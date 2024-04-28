@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  locator:
+    path: ../locator
 
 dev_dependencies:
   flutter_test:
