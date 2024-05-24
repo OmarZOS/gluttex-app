@@ -1,0 +1,168 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "gluttex_constants",
+            "cwd": "gluttex_constants",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gluttex_constants (profile mode)",
+            "cwd": "gluttex_constants",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "gluttex_constants (release mode)",
+            "cwd": "gluttex_constants",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "gluttex_core",
+            "cwd": "gluttex_core",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gluttex_core (profile mode)",
+            "cwd": "gluttex_core",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "gluttex_core (release mode)",
+            "cwd": "gluttex_core",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "gluttex_impl_app",
+            "cwd": "gluttex_impl_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gluttex_impl_app (profile mode)",
+            "cwd": "gluttex_impl_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "gluttex_impl_app (release mode)",
+            "cwd": "gluttex_impl_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "gluttex_impl_business",
+            "cwd": "gluttex_impl_business",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gluttex_impl_business (profile mode)",
+            "cwd": "gluttex_impl_business",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "gluttex_impl_business (release mode)",
+            "cwd": "gluttex_impl_business",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "gluttex_impl_mediation",
+            "cwd": "gluttex_impl_mediation",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gluttex_impl_mediation (profile mode)",
+            "cwd": "gluttex_impl_mediation",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "gluttex_impl_mediation (release mode)",
+            "cwd": "gluttex_impl_mediation",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "gluttex_localiser",
+            "cwd": "gluttex_localiser",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gluttex_localiser (profile mode)",
+            "cwd": "gluttex_localiser",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "gluttex_localiser (release mode)",
+            "cwd": "gluttex_localiser",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "locator",
+            "cwd": "locator",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "locator (profile mode)",
+            "cwd": "locator",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "locator (release mode)",
+            "cwd": "locator",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "medicom_catalog",
+            "cwd": "medicom_catalog",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "medicom_catalog (profile mode)",
+            "cwd": "medicom_catalog",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "medicom_catalog (release mode)",
+            "cwd": "medicom_catalog",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

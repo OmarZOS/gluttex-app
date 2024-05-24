@@ -1,10 +1,22 @@
-import 'package:gluttex_core/app/AppUser.dart';
-
 abstract class StorageService {
-  void insertAppUser(Map<String, dynamic> data) {}
-  AppUser? getAppUser() {
+  Future<dynamic> getAll(String destination) async {
     return null;
   }
 
-  void deleteAppUser(Map<String, dynamic> data) {}
+  Future<String?> insert(String destination, Map<String, dynamic> data) async {
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> get(String destination, String id) async {
+    return null;
+  }
+
+  Future<String?> delete(String destination, String id) async {
+    return null;
+  }
+
+  Future<String?> update(
+      String destination, String id, Map<String, dynamic> data) async {
+    return null;
+  }
 }
