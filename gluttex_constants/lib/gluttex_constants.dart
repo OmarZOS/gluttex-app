@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class GluttexConstants {
   // API endpoints
-  static const String apiBaseUrl = 'http://10.0.2.2:9000';
+  static const String apiBaseUrl = 'http://localhost:9000';
 
   static const String addAppUserEndpoint = '/appUser/add';
   static const String deleteAppUserEndpoint = '/appUser/delete';
@@ -12,14 +12,16 @@ class GluttexConstants {
   static const String appUserEndpoint = '/appUser';
 
   static const String addProductEndpoint = '/product/add';
-  static const String deleteProductEndpoint = '/product/delete';
+  static const String deleteProductEndpoint = '/Product/delete';
   static const String getAllProductsEndpoint = '/Product/all';
   static const String productEndpoint = '/product';
+  static const String getProductCategoriesEndpoint = '/product/Category/all';
 
   static const String addSupplierEndpoint = '/supplier/add';
   static const String deleteSupplierEndpoint = '/supplier/delete';
-  static const String getAllSuppliersEndpoint = '/supplier';
+  static const String getAllSuppliersEndpoint = '/Supplier/all';
   static const String supplierEndpoint = '/supplier';
+  static const String getSupplierCategoriesEndpoint = '/Supplier/Category/all';
 
   static const String loginEndpoint = '/login';
   static const String productsEndpoint = '/products';
@@ -32,7 +34,9 @@ class GluttexConstants {
   static const String noProductsFound = 'No products to display.';
   static const String addToCart = 'Add';
   static const String aboutProvider = 'About';
-  static const String productReference = 'About';
+  static const String productQuantity = 'Quantity';
+  static const String productReference = 'Reference';
+  static const String priceText = 'Price';
 
   // Responses
   static const String deleteSuccess = 'Successfully deleted item';

@@ -3,7 +3,7 @@ abstract class StorageService {
     return null;
   }
 
-  Future<String?> insert(String destination, Map<String, dynamic> data) async {
+  Future<int?> insert(String destination, Map<String, dynamic> data) async {
     return null;
   }
 
@@ -11,11 +11,11 @@ abstract class StorageService {
     return null;
   }
 
-  Future<String?> delete(String destination, String id) async {
+  Future<int?> delete(String destination, String id) async {
     return null;
   }
 
-  Future<String?> update(
+  Future<int?> update(
       String destination, String id, Map<String, dynamic> data) async {
     return null;
   }

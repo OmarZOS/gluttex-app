@@ -145,10 +145,14 @@
             "flutterMode": "release"
         },
         {
-            "name": "medicom_catalog",
-            "cwd": "medicom_catalog",
+            "name": "Flutter",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "flutterMode": "debug",
+            "program": "lib/main.dart",
+            "args": [
+              "--no-catch-exceptions"
+            ]
         },
         {
             "name": "medicom_catalog (profile mode)",

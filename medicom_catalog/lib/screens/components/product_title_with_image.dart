@@ -14,10 +14,10 @@ class ProductTitleWithImage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          SizedBox(height: GluttexConstants.kDefaultPaddin * 1.2),
+          const SizedBox(height: GluttexConstants.kDefaultPaddin * 1.2),
           Text(
             product.product_brand ?? "",
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
           Text(
             product.product_name ?? "",
@@ -31,9 +31,9 @@ class ProductTitleWithImage extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   children: [
-                    TextSpan(text: "Price\n"),
+                    const TextSpan(text: "${GluttexConstants.priceText}\n"),
                     TextSpan(
-                      text: "\$${product.product_barcode}",
+                      text: "\$${product.product_price}",
                       style: Theme.of(context)
                           .textTheme
                           .headlineSmall!
@@ -43,19 +43,22 @@ class ProductTitleWithImage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: GluttexConstants.kDefaultPaddin),
+              const SizedBox(width: GluttexConstants.kDefaultPaddin),
               Expanded(
                 child: Hero(
                     tag: "${product.id_product}",
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(
                           100), // Adjust the radius as needed
-                      child: Image.network(
-                        "https://images.pexels.com/photos/213780/pexels-photo-213780.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-                        width: 156, // Adjust the size as needed
-                        height: 156, // Adjust the size as needed
-                        fit: BoxFit.cover,
-                      ),
+                      child: product.product_image_data != null &&
+                              product.product_image_data!.isNotEmpty
+                          ? Image.memory(
+                              width: 156, // Adjust the size as needed
+                              height: 156, // Adjust the size as needed
+                              product.product_image_data!,
+                              // fit: BoxFit.cover,
+                            )
+                          : const Icon(Icons.image_not_supported),
                     )),
               )
             ],

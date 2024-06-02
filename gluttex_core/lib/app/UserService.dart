@@ -6,15 +6,15 @@ abstract class UserService {
     return null;
   }
 
-  Future<String?> addAppUser(AppUser AppUser) async {
+  Future<int?> addAppUser(AppUser AppUser) async {
     return null;
   }
 
-  Future<String?> updateAppUser(AppUser updatedAppUser) async {
+  Future<int?> updateAppUser(AppUser updatedAppUser) async {
     return null;
   }
 
-  Future<String?> deleteAppUser(int appUserId) async {
+  Future<int?> deleteAppUser(int appUserId) async {
     return null;
   }
 }

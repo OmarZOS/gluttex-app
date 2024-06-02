@@ -9,39 +9,40 @@ import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 
 class ProductServiceImpl implements ProductService {
+  List<ProductCategory> categories = [];
   @override
-  Future<String?> addProduct(Product Product) {
-    StorageService storageService = Locator.get<StorageService>();
+  Future<int?> addProduct(Product Product) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
 
-    return storageService.insert(
-        '$GluttexConstants.apiBaseUrl$GluttexConstants.addProductEndpoint',
+    return await storageService.insert(
+        GluttexConstants.apiBaseUrl + GluttexConstants.addProductEndpoint,
         Product.toJson());
   }
 
   @override
-  Future<String?> deleteProduct(String ProductId) {
-    StorageService storageService = Locator.get<StorageService>();
+  Future<int?> deleteProduct(String ProductId) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
 
-    return storageService.delete(
-        '$GluttexConstants.apiBaseUrl$GluttexConstants.addProductEndpoint',
-        '$ProductId');
+    return await storageService.delete(
+        GluttexConstants.apiBaseUrl + GluttexConstants.deleteProductEndpoint,
+        ProductId);
   }
 
   @override
-  Future<String?> updateProduct(Product updatedProduct) {
-    StorageService storageService = Locator.get<StorageService>();
-    return storageService.update(
-        '$GluttexConstants.apiBaseUrl$GluttexConstants.addProductEndpoint',
-        '$updatedProduct.id_app_Product',
+  Future<int?> updateProduct(Product updatedProduct) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    return await storageService.update(
+        GluttexConstants.apiBaseUrl + GluttexConstants.productEndpoint,
+        '${updatedProduct.id_product}',
         updatedProduct.toJson());
   }
 
   @override
-  Future<Product?> getProduct(String id) {
-    StorageService storageService = Locator.get<StorageService>();
+  Future<Product?> getProduct(String id) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
     Map<String, dynamic> data = storageService.get(
-        '$GluttexConstants.apiBaseUrl$GluttexConstants.getProductEndpoint',
-        id) as Map<String, dynamic>;
+            GluttexConstants.apiBaseUrl + GluttexConstants.productEndpoint, id)
+        as Map<String, dynamic>;
     return Product.fromJson(data) as Future<Product?>;
   }
 
@@ -49,29 +50,51 @@ class ProductServiceImpl implements ProductService {
   Future<List<Product>?>? getAllProducts() async {
     try {
       // Get the storage service instance
-      StorageService storageService = Locator.get<StorageService>();
+      StorageService storageService = GluttexLocator.get<StorageService>();
 
       // Make a call to get all products
       List<dynamic> responseData = await storageService.getAll(
           GluttexConstants.apiBaseUrl +
               GluttexConstants.getAllProductsEndpoint);
       // Check if the response data is not null and is a list
-      if (responseData != null) {
-        // Convert the list of dynamic maps to a list of Product objects
-        List dateien = responseData;
-        List<Product?> products = dateien
-            .map((data) => Product.fromJson(data as Map<String, dynamic>))
-            .toList();
-        return products as List<Product>?;
-      } else {
-        developer.log("Unknown response data format");
-        // Return null or throw an exception based on your requirement
-        return [] as Future<List<Product>?>?;
-      }
+      // Convert the list of dynamic maps to a list of Product objects
+      List dateien = responseData;
+      List<Product?> products = dateien
+          .map((data) => Product.fromJson(data as Map<String, dynamic>))
+          .toList();
+      return products as List<Product>?;
+    } catch (e, stacktrace) {
+      developer.log(e.toString());
+      developer.log(stacktrace.toString());
+      // Handle exceptions here
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ProductCategory>>? getCategories() async {
+    if (categories.isNotEmpty) return categories;
+    try {
+      // Get the storage service instance
+      StorageService storageService = GluttexLocator.get<StorageService>();
+
+      // Make a call to get all categories
+      List<dynamic> responseData = await storageService.getAll(
+          GluttexConstants.apiBaseUrl +
+              GluttexConstants.getProductCategoriesEndpoint);
+
+      // Check if the response data is not null and is a list
+      // Convert the list of ProductCategory maps to a list of Supplier objects
+      List dateien = responseData;
+      List<ProductCategory?> categories = dateien
+          .map((data) => ProductCategory.fromJson(data as Map<String, dynamic>))
+          .toList();
+      // developer.//log('${dateien.length}');
+      return categories as List<ProductCategory>;
     } catch (e) {
       developer.log(e.toString());
       // Handle exceptions here
-      return [] as Future<List<Product>?>?;
+      return [];
     }
   }
 }

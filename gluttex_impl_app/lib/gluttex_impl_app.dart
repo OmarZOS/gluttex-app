@@ -8,8 +8,8 @@ import 'package:locator/locator.dart';
 
 class UserServiceImpl implements UserService {
   @override
-  Future<String?> addAppUser(AppUser appUser) {
-    StorageService storageService = Locator.get<StorageService>();
+  Future<int?> addAppUser(AppUser appUser) {
+    StorageService storageService = GluttexLocator.get<StorageService>();
 
     return storageService.insert(
         '$GluttexConstants.apiBaseUrl$GluttexConstants.addAppUserEndpoint',
@@ -17,8 +17,8 @@ class UserServiceImpl implements UserService {
   }
 
   @override
-  Future<String?> deleteAppUser(int appUserId) {
-    StorageService storageService = Locator.get<StorageService>();
+  Future<int?> deleteAppUser(int appUserId) {
+    StorageService storageService = GluttexLocator.get<StorageService>();
 
     return storageService.delete(
         '$GluttexConstants.apiBaseUrl$GluttexConstants.addAppUserEndpoint',
@@ -26,8 +26,8 @@ class UserServiceImpl implements UserService {
   }
 
   @override
-  Future<String?> updateAppUser(AppUser updatedAppUser) {
-    StorageService storageService = Locator.get<StorageService>();
+  Future<int?> updateAppUser(AppUser updatedAppUser) {
+    StorageService storageService = GluttexLocator.get<StorageService>();
     return storageService.update(
         '$GluttexConstants.apiBaseUrl$GluttexConstants.addAppUserEndpoint',
         '$updatedAppUser.id_app_user',
@@ -36,7 +36,7 @@ class UserServiceImpl implements UserService {
 
   @override
   Future<AppUser?> getAppUser(String id) {
-    StorageService storageService = Locator.get<StorageService>();
+    StorageService storageService = GluttexLocator.get<StorageService>();
     Map<String, dynamic> data = storageService.get(
         GluttexConstants.apiBaseUrl, id) as Map<String, dynamic>;
     return AppUser.fromJson(data) as Future<AppUser?>;

@@ -2,7 +2,7 @@ library locator;
 
 import 'package:get_it/get_it.dart';
 
-class Locator {
+class GluttexLocator {
   static final GetIt _getIt = GetIt.instance;
 
   static void setup() {

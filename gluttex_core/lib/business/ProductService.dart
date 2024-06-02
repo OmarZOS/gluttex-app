@@ -2,23 +2,27 @@ import 'Product.dart';
 
 // ProductService.dart
 abstract class ProductService {
+  Future<List<ProductCategory>?>? getCategories() async {
+    return null;
+  }
+
   Future<List<Product>?>? getAllProducts() async {
     return null;
   }
 
-  Future<Product?> getProduct(String id_product) async {
+  Future<Product?> getProduct(String idProduct) async {
     return null;
   }
 
-  Future<String?> addProduct(Product Product) async {
+  Future<int?> addProduct(Product Product) async {
     return null;
   }
 
-  Future<String?> updateProduct(Product updatedProduct) async {
+  Future<int?> updateProduct(Product updatedProduct) async {
     return null;
   }
 
-  Future<String?> deleteProduct(String productId) async {
+  Future<int?> deleteProduct(String productId) async {
     return null;
   }
 }

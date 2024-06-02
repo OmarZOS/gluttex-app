@@ -1,0 +1,39 @@
+import 'package:flutter/material.dart';
+import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_core/business/ProductService.dart';
+import 'package:locator/locator.dart';
+
+class ProductNotifier extends ChangeNotifier {
+  ProductService _productService = GluttexLocator.get<ProductService>();
+  List<Product> _products = [];
+
+  List<Product> get products => _products;
+
+  ProductNotifier() {
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    var products = await _productService.getAllProducts();
+    _products = products ?? [];
+    notifyListeners();
+  }
+
+  Future<int?> addProduct(Product product) async {
+    int? status = await _productService.addProduct(product);
+    await fetchProducts();
+    return status;
+  }
+
+  Future<int?> updateProduct(Product product) async {
+    int? status = await _productService.updateProduct(product);
+    await fetchProducts();
+    return status;
+  }
+
+  Future<int?> deleteProduct(String id_product) async {
+    int? status = await _productService.deleteProduct(id_product);
+    await fetchProducts();
+    return status;
+  }
+}

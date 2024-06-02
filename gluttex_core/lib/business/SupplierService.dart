@@ -1,26 +1,34 @@
 // SupplierService.dart
-import 'package:locator/locator.dart';
 
 import 'Supplier.dart';
 
 abstract class SupplierService {
+  Future<List<Category>> getCategories() async {
+    throw UnimplementedError();
+  }
+
+  Future<Category?> getCategoryById(int categoryId) {
+    throw UnimplementedError();
+    // throw UnimplementedError();
+  }
+
   Future<Supplier?> getSupplier(String id) async {
-    return null;
+    throw UnimplementedError();
   }
 
-  Future<List<Supplier>?>? getAllSuppliers() async {
-    return null;
+  Future<List<Supplier>> getAllSuppliers() async {
+    throw UnimplementedError();
   }
 
-  Future<String?> addSupplier(Supplier supplier) async {
-    return null;
+  Future<int?> addSupplier(Supplier supplier) async {
+    throw UnimplementedError();
   }
 
-  Future<String?> updateSupplier(Supplier updatedSupplier) async {
-    return null;
+  Future<int?> updateSupplier(Supplier updatedSupplier) async {
+    throw UnimplementedError();
   }
 
-  Future<String?> deleteSupplier(String supplierId) async {
-    return null;
+  Future<int?> deleteSupplier(String supplierId) async {
+    throw UnimplementedError();
   }
 }

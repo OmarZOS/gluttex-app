@@ -17,7 +17,7 @@ class ItemCard extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(GluttexConstants.kDefaultPaddin),
+              padding: const EdgeInsets.all(GluttexConstants.kDefaultPaddin),
               decoration: BoxDecoration(
                 // color: product.color,
                 borderRadius: BorderRadius.circular(16),
@@ -30,18 +30,19 @@ class ItemCard extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                vertical: GluttexConstants.kDefaultPaddin / 4),
-            child: Text(
-              // products is out demo list
-              product.product_name ?? "",
-              style: TextStyle(color: GluttexConstants.kTextLightColor),
-            ),
+          // Padding(
+          // padding: const EdgeInsets.symmetric(
+          //     vertical: GluttexConstants.kDefaultPaddin / 4),
+          // child:
+          Text(
+            // products is out demo list
+            product.product_name ?? "",
+            style: const TextStyle(color: GluttexConstants.kTextLightColor),
           ),
+          // ),
           Text(
             "\$${product.product_category_desc}",
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           )
         ],
       ),

@@ -4,34 +4,44 @@ import 'package:gluttex_core/business/ProductService.dart';
 import 'package:gluttex_core/business/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_impl_app/gluttex_impl_app.dart';
+import 'package:gluttex_impl_business/change_notifier.dart';
 import 'package:gluttex_impl_business/gluttex_impl_product.dart';
 import 'package:gluttex_impl_business/gluttex_impl_supplier.dart';
 import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 import 'package:locator/locator.dart';
 import 'package:medicom_catalog/screens/catalog_screen.dart';
+import 'package:provider/provider.dart';
 
 void setupLocator() {
   // Register your services or dependencies here
   // For example:
-  Locator.registerSingletonService<UserService>(UserServiceImpl());
-  Locator.registerSingletonService<ProductService>(
+  GluttexLocator.registerSingletonService<UserService>(UserServiceImpl());
+  GluttexLocator.registerSingletonService<ProductService>(
       ProductServiceImpl() as ProductService);
-  Locator.registerSingletonService<StorageService>(StorageServiceImpl());
-  Locator.registerSingletonService<SupplierService>(SupplierServiceImpl());
+  GluttexLocator.registerSingletonService<StorageService>(StorageServiceImpl());
+  GluttexLocator.registerSingletonService<SupplierService>(
+      SupplierServiceImpl());
 }
 
 void main() {
   setupLocator();
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ProductNotifier(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'My App',
       darkTheme: ThemeData.dark(), // Default dark theme
-      home: CatalogScreen(
+      home: const CatalogScreen(
         isRightToLeft: false,
       ),
     );
