@@ -17,14 +17,13 @@ class ProductTitleWithImage extends StatelessWidget {
           const SizedBox(height: GluttexConstants.kDefaultPaddin * 1.2),
           Text(
             product.product_brand ?? "",
-            style: const TextStyle(color: Colors.white),
+            // style: const TextStyle(color: Colors.white),
           ),
           Text(
             product.product_name ?? "",
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge!
-                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                // color: Colors.white,
+                fontWeight: FontWeight.bold),
           ),
           Row(
             children: <Widget>[
@@ -33,12 +32,11 @@ class ProductTitleWithImage extends StatelessWidget {
                   children: [
                     const TextSpan(text: "${GluttexConstants.priceText}\n"),
                     TextSpan(
-                      text: "\$${product.product_price}",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall!
-                          .copyWith(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                      text: "${product.product_price} DA",
+                      style:
+                          Theme.of(context).textTheme.headlineSmall!.copyWith(
+                              // color: Colors.white,
+                              fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),

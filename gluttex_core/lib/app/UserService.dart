@@ -1,12 +1,17 @@
 // UserService.dart
 import 'AppUser.dart';
 
-abstract class UserService {
-  Future<AppUser?> getAppUser(String id) async {
+// AppUserService.dart
+abstract class AppUserService {
+  Future<List<AppUserCategory>?>? getCategories() async {
     return null;
   }
 
-  Future<int?> addAppUser(AppUser AppUser) async {
+  Future<AppUser?> getAppUser(String idAppUser) async {
+    return null;
+  }
+
+  Future<int?> addAppUser(AppUser appUser) async {
     return null;
   }
 
@@ -14,7 +19,7 @@ abstract class UserService {
     return null;
   }
 
-  Future<int?> deleteAppUser(int appUserId) async {
+  Future<int?> deleteAppUser(String appUserId) async {
     return null;
   }
 }

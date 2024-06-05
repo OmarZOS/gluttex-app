@@ -20,7 +20,7 @@ class MapScreen extends StatelessWidget {
         onMapCreated(controller);
       },
       initialCameraPosition: const CameraPosition(
-        target: LatLng(0, 0),
+        target: LatLng(30.65630000, 2.64740000),
         zoom: 10.0,
       ),
       markers: markers,

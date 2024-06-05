@@ -24,7 +24,7 @@ class StorageServiceImpl implements StorageService {
   }
 
   @override
-  Future<Map<String, dynamic>?> get(String destination, String id) async {
+  Future<dynamic> get(String destination, String id) async {
     try {
       final response = await _dio.get('$destination/$id');
       if (response.statusCode == 200) {
@@ -35,7 +35,7 @@ class StorageServiceImpl implements StorageService {
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e, stacktrace) {
-      //log('${stacktrace}');
+      log('${stacktrace}');
       throw Exception(GluttexConstants.serverError);
     }
   }
@@ -54,6 +54,7 @@ class StorageServiceImpl implements StorageService {
       }
     } on DioException catch (e, stacktrace) {
       developer.log('${e}');
+      developer.log('${stacktrace}');
       throw Exception(GluttexConstants.serverError);
     }
   }
@@ -81,8 +82,8 @@ class StorageServiceImpl implements StorageService {
       // Return success message
     } on DioException catch (e, stacktrace) {
       // Log the error and stack trace for better debugging
-      // //log('Error: $e');
-      // //log('Stack trace: $stacktrace');
+      log('Error: $e');
+      log('Stack trace: $stacktrace');
 
       // Return server error message
       return e.response?.statusCode;
@@ -95,7 +96,7 @@ class StorageServiceImpl implements StorageService {
   Future<int?> update(
       String destination, String id, Map<String, dynamic> data) async {
     try {
-      // //log('${json.encode(data)}');
+      // log('${json.encode(data)}');
       final response = await _dio.post('${destination}/${id}',
           data: json.encode(data),
           options: Options(headers: {
@@ -105,8 +106,8 @@ class StorageServiceImpl implements StorageService {
 
       return response.statusCode;
     } on DioException catch (e, stacktrace) {
-      //log('Error: $e');
-      //log('Stack trace: $stacktrace');
+      log('Error: $e');
+      log('Stack trace: $stacktrace');
 
       // Return server error message
       return e.response?.statusCode;

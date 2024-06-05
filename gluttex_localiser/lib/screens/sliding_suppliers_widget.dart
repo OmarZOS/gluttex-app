@@ -6,7 +6,7 @@ import 'package:gluttex_localiser/components/supplier_icon.dart';
 import 'package:gluttex_localiser/screens/business_form_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:locator/locator.dart';
-import 'package:gluttex_core/business/SupplierService.dart';
+import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_localiser/screens/map_locations_screen.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -118,18 +118,12 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
         title: TextField(
           controller: _searchController,
           decoration: const InputDecoration(
-            hintText: 'Search',
-            border: InputBorder.none,
-          ),
+              hintText: 'Search',
+              border: InputBorder.none,
+              icon: Icon(Icons.search_outlined)),
         ),
         actions: [
           IconButton(
@@ -144,6 +138,7 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
         ],
       ),
       body: SlidingUpPanel(
+        backdropEnabled: true,
         panel: Column(
           children: [
             Container(
@@ -168,7 +163,7 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                   return Card(
                     margin: const EdgeInsets.all(8.0),
                     child: ListTile(
-                      tileColor: Colors.blue[50],
+                      // tileColor: Colors.blue[50],
                       leading: getProviderTypeIcon(
                           supplier.product_provider_type_id),
                       title: Text(supplier.provider_name),

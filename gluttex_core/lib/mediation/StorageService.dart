@@ -7,7 +7,7 @@ abstract class StorageService {
     return null;
   }
 
-  Future<Map<String, dynamic>?> get(String destination, String id) async {
+  Future<dynamic> get(String destination, String id) async {
     return null;
   }
 

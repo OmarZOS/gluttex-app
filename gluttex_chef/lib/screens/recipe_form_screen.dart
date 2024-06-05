@@ -1,0 +1,253 @@
+import 'dart:developer';
+import 'dart:typed_data';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:gluttex_chef/components/category_picker.dart';
+import 'package:gluttex_impl_business/recipe_change_notifier.dart';
+import 'package:gluttex_chef/tools/duration.dart';
+import 'package:gluttex_chef/tools/image_picker.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/business/Recipe.dart';
+import 'package:gluttex_core/app/Response.dart';
+import 'package:gluttex_core/business/services/RecipeService.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:locator/locator.dart';
+import 'package:provider/provider.dart';
+
+class RecipeFormScreen extends StatefulWidget {
+  const RecipeFormScreen({super.key});
+
+  @override
+  _RecipeFormScreenState createState() => _RecipeFormScreenState();
+}
+
+class _RecipeFormScreenState extends State<RecipeFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  String? _recipeName;
+  Uint8List? _recipeImage;
+  int? _recipeTypeId;
+  int? _recipe_owner_id;
+  int? _recipe_category_id;
+  int? _id_recipe;
+  int? _id_recipe_image;
+  String? _recipeDescription;
+  String? _recipeInstruction;
+  String? _recipePreparationTime;
+  DateTime? recipe_created_at;
+  DateTime? recipe_last_updated;
+
+  Duration preparationTime = Duration.zero;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      Uint8List imageData = await pickedFile.readAsBytes();
+      Uint8List resizedImage = resizeImage(
+          imageData,
+          MediaQuery.of(context).size.width.floor(),
+          MediaQuery.of(context).size.width.floor());
+      setState(() {
+        _recipeImage = resizedImage;
+      });
+    }
+  }
+
+  void _selectDuration(BuildContext context) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          // color: Colors.white,
+          child: CupertinoTimerPicker(
+            mode: CupertinoTimerPickerMode.hm,
+            onTimerDurationChanged: (Duration newDuration) {
+              setState(() {
+                preparationTime = newDuration;
+                _recipePreparationTime = ((newDuration.inHours != 0)
+                        ? '${newDuration.inHours} hours'
+                        : '') +
+                    ((newDuration.inMinutes.remainder(60) != 0)
+                        ? ' ${newDuration.inMinutes.remainder(60)} minutes.'
+                        : '.');
+              });
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _onCategoryChanged(int identifier) {
+    _recipe_category_id = identifier;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Insert Recipe'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.shopify_sharp,
+          // color: Colors.yellow[50],
+        ),
+        onPressed: () {},
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Recipe Name'),
+                onSaved: (value) => _recipeName = value,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a recipe name';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                decoration:
+                    const InputDecoration(labelText: 'Recipe Description'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a recipe description';
+                  }
+
+                  if ((value).length >= 300) {
+                    return 'Character limit: 300.';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _recipeDescription = value,
+              ),
+              TextFormField(
+                maxLines: null, // Allow for multiline input
+                keyboardType:
+                    TextInputType.multiline, // Show multiline keyboard
+                decoration:
+                    const InputDecoration(labelText: 'Recipe Instructions'),
+                // keyboardType: TextInputType.number,
+                // validator: (value) {
+                //   return null;
+                // },
+                onSaved: (value) => _recipeInstruction = value,
+              ),
+              const SizedBox(height: 16.0),
+              FutureBuilder<List<RecipeCategory>?>(
+                future: GluttexLocator.get<RecipeService>().getCategories(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(); // Show a loading indicator while waiting
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Text('Categories not found');
+                  } else {
+                    return CategoryPicker(
+                      category_id: _recipe_category_id ?? 1,
+                      categories: snapshot.data!,
+                      onCategoryChanged: (selectedCategoryId) {
+                        _onCategoryChanged(selectedCategoryId);
+                      },
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 16.0),
+              ListTile(
+                title: Text(
+                    'Preparation Time: ${preparationTime.inHours} hours, ${preparationTime.inMinutes.remainder(60)} minutes'),
+                trailing: Icon(Icons.timer),
+                onTap: () => _selectDuration(context),
+              ),
+              const SizedBox(height: 16.0),
+              _recipeImage != null
+                  ? Image.memory(_recipeImage!,
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.width)
+                  : const Text('No image selected'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: const Text('Pick Image'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    final recipe = Recipe(
+                      id_recipe: _id_recipe,
+                      recipe_owner_id: _recipe_owner_id ?? 1,
+                      recipe_category_id: _recipe_category_id,
+                      id_recipe_image: _id_recipe_image,
+                      recipe_name: _recipeName,
+                      recipe_image_data: _recipeImage,
+                      recipe_description: _recipeDescription,
+                      recipe_created_at: null,
+                      recipe_last_updated: null,
+                      recipe_instruction: _recipeInstruction,
+                      recipe_preparation_time: _recipePreparationTime,
+                      recipe_category_desc: "",
+                    );
+
+                    // Handle recipe submission
+                    int? status_code = await GluttexLocator.get<RecipeService>()
+                        .addRecipe(recipe);
+
+                    Response response = Response();
+
+                    switch (status_code) {
+                      case 200:
+                        response.color = Colors.green;
+                        response.text = GluttexConstants.putSuccess;
+                        await Provider.of<RecipeNotifier>(context,
+                                listen: false)
+                            .fetchRecipes();
+                        Navigator.pop(context, recipe);
+                        break;
+                      case 406:
+                        response.color = Colors.amberAccent;
+                        response.text = 'Error ${status_code}: ' +
+                            GluttexConstants.putFailure;
+                        break;
+                      case 422:
+                        response.color = Colors.amberAccent;
+                        response.text = 'Error ${status_code}: ' +
+                            GluttexConstants.putFailure;
+                        break;
+
+                      default:
+                        response.color = Colors.red;
+                        response.text = 'Error ${status_code}: ' +
+                            GluttexConstants.serverError;
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(response.text),
+                        backgroundColor: response.color,
+                      ),
+                    );
+
+                    // You can use a provider or any state management to save the recipe
+                  }
+                },
+                child: const Text('Submit'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

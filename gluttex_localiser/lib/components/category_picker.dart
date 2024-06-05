@@ -27,7 +27,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
     return Column(
       children: [
         ListTile(
-          tileColor: Colors.blue[50],
+          // tileColor: Colors.blue[50],
           title: Text(
             widget.categories[_selectedCategoryIndex].product_category_desc,
           ),

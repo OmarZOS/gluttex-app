@@ -1,22 +1,13 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
-import 'package:gluttex_core/business/ProductService.dart';
-import 'package:gluttex_impl_business/change_notifier.dart';
-import 'package:locator/locator.dart';
-import 'package:medicom_catalog/screens/cart_screen.dart';
+import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:medicom_catalog/screens/components/ProductCard.dart';
 import 'package:medicom_catalog/screens/product_form_screen.dart';
-import 'package:medicom_catalog/screens/product_screen.dart';
-import 'package:badges/badges.dart' as badges;
 import 'package:provider/provider.dart';
 
 class CatalogScreen extends StatefulWidget {
-  final bool isRightToLeft;
-
-  const CatalogScreen({Key? key, required this.isRightToLeft})
-      : super(key: key);
+  const CatalogScreen({Key? key}) : super(key: key);
 
   @override
   _CatalogScreenState createState() => _CatalogScreenState();
@@ -28,12 +19,20 @@ class _CatalogScreenState extends State<CatalogScreen> {
   @override
   void initState() {
     super.initState();
+
+    // await Provider.of<ProductNotifier>(context).fetchProducts();
     _searchController.addListener(_filterProducts);
   }
 
   void _filterProducts() {
-    // This method can be updated to filter products based on _searchController's text
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_filterProducts);
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -41,18 +40,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
         title: TextField(
           controller: _searchController,
           decoration: const InputDecoration(
-            hintText: 'Search',
-            border: InputBorder.none,
-          ),
+              hintText: 'Search',
+              border: InputBorder.none,
+              icon: Icon(Icons.search_outlined)),
         ),
         actions: <Widget>[
           IconButton(
@@ -68,18 +61,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
           const SizedBox(width: GluttexConstants.kDefaultPaddin / 2)
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CartScreen()),
-          );
-        },
-        child: const Icon(Icons.shopping_cart),
-      ),
       body: Consumer<ProductNotifier>(
         builder: (context, productNotifier, child) {
-          var products = productNotifier.products;
+          final products = productNotifier.products;
           var filteredProducts = products.where((product) {
             var query = _searchController.text.toLowerCase();
             return product.product_name?.toLowerCase().contains(query) ?? false;

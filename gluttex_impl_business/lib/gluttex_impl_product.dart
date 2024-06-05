@@ -4,7 +4,7 @@ import 'dart:developer' as developer;
 
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
-import 'package:gluttex_core/business/ProductService.dart';
+import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 

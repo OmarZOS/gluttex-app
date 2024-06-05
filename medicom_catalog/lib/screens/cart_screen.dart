@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/business/ProductService.dart';
+import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:locator/locator.dart';
 import 'package:medicom_catalog/screens/product_screen.dart';
 

@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_core/business/SupplierService.dart';
+import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_localiser/components/category_picker.dart';
 import 'package:gluttex_localiser/components/image_picker.dart';
 import 'package:gluttex_localiser/components/map_picker.dart';
@@ -211,7 +211,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                   Widget field = entry.value;
                   return ListTile(
                     title: field,
-                    tileColor: Colors.amber[100],
+                    // // tileColor: Colors.amber[100],
                     trailing: IconButton(
                       icon: const Icon(Icons.remove_circle),
                       onPressed: () {
@@ -225,14 +225,14 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               ListTile(
                 leading: const Icon(Icons.add_circle),
                 title: const Text('Add Contact Info'),
-                tileColor: Colors.amber[100],
+                // tileColor: Colors.amber[100],
                 onTap: _addContactField,
               ),
               const SizedBox(height: 16.0),
               ListTile(
                 leading: const Icon(Icons.location_on),
                 title: Text('${_position ?? "Insert coordinates"}'),
-                tileColor: Colors.grey[100],
+                // tileColor: Colors.grey[100],
                 trailing: _position != null
                     ? Icon(
                         Icons.check_circle_outline_outlined,
@@ -250,7 +250,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               ListTile(
                 leading: const Icon(Icons.photo_camera_rounded),
                 title: const Text('Add photo'),
-                tileColor: Colors.grey[100],
+                // tileColor: Colors.grey[100],
                 onTap: () async {
                   final pickedImage = await pickImage();
                   setState(() {

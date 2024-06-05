@@ -64,13 +64,13 @@ class ProductCard extends StatelessWidget {
                         '${product.product_price ?? 'N/A'} DA',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          // Add to cart action
-                        },
-                        icon: const Icon(Icons.add_shopping_cart),
-                        // label: const Text(GluttexConstants.addToCart),
-                      ),
+                      // IconButton(
+                      //   onPressed: () {
+                      //     // Add to cart action
+                      //   },
+                      //   icon: const Icon(Icons.add_shopping_cart),
+                      //   // label: const Text(GluttexConstants.addToCart),
+                      // ),
                     ],
                   ),
                 ],

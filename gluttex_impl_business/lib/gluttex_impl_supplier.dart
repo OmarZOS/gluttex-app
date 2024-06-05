@@ -3,7 +3,7 @@ library gluttex_impl_business;
 import 'dart:developer' as developer;
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_core/business/SupplierService.dart';
+import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 

@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 
 class GluttexConstants {
   // API endpoints
-  static const String apiBaseUrl = 'http://localhost:9000';
+  static const String apiBaseUrl = 'http://192.168.178.158:9000';
 
   static const String addAppUserEndpoint = '/appUser/add';
   static const String deleteAppUserEndpoint = '/appUser/delete';
   static const String getAllAppUsersEndpoint = '/appUser';
   static const String appUserEndpoint = '/appUser';
+  static const String getAppUserCategoriesEndpoint = '/appUser/Category/all';
 
   static const String addProductEndpoint = '/product/add';
   static const String deleteProductEndpoint = '/Product/delete';
@@ -22,6 +23,12 @@ class GluttexConstants {
   static const String getAllSuppliersEndpoint = '/Supplier/all';
   static const String supplierEndpoint = '/supplier';
   static const String getSupplierCategoriesEndpoint = '/Supplier/Category/all';
+
+  static const String addRecipeEndpoint = '/recipe/add';
+  static const String deleteRecipeEndpoint = '/Recipe/delete';
+  static const String getAllRecipesEndpoint = '/Recipe/all';
+  static const String recipeEndpoint = '/recipe';
+  static const String getRecipeCategoriesEndpoint = '/recipe/Category/all';
 
   static const String loginEndpoint = '/login';
   static const String productsEndpoint = '/products';
@@ -37,6 +44,8 @@ class GluttexConstants {
   static const String productQuantity = 'Quantity';
   static const String productReference = 'Reference';
   static const String priceText = 'Price';
+  static const String noRecipesFound = 'No recipes found';
+  static const String noAppUsersFound = 'No users found';
 
   // Responses
   static const String deleteSuccess = 'Successfully deleted item';

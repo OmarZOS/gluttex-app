@@ -16,7 +16,7 @@
 			dependencies = (
 			);
 			name = "Flutter Assemble";
-			productName = FLX;
+			recipeName = FLX;
 		};
 /* End PBXAggregateTarget section */
 
@@ -60,11 +60,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_RECIPES_DIR; };
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
-		33CC10ED2044A3C60003C045 /* gluttex_chef.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "gluttex_chef.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		33CC10ED2044A3C60003C045 /* gluttex_chef.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "gluttex_chef.app"; sourceTree = BUILT_RECIPES_DIR; };
 		33CC10F02044A3C60003C045 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		33CC10F22044A3C60003C045 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Runner/Assets.xcassets; sourceTree = "<group>"; };
 		33CC10F52044A3C60003C045 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -123,18 +123,18 @@
 				33FAB671232836740065AC1E /* Runner */,
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				331C80D6294CF71000263BE5 /* RunnerTests */,
-				33CC10EE2044A3C60003C045 /* Products */,
+				33CC10EE2044A3C60003C045 /* Recipes */,
 				D73912EC22F37F3D000D13A0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
-		33CC10EE2044A3C60003C045 /* Products */ = {
+		33CC10EE2044A3C60003C045 /* Recipes */ = {
 			isa = PBXGroup;
 			children = (
 				33CC10ED2044A3C60003C045 /* gluttex_chef.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
 			);
-			name = Products;
+			name = Recipes;
 			sourceTree = "<group>";
 		};
 		33CC11242044D66E0003C045 /* Resources */ = {
@@ -196,9 +196,9 @@
 				331C80DA294CF71000263BE5 /* PBXTargetDependency */,
 			);
 			name = RunnerTests;
-			productName = RunnerTests;
-			productReference = 331C80D5294CF71000263BE5 /* RunnerTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
+			recipeName = RunnerTests;
+			recipeReference = 331C80D5294CF71000263BE5 /* RunnerTests.xctest */;
+			recipeType = "com.apple.recipe-type.bundle.unit-test";
 		};
 		33CC10EC2044A3C60003C045 /* Runner */ = {
 			isa = PBXNativeTarget;
@@ -216,9 +216,9 @@
 				33CC11202044C79F0003C045 /* PBXTargetDependency */,
 			);
 			name = Runner;
-			productName = Runner;
-			productReference = 33CC10ED2044A3C60003C045 /* gluttex_chef.app */;
-			productType = "com.apple.product-type.application";
+			recipeName = Runner;
+			recipeReference = 33CC10ED2044A3C60003C045 /* gluttex_chef.app */;
+			recipeType = "com.apple.recipe-type.application";
 		};
 /* End PBXNativeTarget section */
 
@@ -260,7 +260,7 @@
 				Base,
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
-			productRefGroup = 33CC10EE2044A3C60003C045 /* Products */;
+			recipeRefGroup = 33CC10EE2044A3C60003C045 /* Recipes */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -307,7 +307,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
+			shellScript = "echo \"$RECIPE_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
 		};
 		33CC111E2044C6BF0003C045 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -385,10 +385,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.gluttexChef.RunnerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				RECIPE_BUNDLE_IDENTIFIER = com.example.gluttexChef.RunnerTests;
+				RECIPE_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gluttex_chef.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gluttex_chef";
+				TEST_HOST = "$(BUILT_RECIPES_DIR)/gluttex_chef.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gluttex_chef";
 			};
 			name = Debug;
 		};
@@ -399,10 +399,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.gluttexChef.RunnerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				RECIPE_BUNDLE_IDENTIFIER = com.example.gluttexChef.RunnerTests;
+				RECIPE_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gluttex_chef.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gluttex_chef";
+				TEST_HOST = "$(BUILT_RECIPES_DIR)/gluttex_chef.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gluttex_chef";
 			};
 			name = Release;
 		};
@@ -413,10 +413,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.gluttexChef.RunnerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				RECIPE_BUNDLE_IDENTIFIER = com.example.gluttexChef.RunnerTests;
+				RECIPE_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gluttex_chef.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gluttex_chef";
+				TEST_HOST = "$(BUILT_RECIPES_DIR)/gluttex_chef.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gluttex_chef";
 			};
 			name = Profile;
 		};
@@ -492,7 +492,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				RECIPE_NAME = "$(TARGET_NAME)";
 			};
 			name = Profile;
 		};
@@ -644,7 +644,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				RECIPE_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
@@ -652,7 +652,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				RECIPE_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};

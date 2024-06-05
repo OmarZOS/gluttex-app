@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Product.dart';
-import 'package:gluttex_impl_business/change_notifier.dart';
+import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:medicom_catalog/screens/components/add_to_cart.dart';
-import 'package:medicom_catalog/screens/components/color_and_size.dart';
+import 'package:medicom_catalog/screens/components/quantity_and_ref.dart';
 import 'package:medicom_catalog/screens/components/counter_with_fav_btn.dart';
 import 'package:medicom_catalog/screens/components/description.dart';
 import 'package:medicom_catalog/screens/components/dialogue/confirmation_dialogue.dart';
@@ -134,6 +134,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
               child: Stack(
                 children: <Widget>[
                   Container(
+                    // color: Colors.grey,
                     margin: EdgeInsets.only(top: size.height * 0.3),
                     padding: EdgeInsets.only(
                       top: size.height * 0.12,
@@ -141,6 +142,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       right: GluttexConstants.kDefaultPaddin,
                     ),
                     decoration: const BoxDecoration(
+                      // color: Colors.grey,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(24),
                         topRight: Radius.circular(24),
@@ -148,7 +150,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ),
                     child: Column(
                       children: <Widget>[
-                        ColorAndSize(product: _product),
+                        QuantityAndRef(product: _product),
                         const SizedBox(
                             height: GluttexConstants.kDefaultPaddin / 2),
                         Description(product: _product),
@@ -157,7 +159,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         const CounterWithFavBtn(),
                         const SizedBox(
                             height: GluttexConstants.kDefaultPaddin / 2),
-                        AddToCart(product: _product),
+                        // AddToCart(product: _product),
                       ],
                     ),
                   ),
