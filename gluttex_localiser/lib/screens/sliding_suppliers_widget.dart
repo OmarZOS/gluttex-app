@@ -228,21 +228,21 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FutureBuilder<Category?>(
-              future: GluttexLocator.get<SupplierService>()
-                  .getCategoryById(supplier.product_provider_type_id),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(); // Show a loading indicator while waiting
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data == null) {
-                  return Text('Category not found');
-                } else {
-                  return Text(snapshot.data!.product_category_desc);
-                }
-              },
-            ),
+            // FutureBuilder<Category?>(
+            //   future: GluttexLocator.get<SupplierService>()
+            //       .getCategoryById(supplier.product_provider_type_id),
+            //   builder: (context, snapshot) {
+            //     if (snapshot.connectionState == ConnectionState.waiting) {
+            //       return CircularProgressIndicator(); // Show a loading indicator while waiting
+            //     } else if (snapshot.hasError) {
+            //       return Text('Error: ${snapshot.error}');
+            //     } else if (!snapshot.hasData || snapshot.data == null) {
+            //       return Text('Category not found');
+            //     } else {
+            //       return Text(snapshot.data!.product_category_desc);
+            //     }
+            //   },
+            // ),
             Text('Location: ${supplier.location_name}'),
             GestureDetector(
               child: Text(supplier.provider_contact_info.replaceAll(",", "\n")),

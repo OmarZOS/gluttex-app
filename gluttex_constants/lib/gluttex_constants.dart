@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class GluttexConstants {
   // API endpoints
-  static const String apiBaseUrl = 'http://192.168.178.158:9000';
+  static const String apiBaseUrl = 'http://localhost:9000';
 
   static const String addAppUserEndpoint = '/appUser/add';
   static const String deleteAppUserEndpoint = '/appUser/delete';

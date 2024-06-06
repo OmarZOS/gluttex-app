@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_play/components/game.dart';
+import 'package:gluttex_play/components/snake.dart';
 import 'package:gluttex_play/screens/game_play_screen.dart';
 
 class GameListScreen extends StatelessWidget {
@@ -29,7 +30,7 @@ class GameListScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => GamePlayScreen(game: games[index]),
+                    builder: (context) => SnakeGame(),
                   ),
                 );
               },

@@ -135,6 +135,20 @@ class _CeliacScreenState extends State<CeliacScreen> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 9),
+                  ElevatedButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Data Submitted successfully."),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      },
+                      child: Center(
+                        child: Text("Submit"),
+                      )),
+
                   Text(
                     'Recommendations',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

@@ -48,10 +48,10 @@ class GluttexApp extends StatelessWidget {
         ],
         child: MaterialApp(
           home: HomePage(),
-          darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            /* dark theme settings */
-          ),
+          // darkTheme: ThemeData(
+          //   brightness: Brightness.dark,
+          //   /* dark theme settings */
+          // ),
           themeMode: ThemeMode.dark,
         ));
   }
