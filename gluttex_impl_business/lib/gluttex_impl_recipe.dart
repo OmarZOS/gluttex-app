@@ -1,6 +1,7 @@
 library gluttex_impl_business;
 
 import 'dart:developer' as developer;
+import 'dart:typed_data';
 
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
@@ -10,6 +11,16 @@ import 'package:locator/locator.dart';
 
 class RecipeServiceImpl implements RecipeService {
   List<RecipeCategory> categories = [];
+
+  @override
+  Future<Uint8List?> getRecipeImage(String id) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    List<dynamic> data = await storageService.get(
+        GluttexConstants.apiBaseUrl + GluttexConstants.getRecipeImageEndpoint,
+        id) as List<dynamic>;
+    return Recipe.imageFromJson(data);
+  }
+
   @override
   Future<int?> addRecipe(Recipe Recipe) async {
     StorageService storageService = GluttexLocator.get<StorageService>();

@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:medicom_catalog/screens/product_screen.dart';
+import 'package:provider/provider.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -9,6 +13,15 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log('${product.id_product_image}');
+
+    if (product.id_product_image != null &&
+        product.id_product_image != 0 &&
+        product.product_image_data == null) {
+      Provider.of<ProductNotifier>(context, listen: false)
+          .getProductImage(product);
+    }
+
     return InkWell(
       onTap: () => Navigator.push(
         context,

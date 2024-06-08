@@ -35,7 +35,9 @@ class StorageServiceImpl implements StorageService {
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e, stacktrace) {
+      log('${e}');
       log('${stacktrace}');
+      log('$destination/$id');
       throw Exception(GluttexConstants.serverError);
     }
   }
@@ -53,6 +55,7 @@ class StorageServiceImpl implements StorageService {
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e, stacktrace) {
+      log("${destination}");
       developer.log('${e}');
       developer.log('${stacktrace}');
       throw Exception(GluttexConstants.serverError);

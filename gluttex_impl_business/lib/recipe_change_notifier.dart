@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Recipe.dart';
@@ -13,6 +14,19 @@ class RecipeNotifier extends ChangeNotifier {
 
   RecipeNotifier() {
     fetchRecipes();
+  }
+
+  Future<void> getRecipeImage(Recipe recipe) async {
+    Uint8List? image =
+        await _recipeService.getRecipeImage('${recipe.id_recipe_image}');
+    // await fetchRecipes();
+    log("Changing recipe image");
+    log('${_recipes.where((element) => element.id_recipe == recipe.id_recipe)}');
+    _recipes
+        .where((element) => element.id_recipe == recipe.id_recipe)
+        .first
+        .recipe_image_data = image;
+    notifyListeners();
   }
 
   Future<void> fetchRecipes() async {

@@ -7,7 +7,7 @@ class Recipe {
   final int? recipe_category_id;
 
   final int? id_recipe_image;
-  final Uint8List? recipe_image_data;
+  Uint8List? recipe_image_data;
   final DateTime? recipe_created_at;
   final DateTime? recipe_last_updated;
   final String? recipe_name;
@@ -32,9 +32,12 @@ class Recipe {
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     Uint8List? imageData;
+    int cardImageId = 0;
     if (json['recipe_image'] != null &&
         json['recipe_image'] is List &&
         json['recipe_image']!.isNotEmpty) {
+      final imageId = json['recipe_image'][0]["id_recipe_image"];
+      cardImageId = imageId;
       final imageBase64 = json['recipe_image'][0]["recipe_image_data"];
       if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
         imageData = base64Decode(imageBase64);
@@ -44,7 +47,7 @@ class Recipe {
       id_recipe: json['id_recipe'] ?? 0,
       recipe_owner_id: json['recipe_owner_id'] ?? 0,
       recipe_category_id: json['recipe_category_id'] ?? 0,
-      id_recipe_image: json['id_recipe_image'] ?? 0,
+      id_recipe_image: cardImageId,
       recipe_image_data: imageData,
       recipe_name: json['recipe_name'] ?? "",
       recipe_description: json['recipe_description'],
@@ -55,6 +58,16 @@ class Recipe {
       recipe_category_desc:
           json['recipe_category']['recipe_category_desc'] ?? "",
     );
+  }
+  static Uint8List? imageFromJson(List<dynamic> json) {
+    Uint8List? imageData;
+    if (json != null && json is List && json!.isNotEmpty) {
+      final imageBase64 = json[0]["recipe_image_data"];
+      if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
+        imageData = base64Decode(imageBase64);
+      }
+    }
+    return imageData;
   }
 
   Map<String, dynamic> toJson() {

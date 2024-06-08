@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class GluttexConstants {
   // API endpoints
-  static const String apiBaseUrl = 'http://localhost:9000';
+  static const String apiBaseUrl = 'http://192.168.178.158:9000';
 
   static const String addAppUserEndpoint = '/appUser/add';
   static const String deleteAppUserEndpoint = '/appUser/delete';
@@ -17,12 +17,14 @@ class GluttexConstants {
   static const String getAllProductsEndpoint = '/Product/all';
   static const String productEndpoint = '/product';
   static const String getProductCategoriesEndpoint = '/product/Category/all';
+  static const String getProductImageEndpoint = '/image/product';
 
   static const String addSupplierEndpoint = '/supplier/add';
   static const String deleteSupplierEndpoint = '/supplier/delete';
   static const String getAllSuppliersEndpoint = '/Supplier/all';
   static const String supplierEndpoint = '/supplier';
   static const String getSupplierCategoriesEndpoint = '/Supplier/Category/all';
+  static const String getRecipeImageEndpoint = '/image/recipe';
 
   static const String addRecipeEndpoint = '/recipe/add';
   static const String deleteRecipeEndpoint = '/Recipe/delete';

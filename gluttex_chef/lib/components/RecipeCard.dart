@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_screen.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
+import 'package:gluttex_impl_business/recipe_change_notifier.dart';
+import 'package:provider/provider.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
@@ -12,6 +14,12 @@ class RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final double cardHeight = MediaQuery.of(context).size.height / 4;
 
+    if (recipe.id_recipe_image != null &&
+        recipe.id_recipe_image != 0 &&
+        recipe.recipe_image_data == null) {
+      Provider.of<RecipeNotifier>(context, listen: false)
+          .getRecipeImage(recipe);
+    }
     return InkWell(
       onTap: () => Navigator.push(
         context,

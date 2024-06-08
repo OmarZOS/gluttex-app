@@ -1,6 +1,7 @@
 library gluttex_impl_business;
 
 import 'dart:developer' as developer;
+import 'dart:typed_data';
 
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -35,6 +36,15 @@ class ProductServiceImpl implements ProductService {
         GluttexConstants.apiBaseUrl + GluttexConstants.productEndpoint,
         '${updatedProduct.id_product}',
         updatedProduct.toJson());
+  }
+
+  @override
+  Future<Uint8List?> getProductImage(String id) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    List<dynamic> data = await storageService.get(
+        GluttexConstants.apiBaseUrl + GluttexConstants.getProductImageEndpoint,
+        id) as List<dynamic>;
+    return Product.imageFromJson(data);
   }
 
   @override

@@ -14,7 +14,7 @@ class Product {
   final double? product_price;
   final int? product_quantity;
   final String? product_category_desc;
-  final Uint8List? product_image_data;
+  Uint8List? product_image_data;
 
   final String? product_description;
   final DateTime? product_created_at;
@@ -41,9 +41,12 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     Uint8List? imageData;
+    int cardImageId = 0;
     if (json['product_image'] != null &&
         json['product_image'] is List &&
         json['product_image']!.isNotEmpty) {
+      final imageId = json['product_image'][0]["id_product_image"] ?? 0;
+      cardImageId = imageId;
       final imageBase64 = json['product_image'][0]["product_image_data"];
       if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
         imageData = base64Decode(imageBase64);
@@ -54,7 +57,7 @@ class Product {
       product_provider_id: json['product_provider_id'] ?? 0,
       product_category_id: json['product_category_id'] ?? 0,
       id_product_category: json['id_product_category'] ?? 0,
-      id_product_image: json['id_product_image'] ?? 0,
+      id_product_image: cardImageId,
       product_ref_id: json['product_ref_id'] ?? 0,
       product_name: json['product_name'] ?? "",
       product_brand: json['product_brand'] ?? "",
@@ -70,6 +73,17 @@ class Product {
       // product_created_at: DateTime.tryParse(json['created'] ?? 0),
       // product_last_updated: DateTime.tryParse(json['last_updated'] ?? 0),
     );
+  }
+
+  static Uint8List? imageFromJson(List<dynamic> json) {
+    Uint8List? imageData;
+    if (json != null && json is List && json!.isNotEmpty) {
+      final imageBase64 = json[0]["product_image_data"];
+      if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
+        imageData = base64Decode(imageBase64);
+      }
+    }
+    return imageData;
   }
 
   Map<String, dynamic> toJson() {

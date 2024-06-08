@@ -1,7 +1,13 @@
+import 'dart:typed_data';
+
 import '../Recipe.dart';
 
 // RecipeService.dart
 abstract class RecipeService {
+  Future<Uint8List?> getRecipeImage(String id) async {
+    return null;
+  }
+
   Future<List<RecipeCategory>?>? getCategories() async {
     return null;
   }

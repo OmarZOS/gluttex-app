@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
@@ -19,10 +22,29 @@ class ProductNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<int?> getProduct(Product product) async {
+    int? status = await _productService.addProduct(product);
+    await fetchProducts();
+    return status;
+  }
+
   Future<int?> addProduct(Product product) async {
     int? status = await _productService.addProduct(product);
     await fetchProducts();
     return status;
+  }
+
+  Future<void> getProductImage(Product product) async {
+    Uint8List? image =
+        await _productService.getProductImage('${product.id_product_image}');
+    // await fetchProducts();
+    log("Changing product image");
+    log('${_products.where((element) => element.id_product == product.id_product)}');
+    _products
+        .where((element) => element.id_product == product.id_product)
+        .first
+        .product_image_data = image;
+    notifyListeners();
   }
 
   Future<int?> updateProduct(Product product) async {
