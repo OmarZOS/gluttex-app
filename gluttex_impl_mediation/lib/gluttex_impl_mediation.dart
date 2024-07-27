@@ -7,6 +7,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 
 class StorageServiceImpl implements StorageService {
@@ -55,7 +56,7 @@ class StorageServiceImpl implements StorageService {
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e, stacktrace) {
-      log("${destination}");
+      // log("${destination}");
       developer.log('${e}');
       developer.log('${stacktrace}');
       throw Exception(GluttexConstants.serverError);
@@ -99,7 +100,6 @@ class StorageServiceImpl implements StorageService {
   Future<int?> update(
       String destination, String id, Map<String, dynamic> data) async {
     try {
-      // log('${json.encode(data)}');
       final response = await _dio.post('${destination}/${id}',
           data: json.encode(data),
           options: Options(headers: {
@@ -114,6 +114,71 @@ class StorageServiceImpl implements StorageService {
 
       // Return server error message
       return e.response?.statusCode;
+    }
+  }
+
+  @override
+  Future<dynamic> signUpUsingUsernameAndPassword(
+      String destination, Map<String, dynamic> data) async {
+    try {
+      log('$data');
+      final response = await _dio.put('${destination}',
+          data: data, //json.encode(data)
+          options: Options(
+              validateStatus: (status) => status == 200 || status == 406,
+              headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json'
+              }));
+      if (response.statusCode == 406) {
+        throw Exception(response.data["detail"]);
+      }
+      return response.data;
+    } on DioException catch (e, stacktrace) {
+      // log('Error: ' + e.message.toString());
+      // log('Stack trace: $stacktrace');
+      // Return server error message
+      throw Exception(e.message);
+    }
+  }
+
+  Future<dynamic> signInUsingUsernameAndPassword(
+      String destination, Map<String, dynamic> data) async {
+    try {
+      // log('${json.encode(data)}');
+      final response = await _dio.post('${destination}',
+          data: json.encode(data),
+          options: Options(
+              headers: {'Content-Type': 'application/x-www-form-urlencoded'}));
+
+      return response.data;
+    } on DioException catch (e, stacktrace) {
+      log('Error: $e');
+      log('Stack trace: $stacktrace');
+
+      // Return server error message
+      return 'Stack trace: $stacktrace';
+    }
+  }
+
+  Future<dynamic> signInUsingProvider(String destination, String providerName,
+      Map<String, dynamic> data) async {
+    try {
+      // log('${json.encode(data)}');
+      final response = await _dio.post('${destination}',
+          data: json.encode(data),
+          options: Options(headers: {
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
+          }));
+
+      return response.data;
+    } on DioException catch (e, stacktrace) {
+      log('Error: $e');
+      log('Stack trace: $stacktrace');
+
+      // Return server error message
+      return 'Stack trace: $stacktrace';
     }
   }
 }

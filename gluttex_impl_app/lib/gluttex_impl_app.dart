@@ -59,31 +59,6 @@ class AppUserServiceImpl implements AppUserService {
     }
   }
 
-  // @override
-  // Future<List<AppUser>?>? getAllAppUsers() async {
-  //   try {
-  //     // Get the storage service instance
-  //     StorageService storageService = GluttexLocator.get<StorageService>();
-
-  //     // Make a call to get all appUsers
-  //     List<dynamic> responseData = await storageService.getAll(
-  //         GluttexConstants.apiBaseUrl +
-  //             GluttexConstants.getAllAppUsersEndpoint);
-  //     // Check if the response data is not null and is a list
-  //     // Convert the list of dynamic maps to a list of AppUser objects
-  //     List dateien = responseData;
-  //     List<AppUser?> appUsers = dateien
-  //         .map((data) => AppUser.fromJson(data as Map<String, dynamic>))
-  //         .toList();
-  //     return appUsers as List<AppUser>?;
-  //   } catch (e, stacktrace) {
-  //     log(e.toString());
-  //     log(stacktrace.toString());
-  //     // Handle exceptions here
-  //     return [];
-  //   }
-  // }
-
   @override
   Future<List<AppUserCategory>>? getCategories() async {
     if (categories.isNotEmpty) return categories;

@@ -42,8 +42,8 @@ class _HomePageState extends State<HomePage> {
           IconButton(
               onPressed: () async {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  Provider.of<AppUserNotifier>(context, listen: false)
-                      .fetchAppUser('1');
+                  // Provider.of<AppUserNotifier>(context, listen: false)
+                  //     .fetchAppUser('1');
                   return const ProfileScreen();
                 }));
               },

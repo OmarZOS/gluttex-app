@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 void main() {
   runApp(SnakeGame());
@@ -131,12 +133,21 @@ class _SnakeGameState extends State<SnakeGame> {
                   ),
                 );
               } else if (fruit == cell) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                );
+                return SvgPicture.asset(
+                  'assets/images/apple_pie.svg',
+                  // height: 100.0,
+                  // width: 100.0,
+                  // color: Colors.red,
+                )
+                    // Container(
+
+                    //   decoration: BoxDecoration(
+                    //     color: Colors.red,
+                    //     shape: BoxShape.circle,
+                    //     icon:Icon(Icons.g_mobiledata)
+                    //   ),
+                    // )
+                    ;
               } else {
                 return Container();
               }

@@ -5,9 +5,9 @@ import 'package:gluttex_play/screens/game_play_screen.dart';
 
 class GameListScreen extends StatelessWidget {
   final List<Game> games = [
-    Game(name: 'Game 1'),
-    Game(name: 'Game 2'),
-    Game(name: 'Game 3'),
+    Game(name: 'Snake', screen: SnakeGame()),
+    Game(name: 'Game 2', screen: SnakeGame()),
+    Game(name: 'Game 3', screen: SnakeGame()),
     // Add more games as needed
   ];
 
@@ -30,7 +30,7 @@ class GameListScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SnakeGame(),
+                    builder: (context) => games[index].screen,
                   ),
                 );
               },
