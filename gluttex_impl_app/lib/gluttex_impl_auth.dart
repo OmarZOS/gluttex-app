@@ -99,7 +99,7 @@ class AuthServiceImpl implements AuthService {
   }
 
   @override
-  Future<AppUser?> signInWithUsernameAndPassword(
+  Future<dynamic> signInWithUsernameAndPassword(
       String username, String password) async {
     // TODO: implement signInWithUsernameAndPassword
     String destination =
@@ -110,7 +110,7 @@ class AuthServiceImpl implements AuthService {
       "app_user_password": password,
     };
 
-    AppUser? appUser =
+    dynamic appUser =
         await storageService.signInUsingUsernameAndPassword(destination, data);
 
     return appUser;

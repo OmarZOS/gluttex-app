@@ -23,16 +23,27 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await Provider.of<AppUserNotifier>(context, listen: false)
+      dynamic data = await Provider.of<AppUserNotifier>(context, listen: false)
           .signInWithUsernameAndPassword(
         _usernameController.text,
         _passwordController.text,
       );
+      if (data != null)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data.toString())),
+        );
+      else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              backgroundColor: Colors.green,
+              content: Text("Successfully signed up.")),
+        );
+      }
       // Navigate to the next screen on successful login
     } catch (error) {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
+        SnackBar(backgroundColor: Colors.red, content: Text(error.toString())),
       );
     }
 
@@ -108,8 +119,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _usernameController,
                   decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
+                    labelText: 'Username',
+                    prefixIcon: Icon(Icons.person),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -117,10 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return 'Please enter a valid email';
+                      return 'Please enter your username';
                     }
                     return null;
                   },

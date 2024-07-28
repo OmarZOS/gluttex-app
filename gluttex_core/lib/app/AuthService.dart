@@ -11,7 +11,7 @@ abstract class AuthService {
   }
 
   // Sign in with Username and password
-  Future<AppUser?> signInWithUsernameAndPassword(
+  Future<dynamic> signInWithUsernameAndPassword(
       String username, String password) async {
     throw UnimplementedError();
   }

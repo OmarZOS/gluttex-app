@@ -10,16 +10,13 @@ class AppUserNotifier extends ChangeNotifier {
   final AppUserService _appUserService = GluttexLocator.get<AppUserService>();
   final AuthService _authService = GluttexLocator.get<AuthService>();
   late AppUser? _appUser;
+  late String? token;
 
-  // AppUserNotifier() {}
   AppUser? get appUser => _appUser;
 
   Future<void> fetchAppUser(String userId) async {
-    log('Finding him!!');
     var appUser = await _appUserService.getAppUser(userId);
-    log('found him');
 
-    log('${appUser?.id_app_user}');
     _appUser = appUser;
     notifyListeners();
   }
@@ -54,12 +51,17 @@ class AppUserNotifier extends ChangeNotifier {
   }
 
   // Sign in with email and password
-  Future<AppUser?> signInWithUsernameAndPassword(
+  Future<dynamic> signInWithUsernameAndPassword(
       String username, String password) async {
-    AppUser? appUser =
+    dynamic appUserData =
         await _authService.signInWithUsernameAndPassword(username, password);
 
-    return appUser;
+    if (appUserData['app_user_id'] != null) {
+      token = appUserData['access_token'];
+      await fetchAppUser(appUserData['app_user_id'].toString());
+      return;
+    }
+    return appUserData;
   }
 
   // Sign in with Google

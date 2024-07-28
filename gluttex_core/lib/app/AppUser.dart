@@ -61,7 +61,6 @@ class AppUser {
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
     Uint8List? imageData;
-    log("= json['app_user_image']");
     if (json['app_user_image'] != null && json['app_user_image']!.isNotEmpty) {
       final imageBase64 = json['app_user_image'];
       if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
@@ -86,7 +85,6 @@ class AppUser {
     var _address_country;
     var _address_postal_code;
 
-    log("= json['app_user_person']");
     var _app_user_person = json['app_user_person'];
     if (_app_user_person != null && _app_user_person.isNotEmpty) {
       var _person_blood_type = _app_user_person["person_blood_type"];

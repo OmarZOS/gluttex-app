@@ -33,7 +33,7 @@ class GluttexConstants {
   static const String recipeEndpoint = '/recipe';
   static const String getRecipeCategoriesEndpoint = '/recipe/Category/all';
 
-  static const String loginEndpoint = '/login';
+  static const String loginEndpoint = '/authentication/token';
   static const String productsEndpoint = '/products';
 
   // Texts

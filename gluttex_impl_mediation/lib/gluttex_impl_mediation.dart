@@ -134,7 +134,7 @@ class StorageServiceImpl implements StorageService {
         throw Exception(response.data["detail"]);
       }
       return response.data;
-    } on DioException catch (e, stacktrace) {
+    } on DioException catch (e) {
       // log('Error: ' + e.message.toString());
       // log('Stack trace: $stacktrace');
       // Return server error message
@@ -142,6 +142,7 @@ class StorageServiceImpl implements StorageService {
     }
   }
 
+  @override
   Future<dynamic> signInUsingUsernameAndPassword(
       String destination, Map<String, dynamic> data) async {
     try {
@@ -149,22 +150,24 @@ class StorageServiceImpl implements StorageService {
       final response = await _dio.post('${destination}',
           data: json.encode(data),
           options: Options(
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'}));
-
+              validateStatus: (status) => status == 200 || status == 406,
+              headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json'
+              }));
+      if (response.statusCode == 406) {
+        throw Exception(response.data["detail"]);
+      }
       return response.data;
-    } on DioException catch (e, stacktrace) {
-      log('Error: $e');
-      log('Stack trace: $stacktrace');
-
+    } on DioException catch (e) {
       // Return server error message
-      return 'Stack trace: $stacktrace';
+      throw Exception(e.message);
     }
   }
 
   Future<dynamic> signInUsingProvider(String destination, String providerName,
       Map<String, dynamic> data) async {
     try {
-      // log('${json.encode(data)}');
       final response = await _dio.post('${destination}',
           data: json.encode(data),
           options: Options(headers: {
