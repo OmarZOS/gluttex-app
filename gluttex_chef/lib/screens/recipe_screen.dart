@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_chef/components/RecipeOwner.dart';
 import 'package:gluttex_chef/screens/recipe_update_form_screen.dart';
 import 'package:gluttex_chef/tools/confirmation_dialogue.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
@@ -36,87 +37,92 @@ class _DetailsScreenState extends State<DetailsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(
-              Icons.delete,
-              color: Colors.red,
-            ),
-            onPressed: () async {
-              showConfirmationDialog(
-                context,
-                'Are you sure you want to delete this recipe?',
-                () async {
-                  int? status_code =
-                      await Provider.of<RecipeNotifier>(context, listen: false)
-                          .deleteRecipe('${_recipe.id_recipe}');
-
-                  Response response = Response();
-
-                  switch (status_code) {
-                    case 200:
-                      response.color = Colors.green;
-                      response.text = GluttexConstants.deleteSuccess;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(response.text),
-                          backgroundColor: response.color,
-                        ),
-                      );
-                      Navigator.pop(context);
-                      break;
-                    case 406:
-                      response.color = Colors.amberAccent;
-                      response.text = GluttexConstants.deleteFailure;
-                      break;
-                    case 422:
-                      response.color = Colors.amberAccent;
-                      response.text = GluttexConstants.deleteFailure;
-                      break;
-
-                    default:
-                      response.color = Colors.red;
-                      response.text = GluttexConstants.serverError;
-                  }
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(response.text),
-                      backgroundColor: response.color,
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () async {
-              final updatedRecipe = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RecipeEditFormScreen(
-                    initialRecipeName: _recipe.recipe_name,
-                    initialRecipeImage: _recipe.recipe_image_data,
-                    initialRecipeTypeId: _recipe.recipe_category_id,
-                    initialRecipe_provider_id: _recipe.recipe_owner_id,
-                    initialRecipe_category_id: _recipe.recipe_category_id,
-                    initialIdRecipe: _recipe.id_recipe,
-                    initialIdRecipeImage: _recipe.id_recipe_image,
-                    initialRecipeDescription: _recipe.recipe_description,
-                    initialRecipeInstruction: _recipe.recipe_instruction,
-                    initialRecipePreparationTime:
-                        _recipe.recipe_preparation_time,
+          is_recipe_owner(context, _recipe.recipe_owner_id ?? 0)
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
                   ),
-                ),
-              );
+                  onPressed: () async {
+                    showConfirmationDialog(
+                      context,
+                      'Are you sure you want to delete this recipe?',
+                      () async {
+                        int? status_code = await Provider.of<RecipeNotifier>(
+                                context,
+                                listen: false)
+                            .deleteRecipe('${_recipe.id_recipe}');
 
-              if (updatedRecipe != null) {
-                setState(() {
-                  _recipe = updatedRecipe;
-                });
-              }
-            },
-          ),
+                        Response response = Response();
+
+                        switch (status_code) {
+                          case 200:
+                            response.color = Colors.green;
+                            response.text = GluttexConstants.deleteSuccess;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(response.text),
+                                backgroundColor: response.color,
+                              ),
+                            );
+                            Navigator.pop(context);
+                            break;
+                          case 406:
+                            response.color = Colors.amberAccent;
+                            response.text = GluttexConstants.deleteFailure;
+                            break;
+                          case 422:
+                            response.color = Colors.amberAccent;
+                            response.text = GluttexConstants.deleteFailure;
+                            break;
+
+                          default:
+                            response.color = Colors.red;
+                            response.text = GluttexConstants.serverError;
+                        }
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(response.text),
+                            backgroundColor: response.color,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                )
+              : Container(),
+          is_recipe_owner(context, _recipe.recipe_owner_id ?? 0)
+              ? IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async {
+                    final updatedRecipe = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecipeEditFormScreen(
+                          initialRecipeName: _recipe.recipe_name,
+                          initialRecipeImage: _recipe.recipe_image_data,
+                          initialRecipeTypeId: _recipe.recipe_category_id,
+                          initialRecipe_provider_id: _recipe.recipe_owner_id,
+                          initialRecipe_category_id: _recipe.recipe_category_id,
+                          initialIdRecipe: _recipe.id_recipe,
+                          initialIdRecipeImage: _recipe.id_recipe_image,
+                          initialRecipeDescription: _recipe.recipe_description,
+                          initialRecipeInstruction: _recipe.recipe_instruction,
+                          initialRecipePreparationTime:
+                              _recipe.recipe_preparation_time,
+                        ),
+                      ),
+                    );
+
+                    if (updatedRecipe != null) {
+                      setState(() {
+                        _recipe = updatedRecipe;
+                      });
+                    }
+                  },
+                )
+              : Container(),
           const SizedBox(width: GluttexConstants.kDefaultPaddin / 2)
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_login/screens/registration_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -37,6 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(
               backgroundColor: Colors.green,
               content: Text("Successfully signed up.")),
+        );
+        globalNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+          AppRoutes.home,
+          (route) => false,
         );
       }
       // Navigate to the next screen on successful login

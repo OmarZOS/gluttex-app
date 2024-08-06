@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/app/AuthService.dart';
 import 'package:gluttex_core/app/UserService.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
+import 'package:gluttex_home/gluttex_router.dart';
 import 'package:gluttex_home/screens/home_screen.dart';
 import 'package:gluttex_impl_app/gluttex_impl_app.dart';
+import 'package:gluttex_impl_app/gluttex_impl_auth.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/gluttex_impl_product.dart';
 import 'package:gluttex_impl_business/gluttex_impl_recipe.dart';
@@ -15,6 +19,7 @@ import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
+import 'package:gluttex_login/screens/login_screen.dart';
 
 void setupLocator() {
   // Register your services or dependencies here
@@ -24,6 +29,7 @@ void setupLocator() {
   GluttexLocator.registerSingletonService<SupplierService>(
       SupplierServiceImpl());
   GluttexLocator.registerSingletonService<ProductService>(ProductServiceImpl());
+  GluttexLocator.registerSingletonService<AuthService>(AuthServiceImpl());
 }
 
 void main() {
@@ -47,12 +53,9 @@ class GluttexApp extends StatelessWidget {
           ),
         ],
         child: MaterialApp(
-          home: HomePage(),
-          // darkTheme: ThemeData(
-          //   brightness: Brightness.dark,
-          //   /* dark theme settings */
-          // ),
-          themeMode: ThemeMode.dark,
+          navigatorKey: globalNavigatorKey, // Set the navigator key here
+          onGenerateRoute: AppRouter.generateRoute, // Use the router
+          // themeMode: ThemeMode.dark,
         ));
   }
 }

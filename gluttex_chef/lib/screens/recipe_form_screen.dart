@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/components/category_picker.dart';
+import 'package:gluttex_core/app/AuthService.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_chef/tools/duration.dart';
 import 'package:gluttex_chef/tools/image_picker.dart';
@@ -187,7 +189,8 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                     _formKey.currentState!.save();
                     final recipe = Recipe(
                       id_recipe: _id_recipe,
-                      recipe_owner_id: _recipe_owner_id ?? 1,
+                      recipe_owner_id:
+                          AppUserNotifier().appUser!.id_app_user ?? 1,
                       recipe_category_id: _recipe_category_id,
                       id_recipe_image: _id_recipe_image,
                       recipe_name: _recipeName,

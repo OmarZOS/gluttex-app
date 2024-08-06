@@ -12,13 +12,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: HomeScreen(),
+      home: MapPickerHomeScreen(),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class MapPickerHomeScreen extends StatelessWidget {
+  const MapPickerHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

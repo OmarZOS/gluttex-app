@@ -279,7 +279,6 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                       id_app_user: _id_app_user ?? 0,
                       app_user_person_id: _app_user_person_id ?? 0,
                       app_user_type_id: _app_user_type_id ?? 0,
-                      id_app_user_type: _id_app_user_type ?? 1,
                       app_user_name: _app_user_name ?? "",
                       app_user_password: _app_user_password ?? "",
                       app_user_preferences: _app_user_preferences ?? "",

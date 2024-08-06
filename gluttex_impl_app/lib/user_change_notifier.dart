@@ -9,7 +9,7 @@ import 'package:locator/locator.dart';
 class AppUserNotifier extends ChangeNotifier {
   final AppUserService _appUserService = GluttexLocator.get<AppUserService>();
   final AuthService _authService = GluttexLocator.get<AuthService>();
-  late AppUser? _appUser;
+  AppUser? _appUser = null;
   late String? token;
 
   AppUser? get appUser => _appUser;

@@ -2,6 +2,9 @@ library gluttex_constants;
 
 import 'package:flutter/material.dart';
 
+final GlobalKey<NavigatorState> globalNavigatorKey =
+    GlobalKey<NavigatorState>();
+
 class GluttexConstants {
   // API endpoints
   static const String apiBaseUrl = 'http://localhost:9000';
@@ -69,4 +72,10 @@ class GluttexConstants {
   static const kTextLightColor = Color(0xFFACACAC);
 
   static const kDefaultPaddin = 20.0;
+}
+
+class AppRoutes {
+  static const String login = '/login';
+  static const String registration = '/registration';
+  static const String home = '/home';
 }
