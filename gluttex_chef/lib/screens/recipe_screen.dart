@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/components/RecipeOwner.dart';
+import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/screens/recipe_update_form_screen.dart';
 import 'package:gluttex_chef/tools/confirmation_dialogue.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
@@ -19,6 +20,55 @@ class DetailsScreen extends StatefulWidget {
 
 class _DetailsScreenState extends State<DetailsScreen> {
   late Recipe _recipe;
+
+  // final List<Map<String, String>> ingredients = [
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Flour",
+  //     "quantity": "2 cups"
+  //   },
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Sugar",
+  //     "quantity": "1 cup"
+  //   },
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Eggs",
+  //     "quantity": "3"
+  //   },
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Eggs",
+  //     "quantity": "3"
+  //   },
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Eggs",
+  //     "quantity": "3"
+  //   },
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Eggs",
+  //     "quantity": "3"
+  //   },
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Eggs",
+  //     "quantity": "3"
+  //   },
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Eggs",
+  //     "quantity": "3"
+  //   },
+  //   {
+  //     "imageUrl": "https://via.placeholder.com/100",
+  //     "name": "Eggs",
+  //     "quantity": "3"
+  //   },
+  //   // Add more ingredients as needed
+  // ];
 
   @override
   void initState() {
@@ -148,12 +198,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
               const SizedBox(height: 16),
               Text(
                 _recipe.recipe_name ?? 'Recipe Name',
-                style: Theme.of(context).textTheme.headline5,
+                style: Theme.of(context).textTheme.labelLarge,
               ),
               const SizedBox(height: 8),
               Text(
                 _recipe.recipe_description ?? 'No description available.',
-                style: Theme.of(context).textTheme.subtitle1,
+                style: Theme.of(context).textTheme.labelMedium,
               ),
               const SizedBox(height: 16),
               Row(
@@ -162,7 +212,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   const SizedBox(width: 8),
                   Text(
                     _recipe.recipe_preparation_time ?? 'No preparation time',
-                    style: Theme.of(context).textTheme.bodyText1,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -171,14 +221,43 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   onPressed: () {},
                   child: Text('${_recipe.recipe_category_desc}')),
               const SizedBox(height: 16),
+              (_recipe.recipe_ingredients!.isNotEmpty)
+                  ? SizedBox(
+                      height: 120, // Set a fixed height for the ListView
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _recipe.recipe_ingredients!.length,
+                        itemBuilder: (context, index) {
+                          // Extract the key and corresponding value
+                          int key =
+                              _recipe.recipe_ingredients!.keys.elementAt(index);
+                          String quantity = _recipe.recipe_ingredients![key]!;
+
+                          // Return the IngredientCard with the correct data
+                          return IngredientCard(
+                            onClicked: () {},
+                            name: Provider.of<RecipeNotifier>(context,
+                                    listen: false)
+                                .getIngredientById(key)!
+                                .ingredient_name,
+                            quantity: quantity,
+                            icon: Provider.of<RecipeNotifier>(context,
+                                    listen: false)
+                                .getIngredientById(key)!
+                                .ingredient_icon,
+                          );
+                        },
+                      ),
+                    )
+                  : Container(),
               Text(
                 'Instructions',
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 8),
               Text(
                 _recipe.recipe_instruction ?? 'No instructions available.',
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),

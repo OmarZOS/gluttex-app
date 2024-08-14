@@ -9,11 +9,30 @@ import 'package:locator/locator.dart';
 class RecipeNotifier extends ChangeNotifier {
   final RecipeService _recipeService = GluttexLocator.get<RecipeService>();
   List<Recipe> _recipes = [];
-
+  List<RecipeIngredient> _recipeIngredients = [];
   List<Recipe> get recipes => _recipes;
+  List<RecipeIngredient> get recipeIngredients =>
+      _recipeIngredients.map((ingredient) {
+        return RecipeIngredient(
+            id_ingredient: ingredient.id_ingredient,
+            ingredient_name: ingredient.ingredient_name,
+            ingredient_icon: ""); // remove the icon data from the object
+      }).toList();
+  // Getter method to retrieve an ingredient by its id
+  RecipeIngredient? getIngredientById(int id) {
+    try {
+      return _recipeIngredients.firstWhere(
+        (ingredient) => ingredient.id_ingredient == id,
+        // orElse: () => null, // Returns null if the ingredient is not found
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   RecipeNotifier() {
     fetchRecipes();
+    fetchIngredients();
   }
 
   Future<void> getRecipeImage(Recipe recipe) async {
@@ -26,6 +45,14 @@ class RecipeNotifier extends ChangeNotifier {
         .where((element) => element.id_recipe == recipe.id_recipe)
         .first
         .recipe_image_data = image;
+    notifyListeners();
+  }
+
+  Future<void> fetchIngredients() async {
+    var recipeIngredients = await _recipeService.getAllIngredients();
+
+    // log('${recipes}');
+    _recipeIngredients = recipeIngredients ?? [];
     notifyListeners();
   }
 

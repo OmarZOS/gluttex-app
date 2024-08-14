@@ -107,4 +107,31 @@ class RecipeServiceImpl implements RecipeService {
       return [];
     }
   }
+
+  @override
+  Future<List<RecipeIngredient>?> getAllIngredients() async {
+    try {
+      // Get the storage service instance
+      StorageService storageService = GluttexLocator.get<StorageService>();
+
+      // Make a call to get all categories
+      List<dynamic> responseData = await storageService.getAll(
+          GluttexConstants.apiBaseUrl + GluttexConstants.getIngredientEndpoint);
+
+      // Check if the response data is not null and is a list
+      // Convert the list of RecipeCategory maps to a list of Supplier objects
+      List dateien = responseData;
+      developer.log(dateien.toString());
+      List<RecipeIngredient>? mappedIngredients = dateien
+          .map(
+              (data) => RecipeIngredient.fromJson(data as Map<String, dynamic>))
+          .toList();
+      // developer.//log('${dateien.length}');
+      return mappedIngredients;
+    } catch (e) {
+      developer.log(e.toString());
+      // Handle exceptions here
+      return [];
+    }
+  }
 }

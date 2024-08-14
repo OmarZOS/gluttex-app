@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'My App',
-      darkTheme: ThemeData.dark(), // Default dark theme
+      // darkTheme: ThemeData.dark(), // Default dark theme
       home: const RecipeCatalogScreen(),
     );
   }

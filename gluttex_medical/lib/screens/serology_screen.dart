@@ -60,45 +60,45 @@ class _SerologyScreenState extends State<SerologyScreen> {
         SizedBox(height: 8.0),
         Container(
           height: 200,
-          child: LineChart(
-            LineChartData(
-              titlesData: FlTitlesData(
-                bottomTitles: SideTitles(
-                  showTitles: true,
-                  interval: 1,
-                  getTitles: (value) {
-                    return 'Day ${value.toInt()}';
-                  },
-                ),
-                leftTitles: SideTitles(
-                  showTitles: true,
-                  interval: 5,
-                  getTitles: (value) {
-                    return value.toString();
-                  },
-                ),
-              ),
-              gridData: FlGridData(show: true),
-              borderData: FlBorderData(show: true),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: spots,
-                  isCurved: true,
-                  barWidth: 4,
-                  colors: [color],
-                  belowBarData: BarAreaData(show: false),
-                ),
-                if (secondarySpots != null)
-                  LineChartBarData(
-                    spots: secondarySpots,
-                    isCurved: true,
-                    barWidth: 4,
-                    colors: [secondaryColor!],
-                    belowBarData: BarAreaData(show: false),
-                  ),
-              ],
-            ),
-          ),
+          // child: LineChart(
+          // LineChartData(
+          //   titlesData: FlTitlesData(
+          //     rightTitles: SideTitles(
+          //       showTitles: true,
+          //       interval: 1,
+          //       getTitles: (value) {
+          //         return 'Day ${value.toInt()}';
+          //       },
+          //     ),
+          //     leftTitles: SideTitles(
+          //       showTitles: true,
+          //       interval: 5,
+          //       getTitles: (value) {
+          //         return value.toString();
+          //       },
+          //     ),
+          //   ),
+          //   gridData: FlGridData(show: true),
+          //   borderData: FlBorderData(show: true),
+          //   lineBarsData: [
+          //     LineChartBarData(
+          //       spots: spots,
+          //       isCurved: true,
+          //       barWidth: 4,
+          //       // colors: [color],
+          //       belowBarData: BarAreaData(show: false),
+          //     ),
+          //     if (secondarySpots != null)
+          //       LineChartBarData(
+          //         spots: secondarySpots,
+          //         isCurved: true,
+          //         barWidth: 4,
+          //         // colors: [secondaryColor!],
+          //         belowBarData: BarAreaData(show: false),
+          //       ),
+          //   ],
+          // ),
+          // ),
         ),
       ],
     );

@@ -31,6 +31,7 @@ class GluttexConstants {
   static const String getRecipeImageEndpoint = '/image/recipe';
 
   static const String addRecipeEndpoint = '/recipe/add';
+  static const String getIngredientEndpoint = '/recipe/Ingredients/all';
   static const String deleteRecipeEndpoint = '/Recipe/delete';
   static const String getAllRecipesEndpoint = '/Recipe/all';
   static const String recipeEndpoint = '/recipe';

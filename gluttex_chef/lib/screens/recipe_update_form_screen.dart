@@ -250,6 +250,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                       recipe_instruction: _recipeInstruction,
                       recipe_preparation_time: _recipePreparationTime,
                       recipe_category_desc: "",
+                      recipe_ingredients: {},
                     );
 
                     // Handle recipe submission

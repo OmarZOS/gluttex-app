@@ -15,6 +15,7 @@ class Recipe {
   final String? recipe_instruction;
   final String? recipe_preparation_time;
   final String? recipe_category_desc;
+  final Map<int, String>? recipe_ingredients;
 
   Recipe(
       {required this.id_recipe,
@@ -28,7 +29,8 @@ class Recipe {
       required this.recipe_owner_id,
       required this.recipe_instruction,
       required this.recipe_preparation_time,
-      required this.recipe_category_desc});
+      required this.recipe_category_desc,
+      required this.recipe_ingredients});
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     Uint8List? imageData;
@@ -43,21 +45,32 @@ class Recipe {
         imageData = base64Decode(imageBase64);
       }
     }
+
+    Map<int, String> ingredientsMap = {};
+    if (json['recipe_contains_ingredient'] != null)
+      for (var ingredient in json['recipe_contains_ingredient']) {
+        if (ingredient['contained_ingredient_id'] != null &&
+            ingredient['contained_quantity'] != null) {
+          ingredientsMap[ingredient['contained_ingredient_id']] =
+              ingredient['contained_quantity'];
+        }
+      }
+
     return Recipe(
-      id_recipe: json['id_recipe'] ?? 0,
-      recipe_owner_id: json['recipe_owner_id'] ?? 0,
-      recipe_category_id: json['recipe_category_id'] ?? 0,
-      id_recipe_image: cardImageId,
-      recipe_image_data: imageData,
-      recipe_name: json['recipe_name'] ?? "",
-      recipe_description: json['recipe_description'],
-      recipe_instruction: json['recipe_instructions'],
-      recipe_preparation_time: json['recipe_preparation_time'],
-      recipe_created_at: null,
-      recipe_last_updated: null,
-      recipe_category_desc:
-          json['recipe_category']['recipe_category_desc'] ?? "",
-    );
+        id_recipe: json['id_recipe'] ?? 0,
+        recipe_owner_id: json['recipe_owner_id'] ?? 0,
+        recipe_category_id: json['recipe_category_id'] ?? 0,
+        id_recipe_image: cardImageId,
+        recipe_image_data: imageData,
+        recipe_name: json['recipe_name'] ?? "",
+        recipe_description: json['recipe_description'],
+        recipe_instruction: json['recipe_instructions'],
+        recipe_preparation_time: json['recipe_preparation_time'],
+        recipe_created_at: null,
+        recipe_last_updated: null,
+        recipe_category_desc:
+            json['recipe_category']['recipe_category_desc'] ?? "",
+        recipe_ingredients: ingredientsMap);
   }
   static Uint8List? imageFromJson(List<dynamic> json) {
     Uint8List? imageData;
@@ -70,6 +83,10 @@ class Recipe {
     return imageData;
   }
 
+  static Map<String, dynamic> ingredientsFromJson(List<dynamic> json) {
+    throw UnimplementedError();
+  }
+
   Map<String, dynamic> toJson() {
     return {
       "recipe": {
@@ -80,6 +97,7 @@ class Recipe {
         "recipe_name": recipe_name ?? "",
         "recipe_description": recipe_description ?? "",
         "recipe_instructions": recipe_instruction ?? "",
+        "recipe_ingredients": recipe_ingredients.toString(),
       },
       "image": {
         "id_recipe_image": id_recipe_image ?? 0,
@@ -107,6 +125,31 @@ class RecipeCategory {
     return {
       'recipe_category_id': recipe_category_id,
       'recipe_category_desc': recipe_category_desc,
+    };
+  }
+}
+
+class RecipeIngredient {
+  final int id_ingredient;
+  final String ingredient_name;
+  final String ingredient_icon;
+  RecipeIngredient(
+      {required this.id_ingredient,
+      required this.ingredient_name,
+      required this.ingredient_icon});
+
+  factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
+    return RecipeIngredient(
+        id_ingredient: json['id_ingredient'] ?? 0,
+        ingredient_icon: json['ingredient_icon'] ?? "",
+        ingredient_name: json['ingredient_name'] ?? "");
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id_ingredient': id_ingredient,
+      'ingredient_name': ingredient_name,
+      'ingredient_icon': ingredient_icon
     };
   }
 }

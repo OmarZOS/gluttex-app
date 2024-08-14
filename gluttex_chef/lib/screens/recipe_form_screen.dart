@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/components/category_picker.dart';
+import 'package:gluttex_chef/components/ingredientCard.dart';
+import 'package:gluttex_chef/components/ingredient_popup.dart';
 import 'package:gluttex_core/app/AuthService.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
@@ -28,8 +30,6 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
   String? _recipeName;
   Uint8List? _recipeImage;
-  int? _recipeTypeId;
-  int? _recipe_owner_id;
   int? _recipe_category_id;
   int? _id_recipe;
   int? _id_recipe_image;
@@ -38,6 +38,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   String? _recipePreparationTime;
   DateTime? recipe_created_at;
   DateTime? recipe_last_updated;
+  Map<int, String> _selectedIngredients = {};
 
   Duration preparationTime = Duration.zero;
 
@@ -92,13 +93,6 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Insert Recipe'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.shopify_sharp,
-          // color: Colors.yellow[50],
-        ),
-        onPressed: () {},
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -171,6 +165,63 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                 trailing: Icon(Icons.timer),
                 onTap: () => _selectDuration(context),
               ),
+              Column(
+                children: [
+                  // Other form fields...
+                  (_selectedIngredients.isNotEmpty)
+                      ? SizedBox(
+                          height: 120,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _selectedIngredients.length,
+                            itemBuilder: (context, index) {
+                              // Extract the key and corresponding value
+                              int key =
+                                  _selectedIngredients.keys.elementAt(index);
+                              String quantity = _selectedIngredients[key]!;
+
+                              // Return the IngredientCard with the correct data
+                              return IngredientCard(
+                                onClicked: () {
+                                  // _selectedIngredients.remove(key);
+                                },
+                                name: Provider.of<RecipeNotifier>(context,
+                                        listen: false)
+                                    .getIngredientById(key)!
+                                    .ingredient_name,
+                                quantity: quantity,
+                                icon: Provider.of<RecipeNotifier>(context,
+                                        listen: false)
+                                    .getIngredientById(key)!
+                                    .ingredient_icon,
+                              );
+                            },
+                          ),
+                        )
+                      : Container(),
+
+                  const SizedBox(height: 16.0),
+                  ListTile(
+                    title: const Text("Add Ingredient"),
+                    trailing: const Icon(Icons.add),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          // AlertDialog(title: Text('Select Ingredient'));
+                          return IngredientPopup(
+                              onIngredientSelected: (ingredient, quantity) {
+                            // Handle adding the selected ingredient and quantity to the form
+                            setState(() {
+                              _selectedIngredients[ingredient] = quantity;
+                            });
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 16.0),
               _recipeImage != null
                   ? Image.memory(_recipeImage!,
@@ -201,10 +252,14 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                       recipe_instruction: _recipeInstruction,
                       recipe_preparation_time: _recipePreparationTime,
                       recipe_category_desc: "",
+                      recipe_ingredients: _selectedIngredients,
                     );
 
                     // Handle recipe submission
-                    int? status_code = await GluttexLocator.get<RecipeService>()
+
+                    int? status_code = await Provider.of<RecipeNotifier>(
+                            context,
+                            listen: false)
                         .addRecipe(recipe);
 
                     Response response = Response();
