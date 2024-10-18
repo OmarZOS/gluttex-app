@@ -97,7 +97,9 @@ class Recipe {
         "recipe_name": recipe_name ?? "",
         "recipe_description": recipe_description ?? "",
         "recipe_instructions": recipe_instruction ?? "",
-        "recipe_ingredients": recipe_ingredients.toString(),
+        "recipe_ingredients": recipe_ingredients!.map((key, value) {
+          return MapEntry(key.toString(), value);
+        })
       },
       "image": {
         "id_recipe_image": id_recipe_image ?? 0,

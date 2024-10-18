@@ -67,7 +67,7 @@ class StorageServiceImpl implements StorageService {
   Future<int?> insert(String destination, Map<String, dynamic> data) async {
     try {
       // Log the request data
-      // //log('Request data: ${json.encode(data)}');
+      log('Request data: ${json.encode(data)}');
 
       // Make the PUT request
       final response = await _dio.put(
