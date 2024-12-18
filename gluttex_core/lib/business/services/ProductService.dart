@@ -16,6 +16,10 @@ abstract class ProductService {
     return null;
   }
 
+  Future<dynamic> focusOnProduct(String idProduct) async {
+    return null;
+  }
+
   Future<Product?> getProduct(String idProduct) async {
     return null;
   }

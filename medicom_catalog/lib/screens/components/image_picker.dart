@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:image/image.dart' as img;
 import 'package:custom_image_crop/custom_image_crop.dart';
 import 'package:flutter/cupertino.dart';
@@ -35,7 +36,7 @@ class ImagePickerComponent extends StatefulWidget {
 class _ImagePickerComponentState extends State<ImagePickerComponent> {
   late CustomImageCropController controller;
   CustomCropShape _currentShape = CustomCropShape.Square;
-  CustomImageFit _imageFit = CustomImageFit.fillCropSpace;
+  final CustomImageFit _imageFit = CustomImageFit.fillCropSpace;
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _radiusController = TextEditingController();
@@ -104,7 +105,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                     ..style = PaintingStyle.stroke
                     ..strokeJoin = StrokeJoin.round,
                 )
-              : Center(child: Text('No image selected')),
+              : const Center(child: Text(GluttexConstants.noImageSelectedTxt)),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -114,7 +115,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
               widget.onImageEdited(croppedImage as Uint8List);
             }
           },
-          child: Icon(Icons.crop),
+          child: const Icon(Icons.crop),
         ),
       ],
     );

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:gluttex_core/health/blood_type.dart';
@@ -10,11 +8,11 @@ class BloodPicker extends StatefulWidget {
   final int blood_id;
 
   const BloodPicker({
-    Key? key,
+    super.key,
     required this.onBloodChanged,
     required this.blood_type,
     required this.blood_id,
-  }) : super(key: key);
+  });
 
   @override
   _BloodPickerState createState() => _BloodPickerState();

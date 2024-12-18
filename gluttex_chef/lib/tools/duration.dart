@@ -13,8 +13,8 @@ Duration ParseDurationString(String durationString) {
   }
 
   final minuteMatch = minuteRegex.firstMatch(durationString);
-  log('${hourMatch?.group(1)} ');
-  log('${minuteMatch?.group(1)} ');
+  // log('${hourMatch?.group(1)} ');
+  // log('${minuteMatch?.group(1)} ');
   if (minuteMatch != null) {
     minutes = int.parse(minuteMatch.group(1)!);
   }

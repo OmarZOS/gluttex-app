@@ -1,4 +1,3 @@
-import 'package:gluttex_core/app/AppUser.dart';
 
 abstract class StorageService {
   Future<dynamic> getAll(String destination) async {

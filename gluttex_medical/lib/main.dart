@@ -5,6 +5,8 @@ import 'package:gluttex_medical/screens/serology_screen.dart';
 import 'package:gluttex_medical/screens/symptoms_screen.dart';
 
 class CeliacScreen extends StatefulWidget {
+  const CeliacScreen({super.key});
+
   @override
   _CeliacScreenState createState() => _CeliacScreenState();
 }

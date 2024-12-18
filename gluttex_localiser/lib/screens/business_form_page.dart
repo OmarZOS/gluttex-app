@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Supplier.dart';
@@ -56,12 +55,13 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     final controller = TextEditingController();
     final field = TextFormField(
       controller: controller,
-      decoration: const InputDecoration(labelText: 'Contact Info'),
+      decoration:
+          const InputDecoration(labelText: GluttexConstants.contactInfoMsg),
       // onSaved: (value) =>
       //     _provider_contact_info = '${_provider_contact_info}${value},',
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Please enter contact info';
+          return GluttexConstants.pleaseInputContactInfoMsg;
         }
         return null;
       },
@@ -152,8 +152,9 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         child: const Icon(Icons.add_business_sharp),
       ),
       appBar: AppBar(
-        title: const Text('Add Supplier'),
-      ),
+          title: const Text(
+        GluttexConstants.addSupplierTxt,
+      )),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -161,11 +162,12 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           child: ListView(
             children: [
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Supplier Name'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.supplierNameMsg),
                 onSaved: (value) => _provider_name = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a business name';
+                    return GluttexConstants.addBusinessNameMsg;
                   }
                   return null;
                 },
@@ -175,11 +177,12 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               //   onSaved: (value) => _provider_contact_info = value,
               // ),
               TextFormField(
-                  decoration: const InputDecoration(labelText: 'Location name'),
+                  decoration: const InputDecoration(
+                      labelText: GluttexConstants.locationNameText),
                   onSaved: (value) => _location_name = value,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a Location name';
+                      return GluttexConstants.pleaseInputLocationNameMsg;
                     }
                     return null;
                   }),
@@ -188,17 +191,16 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                 future: GluttexLocator.get<SupplierService>().getCategories(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator(); // Show a loading indicator while waiting
+                    return const CircularProgressIndicator(); // Show a loading indicator while waiting
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('Category not found');
+                    return const Text(GluttexConstants.categoriesNotFoundTxt);
                   } else {
                     return CategoryPicker(
                       categories: snapshot.data!,
                       onCategoryChanged: (selectedCategoryId) {
                         _onCategoryChanged(selectedCategoryId);
-                        print('Selected category ID: $selectedCategoryId');
                       },
                     );
                   }
@@ -224,17 +226,18 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               const SizedBox(height: 16.0),
               ListTile(
                 leading: const Icon(Icons.add_circle),
-                title: const Text('Add Contact Info'),
+                title: const Text(GluttexConstants.addContactInfoMsg),
                 // tileColor: Colors.amber[100],
                 onTap: _addContactField,
               ),
               const SizedBox(height: 16.0),
               ListTile(
                 leading: const Icon(Icons.location_on),
-                title: Text('${_position ?? "Insert coordinates"}'),
+                title: Text(
+                    '${_position ?? GluttexConstants.insertCoordinatesMsg}'),
                 // tileColor: Colors.grey[100],
                 trailing: _position != null
-                    ? Icon(
+                    ? const Icon(
                         Icons.check_circle_outline_outlined,
                         color: Colors.green,
                       )
@@ -249,7 +252,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               const SizedBox(height: 16.0),
               ListTile(
                 leading: const Icon(Icons.photo_camera_rounded),
-                title: const Text('Add photo'),
+                title: const Text(GluttexConstants.pickImageMsg),
                 // tileColor: Colors.grey[100],
                 onTap: () async {
                   final pickedImage = await pickImage();

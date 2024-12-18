@@ -1,6 +1,4 @@
-import 'dart:developer';
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
@@ -43,7 +41,7 @@ class AppUserEditFormScreen extends StatefulWidget {
   final String? initial_addressCountry;
 
   const AppUserEditFormScreen(
-      {Key? key,
+      {super.key,
       required this.initial_id_app_user,
       required this.initial_app_user_person_id,
       required this.initial_app_user_type_id,
@@ -70,8 +68,7 @@ class AppUserEditFormScreen extends StatefulWidget {
       required this.initial_addressCity,
       required this.initial_addressPostalCode,
       required this.initial_addressCountry,
-      required this.initial_bloodTypeDesc})
-      : super(key: key);
+      required this.initial_bloodTypeDesc});
 
   @override
   _AppUserEditFormScreenState createState() => _AppUserEditFormScreenState();
@@ -180,7 +177,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
         title: const Text('Update AppUser'),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(
+        child: const Icon(
           Icons.shopify_sharp,
           // color: Colors.yellow[50],
         ),
@@ -223,7 +220,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                 },
               ),
               TextFormField(
-                initialValue: '${_personFirstName ?? ""}',
+                initialValue: _personFirstName ?? "",
                 decoration:
                     const InputDecoration(labelText: 'AppUser Description'),
                 validator: (value) {
@@ -247,7 +244,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('Categories not found');
+                    return const Text('Categories not found');
                   } else {
                     return CategoryPicker(
                       category_id: _id_app_user_type ?? 1,
@@ -305,35 +302,34 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                     );
 
                     // Handle appUser submission
-                    int? status_code =
-                        await GluttexLocator.get<AppUserService>()
-                            .updateAppUser(appUser);
+                    int? statusCode = await GluttexLocator.get<AppUserService>()
+                        .updateAppUser(appUser);
 
                     Response response = Response();
 
-                    switch (status_code) {
+                    switch (statusCode) {
                       case 200:
                         response.color = Colors.green;
                         response.text = GluttexConstants.putSuccess;
                         await Provider.of<AppUserNotifier>(context,
                                 listen: false)
-                            .fetchAppUser('${_id_app_user}');
+                            .fetchAppUser('$_id_app_user');
                         Navigator.pop(context, appUser);
                         break;
                       case 406:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error ${status_code}: ' +
-                            GluttexConstants.putFailure;
+                        response.text =
+                            'Error $statusCode: ' + GluttexConstants.putFailure;
                         break;
                       case 422:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error ${status_code}: ' +
-                            GluttexConstants.putFailure;
+                        response.text =
+                            'Error $statusCode: ' + GluttexConstants.putFailure;
                         break;
 
                       default:
                         response.color = Colors.red;
-                        response.text = 'Error ${status_code}: ' +
+                        response.text = 'Error $statusCode: ' +
                             GluttexConstants.serverError;
                     }
 

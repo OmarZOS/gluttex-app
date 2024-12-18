@@ -6,9 +6,9 @@ class InformationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return SingleChildScrollView(
+    return const SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_home/screens/app_user_update_form_screen.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +15,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: const Text('Profile'),
         // actions: [IconButton(icon: Icon(Icons.edit), onPressed: () {})]
       ),
       body: Consumer<AppUserNotifier>(
@@ -26,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           return (user is AppUser)
               ? _buildProfile(user)
-              : Center(child: CircularProgressIndicator());
+              : const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -37,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
         ),
@@ -53,13 +52,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
             ),
           ),
           Text(
             value == "" ? "--" : value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 22,
             ),
           ),
@@ -80,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           //   backgroundImage: user!.app_user_image,
           //   backgroundColor: Colors.transparent,
           // )),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
 
           // User Info
           _buildSectionTitle('User Info'),

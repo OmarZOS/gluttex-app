@@ -17,7 +17,7 @@ class SupplierServiceImpl implements SupplierService {
     }
     Category category = categories[categoryId - 1];
     // developer.//log('Category length: ${category}');
-    return category ?? null;
+    return category;
   }
 
   @override
@@ -62,7 +62,7 @@ class SupplierServiceImpl implements SupplierService {
 
     return storageService.delete(
         GluttexConstants.apiBaseUrl + GluttexConstants.deleteSupplierEndpoint,
-        '${SupplierId}');
+        SupplierId);
   }
 
   @override

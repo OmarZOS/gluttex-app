@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
@@ -9,7 +8,7 @@ import 'package:locator/locator.dart';
 class AppUserNotifier extends ChangeNotifier {
   final AppUserService _appUserService = GluttexLocator.get<AppUserService>();
   final AuthService _authService = GluttexLocator.get<AuthService>();
-  AppUser? _appUser = null;
+  AppUser? _appUser;
   late String? token;
 
   AppUser? get appUser => _appUser;
@@ -33,9 +32,9 @@ class AppUserNotifier extends ChangeNotifier {
     return status;
   }
 
-  Future<int?> deleteAppUser(String id_appUser) async {
-    int? status = await _appUserService.deleteAppUser(id_appUser);
-    await fetchAppUser(id_appUser);
+  Future<int?> deleteAppUser(String idAppuser) async {
+    int? status = await _appUserService.deleteAppUser(idAppuser);
+    await fetchAppUser(idAppuser);
     return status;
   }
 

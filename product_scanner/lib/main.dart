@@ -6,6 +6,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,6 +17,8 @@ class MyApp extends StatelessWidget {
 }
 
 class BarcodeScannerScreen extends StatefulWidget {
+  const BarcodeScannerScreen({super.key});
+
   @override
   _BarcodeScannerScreenState createState() => _BarcodeScannerScreenState();
 }
@@ -48,7 +52,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Barcode Scanner'),
+        title: const Text('Barcode Scanner'),
       ),
       body: Center(
         child: Text('Scan result: $_barcode'),
@@ -56,7 +60,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: scanBarcode,
         tooltip: 'Scan Barcode',
-        child: Icon(Icons.camera_alt),
+        child: const Icon(Icons.camera_alt),
       ),
     );
   }

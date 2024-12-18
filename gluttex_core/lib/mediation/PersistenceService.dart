@@ -1,6 +1,7 @@
 /// This abstraction is used to store the
 /// data that is required during the start
 /// of the application and for recurrent use
+library;
 
 abstract class PersistenceService {
   Future<dynamic> getAll(String destination) async {

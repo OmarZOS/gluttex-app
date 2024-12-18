@@ -11,6 +11,7 @@ import 'package:gluttex_home/screens/home_screen.dart';
 import 'package:gluttex_impl_app/gluttex_impl_app.dart';
 import 'package:gluttex_impl_app/gluttex_impl_auth.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
+import 'package:gluttex_impl_business/cart_change_notifier.dart';
 import 'package:gluttex_impl_business/gluttex_impl_product.dart';
 import 'package:gluttex_impl_business/gluttex_impl_recipe.dart';
 import 'package:gluttex_impl_business/gluttex_impl_supplier.dart';
@@ -19,7 +20,6 @@ import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
-import 'package:gluttex_login/screens/login_screen.dart';
 
 void setupLocator() {
   // Register your services or dependencies here
@@ -38,6 +38,8 @@ void main() {
 }
 
 class GluttexApp extends StatelessWidget {
+  const GluttexApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -51,10 +53,14 @@ class GluttexApp extends StatelessWidget {
           ChangeNotifierProvider<AppUserNotifier>(
             create: (_) => AppUserNotifier(),
           ),
+          ChangeNotifierProvider<CartChangeNotifier>(
+            create: (_) => CartChangeNotifier(),
+          ),
         ],
         child: MaterialApp(
           navigatorKey: globalNavigatorKey, // Set the navigator key here
-          onGenerateRoute: AppRouter.generateRoute, // Use the router
+          home: HomePage(),
+          // onGenerateRoute: AppRouter.generateRoute, // Use the router
           // themeMode: ThemeMode.dark,
         ));
   }

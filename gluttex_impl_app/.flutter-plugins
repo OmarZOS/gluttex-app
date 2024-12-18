@@ -1,22 +1,5 @@
 # This is a generated file; do not edit or check into version control.
-facebook_auth_desktop=/home/omar/.pub-cache/hosted/pub.dev/facebook_auth_desktop-2.0.0/
-flutter_facebook_auth=/home/omar/.pub-cache/hosted/pub.dev/flutter_facebook_auth-7.0.1/
-flutter_facebook_auth_web=/home/omar/.pub-cache/hosted/pub.dev/flutter_facebook_auth_web-6.0.0/
-flutter_secure_storage=/home/omar/.pub-cache/hosted/pub.dev/flutter_secure_storage-9.2.2/
-flutter_secure_storage_linux=/home/omar/.pub-cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.1/
-flutter_secure_storage_macos=/home/omar/.pub-cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.2/
-flutter_secure_storage_web=/home/omar/.pub-cache/hosted/pub.dev/flutter_secure_storage_web-1.2.1/
-flutter_secure_storage_windows=/home/omar/.pub-cache/hosted/pub.dev/flutter_secure_storage_windows-3.1.2/
 google_sign_in=/home/omar/.pub-cache/hosted/pub.dev/google_sign_in-6.2.1/
 google_sign_in_android=/home/omar/.pub-cache/hosted/pub.dev/google_sign_in_android-6.1.28/
 google_sign_in_ios=/home/omar/.pub-cache/hosted/pub.dev/google_sign_in_ios-5.7.6/
 google_sign_in_web=/home/omar/.pub-cache/hosted/pub.dev/google_sign_in_web-0.12.4+2/
-insta_login=/home/omar/.pub-cache/hosted/pub.dev/insta_login-0.0.3/
-path_provider=/home/omar/.pub-cache/hosted/pub.dev/path_provider-2.1.4/
-path_provider_android=/home/omar/.pub-cache/hosted/pub.dev/path_provider_android-2.2.10/
-path_provider_foundation=/home/omar/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.0/
-path_provider_linux=/home/omar/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
-path_provider_windows=/home/omar/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
-webview_flutter=/home/omar/.pub-cache/hosted/pub.dev/webview_flutter-4.8.0/
-webview_flutter_android=/home/omar/.pub-cache/hosted/pub.dev/webview_flutter_android-3.16.6/
-webview_flutter_wkwebview=/home/omar/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.14.0/

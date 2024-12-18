@@ -7,7 +7,7 @@ import 'package:gluttex_core/business/Recipe.dart';
 import 'package:provider/provider.dart';
 
 class RecipeCatalogScreen extends StatefulWidget {
-  const RecipeCatalogScreen({Key? key}) : super(key: key);
+  const RecipeCatalogScreen({super.key});
 
   @override
   _RecipeCatalogScreenState createState() => _RecipeCatalogScreenState();
@@ -88,7 +88,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
 
     return GridView.builder(
       itemCount: recipes.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 1,
         mainAxisSpacing: GluttexConstants.kDefaultPaddin,
         crossAxisSpacing: GluttexConstants.kDefaultPaddin,

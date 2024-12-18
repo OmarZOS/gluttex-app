@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_play/components/game.dart';
 import 'package:gluttex_play/components/snake.dart';
-import 'package:gluttex_play/screens/game_play_screen.dart';
 
 class GameListScreen extends StatelessWidget {
   final List<Game> games = [
@@ -10,6 +9,8 @@ class GameListScreen extends StatelessWidget {
     Game(name: 'Game 3', screen: SnakeGame()),
     // Add more games as needed
   ];
+
+  GameListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,8 @@ class GameListScreen extends StatelessWidget {
                 child: Center(
                   child: Text(
                     games[index].name,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),

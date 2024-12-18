@@ -22,6 +22,12 @@ class GluttexConstants {
   static const String productEndpoint = '/product';
   static const String getProductCategoriesEndpoint = '/product/Category/all';
   static const String getProductImageEndpoint = '/image/product';
+  static const String getProductFeedEndpoint = '/products/observer';
+
+  static const String addOrderEndpoint = '/business/order/add';
+  // static const String deleteOrderEndpoint = '/Order/delete';
+  // static const String getAllOrdersEndpoint = '/Order/all';
+  // static const String orderEndpoint = '/Order';
 
   static const String addSupplierEndpoint = '/supplier/add';
   static const String deleteSupplierEndpoint = '/supplier/delete';
@@ -53,6 +59,113 @@ class GluttexConstants {
   static const String priceText = 'Price';
   static const String noRecipesFound = 'No recipes found';
   static const String noAppUsersFound = 'No users found';
+  // // Login:
+  static const String successfullLoginMsg = "Successfully signed up.";
+  static const String welcomeBackMsg = 'Welcome Back!';
+  static const String loginText = 'Login';
+  static const String pleaseLoginMsg = 'Please login to your account';
+  static const String pleaseInputUsernameMsg = 'Please enter your username';
+  static const String pleaseInputPasswordMsg = 'Please enter your password';
+  static const String passwordLengthConstraintMsg =
+      'Password must be at least 6 characters';
+  static const String suggestRegistrationMsg =
+      'Don\'t have an account? Register';
+  static const String suggest3rdPartyLogintMsg = 'Or login with';
+  // // Registration:
+  static const String pleaseInputusernameMsg = 'Please enter a username';
+  static const String pleaseInputpasswordMsg = 'Please enter a password';
+  static const String pleaseInputUserTypeMsg = 'Please select a user type';
+  static const String pleaseInputFirstNameMsg = 'Please enter a first name';
+  static const String pleaseInputLastNameMsg = 'Please enter a last name';
+  static const String pleaseInputBirthdateMsg = 'Please select your birthdate';
+  static const String pleaseInputLocationNameMsg = 'Please input location name';
+  static const String pleaseInputgenderMsg = 'Please select a gender';
+  static const String pleaseInputnationalityMsg = 'Please select a nationality';
+  static const String pleaseInputBloodTypeMsg = 'Please select a blood type';
+  static const String pleaseInputCountryMsg = 'Please select a country';
+  static const String birthdayText = 'Birthdate';
+  static const String loginSuccessfullMsg = "Successfully signed up.";
+  static const String registerText = 'Register';
+  static const String registerationFormText = 'Registration Form';
+
+  static const String usernameText = 'Username';
+  static const String passwordText = 'Password';
+  static const String userTypeText = 'User Type';
+  static const String firstNameText = 'First Name';
+  static const String lastNameText = 'Last Name';
+  static const String genderText = 'Gender';
+  static const String nationalityText = 'Nationality';
+  static const String bloodTypeText = 'Blood Type';
+  static const String latitudeText = 'Latitude';
+  static const String longitudeText = 'Longitude';
+  static const String locationNameText = 'Location Name';
+  static const String locationText = 'Location';
+  static const String streetText = 'Street';
+  static const String cityText = 'City';
+  static const String postalCodeText = 'Postal Code';
+  static const String countryText = 'Country';
+  static const String clientText = 'Client';
+  static const String cookingChefText = 'Cooking Chef';
+  static const List<String> genderTextList = ['Male', 'Female', 'Other'];
+  static const List<String> nationalityTextList = ['Algerian', 'Other'];
+  // // Product
+  static const String missingText = 'Missing';
+  static const String productdeletionConfirmationMessage =
+      'Are you sure you want to delete this product?';
+  static const String cartAddConfirmationMessage = "Confirm Add to Cart";
+  static const String updateProductText = 'Update Product';
+
+  static const String pleaseInputProductNameMsg = 'Please enter a product name';
+  static const String pleaseInputProductPriceMsg =
+      'Please enter a product price';
+  static const String pleaseInputProductBrandMsg =
+      'Please enter a product brand';
+  static const String pleaseInputProductBarcodeMsg =
+      'Please enter a product bar code';
+  static const String pleaseInputvalidnumberMsg = 'Please enter a valid number';
+  static const String numberConstraintMsg =
+      'Please enter a number between 0 and 999999';
+  static const String pleaseInputProductDescriptionMsg =
+      'Please enter a product description';
+  static const String pleaseInputProductQuantityMsg =
+      'Please enter a product quantity';
+  static const String ProductQuantityText = 'Product Quantity';
+  static const String ProductDescriptionText = 'Product Description';
+  static const String descriptionCharacterConstraintMsg =
+      'Character limit: 300.';
+  static const String pickImageMsg = 'Pick Image';
+  static const String submitText = 'Pick Image';
+  static const String productNameTxt = 'Product Name';
+  static const String productBrandTxt = 'Product Brand';
+  static const String productBarcodeTxt = 'Product Barcode';
+  static const String productPriceTxt = 'Product Price';
+  static const String categoriesNotFoundTxt = 'Categories not found';
+  static const String noImageSelectedTxt = 'No image selected';
+  static const String addProductTxt = 'Add Product';
+  static const String orderNowTxt = 'Order Now';
+  static const String subtotalTxt = 'Subtotal';
+  static const String totalTxt = 'Total';
+  static const String confirmOrderTxt = "Confirm Order";
+  static const String searchTxt = 'Search';
+  static const String emptyCartTxt = 'Your cart is empty!';
+
+  static const String taxTxt = 'Tax';
+  static const String discountText = 'Discount';
+  static const String cancelTxt = 'Cancel';
+  static const String confirmTxt = 'Confirm';
+  static const String confirmationTxt = 'confirmation';
+  static const String addSupplierTxt = 'Add Supplier';
+  static const String addBusinessNameMsg = 'Please enter a business name';
+  static const String supplierNameMsg = 'Supplier Name';
+  static const String insertCoordinatesMsg = 'Insert coordinates';
+  static const String addContactInfoMsg = 'Add Contact Info';
+  static const String contactInfoMsg = 'Contact information';
+  static const String pleaseInputContactInfoMsg = 'Please enter contact info';
+  static const String latitudeMsg = 'Latitude';
+  static const String longitudeMsg = 'Longitude';
+  static const String setLocationMsg = 'Set Location';
+  static const String updateRecipeMsg = 'Update Recipe';
+  static const String addIngredientMsg = 'Add Ingredient';
 
   // Responses
   static const String deleteSuccess = 'Successfully deleted item';

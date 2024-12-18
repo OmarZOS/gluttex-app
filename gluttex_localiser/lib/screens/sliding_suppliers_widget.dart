@@ -121,7 +121,7 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
         title: TextField(
           controller: _searchController,
           decoration: const InputDecoration(
-              hintText: 'Search',
+              hintText: GluttexConstants.searchTxt,
               border: InputBorder.none,
               icon: Icon(Icons.search_outlined)),
         ),
@@ -243,7 +243,7 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
             //     }
             //   },
             // ),
-            Text('Location: ${supplier.location_name}'),
+            Text('${GluttexConstants.locationText}: ${supplier.location_name}'),
             GestureDetector(
               child: Text(supplier.provider_contact_info.replaceAll(",", "\n")),
               onLongPress: () {

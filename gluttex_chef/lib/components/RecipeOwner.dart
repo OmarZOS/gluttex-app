@@ -17,7 +17,7 @@ bool is_recipe_owner(BuildContext context, int ownerId) {
 class RecipeOwner extends StatelessWidget {
   final Recipe recipe;
 
-  const RecipeOwner({Key? key, required this.recipe}) : super(key: key);
+  const RecipeOwner({super.key, required this.recipe});
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +39,14 @@ class RecipeOwner extends StatelessWidget {
         ),
       ),
       child: Card(
-        child: Container(
+        child: SizedBox(
           height: cardHeight,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 flex: 2,
-                child: Container(
+                child: SizedBox(
                     width: double
                         .infinity, // Make the container take up the full width
                     child: recipe.recipe_image_data != null &&
@@ -98,7 +98,7 @@ Widget _buildRecipeGrid(List<Recipe> recipes) {
 
   return GridView.builder(
     itemCount: recipes.length,
-    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
       crossAxisCount: 2,
       mainAxisSpacing: GluttexConstants.kDefaultPaddin,
       crossAxisSpacing: GluttexConstants.kDefaultPaddin,

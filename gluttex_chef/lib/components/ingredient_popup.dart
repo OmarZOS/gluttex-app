@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 class IngredientPopup extends StatefulWidget {
   final Function(int ingredient_id, String quantity) onIngredientSelected;
 
-  IngredientPopup({required this.onIngredientSelected});
+  const IngredientPopup({super.key, required this.onIngredientSelected});
 
   @override
   _IngredientPopupState createState() => _IngredientPopupState();
@@ -39,8 +39,8 @@ class _IngredientPopupState extends State<IngredientPopup> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Select Ingredient'),
-      content: Container(
+      title: const Text('Select Ingredient'),
+      content: SizedBox(
           width: MediaQuery.of(context).size.height *
               0.7, // Set your desired width
           height: MediaQuery.of(context).size.height *
@@ -52,11 +52,11 @@ class _IngredientPopupState extends State<IngredientPopup> {
                 TextField(
                   controller: _searchController,
                   onChanged: _filterIngredients,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Search Ingredient',
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.6,
                   child: ListView.builder(
@@ -71,11 +71,11 @@ class _IngredientPopupState extends State<IngredientPopup> {
                             context: context,
                             builder: (context) {
                               return AlertDialog(
-                                title: Text('Enter Quantity'),
+                                title: const Text('Enter Quantity'),
                                 content: TextField(
                                   controller: _quantityController,
                                   keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     hintText: 'Enter quantity',
                                   ),
                                 ),
@@ -90,7 +90,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
                                       // Navigator.pop(context);
                                       Navigator.pop(context);
                                     },
-                                    child: Text('Add'),
+                                    child: const Text('Add'),
                                   ),
                                 ],
                               );
@@ -109,7 +109,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
       ],
     );

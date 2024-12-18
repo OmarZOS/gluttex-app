@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 
 Future<void> showConfirmationDialog(
     BuildContext context, String message, VoidCallback onConfirm) async {
@@ -7,7 +8,7 @@ Future<void> showConfirmationDialog(
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Confirmation'),
+        title: const Text(GluttexConstants.confirmationTxt),
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
@@ -17,13 +18,13 @@ Future<void> showConfirmationDialog(
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text('Cancel'),
+            child: const Text(GluttexConstants.cancelTxt),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text('Confirm'),
+            child: const Text(GluttexConstants.confirmTxt),
             onPressed: () {
               onConfirm();
               Navigator.of(context).pop();

@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
@@ -8,7 +7,6 @@ import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
-import 'package:medicom_catalog/screens/catalog_screen.dart';
 import 'package:medicom_catalog/screens/components/category_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -112,10 +110,10 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Update Product'),
+        title: const Text(GluttexConstants.updateProductText),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(
+        child: const Icon(
           Icons.shopify_sharp,
           // color: Colors.yellow[50],
         ),
@@ -129,50 +127,54 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
             children: [
               TextFormField(
                 initialValue: _productName,
-                decoration: const InputDecoration(labelText: 'Product Name'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.productNameTxt),
                 onSaved: (value) => _productName = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product name';
+                    return GluttexConstants.pleaseInputProductNameMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
                 initialValue: _productBrand,
-                decoration: const InputDecoration(labelText: 'Product Brand'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.productBrandTxt),
                 onSaved: (value) => _productBrand = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product brand';
+                    return GluttexConstants.pleaseInputProductBrandMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
                 initialValue: _productBarcode,
-                decoration: const InputDecoration(labelText: 'Product Barcode'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.productBarcodeTxt),
                 onSaved: (value) => _productBarcode = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product bar code';
+                    return GluttexConstants.pleaseInputProductBarcodeMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                initialValue: '${_productPrice}',
-                decoration: const InputDecoration(labelText: 'Product Price'),
+                initialValue: '$_productPrice',
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.productPriceTxt),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product name';
+                    return GluttexConstants.pleaseInputProductNameMsg;
                   }
                   if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
+                    return GluttexConstants.pleaseInputvalidnumberMsg;
                   }
                   if (double.tryParse(value)! >= 1000000) {
-                    return 'Please enter a number between 0 and 999999';
+                    return GluttexConstants.numberConstraintMsg;
                   }
                   return null;
                 },
@@ -180,33 +182,33 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                     _productPrice = double.tryParse(value ?? "0.0"),
               ),
               TextFormField(
-                initialValue: '${_productQuantity}',
-                decoration:
-                    const InputDecoration(labelText: 'Product Quantity'),
+                initialValue: '$_productQuantity',
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.ProductQuantityText),
                 keyboardType: TextInputType.number,
                 onSaved: (value) =>
                     _productQuantity = int.tryParse(value ?? "0"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product name';
+                    return GluttexConstants.pleaseInputProductNameMsg;
                   }
                   if (int.tryParse(value) == null) {
-                    return 'Please enter a product name';
+                    return GluttexConstants.pleaseInputProductNameMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                initialValue: '${_productDescription ?? ""}',
-                decoration:
-                    const InputDecoration(labelText: 'Product Description'),
+                initialValue: _productDescription ?? "",
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.ProductDescriptionText),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product description';
+                    return GluttexConstants.pleaseInputProductDescriptionMsg;
                   }
 
                   if ((value).length >= 300) {
-                    return 'Character limit: 300.';
+                    return GluttexConstants.descriptionCharacterConstraintMsg;
                   }
                   return null;
                 },
@@ -221,7 +223,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('Categories not found');
+                    return const Text(GluttexConstants.categoriesNotFoundTxt);
                   } else {
                     return CategoryPicker(
                       category_id: _productTypeId ?? 1,
@@ -238,11 +240,11 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                   ? Image.memory(_productImage!,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.width)
-                  : const Text('No image selected'),
+                  : const Text(GluttexConstants.noImageSelectedTxt),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _pickImage,
-                child: const Text('Pick Image'),
+                child: const Text(GluttexConstants.pickImageMsg),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -270,13 +272,13 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                     );
 
                     // Handle product submission
-                    int? status_code =
+                    int? statusCode =
                         await GluttexLocator.get<ProductService>()
                             .updateProduct(product);
 
                     Response response = Response();
 
-                    switch (status_code) {
+                    switch (statusCode) {
                       case 200:
                         response.color = Colors.green;
                         response.text = GluttexConstants.putSuccess;
@@ -287,18 +289,18 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                         break;
                       case 406:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error ${status_code}: ' +
+                        response.text = 'Error $statusCode: ' +
                             GluttexConstants.putFailure;
                         break;
                       case 422:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error ${status_code}: ' +
+                        response.text = 'Error $statusCode: ' +
                             GluttexConstants.putFailure;
                         break;
 
                       default:
                         response.color = Colors.red;
-                        response.text = 'Error ${status_code}: ' +
+                        response.text = 'Error $statusCode: ' +
                             GluttexConstants.serverError;
                     }
 
@@ -312,7 +314,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                     // You can use a provider or any state management to save the product
                   }
                 },
-                child: const Text('Submit'),
+                child: const Text(GluttexConstants.submitText),
               ),
             ],
           ),

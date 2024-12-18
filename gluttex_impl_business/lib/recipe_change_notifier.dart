@@ -39,8 +39,8 @@ class RecipeNotifier extends ChangeNotifier {
     Uint8List? image =
         await _recipeService.getRecipeImage('${recipe.id_recipe_image}');
     // await fetchRecipes();
-    log("Changing recipe image");
-    log('${_recipes.where((element) => element.id_recipe == recipe.id_recipe)}');
+    // log("Changing recipe image");
+    // log('${_recipes.where((element) => element.id_recipe == recipe.id_recipe)}');
     _recipes
         .where((element) => element.id_recipe == recipe.id_recipe)
         .first
@@ -76,8 +76,8 @@ class RecipeNotifier extends ChangeNotifier {
     return status;
   }
 
-  Future<int?> deleteRecipe(String id_recipe) async {
-    int? status = await _recipeService.deleteRecipe(id_recipe);
+  Future<int?> deleteRecipe(String idRecipe) async {
+    int? status = await _recipeService.deleteRecipe(idRecipe);
     await fetchRecipes();
     return status;
   }

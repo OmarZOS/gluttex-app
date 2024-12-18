@@ -43,7 +43,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         title: TextField(
           controller: _searchController,
           decoration: const InputDecoration(
-              hintText: 'Search',
+              hintText: GluttexConstants.searchTxt,
               border: InputBorder.none,
               icon: Icon(Icons.search_outlined)),
         ),

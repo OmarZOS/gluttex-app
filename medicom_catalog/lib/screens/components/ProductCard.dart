@@ -37,7 +37,7 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
-              child: Container(
+              child: SizedBox(
                 width: double
                     .infinity, // make the container take up the full width
                 child: Center(
@@ -48,7 +48,7 @@ class ProductCard extends StatelessWidget {
                           fit: BoxFit.cover, // fit the image within the space
                         )
                       : Container(
-                          child: Placeholder(),
+                          child: const Placeholder(),
                         ),
                 ),
               ),

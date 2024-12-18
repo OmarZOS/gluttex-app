@@ -98,14 +98,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       context,
                       'Are you sure you want to delete this recipe?',
                       () async {
-                        int? status_code = await Provider.of<RecipeNotifier>(
+                        int? statusCode = await Provider.of<RecipeNotifier>(
                                 context,
                                 listen: false)
                             .deleteRecipe('${_recipe.id_recipe}');
 
                         Response response = Response();
 
-                        switch (status_code) {
+                        switch (statusCode) {
                           case 200:
                             response.color = Colors.green;
                             response.text = GluttexConstants.deleteSuccess;
@@ -190,7 +190,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         height: size.height / 3,
                         fit: BoxFit.cover,
                       )
-                    : Container(
+                    : SizedBox(
                         height: size.height / 3,
                         child: const Placeholder(),
                       ),

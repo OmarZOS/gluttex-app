@@ -3,8 +3,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:provider/provider.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 
 class RegistrationForm extends StatefulWidget {
+  const RegistrationForm({super.key});
+
   @override
   _RegistrationFormState createState() => _RegistrationFormState();
 }
@@ -28,14 +31,14 @@ class _RegistrationFormState extends State<RegistrationForm> {
   String? addressPostalCode = "";
   String? addressCountry = "";
 
-  TextEditingController _birthDateController = TextEditingController();
+  final TextEditingController _birthDateController = TextEditingController();
   DateTime? selectedDate;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Registration Form'),
+        title: const Text(GluttexConstants.registerationFormText),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -44,36 +47,39 @@ class _RegistrationFormState extends State<RegistrationForm> {
           child: ListView(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Username'),
+                decoration:
+                    const InputDecoration(labelText: GluttexConstants.usernameText),
                 onSaved: (value) {
                   appUserName = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a username';
+                    return GluttexConstants.pleaseInputusernameMsg;
                   }
                   return null;
                 },
               ),
-              Padding(padding: const EdgeInsets.all(8.0)),
+              const Padding(padding: EdgeInsets.all(8.0)),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration:
+                    const InputDecoration(labelText: GluttexConstants.passwordText),
                 obscureText: true,
                 onSaved: (value) {
                   appUserPassword = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a password';
+                    return GluttexConstants.pleaseInputpasswordMsg;
                   }
                   return null;
                 },
               ),
               DropdownButtonFormField<int>(
-                decoration: InputDecoration(labelText: 'User Type'),
+                decoration:
+                    const InputDecoration(labelText: GluttexConstants.userTypeText),
                 items: [
-                  {'value': 1, 'label': 'Client'},
-                  {'value': 3, 'label': 'Cooking Chef'}
+                  {'value': 1, 'label': GluttexConstants.clientText},
+                  {'value': 3, 'label': GluttexConstants.cookingChefText}
                 ].map((Map<String, dynamic> item) {
                   return DropdownMenuItem<int>(
                     value: item['value'],
@@ -85,42 +91,44 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return 'Please select a user type';
+                    return GluttexConstants.pleaseInputUserTypeMsg;
                   }
                   return null;
                 },
               ),
-              Padding(padding: const EdgeInsets.all(8.0)),
+              const Padding(padding: EdgeInsets.all(8.0)),
               TextFormField(
-                decoration: InputDecoration(labelText: 'First Name'),
+                decoration:
+                    const InputDecoration(labelText: GluttexConstants.firstNameText),
                 onSaved: (value) {
                   personFirstName = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a first name';
+                    return GluttexConstants.pleaseInputFirstNameMsg;
                   }
                   return null;
                 },
               ),
-              Padding(padding: const EdgeInsets.all(8.0)),
+              const Padding(padding: EdgeInsets.all(8.0)),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Last Name'),
+                decoration:
+                    const InputDecoration(labelText: GluttexConstants.lastNameText),
                 onSaved: (value) {
                   personLastName = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a last name';
+                    return GluttexConstants.pleaseInputLastNameMsg;
                   }
                   return null;
                 },
               ),
-              Padding(padding: const EdgeInsets.all(8.0)),
+              const Padding(padding: EdgeInsets.all(8.0)),
               TextFormField(
                 controller: _birthDateController,
-                decoration: InputDecoration(
-                  labelText: 'Birthdate',
+                decoration: const InputDecoration(
+                  labelText: GluttexConstants.birthdayText,
                   suffixIcon: Icon(Icons.calendar_today),
                 ),
                 readOnly: true,
@@ -142,14 +150,15 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please select your birthdate';
+                    return GluttexConstants.pleaseInputBirthdateMsg;
                   }
                   return null;
                 },
               ),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: 'Gender'),
-                items: ['Male', 'Female', 'Other'].map((String value) {
+                decoration:
+                    const InputDecoration(labelText: GluttexConstants.genderText),
+                items: GluttexConstants.genderTextList.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -160,14 +169,15 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return 'Please select a gender';
+                    return GluttexConstants.pleaseInputgenderMsg;
                   }
                   return null;
                 },
               ),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: 'Nationality'),
-                items: ['Algerian', 'Other'].map((String value) {
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.nationalityText),
+                items: GluttexConstants.nationalityTextList.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -178,13 +188,14 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return 'Please select a nationality';
+                    return GluttexConstants.pleaseInputnationalityMsg;
                   }
                   return null;
                 },
               ),
               DropdownButtonFormField<int>(
-                decoration: InputDecoration(labelText: 'Blood Type'),
+                decoration:
+                    const InputDecoration(labelText: GluttexConstants.bloodTypeText),
                 items: [
                   {'value': 1, 'label': 'O+'},
                   {'value': 2, 'label': 'A+'},
@@ -205,14 +216,14 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return 'Please select a blood type';
+                    return GluttexConstants.pleaseInputBloodTypeMsg;
                   }
                   return null;
                 },
               ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: 'Latitude'),
+              //   decoration: InputDecoration(labelText: GluttexConstants.latitudeText),
               //   keyboardType: TextInputType.number,
               //   onSaved: (value) {
               //     locationLatitude = double.tryParse(value ?? '');
@@ -220,7 +231,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: 'Longitude'),
+              //   decoration: InputDecoration(labelText: GluttexConstants.longitudeText),
               //   keyboardType: TextInputType.number,
               //   onSaved: (value) {
               //     locationLongitude = double.tryParse(value ?? '');
@@ -228,34 +239,35 @@ class _RegistrationFormState extends State<RegistrationForm> {
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: 'Location Name'),
+              //   decoration: InputDecoration(labelText: GluttexConstants.locationNameText),
               //   onSaved: (value) {
               //     locationName = value;
               //   },
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: 'Street'),
+              //   decoration: InputDecoration(labelText: GluttexConstants.streetText),
               //   onSaved: (value) {
               //     addressStreet = value;
               //   },
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: 'City'),
+              //   decoration: InputDecoration(labelText: GluttexConstants.cityText),
               //   onSaved: (value) {
               //     addressCity = value;
               //   },
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: 'Postal Code'),
+              //   decoration: InputDecoration(labelText: GluttexConstants.postalCodeText),
               //   onSaved: (value) {
               //     addressPostalCode = value;
               //   },
               // ),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: 'Country'),
+                decoration:
+                    const InputDecoration(labelText: GluttexConstants.countryText),
                 items: ['Algeria', 'Other'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -267,12 +279,12 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return 'Please select a country';
+                    return GluttexConstants.pleaseInputCountryMsg;
                   }
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
@@ -319,20 +331,21 @@ class _RegistrationFormState extends State<RegistrationForm> {
                               listen: false)
                           .signUpWithData(payload);
 
-                      if (data != null)
+                      if (data != null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(data.toString())),
                         );
-                      else {
+                      } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                               backgroundColor: Colors.green,
-                              content: Text("Successfully signed up.")),
+                              content:
+                                  Text(GluttexConstants.loginSuccessfullMsg)),
                         );
                       }
 
                       Navigator.of(context).pop();
-                    } catch (error, stacktrace) {
+                    } catch (error) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                             backgroundColor: Colors.red,
@@ -341,7 +354,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
                     }
                   }
                 },
-                child: Text('Register'),
+                child: const Text(GluttexConstants.registerText),
               ),
             ],
           ),

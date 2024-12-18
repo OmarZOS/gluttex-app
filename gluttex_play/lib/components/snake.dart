@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -9,6 +8,8 @@ void main() {
 }
 
 class SnakeGame extends StatefulWidget {
+  const SnakeGame({super.key});
+
   @override
   _SnakeGameState createState() => _SnakeGameState();
 }
@@ -21,7 +22,7 @@ class _SnakeGameState extends State<SnakeGame> {
   static const Duration GAME_SPEED = Duration(milliseconds: 300);
 
   List<Offset> snake = [];
-  Offset fruit = Offset(0, 0);
+  Offset fruit = const Offset(0, 0);
   Direction direction = Direction.right;
   bool isPlaying = false;
 
@@ -33,7 +34,7 @@ class _SnakeGameState extends State<SnakeGame> {
 
   void startGame() {
     snake.clear();
-    snake.add(Offset(ROWS / 2, COLUMNS / 2));
+    snake.add(const Offset(ROWS / 2, COLUMNS / 2));
     for (int i = 1; i < START_LENGTH; i++) {
       snake.add(Offset(ROWS / 2 - i, COLUMNS / 2));
     }
@@ -97,7 +98,7 @@ class _SnakeGameState extends State<SnakeGame> {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back)),
+            icon: const Icon(Icons.arrow_back)),
       ),
       body: GestureDetector(
         onVerticalDragUpdate: (details) {
@@ -118,7 +119,7 @@ class _SnakeGameState extends State<SnakeGame> {
           color: Colors.grey[300],
           child: GridView.builder(
             itemCount: ROWS * COLUMNS,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: ROWS,
             ),
             itemBuilder: (BuildContext context, int index) {
@@ -127,7 +128,7 @@ class _SnakeGameState extends State<SnakeGame> {
               Offset cell = Offset(row.toDouble(), col.toDouble());
               if (snake.contains(cell)) {
                 return Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.green,
                     shape: BoxShape.circle,
                   ),

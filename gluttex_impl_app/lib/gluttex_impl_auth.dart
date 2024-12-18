@@ -1,17 +1,14 @@
 library gluttex_impl_app;
 
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/AuthService.dart';
-import 'package:gluttex_core/app/UserService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:insta_login/insta_login.dart';
 
 class AuthServiceImpl implements AuthService {
   StorageService storageService = GluttexLocator.get<StorageService>();
@@ -50,9 +47,9 @@ class AuthServiceImpl implements AuthService {
 
   @override
   Future<AppUser?> signInWithGoogle() async {
-    final GoogleSignIn _googleSignIn = GoogleSignIn();
+    final GoogleSignIn googleSignIn = GoogleSignIn();
     try {
-      final account = await _googleSignIn.signIn();
+      final account = await googleSignIn.signIn();
       if (account != null) {
         // Retrieve user information
         String displayName = account.displayName ?? "No name";
@@ -61,15 +58,16 @@ class AuthServiceImpl implements AuthService {
         String photoUrl = account.photoUrl ?? "No photo";
 
         // Handle successful login
-        log("Google user info:");
-        log("Display Name: $displayName");
-        log("Email: $email");
-        log("ID: $id");
-        log("Photo URL: $photoUrl");
+        // log("Google user info:");
+        // log("Display Name: $displayName");
+        // log("Email: $email");
+        // log("ID: $id");
+        // log("Photo URL: $photoUrl");
       }
     } catch (error) {
       throw Exception("Google login failed: $error");
     }
+    return null;
   }
 
   // Future<AppUser?> signInWithInstagram() async {

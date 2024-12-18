@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:typed_data';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -9,7 +10,7 @@ import 'package:locator/locator.dart';
 class ProductNotifier extends ChangeNotifier {
   final ProductService _productService = GluttexLocator.get<ProductService>();
   List<Product> _products = [];
-
+  Timer? _pollingTimer; // Timer for polling updates
   List<Product> get products => _products;
 
   ProductNotifier() {
@@ -38,8 +39,8 @@ class ProductNotifier extends ChangeNotifier {
     Uint8List? image =
         await _productService.getProductImage('${product.id_product_image}');
     // await fetchProducts();
-    log("Changing product image");
-    log('${_products.where((element) => element.id_product == product.id_product)}');
+    // log("Changing product image");
+    // log('${_products.where((element) => element.id_product == product.id_product)}');
     _products
         .where((element) => element.id_product == product.id_product)
         .first
@@ -53,9 +54,46 @@ class ProductNotifier extends ChangeNotifier {
     return status;
   }
 
-  Future<int?> deleteProduct(String id_product) async {
-    int? status = await _productService.deleteProduct(id_product);
+  Future<int?> deleteProduct(String idProduct) async {
+    int? status = await _productService.deleteProduct(idProduct);
     await fetchProducts();
     return status;
+  }
+
+  void startPollingProductUpdates(Product product) async {
+    // Poll every 5 seconds
+    log("Polling product updates");
+    _pollingTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+      await focusOnProduct(product);
+    });
+  }
+
+  Future<void> stopPollingProductUpdates() async {
+    _pollingTimer?.cancel();
+  }
+
+  void updateProductById(int product_id, int updatedvalue) {
+    int index =
+        _products.indexWhere((element) => product_id == element.id_product);
+    if (index != -1) {
+      _products[index] = _products[index].copyWith(
+        product_quantity: updatedvalue,
+      );
+    }
+    notifyListeners();
+  }
+
+  Future<void> focusOnProduct(Product product) async {
+    Product updatedvalue =
+        await _productService.focusOnProduct(product.id_product.toString());
+    // log(updatedvalue);
+    int index = _products
+        .indexWhere((element) => product.id_product == element.id_product);
+    if (index != -1) {
+      _products[index] = _products[index].copyWith(
+        product_quantity: updatedvalue.product_quantity,
+      );
+    }
+    notifyListeners();
   }
 }

@@ -35,7 +35,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   String? _recipePreparationTime;
   DateTime? recipe_created_at;
   DateTime? recipe_last_updated;
-  Map<int, String> _selectedIngredients = {};
+  final Map<int, String> _selectedIngredients = {};
 
   Duration preparationTime = Duration.zero;
 
@@ -59,7 +59,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
+        return SizedBox(
           height: MediaQuery.of(context).size.height * 0.7,
           // color: Colors.white,
           child: CupertinoTimerPicker(
@@ -143,7 +143,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('Categories not found');
+                    return const Text('Categories not found');
                   } else {
                     return CategoryPicker(
                       category_id: _recipe_category_id ?? 1,
@@ -159,7 +159,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               ListTile(
                 title: Text(
                     'Preparation Time: ${preparationTime.inHours} hours, ${preparationTime.inMinutes.remainder(60)} minutes'),
-                trailing: Icon(Icons.timer),
+                trailing: const Icon(Icons.timer),
                 onTap: () => _selectDuration(context),
               ),
               Column(
@@ -239,7 +239,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                     _formKey.currentState!.save();
                     final recipe = Recipe(
                       id_recipe: _id_recipe,
-                      recipe_owner_id: await Provider.of<AppUserNotifier>(
+                      recipe_owner_id: Provider.of<AppUserNotifier>(
                                   context,
                                   listen: false)
                               .appUser!
@@ -260,14 +260,14 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
                     // Handle recipe submission
 
-                    int? status_code = await Provider.of<RecipeNotifier>(
+                    int? statusCode = await Provider.of<RecipeNotifier>(
                             context,
                             listen: false)
                         .addRecipe(recipe);
 
                     Response response = Response();
 
-                    switch (status_code) {
+                    switch (statusCode) {
                       case 200:
                         response.color = Colors.green;
                         response.text = GluttexConstants.putSuccess;
@@ -278,18 +278,18 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                         break;
                       case 406:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error ${status_code}: ' +
+                        response.text = 'Error $statusCode: ' +
                             GluttexConstants.putFailure;
                         break;
                       case 422:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error ${status_code}: ' +
+                        response.text = 'Error $statusCode: ' +
                             GluttexConstants.putFailure;
                         break;
 
                       default:
                         response.color = Colors.red;
-                        response.text = 'Error ${status_code}: ' +
+                        response.text = 'Error $statusCode: ' +
                             GluttexConstants.serverError;
                     }
 

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_localiser/components/map_picker.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,8 +22,8 @@ class MapPickerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home Screen'),
-      ),
+          // title: const Text('Home Screen'),
+          ),
       body: Center(
         child: ElevatedButton(
           onPressed: () async {

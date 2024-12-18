@@ -4,6 +4,7 @@ import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_impl_app/gluttex_impl_app.dart';
+import 'package:gluttex_impl_business/cart_change_notifier.dart';
 import 'package:gluttex_impl_business/gluttex_impl_product.dart';
 import 'package:gluttex_impl_business/gluttex_impl_supplier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
@@ -26,10 +27,14 @@ void setupLocator() {
 void main() {
   setupLocator();
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ProductNotifier(),
-      child: ProductCatalog(),
-    ),
+    MultiProvider(providers: [
+      ChangeNotifierProvider<ProductNotifier>(
+        create: (_) => ProductNotifier(),
+      ),
+      ChangeNotifierProvider<CartChangeNotifier>(
+        create: (_) => CartChangeNotifier(),
+      ),
+    ], child: const ProductCatalog()),
   );
 }
 

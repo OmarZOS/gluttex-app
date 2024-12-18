@@ -28,7 +28,7 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (context) => RecipeNotifier(),
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -38,10 +38,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'My App',
       // darkTheme: ThemeData.dark(), // Default dark theme
-      home: const RecipeCatalogScreen(),
+      home: RecipeCatalogScreen(),
     );
   }
 }

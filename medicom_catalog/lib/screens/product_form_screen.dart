@@ -53,10 +53,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Product'),
+        title: const Text(GluttexConstants.addProductTxt),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(
+        child: const Icon(
           Icons.shopify_sharp,
           // color: Colors.yellow[50],
         ),
@@ -69,47 +69,51 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           child: ListView(
             children: [
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Product Name'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.productNameTxt),
                 onSaved: (value) => _productName = value ?? "",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product name';
+                    return GluttexConstants.pleaseInputProductNameMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Product Brand'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.productBarcodeTxt),
                 onSaved: (value) => _productBrand = value ?? "",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product brand';
+                    return GluttexConstants.pleaseInputProductBrandMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Product Barcode'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.productBarcodeTxt),
                 onSaved: (value) => _productBarcode = value ?? "",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product bar code';
+                    return GluttexConstants.pleaseInputProductBarcodeMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Product Price'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.productPriceTxt),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product price';
+                    return GluttexConstants.pleaseInputProductPriceMsg;
                   }
                   if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
+                    return GluttexConstants.pleaseInputvalidnumberMsg;
                   }
                   if (double.tryParse(value)! >= 1000000) {
-                    return 'Please enter a number between 0 and 999999';
+                    return GluttexConstants.numberConstraintMsg;
                   }
                   return null;
                 },
@@ -117,29 +121,29 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     _productPrice = double.tryParse(value ?? "0.0"),
               ),
               TextFormField(
-                decoration:
-                    const InputDecoration(labelText: 'Product Quantity'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.ProductQuantityText),
                 keyboardType: TextInputType.number,
                 onSaved: (value) =>
                     _productQuantity = int.tryParse(value ?? "0"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a product name';
+                    return GluttexConstants.ProductQuantityText;
                   }
                   if (int.tryParse(value) == null) {
-                    return 'Please enter a product name';
+                    return GluttexConstants.pleaseInputProductQuantityMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration:
-                    const InputDecoration(labelText: 'Product Description'),
+                decoration: const InputDecoration(
+                    labelText: GluttexConstants.ProductDescriptionText),
                 // keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value != null) {
                     if ((value).length >= 300) {
-                      return 'Character limit: 300.';
+                      return GluttexConstants.descriptionCharacterConstraintMsg;
                     }
                   }
                   return null;
@@ -155,7 +159,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('Categories not found');
+                    return const Text(GluttexConstants.categoriesNotFoundTxt);
                   } else {
                     return CategoryPicker(
                       category_id: _product_type_id ?? 1,
@@ -173,10 +177,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   ? Image.memory(_productImage!,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.width)
-                  : const Text('No image selected'),
+                  : const Text(GluttexConstants.noImageSelectedTxt),
               ElevatedButton(
                 onPressed: _pickImage,
-                child: const Text('Pick Image'),
+                child: const Text(GluttexConstants.pickImageMsg),
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
@@ -202,15 +206,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       product_last_updated: null,
                     );
                     // Handle product submission
-                    int? status_code;
+                    int? statusCode;
                     Response response = Response();
                     try {
-                      int? status_code = await Provider.of<ProductNotifier>(
+                      int? statusCode = await Provider.of<ProductNotifier>(
                               context,
                               listen: false)
                           .addProduct(product);
 
-                      switch (status_code) {
+                      switch (statusCode) {
                         case 200:
                           response.color = Colors.green;
                           response.text = GluttexConstants.putSuccess;
@@ -227,24 +231,24 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           break;
                         case 406:
                           response.color = Colors.amberAccent;
-                          response.text = 'Error ${status_code}: ' +
+                          response.text = 'Error $statusCode: ' +
                               GluttexConstants.putFailure;
                           break;
                         case 422:
                           response.color = Colors.amberAccent;
-                          response.text = 'Error ${status_code}: ' +
+                          response.text = 'Error $statusCode: ' +
                               GluttexConstants.putFailure;
                           break;
 
                         default:
                           response.color = Colors.red;
-                          response.text = 'Error ${status_code}: ' +
+                          response.text = 'Error $statusCode: ' +
                               GluttexConstants.serverError;
                       }
                     } catch (e, stacktrace) {
-                      log("${stacktrace}");
+                      log("$stacktrace");
                       response.color = Colors.red;
-                      response.text = 'Error ${status_code!}: ' +
+                      response.text = 'Error ${statusCode!}: ' +
                           GluttexConstants.serverError;
                     }
 
@@ -257,7 +261,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     // You can use a provider or any state management to save the product
                   }
                 },
-                child: const Text('Submit'),
+                child: const Text(GluttexConstants.submitText),
               ),
             ],
           ),

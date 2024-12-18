@@ -107,4 +107,26 @@ class ProductServiceImpl implements ProductService {
       return [];
     }
   }
+
+  @override
+  Future<dynamic> focusOnProduct(String idProduct) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    // developer.log("message: focusOnProduct");
+    // Convert the list of dynamic maps to a list of Product objects
+
+    developer.log("Getting product");
+    dynamic responseData = await storageService.get(
+        GluttexConstants.apiBaseUrl + GluttexConstants.productEndpoint,
+        idProduct);
+
+    developer.log("Building product");
+    developer.log(responseData.toString());
+
+    // developer.log(responseData["id_product"]);
+    Product product = Product.fromJson(responseData);
+    developer.log("Got product");
+    developer.log(product.product_name ?? "No product");
+
+    return product;
+  }
 }

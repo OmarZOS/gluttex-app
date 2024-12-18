@@ -52,8 +52,8 @@ class AppUserServiceImpl implements AppUserService {
       var user = appUsers.first;
       return user;
     } catch (e, stacktrace) {
-      log('${e}');
-      log('${stacktrace}');
+      log('$e');
+      log('$stacktrace');
 
       return AppUser.empty();
     }

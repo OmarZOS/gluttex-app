@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class SymptomScreen extends StatefulWidget {
   const SymptomScreen({super.key});
+  @override
   _SymptomScreenState createState() => _SymptomScreenState();
 }
 
@@ -19,22 +20,22 @@ class _SymptomScreenState extends State<SymptomScreen> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Are you having symptoms?',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 16.0),
+          const SizedBox(height: 16.0),
           // Add your symptom widgets here
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 8.0,
             children: [
               FilterChip(
-                label: Text('Chronic diarrhea'),
+                label: const Text('Chronic diarrhea'),
                 selected: _diarrheaIsSelected,
                 onSelected: (bool value) {
                   setState(() {
@@ -45,7 +46,7 @@ class _SymptomScreenState extends State<SymptomScreen> {
                     141), // Change to the color you want when selected
               ),
               FilterChip(
-                label: Text('Iron-deficiency anemia'),
+                label: const Text('Iron-deficiency anemia'),
                 selected: _ironDeficiencyIsSelected,
                 onSelected: (bool value) {
                   setState(() {
@@ -56,7 +57,7 @@ class _SymptomScreenState extends State<SymptomScreen> {
                     141), // Change to the color you want when selected
               ),
               FilterChip(
-                label: Text('Fatigue'),
+                label: const Text('Fatigue'),
                 selected: _fatigueIsSelected,
                 onSelected: (bool value) {
                   setState(() {
@@ -67,7 +68,7 @@ class _SymptomScreenState extends State<SymptomScreen> {
                     141), // Change to the color you want when selected
               ),
               FilterChip(
-                label: Text('Abdominal pain and bloating'),
+                label: const Text('Abdominal pain and bloating'),
                 selected: _abdominalPainIsSelected,
                 onSelected: (bool value) {
                   setState(() {
@@ -79,7 +80,7 @@ class _SymptomScreenState extends State<SymptomScreen> {
               ),
             ],
           ),
-          SizedBox(height: 9.0),
+          const SizedBox(height: 9.0),
           TextFormField(
             // initialValue: _app_user_name,
             decoration: const InputDecoration(
@@ -96,7 +97,7 @@ class _SymptomScreenState extends State<SymptomScreen> {
               return null;
             },
           ),
-          SizedBox(height: 9),
+          const SizedBox(height: 9),
           TextFormField(
             // initialValue: _app_user_name,
             decoration:
@@ -113,7 +114,7 @@ class _SymptomScreenState extends State<SymptomScreen> {
               return null;
             },
           ),
-          SizedBox(height: 9),
+          const SizedBox(height: 9),
           TextFormField(
             // initialValue: _app_user_name,
             decoration: const InputDecoration(
@@ -130,29 +131,29 @@ class _SymptomScreenState extends State<SymptomScreen> {
               return null;
             },
           ),
-          SizedBox(height: 9),
+          const SizedBox(height: 9),
           ElevatedButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     content: Text("Data Submitted successfully."),
                     backgroundColor: Colors.green,
                   ),
                 );
               },
-              child: Center(
+              child: const Center(
                 child: Text("Submit"),
               )),
 
-          Text(
+          const Text(
             'Recommendations',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 16.0),
-          Text('1. Avoid gluten-containing products.'),
-          Text('2. Follow a balanced diet.'),
-          Text('3. Keep a symptom diary.'),
-          Text('4. Consult with your healthcare provider regularly.'),
+          const SizedBox(height: 16.0),
+          const Text('1. Avoid gluten-containing products.'),
+          const Text('2. Follow a balanced diet.'),
+          const Text('3. Keep a symptom diary.'),
+          const Text('4. Consult with your healthcare provider regularly.'),
         ],
       ),
     );

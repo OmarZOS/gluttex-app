@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:gluttex_core/app/AppUser.dart';
@@ -10,11 +8,11 @@ class CategoryPicker extends StatefulWidget {
   final int category_id;
 
   const CategoryPicker({
-    Key? key,
+    super.key,
     required this.onCategoryChanged,
     required this.categories,
     required this.category_id,
-  }) : super(key: key);
+  });
 
   @override
   _CategoryPickerState createState() => _CategoryPickerState();

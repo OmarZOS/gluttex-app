@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +34,7 @@ class RecipeEditFormScreen extends StatefulWidget {
   final Map<int, String>? initialIngredients;
 
   const RecipeEditFormScreen(
-      {Key? key,
+      {super.key,
       this.initialRecipeName,
       this.initialRecipeBrand,
       this.initialRecipeBarcode,
@@ -50,8 +49,7 @@ class RecipeEditFormScreen extends StatefulWidget {
       this.initialRecipeDescription,
       this.initialRecipeInstruction,
       this.initialRecipePreparationTime,
-      this.initialIngredients})
-      : super(key: key);
+      this.initialIngredients});
 
   @override
   _RecipeEditFormScreenState createState() => _RecipeEditFormScreenState();
@@ -112,7 +110,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
+        return SizedBox(
           height: MediaQuery.of(context).size.height * 0.7,
           // color: Colors.white,
           child: CupertinoTimerPicker(
@@ -144,14 +142,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Update Recipe'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.shopify_sharp,
-          // color: Colors.yellow[50],
-        ),
-        onPressed: () {},
+        title: const Text(GluttexConstants.updateRecipeMsg),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -171,7 +162,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                 },
               ),
               TextFormField(
-                initialValue: '${_recipeDescription ?? ""}',
+                initialValue: _recipeDescription ?? "",
                 decoration:
                     const InputDecoration(labelText: 'Recipe Description'),
                 validator: (value) {
@@ -187,7 +178,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                 onSaved: (value) => _recipeDescription = value,
               ),
               TextFormField(
-                initialValue: '${_recipeInstruction ?? ""}',
+                initialValue: _recipeInstruction ?? "",
                 maxLines: null, // Allow for multiline input
                 keyboardType:
                     TextInputType.multiline, // Show multiline keyboard
@@ -208,7 +199,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('Categories not found');
+                    return const Text(GluttexConstants.categoriesNotFoundTxt);
                   } else {
                     return CategoryPicker(
                       category_id: _recipe_category_id ?? 1,
@@ -224,7 +215,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
               ListTile(
                 title: Text(
                     'Preparation Time: ${preparationTime.inHours} hours, ${preparationTime.inMinutes.remainder(60)} minutes'),
-                trailing: Icon(Icons.timer),
+                trailing: const Icon(Icons.timer),
                 onTap: () => _selectDuration(context),
               ),
               const SizedBox(height: 16.0),
@@ -267,7 +258,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
 
                   const SizedBox(height: 16.0),
                   ListTile(
-                    title: const Text("Add Ingredient"),
+                    title: const Text(GluttexConstants.addIngredientMsg),
                     trailing: const Icon(Icons.add),
                     onTap: () {
                       showDialog(
@@ -292,11 +283,11 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                   ? Image.memory(_recipeImage!,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.width)
-                  : const Text('No image selected'),
+                  : const Text(GluttexConstants.noImageSelectedTxt),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _pickImage,
-                child: const Text('Pick Image'),
+                child: const Text(GluttexConstants.pickImageMsg),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -320,12 +311,12 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                     );
 
                     // Handle recipe submission
-                    int? status_code = await GluttexLocator.get<RecipeService>()
+                    int? statusCode = await GluttexLocator.get<RecipeService>()
                         .updateRecipe(recipe);
 
                     Response response = Response();
 
-                    switch (status_code) {
+                    switch (statusCode) {
                       case 200:
                         response.color = Colors.green;
                         response.text = GluttexConstants.putSuccess;
@@ -336,18 +327,18 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                         break;
                       case 406:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error ${status_code}: ' +
-                            GluttexConstants.putFailure;
+                        response.text =
+                            'Error $statusCode: ' + GluttexConstants.putFailure;
                         break;
                       case 422:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error ${status_code}: ' +
-                            GluttexConstants.putFailure;
+                        response.text =
+                            'Error $statusCode: ' + GluttexConstants.putFailure;
                         break;
 
                       default:
                         response.color = Colors.red;
-                        response.text = 'Error ${status_code}: ' +
+                        response.text = 'Error $statusCode: ' +
                             GluttexConstants.serverError;
                     }
 
@@ -361,7 +352,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                     // You can use a provider or any state management to save the recipe
                   }
                 },
-                child: const Text('Submit'),
+                child: const Text(GluttexConstants.submitText),
               ),
             ],
           ),

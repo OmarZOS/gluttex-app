@@ -49,11 +49,15 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   image: ^3.0.1
-  flutter_svg: ^2.0.10+1
+  flutter_svg: 
   badges: ^3.0.2
   image_picker: ^0.8.4+4
   provider: ^6.0.1
   custom_image_crop: ^0.0.13
+  sliding_up_panel: ^2.0.0+1
+  # eventsource: ^0.4.0
+  # http: ^0.13.3
+# dependency_overrides:
 
 dev_dependencies:
   flutter_test:

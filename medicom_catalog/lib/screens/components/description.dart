@@ -9,10 +9,10 @@ class Description extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: GluttexConstants.kDefaultPaddin),
+      padding: const EdgeInsets.symmetric(vertical: GluttexConstants.kDefaultPaddin),
       child: Text(
         product.product_description ?? "",
-        style: TextStyle(height: 1.5),
+        style: const TextStyle(height: 1.5),
       ),
     );
   }

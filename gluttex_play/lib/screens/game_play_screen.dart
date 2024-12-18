@@ -4,7 +4,7 @@ import 'package:gluttex_play/components/game.dart';
 class GamePlayScreen extends StatelessWidget {
   final Game game;
 
-  const GamePlayScreen({Key? key, required this.game}) : super(key: key);
+  const GamePlayScreen({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +13,8 @@ class GamePlayScreen extends StatelessWidget {
         title: Text('Playing ${game.name}'),
       ),
       body: Center(
-        child:
-            Text('Now playing: ${game.name}', style: TextStyle(fontSize: 24)),
+        child: Text('Now playing: ${game.name}',
+            style: const TextStyle(fontSize: 24)),
       ),
     );
   }

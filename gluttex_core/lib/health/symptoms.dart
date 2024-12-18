@@ -61,7 +61,7 @@ class Diagnosis {
   }
   static Uint8List? imageFromJson(List<dynamic> json) {
     Uint8List? imageData;
-    if (json != null && json is List && json!.isNotEmpty) {
+    if (json.isNotEmpty) {
       final imageBase64 = json[0]["diagnosis_image_data"];
       if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
         imageData = base64Decode(imageBase64);

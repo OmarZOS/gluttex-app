@@ -7,7 +7,6 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 
 class StorageServiceImpl implements StorageService {
@@ -19,7 +18,7 @@ class StorageServiceImpl implements StorageService {
       final response = await _dio.delete("$destination/$id");
       return response.statusCode;
     } on DioException catch (e, stacktrace) {
-      developer.log('${stacktrace}');
+      developer.log('$stacktrace');
       return 505;
     }
   }
@@ -36,8 +35,8 @@ class StorageServiceImpl implements StorageService {
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e, stacktrace) {
-      log('${e}');
-      log('${stacktrace}');
+      log('$e');
+      log('$stacktrace');
       log('$destination/$id');
       throw Exception(GluttexConstants.serverError);
     }
@@ -57,8 +56,8 @@ class StorageServiceImpl implements StorageService {
       }
     } on DioException catch (e, stacktrace) {
       // log("${destination}");
-      developer.log('${e}');
-      developer.log('${stacktrace}');
+      developer.log('$e');
+      developer.log('$stacktrace');
       throw Exception(GluttexConstants.serverError);
     }
   }
@@ -100,7 +99,7 @@ class StorageServiceImpl implements StorageService {
   Future<int?> update(
       String destination, String id, Map<String, dynamic> data) async {
     try {
-      final response = await _dio.post('${destination}/${id}',
+      final response = await _dio.post('$destination/$id',
           data: json.encode(data),
           options: Options(headers: {
             'Content-Type': 'application/json',
@@ -122,7 +121,7 @@ class StorageServiceImpl implements StorageService {
       String destination, Map<String, dynamic> data) async {
     try {
       log('$data');
-      final response = await _dio.put('${destination}',
+      final response = await _dio.put(destination,
           data: data, //json.encode(data)
           options: Options(
               validateStatus: (status) => status == 200 || status == 406,
@@ -147,7 +146,7 @@ class StorageServiceImpl implements StorageService {
       String destination, Map<String, dynamic> data) async {
     try {
       // log('${json.encode(data)}');
-      final response = await _dio.post('${destination}',
+      final response = await _dio.post(destination,
           data: json.encode(data),
           options: Options(
               validateStatus: (status) => status == 200 || status == 406,
@@ -165,10 +164,11 @@ class StorageServiceImpl implements StorageService {
     }
   }
 
+  @override
   Future<dynamic> signInUsingProvider(String destination, String providerName,
       Map<String, dynamic> data) async {
     try {
-      final response = await _dio.post('${destination}',
+      final response = await _dio.post(destination,
           data: json.encode(data),
           options: Options(headers: {
             'Content-Type': 'application/json',

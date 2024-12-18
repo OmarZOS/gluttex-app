@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 class Product {
@@ -42,6 +43,9 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     Uint8List? imageData;
     int cardImageId = 0;
+    String productCategory = "Missing";
+    // log("Got product");
+
     if (json['product_image'] != null &&
         json['product_image'] is List &&
         json['product_image']!.isNotEmpty) {
@@ -52,6 +56,11 @@ class Product {
         imageData = base64Decode(imageBase64);
       }
     }
+
+    if (json['product_category'] != null) {
+      productCategory = json['product_category']['product_category_desc'];
+    }
+
     return Product(
       id_product: json['id_product'] ?? 0,
       product_provider_id: json['product_provider_id'] ?? 0,
@@ -62,8 +71,7 @@ class Product {
       product_name: json['product_name'] ?? "",
       product_brand: json['product_brand'] ?? "",
       product_barcode: json['product_barcode'] ?? "",
-      product_category_desc:
-          json['product_category']['product_category_desc'] ?? "",
+      product_category_desc: productCategory,
       product_image_data: imageData,
       product_price: json['product_price'] ?? 0.0,
       product_quantity: json['product_quantity'] ?? 0,
@@ -77,13 +85,38 @@ class Product {
 
   static Uint8List? imageFromJson(List<dynamic> json) {
     Uint8List? imageData;
-    if (json != null && json is List && json!.isNotEmpty) {
+    if (json.isNotEmpty) {
       final imageBase64 = json[0]["product_image_data"];
       if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
         imageData = base64Decode(imageBase64);
       }
     }
     return imageData;
+  }
+
+  Product copyWith({
+    int? id_product,
+    int? product_quantity,
+  }) {
+    return Product(
+      id_product: id_product ?? this.id_product,
+      product_provider_id: product_provider_id ?? this.product_provider_id,
+      product_category_id: product_category_id ?? this.product_category_id,
+      id_product_category: id_product_category ?? this.id_product_category,
+      id_product_image: id_product_image ?? this.id_product_image,
+      product_ref_id: product_ref_id ?? this.product_ref_id,
+      product_name: product_name ?? this.product_name,
+      product_brand: product_brand ?? this.product_brand,
+      product_barcode: product_barcode ?? this.product_barcode,
+      product_category_desc:
+          product_category_desc ?? this.product_category_desc,
+      product_image_data: product_image_data ?? this.product_image_data,
+      product_price: product_price ?? this.product_price,
+      product_quantity: product_quantity ?? this.product_quantity,
+      product_description: product_description ?? this.product_description,
+      product_created_at: product_created_at ?? this.product_created_at,
+      product_last_updated: product_last_updated ?? this.product_last_updated,
+    );
   }
 
   Map<String, dynamic> toJson() {
