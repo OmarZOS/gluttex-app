@@ -1,6 +1,5 @@
 library gluttex_impl_app;
 
-import 'dart:developer';
 
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';

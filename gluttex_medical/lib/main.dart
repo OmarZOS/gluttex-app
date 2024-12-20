@@ -45,4 +45,4 @@ class _CeliacScreenState extends State<CeliacScreen> {
   }
 }
 
-void main() => runApp(MaterialApp(home: CeliacScreen()));
+void main() => runApp(const MaterialApp(home: CeliacScreen()));

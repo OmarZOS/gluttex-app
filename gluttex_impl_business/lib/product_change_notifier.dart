@@ -10,16 +10,25 @@ import 'package:locator/locator.dart';
 class ProductNotifier extends ChangeNotifier {
   final ProductService _productService = GluttexLocator.get<ProductService>();
   List<Product> _products = [];
+  late List<ProductCategory> _categories = [];
+  List<ProductCategory> get categories => _categories;
   Timer? _pollingTimer; // Timer for polling updates
   List<Product> get products => _products;
 
   ProductNotifier() {
+    getCategories();
     fetchProducts();
   }
 
   Future<void> fetchProducts() async {
     var products = await _productService.getAllProducts();
     _products = products ?? [];
+    notifyListeners();
+  }
+
+  Future<void> getCategories() async {
+    var categories = await _productService.getCategories();
+    _categories = categories ?? [];
     notifyListeners();
   }
 
@@ -63,7 +72,7 @@ class ProductNotifier extends ChangeNotifier {
   void startPollingProductUpdates(Product product) async {
     // Poll every 5 seconds
     log("Polling product updates");
-    _pollingTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       await focusOnProduct(product);
     });
   }
@@ -72,9 +81,9 @@ class ProductNotifier extends ChangeNotifier {
     _pollingTimer?.cancel();
   }
 
-  void updateProductById(int product_id, int updatedvalue) {
+  void updateProductById(int productId, int updatedvalue) {
     int index =
-        _products.indexWhere((element) => product_id == element.id_product);
+        _products.indexWhere((element) => productId == element.id_product);
     if (index != -1) {
       _products[index] = _products[index].copyWith(
         product_quantity: updatedvalue,

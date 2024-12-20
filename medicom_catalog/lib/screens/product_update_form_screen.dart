@@ -289,19 +289,16 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                         break;
                       case 406:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error $statusCode: ' +
-                            GluttexConstants.putFailure;
+                        response.text = 'Error $statusCode: ${GluttexConstants.putFailure}';
                         break;
                       case 422:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error $statusCode: ' +
-                            GluttexConstants.putFailure;
+                        response.text = 'Error $statusCode: ${GluttexConstants.putFailure}';
                         break;
 
                       default:
                         response.color = Colors.red;
-                        response.text = 'Error $statusCode: ' +
-                            GluttexConstants.serverError;
+                        response.text = 'Error $statusCode: ${GluttexConstants.serverError}';
                     }
 
                     ScaffoldMessenger.of(context).showSnackBar(

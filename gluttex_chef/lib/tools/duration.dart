@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 Duration ParseDurationString(String durationString) {
   final RegExp hourRegex = RegExp(r'(\d+)\s*hours');

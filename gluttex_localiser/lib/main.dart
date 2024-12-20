@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_impl_business/gluttex_impl_supplier.dart';
+import 'package:gluttex_impl_business/supplier_change_notifier.dart';
 import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
 
 import 'package:locator/locator.dart';
+import 'package:provider/provider.dart';
 
 void setupLocator() {
   // Register your services or dependencies here
@@ -17,7 +19,12 @@ void setupLocator() {
 
 void main() {
   setupLocator();
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => SupplierChangeNotifier(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

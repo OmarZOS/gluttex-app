@@ -7,8 +7,10 @@ import 'package:gluttex_localiser/screens/business_form_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:locator/locator.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
+import 'package:gluttex_impl_business/supplier_change_notifier.dart';
 import 'package:gluttex_localiser/screens/map_locations_screen.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:provider/provider.dart';
 
 class SlidingSuppliersWidget extends StatefulWidget {
   const SlidingSuppliersWidget({Key? key}) : super(key: key);
@@ -155,51 +157,54 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                 ),
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _filteredSuppliers.length,
-                itemBuilder: (context, index) {
-                  var supplier = _filteredSuppliers[index];
-                  return Card(
-                    margin: const EdgeInsets.all(8.0),
-                    child: ListTile(
-                      // tileColor: Colors.blue[50],
-                      leading: getProviderTypeIcon(
-                          supplier.product_provider_type_id),
-                      title: Text(supplier.provider_name),
-                      // subtitle:
-                      // FutureBuilder<Category?>(
-                      //   future: GluttexLocator.get<SupplierService>()
-                      //       .getCategoryById(supplier.product_provider_type_id),
-                      //   builder: (context, snapshot) {
-                      //     if (snapshot.connectionState ==
-                      //         ConnectionState.waiting) {
-                      //       return CircularProgressIndicator(); // Show a loading indicator while waiting
-                      //     } else if (snapshot.hasError) {
-                      //       return Text('Error: ${snapshot.error}');
-                      //     } else if (!snapshot.hasData ||
-                      //         snapshot.data == null) {
-                      //       return Text('Category not found');
-                      //     } else {
-                      //       return Text(snapshot.data!.product_category_desc);
-                      //     }
-                      //   },
-                      // ),
-                      trailing: IconButton(
-                        onPressed: () {
-                          _focusOnLocation(supplier.location_latitude,
-                              supplier.location_longitude);
+            Consumer<SupplierChangeNotifier>(
+                builder: (context, supplierNotifier, child) {
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: _filteredSuppliers.length,
+                  itemBuilder: (context, index) {
+                    var supplier = _filteredSuppliers[index];
+                    return Card(
+                      margin: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        // tileColor: Colors.blue[50],
+                        leading: getProviderTypeIcon(
+                            supplier.product_provider_type_id),
+                        title: Text(supplier.provider_name),
+                        // subtitle:
+                        // FutureBuilder<Category?>(
+                        //   future: GluttexLocator.get<SupplierService>()
+                        //       .getCategoryById(supplier.product_provider_type_id),
+                        //   builder: (context, snapshot) {
+                        //     if (snapshot.connectionState ==
+                        //         ConnectionState.waiting) {
+                        //       return CircularProgressIndicator(); // Show a loading indicator while waiting
+                        //     } else if (snapshot.hasError) {
+                        //       return Text('Error: ${snapshot.error}');
+                        //     } else if (!snapshot.hasData ||
+                        //         snapshot.data == null) {
+                        //       return Text('Category not found');
+                        //     } else {
+                        //       return Text(snapshot.data!.product_category_desc);
+                        //     }
+                        //   },
+                        // ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            _focusOnLocation(supplier.location_latitude,
+                                supplier.location_longitude);
+                          },
+                          icon: const Icon(Icons.location_on_outlined),
+                        ),
+                        onTap: () {
+                          showSupplierDetails(context, supplier);
                         },
-                        icon: const Icon(Icons.location_on_outlined),
                       ),
-                      onTap: () {
-                        showSupplierDetails(context, supplier);
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
+                    );
+                  },
+                ),
+              );
+            }),
           ],
         ),
         collapsed: Container(

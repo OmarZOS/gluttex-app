@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -15,17 +17,25 @@ class CatalogScreen extends StatefulWidget {
 
 class _CatalogScreenState extends State<CatalogScreen> {
   final TextEditingController _searchController = TextEditingController();
+  late List<String> _categories;
+  late String _selectedCategory = "All";
 
   @override
   void initState() {
-    super.initState();
+    _categories = ["All"];
 
-    // await Provider.of<ProductNotifier>(context).fetchProducts();
+    super.initState();
     _searchController.addListener(_filterProducts);
   }
 
   void _filterProducts() {
     setState(() {});
+  }
+
+  void _selectCategory(String category) {
+    setState(() {
+      _selectedCategory = category;
+    });
   }
 
   @override
@@ -43,9 +53,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
         title: TextField(
           controller: _searchController,
           decoration: const InputDecoration(
-              hintText: GluttexConstants.searchTxt,
-              border: InputBorder.none,
-              icon: Icon(Icons.search_outlined)),
+            hintText: GluttexConstants.searchTxt,
+            border: InputBorder.none,
+            icon: Icon(Icons.search_outlined),
+          ),
         ),
         actions: <Widget>[
           IconButton(
@@ -58,7 +69,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
               );
             },
           ),
-          const SizedBox(width: GluttexConstants.kDefaultPaddin / 2)
+          const SizedBox(width: GluttexConstants.kDefaultPaddin / 2),
         ],
       ),
       body: Consumer<ProductNotifier>(
@@ -66,12 +77,18 @@ class _CatalogScreenState extends State<CatalogScreen> {
           final products = productNotifier.products;
           var filteredProducts = products.where((product) {
             var query = _searchController.text.toLowerCase();
-            return product.product_name?.toLowerCase().contains(query) ?? false;
+            var matchesCategory = _selectedCategory == "All" ||
+                product.product_category_desc?.toLowerCase() ==
+                    _selectedCategory.toLowerCase();
+            return (product.product_name?.toLowerCase().contains(query) ??
+                    false) &&
+                matchesCategory;
           }).toList();
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              _buildCategoryRow(),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -87,6 +104,52 @@ class _CatalogScreenState extends State<CatalogScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildCategoryRow() {
+    return Consumer<ProductNotifier>(
+        builder: (context, productNotifier, child) {
+      if (_categories.length == 1) {
+        _categories.addAll(Provider.of<ProductNotifier>(context, listen: false)
+            .categories
+            .map((category) => category.product_category_desc)
+            .toList());
+      }
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: _categories.map((category) {
+            bool isSelected = _selectedCategory == category;
+            return GestureDetector(
+              onTap: () => _selectCategory(category),
+              child: Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: GluttexConstants.kDefaultPaddin / 2,
+                  vertical: GluttexConstants.kDefaultPaddin / 4,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: GluttexConstants.kDefaultPaddin,
+                  vertical: GluttexConstants.kDefaultPaddin / 2,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  category,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    });
   }
 
   Widget _buildProductGrid(List<Product> products) {

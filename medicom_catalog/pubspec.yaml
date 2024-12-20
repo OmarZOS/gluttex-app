@@ -55,6 +55,8 @@ dependencies:
   provider: ^6.0.1
   custom_image_crop: ^0.0.13
   sliding_up_panel: ^2.0.0+1
+  flutter_localizations:
+    sdk: flutter
   # eventsource: ^0.4.0
   # http: ^0.13.3
 # dependency_overrides:

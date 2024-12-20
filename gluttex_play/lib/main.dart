@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_play/screens/game_catalog.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

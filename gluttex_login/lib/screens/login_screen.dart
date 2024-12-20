@@ -175,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        child: Text(GluttexConstants.loginText),
+                        child: const Text(GluttexConstants.loginText),
                       ),
                 const SizedBox(height: 20),
                 TextButton(
@@ -184,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RegistrationForm(),
+                        builder: (context) => const RegistrationForm(),
                       ),
                     );
                   },

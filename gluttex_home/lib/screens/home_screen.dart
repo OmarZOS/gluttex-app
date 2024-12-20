@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
+import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
 import 'package:gluttex_play/screens/game_catalog.dart';
 import 'package:medicom_catalog/screens/catalog_screen.dart';
 
@@ -17,7 +18,7 @@ class _HomePageState extends State<HomePage> {
 
   static final List<Widget> _pages = <Widget>[
     const CatalogScreen(),
-    // const SlidingSuppliersWidget(),
+    const SlidingSuppliersWidget(),
     const RecipeCatalogScreen(),
     // CeliacScreen(),
     GameListScreen(),
@@ -58,11 +59,11 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(CupertinoIcons.cube_box_fill),
             label: 'Products',
           ),
-          // BottomNavigationBarItem(
-          //   backgroundColor: Color.fromARGB(255, 70, 99, 138),
-          //   icon: Icon(Icons.store_sharp),
-          //   label: 'Providers',
-          // ),
+          BottomNavigationBarItem(
+            backgroundColor: Color.fromARGB(255, 70, 99, 138),
+            icon: Icon(Icons.store_sharp),
+            label: 'Providers',
+          ),
           BottomNavigationBarItem(
             backgroundColor: Color.fromARGB(255, 107, 63, 124),
             icon: Icon(Icons.restaurant_menu_outlined),

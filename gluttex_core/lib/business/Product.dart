@@ -100,22 +100,21 @@ class Product {
   }) {
     return Product(
       id_product: id_product ?? this.id_product,
-      product_provider_id: product_provider_id ?? this.product_provider_id,
-      product_category_id: product_category_id ?? this.product_category_id,
-      id_product_category: id_product_category ?? this.id_product_category,
-      id_product_image: id_product_image ?? this.id_product_image,
-      product_ref_id: product_ref_id ?? this.product_ref_id,
-      product_name: product_name ?? this.product_name,
-      product_brand: product_brand ?? this.product_brand,
-      product_barcode: product_barcode ?? this.product_barcode,
-      product_category_desc:
-          product_category_desc ?? this.product_category_desc,
-      product_image_data: product_image_data ?? this.product_image_data,
-      product_price: product_price ?? this.product_price,
+      product_provider_id: product_provider_id ?? product_provider_id,
+      product_category_id: product_category_id ?? product_category_id,
+      id_product_category: id_product_category ?? id_product_category,
+      id_product_image: id_product_image ?? id_product_image,
+      product_ref_id: product_ref_id ?? product_ref_id,
+      product_name: product_name ?? product_name,
+      product_brand: product_brand ?? product_brand,
+      product_barcode: product_barcode ?? product_barcode,
+      product_category_desc: product_category_desc ?? product_category_desc,
+      product_image_data: product_image_data ?? product_image_data,
+      product_price: product_price ?? product_price,
       product_quantity: product_quantity ?? this.product_quantity,
-      product_description: product_description ?? this.product_description,
-      product_created_at: product_created_at ?? this.product_created_at,
-      product_last_updated: product_last_updated ?? this.product_last_updated,
+      product_description: product_description ?? product_description,
+      product_created_at: product_created_at ?? product_created_at,
+      product_last_updated: product_last_updated ?? product_last_updated,
     );
   }
 

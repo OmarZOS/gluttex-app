@@ -7,7 +7,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey =
 
 class GluttexConstants {
   // API endpoints
-  static const String apiBaseUrl = 'http://localhost:9000';
+  static const String apiBaseUrl = 'http://192.168.162.158:9000';
   // static const String authApiBaseUrl = 'http://localhost:9090';
 
   static const String addAppUserEndpoint = '/appUser/add';
@@ -134,7 +134,7 @@ class GluttexConstants {
   static const String descriptionCharacterConstraintMsg =
       'Character limit: 300.';
   static const String pickImageMsg = 'Pick Image';
-  static const String submitText = 'Pick Image';
+  static const String submitText = 'Submit';
   static const String productNameTxt = 'Product Name';
   static const String productBrandTxt = 'Product Brand';
   static const String productBarcodeTxt = 'Product Barcode';

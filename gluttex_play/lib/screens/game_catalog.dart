@@ -4,9 +4,9 @@ import 'package:gluttex_play/components/snake.dart';
 
 class GameListScreen extends StatelessWidget {
   final List<Game> games = [
-    Game(name: 'Snake', screen: SnakeGame()),
-    Game(name: 'Game 2', screen: SnakeGame()),
-    Game(name: 'Game 3', screen: SnakeGame()),
+    Game(name: 'Snake', screen: const SnakeGame()),
+    Game(name: 'Game 2', screen: const SnakeGame()),
+    Game(name: 'Game 3', screen: const SnakeGame()),
     // Add more games as needed
   ];
 

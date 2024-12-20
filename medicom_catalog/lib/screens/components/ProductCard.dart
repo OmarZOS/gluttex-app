@@ -13,7 +13,7 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log('${product.id_product_image}');
+    // log('${product.id_product_image}');
 
     if (product.id_product_image != null &&
         product.id_product_image != 0 &&

@@ -27,7 +27,7 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider<AppUserNotifier>.value(
         value: appUserNotifier,
-        child: MaterialApp(
+        child: const MaterialApp(
           home: Scaffold(
             body: RegistrationForm(),
           ),

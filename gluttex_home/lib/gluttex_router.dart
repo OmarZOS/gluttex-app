@@ -16,13 +16,14 @@ class AppRouter {
 
         switch (settings.name) {
           case AppRoutes.home:
-            return _buildGuardedRoute(appUser, HomePage(), LoginScreen());
+            return _buildGuardedRoute(
+                appUser, const HomePage(), const LoginScreen());
           case AppRoutes.login:
-            return LoginScreen();
+            return const LoginScreen();
           case AppRoutes.registration:
-            return RegistrationForm();
+            return const RegistrationForm();
           default:
-            return LoginScreen();
+            return const LoginScreen();
         }
       },
       settings: settings,

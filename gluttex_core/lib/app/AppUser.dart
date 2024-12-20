@@ -67,54 +67,54 @@ class AppUser {
       }
     }
 
-    var id_blood_type;
-    var blood_type_desc;
-    var person_birth_date;
-    var id_person_details;
-    var person_nationality;
-    var person_first_name;
-    var person_last_name;
-    var person_gender;
-    var location_latitude;
-    var location_longitude;
-    var location_address_id;
-    var location_name;
-    var address_city;
-    var address_street;
-    var address_country;
-    var address_postal_code;
+    var idBloodType;
+    var bloodTypeDesc;
+    var personBirthDate;
+    var idPersonDetails;
+    var personNationality;
+    var personFirstName;
+    var personLastName;
+    var personGender;
+    var locationLatitude;
+    var locationLongitude;
+    var locationAddressId;
+    var locationName;
+    var addressCity;
+    var addressStreet;
+    var addressCountry;
+    var addressPostalCode;
 
-    var app_user_person = json['app_user_person'];
-    if (app_user_person != null && app_user_person.isNotEmpty) {
-      var person_blood_type = app_user_person["person_blood_type"];
-      if (person_blood_type != null && person_blood_type.isNotEmpty) {
-        id_blood_type = person_blood_type["id_blood_type"];
-        blood_type_desc = person_blood_type["blood_type_desc"];
+    var appUserPerson = json['app_user_person'];
+    if (appUserPerson != null && appUserPerson.isNotEmpty) {
+      var personBloodType = appUserPerson["person_blood_type"];
+      if (personBloodType != null && personBloodType.isNotEmpty) {
+        idBloodType = personBloodType["id_blood_type"];
+        bloodTypeDesc = personBloodType["blood_type_desc"];
       }
 
-      var person_details = app_user_person['person_details'];
-      if (person_details != null && person_details.isNotEmpty) {
-        person_birth_date = person_details['person_birth_date'];
-        id_person_details = person_details['id_person_details'];
-        person_nationality = person_details['person_nationality'];
-        person_first_name = person_details['person_first_name'];
-        person_last_name = person_details['person_last_name'];
-        person_gender = person_details['person_gender'];
+      var personDetails = appUserPerson['person_details'];
+      if (personDetails != null && personDetails.isNotEmpty) {
+        personBirthDate = personDetails['person_birth_date'];
+        idPersonDetails = personDetails['id_person_details'];
+        personNationality = personDetails['person_nationality'];
+        personFirstName = personDetails['person_first_name'];
+        personLastName = personDetails['person_last_name'];
+        personGender = personDetails['person_gender'];
       }
 
-      var person_location = app_user_person['person_location'];
-      if (person_location != null && person_location.isNotEmpty) {
-        location_latitude = person_location["location_latitude"];
-        location_longitude = person_location["location_longitude"];
-        location_address_id = person_location["location_address_id"];
-        location_name = person_location["location_name"];
+      var personLocation = appUserPerson['person_location'];
+      if (personLocation != null && personLocation.isNotEmpty) {
+        locationLatitude = personLocation["location_latitude"];
+        locationLongitude = personLocation["location_longitude"];
+        locationAddressId = personLocation["location_address_id"];
+        locationName = personLocation["location_name"];
 
-        var location_address = person_location['location_address'];
-        if (location_address != null && location_address.isNotEmpty) {
-          address_city = location_address['address_city'];
-          address_street = location_address['address_street'];
-          address_country = location_address['address_country'];
-          address_postal_code = location_address['address_postal_code'];
+        var locationAddress = personLocation['location_address'];
+        if (locationAddress != null && locationAddress.isNotEmpty) {
+          addressCity = locationAddress['address_city'];
+          addressStreet = locationAddress['address_street'];
+          addressCountry = locationAddress['address_country'];
+          addressPostalCode = locationAddress['address_postal_code'];
         }
       }
     }
@@ -129,23 +129,23 @@ class AppUser {
       app_user_type_desc: json['app_user_type']?['app_user_type_desc'] ?? "",
       app_user_image: imageData,
       idPerson: json['idPerson'] ?? 0,
-      personDetailsId: id_person_details ?? 0,
-      personFirstName: person_first_name ?? "",
-      personLastName: person_last_name ?? "",
-      personBirthDate: person_birth_date ?? "",
-      personGender: person_gender ?? "",
-      personNationality: person_nationality ?? "",
-      idBloodType: id_blood_type ?? 0,
+      personDetailsId: idPersonDetails ?? 0,
+      personFirstName: personFirstName ?? "",
+      personLastName: personLastName ?? "",
+      personBirthDate: personBirthDate ?? "",
+      personGender: personGender ?? "",
+      personNationality: personNationality ?? "",
+      idBloodType: idBloodType ?? 0,
       idLocation: json['idLocation'] ?? 0,
-      locationLatitude: location_latitude ?? 0.0,
-      locationLongitude: location_longitude ?? 0.0,
-      locationName: location_name ?? "",
-      locationAddressId: location_address_id ?? 0,
-      addressStreet: address_street ?? "",
-      addressCity: address_city ?? "",
-      addressPostalCode: address_postal_code ?? "",
-      addressCountry: address_country ?? "",
-      bloodTypeDesc: blood_type_desc ?? "",
+      locationLatitude: locationLatitude ?? 0.0,
+      locationLongitude: locationLongitude ?? 0.0,
+      locationName: locationName ?? "",
+      locationAddressId: locationAddressId ?? 0,
+      addressStreet: addressStreet ?? "",
+      addressCity: addressCity ?? "",
+      addressPostalCode: addressPostalCode ?? "",
+      addressCountry: addressCountry ?? "",
+      bloodTypeDesc: bloodTypeDesc ?? "",
     );
   }
 

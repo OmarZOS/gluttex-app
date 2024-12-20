@@ -19,7 +19,7 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (context) => AppUserNotifier(),
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => AppUserNotifier(),
-      child: MaterialApp(
+      child: const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: LoginScreen(),
       ),

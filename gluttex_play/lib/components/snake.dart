@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 void main() {
-  runApp(SnakeGame());
+  runApp(const SnakeGame());
 }
 
 class SnakeGame extends StatefulWidget {

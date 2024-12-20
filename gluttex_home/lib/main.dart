@@ -17,6 +17,7 @@ import 'package:gluttex_impl_business/gluttex_impl_recipe.dart';
 import 'package:gluttex_impl_business/gluttex_impl_supplier.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
+import 'package:gluttex_impl_business/supplier_change_notifier.dart';
 import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +35,7 @@ void setupLocator() {
 
 void main() {
   setupLocator();
-  runApp(GluttexApp());
+  runApp(const GluttexApp());
 }
 
 class GluttexApp extends StatelessWidget {
@@ -56,11 +57,14 @@ class GluttexApp extends StatelessWidget {
           ChangeNotifierProvider<CartChangeNotifier>(
             create: (_) => CartChangeNotifier(),
           ),
+          ChangeNotifierProvider<SupplierChangeNotifier>(
+            create: (_) => SupplierChangeNotifier(),
+          ),
         ],
         child: MaterialApp(
           navigatorKey: globalNavigatorKey, // Set the navigator key here
-          home: HomePage(),
-          // onGenerateRoute: AppRouter.generateRoute, // Use the router
+          // home: const HomePage(),
+          onGenerateRoute: AppRouter.generateRoute, // Use the router
           // themeMode: ThemeMode.dark,
         ));
   }
