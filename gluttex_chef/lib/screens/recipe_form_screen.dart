@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_chef/components/category_picker.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/components/ingredient_popup.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_chef/tools/image_picker.dart';
@@ -68,10 +69,12 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               setState(() {
                 preparationTime = newDuration;
                 _recipePreparationTime = ((newDuration.inHours != 0)
-                        ? '${newDuration.inHours} hours'
+                        ? AppLocalizations.of(context)!
+                            .hoursTextValue(newDuration.inHours.toString())
                         : '') +
                     ((newDuration.inMinutes.remainder(60) != 0)
-                        ? ' ${newDuration.inMinutes.remainder(60)} minutes.'
+                        ? AppLocalizations.of(context)!.minutesTextValue(
+                            newDuration.inMinutes.remainder(60).toString())
                         : '.');
               });
             },
@@ -89,7 +92,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Insert Recipe'),
+        title: Text(AppLocalizations.of(context)!.insertRecipeText),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -98,25 +101,30 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
           child: ListView(
             children: [
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Recipe Name'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.recipeNameText),
                 onSaved: (value) => _recipeName = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a recipe name';
+                    return AppLocalizations.of(context)!
+                        .pleaseInputRecipeNameMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration:
-                    const InputDecoration(labelText: 'Recipe Description'),
+                decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.recipeDescriptionText),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a recipe description';
+                    return AppLocalizations.of(context)!
+                        .pleaseInputRecipeDescriptionMsg;
                   }
 
                   if ((value).length >= 300) {
-                    return 'Character limit: 300.';
+                    return AppLocalizations.of(context)!
+                        .descriptionCharacterConstraintMsg;
                   }
                   return null;
                 },
@@ -126,8 +134,9 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                 maxLines: null, // Allow for multiline input
                 keyboardType:
                     TextInputType.multiline, // Show multiline keyboard
-                decoration:
-                    const InputDecoration(labelText: 'Recipe Instructions'),
+                decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.recipeinstructiontext),
                 // keyboardType: TextInputType.number,
                 // validator: (value) {
                 //   return null;
@@ -143,7 +152,8 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('Categories not found');
+                    return Text(
+                        AppLocalizations.of(context)!.categoriesNotFoundTxt);
                   } else {
                     return CategoryPicker(
                       category_id: _recipe_category_id ?? 1,
@@ -158,7 +168,10 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               const SizedBox(height: 16.0),
               ListTile(
                 title: Text(
-                    'Preparation Time: ${preparationTime.inHours} hours, ${preparationTime.inMinutes.remainder(60)} minutes'),
+                  AppLocalizations.of(context)!.preparationTimeText(
+                      preparationTime.inHours.toString(),
+                      preparationTime.inMinutes.remainder(60).toString()),
+                ),
                 trailing: const Icon(Icons.timer),
                 onTap: () => _selectDuration(context),
               ),
@@ -201,7 +214,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
                   const SizedBox(height: 16.0),
                   ListTile(
-                    title: const Text("Add Ingredient"),
+                    title: Text(AppLocalizations.of(context)!.addIngredientMsg),
                     trailing: const Icon(Icons.add),
                     onTap: () {
                       showDialog(
@@ -226,11 +239,11 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                   ? Image.memory(_recipeImage!,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.width)
-                  : const Text('No image selected'),
+                  : Text(AppLocalizations.of(context)!.noImageSelectedTxt),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _pickImage,
-                child: const Text('Pick Image'),
+                child: Text(AppLocalizations.of(context)!.pickImageMsg),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -239,12 +252,11 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                     _formKey.currentState!.save();
                     final recipe = Recipe(
                       id_recipe: _id_recipe,
-                      recipe_owner_id: Provider.of<AppUserNotifier>(
-                                  context,
-                                  listen: false)
-                              .appUser!
-                              .id_app_user ??
-                          1,
+                      recipe_owner_id:
+                          Provider.of<AppUserNotifier>(context, listen: false)
+                                  .appUser!
+                                  .id_app_user ??
+                              1,
                       recipe_category_id: _recipe_category_id,
                       id_recipe_image: _id_recipe_image,
                       recipe_name: _recipeName,
@@ -260,8 +272,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
                     // Handle recipe submission
 
-                    int? statusCode = await Provider.of<RecipeNotifier>(
-                            context,
+                    int? statusCode = await Provider.of<RecipeNotifier>(context,
                             listen: false)
                         .addRecipe(recipe);
 
@@ -270,7 +281,8 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                     switch (statusCode) {
                       case 200:
                         response.color = Colors.green;
-                        response.text = GluttexConstants.putSuccess;
+                        response.text =
+                            AppLocalizations.of(context)!.putSuccess;
                         await Provider.of<RecipeNotifier>(context,
                                 listen: false)
                             .fetchRecipes();
@@ -278,16 +290,19 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                         break;
                       case 406:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error $statusCode: ${GluttexConstants.putFailure}';
+                        response.text =
+                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                         break;
                       case 422:
                         response.color = Colors.amberAccent;
-                        response.text = 'Error $statusCode: ${GluttexConstants.putFailure}';
+                        response.text =
+                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                         break;
 
                       default:
                         response.color = Colors.red;
-                        response.text = 'Error $statusCode: ${GluttexConstants.serverError}';
+                        response.text =
+                            'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
                     }
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -300,7 +315,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                     // You can use a provider or any state management to save the recipe
                   }
                 },
-                child: const Text('Submit'),
+                child: Text(AppLocalizations.of(context)!.submitText),
               ),
             ],
           ),

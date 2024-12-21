@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AuthService.dart';
 import 'package:gluttex_core/app/UserService.dart';
@@ -19,8 +20,10 @@ import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:gluttex_impl_business/supplier_change_notifier.dart';
 import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
+import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void setupLocator() {
   // Register your services or dependencies here
@@ -33,39 +36,57 @@ void setupLocator() {
   GluttexLocator.registerSingletonService<AuthService>(AuthServiceImpl());
 }
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final localeProvider = LocaleProvider();
+  // await localeProvider.loadSavedLocale();
+  await localeProvider.setLanguagePreference("ar");
+
   setupLocator();
-  runApp(const GluttexApp());
+  runApp(GluttexApp(localeProvider));
 }
 
 class GluttexApp extends StatelessWidget {
-  const GluttexApp({super.key});
+  final LocaleProvider localeProvider;
+
+  const GluttexApp(this.localeProvider, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider<ProductNotifier>(
-            create: (_) => ProductNotifier(),
-          ),
-          ChangeNotifierProvider<RecipeNotifier>(
-            create: (_) => RecipeNotifier(),
-          ),
-          ChangeNotifierProvider<AppUserNotifier>(
-            create: (_) => AppUserNotifier(),
-          ),
-          ChangeNotifierProvider<CartChangeNotifier>(
-            create: (_) => CartChangeNotifier(),
-          ),
-          ChangeNotifierProvider<SupplierChangeNotifier>(
-            create: (_) => SupplierChangeNotifier(),
-          ),
-        ],
-        child: MaterialApp(
-          navigatorKey: globalNavigatorKey, // Set the navigator key here
-          // home: const HomePage(),
-          onGenerateRoute: AppRouter.generateRoute, // Use the router
-          // themeMode: ThemeMode.dark,
-        ));
+      providers: [
+        ChangeNotifierProvider<ProductNotifier>(
+            create: (_) => ProductNotifier()),
+        ChangeNotifierProvider<RecipeNotifier>(create: (_) => RecipeNotifier()),
+        ChangeNotifierProvider<AppUserNotifier>(
+            create: (_) => AppUserNotifier()),
+        ChangeNotifierProvider<CartChangeNotifier>(
+            create: (_) => CartChangeNotifier()),
+        ChangeNotifierProvider<SupplierChangeNotifier>(
+            create: (_) => SupplierChangeNotifier()),
+        ChangeNotifierProvider<LocaleProvider>(create: (_) => localeProvider),
+      ],
+      child: Consumer<LocaleProvider>(
+        builder: (context, localeProvider, child) {
+          return MaterialApp(
+            locale: const Locale("ar"),
+            supportedLocales: const [
+              Locale('ar'), // Arabic
+              Locale('fr'), // French
+              Locale('en'), // English
+            ],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            // home: const HomePage(),
+            navigatorKey: globalNavigatorKey,
+            onGenerateRoute: AppRouter.generateRoute,
+          );
+        },
+      ),
+    );
   }
 }

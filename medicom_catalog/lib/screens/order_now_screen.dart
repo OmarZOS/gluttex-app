@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -45,7 +46,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(GluttexConstants.orderNowTxt),
+        title: Text(AppLocalizations.of(context)!.orderNowTxt),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -55,7 +56,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             // Product details
             Text(
               widget.product.product_name ?? "",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Divider(),
@@ -63,7 +64,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(GluttexConstants.productQuantity,
+                Text(AppLocalizations.of(context)!.productQuantity,
                     style: TextStyle(fontSize: 16)),
                 Row(
                   children: [
@@ -97,16 +98,16 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             const Divider(),
             // Price breakdown
             Text(
-                "${GluttexConstants.subtotalTxt}\$${(widget.product.product_price ?? 0.0).toStringAsFixed(2)}"),
+                "${AppLocalizations.of(context)!.subtotalTxt}\$${(widget.product.product_price ?? 0.0).toStringAsFixed(2)}"),
             Text(
-                "${GluttexConstants.taxTxt}\$${((widget.product.product_price ?? 0.0) * taxRate).toStringAsFixed(2)}"),
+                "${AppLocalizations.of(context)!.taxTxt}\$${((widget.product.product_price ?? 0.0) * taxRate).toStringAsFixed(2)}"),
             if (discount > 0)
               Text(
-                  "${GluttexConstants.discountText}-\$${discount.toStringAsFixed(2)}"),
+                  "${AppLocalizations.of(context)!.discountText}-\$${discount.toStringAsFixed(2)}"),
             const Divider(),
             Text(
-              "${GluttexConstants.totalTxt}\$${((int.tryParse(_quantityController.text) ?? 1) * (widget.product.product_price ?? 0.0 + ((widget.product.product_price ?? 0.0) * taxRate) - discount)).toStringAsFixed(2)}",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              "${AppLocalizations.of(context)!.totalTxt}\$${((int.tryParse(_quantityController.text) ?? 1) * (widget.product.product_price ?? 0.0 + ((widget.product.product_price ?? 0.0) * taxRate) - discount)).toStringAsFixed(2)}",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const Spacer(),
             // Order button
@@ -144,24 +145,24 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                 switch (statusCode) {
                   case 200:
                     response.color = Colors.green;
-                    response.text = GluttexConstants.putSuccess;
+                    response.text = AppLocalizations.of(context)!.putSuccess;
                     Navigator.pop(context);
                     break;
                   case 406:
                     response.color = Colors.amberAccent;
                     response.text =
-                        'Error $statusCode: ${GluttexConstants.putFailure}';
+                        'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                     break;
                   case 422:
                     response.color = Colors.amberAccent;
                     response.text =
-                        'Error $statusCode: ${GluttexConstants.putFailure}';
+                        'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                     break;
 
                   default:
                     response.color = Colors.red;
                     response.text =
-                        'Error $statusCode: ${GluttexConstants.serverError}';
+                        'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
                 }
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -174,7 +175,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
-              child: const Text(GluttexConstants.confirmOrderTxt),
+              child: Text(AppLocalizations.of(context)!.confirmOrderTxt),
             ),
           ],
         ),

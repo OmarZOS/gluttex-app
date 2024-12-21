@@ -3,6 +3,7 @@ import 'package:gluttex_chef/components/RecipeOwner.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/screens/recipe_update_form_screen.dart';
 import 'package:gluttex_chef/tools/confirmation_dialogue.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Recipe.dart';
@@ -96,7 +97,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   onPressed: () async {
                     showConfirmationDialog(
                       context,
-                      'Are you sure you want to delete this recipe?',
+                      AppLocalizations.of(context)!
+                          .recipedeletionConfirmationMessage,
                       () async {
                         int? statusCode = await Provider.of<RecipeNotifier>(
                                 context,
@@ -108,7 +110,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         switch (statusCode) {
                           case 200:
                             response.color = Colors.green;
-                            response.text = GluttexConstants.deleteSuccess;
+                            response.text =
+                                AppLocalizations.of(context)!.deleteSuccess;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(response.text),
@@ -119,16 +122,19 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             break;
                           case 406:
                             response.color = Colors.amberAccent;
-                            response.text = GluttexConstants.deleteFailure;
+                            response.text =
+                                AppLocalizations.of(context)!.deleteFailure;
                             break;
                           case 422:
                             response.color = Colors.amberAccent;
-                            response.text = GluttexConstants.deleteFailure;
+                            response.text =
+                                AppLocalizations.of(context)!.deleteFailure;
                             break;
 
                           default:
                             response.color = Colors.red;
-                            response.text = GluttexConstants.serverError;
+                            response.text =
+                                AppLocalizations.of(context)!.serverError;
                         }
 
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -197,12 +203,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                _recipe.recipe_name ?? 'Recipe Name',
+                _recipe.recipe_name ??
+                    AppLocalizations.of(context)!.recipeNameText,
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               const SizedBox(height: 8),
               Text(
-                _recipe.recipe_description ?? 'No description available.',
+                _recipe.recipe_description ??
+                    AppLocalizations.of(context)!.noDescriptionAvailableText,
                 style: Theme.of(context).textTheme.labelMedium,
               ),
               const SizedBox(height: 16),
@@ -211,7 +219,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   const Icon(Icons.timer),
                   const SizedBox(width: 8),
                   Text(
-                    _recipe.recipe_preparation_time ?? 'No preparation time',
+                    _recipe.recipe_preparation_time ??
+                        AppLocalizations.of(context)!.noPreparationTimeText,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -251,12 +260,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     )
                   : Container(),
               Text(
-                'Instructions',
+                AppLocalizations.of(context)!.instructionsText,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 8),
               Text(
-                _recipe.recipe_instruction ?? 'No instructions available.',
+                _recipe.recipe_instruction ??
+                    AppLocalizations.of(context)!.noInstructionsAvailableText,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
@@ -55,13 +56,13 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     final controller = TextEditingController();
     final field = TextFormField(
       controller: controller,
-      decoration:
-          const InputDecoration(labelText: GluttexConstants.contactInfoMsg),
+      decoration: InputDecoration(
+          labelText: AppLocalizations.of(context)!.contactInfoMsg),
       // onSaved: (value) =>
       //     _provider_contact_info = '${_provider_contact_info}${value},',
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return GluttexConstants.pleaseInputContactInfoMsg;
+          return AppLocalizations.of(context)!.pleaseInputContactInfoMsg;
         }
         return null;
       },
@@ -118,20 +119,20 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
             switch (result) {
               case 200:
                 response.color = Colors.green;
-                response.text = GluttexConstants.putSuccess;
+                response.text = AppLocalizations.of(context)!.putSuccess;
                 break;
               case 406:
                 response.color = Colors.amberAccent;
-                response.text = GluttexConstants.putFailure;
+                response.text = AppLocalizations.of(context)!.putFailure;
                 break;
               case 422:
                 response.color = Colors.amberAccent;
-                response.text = GluttexConstants.putFailure;
+                response.text = AppLocalizations.of(context)!.putFailure;
                 break;
 
               default:
                 response.color = Colors.red;
-                response.text = GluttexConstants.serverError;
+                response.text = AppLocalizations.of(context)!.serverError;
             }
 
             ScaffoldMessenger.of(context).showSnackBar(
@@ -152,8 +153,8 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         child: const Icon(Icons.add_business_sharp),
       ),
       appBar: AppBar(
-          title: const Text(
-        GluttexConstants.addSupplierTxt,
+          title: Text(
+        AppLocalizations.of(context)!.addSupplierTxt,
       )),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -162,12 +163,12 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           child: ListView(
             children: [
               TextFormField(
-                decoration: const InputDecoration(
-                    labelText: GluttexConstants.supplierNameMsg),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.supplierNameMsg),
                 onSaved: (value) => _provider_name = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.addBusinessNameMsg;
+                    return AppLocalizations.of(context)!.addBusinessNameMsg;
                   }
                   return null;
                 },
@@ -177,12 +178,14 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               //   onSaved: (value) => _provider_contact_info = value,
               // ),
               TextFormField(
-                  decoration: const InputDecoration(
-                      labelText: GluttexConstants.locationNameText),
+                  decoration: InputDecoration(
+                      labelText:
+                          AppLocalizations.of(context)!.locationNameText),
                   onSaved: (value) => _location_name = value,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return GluttexConstants.pleaseInputLocationNameMsg;
+                      return AppLocalizations.of(context)!
+                          .pleaseInputLocationNameMsg;
                     }
                     return null;
                   }),
@@ -195,7 +198,8 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text(GluttexConstants.categoriesNotFoundTxt);
+                    return Text(
+                        AppLocalizations.of(context)!.categoriesNotFoundTxt);
                   } else {
                     return CategoryPicker(
                       categories: snapshot.data!,
@@ -226,7 +230,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               const SizedBox(height: 16.0),
               ListTile(
                 leading: const Icon(Icons.add_circle),
-                title: const Text(GluttexConstants.addContactInfoMsg),
+                title: Text(AppLocalizations.of(context)!.addContactInfoMsg),
                 // tileColor: Colors.amber[100],
                 onTap: _addContactField,
               ),
@@ -234,7 +238,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               ListTile(
                 leading: const Icon(Icons.location_on),
                 title: Text(
-                    '${_position ?? GluttexConstants.insertCoordinatesMsg}'),
+                    '${_position ?? AppLocalizations.of(context)!.insertCoordinatesMsg}'),
                 // tileColor: Colors.grey[100],
                 trailing: _position != null
                     ? const Icon(
@@ -252,7 +256,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               const SizedBox(height: 16.0),
               ListTile(
                 leading: const Icon(Icons.photo_camera_rounded),
-                title: const Text(GluttexConstants.pickImageMsg),
+                title: Text(AppLocalizations.of(context)!.pickImageMsg),
                 // tileColor: Colors.grey[100],
                 onTap: () async {
                   final pickedImage = await pickImage();

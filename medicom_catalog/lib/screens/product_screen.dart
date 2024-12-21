@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -114,7 +114,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     onPressed: () async {
                       showConfirmationDialog(
                         context,
-                        GluttexConstants.productdeletionConfirmationMessage,
+                        AppLocalizations.of(context)!
+                            .productdeletionConfirmationMessage,
                         () async {
                           int? statusCode = await Provider.of<ProductNotifier>(
                                   context,
@@ -126,7 +127,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           switch (statusCode) {
                             case 200:
                               response.color = Colors.green;
-                              response.text = GluttexConstants.deleteSuccess;
+                              response.text =
+                                  AppLocalizations.of(context)!.deleteSuccess;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(response.text),
@@ -137,16 +139,19 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               break;
                             case 406:
                               response.color = Colors.amberAccent;
-                              response.text = GluttexConstants.deleteFailure;
+                              response.text =
+                                  AppLocalizations.of(context)!.deleteFailure;
                               break;
                             case 422:
                               response.color = Colors.amberAccent;
-                              response.text = GluttexConstants.deleteFailure;
+                              response.text =
+                                  AppLocalizations.of(context)!.deleteFailure;
                               break;
 
                             default:
                               response.color = Colors.red;
-                              response.text = GluttexConstants.serverError;
+                              response.text =
+                                  AppLocalizations.of(context)!.serverError;
                           }
 
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -308,12 +313,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.product.product_name ?? GluttexConstants.missingText,
+                    widget.product.product_name ??
+                        AppLocalizations.of(context)!.missingText,
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    "${(widget.product.product_price ?? 0 * quantity).toStringAsFixed(2)} DA",
+                    AppLocalizations.of(context)!.price(
+                        (widget.product.product_price ?? 0 * quantity)
+                            .toStringAsFixed(2)),
                     style: const TextStyle(
                       fontSize: 16,
                     ),
@@ -358,7 +366,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   .addItem(widget.product, quantity);
               _panelController.close();
             },
-            child: const Text(GluttexConstants.cartAddConfirmationMessage),
+            child:
+                Text(AppLocalizations.of(context)!.cartAddConfirmationMessage),
           ),
         ],
       ),

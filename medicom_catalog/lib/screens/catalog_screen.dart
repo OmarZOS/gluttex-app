@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
@@ -17,13 +18,11 @@ class CatalogScreen extends StatefulWidget {
 
 class _CatalogScreenState extends State<CatalogScreen> {
   final TextEditingController _searchController = TextEditingController();
-  late List<String> _categories;
-  late String _selectedCategory = "All";
-
+  late List<String> _categories = [];
+  late String _selectedCategory = AppLocalizations.of(context)!.allText;
+  late int _selectedCategoryId = 0;
   @override
   void initState() {
-    _categories = ["All"];
-
     super.initState();
     _searchController.addListener(_filterProducts);
   }
@@ -32,8 +31,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
     setState(() {});
   }
 
-  void _selectCategory(String category) {
+  void _selectCategory(int index, String category) {
     setState(() {
+      _selectedCategoryId = index;
       _selectedCategory = category;
     });
   }
@@ -52,10 +52,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
         elevation: 0,
         title: TextField(
           controller: _searchController,
-          decoration: const InputDecoration(
-            hintText: GluttexConstants.searchTxt,
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)?.searchTxt,
             border: InputBorder.none,
-            icon: Icon(Icons.search_outlined),
+            icon: const Icon(Icons.search_outlined),
           ),
         ),
         actions: <Widget>[
@@ -77,9 +77,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
           final products = productNotifier.products;
           var filteredProducts = products.where((product) {
             var query = _searchController.text.toLowerCase();
-            var matchesCategory = _selectedCategory == "All" ||
-                product.product_category_desc?.toLowerCase() ==
-                    _selectedCategory.toLowerCase();
+            var matchesCategory = _selectedCategory ==
+                    AppLocalizations.of(context)?.allText ||
+                ((product.product_category_id ?? 1) - 1) == _selectedCategoryId;
             return (product.product_name?.toLowerCase().contains(query) ??
                     false) &&
                 matchesCategory;
@@ -109,11 +109,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
   Widget _buildCategoryRow() {
     return Consumer<ProductNotifier>(
         builder: (context, productNotifier, child) {
-      if (_categories.length == 1) {
-        _categories.addAll(Provider.of<ProductNotifier>(context, listen: false)
-            .categories
-            .map((category) => category.product_category_desc)
-            .toList());
+      if (_categories.isEmpty) {
+        _categories.addAll(
+            AppLocalizations.of(context)!.productCategoryTextList.split(","));
+        _categories.add(AppLocalizations.of(context)!.allText);
       }
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -121,7 +120,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
           children: _categories.map((category) {
             bool isSelected = _selectedCategory == category;
             return GestureDetector(
-              onTap: () => _selectCategory(category),
+              onTap: () =>
+                  _selectCategory(_categories.indexOf(category), category),
               child: Container(
                 margin: const EdgeInsets.symmetric(
                   horizontal: GluttexConstants.kDefaultPaddin / 2,
@@ -154,7 +154,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
   Widget _buildProductGrid(List<Product> products) {
     if (products.isEmpty) {
-      return const Center(child: Text(GluttexConstants.noProductsFound));
+      return Center(
+          child: Text(AppLocalizations.of(context)?.noProductsFound ?? ""));
     }
 
     return GridView.builder(

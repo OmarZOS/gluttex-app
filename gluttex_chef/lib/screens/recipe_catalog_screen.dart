@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/components/RecipeCard.dart';
 import 'package:gluttex_chef/screens/recipe_form_screen.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
@@ -34,8 +35,8 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
         elevation: 0,
         title: TextField(
           controller: _searchController,
-          decoration: const InputDecoration(
-              hintText: 'Search',
+          decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.searchTxt,
               border: InputBorder.none,
               icon: Icon(Icons.search_outlined)),
         ),
@@ -83,7 +84,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
 
   Widget _buildRecipeGrid(List<Recipe> recipes) {
     if (recipes.isEmpty) {
-      return const Center(child: Text(GluttexConstants.noRecipesFound));
+      return Center(child: Text(AppLocalizations.of(context)!.noRecipesFound));
     }
 
     return GridView.builder(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 
@@ -15,7 +16,8 @@ class QuantityAndRef extends StatelessWidget {
             text: TextSpan(
               style: const TextStyle(color: GluttexConstants.kTextColor),
               children: [
-                const TextSpan(text: "${GluttexConstants.productQuantity}\n"),
+                TextSpan(
+                    text: "${AppLocalizations.of(context)!.productQuantity}\n"),
                 TextSpan(
                   text: "${product.product_quantity}",
                   style: Theme.of(context)
@@ -32,7 +34,9 @@ class QuantityAndRef extends StatelessWidget {
             text: TextSpan(
               style: const TextStyle(color: GluttexConstants.kTextColor),
               children: [
-                const TextSpan(text: "${GluttexConstants.productReference}\n"),
+                TextSpan(
+                    text:
+                        "${AppLocalizations.of(context)!.productReference}\n"),
                 TextSpan(
                   text: "${product.product_barcode}",
                   style: Theme.of(context)

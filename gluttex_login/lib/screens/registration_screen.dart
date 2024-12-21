@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 
 class RegistrationForm extends StatefulWidget {
   const RegistrationForm({super.key});
@@ -38,7 +39,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(GluttexConstants.registerationFormText),
+        title: Text(AppLocalizations.of(context)!.registerationFormText),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -47,39 +48,45 @@ class _RegistrationFormState extends State<RegistrationForm> {
           child: ListView(
             children: [
               TextFormField(
-                decoration:
-                    const InputDecoration(labelText: GluttexConstants.usernameText),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.usernameText),
                 onSaved: (value) {
                   appUserName = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputusernameMsg;
+                    return AppLocalizations.of(context)!.pleaseInputusernameMsg;
                   }
                   return null;
                 },
               ),
               const Padding(padding: EdgeInsets.all(8.0)),
               TextFormField(
-                decoration:
-                    const InputDecoration(labelText: GluttexConstants.passwordText),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.passwordText),
                 obscureText: true,
                 onSaved: (value) {
                   appUserPassword = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputpasswordMsg;
+                    return AppLocalizations.of(context)!.pleaseInputpasswordMsg;
                   }
                   return null;
                 },
               ),
               DropdownButtonFormField<int>(
-                decoration:
-                    const InputDecoration(labelText: GluttexConstants.userTypeText),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.userTypeText),
                 items: [
-                  {'value': 1, 'label': GluttexConstants.clientText},
-                  {'value': 3, 'label': GluttexConstants.cookingChefText}
+                  {
+                    'value': 1,
+                    'label': AppLocalizations.of(context)!.clientText
+                  },
+                  {
+                    'value': 3,
+                    'label': AppLocalizations.of(context)!.cookingChefText
+                  }
                 ].map((Map<String, dynamic> item) {
                   return DropdownMenuItem<int>(
                     value: item['value'],
@@ -91,35 +98,36 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return GluttexConstants.pleaseInputUserTypeMsg;
+                    return AppLocalizations.of(context)!.pleaseInputUserTypeMsg;
                   }
                   return null;
                 },
               ),
               const Padding(padding: EdgeInsets.all(8.0)),
               TextFormField(
-                decoration:
-                    const InputDecoration(labelText: GluttexConstants.firstNameText),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.firstNameText),
                 onSaved: (value) {
                   personFirstName = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputFirstNameMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputFirstNameMsg;
                   }
                   return null;
                 },
               ),
               const Padding(padding: EdgeInsets.all(8.0)),
               TextFormField(
-                decoration:
-                    const InputDecoration(labelText: GluttexConstants.lastNameText),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.lastNameText),
                 onSaved: (value) {
                   personLastName = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputLastNameMsg;
+                    return AppLocalizations.of(context)!.pleaseInputLastNameMsg;
                   }
                   return null;
                 },
@@ -127,8 +135,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               const Padding(padding: EdgeInsets.all(8.0)),
               TextFormField(
                 controller: _birthDateController,
-                decoration: const InputDecoration(
-                  labelText: GluttexConstants.birthdayText,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.birthdayText,
                   suffixIcon: Icon(Icons.calendar_today),
                 ),
                 readOnly: true,
@@ -150,15 +158,19 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputBirthdateMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputBirthdateMsg;
                   }
                   return null;
                 },
               ),
               DropdownButtonFormField<String>(
-                decoration:
-                    const InputDecoration(labelText: GluttexConstants.genderText),
-                items: GluttexConstants.genderTextList.map((String value) {
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.genderText),
+                items: AppLocalizations.of(context)!
+                    .genderTextList
+                    .split(",")
+                    .map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -169,15 +181,18 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return GluttexConstants.pleaseInputgenderMsg;
+                    return AppLocalizations.of(context)!.pleaseInputgenderMsg;
                   }
                   return null;
                 },
               ),
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                    labelText: GluttexConstants.nationalityText),
-                items: GluttexConstants.nationalityTextList.map((String value) {
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.nationalityText),
+                items: AppLocalizations.of(context)!
+                    .nationalityTextList
+                    .split(",")
+                    .map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -188,14 +203,15 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return GluttexConstants.pleaseInputnationalityMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputnationalityMsg;
                   }
                   return null;
                 },
               ),
               DropdownButtonFormField<int>(
-                decoration:
-                    const InputDecoration(labelText: GluttexConstants.bloodTypeText),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.bloodTypeText),
                 items: [
                   {'value': 1, 'label': 'O+'},
                   {'value': 2, 'label': 'A+'},
@@ -216,14 +232,15 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return GluttexConstants.pleaseInputBloodTypeMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputBloodTypeMsg;
                   }
                   return null;
                 },
               ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: GluttexConstants.latitudeText),
+              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.latitudeText),
               //   keyboardType: TextInputType.number,
               //   onSaved: (value) {
               //     locationLatitude = double.tryParse(value ?? '');
@@ -231,7 +248,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: GluttexConstants.longitudeText),
+              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.longitudeText),
               //   keyboardType: TextInputType.number,
               //   onSaved: (value) {
               //     locationLongitude = double.tryParse(value ?? '');
@@ -239,35 +256,35 @@ class _RegistrationFormState extends State<RegistrationForm> {
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: GluttexConstants.locationNameText),
+              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.locationNameText),
               //   onSaved: (value) {
               //     locationName = value;
               //   },
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: GluttexConstants.streetText),
+              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.streetText),
               //   onSaved: (value) {
               //     addressStreet = value;
               //   },
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: GluttexConstants.cityText),
+              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.cityText),
               //   onSaved: (value) {
               //     addressCity = value;
               //   },
               // ),
               // Padding(padding: const EdgeInsets.all(8.0)),
               // TextFormField(
-              //   decoration: InputDecoration(labelText: GluttexConstants.postalCodeText),
+              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.postalCodeText),
               //   onSaved: (value) {
               //     addressPostalCode = value;
               //   },
               // ),
               DropdownButtonFormField<String>(
-                decoration:
-                    const InputDecoration(labelText: GluttexConstants.countryText),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.countryText),
                 items: ['Algeria', 'Other'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -279,7 +296,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return GluttexConstants.pleaseInputCountryMsg;
+                    return AppLocalizations.of(context)!.pleaseInputCountryMsg;
                   }
                   return null;
                 },
@@ -337,10 +354,10 @@ class _RegistrationFormState extends State<RegistrationForm> {
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                               backgroundColor: Colors.green,
-                              content:
-                                  Text(GluttexConstants.loginSuccessfullMsg)),
+                              content: Text(AppLocalizations.of(context)!
+                                  .loginSuccessfullMsg)),
                         );
                       }
 
@@ -354,7 +371,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
                     }
                   }
                 },
-                child: const Text(GluttexConstants.registerText),
+                child: Text(AppLocalizations.of(context)!.registerText),
               ),
             ],
           ),

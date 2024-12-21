@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Cart.dart';
@@ -48,24 +49,24 @@ class CartScreen extends StatelessWidget {
           switch (statusCode) {
             case 200:
               response.color = Colors.green;
-              response.text = GluttexConstants.putSuccess;
+              response.text = AppLocalizations.of(context)!.putSuccess;
               Navigator.pop(context);
               break;
             case 406:
               response.color = Colors.amberAccent;
               response.text =
-                  'Error $statusCode: ${GluttexConstants.putFailure}';
+                  'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
               break;
             case 422:
               response.color = Colors.amberAccent;
               response.text =
-                  'Error $statusCode: ${GluttexConstants.putFailure}';
+                  'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
               break;
 
             default:
               response.color = Colors.red;
               response.text =
-                  'Error $statusCode: ${GluttexConstants.serverError}';
+                  'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
           }
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -81,10 +82,11 @@ class CartScreen extends StatelessWidget {
         ),
       ),
       body: cartItems.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
-                GluttexConstants.emptyCartTxt,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                AppLocalizations.of(context)!.emptyCartTxt,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             )
           : ListView.builder(
@@ -95,9 +97,12 @@ class CartScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(8.0),
                   child: ListTile(
                     leading: const Icon(Icons.food_bank_sharp),
-                    title: Text(
-                        product.product_name ?? GluttexConstants.missingText),
-                    subtitle: Text('${GluttexConstants.productQuantity} ${cartItems[index].quantity}'),
+                    title: Text(product.product_name ??
+                        AppLocalizations.of(context)!.missingText),
+                    subtitle: Text(
+                      AppLocalizations.of(context)!.orderAmountText(
+                          cartItems[index].quantity.toString()),
+                    ),
                     trailing: IconButton(
                       onPressed: () {
                         Provider.of<CartChangeNotifier>(context, listen: false)

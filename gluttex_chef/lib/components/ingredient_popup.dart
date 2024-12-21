@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +40,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Select Ingredient'),
+      title: Text(AppLocalizations.of(context)!.ingredientSelect),
       content: SizedBox(
           width: MediaQuery.of(context).size.height *
               0.7, // Set your desired width
@@ -52,8 +53,8 @@ class _IngredientPopupState extends State<IngredientPopup> {
                 TextField(
                   controller: _searchController,
                   onChanged: _filterIngredients,
-                  decoration: const InputDecoration(
-                    hintText: 'Search Ingredient',
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.ingredientSearch,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -71,12 +72,14 @@ class _IngredientPopupState extends State<IngredientPopup> {
                             context: context,
                             builder: (context) {
                               return AlertDialog(
-                                title: const Text('Enter Quantity'),
+                                title: Text(AppLocalizations.of(context)!
+                                    .ingredientQuantity),
                                 content: TextField(
                                   controller: _quantityController,
                                   keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Enter quantity',
+                                  decoration: InputDecoration(
+                                    hintText: AppLocalizations.of(context)!
+                                        .ingredientQuantity,
                                   ),
                                 ),
                                 actions: [
@@ -90,7 +93,8 @@ class _IngredientPopupState extends State<IngredientPopup> {
                                       // Navigator.pop(context);
                                       Navigator.pop(context);
                                     },
-                                    child: const Text('Add'),
+                                    child: Text(
+                                        AppLocalizations.of(context)!.addText),
                                   ),
                                 ],
                               );
@@ -109,7 +113,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)!.cancelTxt),
         ),
       ],
     );

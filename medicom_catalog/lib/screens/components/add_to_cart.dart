@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:medicom_catalog/screens/order_now_screen.dart';
@@ -49,7 +50,7 @@ class AddToCart extends StatelessWidget {
                   ),
                 );
                 if (selectedStore != null) {
-                  print("Selected Store: $selectedStore");
+                  // print("Selected Store: $selectedStore");
                   // Handle the selected store (e.g., proceed to checkout)
                 }
               },
@@ -60,7 +61,7 @@ class AddToCart extends StatelessWidget {
                 ),
               ),
               child: Text(
-                GluttexConstants.orderNowTxt.toUpperCase(),
+                AppLocalizations.of(context)!.orderNowTxt.toUpperCase(),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

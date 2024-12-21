@@ -4,6 +4,7 @@ import 'package:gluttex_login/screens/registration_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,9 +38,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
               backgroundColor: Colors.green,
-              content: Text(GluttexConstants.successfullLoginMsg)),
+              content: Text(AppLocalizations.of(context)!.successfullLoginMsg)),
         );
         globalNavigatorKey.currentState?.pushNamedAndRemoveUntil(
           AppRoutes.home,
@@ -113,20 +114,20 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Image.asset('assets/images/logo.png', height: 150),
                 const SizedBox(height: 20),
-                const Text(
-                  GluttexConstants.welcomeBackMsg,
+                Text(
+                  AppLocalizations.of(context)!.welcomeBackMsg,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  GluttexConstants.pleaseLoginMsg,
+                  AppLocalizations.of(context)!.pleaseLoginMsg,
                   style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                 ),
                 const SizedBox(height: 30),
                 TextFormField(
                   controller: _usernameController,
                   decoration: InputDecoration(
-                    labelText: GluttexConstants.usernameText,
+                    labelText: AppLocalizations.of(context)!.usernameText,
                     prefixIcon: const Icon(Icons.person),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -135,7 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return GluttexConstants.pleaseInputUsernameMsg;
+                      return AppLocalizations.of(context)!
+                          .pleaseInputUsernameMsg;
                     }
                     return null;
                   },
@@ -144,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                    labelText: GluttexConstants.passwordText,
+                    labelText: AppLocalizations.of(context)!.passwordText,
                     prefixIcon: const Icon(Icons.lock),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -153,10 +155,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return GluttexConstants.pleaseInputPasswordMsg;
+                      return AppLocalizations.of(context)!
+                          .pleaseInputPasswordMsg;
                     }
                     if (value.length < 6) {
-                      return GluttexConstants.passwordLengthConstraintMsg;
+                      return AppLocalizations.of(context)!
+                          .passwordLengthConstraintMsg;
                     }
                     return null;
                   },
@@ -175,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        child: const Text(GluttexConstants.loginText),
+                        child: Text(AppLocalizations.of(context)!.loginText),
                       ),
                 const SizedBox(height: 20),
                 TextButton(
@@ -188,10 +192,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     );
                   },
-                  child: const Text(GluttexConstants.suggestRegistrationMsg),
+                  child: Text(
+                      AppLocalizations.of(context)!.suggestRegistrationMsg),
                 ),
                 const SizedBox(height: 20),
-                const Text(GluttexConstants.suggest3rdPartyLogintMsg),
+                Text(AppLocalizations.of(context)!.suggest3rdPartyLogintMsg),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

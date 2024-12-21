@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 
@@ -9,33 +10,35 @@ Future<LatLng?> showLocationInputDialog(BuildContext context) async {
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text(GluttexConstants.insertCoordinatesMsg),
+        title: Text(AppLocalizations.of(context)!.insertCoordinatesMsg),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: latController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration:
-                  const InputDecoration(labelText: GluttexConstants.latitudeMsg),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.latitudeMsg),
             ),
             TextField(
               controller: lngController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration:
-                  const InputDecoration(labelText: GluttexConstants.longitudeMsg),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.longitudeMsg),
             ),
           ],
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text(GluttexConstants.cancelTxt),
+            child: Text(AppLocalizations.of(context)!.cancelTxt),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           ElevatedButton(
-            child: const Text(GluttexConstants.setLocationMsg),
+            child: Text(AppLocalizations.of(context)!.setLocationMsg),
             onPressed: () {
               double? latitude = double.tryParse(latController.text);
               double? longitude = double.tryParse(lngController.text);

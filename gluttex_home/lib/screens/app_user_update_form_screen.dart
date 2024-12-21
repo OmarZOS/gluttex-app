@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/Response.dart';
@@ -310,7 +311,8 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                     switch (statusCode) {
                       case 200:
                         response.color = Colors.green;
-                        response.text = GluttexConstants.putSuccess;
+                        response.text =
+                            AppLocalizations.of(context)!.putSuccess;
                         await Provider.of<AppUserNotifier>(context,
                                 listen: false)
                             .fetchAppUser('$_id_app_user');
@@ -319,17 +321,18 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                       case 406:
                         response.color = Colors.amberAccent;
                         response.text =
-                            'Error $statusCode: ${GluttexConstants.putFailure}';
+                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                         break;
                       case 422:
                         response.color = Colors.amberAccent;
                         response.text =
-                            'Error $statusCode: ${GluttexConstants.putFailure}';
+                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                         break;
 
                       default:
                         response.color = Colors.red;
-                        response.text = 'Error $statusCode: ${GluttexConstants.serverError}';
+                        response.text =
+                            'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
                     }
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -342,7 +345,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                     // You can use a provider or any state management to save the appUser
                   }
                 },
-                child: const Text('Submit'),
+                child: Text(AppLocalizations.of(context)!.submitText),
               ),
             ],
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_localiser/components/supplier_icon.dart';
@@ -122,10 +123,10 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
       appBar: AppBar(
         title: TextField(
           controller: _searchController,
-          decoration: const InputDecoration(
-              hintText: GluttexConstants.searchTxt,
+          decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.searchTxt,
               border: InputBorder.none,
-              icon: Icon(Icons.search_outlined)),
+              icon: const Icon(Icons.search_outlined)),
         ),
         actions: [
           IconButton(
@@ -248,7 +249,8 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
             //     }
             //   },
             // ),
-            Text('${GluttexConstants.locationText}: ${supplier.location_name}'),
+            Text(
+                '${AppLocalizations.of(context)!.locationText}: ${supplier.location_name}'),
             GestureDetector(
               child: Text(supplier.provider_contact_info.replaceAll(",", "\n")),
               onLongPress: () {

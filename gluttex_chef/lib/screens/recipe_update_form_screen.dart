@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_chef/components/category_picker.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/components/ingredient_popup.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_chef/tools/duration.dart';
 import 'package:gluttex_chef/tools/image_picker.dart';
@@ -121,10 +122,12 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
               setState(() {
                 preparationTime = newDuration;
                 _recipePreparationTime = ((newDuration.inHours != 0)
-                        ? '${newDuration.inHours} hours'
+                        ? AppLocalizations.of(context)!
+                            .hoursTextValue(newDuration.inHours.toString())
                         : '') +
                     ((newDuration.inMinutes.remainder(60) != 0)
-                        ? ' ${newDuration.inMinutes.remainder(60)} minutes.'
+                        ? AppLocalizations.of(context)!.minutesTextValue(
+                            newDuration.inMinutes.remainder(60).toString())
                         : '.');
               });
             },
@@ -142,7 +145,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(GluttexConstants.updateRecipeMsg),
+        title: Text(AppLocalizations.of(context)!.updateRecipeMsg),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -152,26 +155,31 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
             children: [
               TextFormField(
                 initialValue: _recipeName,
-                decoration: const InputDecoration(labelText: 'Recipe Name'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.recipeNameText),
                 onSaved: (value) => _recipeName = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a recipe name';
+                    return AppLocalizations.of(context)!
+                        .pleaseInputRecipeNameMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
                 initialValue: _recipeDescription ?? "",
-                decoration:
-                    const InputDecoration(labelText: 'Recipe Description'),
+                decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.recipeDescriptionText),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a recipe description';
+                    return AppLocalizations.of(context)!
+                        .pleaseInputRecipeDescriptionMsg;
                   }
 
                   if ((value).length >= 300) {
-                    return 'Character limit: 300.';
+                    return AppLocalizations.of(context)!
+                        .descriptionCharacterConstraintMsg;
                   }
                   return null;
                 },
@@ -182,8 +190,9 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                 maxLines: null, // Allow for multiline input
                 keyboardType:
                     TextInputType.multiline, // Show multiline keyboard
-                decoration:
-                    const InputDecoration(labelText: 'Recipe Instructions'),
+                decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.recipeinstructiontext),
                 // keyboardType: TextInputType.number,
                 // validator: (value) {
                 //   return null;
@@ -199,7 +208,8 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text(GluttexConstants.categoriesNotFoundTxt);
+                    return Text(
+                        AppLocalizations.of(context)!.categoriesNotFoundTxt);
                   } else {
                     return CategoryPicker(
                       category_id: _recipe_category_id ?? 1,
@@ -214,7 +224,10 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
               const SizedBox(height: 16.0),
               ListTile(
                 title: Text(
-                    'Preparation Time: ${preparationTime.inHours} hours, ${preparationTime.inMinutes.remainder(60)} minutes'),
+                  AppLocalizations.of(context)!.preparationTimeText(
+                      preparationTime.inHours.toString(),
+                      preparationTime.inMinutes.remainder(60).toString()),
+                ),
                 trailing: const Icon(Icons.timer),
                 onTap: () => _selectDuration(context),
               ),
@@ -258,7 +271,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
 
                   const SizedBox(height: 16.0),
                   ListTile(
-                    title: const Text(GluttexConstants.addIngredientMsg),
+                    title: Text(AppLocalizations.of(context)!.addIngredientMsg),
                     trailing: const Icon(Icons.add),
                     onTap: () {
                       showDialog(
@@ -283,11 +296,11 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                   ? Image.memory(_recipeImage!,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.width)
-                  : const Text(GluttexConstants.noImageSelectedTxt),
+                  : Text(AppLocalizations.of(context)!.noImageSelectedTxt),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _pickImage,
-                child: const Text(GluttexConstants.pickImageMsg),
+                child: Text(AppLocalizations.of(context)!.pickImageMsg),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -319,7 +332,8 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                     switch (statusCode) {
                       case 200:
                         response.color = Colors.green;
-                        response.text = GluttexConstants.putSuccess;
+                        response.text =
+                            AppLocalizations.of(context)!.putSuccess;
                         await Provider.of<RecipeNotifier>(context,
                                 listen: false)
                             .fetchRecipes();
@@ -328,17 +342,18 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                       case 406:
                         response.color = Colors.amberAccent;
                         response.text =
-                            'Error $statusCode: ${GluttexConstants.putFailure}';
+                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                         break;
                       case 422:
                         response.color = Colors.amberAccent;
                         response.text =
-                            'Error $statusCode: ${GluttexConstants.putFailure}';
+                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                         break;
 
                       default:
                         response.color = Colors.red;
-                        response.text = 'Error $statusCode: ${GluttexConstants.serverError}';
+                        response.text =
+                            'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
                     }
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -351,7 +366,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                     // You can use a provider or any state management to save the recipe
                   }
                 },
-                child: const Text(GluttexConstants.submitText),
+                child: Text(AppLocalizations.of(context)!.submitText),
               ),
             ],
           ),

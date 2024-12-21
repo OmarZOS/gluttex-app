@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:medicom_catalog/screens/product_screen.dart';
@@ -65,7 +66,9 @@ class ProductCard extends StatelessWidget {
                   ),
                   // const SizedBox(height: 4),
                   Text(
-                    product.product_category_desc ?? '',
+                    AppLocalizations.of(context)!
+                        .productCategoryTextList
+                        .split(",")[(product.product_category_id ?? 1) - 1],
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -74,7 +77,8 @@ class ProductCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${product.product_price ?? 'N/A'} DA',
+                        AppLocalizations.of(context)!
+                            .price(product.product_price ?? '--'),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       // IconButton(

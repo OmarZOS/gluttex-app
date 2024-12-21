@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 
@@ -30,9 +31,11 @@ class ProductTitleWithImage extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   children: [
-                    const TextSpan(text: "${GluttexConstants.priceText}\n"),
                     TextSpan(
-                      text: "${product.product_price} DA",
+                        text: "${AppLocalizations.of(context)!.priceText}\n"),
+                    TextSpan(
+                      text: AppLocalizations.of(context)!
+                          .price(product.product_price.toString()),
                       style:
                           Theme.of(context).textTheme.headlineSmall!.copyWith(
                               // color: Colors.white,

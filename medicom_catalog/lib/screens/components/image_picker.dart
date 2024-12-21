@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:image/image.dart' as img;
 import 'package:custom_image_crop/custom_image_crop.dart';
@@ -105,7 +106,9 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                     ..style = PaintingStyle.stroke
                     ..strokeJoin = StrokeJoin.round,
                 )
-              : const Center(child: Text(GluttexConstants.noImageSelectedTxt)),
+              : Center(
+                  child:
+                      Text(AppLocalizations.of(context)!.noImageSelectedTxt)),
         ),
         ElevatedButton(
           onPressed: () async {

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/app/Response.dart';
@@ -53,7 +54,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(GluttexConstants.addProductTxt),
+        title: Text(AppLocalizations.of(context)!.addProductTxt),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(
@@ -69,51 +70,56 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           child: ListView(
             children: [
               TextFormField(
-                decoration: const InputDecoration(
-                    labelText: GluttexConstants.productNameTxt),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.productNameTxt),
                 onSaved: (value) => _productName = value ?? "",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputProductNameMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputProductNameMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(
-                    labelText: GluttexConstants.productBarcodeTxt),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.productBrandTxt),
                 onSaved: (value) => _productBrand = value ?? "",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputProductBrandMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputProductBrandMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(
-                    labelText: GluttexConstants.productBarcodeTxt),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.productBarcodeTxt),
                 onSaved: (value) => _productBarcode = value ?? "",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputProductBarcodeMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputProductBarcodeMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(
-                    labelText: GluttexConstants.productPriceTxt),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.productPriceTxt),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.pleaseInputProductPriceMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputProductPriceMsg;
                   }
                   if (double.tryParse(value) == null) {
-                    return GluttexConstants.pleaseInputvalidnumberMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputvalidnumberMsg;
                   }
                   if (double.tryParse(value)! >= 1000000) {
-                    return GluttexConstants.numberConstraintMsg;
+                    return AppLocalizations.of(context)!.numberConstraintMsg;
                   }
                   return null;
                 },
@@ -121,29 +127,33 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     _productPrice = double.tryParse(value ?? "0.0"),
               ),
               TextFormField(
-                decoration: const InputDecoration(
-                    labelText: GluttexConstants.ProductQuantityText),
+                decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.productQuantityText),
                 keyboardType: TextInputType.number,
                 onSaved: (value) =>
                     _productQuantity = int.tryParse(value ?? "0"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return GluttexConstants.ProductQuantityText;
+                    return AppLocalizations.of(context)!.productQuantityText;
                   }
                   if (int.tryParse(value) == null) {
-                    return GluttexConstants.pleaseInputProductQuantityMsg;
+                    return AppLocalizations.of(context)!
+                        .pleaseInputProductQuantityMsg;
                   }
                   return null;
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(
-                    labelText: GluttexConstants.ProductDescriptionText),
+                decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.productDescriptionText),
                 // keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value != null) {
                     if ((value).length >= 300) {
-                      return GluttexConstants.descriptionCharacterConstraintMsg;
+                      return AppLocalizations.of(context)!
+                          .descriptionCharacterConstraintMsg;
                     }
                   }
                   return null;
@@ -159,7 +169,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text(GluttexConstants.categoriesNotFoundTxt);
+                    return Text(
+                        AppLocalizations.of(context)!.categoriesNotFoundTxt);
                   } else {
                     return CategoryPicker(
                       category_id: _product_type_id ?? 1,
@@ -177,10 +188,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   ? Image.memory(_productImage!,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.width)
-                  : const Text(GluttexConstants.noImageSelectedTxt),
+                  : Text(AppLocalizations.of(context)!.noImageSelectedTxt),
               ElevatedButton(
                 onPressed: _pickImage,
-                child: const Text(GluttexConstants.pickImageMsg),
+                child: Text(AppLocalizations.of(context)!.pickImageMsg),
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
@@ -217,7 +228,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       switch (statusCode) {
                         case 200:
                           response.color = Colors.green;
-                          response.text = GluttexConstants.putSuccess;
+                          response.text =
+                              AppLocalizations.of(context)!.putSuccess;
                           await Provider.of<ProductNotifier>(context,
                                   listen: false)
                               .fetchProducts();
@@ -231,21 +243,25 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           break;
                         case 406:
                           response.color = Colors.amberAccent;
-                          response.text = 'Error $statusCode: ${GluttexConstants.putFailure}';
+                          response.text =
+                              'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                           break;
                         case 422:
                           response.color = Colors.amberAccent;
-                          response.text = 'Error $statusCode: ${GluttexConstants.putFailure}';
+                          response.text =
+                              'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
                           break;
 
                         default:
                           response.color = Colors.red;
-                          response.text = 'Error $statusCode: ${GluttexConstants.serverError}';
+                          response.text =
+                              'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
                       }
                     } catch (e, stacktrace) {
                       log("$stacktrace");
                       response.color = Colors.red;
-                      response.text = 'Error ${statusCode!}: ${GluttexConstants.serverError}';
+                      response.text =
+                          'Error ${statusCode!}: ${AppLocalizations.of(context)!.serverError}';
                     }
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -257,7 +273,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     // You can use a provider or any state management to save the product
                   }
                 },
-                child: const Text(GluttexConstants.submitText),
+                child: Text(AppLocalizations.of(context)!.submitText),
               ),
             ],
           ),

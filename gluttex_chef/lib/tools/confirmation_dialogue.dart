@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 
 Future<void> showConfirmationDialog(
@@ -8,7 +9,7 @@ Future<void> showConfirmationDialog(
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text(GluttexConstants.confirmationTxt),
+        title: Text(AppLocalizations.of(context)!.confirmationTxt),
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
@@ -18,13 +19,13 @@ Future<void> showConfirmationDialog(
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text(GluttexConstants.cancelTxt),
+            child: Text(AppLocalizations.of(context)!.cancelTxt),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text(GluttexConstants.confirmTxt),
+            child: Text(AppLocalizations.of(context)!.confirmTxt),
             onPressed: () {
               onConfirm();
               Navigator.of(context).pop();

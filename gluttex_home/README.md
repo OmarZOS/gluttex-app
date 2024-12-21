@@ -1,16 +1,136 @@
-# gluttex_home
+# Gluttex Home
 
-A new Flutter project.
+Gluttex Home is the central Flutter application that integrates multiple modules and packages to deliver a cohesive experience for users. This application is designed for managing products, recipes, medical data, localization, and other features related to the Gluttex ecosystem.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## Features
 
-A few resources to get you started if this is your first Flutter project:
+1. **Product Management**:
+   - Add, update, and delete products.
+   - View and search products through a catalog.
+   
+2. **Recipe Management**:
+   - Add and manage recipes, including ingredients and steps.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+3. **Medical Integration**:
+   - Handle medical data relevant to the user base.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+4. **Localization Support**:
+   - Multilingual support including English, French, and Arabic.
+
+5. **Authentication**:
+   - Login and registration system with validation.
+
+6. **Catalog and Supplier Management**:
+   - Comprehensive catalog management and supplier details integration.
+
+---
+
+## Packages and Dependencies
+
+The application uses the following custom packages and modules:
+
+### Core Packages
+- **locator**: Handles dependency injection and service location.
+- **gluttex_core**: Core business logic and shared utilities.
+- **gluttex_constants**: Centralized constants and localization files.
+
+### Feature-Specific Packages
+- **gluttex_impl_app**: Application-level implementation details.
+- **gluttex_impl_business**: Business logic specific to Gluttex.
+- **gluttex_impl_mediation**: Handles communication between different modules.
+- **gluttex_chef**: Module for managing chefs and related data.
+- **gluttex_medical**: Manages medical-related functionality and data.
+- **gluttex_localiser**: Localization handling and location-based services.
+- **medicom_catalog**: Catalog management, including product browsing and supplier details.
+- **gluttex_play**: Entertainment and gamification features.
+- **gluttex_login**: User authentication and login system.
+
+---
+
+## Installation
+
+### Prerequisites
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) (v3.10 or higher)
+- Dart SDK
+
+### Steps
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/OmarZos/gluttex-app.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd gluttex_home
+   ```
+
+3. Fetch dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+4. Run the app:
+   ```bash
+   flutter run
+   ```
+
+---
+
+## Project Structure
+
+```plaintext
+├── lib
+│   ├── main.dart        # Application entry point
+│   ├── screens          # UI screens and widgets
+│   ├── models           # Data models
+│   ├── services         # Backend and API services
+│   └── utils            # Utility functions and helpers
+├── assets
+│   ├── images           # Static image assets
+│   ├── translations     # ARB files for localization
+├── pubspec.yaml         # Flutter dependencies
+└── README.md            # Project documentation
+```
+
+---
+
+## Localization
+
+The application supports multiple languages using ARB files stored in the `assets/translations` directory. Current languages:
+- English (`en.arb`)
+- French (`fr.arb`)
+- Arabic (`ar.arb`)
+
+### Adding a New Language
+1. Create a new ARB file in `assets/translations` (e.g., `es.arb` for Spanish).
+2. Add translations for all keys present in `en.arb`.
+3. Update the supported locales in the app configuration.
+
+---
+
+## Contribution
+
+1. Fork the repository.
+2. Create a feature branch:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Commit your changes and push to the branch:
+   ```bash
+   git commit -m "Add new feature"
+   git push origin feature-name
+   ```
+4. Create a pull request for review.
+
+---
+
+## License
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Contact
+For any inquiries, reach out at [support@gluttex.com](mailto:support@gluttex.com).
+

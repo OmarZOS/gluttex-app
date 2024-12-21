@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_screen.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
@@ -91,21 +92,21 @@ class RecipeOwner extends StatelessWidget {
   }
 }
 
-Widget _buildRecipeGrid(List<Recipe> recipes) {
-  if (recipes.isEmpty) {
-    return const Center(child: Text(GluttexConstants.noRecipesFound));
-  }
+// Widget _buildRecipeGrid(List<Recipe> recipes) {
+//   if (recipes.isEmpty) {
+//     return Center(child: Text(AppLocalizations.of(context)!.noRecipesFound));
+//   }
 
-  return GridView.builder(
-    itemCount: recipes.length,
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      mainAxisSpacing: GluttexConstants.kDefaultPaddin,
-      crossAxisSpacing: GluttexConstants.kDefaultPaddin,
-      childAspectRatio: 0.5, // Adjust childAspectRatio to fit your layout needs
-    ),
-    itemBuilder: (context, index) => RecipeOwner(
-      recipe: recipes[index],
-    ),
-  );
-}
+//   return GridView.builder(
+//     itemCount: recipes.length,
+//     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+//       crossAxisCount: 2,
+//       mainAxisSpacing: GluttexConstants.kDefaultPaddin,
+//       crossAxisSpacing: GluttexConstants.kDefaultPaddin,
+//       childAspectRatio: 0.5, // Adjust childAspectRatio to fit your layout needs
+//     ),
+//     itemBuilder: (context, index) => RecipeOwner(
+//       recipe: recipes[index],
+//     ),
+//   );
+// }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
 import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
 import 'package:gluttex_play/screens/game_catalog.dart';
@@ -34,7 +35,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gluttex'),
+        title: Text(AppLocalizations.of(context)!.appName),
         actions: [
           IconButton(
               onPressed: () async {
@@ -53,21 +54,21 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.orangeAccent,
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             backgroundColor: Color.fromARGB(255, 67, 125, 133),
-            icon: Icon(CupertinoIcons.cube_box_fill),
-            label: 'Products',
+            icon: const Icon(CupertinoIcons.cube_box_fill),
+            label: AppLocalizations.of(context)!.productsText,
           ),
           BottomNavigationBarItem(
             backgroundColor: Color.fromARGB(255, 70, 99, 138),
-            icon: Icon(Icons.store_sharp),
-            label: 'Providers',
+            icon: const Icon(Icons.store_sharp),
+            label: AppLocalizations.of(context)!.providersText,
           ),
           BottomNavigationBarItem(
             backgroundColor: Color.fromARGB(255, 107, 63, 124),
-            icon: Icon(Icons.restaurant_menu_outlined),
-            label: 'Recipes',
+            icon: const Icon(Icons.restaurant_menu_outlined),
+            label: AppLocalizations.of(context)!.recipesText,
           ),
           // BottomNavigationBarItem(
           //   backgroundColor: Color.fromARGB(255, 136, 68, 102),
@@ -76,8 +77,8 @@ class _HomePageState extends State<HomePage> {
           // ),
           BottomNavigationBarItem(
             backgroundColor: Color.fromARGB(255, 67, 72, 133),
-            icon: Icon(CupertinoIcons.gamecontroller_alt_fill),
-            label: 'Games',
+            icon: const Icon(CupertinoIcons.gamecontroller_alt_fill),
+            label: AppLocalizations.of(context)!.gamesText,
           ),
         ],
         currentIndex: _selectedIndex,

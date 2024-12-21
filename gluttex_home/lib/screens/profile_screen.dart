@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_home/screens/LanguageSelectionScreen.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -14,8 +17,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+          onPressed: () => {
+                IconButton(
+                    onPressed: () async {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        // Provider.of<AppUserNotifier>(context, listen: false)
+                        //     .fetchAppUser('1');
+                        return const LanguageSelectionScreen();
+                      }));
+                    },
+                    icon: const Icon(CupertinoIcons.add_circled))
+              }),
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(AppLocalizations.of(context)!.profileText),
         // actions: [IconButton(icon: Icon(Icons.edit), onPressed: () {})]
       ),
       body: Consumer<AppUserNotifier>(
@@ -82,27 +98,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 20),
 
           // User Info
-          _buildSectionTitle('User Info'),
-          _buildInfoRow('Username', user!.app_user_name!),
+          _buildSectionTitle(AppLocalizations.of(context)!.userInfoText),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.usernameText, user!.app_user_name!),
           // _buildInfoRow('Preferences', user.app_user_preferences!),
-          _buildInfoRow('Type', user.app_user_type_desc!),
-          _buildInfoRow('Blood type', user.bloodTypeDesc),
+          _buildInfoRow(AppLocalizations.of(context)!.userTypeText,
+              user.app_user_type_desc!),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.bloodTypeText, user.bloodTypeDesc),
 
           // Person Info
-          _buildSectionTitle('Personal Info'),
-          _buildInfoRow('First Name', user.personFirstName),
-          _buildInfoRow('Last Name', user.personLastName),
-          _buildInfoRow('Birth Date', user.personBirthDate),
-          _buildInfoRow('Gender', user.personGender),
-          _buildInfoRow('Nationality', user.personNationality),
+          _buildSectionTitle(AppLocalizations.of(context)!.personalInfoText),
+          _buildInfoRow(AppLocalizations.of(context)!.firstNameText,
+              user.personFirstName),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.lastNameText, user.personLastName),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.birthdayText, user.personBirthDate),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.genderText, user.personGender),
+          _buildInfoRow(AppLocalizations.of(context)!.nationalityText,
+              user.personNationality),
 
           // Location Info
-          _buildSectionTitle('Location Info'),
-          _buildInfoRow('Location Name', user.locationName),
-          _buildInfoRow('Street', user.addressStreet),
-          _buildInfoRow('City', user.addressCity),
-          _buildInfoRow('Postal Code', user.addressPostalCode),
-          _buildInfoRow('Country', user.addressCountry),
+          _buildSectionTitle(AppLocalizations.of(context)!.locationInfoText),
+          _buildInfoRow(AppLocalizations.of(context)!.locationNameText,
+              user.locationName),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.streetText, user.addressStreet),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.cityText, user.addressCity),
+          _buildInfoRow(AppLocalizations.of(context)!.postalCodeText,
+              user.addressPostalCode),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.countryText, user.addressCountry),
           // Center(
           //   child: TextButton(
           //       onPressed: () async {
