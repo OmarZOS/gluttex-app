@@ -39,8 +39,8 @@ void setupLocator() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final localeProvider = LocaleProvider();
-  // await localeProvider.loadSavedLocale();
-  await localeProvider.setLanguagePreference("ar");
+  await localeProvider.loadSavedLocale();
+  // await localeProvider.setLanguagePreference("ar");
 
   setupLocator();
   runApp(GluttexApp(localeProvider));
@@ -69,7 +69,7 @@ class GluttexApp extends StatelessWidget {
       child: Consumer<LocaleProvider>(
         builder: (context, localeProvider, child) {
           return MaterialApp(
-            locale: const Locale("ar"),
+            locale: localeProvider.locale,
             supportedLocales: const [
               Locale('ar'), // Arabic
               Locale('fr'), // French

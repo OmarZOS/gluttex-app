@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:medicom_catalog/screens/components/product_category_assets.dart';
 
@@ -39,7 +40,9 @@ class _CategoryPickerState extends State<CategoryPicker> {
         ListTile(
           // tileColor: Colors.blue[50],
           title: Text(
-            widget.categories[_selectedCategoryIndex].product_category_desc,
+            AppLocalizations.of(context)!
+                .productCategoryTextList
+                .split(",")[_selectedCategoryIndex],
           ),
           onTap: () {
             _showPicker(context);
@@ -73,7 +76,10 @@ class _CategoryPickerState extends State<CategoryPicker> {
               );
             },
             children: widget.categories.map((ProductCategory category) {
-              return Center(child: Text(category.product_category_desc));
+              return Center(
+                  child: Text(AppLocalizations.of(context)!
+                      .productCategoryTextList
+                      .split(",")[category.product_provider_type_id - 1]));
             }).toList(),
           ),
         );

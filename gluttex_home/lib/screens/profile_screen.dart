@@ -18,18 +18,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-          onPressed: () => {
-                IconButton(
-                    onPressed: () async {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        // Provider.of<AppUserNotifier>(context, listen: false)
-                        //     .fetchAppUser('1');
-                        return const LanguageSelectionScreen();
-                      }));
-                    },
-                    icon: const Icon(CupertinoIcons.add_circled))
-              }),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return const LanguageSelectionScreen();
+            }),
+          );
+        },
+        child: const Icon(Icons.abc), // Replace with the desired icon
+      ),
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.profileText),
         // actions: [IconButton(icon: Icon(Icons.edit), onPressed: () {})]

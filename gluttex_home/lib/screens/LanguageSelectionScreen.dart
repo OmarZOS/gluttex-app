@@ -20,6 +20,7 @@ class LanguageSelectionScreen extends StatelessWidget {
             onTap: () async {
               await localeProvider.setLanguagePreference('en');
               localeProvider.setLocale(const Locale('en'));
+              Navigator.pop(context); // Closes the language selection screen
             },
           ),
           ListTile(
@@ -27,6 +28,7 @@ class LanguageSelectionScreen extends StatelessWidget {
             onTap: () async {
               await localeProvider.setLanguagePreference('fr');
               localeProvider.setLocale(const Locale('fr'));
+              Navigator.pop(context);
             },
           ),
           ListTile(
@@ -34,6 +36,7 @@ class LanguageSelectionScreen extends StatelessWidget {
             onTap: () async {
               await localeProvider.setLanguagePreference('ar');
               localeProvider.setLocale(const Locale('ar'));
+              Navigator.pop(context);
             },
           ),
         ],
