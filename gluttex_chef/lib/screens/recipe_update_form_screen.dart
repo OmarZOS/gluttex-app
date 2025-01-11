@@ -88,7 +88,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
     _id_recipe_image = widget.initialIdRecipeImage;
     _recipePreparationTime = widget.initialRecipePreparationTime;
     _selectedIngredients = widget.initialIngredients ?? {};
-    preparationTime = ParseDurationString(_recipePreparationTime ?? "");
+    preparationTime = parseDuration(_recipePreparationTime!);
   }
 
   Future<void> _pickImage() async {
@@ -318,7 +318,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                       recipe_created_at: null,
                       recipe_last_updated: null,
                       recipe_instruction: _recipeInstruction,
-                      recipe_preparation_time: _recipePreparationTime,
+                      recipe_preparation_time: preparationTime.toString(),
                       recipe_category_desc: "",
                       recipe_ingredients: {},
                     );

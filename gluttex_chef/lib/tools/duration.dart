@@ -1,4 +1,3 @@
-
 Duration ParseDurationString(String durationString) {
   final RegExp hourRegex = RegExp(r'(\d+)\s*hours');
   final RegExp minuteRegex = RegExp(r'(\d+)\s*minutes');
@@ -19,4 +18,17 @@ Duration ParseDurationString(String durationString) {
   }
 
   return Duration(hours: hours, minutes: minutes);
+}
+
+Duration parseDuration(String durationString) {
+  final parts = durationString.split(':');
+  if (parts.length != 3) {
+    throw FormatException("Invalid duration format: $durationString");
+  }
+
+  final hours = int.parse(parts[0]);
+  final minutes = int.parse(parts[1]);
+  final seconds = int.parse(parts[2]);
+
+  return Duration(hours: hours, minutes: minutes, seconds: seconds);
 }

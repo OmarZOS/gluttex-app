@@ -948,6 +948,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get allText;
+
+  /// No description provided for @providerCategoryTextList.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant,Bakery,Factory,Supermarket'**
+  String get providerCategoryTextList;
+
+  /// No description provided for @recipeCategoryTextList.
+  ///
+  /// In en, this message translates to:
+  /// **'Appetizers & Snacks,Soups & Stews,Salads,Main Courses,Side Dishes,Pasta & Noodles,Casseroles,Breakfast & Brunch,Breads & Baking,Desserts,Drinks & Beverages,Sauces & Condiments,International Cuisine,Healthy & Special Diets,Holiday & Seasonal,Kids & Family,Slow Cooker & Instant Pot,Quick & Easy,One-Pan Recipes,Grilling & BBQ'**
+  String get recipeCategoryTextList;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

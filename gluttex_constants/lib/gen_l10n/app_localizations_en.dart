@@ -441,4 +441,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allText => 'All';
+
+  @override
+  String get providerCategoryTextList => 'Restaurant,Bakery,Factory,Supermarket';
+
+  @override
+  String get recipeCategoryTextList => 'Appetizers & Snacks,Soups & Stews,Salads,Main Courses,Side Dishes,Pasta & Noodles,Casseroles,Breakfast & Brunch,Breads & Baking,Desserts,Drinks & Beverages,Sauces & Condiments,International Cuisine,Healthy & Special Diets,Holiday & Seasonal,Kids & Family,Slow Cooker & Instant Pot,Quick & Easy,One-Pan Recipes,Grilling & BBQ';
 }

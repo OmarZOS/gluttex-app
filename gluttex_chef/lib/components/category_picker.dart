@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 
 class CategoryPicker extends StatefulWidget {
@@ -37,9 +38,9 @@ class _CategoryPickerState extends State<CategoryPicker> {
       children: [
         ListTile(
           // tileColor: Colors.blue[50],
-          title: Text(
-            widget.categories[_selectedCategoryIndex].recipe_category_desc,
-          ),
+          title: Text(AppLocalizations.of(context)!
+              .recipeCategoryTextList
+              .split(",")[_selectedCategoryIndex]),
           onTap: () {
             _showPicker(context);
           },
@@ -72,7 +73,10 @@ class _CategoryPickerState extends State<CategoryPicker> {
               );
             },
             children: widget.categories.map((RecipeCategory category) {
-              return Center(child: Text(category.recipe_category_desc));
+              return Center(
+                  child: Text(AppLocalizations.of(context)!
+                      .recipeCategoryTextList
+                      .split(",")[category.recipe_category_id - 1]));
             }).toList(),
           ),
         );

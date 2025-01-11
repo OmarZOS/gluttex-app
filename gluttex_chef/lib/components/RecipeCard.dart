@@ -60,7 +60,9 @@ class RecipeCard extends StatelessWidget {
                   children: [
                     const SizedBox(height: 4),
                     Text(
-                      '${recipe.recipe_category_desc}',
+                      AppLocalizations.of(context)!
+                          .recipeCategoryTextList
+                          .split(",")[(recipe.recipe_category_id ?? 1) - 1],
                       // style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(

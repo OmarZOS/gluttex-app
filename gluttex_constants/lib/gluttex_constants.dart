@@ -7,7 +7,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey =
 
 class GluttexConstants {
   // API endpoints
-  static const String apiBaseUrl = 'http://192.168.162.158:9000';
+  static const String apiBaseUrl = 'http://192.168.14.158:9000';
   // static const String authApiBaseUrl = 'http://localhost:9090';
 
   static const String addAppUserEndpoint = '/appUser/add';

@@ -141,5 +141,7 @@
   "locationInfoText": "Location Informations",
   "orderAmountText": "Quantity: {amount}",
   "productCategoryTextList":"Baked Goods,Spreads,Cereals,Pasta,Snacks,Beverages,Desserts",
-  "allText":"All"
+  "allText":"All",
+  "providerCategoryTextList":"Restaurant,Bakery,Factory,Supermarket",
+  "recipeCategoryTextList":"Appetizers & Snacks,Soups & Stews,Salads,Main Courses,Side Dishes,Pasta & Noodles,Casseroles,Breakfast & Brunch,Breads & Baking,Desserts,Drinks & Beverages,Sauces & Condiments,International Cuisine,Healthy & Special Diets,Holiday & Seasonal,Kids & Family,Slow Cooker & Instant Pot,Quick & Easy,One-Pan Recipes,Grilling & BBQ"
 }

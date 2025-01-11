@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/AuthService.dart';
@@ -14,7 +16,6 @@ class AppUserNotifier extends ChangeNotifier {
 
   Future<void> fetchAppUser(String userId) async {
     var appUser = await _appUserService.getAppUser(userId);
-
     _appUser = appUser;
     notifyListeners();
   }
@@ -56,7 +57,9 @@ class AppUserNotifier extends ChangeNotifier {
 
     if (appUserData['app_user_id'] != null) {
       token = appUserData['access_token'];
+      log("Fetching : " + appUserData['app_user_id'].toString());
       await fetchAppUser(appUserData['app_user_id'].toString());
+      // log(data.toString());
       return;
     }
     return appUserData;

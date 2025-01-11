@@ -163,7 +163,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           initialRecipe_category_id: _recipe.recipe_category_id,
                           initialIdRecipe: _recipe.id_recipe,
                           initialIdRecipeImage: _recipe.id_recipe_image,
-                          initialRecipeDescription: _recipe.recipe_description,
+                          initialRecipeDescription:
+                              AppLocalizations.of(context)!
+                                      .recipeCategoryTextList
+                                      .split(",")[
+                                  (_recipe.recipe_category_id ?? 1) - 1],
                           initialRecipeInstruction: _recipe.recipe_instruction,
                           initialRecipePreparationTime:
                               _recipe.recipe_preparation_time,
@@ -209,7 +213,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                _recipe.recipe_description ??
+                AppLocalizations.of(context)!
+                        .recipeCategoryTextList
+                        .split(",")[(_recipe.recipe_category_id ?? 1) - 1] ??
                     AppLocalizations.of(context)!.noDescriptionAvailableText,
                 style: Theme.of(context).textTheme.labelMedium,
               ),
@@ -228,7 +234,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                   onPressed: () {},
-                  child: Text('${_recipe.recipe_category_desc}')),
+                  child: Text(AppLocalizations.of(context)!
+                      .recipeCategoryTextList
+                      .split(",")[(_recipe.recipe_category_id ?? 1) - 1])),
               const SizedBox(height: 16),
               (_recipe.recipe_ingredients!.isNotEmpty)
                   ? SizedBox(

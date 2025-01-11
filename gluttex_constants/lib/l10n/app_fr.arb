@@ -141,5 +141,7 @@
   "locationInfoText": "Informations de Localisation",
   "orderAmountText": "Quantité : {amount}",
   "productCategoryTextList": "Produits de boulangerie, Tartinades, Céréales, Pâtes, Collations, Boissons, Desserts",
-  "allText": "Tout"
+  "allText": "Tout",
+  "providerCategoryTextList": "Restaurant, Boulangerie, Usine, Supermarché",
+  "recipeCategoryTextList": "Apéritifs & Collations, Soupes & Ragoûts, Salades, Plats Principaux, Accompagnements, Pâtes & Nouilles, Gratinés, Petit-Déjeuner & Brunch, Pains & Pâtisseries, Desserts, Boissons, Sauces & Condiments, Cuisine Internationale, Régimes Sains & Spéciaux, Fêtes & Saisons, Enfants & Famille, Cuiseur Lent & Instantané, Rapide & Facile, Recettes en Une Seule Poêle, Grillades & BBQ"
 }

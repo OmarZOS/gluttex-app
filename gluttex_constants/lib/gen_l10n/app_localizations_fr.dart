@@ -441,4 +441,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get allText => 'Tout';
+
+  @override
+  String get providerCategoryTextList => 'Restaurant, Boulangerie, Usine, Supermarché';
+
+  @override
+  String get recipeCategoryTextList => 'Apéritifs & Collations, Soupes & Ragoûts, Salades, Plats Principaux, Accompagnements, Pâtes & Nouilles, Gratinés, Petit-Déjeuner & Brunch, Pains & Pâtisseries, Desserts, Boissons, Sauces & Condiments, Cuisine Internationale, Régimes Sains & Spéciaux, Fêtes & Saisons, Enfants & Famille, Cuiseur Lent & Instantané, Rapide & Facile, Recettes en Une Seule Poêle, Grillades & BBQ';
 }

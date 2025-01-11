@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
@@ -172,24 +174,9 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                         leading: getProviderTypeIcon(
                             supplier.product_provider_type_id),
                         title: Text(supplier.provider_name),
-                        // subtitle:
-                        // FutureBuilder<Category?>(
-                        //   future: GluttexLocator.get<SupplierService>()
-                        //       .getCategoryById(supplier.product_provider_type_id),
-                        //   builder: (context, snapshot) {
-                        //     if (snapshot.connectionState ==
-                        //         ConnectionState.waiting) {
-                        //       return CircularProgressIndicator(); // Show a loading indicator while waiting
-                        //     } else if (snapshot.hasError) {
-                        //       return Text('Error: ${snapshot.error}');
-                        //     } else if (!snapshot.hasData ||
-                        //         snapshot.data == null) {
-                        //       return Text('Category not found');
-                        //     } else {
-                        //       return Text(snapshot.data!.product_category_desc);
-                        //     }
-                        //   },
-                        // ),
+                        subtitle: Text(AppLocalizations.of(context)!
+                            .providerCategoryTextList
+                            .split(",")[supplier.product_provider_type_id - 1]),
                         trailing: IconButton(
                           onPressed: () {
                             _focusOnLocation(supplier.location_latitude,

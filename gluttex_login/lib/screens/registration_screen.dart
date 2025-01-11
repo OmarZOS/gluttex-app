@@ -316,32 +316,32 @@ class _RegistrationFormState extends State<RegistrationForm> {
                         "app_user_password": appUserPassword ?? "",
                         "app_user_type_id": appUserTypeId ?? 1,
                       },
-                      // "person": {
-                      //   "id_person": 0,
-                      //   "person_details_id": 0,
-                      //   "id_person_details": 0,
-                      //   "person_first_name": personFirstName,
-                      //   "person_last_name": personLastName,
-                      //   "person_birth_date": _birthDateController.text,
-                      //   "person_gender": personGender,
-                      //   "person_nationality": personNationality,
-                      //   "id_blood_type": bloodTypeId,
-                      // },
-                      // "location": {
-                      //   "id_location": 0,
-                      //   "location_address_id": 0,
-                      //   "id_address": 0,
-                      //   "location_latitude": locationLatitude ?? 0.0,
-                      //   "location_longitude": locationLongitude ?? 0.0,
-                      //   "location_name": locationName ?? "",
-                      //   "address_street": addressStreet ?? "",
-                      //   "address_city": addressCity ?? "",
-                      //   "address_postal_code": addressPostalCode,
-                      //   "address_country": addressCountry ?? "",
-                      // }
+                      "person": {
+                        "id_person": 0,
+                        "person_details_id": 0,
+                        "id_person_details": 0,
+                        "person_first_name": personFirstName,
+                        "person_last_name": personLastName,
+                        "person_birth_date": _birthDateController.text,
+                        "person_gender": personGender,
+                        "person_nationality": personNationality,
+                        "id_blood_type": bloodTypeId,
+                      },
+                      "location": {
+                        "id_location": 0,
+                        "location_address_id": 0,
+                        "id_address": 0,
+                        "location_latitude": locationLatitude ?? 0.0,
+                        "location_longitude": locationLongitude ?? 0.0,
+                        "location_name": locationName ?? "",
+                        "address_street": addressStreet ?? "",
+                        "address_city": addressCity ?? "",
+                        "address_postal_code": addressPostalCode,
+                        "address_country": addressCountry ?? "",
+                      }
                     };
 
-                    log(payload.toString());
+                    // log(payload.toString());
 
                     try {
                       dynamic data = await Provider.of<AppUserNotifier>(context,

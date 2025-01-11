@@ -44,12 +44,9 @@ class AppUserServiceImpl implements AppUserService {
       // log('${await storageService.get(GluttexConstants.apiBaseUrl + GluttexConstants.appUserEndpoint, id)}');
       var data = await storageService.get(
           GluttexConstants.apiBaseUrl + GluttexConstants.appUserEndpoint, id);
-      // log('${data}');
 
-      var appUsers = data
-          .map((data) => AppUser.fromJson(data as Map<String, dynamic>))
-          .toList();
-      var user = appUsers.first;
+      var appUsers = AppUser.fromJson(data as Map<String, dynamic>);
+      var user = appUsers;
       return user;
     } catch (e, stacktrace) {
       log('$e');

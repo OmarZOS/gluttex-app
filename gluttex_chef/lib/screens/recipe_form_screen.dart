@@ -265,7 +265,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                       recipe_created_at: null,
                       recipe_last_updated: null,
                       recipe_instruction: _recipeInstruction,
-                      recipe_preparation_time: _recipePreparationTime,
+                      recipe_preparation_time: preparationTime.toString(),
                       recipe_category_desc: "",
                       recipe_ingredients: _selectedIngredients,
                     );
