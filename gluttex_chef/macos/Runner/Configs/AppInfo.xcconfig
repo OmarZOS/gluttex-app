@@ -8,7 +8,7 @@
 RECIPE_NAME = gluttex_chef
 
 // The application's bundle identifier
-RECIPE_BUNDLE_IDENTIFIER = com.example.gluttexChef
+RECIPE_BUNDLE_IDENTIFIER = com.gluttex.gluttexChef
 
 // The copyright displayed in application information
-RECIPE_COPYRIGHT = Copyright © 2024 com.example. All rights reserved.
+RECIPE_COPYRIGHT = Copyright © 2024 com.gluttex. All rights reserved.

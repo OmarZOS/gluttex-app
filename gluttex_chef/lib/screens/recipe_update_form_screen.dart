@@ -31,7 +31,7 @@ class RecipeEditFormScreen extends StatefulWidget {
   final int? initialIdRecipeImage;
   final String? initialRecipeDescription;
   final String? initialRecipeInstruction;
-  final String? initialRecipePreparationTime;
+  final Duration? initialRecipePreparationTime;
   final Map<int, String>? initialIngredients;
 
   const RecipeEditFormScreen(
@@ -67,7 +67,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
   int? _id_recipe_image;
   String? _recipeDescription;
   String? _recipeInstruction;
-  String? _recipePreparationTime;
+  Duration? _recipePreparationTime;
   late Duration preparationTime;
   DateTime? recipe_created_at;
   DateTime? recipe_last_updated;
@@ -88,7 +88,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
     _id_recipe_image = widget.initialIdRecipeImage;
     _recipePreparationTime = widget.initialRecipePreparationTime;
     _selectedIngredients = widget.initialIngredients ?? {};
-    preparationTime = parseDuration(_recipePreparationTime!);
+    preparationTime = _recipePreparationTime!;
   }
 
   Future<void> _pickImage() async {
@@ -115,20 +115,12 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
           height: MediaQuery.of(context).size.height * 0.7,
           // color: Colors.white,
           child: CupertinoTimerPicker(
-            initialTimerDuration:
-                ParseDurationString(_recipePreparationTime ?? ""),
+            initialTimerDuration: _recipePreparationTime!,
             mode: CupertinoTimerPickerMode.hm,
             onTimerDurationChanged: (Duration newDuration) {
               setState(() {
                 preparationTime = newDuration;
-                _recipePreparationTime = ((newDuration.inHours != 0)
-                        ? AppLocalizations.of(context)!
-                            .hoursTextValue(newDuration.inHours.toString())
-                        : '') +
-                    ((newDuration.inMinutes.remainder(60) != 0)
-                        ? AppLocalizations.of(context)!.minutesTextValue(
-                            newDuration.inMinutes.remainder(60).toString())
-                        : '.');
+                _recipePreparationTime = newDuration;
               });
             },
           ),
@@ -314,11 +306,12 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                       id_recipe_image: _id_recipe_image,
                       recipe_name: _recipeName,
                       recipe_image_data: _recipeImage,
+                      recipe_image_url: null,
                       recipe_description: _recipeDescription,
                       recipe_created_at: null,
                       recipe_last_updated: null,
                       recipe_instruction: _recipeInstruction,
-                      recipe_preparation_time: preparationTime.toString(),
+                      recipe_preparation_time: preparationTime,
                       recipe_category_desc: "",
                       recipe_ingredients: {},
                     );

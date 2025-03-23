@@ -2,7 +2,6 @@ library gluttex_impl_business;
 
 import 'dart:developer' as developer;
 import 'dart:typed_data';
-
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
@@ -58,14 +57,14 @@ class RecipeServiceImpl implements RecipeService {
   }
 
   @override
-  Future<List<Recipe>?>? getAllRecipes() async {
+  Future<List<Recipe>?>? getAllRecipes(int page, int limit) async {
     try {
       // Get the storage service instance
       StorageService storageService = GluttexLocator.get<StorageService>();
 
       // Make a call to get all recipes
       List<dynamic> responseData = await storageService.getAll(
-          GluttexConstants.apiBaseUrl + GluttexConstants.getAllRecipesEndpoint);
+          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllRecipesEndpoint}/$page/$limit");
       // Check if the response data is not null and is a list
       // Convert the list of dynamic maps to a list of Recipe objects
       List dateien = responseData;

@@ -9,6 +9,7 @@ import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:provider/provider.dart';
+import '../components/RecipeCard.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({super.key, required this.recipe});
@@ -193,10 +194,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: _recipe.recipe_image_data != null &&
-                        _recipe.recipe_image_data!.isNotEmpty
-                    ? Image.memory(
-                        _recipe.recipe_image_data!,
+                child: _recipe.recipe_image_url != null &&
+                        _recipe.recipe_image_url!.isNotEmpty
+                    ? Image.network(
+                        GluttexConstants.fsBaseUrl + _recipe.recipe_image_url!,
                         height: size.height / 3,
                         fit: BoxFit.cover,
                       )
@@ -225,8 +226,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   const Icon(Icons.timer),
                   const SizedBox(width: 8),
                   Text(
-                    _recipe.recipe_preparation_time ??
-                        AppLocalizations.of(context)!.noPreparationTimeText,
+                    RecipeCard.getRecipePreparationTime(
+                        context, _recipe.recipe_preparation_time),
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -249,19 +250,18 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           int key =
                               _recipe.recipe_ingredients!.keys.elementAt(index);
                           String quantity = _recipe.recipe_ingredients![key]!;
-
+                          RecipeIngredient currentIngredient =
+                              Provider.of<RecipeNotifier>(context,
+                                      listen: false)
+                                  .getIngredientById(key)!;
                           // Return the IngredientCard with the correct data
                           return IngredientCard(
                             onClicked: () {},
-                            name: Provider.of<RecipeNotifier>(context,
-                                    listen: false)
-                                .getIngredientById(key)!
-                                .ingredient_name,
+                            name: AppLocalizations.of(context)!
+                                .ingredientTextList
+                                .split(',')[key - 1],
                             quantity: quantity,
-                            icon: Provider.of<RecipeNotifier>(context,
-                                    listen: false)
-                                .getIngredientById(key)!
-                                .ingredient_icon,
+                            icon: currentIngredient.ingredient_icon,
                           );
                         },
                       ),

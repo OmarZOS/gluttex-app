@@ -10,7 +10,10 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 
 class StorageServiceImpl implements StorageService {
-  final Dio _dio = Dio();
+  final Dio _dio;
+
+  // Constructor allows optional Dio injection
+  StorageServiceImpl({Dio? dio}) : _dio = dio ?? Dio();
 
   @override
   Future<int?> delete(String destination, String id) async {
@@ -120,24 +123,33 @@ class StorageServiceImpl implements StorageService {
   Future<dynamic> signUpUsingUsernameAndPassword(
       String destination, Map<String, dynamic> data) async {
     try {
-      log('$data');
-      final response = await _dio.put(destination,
-          data: data, //json.encode(data)
-          options: Options(
-              validateStatus: (status) => status == 200 || status == 406,
-              headers: {
-                'Content-Type': 'application/json',
-                'accept': 'application/json'
-              }));
+      log('Sending data: $data'); // ✅ Log request data
+
+      final response = await _dio.put(
+        destination,
+        data: data, // ✅ Removed json.encode(data)
+        options: Options(
+          validateStatus: (status) => status == 200 || status == 406,
+          headers: {
+            'Content-Type': 'application/json',
+            'accept': 'application/json',
+          },
+        ),
+      );
+
+      log('Response: ${response.data}'); // ✅ Log response
+
       if (response.statusCode == 406) {
         throw Exception(response.data["detail"]);
       }
+
       return response.data;
     } on DioException catch (e) {
-      // log('Error: ' + e.message.toString());
-      // log('Stack trace: $stacktrace');
-      // Return server error message
-      throw Exception(e.message);
+      log('Dio Error: ${e.response?.data ?? e.message}'); // ✅ Better error logging
+      throw Exception(e.response?.data ?? e.message);
+    } catch (e) {
+      log('Unexpected Error: $e'); // ✅ Catch other errors
+      throw Exception('Unexpected error occurred.');
     }
   }
 
@@ -145,7 +157,7 @@ class StorageServiceImpl implements StorageService {
   Future<dynamic> signInUsingUsernameAndPassword(
       String destination, Map<String, dynamic> data) async {
     try {
-      // log('${json.encode(data)}');
+      log('${json.encode(data)}');
       final response = await _dio.post(destination,
           data: json.encode(data),
           options: Options(
@@ -155,11 +167,14 @@ class StorageServiceImpl implements StorageService {
                 'accept': 'application/json'
               }));
       if (response.statusCode == 406) {
+        log(response.data.toString());
         throw Exception(response.data["detail"]);
       }
+      log(response.data.toString());
       return response.data;
     } on DioException catch (e) {
       // Return server error message
+      log(e.message.toString());
       throw Exception(e.message);
     }
   }

@@ -6,6 +6,7 @@ import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:gluttex_impl_business/cart_change_notifier.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
+import 'package:medicom_catalog/screens/components/ProductOwner.dart';
 import 'package:medicom_catalog/screens/components/add_to_cart.dart';
 import 'package:medicom_catalog/screens/components/quantity_and_ref.dart';
 import 'package:medicom_catalog/screens/components/counter_with_fav_btn.dart';
@@ -105,7 +106,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           actions: <Widget>[
-            (true)
+            is_product_owner(context, _product.product_owner_id ?? 0)
                 ? (IconButton(
                     icon: const Icon(
                       Icons.delete,
@@ -165,7 +166,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     },
                   ))
                 : Container(),
-            (true)
+            is_product_owner(context, _product.product_owner_id ?? 0)
                 ? (IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
@@ -177,6 +178,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             initialProductBrand: _product.product_brand,
                             initialProductBarcode: _product.product_barcode,
                             initialProductImage: _product.product_image_data,
+                            initialProductOwner: _product.product_owner_id,
                             initialProductTypeId: _product.product_category_id,
                             initialProductPrice: _product.product_price,
                             initialProductQuantity: _product.product_quantity,
@@ -248,7 +250,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             Description(product: _product),
                             const SizedBox(
                                 height: GluttexConstants.kDefaultPaddin / 2),
-                            const CounterWithFavBtn(),
+                            // const CounterWithFavBtn(),
                             const SizedBox(
                                 height: GluttexConstants.kDefaultPaddin / 2),
                             AddToCart(

@@ -8,12 +8,13 @@ class Recipe {
 
   final int? id_recipe_image;
   Uint8List? recipe_image_data;
+  final String? recipe_image_url;
   final DateTime? recipe_created_at;
   final DateTime? recipe_last_updated;
   final String? recipe_name;
   final String? recipe_description;
   final String? recipe_instruction;
-  final String? recipe_preparation_time;
+  final Duration? recipe_preparation_time;
   final String? recipe_category_desc;
   final Map<int, String>? recipe_ingredients;
 
@@ -23,6 +24,7 @@ class Recipe {
       required this.id_recipe_image,
       required this.recipe_name,
       required this.recipe_image_data,
+      required this.recipe_image_url,
       required this.recipe_description,
       required this.recipe_created_at,
       required this.recipe_last_updated,
@@ -33,18 +35,21 @@ class Recipe {
       required this.recipe_ingredients});
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
-    Uint8List? imageData;
+    String? imageUrl;
     int cardImageId = 0;
     if (json['recipe_image'] != null &&
         json['recipe_image'] is List &&
         json['recipe_image']!.isNotEmpty) {
       final imageId = json['recipe_image'][0]["id_recipe_image"];
       cardImageId = imageId;
-      final imageBase64 = json['recipe_image'][0]["recipe_image_data"];
-      if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
-        imageData = base64Decode(imageBase64);
-      }
+      imageUrl = json['recipe_image'][0]["recipe_image_url"];
     }
+
+    List<String> preparationTime =
+        json['recipe_preparation_time'].toString().split("h");
+    Duration? preparationDuration = Duration(
+        hours: int.parse(preparationTime[0]),
+        minutes: int.parse(preparationTime[1]));
 
     Map<int, String> ingredientsMap = {};
     if (json['recipe_contains_ingredient'] != null)
@@ -61,11 +66,12 @@ class Recipe {
         recipe_owner_id: json['recipe_owner_id'] ?? 0,
         recipe_category_id: json['recipe_category_id'] ?? 0,
         id_recipe_image: cardImageId,
-        recipe_image_data: imageData,
+        recipe_image_data: null,
+        recipe_image_url: imageUrl ?? "",
         recipe_name: json['recipe_name'] ?? "",
         recipe_description: json['recipe_description'],
         recipe_instruction: json['recipe_instructions'],
-        recipe_preparation_time: json['recipe_preparation_time'],
+        recipe_preparation_time: preparationDuration,
         recipe_created_at: null,
         recipe_last_updated: null,
         recipe_category_desc:
@@ -93,7 +99,8 @@ class Recipe {
         "id_recipe": id_recipe ?? 0,
         "recipe_owner_id": recipe_owner_id ?? 0,
         "recipe_category_id": recipe_category_id ?? 0,
-        "recipe_preparation_time": recipe_preparation_time ?? "",
+        "recipe_preparation_time":
+            "${recipe_preparation_time!.inHours}h${recipe_preparation_time!.inMinutes}",
         "recipe_name": recipe_name ?? "",
         "recipe_description": recipe_description ?? "",
         "recipe_instructions": recipe_instruction ?? "",

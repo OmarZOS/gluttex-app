@@ -57,15 +57,23 @@ class ProductServiceImpl implements ProductService {
   }
 
   @override
-  Future<List<Product>?>? getAllProducts() async {
+  Future<List<Product>?>? getAllProducts(
+      int category, int page, int limit) async {
     try {
       // Get the storage service instance
       StorageService storageService = GluttexLocator.get<StorageService>();
 
+      String route;
+      if (category > 0) {
+        route =
+            "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllProductsByCategoryEndpoint}/$category/$page/$limit";
+      } else {
+        route =
+            "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllProductsEndpoint}/$page/$limit";
+      }
+
       // Make a call to get all products
-      List<dynamic> responseData = await storageService.getAll(
-          GluttexConstants.apiBaseUrl +
-              GluttexConstants.getAllProductsEndpoint);
+      List<dynamic> responseData = await storageService.getAll(route);
       // Check if the response data is not null and is a list
       // Convert the list of dynamic maps to a list of Product objects
       List dateien = responseData;

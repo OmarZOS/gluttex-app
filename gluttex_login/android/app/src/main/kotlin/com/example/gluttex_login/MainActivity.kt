@@ -1,4 +1,4 @@
-package com.example.gluttex_login
+package com.gluttex.gluttex_login
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:medicom_catalog/screens/product_screen.dart';
@@ -16,13 +17,13 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // log('${product.id_product_image}');
 
-    if (product.id_product_image != null &&
-        product.id_product_image != 0 &&
-        product.product_image_data == null) {
-      Provider.of<ProductNotifier>(context, listen: false)
-          .getProductImage(product);
-    }
-
+    // if (product.id_product_image != null &&
+    //     product.id_product_image != 0 &&
+    //     product.product_image_url == null) {
+    //   Provider.of<ProductNotifier>(context, listen: false)
+    //       .getProductImage(product);
+    // }
+    log(GluttexConstants.fsBaseUrl + product.product_image_url!);
     return InkWell(
       onTap: () => Navigator.push(
         context,
@@ -39,18 +40,28 @@ class ProductCard extends StatelessWidget {
           children: [
             Expanded(
               child: SizedBox(
-                width: double
-                    .infinity, // make the container take up the full width
+                width: double.infinity,
                 child: Center(
-                  child: product.product_image_data != null &&
-                          product.product_image_data!.isNotEmpty
-                      ? Image.memory(
-                          product.product_image_data!,
-                          fit: BoxFit.cover, // fit the image within the space
-                        )
-                      : Container(
-                          child: const Placeholder(),
-                        ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    child: product.product_image_url != null
+                        ? Image.network(
+                            GluttexConstants.fsBaseUrl +
+                                product.product_image_url!,
+                            fit: BoxFit.cover,
+                            key: ValueKey(product.id_product_image),
+                          )
+                        : Container(
+                            key: const ValueKey('placeholder'),
+                            child: const Placeholder(),
+                          ),
+                  ),
                 ),
               ),
             ),

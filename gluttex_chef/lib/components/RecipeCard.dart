@@ -11,16 +11,26 @@ class RecipeCard extends StatelessWidget {
 
   const RecipeCard({super.key, required this.recipe});
 
+  static String getRecipePreparationTime(
+      BuildContext context, Duration? preparationTime) {
+    if (preparationTime != null)
+      // ignore: curly_braces_in_flow_control_structures
+      return AppLocalizations.of(context)!.preparationTimeText(
+          preparationTime.inHours.toInt(),
+          preparationTime.inMinutes.toInt() % 60);
+    return AppLocalizations.of(context)!.noPreparationTimeText;
+  }
+
   @override
   Widget build(BuildContext context) {
     final double cardHeight = MediaQuery.of(context).size.height / 4;
 
-    if (recipe.id_recipe_image != null &&
-        recipe.id_recipe_image != 0 &&
-        recipe.recipe_image_data == null) {
-      Provider.of<RecipeNotifier>(context, listen: false)
-          .getRecipeImage(recipe);
-    }
+    // if (recipe.id_recipe_image != null &&
+    //     recipe.id_recipe_image != 0 &&
+    //     recipe.recipe_image_data == null) {
+    //   Provider.of<RecipeNotifier>(context, listen: false)
+    //       .getRecipeImage(recipe);
+    // }
     return InkWell(
       onTap: () => Navigator.push(
         context,
@@ -41,10 +51,10 @@ class RecipeCard extends StatelessWidget {
                 child: SizedBox(
                     width: double
                         .infinity, // Make the container take up the full width
-                    child: recipe.recipe_image_data != null &&
-                            recipe.recipe_image_data!.isNotEmpty
-                        ? Image.memory(
-                            recipe.recipe_image_data!,
+                    child: recipe.recipe_image_url != null
+                        ? Image.network(
+                            GluttexConstants.fsBaseUrl +
+                                recipe.recipe_image_url!,
                             fit: BoxFit.fill, // Fit the image within the space
                           )
                         : Container(
@@ -63,17 +73,14 @@ class RecipeCard extends StatelessWidget {
                       AppLocalizations.of(context)!
                           .recipeCategoryTextList
                           .split(",")[(recipe.recipe_category_id ?? 1) - 1],
-                      // style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
                       recipe.recipe_name ?? '',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      '${recipe.recipe_preparation_time}',
-                      // style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    Text(getRecipePreparationTime(
+                        context, recipe.recipe_preparation_time)),
                   ],
                 ),
               ),
@@ -84,22 +91,3 @@ class RecipeCard extends StatelessWidget {
     );
   }
 }
-
-// Widget _buildRecipeGrid(List<Recipe> recipes) {
-//   if (recipes.isEmpty) {
-//     return Center(child: Text(AppLocalizations.of(context)!.noRecipesFound));
-//   }
-
-//   return GridView.builder(
-//     itemCount: recipes.length,
-//     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//       crossAxisCount: 2,
-//       mainAxisSpacing: GluttexConstants.kDefaultPaddin,
-//       crossAxisSpacing: GluttexConstants.kDefaultPaddin,
-//       childAspectRatio: 0.5, // Adjust childAspectRatio to fit your layout needs
-//     ),
-//     itemBuilder: (context, index) => RecipeCard(
-//       recipe: recipes[index],
-//     ),
-//   );
-// }

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_home/screens/LanguageSelectionScreen.dart';
+import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -22,11 +22,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
-              return const LanguageSelectionScreen();
+              return const SettingsScreen();
             }),
           );
         },
-        child: const Icon(Icons.abc), // Replace with the desired icon
+        child: const Icon(Icons.settings), // Replace with the desired icon
       ),
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.profileText),

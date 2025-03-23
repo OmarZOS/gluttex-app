@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
@@ -51,12 +53,13 @@ class ProductTitleWithImage extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(
                           100), // Adjust the radius as needed
-                      child: product.product_image_data != null &&
-                              product.product_image_data!.isNotEmpty
-                          ? Image.memory(
+                      child: product.product_image_url != null &&
+                              product.product_image_url!.isNotEmpty
+                          ? Image.network(
+                              GluttexConstants.fsBaseUrl +
+                                  product.product_image_url!,
                               width: 156, // Adjust the size as needed
                               height: 156, // Adjust the size as needed
-                              product.product_image_data!,
                               // fit: BoxFit.cover,
                             )
                           : const Icon(Icons.image_not_supported),

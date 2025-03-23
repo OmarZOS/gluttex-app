@@ -143,5 +143,317 @@
   "productCategoryTextList": "Produits de boulangerie, Tartinades, Céréales, Pâtes, Collations, Boissons, Desserts",
   "allText": "Tout",
   "providerCategoryTextList": "Restaurant, Boulangerie, Usine, Supermarché",
-  "recipeCategoryTextList": "Apéritifs & Collations, Soupes & Ragoûts, Salades, Plats Principaux, Accompagnements, Pâtes & Nouilles, Gratinés, Petit-Déjeuner & Brunch, Pains & Pâtisseries, Desserts, Boissons, Sauces & Condiments, Cuisine Internationale, Régimes Sains & Spéciaux, Fêtes & Saisons, Enfants & Famille, Cuiseur Lent & Instantané, Rapide & Facile, Recettes en Une Seule Poêle, Grillades & BBQ"
+  "recipeCategoryTextList": "Apéritifs & Collations, Soupes & Ragoûts, Salades, Plats Principaux, Accompagnements, Pâtes & Nouilles, Gratinés, Petit-Déjeuner & Brunch, Pains & Pâtisseries, Desserts, Boissons, Sauces & Condiments, Cuisine Internationale, Régimes Sains & Spéciaux, Fêtes & Saisons, Enfants & Famille, Cuiseur Lent & Instantané, Rapide & Facile, Recettes en Une Seule Poêle, Grillades & BBQ",
+  "ingredientTextList" :"Blé,Orge,Seigle,Avoine,Maïs,Riz,Soja,Lait,Œuf,Arachides,Noix,Poisson,Crustacés,Lentilles,Pois chiches ,Sarrasin ,Amande,Noix de coco ,Graines de tournesol ,Graines de courge,Graines de sésame,Pomme de terre ,Patate douce ,Gélatine ,Lupin ,Moutarde ,Fenouil,Cumin ,Gingembre,Ail,Oignon,Poireau,Échalote ,Ciboule,Ciboulette ,Persil,Coriandre,Basilic,Origan,Thym,Romarin,Sauge ,Menthe,Citronnelle,Lavande,Paprika,Piment,Poivre noir,Poivre blanc ,Poivre vert,Poivre rouge ,Cannelle ,Piment de la Jamaïque,Beurre,Margarine,Huile végétale ,Levure chimique,Bicarbonate de soude ,Fécule de maïs ,Farine tout usage,Farine de pâtisserie ,Farine auto-levante",
+  "cartText":"Panier",
+  "ordersText":"Commandes",
+  "noOrdersTxt":"Pas de commandes à afficher.",
+  "orderIdentifierTxt":"Identificateur: {orderId}",
+  "settingsTitle":"Paramètres",
+  "languageText":"Langue",
+  "currentLanguage":"Langue actuelle: {currentLang}",
+  "darkModeText":"Basculer le thème sombre",
+  "profileUpdateText":"Mettre à jour mon profil",
+  "passwordUpdateText":"Mettre à jour le mot de passe",
+  "showMoreText":"Afficher plus",
+
+
+"question_1": "Qu'est-ce que la maladie cœliaque ?",
+  "options_1": "Une allergie au gluten,Une intolérance permanente au gluten,Une carence en vitamines,Une infection virale",
+
+  "question_2": "Quel ingrédient contient du gluten ?",
+  "options_2": "Le riz,Le blé,Le maïs,Le quinoa",
+
+  "question_3": "Quel aliment est naturellement sans gluten ?",
+  "options_3": "Le pain de seigle,Les pâtes au blé,Le riz,La bière traditionnelle",
+
+  "question_4": "Quel symptôme peut être causé par l'ingestion de gluten chez une personne atteinte de la maladie cœliaque ?",
+  "options_4": "Une indigestion,Une amélioration de la digestion,Une augmentation de l'énergie,Un renforcement du système immunitaire",
+
+  "question_5": "Quel type de farine est naturellement sans gluten ?",
+  "options_5": "Farine de blé,Farine de seigle,Farine de riz,Farine d'orge",
+
+  "question_6": "Quel aliment peut contenir du gluten caché ?",
+  "options_6": "Les légumes frais,Le chocolat noir pur,Les sauces industrielles,Les fruits frais",
+
+  "question_7": "Quel est un effet à long terme de la consommation de gluten chez les personnes atteintes de la maladie cœliaque ?",
+  "options_7": "Amélioration de la digestion,Malabsorption des nutriments,Gain de poids rapide,Augmentation de la tolérance au gluten",
+
+  "question_8": "Quelle céréale contient du gluten ?",
+  "options_8": "Le riz,Le maïs,L'orge,Le quinoa",
+
+  "question_9": "Quelle boisson peut contenir du gluten ?",
+  "options_9": "Le jus d'orange,L'eau plate,La bière,Le café noir",
+
+  "question_10": "Quelle certification doit-on rechercher sur les produits sans gluten ?",
+  "options_10": "Biologique,Végétalien,Certifié sans gluten,Riche en protéines",
+
+  "question_11": "Quelle céréale est naturellement sans gluten ?",
+  "options_11": "Le blé,L'avoine non certifiée,Le quinoa,Le seigle",
+
+  "question_12": "Quel produit de boulangerie est généralement sans gluten ?",
+  "options_12": "Le pain de campagne,Le pain à base de farine de riz,Le pain complet,La brioche traditionnelle",
+
+  "question_13": "Quel ingrédient est souvent utilisé comme substitut du gluten dans les pains sans gluten ?",
+  "options_13": "La gomme de xanthane,Le sucre,Le beurre,Le sel",
+
+  "question_14": "Quelle pâte est adaptée à un régime sans gluten ?",
+  "options_14": "Les pâtes de blé,Les pâtes de maïs,Les pâtes complètes,Les pâtes à l’orge",
+
+  "question_15": "Quel type de restaurant doit être approché avec prudence lorsqu'on suit un régime sans gluten ?",
+  "options_15": "Les restaurants végétaliens,Les boulangeries traditionnelles,Les bars à salades,Les glaciers",
+
+  "question_16": "Quel symptôme peut indiquer une contamination croisée au gluten ?",
+  "options_16": "Maux d'estomac,Amélioration de la digestion,Augmentation de l'énergie,Peau plus éclatante",
+
+  "question_17": "Quel aliment doit être vérifié pour une éventuelle présence de gluten ?",
+  "options_17": "Le poulet cru,Le lait,Les sauces et assaisonnements,Les fruits frais",
+
+  "question_18": "Quel légume est naturellement sans gluten ?",
+  "options_18": "Les pommes de terre,Le blé,L'orge,Le seigle",
+
+  "question_19": "Pourquoi est-il important de lire les étiquettes des produits alimentaires ?",
+  "options_19": "Pour vérifier la présence de gluten,Pour identifier la couleur de l'emballage,Pour comparer les prix,Pour voir la date de fabrication",
+
+  "question_20": "Quel type de riz est sans gluten ?",
+  "options_20": "Le riz complet,Le riz basmati,Le riz blanc,Tout type de riz naturel",
+"question_21": "Quel substitut de farine est couramment utilisé dans les recettes sans gluten ?",
+  "options_21": "Farine de blé,Farine d’amande,Farine de seigle,Farine d’orge",
+
+  "question_22": "Quel ingrédient est sûr pour un régime sans gluten ?",
+  "options_22": "Le blé,La semoule,La fécule de maïs,L’orge",
+
+  "question_23": "Quelle maladie est associée à une intolérance permanente au gluten ?",
+  "options_23": "Diabète,Maladie cœliaque,Hypertension,Asthme",
+
+  "question_24": "Quel ingrédient est souvent utilisé pour améliorer la texture des pains sans gluten ?",
+  "options_24": "Gomme de xanthane,Saccharose,Levure chimique,Farine de blé",
+
+  "question_25": "Quelle épice est naturellement sans gluten ?",
+  "options_25": "Le poivre noir,La farine de blé,La sauce soja,L’orge",
+
+  "question_26": "Pourquoi certaines personnes suivent-elles un régime sans gluten sans être atteintes de la maladie cœliaque ?",
+  "options_26": "Pour perdre du poids,Par préférence personnelle,À cause d’une sensibilité au gluten,Toutes ces réponses",
+
+  "question_27": "Quelle céréale est naturellement exempte de gluten ?",
+  "options_27": "L’avoine certifiée sans gluten,Le blé,Le seigle,L’orge",
+
+  "question_28": "Quel plat est généralement sans gluten ?",
+  "options_28": "Les pâtes traditionnelles,Le risotto nature,Le pain complet,Les céréales du petit-déjeuner standards",
+
+  "question_29": "Quel dessert peut contenir du gluten ?",
+  "options_29": "La mousse au chocolat maison,Les brownies classiques,Les fruits frais,Le yaourt nature",
+
+  "question_30": "Pourquoi faut-il faire attention aux fritures dans un régime sans gluten ?",
+  "options_30": "L’huile contient du gluten,La friture détruit le gluten,La contamination croisée est possible,Le gluten se dissout dans l’huile",
+
+  "question_31": "Quelle farine est adaptée à un régime sans gluten ?",
+  "options_31": "Farine de blé,Farine d’avoine non certifiée,Farine de pois chiches,Farine d’orge",
+
+  "question_32": "Quel ingrédient est souvent ajouté aux produits sans gluten pour améliorer leur texture ?",
+  "options_32": "Gomme de guar,Farine de blé,Farine de seigle,Levure chimique",
+
+  "question_33": "Quel aliment est naturellement sans gluten ?",
+  "options_33": "Pain complet,Quinoa,Pâtes classiques,Bière artisanale",
+
+  "question_34": "Quel condiment peut contenir du gluten caché ?",
+  "options_34": "Le ketchup,Le sel,Le poivre noir,Le vinaigre blanc",
+
+  "question_35": "Quel aliment est à éviter dans un régime sans gluten ?",
+  "options_35": "Les pommes de terre,Le pain complet,Les légumineuses,Le poisson grillé",
+
+  "question_36": "Quel problème de santé peut être causé par la maladie cœliaque non traitée ?",
+  "options_36": "Déficience en nutriments,Amélioration de la digestion,Augmentation de la masse musculaire,Régénération plus rapide des cellules",
+
+  "question_37": "Quelle sauce est généralement sans gluten ?",
+  "options_37": "La sauce soja,La sauce béchamel classique,La sauce tomate maison,La sauce Worcestershire",
+
+  "question_38": "Pourquoi certaines personnes doivent-elles éviter l’avoine dans un régime sans gluten ?",
+  "options_38": "L’avoine contient naturellement du gluten,L’avoine est souvent contaminée par le gluten,L’avoine est un type de blé,L’avoine est trop calorique",
+
+  "question_39": "Quel plat peut contenir du gluten caché ?",
+  "options_39": "Le steak grillé,Les pâtes sans gluten,Le potage épaissi avec de la farine,Le riz nature",
+
+  "question_40": "Quelle boisson est garantie sans gluten ?",
+  "options_40": "Bière artisanale,Jus de fruits 100 % pur,Boisson à base de malt,Whisky non certifié",
+  "question_41": "Quel type de pain convient à un régime sans gluten ?",
+  "options_41": "Pain complet,Pain de seigle,Pain à base de farine de riz,Pain aux céréales",
+
+  "question_42": "Quel aliment peut contenir du gluten en raison d’une contamination croisée ?",
+  "options_42": "Fruits frais,Riz blanc,Pâtes de blé,Flocons d’avoine non certifiés",
+
+  "question_43": "Quel ingrédient doit être vérifié sur l’étiquette d’un produit sans gluten ?",
+  "options_43": "Farine de blé,Gomme de xanthane,Fécule de maïs,Farine de coco",
+
+  "question_44": "Quelle pâte est naturellement sans gluten ?",
+  "options_44": "Pâte feuilletée,Pâte brisée,Pâte à base de farine de maïs,Pâte à pain classique",
+
+  "question_45": "Quel dessert est naturellement sans gluten ?",
+  "options_45": "Tarte aux pommes,Brownie traditionnel,Glace à la vanille maison,Crêpes au blé",
+
+  "question_46": "Quel ingrédient est sûr pour un régime sans gluten ?",
+  "options_46": "Farine d’amande,Farine de blé,Farine de seigle,Farine d’orge",
+
+  "question_47": "Pourquoi la contamination croisée est-elle un problème pour les personnes intolérantes au gluten ?",
+  "options_47": "Elle peut provoquer des symptômes sévères,Elle rend les aliments plus caloriques,Elle affecte le goût des aliments,Elle réduit l’efficacité des vitamines",
+
+  "question_48": "Quel type de céréales est interdit dans un régime sans gluten ?",
+  "options_48": "Millet,Sarrasin,Blé,Quinoa",
+
+  "question_49": "Quel ingrédient est souvent utilisé pour épaissir les sauces sans gluten ?",
+  "options_49": "Farine de blé,Fécule de maïs,Farine de seigle,Farine d’orge",
+
+  "question_50": "Quelle légumineuse est naturellement sans gluten ?",
+  "options_50": "Lentilles,Fèves,Pois chiches,Toutes ces réponses",
+
+  "question_51": "Quel type de produit est le plus susceptible de contenir du gluten caché ?",
+  "options_51": "Viande fraîche,Riz basmati,Soupes industrielles,Poisson grillé",
+
+  "question_52": "Quel ingrédient peut être utilisé pour remplacer la farine de blé dans les gâteaux sans gluten ?",
+  "options_52": "Farine de coco,Farine d’orge,Farine de seigle,Farine de blé",
+
+  "question_53": "Quel aliment peut être consommé dans un régime sans gluten ?",
+  "options_53": "Pain blanc,Pâtes classiques,Maïs,Bière artisanale",
+
+  "question_54": "Quel substitut de farine est couramment utilisé pour faire du pain sans gluten ?",
+  "options_54": "Farine de seigle,Farine d’orge,Farine de sarrasin,Farine de blé",
+
+  "question_55": "Pourquoi est-il important de lire les étiquettes des produits transformés dans un régime sans gluten ?",
+  "options_55": "Pour vérifier la présence de gluten caché,Pour connaître la date d’expiration,Pour comparer les calories,Pour voir le prix du produit",
+
+  "question_56": "Quel aliment est généralement sans gluten ?",
+  "options_56": "Pain de seigle,Riz complet,Blé dur,Orge perlé",
+
+  "question_57": "Quel ingrédient peut contenir du gluten caché dans les bonbons ?",
+  "options_57": "Gélatine,Fécule de maïs,Arômes naturels,Sirop de glucose issu du blé",
+
+  "question_58": "Quelle boisson alcoolisée est naturellement sans gluten ?",
+  "options_58": "Bière,Vodka à base de blé,Whisky,Rhum pur",
+
+  "question_59": "Quel fruit est naturellement sans gluten ?",
+  "options_59": "Banane,Pomme,Fraise,Toutes ces réponses",
+
+  "question_60": "Quel ingrédient est souvent ajouté aux pains sans gluten pour améliorer leur élasticité ?",
+  "options_60": "Gomme de xanthane,Farine de blé,Levure chimique,Farine de seigle",
+
+  "question_61": "Quel ingrédient peut être utilisé pour remplacer le gluten dans les pâtes à pain sans gluten ?",
+  "options_61": "Gomme de xanthane,Farine de blé,Farine d’orge,Farine de seigle",
+
+  "question_62": "Quel plat est naturellement sans gluten ?",
+  "options_62": "Ratatouille,Lasagnes,Baguette,Pizza classique",
+
+  "question_63": "Quel ingrédient est souvent utilisé pour donner de la texture aux pâtisseries sans gluten ?",
+  "options_63": "Gomme de guar,Farine de blé,Levure de bière,Farine de seigle",
+
+  "question_64": "Quel produit laitier est naturellement sans gluten ?",
+  "options_64": "Fromage,Yaourt nature,Lait,Toutes ces réponses",
+
+  "question_65": "Quel ingrédient peut contenir du gluten caché dans les sauces ?",
+  "options_65": "Fécule de maïs,Farine de riz,Farine de blé,Huile d’olive",
+
+  "question_66": "Quelle farine est adaptée à un régime sans gluten ?",
+  "options_66": "Farine de sarrasin,Farine de blé,Farine d’orge,Farine de seigle",
+
+  "question_67": "Quel condiment peut contenir du gluten ?",
+  "options_67": "Sauce soja,Vinaigre balsamique,Moutarde,Purée de tomates",
+
+  "question_68": "Quelle céréale est naturellement sans gluten ?",
+  "options_68": "Avoine certifiée,Sarrasin,Millet,Toutes ces réponses",
+
+  "question_69": "Quel ingrédient est souvent utilisé pour lier les préparations sans gluten ?",
+  "options_69": "Gomme de xanthane,Farine de blé,Farine de seigle,Levure chimique",
+
+  "question_70": "Quel aliment est sans gluten ?",
+  "options_70": "Quinoa,Pain de mie,Pâtes classiques,Semoule de blé",
+
+  "question_71": "Quel type de chocolat est généralement sans gluten ?",
+  "options_71": "Chocolat noir pur,Chocolat au lait avec arômes,Chocolat blanc avec biscuits,Chocolat aux céréales",
+
+  "question_72": "Quel ingrédient doit être vérifié sur une pizza sans gluten ?",
+  "options_72": "Pâte,Fromage,Tomates,Basilic",
+
+  "question_73": "Quel type de biscuit est naturellement sans gluten ?",
+  "options_73": "Macarons,Cookies classiques,Petit-beurre,Biscuits sablés",
+
+  "question_74": "Quel aliment peut contenir du gluten même s'il semble naturellement sans gluten ?",
+  "options_74": "Flocons d’avoine non certifiés,Riz basmati,Fruits secs,Amandes",
+
+  "question_75": "Quel produit est naturellement sans gluten ?",
+  "options_75": "Riz,Pâtes de blé,Pain complet,Semoule de blé",
+
+  "question_76": "Quel ingrédient est utilisé pour épaissir une soupe sans gluten ?",
+  "options_76": "Fécule de maïs,Farine de blé,Farine de seigle,Semoule",
+
+  "question_77": "Quel pain est adapté à un régime sans gluten ?",
+  "options_77": "Pain de maïs,Pain complet,Pain aux graines de seigle,Pain de campagne",
+
+  "question_78": "Quel plat peut contenir du gluten caché ?",
+  "options_78": "Soupe en sachet,Viande grillée,Poisson frais,Légumes vapeur",
+
+  "question_79": "Quel ingrédient peut être un substitut de farine dans une recette sans gluten ?",
+  "options_79": "Farine d’amande,Farine de blé,Farine de seigle,Farine d’orge",
+
+  "question_80": "Quel ingrédient est utilisé pour donner de la légèreté aux gâteaux sans gluten ?",
+  "options_80": "Blancs d'œufs battus,Farine de blé,Farine de seigle,Farine d’orge",
+
+  "question_81": "Quel type de pâtes est naturellement sans gluten ?",
+  "options_81": "Pâtes de riz,Pâtes de blé,Pâtes de seigle,Pâtes d’orge",
+
+  "question_82": "Quel ingrédient est un bon substitut de farine de blé dans une recette sans gluten ?",
+  "options_82": "Farine de coco,Farine d’orge,Farine de seigle,Farine de blé",
+
+  "question_83": "Quelle légumineuse peut être moulue en farine pour une cuisine sans gluten ?",
+  "options_83": "Pois chiches,Lentilles,Amandes,Toutes ces réponses",
+
+  "question_84": "Quel ingrédient est couramment utilisé pour épaissir les sauces sans gluten ?",
+  "options_84": "Fécule de maïs,Farine de blé,Farine d’orge,Farine de seigle",
+
+  "question_85": "Quel type de lait végétal est naturellement sans gluten ?",
+  "options_85": "Lait d’amande,Lait d’avoine,Lait de blé,Lait de seigle",
+
+  "question_86": "Quel dessert est naturellement sans gluten ?",
+  "options_86": "Mousse au chocolat,Tarte aux pommes,Brownie,Pain perdu",
+
+  "question_87": "Quel type de viande transformée peut contenir du gluten ?",
+  "options_87": "Saucisses,Steak haché frais,Filet de poulet,Poisson frais",
+
+  "question_88": "Quel ingrédient peut être utilisé comme liant dans une recette sans gluten ?",
+  "options_88": "Oeufs,Farine de blé,Farine d’orge,Farine de seigle",
+
+  "question_89": "Quel aliment peut être contaminé par le gluten ?",
+  "options_89": "Flocons d’avoine non certifiés,Riz complet,Fruits frais,Légumes crus",
+
+  "question_90": "Quel produit de boulangerie est souvent proposé en version sans gluten ?",
+  "options_90": "Pain,Baguette,Pain de mie,Croissant",
+
+  "question_91": "Quel ingrédient est un bon substitut pour faire lever une pâte sans gluten ?",
+  "options_91": "Levure chimique,Farine de blé,Farine d’orge,Farine de seigle",
+
+  "question_92": "Quelle farine est idéale pour faire des crêpes sans gluten ?",
+  "options_92": "Farine de sarrasin,Farine de blé,Farine de seigle,Farine d’orge",
+
+  "question_93": "Quel féculent est naturellement sans gluten ?",
+  "options_93": "Pommes de terre,Pâtes classiques,Boulgour,Semoule de blé",
+
+  "question_94": "Quel produit peut contenir du gluten caché ?",
+  "options_94": "Sauce tomate industrielle,Miel,Huile d’olive,Jus d’orange",
+
+  "question_95": "Quel pain est adapté aux personnes intolérantes au gluten ?",
+  "options_95": "Pain de riz,Pain complet,Pain de seigle,Pain de blé",
+
+  "question_96": "Quel aliment doit être vérifié pour s’assurer qu’il est sans gluten ?",
+  "options_96": "Chocolat industriel,Riz,Pommes de terre fraîches,Légumes crus",
+
+  "question_97": "Quel type de céréale est autorisé dans un régime sans gluten ?",
+  "options_97": "Sarrasin,Blé,Seigle,Orge",
+
+  "question_98": "Quel ingrédient est essentiel dans une pâte à pain sans gluten ?",
+  "options_98": "Gomme de xanthane,Farine de blé,Farine de seigle,Farine d’orge",
+
+  "question_99": "Quel plat est généralement exempt de gluten ?",
+  "options_99": "Riz cantonais,Lasagnes,Pain pita,Pâtes traditionnelles",
+
+  "question_100": "Quel ingrédient est utilisé pour remplacer la farine de blé dans une pâte à tarte sans gluten ?",
+  "options_100": "Farine d’amande,Farine de blé,Farine d’orge,Farine de seigle"
+
 }

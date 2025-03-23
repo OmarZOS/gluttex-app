@@ -63,7 +63,8 @@ import 'app_localizations_fr.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,7 +72,423 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+  String getLocalizedQuestion(int number) {
+    switch (number) {
+      case 1:
+        return question_1;
+      case 2:
+        return question_2;
+      case 3:
+        return question_3;
+      case 4:
+        return question_4;
+      case 5:
+        return question_5;
+      case 6:
+        return question_6;
+      case 7:
+        return question_7;
+      case 8:
+        return question_8;
+      case 9:
+        return question_9;
+      case 10:
+        return question_10;
+      case 11:
+        return question_11;
+      case 12:
+        return question_12;
+      case 13:
+        return question_13;
+      case 14:
+        return question_14;
+      case 15:
+        return question_15;
+      case 16:
+        return question_16;
+      case 17:
+        return question_17;
+      case 18:
+        return question_18;
+      case 19:
+        return question_19;
+      case 20:
+        return question_20;
+      case 21:
+        return question_21;
+      case 22:
+        return question_22;
+      case 23:
+        return question_23;
+      case 24:
+        return question_24;
+      case 25:
+        return question_25;
+      case 26:
+        return question_26;
+      case 27:
+        return question_27;
+      case 28:
+        return question_28;
+      case 29:
+        return question_29;
+      case 30:
+        return question_30;
+      case 31:
+        return question_31;
+      case 32:
+        return question_32;
+      case 33:
+        return question_33;
+      case 34:
+        return question_34;
+      case 35:
+        return question_35;
+      case 36:
+        return question_36;
+      case 37:
+        return question_37;
+      case 38:
+        return question_38;
+      case 39:
+        return question_39;
+      case 40:
+        return question_40;
+      case 41:
+        return question_41;
+      case 42:
+        return question_42;
+      case 43:
+        return question_43;
+      case 44:
+        return question_44;
+      case 45:
+        return question_45;
+      case 46:
+        return question_46;
+      case 47:
+        return question_47;
+      case 48:
+        return question_48;
+      case 49:
+        return question_49;
+      case 50:
+        return question_50;
+      case 51:
+        return question_51;
+      case 52:
+        return question_52;
+      case 53:
+        return question_53;
+      case 54:
+        return question_54;
+      case 55:
+        return question_55;
+      case 56:
+        return question_56;
+      case 57:
+        return question_57;
+      case 58:
+        return question_58;
+      case 59:
+        return question_59;
+      case 60:
+        return question_60;
+      case 61:
+        return question_61;
+      case 62:
+        return question_62;
+      case 63:
+        return question_63;
+      case 64:
+        return question_64;
+      case 65:
+        return question_65;
+      case 66:
+        return question_66;
+      case 67:
+        return question_67;
+      case 68:
+        return question_68;
+      case 69:
+        return question_69;
+      case 70:
+        return question_70;
+      case 71:
+        return question_71;
+      case 72:
+        return question_72;
+      case 73:
+        return question_73;
+      case 74:
+        return question_74;
+      case 75:
+        return question_75;
+      case 76:
+        return question_76;
+      case 77:
+        return question_77;
+      case 78:
+        return question_78;
+      case 79:
+        return question_79;
+      case 80:
+        return question_80;
+      case 81:
+        return question_81;
+      case 82:
+        return question_82;
+      case 83:
+        return question_83;
+      case 84:
+        return question_84;
+      case 85:
+        return question_85;
+      case 86:
+        return question_86;
+      case 87:
+        return question_87;
+      case 88:
+        return question_88;
+      case 89:
+        return question_89;
+      case 90:
+        return question_90;
+      case 91:
+        return question_91;
+      case 92:
+        return question_92;
+      case 93:
+        return question_93;
+      case 94:
+        return question_94;
+      case 95:
+        return question_95;
+      case 96:
+        return question_96;
+      case 97:
+        return question_97;
+      case 98:
+        return question_98;
+      case 99:
+        return question_99;
+      case 100:
+        return question_100;
+
+      default:
+        return errorOccurred;
+    }
+  }
+
+  String getLocalizedAnswerList(int number) {
+    switch (number) {
+      case 1:
+        return options_1;
+      case 2:
+        return options_2;
+      case 3:
+        return options_3;
+      case 4:
+        return options_4;
+      case 5:
+        return options_5;
+      case 6:
+        return options_6;
+      case 7:
+        return options_7;
+      case 8:
+        return options_8;
+      case 9:
+        return options_9;
+      case 10:
+        return options_10;
+      case 11:
+        return options_11;
+      case 12:
+        return options_12;
+      case 13:
+        return options_13;
+      case 14:
+        return options_14;
+      case 15:
+        return options_15;
+      case 16:
+        return options_16;
+      case 17:
+        return options_17;
+      case 18:
+        return options_18;
+      case 19:
+        return options_19;
+      case 20:
+        return options_20;
+      case 21:
+        return options_21;
+      case 22:
+        return options_22;
+      case 23:
+        return options_23;
+      case 24:
+        return options_24;
+      case 25:
+        return options_25;
+      case 26:
+        return options_26;
+      case 27:
+        return options_27;
+      case 28:
+        return options_28;
+      case 29:
+        return options_29;
+      case 30:
+        return options_30;
+      case 31:
+        return options_31;
+      case 32:
+        return options_32;
+      case 33:
+        return options_33;
+      case 34:
+        return options_34;
+      case 35:
+        return options_35;
+      case 36:
+        return options_36;
+      case 37:
+        return options_37;
+      case 38:
+        return options_38;
+      case 39:
+        return options_39;
+      case 40:
+        return options_40;
+      case 41:
+        return options_41;
+      case 42:
+        return options_42;
+      case 43:
+        return options_43;
+      case 44:
+        return options_44;
+      case 45:
+        return options_45;
+      case 46:
+        return options_46;
+      case 47:
+        return options_47;
+      case 48:
+        return options_48;
+      case 49:
+        return options_49;
+      case 50:
+        return options_50;
+      case 51:
+        return options_51;
+      case 52:
+        return options_52;
+      case 53:
+        return options_53;
+      case 54:
+        return options_54;
+      case 55:
+        return options_55;
+      case 56:
+        return options_56;
+      case 57:
+        return options_57;
+      case 58:
+        return options_58;
+      case 59:
+        return options_59;
+      case 60:
+        return options_60;
+      case 61:
+        return options_61;
+      case 62:
+        return options_62;
+      case 63:
+        return options_63;
+      case 64:
+        return options_64;
+      case 65:
+        return options_65;
+      case 66:
+        return options_66;
+      case 67:
+        return options_67;
+      case 68:
+        return options_68;
+      case 69:
+        return options_69;
+      case 70:
+        return options_70;
+      case 71:
+        return options_71;
+      case 72:
+        return options_72;
+      case 73:
+        return options_73;
+      case 74:
+        return options_74;
+      case 75:
+        return options_75;
+      case 76:
+        return options_76;
+      case 77:
+        return options_77;
+      case 78:
+        return options_78;
+      case 79:
+        return options_79;
+      case 80:
+        return options_80;
+      case 81:
+        return options_81;
+      case 82:
+        return options_82;
+      case 83:
+        return options_83;
+      case 84:
+        return options_84;
+      case 85:
+        return options_85;
+      case 86:
+        return options_86;
+      case 87:
+        return options_87;
+      case 88:
+        return options_88;
+      case 89:
+        return options_89;
+      case 90:
+        return options_90;
+      case 91:
+        return options_91;
+      case 92:
+        return options_92;
+      case 93:
+        return options_93;
+      case 94:
+        return options_94;
+      case 95:
+        return options_95;
+      case 96:
+        return options_96;
+      case 97:
+        return options_97;
+      case 98:
+        return options_98;
+      case 99:
+        return options_99;
+      case 100:
+        return options_100;
+
+      default:
+        return errorOccurred;
+    }
+  }
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -83,7 +500,8 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -960,9 +1378,1282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Appetizers & Snacks,Soups & Stews,Salads,Main Courses,Side Dishes,Pasta & Noodles,Casseroles,Breakfast & Brunch,Breads & Baking,Desserts,Drinks & Beverages,Sauces & Condiments,International Cuisine,Healthy & Special Diets,Holiday & Seasonal,Kids & Family,Slow Cooker & Instant Pot,Quick & Easy,One-Pan Recipes,Grilling & BBQ'**
   String get recipeCategoryTextList;
+
+  /// No description provided for @ingredientTextList.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat,Barley ,Rye,Oats ,Corn ,Rice ,Soy,Milk ,Egg,Peanuts,Tree Nuts,Fish ,Shellfish,Lentils,Chickpeas,Buckwheat,Almond ,Coconut,Sunflower Seeds,Pumpkin Seeds,Sesame Seeds ,Potato ,Sweet Potato ,Gelatin,Lupin,Mustard,Fennel ,Cumin,Ginger ,Garlic ,Onion,Leek ,Shallot,Scallion ,Chive,Parsley,Cilantro ,Basil,Oregano,Thyme,Rosemary ,Sage ,Mint ,Lemongrass ,Lavender ,Paprika,Chili Pepper ,Black Pepper ,White Pepper ,Green Pepper ,Red Pepper ,Cinnamon ,Allspice ,Butter ,Margarine,Vegetable Oil,Baking Powder,Baking Soda,Cornstarch ,All-Purpose Flour,Pastry Flour ,Self-Rising Flour'**
+  String get ingredientTextList;
+
+  /// No description provided for @cartText.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart'**
+  String get cartText;
+
+  /// No description provided for @ordersText.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get ordersText;
+
+  /// No description provided for @noOrdersTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet.'**
+  String get noOrdersTxt;
+
+  /// No description provided for @orderIdentifierTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Identifier: {orderId}'**
+  String orderIdentifierTxt(Object orderId);
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @languageText.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageText;
+
+  /// No description provided for @currentLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Current language: {currentLang}'**
+  String currentLanguage(Object currentLang);
+
+  /// No description provided for @darkModeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle dark mode'**
+  String get darkModeText;
+
+  /// No description provided for @profileUpdateText.
+  ///
+  /// In en, this message translates to:
+  /// **'Update profile informations'**
+  String get profileUpdateText;
+
+  /// No description provided for @passwordUpdateText.
+  ///
+  /// In en, this message translates to:
+  /// **'Update password'**
+  String get passwordUpdateText;
+
+  /// No description provided for @showMoreText.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get showMoreText;
+
+  /// No description provided for @question_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Which traditional dish is naturally gluten-free?'**
+  String get question_1;
+
+  /// No description provided for @options_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Pizza,Tamales,Lasagna,Croissants'**
+  String get options_1;
+
+  /// No description provided for @question_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Which grain contains gluten?'**
+  String get question_2;
+
+  /// No description provided for @options_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice,Quinoa,Wheat,Corn'**
+  String get options_2;
+
+  /// No description provided for @question_3.
+  ///
+  /// In en, this message translates to:
+  /// **'What is Celiac Disease?'**
+  String get question_3;
+
+  /// No description provided for @options_3.
+  ///
+  /// In en, this message translates to:
+  /// **'A gluten allergy,An autoimmune disorder,A viral infection,A type of flu'**
+  String get options_3;
+
+  /// No description provided for @question_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is safe for a gluten-free diet?'**
+  String get question_4;
+
+  /// No description provided for @options_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Barley,Rye,Oats (certified GF),Wheat'**
+  String get options_4;
+
+  /// No description provided for @question_5.
+  ///
+  /// In en, this message translates to:
+  /// **'What does gluten do in baking?'**
+  String get question_5;
+
+  /// No description provided for @options_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds sweetness,Gives elasticity,Increases moisture,Reduces calories'**
+  String get options_5;
+
+  /// No description provided for @question_6.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is naturally gluten-free?'**
+  String get question_6;
+
+  /// No description provided for @options_6.
+  ///
+  /// In en, this message translates to:
+  /// **'Spelt,Soy sauce,Buckwheat,Couscous'**
+  String get options_6;
+
+  /// No description provided for @question_7.
+  ///
+  /// In en, this message translates to:
+  /// **'What is a common gluten-free flour?'**
+  String get question_7;
+
+  /// No description provided for @options_7.
+  ///
+  /// In en, this message translates to:
+  /// **'Almond flour,Rye flour,Spelt flour,Durum wheat'**
+  String get options_7;
+
+  /// No description provided for @question_8.
+  ///
+  /// In en, this message translates to:
+  /// **'Which type of pasta is gluten-free?'**
+  String get question_8;
+
+  /// No description provided for @options_8.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole wheat pasta,Egg noodles,Rice noodles,Semolina pasta'**
+  String get options_8;
+
+  /// No description provided for @question_9.
+  ///
+  /// In en, this message translates to:
+  /// **'Which beer is safe for a gluten-free diet?'**
+  String get question_9;
+
+  /// No description provided for @options_9.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat beer,Barley malt beer,Rice-based beer,Lager beer'**
+  String get options_9;
+
+  /// No description provided for @question_10.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these ingredients should be avoided in a GF diet?'**
+  String get question_10;
+
+  /// No description provided for @options_10.
+  ///
+  /// In en, this message translates to:
+  /// **'Xanthan gum,Malt extract,Tapioca starch,Corn flour'**
+  String get options_10;
+
+  /// No description provided for @question_11.
+  ///
+  /// In en, this message translates to:
+  /// **'What does \'certified gluten-free\' mean?'**
+  String get question_11;
+
+  /// No description provided for @options_11.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains some wheat,Has less than 20 ppm gluten,Made with whole grains,Labeled for celiacs'**
+  String get options_11;
+
+  /// No description provided for @question_12.
+  ///
+  /// In en, this message translates to:
+  /// **'What is cross-contamination?'**
+  String get question_12;
+
+  /// No description provided for @options_12.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixing food colors,Unintentional gluten exposure,Overcooking food,Adding spices'**
+  String get options_12;
+
+  /// No description provided for @question_13.
+  ///
+  /// In en, this message translates to:
+  /// **'Which food requires a gluten-free label to be safe?'**
+  String get question_13;
+
+  /// No description provided for @options_13.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple,Fresh fish,Flavored yogurt,White rice'**
+  String get options_13;
+
+  /// No description provided for @question_14.
+  ///
+  /// In en, this message translates to:
+  /// **'What part of wheat contains gluten?'**
+  String get question_14;
+
+  /// No description provided for @options_14.
+  ///
+  /// In en, this message translates to:
+  /// **'Bran,Germ,Endosperm,All of the above'**
+  String get options_14;
+
+  /// No description provided for @question_15.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these grains contains gluten?'**
+  String get question_15;
+
+  /// No description provided for @options_15.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorghum,Millet,Kamut,Teff'**
+  String get options_15;
+
+  /// No description provided for @question_16.
+  ///
+  /// In en, this message translates to:
+  /// **'Gluten can be found in:'**
+  String get question_16;
+
+  /// No description provided for @options_16.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice,Soy sauce,Buckwheat,Quinoa'**
+  String get options_16;
+
+  /// No description provided for @question_17.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is a gluten-free thickener?'**
+  String get question_17;
+
+  /// No description provided for @options_17.
+  ///
+  /// In en, this message translates to:
+  /// **'Flour,Cornstarch,Roux,Wheat starch'**
+  String get options_17;
+
+  /// No description provided for @question_18.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is NOT a symptom of gluten intolerance?'**
+  String get question_18;
+
+  /// No description provided for @options_18.
+  ///
+  /// In en, this message translates to:
+  /// **'Headaches,Joint pain,Improved digestion,Fatigue'**
+  String get options_18;
+
+  /// No description provided for @question_19.
+  ///
+  /// In en, this message translates to:
+  /// **'Which country has the highest awareness of gluten-free diets?'**
+  String get question_19;
+
+  /// No description provided for @options_19.
+  ///
+  /// In en, this message translates to:
+  /// **'USA,Italy,Japan,India'**
+  String get options_19;
+
+  /// No description provided for @question_20.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these brands offers gluten-free products?'**
+  String get question_20;
+
+  /// No description provided for @options_20.
+  ///
+  /// In en, this message translates to:
+  /// **'Kellogg’s,Udi’s,Nestlé,Oreo'**
+  String get options_20;
+
+  /// No description provided for @question_21.
+  ///
+  /// In en, this message translates to:
+  /// **'Is popcorn gluten-free?'**
+  String get question_21;
+
+  /// No description provided for @options_21.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes,No,Only air-popped,Only flavored ones'**
+  String get options_21;
+
+  /// No description provided for @question_22.
+  ///
+  /// In en, this message translates to:
+  /// **'Which fast food chain has gluten-free options?'**
+  String get question_22;
+
+  /// No description provided for @options_22.
+  ///
+  /// In en, this message translates to:
+  /// **'McDonald\'s,Chipotle,KFC,Domino’s'**
+  String get options_22;
+
+  /// No description provided for @question_23.
+  ///
+  /// In en, this message translates to:
+  /// **'What is cross-contamination?'**
+  String get question_23;
+
+  /// No description provided for @options_23.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking with GF ingredients,When gluten touches GF food,Certified gluten-free process,A type of wheat'**
+  String get options_23;
+
+  /// No description provided for @question_24.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these breakfast cereals is GF?'**
+  String get question_24;
+
+  /// No description provided for @options_24.
+  ///
+  /// In en, this message translates to:
+  /// **'Corn Flakes,Rice Krispies,Chex (Rice),Weetabix'**
+  String get options_24;
+
+  /// No description provided for @question_25.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these chocolates is gluten-free?'**
+  String get question_25;
+
+  /// No description provided for @options_25.
+  ///
+  /// In en, this message translates to:
+  /// **'Twix,Snickers,KitKat,Oreos'**
+  String get options_25;
+
+  /// No description provided for @question_26.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these contains gluten?'**
+  String get question_26;
+
+  /// No description provided for @options_26.
+  ///
+  /// In en, this message translates to:
+  /// **'Soy sauce,Coconut flour,Almond flour,Chia seeds'**
+  String get options_26;
+
+  /// No description provided for @question_27.
+  ///
+  /// In en, this message translates to:
+  /// **'What is a GF alternative to breadcrumbs?'**
+  String get question_27;
+
+  /// No description provided for @options_27.
+  ///
+  /// In en, this message translates to:
+  /// **'Oat flour,Rice flour,Crushed nuts,All-purpose flour'**
+  String get options_27;
+
+  /// No description provided for @question_28.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is a symptom of Celiac Disease?'**
+  String get question_28;
+
+  /// No description provided for @options_28.
+  ///
+  /// In en, this message translates to:
+  /// **'Rashes,Weight gain,Increased appetite,Lower immunity'**
+  String get options_28;
+
+  /// No description provided for @question_29.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these snacks is GF?'**
+  String get question_29;
+
+  /// No description provided for @options_29.
+  ///
+  /// In en, this message translates to:
+  /// **'Pretzels,Chips (corn-based),Granola bars,Ritz crackers'**
+  String get options_29;
+
+  /// No description provided for @question_30.
+  ///
+  /// In en, this message translates to:
+  /// **'Which famous athlete promotes a GF diet?'**
+  String get question_30;
+
+  /// No description provided for @options_30.
+  ///
+  /// In en, this message translates to:
+  /// **'Serena Williams,Tom Brady,LeBron James,Cristiano Ronaldo'**
+  String get options_30;
+
+  /// No description provided for @question_31.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of pizza crust is GF?'**
+  String get question_31;
+
+  /// No description provided for @options_31.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole wheat,Cauliflower,Sourdough,Focaccia'**
+  String get options_31;
+
+  /// No description provided for @question_32.
+  ///
+  /// In en, this message translates to:
+  /// **'Which pasta alternative is GF?'**
+  String get question_32;
+
+  /// No description provided for @options_32.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole wheat pasta,Chickpea pasta,Semolina pasta,Egg noodles'**
+  String get options_32;
+
+  /// No description provided for @question_33.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these condiments contains gluten?'**
+  String get question_33;
+
+  /// No description provided for @options_33.
+  ///
+  /// In en, this message translates to:
+  /// **'Ketchup,Mustard,Teriyaki sauce,Mayonnaise'**
+  String get options_33;
+
+  /// No description provided for @question_34.
+  ///
+  /// In en, this message translates to:
+  /// **'Is quinoa gluten-free?'**
+  String get question_34;
+
+  /// No description provided for @options_34.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes,No,Only organic quinoa,Only in small amounts'**
+  String get options_34;
+
+  /// No description provided for @question_35.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the main ingredient in GF bread?'**
+  String get question_35;
+
+  /// No description provided for @options_35.
+  ///
+  /// In en, this message translates to:
+  /// **'Almond flour,Wheat flour,Corn starch,Oats'**
+  String get options_35;
+
+  /// No description provided for @question_36.
+  ///
+  /// In en, this message translates to:
+  /// **'Which grains are naturally GF?'**
+  String get question_36;
+
+  /// No description provided for @options_36.
+  ///
+  /// In en, this message translates to:
+  /// **'Rye,Barley,Amaranth,Spelt'**
+  String get options_36;
+
+  /// No description provided for @question_37.
+  ///
+  /// In en, this message translates to:
+  /// **'Which soup ingredient might contain gluten?'**
+  String get question_37;
+
+  /// No description provided for @options_37.
+  ///
+  /// In en, this message translates to:
+  /// **'Chicken broth,Rice noodles,Vegetable stock,Soy milk'**
+  String get options_37;
+
+  /// No description provided for @question_38.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these vitamins may be low in a GF diet?'**
+  String get question_38;
+
+  /// No description provided for @options_38.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin C,Vitamin D,Iron,Omega-3'**
+  String get options_38;
+
+  /// No description provided for @question_39.
+  ///
+  /// In en, this message translates to:
+  /// **'Can gluten be found in medicines?'**
+  String get question_39;
+
+  /// No description provided for @options_39.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes,No,Only in vaccines,Only in liquid medicine'**
+  String get options_39;
+
+  /// No description provided for @question_40.
+  ///
+  /// In en, this message translates to:
+  /// **'Which flour alternative is highest in protein?'**
+  String get question_40;
+
+  /// No description provided for @options_40.
+  ///
+  /// In en, this message translates to:
+  /// **'Corn flour,Tapioca flour,Chickpea flour,Rice flour'**
+  String get options_40;
+
+  /// No description provided for @question_41.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is a safe thickener for GF sauces?'**
+  String get question_41;
+
+  /// No description provided for @options_41.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat flour,Cornstarch,Roux,All-purpose flour'**
+  String get options_41;
+
+  /// No description provided for @question_42.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these gluten-free foods is high in fiber?'**
+  String get question_42;
+
+  /// No description provided for @options_42.
+  ///
+  /// In en, this message translates to:
+  /// **'White rice,Brown rice,Corn flakes,Puffed rice'**
+  String get options_42;
+
+  /// No description provided for @question_43.
+  ///
+  /// In en, this message translates to:
+  /// **'Which flour is used in traditional Italian polenta?'**
+  String get question_43;
+
+  /// No description provided for @options_43.
+  ///
+  /// In en, this message translates to:
+  /// **'Cornmeal,Wheat flour,Oat flour,Rye flour'**
+  String get options_43;
+
+  /// No description provided for @question_44.
+  ///
+  /// In en, this message translates to:
+  /// **'Are French fries always gluten-free?'**
+  String get question_44;
+
+  /// No description provided for @options_44.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes,No,Only if fried in separate oil,Only homemade'**
+  String get options_44;
+
+  /// No description provided for @question_45.
+  ///
+  /// In en, this message translates to:
+  /// **'Which candy is typically gluten-free?'**
+  String get question_45;
+
+  /// No description provided for @options_45.
+  ///
+  /// In en, this message translates to:
+  /// **'Twizzlers,Reese’s Cups,KitKat,Wafers'**
+  String get options_45;
+
+  /// No description provided for @question_46.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these grains is gluten-free?'**
+  String get question_46;
+
+  /// No description provided for @options_46.
+  ///
+  /// In en, this message translates to:
+  /// **'Farro,Freekeh,Teff,Spelt'**
+  String get options_46;
+
+  /// No description provided for @question_47.
+  ///
+  /// In en, this message translates to:
+  /// **'What gluten-free flour is often used in baking?'**
+  String get question_47;
+
+  /// No description provided for @options_47.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat flour,Rice flour,Semolina,Durum wheat'**
+  String get options_47;
+
+  /// No description provided for @question_48.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these GF grains is a seed?'**
+  String get question_48;
+
+  /// No description provided for @options_48.
+  ///
+  /// In en, this message translates to:
+  /// **'Quinoa,Wheat,Rye,Barley'**
+  String get options_48;
+
+  /// No description provided for @question_49.
+  ///
+  /// In en, this message translates to:
+  /// **'What is a common gluten-free pizza crust made from?'**
+  String get question_49;
+
+  /// No description provided for @options_49.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat,Oats,Cauliflower,Rye'**
+  String get options_49;
+
+  /// No description provided for @question_50.
+  ///
+  /// In en, this message translates to:
+  /// **'Which alcoholic drink is NOT gluten-free?'**
+  String get question_50;
+
+  /// No description provided for @options_50.
+  ///
+  /// In en, this message translates to:
+  /// **'Wine,Cider,Whiskey,Beer'**
+  String get options_50;
+
+  /// No description provided for @question_51.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is naturally gluten-free?'**
+  String get question_51;
+
+  /// No description provided for @options_51.
+  ///
+  /// In en, this message translates to:
+  /// **'Couscous,Millet,Spelt,Bulgar'**
+  String get options_51;
+
+  /// No description provided for @question_52.
+  ///
+  /// In en, this message translates to:
+  /// **'Is soy sauce gluten-free?'**
+  String get question_52;
+
+  /// No description provided for @options_52.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes,No,Only tamari sauce is,Only organic soy sauce is'**
+  String get options_52;
+
+  /// No description provided for @question_53.
+  ///
+  /// In en, this message translates to:
+  /// **'Which flour is often used in gluten-free baking?'**
+  String get question_53;
+
+  /// No description provided for @options_53.
+  ///
+  /// In en, this message translates to:
+  /// **'Spelt,Chickpea flour,Wheat flour,Durum wheat'**
+  String get options_53;
+
+  /// No description provided for @question_54.
+  ///
+  /// In en, this message translates to:
+  /// **'Which soup is usually gluten-free?'**
+  String get question_54;
+
+  /// No description provided for @options_54.
+  ///
+  /// In en, this message translates to:
+  /// **'Minestrone,Clam chowder,Tomato soup,French onion soup'**
+  String get options_54;
+
+  /// No description provided for @question_55.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is safe for celiacs?'**
+  String get question_55;
+
+  /// No description provided for @options_55.
+  ///
+  /// In en, this message translates to:
+  /// **'Malt vinegar,Oats (certified GF),Wheat germ,Barley malt'**
+  String get options_55;
+
+  /// No description provided for @question_56.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these protein sources is naturally GF?'**
+  String get question_56;
+
+  /// No description provided for @options_56.
+  ///
+  /// In en, this message translates to:
+  /// **'Seitan,Tofu,Barley protein,Rye protein'**
+  String get options_56;
+
+  /// No description provided for @question_57.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these grains is commonly used in gluten-free beer?'**
+  String get question_57;
+
+  /// No description provided for @options_57.
+  ///
+  /// In en, this message translates to:
+  /// **'Barley,Sorghum,Rye,Spelt'**
+  String get options_57;
+
+  /// No description provided for @question_58.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is NOT a gluten-free thickener?'**
+  String get question_58;
+
+  /// No description provided for @options_58.
+  ///
+  /// In en, this message translates to:
+  /// **'Cornstarch,Rice flour,Wheat flour,Arrowroot'**
+  String get options_58;
+
+  /// No description provided for @question_59.
+  ///
+  /// In en, this message translates to:
+  /// **'Can gluten-free foods still cause cross-contamination?'**
+  String get question_59;
+
+  /// No description provided for @options_59.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes,No,Only when cooked,Only when eaten with gluten'**
+  String get options_59;
+
+  /// No description provided for @question_60.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is a naturally gluten-free sweetener?'**
+  String get question_60;
+
+  /// No description provided for @options_60.
+  ///
+  /// In en, this message translates to:
+  /// **'Malt syrup,Honey,Barley malt extract,Wheat syrup'**
+  String get options_60;
+
+  /// No description provided for @question_61.
+  ///
+  /// In en, this message translates to:
+  /// **'What gluten-free grain is used in Ethiopian injera bread?'**
+  String get question_61;
+
+  /// No description provided for @options_61.
+  ///
+  /// In en, this message translates to:
+  /// **'Rye,Teff,Barley,Spelt'**
+  String get options_61;
+
+  /// No description provided for @question_62.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these cheeses is always gluten-free?'**
+  String get question_62;
+
+  /// No description provided for @options_62.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue cheese,Cheddar,Processed cheese,Flavored cheese'**
+  String get options_62;
+
+  /// No description provided for @question_63.
+  ///
+  /// In en, this message translates to:
+  /// **'Which grain is safe for a GF diet?'**
+  String get question_63;
+
+  /// No description provided for @options_63.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat,Oats (certified GF),Barley,Rye'**
+  String get options_63;
+
+  /// No description provided for @question_64.
+  ///
+  /// In en, this message translates to:
+  /// **'Which gluten-free flour works well for thickening soups?'**
+  String get question_64;
+
+  /// No description provided for @options_64.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice flour,Wheat flour,Semolina,Rye flour'**
+  String get options_64;
+
+  /// No description provided for @question_65.
+  ///
+  /// In en, this message translates to:
+  /// **'Which flour is commonly used in gluten-free bread?'**
+  String get question_65;
+
+  /// No description provided for @options_65.
+  ///
+  /// In en, this message translates to:
+  /// **'Rye flour,Tapioca flour,Durum wheat,Spelt'**
+  String get options_65;
+
+  /// No description provided for @question_66.
+  ///
+  /// In en, this message translates to:
+  /// **'What common breakfast item is often NOT gluten-free?'**
+  String get question_66;
+
+  /// No description provided for @options_66.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs,Pancakes,Smoothies,Bacon'**
+  String get options_66;
+
+  /// No description provided for @question_67.
+  ///
+  /// In en, this message translates to:
+  /// **'Which ingredient should be checked for hidden gluten?'**
+  String get question_67;
+
+  /// No description provided for @options_67.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugar,Salt,Soy sauce,Pepper'**
+  String get options_67;
+
+  /// No description provided for @question_68.
+  ///
+  /// In en, this message translates to:
+  /// **'Which food is gluten-free?'**
+  String get question_68;
+
+  /// No description provided for @options_68.
+  ///
+  /// In en, this message translates to:
+  /// **'Pita bread,Brown rice,Couscous,Wheat crackers'**
+  String get options_68;
+
+  /// No description provided for @question_69.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these breakfast foods is naturally GF?'**
+  String get question_69;
+
+  /// No description provided for @options_69.
+  ///
+  /// In en, this message translates to:
+  /// **'Granola bars,Oatmeal (certified GF),Waffles,French toast'**
+  String get options_69;
+
+  /// No description provided for @question_70.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is safe for someone with gluten intolerance?'**
+  String get question_70;
+
+  /// No description provided for @options_70.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole wheat bread,Quinoa salad,Barley soup,Spelt muffins'**
+  String get options_70;
+
+  /// No description provided for @question_71.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is a gluten-free pasta alternative?'**
+  String get question_71;
+
+  /// No description provided for @options_71.
+  ///
+  /// In en, this message translates to:
+  /// **'Semolina pasta,Wheat noodles,Lentil pasta,Egg noodles'**
+  String get options_71;
+
+  /// No description provided for @question_72.
+  ///
+  /// In en, this message translates to:
+  /// **'Which fast-food chain offers gluten-free options?'**
+  String get question_72;
+
+  /// No description provided for @options_72.
+  ///
+  /// In en, this message translates to:
+  /// **'KFC,Chipotle,Pizza Hut,Subway'**
+  String get options_72;
+
+  /// No description provided for @question_73.
+  ///
+  /// In en, this message translates to:
+  /// **'What is a common gluten-free breakfast option?'**
+  String get question_73;
+
+  /// No description provided for @options_73.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat toast,Oatmeal (certified GF),Bagels,Croissants'**
+  String get options_73;
+
+  /// No description provided for @question_74.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is a gluten-free snack?'**
+  String get question_74;
+
+  /// No description provided for @options_74.
+  ///
+  /// In en, this message translates to:
+  /// **'Pretzels,Popcorn,Crackers,Wheat thins'**
+  String get options_74;
+
+  /// No description provided for @question_75.
+  ///
+  /// In en, this message translates to:
+  /// **'Which thickening agent is gluten-free?'**
+  String get question_75;
+
+  /// No description provided for @options_75.
+  ///
+  /// In en, this message translates to:
+  /// **'Flour,Cornstarch,Wheat starch,Roux'**
+  String get options_75;
+
+  /// No description provided for @question_76.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these grains is NOT gluten-free?'**
+  String get question_76;
+
+  /// No description provided for @options_76.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice,Quinoa,Barley,Buckwheat'**
+  String get options_76;
+
+  /// No description provided for @question_77.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these alcoholic drinks is gluten-free?'**
+  String get question_77;
+
+  /// No description provided for @options_77.
+  ///
+  /// In en, this message translates to:
+  /// **'Beer,Whiskey,Vodka (potato-based),Malt liquor'**
+  String get options_77;
+
+  /// No description provided for @question_78.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these dairy products is always gluten-free?'**
+  String get question_78;
+
+  /// No description provided for @options_78.
+  ///
+  /// In en, this message translates to:
+  /// **'Yogurt,Ice cream,Plain milk,Flavored milk'**
+  String get options_78;
+
+  /// No description provided for @question_79.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these foods is naturally gluten-free?'**
+  String get question_79;
+
+  /// No description provided for @options_79.
+  ///
+  /// In en, this message translates to:
+  /// **'Soy sauce,Couscous,Lentils,Wheat tortillas'**
+  String get options_79;
+
+  /// No description provided for @question_80.
+  ///
+  /// In en, this message translates to:
+  /// **'What is a sign of gluten intolerance?'**
+  String get question_80;
+
+  /// No description provided for @options_80.
+  ///
+  /// In en, this message translates to:
+  /// **'Skin rash,Blurred vision,Excessive sweating,Ear infection'**
+  String get options_80;
+
+  /// No description provided for @question_81.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is a gluten-free grain?'**
+  String get question_81;
+
+  /// No description provided for @options_81.
+  ///
+  /// In en, this message translates to:
+  /// **'Kamut,Millet,Spelt,Barley'**
+  String get options_81;
+
+  /// No description provided for @question_82.
+  ///
+  /// In en, this message translates to:
+  /// **'Which dessert is usually gluten-free?'**
+  String get question_82;
+
+  /// No description provided for @options_82.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheesecake,Macarons,Chocolate cake,Brownies'**
+  String get options_82;
+
+  /// No description provided for @question_83.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these soups is gluten-free?'**
+  String get question_83;
+
+  /// No description provided for @options_83.
+  ///
+  /// In en, this message translates to:
+  /// **'Miso soup,Cream of mushroom,French onion soup,Clam chowder'**
+  String get options_83;
+
+  /// No description provided for @question_84.
+  ///
+  /// In en, this message translates to:
+  /// **'Which meat is safe for a gluten-free diet?'**
+  String get question_84;
+
+  /// No description provided for @options_84.
+  ///
+  /// In en, this message translates to:
+  /// **'Breaded chicken,Plain grilled steak,Meatballs,Sausages'**
+  String get options_84;
+
+  /// No description provided for @question_85.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these sauces is gluten-free?'**
+  String get question_85;
+
+  /// No description provided for @options_85.
+  ///
+  /// In en, this message translates to:
+  /// **'Soy sauce,Tomato sauce,Teriyaki sauce,Worcestershire sauce'**
+  String get options_85;
+
+  /// No description provided for @question_86.
+  ///
+  /// In en, this message translates to:
+  /// **'Which pasta alternative is gluten-free?'**
+  String get question_86;
+
+  /// No description provided for @options_86.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole wheat pasta,Semolina pasta,Zucchini noodles,Egg noodles'**
+  String get options_86;
+
+  /// No description provided for @question_87.
+  ///
+  /// In en, this message translates to:
+  /// **'Which type of bread is gluten-free?'**
+  String get question_87;
+
+  /// No description provided for @options_87.
+  ///
+  /// In en, this message translates to:
+  /// **'Rye bread,Baguette,Cornbread (made with GF ingredients),Ciabatta'**
+  String get options_87;
+
+  /// No description provided for @question_88.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is a gluten-free treat?'**
+  String get question_88;
+
+  /// No description provided for @options_88.
+  ///
+  /// In en, this message translates to:
+  /// **'Doughnuts,Rice pudding,Cupcakes,Waffles'**
+  String get options_88;
+
+  /// No description provided for @question_89.
+  ///
+  /// In en, this message translates to:
+  /// **'What is a common gluten-free grain?'**
+  String get question_89;
+
+  /// No description provided for @options_89.
+  ///
+  /// In en, this message translates to:
+  /// **'Barley,Farro,Sorghum,Wheat'**
+  String get options_89;
+
+  /// No description provided for @question_90.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is NOT naturally gluten-free?'**
+  String get question_90;
+
+  /// No description provided for @options_90.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs,Chicken,Soy sauce,Potatoes'**
+  String get options_90;
+
+  /// No description provided for @question_91.
+  ///
+  /// In en, this message translates to:
+  /// **'Which seasoning should be checked for gluten?'**
+  String get question_91;
+
+  /// No description provided for @options_91.
+  ///
+  /// In en, this message translates to:
+  /// **'Salt,Pepper,Soy sauce,Paprika'**
+  String get options_91;
+
+  /// No description provided for @question_92.
+  ///
+  /// In en, this message translates to:
+  /// **'What is a gluten-free thickener for soups?'**
+  String get question_92;
+
+  /// No description provided for @options_92.
+  ///
+  /// In en, this message translates to:
+  /// **'Roux,Wheat flour,Cornstarch,Malt powder'**
+  String get options_92;
+
+  /// No description provided for @question_93.
+  ///
+  /// In en, this message translates to:
+  /// **'Which restaurant meal is most likely gluten-free?'**
+  String get question_93;
+
+  /// No description provided for @options_93.
+  ///
+  /// In en, this message translates to:
+  /// **'Pasta Alfredo,Grilled salmon with steamed veggies,Chicken tenders,Breaded shrimp'**
+  String get options_93;
+
+  /// No description provided for @question_94.
+  ///
+  /// In en, this message translates to:
+  /// **'Which salad dressing is typically gluten-free?'**
+  String get question_94;
+
+  /// No description provided for @options_94.
+  ///
+  /// In en, this message translates to:
+  /// **'Caesar,Vinaigrette,Ranch,Thousand Island'**
+  String get options_94;
+
+  /// No description provided for @question_95.
+  ///
+  /// In en, this message translates to:
+  /// **'Which beer ingredient contains gluten?'**
+  String get question_95;
+
+  /// No description provided for @options_95.
+  ///
+  /// In en, this message translates to:
+  /// **'Hops,Yeast,Barley,Water'**
+  String get options_95;
+
+  /// No description provided for @question_96.
+  ///
+  /// In en, this message translates to:
+  /// **'Which common kitchen ingredient often contains hidden gluten?'**
+  String get question_96;
+
+  /// No description provided for @options_96.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugar,Flour,Butter,Olive oil'**
+  String get options_96;
+
+  /// No description provided for @question_97.
+  ///
+  /// In en, this message translates to:
+  /// **'Which restaurant cuisine has the most gluten-free options?'**
+  String get question_97;
+
+  /// No description provided for @options_97.
+  ///
+  /// In en, this message translates to:
+  /// **'Italian,Japanese,Mexican,French'**
+  String get options_97;
+
+  /// No description provided for @question_98.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these is NOT a gluten-free cereal?'**
+  String get question_98;
+
+  /// No description provided for @options_98.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice Krispies,Corn Flakes,Oatmeal (certified GF),Chex'**
+  String get options_98;
+
+  /// No description provided for @question_99.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these grains can be used for GF baking?'**
+  String get question_99;
+
+  /// No description provided for @options_99.
+  ///
+  /// In en, this message translates to:
+  /// **'Barley,Wheat,Quinoa,Spelt'**
+  String get options_99;
+
+  /// No description provided for @question_100.
+  ///
+  /// In en, this message translates to:
+  /// **'What is a gluten-free source of protein?'**
+  String get question_100;
+
+  /// No description provided for @options_100.
+  ///
+  /// In en, this message translates to:
+  /// **'Seitan,Tempeh,Lentils,Couscous'**
+  String get options_100;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -971,26 +2662,27 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en', 'fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['ar', 'en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar': return AppLocalizationsAr();
-    case 'en': return AppLocalizationsEn();
-    case 'fr': return AppLocalizationsFr();
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

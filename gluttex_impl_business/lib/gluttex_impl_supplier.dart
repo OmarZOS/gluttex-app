@@ -8,20 +8,20 @@ import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 
 class SupplierServiceImpl implements SupplierService {
-  List<Category> categories = [];
+  List<SupplierCategory> categories = [];
   @override
-  Future<Category?> getCategoryById(int categoryId) async {
+  Future<SupplierCategory?> getCategoryById(int categoryId) async {
     if (categories.isEmpty) {
       await getCategories();
       // developer.//log('wanted: ${categoryId}');
     }
-    Category category = categories[categoryId - 1];
+    SupplierCategory category = categories[categoryId - 1];
     // developer.//log('Category length: ${category}');
     return category;
   }
 
   @override
-  Future<List<Category>> getCategories() async {
+  Future<List<SupplierCategory>> getCategories() async {
     if (categories.isNotEmpty) return categories;
     try {
       // Get the storage service instance
@@ -35,11 +35,12 @@ class SupplierServiceImpl implements SupplierService {
       // Check if the response data is not null and is a list
       // Convert the list of dynamic maps to a list of Supplier objects
       List dateien = responseData;
-      List<Category?> categories = dateien
-          .map((data) => Category.fromJson(data as Map<String, dynamic>))
+      List<SupplierCategory?> categories = dateien
+          .map(
+              (data) => SupplierCategory.fromJson(data as Map<String, dynamic>))
           .toList();
       // developer.//log('${dateien.length}');
-      return categories as List<Category>;
+      return categories as List<SupplierCategory>;
     } catch (e) {
       developer.log(e.toString());
       // Handle exceptions here
@@ -84,15 +85,14 @@ class SupplierServiceImpl implements SupplierService {
   }
 
   @override
-  Future<List<Supplier>> getAllSuppliers() async {
+  Future<List<Supplier>> getAllSuppliers(int offset, int itemsPerPage) async {
     try {
       // Get the storage service instance
       StorageService storageService = GluttexLocator.get<StorageService>();
 
       // Make a call to get all Suppliers
       List<dynamic> responseData = await storageService.getAll(
-          GluttexConstants.apiBaseUrl +
-              GluttexConstants.getAllSuppliersEndpoint);
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllSuppliersEndpoint}/$offset/$itemsPerPage');
 
       // Check if the response data is not null and is a list
       // Convert the list of dynamic maps to a list of Supplier objects

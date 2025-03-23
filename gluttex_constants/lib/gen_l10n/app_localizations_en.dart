@@ -447,4 +447,644 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipeCategoryTextList => 'Appetizers & Snacks,Soups & Stews,Salads,Main Courses,Side Dishes,Pasta & Noodles,Casseroles,Breakfast & Brunch,Breads & Baking,Desserts,Drinks & Beverages,Sauces & Condiments,International Cuisine,Healthy & Special Diets,Holiday & Seasonal,Kids & Family,Slow Cooker & Instant Pot,Quick & Easy,One-Pan Recipes,Grilling & BBQ';
+
+  @override
+  String get ingredientTextList => 'Wheat,Barley ,Rye,Oats ,Corn ,Rice ,Soy,Milk ,Egg,Peanuts,Tree Nuts,Fish ,Shellfish,Lentils,Chickpeas,Buckwheat,Almond ,Coconut,Sunflower Seeds,Pumpkin Seeds,Sesame Seeds ,Potato ,Sweet Potato ,Gelatin,Lupin,Mustard,Fennel ,Cumin,Ginger ,Garlic ,Onion,Leek ,Shallot,Scallion ,Chive,Parsley,Cilantro ,Basil,Oregano,Thyme,Rosemary ,Sage ,Mint ,Lemongrass ,Lavender ,Paprika,Chili Pepper ,Black Pepper ,White Pepper ,Green Pepper ,Red Pepper ,Cinnamon ,Allspice ,Butter ,Margarine,Vegetable Oil,Baking Powder,Baking Soda,Cornstarch ,All-Purpose Flour,Pastry Flour ,Self-Rising Flour';
+
+  @override
+  String get cartText => 'Cart';
+
+  @override
+  String get ordersText => 'Orders';
+
+  @override
+  String get noOrdersTxt => 'No orders yet.';
+
+  @override
+  String orderIdentifierTxt(Object orderId) {
+    return 'Identifier: $orderId';
+  }
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get languageText => 'Language';
+
+  @override
+  String currentLanguage(Object currentLang) {
+    return 'Current language: $currentLang';
+  }
+
+  @override
+  String get darkModeText => 'Toggle dark mode';
+
+  @override
+  String get profileUpdateText => 'Update profile informations';
+
+  @override
+  String get passwordUpdateText => 'Update password';
+
+  @override
+  String get showMoreText => 'Show more';
+
+  @override
+  String get question_1 => 'Which traditional dish is naturally gluten-free?';
+
+  @override
+  String get options_1 => 'Pizza,Tamales,Lasagna,Croissants';
+
+  @override
+  String get question_2 => 'Which grain contains gluten?';
+
+  @override
+  String get options_2 => 'Rice,Quinoa,Wheat,Corn';
+
+  @override
+  String get question_3 => 'What is Celiac Disease?';
+
+  @override
+  String get options_3 => 'A gluten allergy,An autoimmune disorder,A viral infection,A type of flu';
+
+  @override
+  String get question_4 => 'Which of these is safe for a gluten-free diet?';
+
+  @override
+  String get options_4 => 'Barley,Rye,Oats (certified GF),Wheat';
+
+  @override
+  String get question_5 => 'What does gluten do in baking?';
+
+  @override
+  String get options_5 => 'Adds sweetness,Gives elasticity,Increases moisture,Reduces calories';
+
+  @override
+  String get question_6 => 'Which of these is naturally gluten-free?';
+
+  @override
+  String get options_6 => 'Spelt,Soy sauce,Buckwheat,Couscous';
+
+  @override
+  String get question_7 => 'What is a common gluten-free flour?';
+
+  @override
+  String get options_7 => 'Almond flour,Rye flour,Spelt flour,Durum wheat';
+
+  @override
+  String get question_8 => 'Which type of pasta is gluten-free?';
+
+  @override
+  String get options_8 => 'Whole wheat pasta,Egg noodles,Rice noodles,Semolina pasta';
+
+  @override
+  String get question_9 => 'Which beer is safe for a gluten-free diet?';
+
+  @override
+  String get options_9 => 'Wheat beer,Barley malt beer,Rice-based beer,Lager beer';
+
+  @override
+  String get question_10 => 'Which of these ingredients should be avoided in a GF diet?';
+
+  @override
+  String get options_10 => 'Xanthan gum,Malt extract,Tapioca starch,Corn flour';
+
+  @override
+  String get question_11 => 'What does \'certified gluten-free\' mean?';
+
+  @override
+  String get options_11 => 'Contains some wheat,Has less than 20 ppm gluten,Made with whole grains,Labeled for celiacs';
+
+  @override
+  String get question_12 => 'What is cross-contamination?';
+
+  @override
+  String get options_12 => 'Mixing food colors,Unintentional gluten exposure,Overcooking food,Adding spices';
+
+  @override
+  String get question_13 => 'Which food requires a gluten-free label to be safe?';
+
+  @override
+  String get options_13 => 'Apple,Fresh fish,Flavored yogurt,White rice';
+
+  @override
+  String get question_14 => 'What part of wheat contains gluten?';
+
+  @override
+  String get options_14 => 'Bran,Germ,Endosperm,All of the above';
+
+  @override
+  String get question_15 => 'Which of these grains contains gluten?';
+
+  @override
+  String get options_15 => 'Sorghum,Millet,Kamut,Teff';
+
+  @override
+  String get question_16 => 'Gluten can be found in:';
+
+  @override
+  String get options_16 => 'Rice,Soy sauce,Buckwheat,Quinoa';
+
+  @override
+  String get question_17 => 'Which of these is a gluten-free thickener?';
+
+  @override
+  String get options_17 => 'Flour,Cornstarch,Roux,Wheat starch';
+
+  @override
+  String get question_18 => 'Which of these is NOT a symptom of gluten intolerance?';
+
+  @override
+  String get options_18 => 'Headaches,Joint pain,Improved digestion,Fatigue';
+
+  @override
+  String get question_19 => 'Which country has the highest awareness of gluten-free diets?';
+
+  @override
+  String get options_19 => 'USA,Italy,Japan,India';
+
+  @override
+  String get question_20 => 'Which of these brands offers gluten-free products?';
+
+  @override
+  String get options_20 => 'Kellogg’s,Udi’s,Nestlé,Oreo';
+
+  @override
+  String get question_21 => 'Is popcorn gluten-free?';
+
+  @override
+  String get options_21 => 'Yes,No,Only air-popped,Only flavored ones';
+
+  @override
+  String get question_22 => 'Which fast food chain has gluten-free options?';
+
+  @override
+  String get options_22 => 'McDonald\'s,Chipotle,KFC,Domino’s';
+
+  @override
+  String get question_23 => 'What is cross-contamination?';
+
+  @override
+  String get options_23 => 'Cooking with GF ingredients,When gluten touches GF food,Certified gluten-free process,A type of wheat';
+
+  @override
+  String get question_24 => 'Which of these breakfast cereals is GF?';
+
+  @override
+  String get options_24 => 'Corn Flakes,Rice Krispies,Chex (Rice),Weetabix';
+
+  @override
+  String get question_25 => 'Which of these chocolates is gluten-free?';
+
+  @override
+  String get options_25 => 'Twix,Snickers,KitKat,Oreos';
+
+  @override
+  String get question_26 => 'Which of these contains gluten?';
+
+  @override
+  String get options_26 => 'Soy sauce,Coconut flour,Almond flour,Chia seeds';
+
+  @override
+  String get question_27 => 'What is a GF alternative to breadcrumbs?';
+
+  @override
+  String get options_27 => 'Oat flour,Rice flour,Crushed nuts,All-purpose flour';
+
+  @override
+  String get question_28 => 'Which of these is a symptom of Celiac Disease?';
+
+  @override
+  String get options_28 => 'Rashes,Weight gain,Increased appetite,Lower immunity';
+
+  @override
+  String get question_29 => 'Which of these snacks is GF?';
+
+  @override
+  String get options_29 => 'Pretzels,Chips (corn-based),Granola bars,Ritz crackers';
+
+  @override
+  String get question_30 => 'Which famous athlete promotes a GF diet?';
+
+  @override
+  String get options_30 => 'Serena Williams,Tom Brady,LeBron James,Cristiano Ronaldo';
+
+  @override
+  String get question_31 => 'What kind of pizza crust is GF?';
+
+  @override
+  String get options_31 => 'Whole wheat,Cauliflower,Sourdough,Focaccia';
+
+  @override
+  String get question_32 => 'Which pasta alternative is GF?';
+
+  @override
+  String get options_32 => 'Whole wheat pasta,Chickpea pasta,Semolina pasta,Egg noodles';
+
+  @override
+  String get question_33 => 'Which of these condiments contains gluten?';
+
+  @override
+  String get options_33 => 'Ketchup,Mustard,Teriyaki sauce,Mayonnaise';
+
+  @override
+  String get question_34 => 'Is quinoa gluten-free?';
+
+  @override
+  String get options_34 => 'Yes,No,Only organic quinoa,Only in small amounts';
+
+  @override
+  String get question_35 => 'What is the main ingredient in GF bread?';
+
+  @override
+  String get options_35 => 'Almond flour,Wheat flour,Corn starch,Oats';
+
+  @override
+  String get question_36 => 'Which grains are naturally GF?';
+
+  @override
+  String get options_36 => 'Rye,Barley,Amaranth,Spelt';
+
+  @override
+  String get question_37 => 'Which soup ingredient might contain gluten?';
+
+  @override
+  String get options_37 => 'Chicken broth,Rice noodles,Vegetable stock,Soy milk';
+
+  @override
+  String get question_38 => 'Which of these vitamins may be low in a GF diet?';
+
+  @override
+  String get options_38 => 'Vitamin C,Vitamin D,Iron,Omega-3';
+
+  @override
+  String get question_39 => 'Can gluten be found in medicines?';
+
+  @override
+  String get options_39 => 'Yes,No,Only in vaccines,Only in liquid medicine';
+
+  @override
+  String get question_40 => 'Which flour alternative is highest in protein?';
+
+  @override
+  String get options_40 => 'Corn flour,Tapioca flour,Chickpea flour,Rice flour';
+
+  @override
+  String get question_41 => 'Which of these is a safe thickener for GF sauces?';
+
+  @override
+  String get options_41 => 'Wheat flour,Cornstarch,Roux,All-purpose flour';
+
+  @override
+  String get question_42 => 'Which of these gluten-free foods is high in fiber?';
+
+  @override
+  String get options_42 => 'White rice,Brown rice,Corn flakes,Puffed rice';
+
+  @override
+  String get question_43 => 'Which flour is used in traditional Italian polenta?';
+
+  @override
+  String get options_43 => 'Cornmeal,Wheat flour,Oat flour,Rye flour';
+
+  @override
+  String get question_44 => 'Are French fries always gluten-free?';
+
+  @override
+  String get options_44 => 'Yes,No,Only if fried in separate oil,Only homemade';
+
+  @override
+  String get question_45 => 'Which candy is typically gluten-free?';
+
+  @override
+  String get options_45 => 'Twizzlers,Reese’s Cups,KitKat,Wafers';
+
+  @override
+  String get question_46 => 'Which of these grains is gluten-free?';
+
+  @override
+  String get options_46 => 'Farro,Freekeh,Teff,Spelt';
+
+  @override
+  String get question_47 => 'What gluten-free flour is often used in baking?';
+
+  @override
+  String get options_47 => 'Wheat flour,Rice flour,Semolina,Durum wheat';
+
+  @override
+  String get question_48 => 'Which of these GF grains is a seed?';
+
+  @override
+  String get options_48 => 'Quinoa,Wheat,Rye,Barley';
+
+  @override
+  String get question_49 => 'What is a common gluten-free pizza crust made from?';
+
+  @override
+  String get options_49 => 'Wheat,Oats,Cauliflower,Rye';
+
+  @override
+  String get question_50 => 'Which alcoholic drink is NOT gluten-free?';
+
+  @override
+  String get options_50 => 'Wine,Cider,Whiskey,Beer';
+
+  @override
+  String get question_51 => 'Which of these is naturally gluten-free?';
+
+  @override
+  String get options_51 => 'Couscous,Millet,Spelt,Bulgar';
+
+  @override
+  String get question_52 => 'Is soy sauce gluten-free?';
+
+  @override
+  String get options_52 => 'Yes,No,Only tamari sauce is,Only organic soy sauce is';
+
+  @override
+  String get question_53 => 'Which flour is often used in gluten-free baking?';
+
+  @override
+  String get options_53 => 'Spelt,Chickpea flour,Wheat flour,Durum wheat';
+
+  @override
+  String get question_54 => 'Which soup is usually gluten-free?';
+
+  @override
+  String get options_54 => 'Minestrone,Clam chowder,Tomato soup,French onion soup';
+
+  @override
+  String get question_55 => 'Which of these is safe for celiacs?';
+
+  @override
+  String get options_55 => 'Malt vinegar,Oats (certified GF),Wheat germ,Barley malt';
+
+  @override
+  String get question_56 => 'Which of these protein sources is naturally GF?';
+
+  @override
+  String get options_56 => 'Seitan,Tofu,Barley protein,Rye protein';
+
+  @override
+  String get question_57 => 'Which of these grains is commonly used in gluten-free beer?';
+
+  @override
+  String get options_57 => 'Barley,Sorghum,Rye,Spelt';
+
+  @override
+  String get question_58 => 'Which of these is NOT a gluten-free thickener?';
+
+  @override
+  String get options_58 => 'Cornstarch,Rice flour,Wheat flour,Arrowroot';
+
+  @override
+  String get question_59 => 'Can gluten-free foods still cause cross-contamination?';
+
+  @override
+  String get options_59 => 'Yes,No,Only when cooked,Only when eaten with gluten';
+
+  @override
+  String get question_60 => 'Which of these is a naturally gluten-free sweetener?';
+
+  @override
+  String get options_60 => 'Malt syrup,Honey,Barley malt extract,Wheat syrup';
+
+  @override
+  String get question_61 => 'What gluten-free grain is used in Ethiopian injera bread?';
+
+  @override
+  String get options_61 => 'Rye,Teff,Barley,Spelt';
+
+  @override
+  String get question_62 => 'Which of these cheeses is always gluten-free?';
+
+  @override
+  String get options_62 => 'Blue cheese,Cheddar,Processed cheese,Flavored cheese';
+
+  @override
+  String get question_63 => 'Which grain is safe for a GF diet?';
+
+  @override
+  String get options_63 => 'Wheat,Oats (certified GF),Barley,Rye';
+
+  @override
+  String get question_64 => 'Which gluten-free flour works well for thickening soups?';
+
+  @override
+  String get options_64 => 'Rice flour,Wheat flour,Semolina,Rye flour';
+
+  @override
+  String get question_65 => 'Which flour is commonly used in gluten-free bread?';
+
+  @override
+  String get options_65 => 'Rye flour,Tapioca flour,Durum wheat,Spelt';
+
+  @override
+  String get question_66 => 'What common breakfast item is often NOT gluten-free?';
+
+  @override
+  String get options_66 => 'Eggs,Pancakes,Smoothies,Bacon';
+
+  @override
+  String get question_67 => 'Which ingredient should be checked for hidden gluten?';
+
+  @override
+  String get options_67 => 'Sugar,Salt,Soy sauce,Pepper';
+
+  @override
+  String get question_68 => 'Which food is gluten-free?';
+
+  @override
+  String get options_68 => 'Pita bread,Brown rice,Couscous,Wheat crackers';
+
+  @override
+  String get question_69 => 'Which of these breakfast foods is naturally GF?';
+
+  @override
+  String get options_69 => 'Granola bars,Oatmeal (certified GF),Waffles,French toast';
+
+  @override
+  String get question_70 => 'Which of these is safe for someone with gluten intolerance?';
+
+  @override
+  String get options_70 => 'Whole wheat bread,Quinoa salad,Barley soup,Spelt muffins';
+
+  @override
+  String get question_71 => 'Which of these is a gluten-free pasta alternative?';
+
+  @override
+  String get options_71 => 'Semolina pasta,Wheat noodles,Lentil pasta,Egg noodles';
+
+  @override
+  String get question_72 => 'Which fast-food chain offers gluten-free options?';
+
+  @override
+  String get options_72 => 'KFC,Chipotle,Pizza Hut,Subway';
+
+  @override
+  String get question_73 => 'What is a common gluten-free breakfast option?';
+
+  @override
+  String get options_73 => 'Wheat toast,Oatmeal (certified GF),Bagels,Croissants';
+
+  @override
+  String get question_74 => 'Which of these is a gluten-free snack?';
+
+  @override
+  String get options_74 => 'Pretzels,Popcorn,Crackers,Wheat thins';
+
+  @override
+  String get question_75 => 'Which thickening agent is gluten-free?';
+
+  @override
+  String get options_75 => 'Flour,Cornstarch,Wheat starch,Roux';
+
+  @override
+  String get question_76 => 'Which of these grains is NOT gluten-free?';
+
+  @override
+  String get options_76 => 'Rice,Quinoa,Barley,Buckwheat';
+
+  @override
+  String get question_77 => 'Which of these alcoholic drinks is gluten-free?';
+
+  @override
+  String get options_77 => 'Beer,Whiskey,Vodka (potato-based),Malt liquor';
+
+  @override
+  String get question_78 => 'Which of these dairy products is always gluten-free?';
+
+  @override
+  String get options_78 => 'Yogurt,Ice cream,Plain milk,Flavored milk';
+
+  @override
+  String get question_79 => 'Which of these foods is naturally gluten-free?';
+
+  @override
+  String get options_79 => 'Soy sauce,Couscous,Lentils,Wheat tortillas';
+
+  @override
+  String get question_80 => 'What is a sign of gluten intolerance?';
+
+  @override
+  String get options_80 => 'Skin rash,Blurred vision,Excessive sweating,Ear infection';
+
+  @override
+  String get question_81 => 'Which of these is a gluten-free grain?';
+
+  @override
+  String get options_81 => 'Kamut,Millet,Spelt,Barley';
+
+  @override
+  String get question_82 => 'Which dessert is usually gluten-free?';
+
+  @override
+  String get options_82 => 'Cheesecake,Macarons,Chocolate cake,Brownies';
+
+  @override
+  String get question_83 => 'Which of these soups is gluten-free?';
+
+  @override
+  String get options_83 => 'Miso soup,Cream of mushroom,French onion soup,Clam chowder';
+
+  @override
+  String get question_84 => 'Which meat is safe for a gluten-free diet?';
+
+  @override
+  String get options_84 => 'Breaded chicken,Plain grilled steak,Meatballs,Sausages';
+
+  @override
+  String get question_85 => 'Which of these sauces is gluten-free?';
+
+  @override
+  String get options_85 => 'Soy sauce,Tomato sauce,Teriyaki sauce,Worcestershire sauce';
+
+  @override
+  String get question_86 => 'Which pasta alternative is gluten-free?';
+
+  @override
+  String get options_86 => 'Whole wheat pasta,Semolina pasta,Zucchini noodles,Egg noodles';
+
+  @override
+  String get question_87 => 'Which type of bread is gluten-free?';
+
+  @override
+  String get options_87 => 'Rye bread,Baguette,Cornbread (made with GF ingredients),Ciabatta';
+
+  @override
+  String get question_88 => 'Which of these is a gluten-free treat?';
+
+  @override
+  String get options_88 => 'Doughnuts,Rice pudding,Cupcakes,Waffles';
+
+  @override
+  String get question_89 => 'What is a common gluten-free grain?';
+
+  @override
+  String get options_89 => 'Barley,Farro,Sorghum,Wheat';
+
+  @override
+  String get question_90 => 'Which of these is NOT naturally gluten-free?';
+
+  @override
+  String get options_90 => 'Eggs,Chicken,Soy sauce,Potatoes';
+
+  @override
+  String get question_91 => 'Which seasoning should be checked for gluten?';
+
+  @override
+  String get options_91 => 'Salt,Pepper,Soy sauce,Paprika';
+
+  @override
+  String get question_92 => 'What is a gluten-free thickener for soups?';
+
+  @override
+  String get options_92 => 'Roux,Wheat flour,Cornstarch,Malt powder';
+
+  @override
+  String get question_93 => 'Which restaurant meal is most likely gluten-free?';
+
+  @override
+  String get options_93 => 'Pasta Alfredo,Grilled salmon with steamed veggies,Chicken tenders,Breaded shrimp';
+
+  @override
+  String get question_94 => 'Which salad dressing is typically gluten-free?';
+
+  @override
+  String get options_94 => 'Caesar,Vinaigrette,Ranch,Thousand Island';
+
+  @override
+  String get question_95 => 'Which beer ingredient contains gluten?';
+
+  @override
+  String get options_95 => 'Hops,Yeast,Barley,Water';
+
+  @override
+  String get question_96 => 'Which common kitchen ingredient often contains hidden gluten?';
+
+  @override
+  String get options_96 => 'Sugar,Flour,Butter,Olive oil';
+
+  @override
+  String get question_97 => 'Which restaurant cuisine has the most gluten-free options?';
+
+  @override
+  String get options_97 => 'Italian,Japanese,Mexican,French';
+
+  @override
+  String get question_98 => 'Which of these is NOT a gluten-free cereal?';
+
+  @override
+  String get options_98 => 'Rice Krispies,Corn Flakes,Oatmeal (certified GF),Chex';
+
+  @override
+  String get question_99 => 'Which of these grains can be used for GF baking?';
+
+  @override
+  String get options_99 => 'Barley,Wheat,Quinoa,Spelt';
+
+  @override
+  String get question_100 => 'What is a gluten-free source of protein?';
+
+  @override
+  String get options_100 => 'Seitan,Tempeh,Lentils,Couscous';
 }

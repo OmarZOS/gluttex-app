@@ -30,7 +30,9 @@ class _IngredientPopupState extends State<IngredientPopup> {
     // Filter the ingredient list based on the search query
     setState(() {
       _filteredIngredients = _filteredIngredients
-          .where((ingredient) => ingredient.ingredient_name
+          .where((ingredient) => AppLocalizations.of(context)!
+              .ingredientTextList
+              .split(',')[ingredient.id_ingredient - 1]
               .toLowerCase()
               .contains(query.toLowerCase()))
           .toList();
@@ -64,8 +66,10 @@ class _IngredientPopupState extends State<IngredientPopup> {
                     itemCount: _filteredIngredients.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title:
-                            Text(_filteredIngredients[index].ingredient_name),
+                        title: Text(AppLocalizations.of(context)!
+                                .ingredientTextList
+                                .split(',')[
+                            _filteredIngredients[index].id_ingredient - 1]),
                         onTap: () {
                           // Handle ingredient selection and show quantity input
                           showDialog(
@@ -90,6 +94,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
                                             .id_ingredient,
                                         _quantityController.text,
                                       );
+                                      _quantityController.text = "";
                                       // Navigator.pop(context);
                                       Navigator.pop(context);
                                     },

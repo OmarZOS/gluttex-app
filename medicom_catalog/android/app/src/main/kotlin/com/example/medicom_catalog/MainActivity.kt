@@ -1,4 +1,4 @@
-package com.example.medicom_catalog
+package com.gluttex.medicom_catalog
 
 import io.flutter.embedding.android.FlutterActivity
 

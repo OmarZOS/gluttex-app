@@ -1,4 +1,4 @@
-package com.example.gluttex_chef
+package com.gluttex.gluttex_chef
 
 import io.flutter.embedding.android.FlutterActivity
 

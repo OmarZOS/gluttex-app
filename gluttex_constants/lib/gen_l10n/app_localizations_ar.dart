@@ -160,7 +160,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get countryText => 'الدولة';
 
   @override
-  String get clientText => 'عميل';
+  String get clientText => 'زبون';
 
   @override
   String get cookingChefText => 'الطاهي';
@@ -447,4 +447,644 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recipeCategoryTextList => 'مقبلات ووجبات خفيفة, شوربات ومرق, سلطات, الأطباق الرئيسية, الأطباق الجانبية, المعكرونة والشعيرية, الأطباق المطهية, الإفطار والغداء المتأخر, الخبز والمعجنات, الحلويات, المشروبات, الصلصات والإضافات, المأكولات العالمية, حمية الصحية والخاصة, المناسبات والمواسم, الأطفال والعائلة, الطهي البطيء والإنستانت بوت, وصفات سريعة وسهلة, وصفات في إناء واحد, الشواء والباربكيو';
+
+  @override
+  String get ingredientTextList => 'قمح,شعير ,الجاودار ,الشوفان,ذرة,أرز,فول الصويا ,حليب ,بيض,فول سوداني ,مكسرات ,سمك ,محار ,عدس,حمص ,الحنطة السوداء ,لوز,جوز الهند,بذور عباد الشمس,بذور القرع ,بذور السمسم,بطاطس ,بطاطا حلوة ,جيلاتين,ترمس ,خردل ,شمر ,كمون ,زنجبيل,ثوم ,بصل ,كرات,كراث صغير,بصل أخضر ,ثوم معمر ,بقدونس ,كزبرة ,ريحان,زعتر,زعتر بري ,إكليل الجبل,مرمرية ,نعناع ,عشبة الليمون ,خزامى ,فلفل حلو ,فلفل حار ,فلفل أسود,فلفل أبيض,فلفل أخضر,فلفل أحمر,قرفة,بهارات ,زبدة,سمن نباتي,زيت نباتي,مسحوق الخبز,بيكربونات الصوديوم,نشا الذرة,دقيق متعدد الاستخدامات,دقيق المعجنات,دقيق ذاتي التخمر ';
+
+  @override
+  String get cartText => 'السلة';
+
+  @override
+  String get ordersText => 'الطلبات';
+
+  @override
+  String get noOrdersTxt => 'لا توجد طلبات بعد.';
+
+  @override
+  String orderIdentifierTxt(Object orderId) {
+    return 'رقم التعريف: $orderId';
+  }
+
+  @override
+  String get settingsTitle => 'الإعدادات';
+
+  @override
+  String get languageText => 'اللغة';
+
+  @override
+  String currentLanguage(Object currentLang) {
+    return 'اللغة الحالية: $currentLang';
+  }
+
+  @override
+  String get darkModeText => 'تفعيل الوضع الليلي';
+
+  @override
+  String get profileUpdateText => 'تحديث معلومات الملف الشخصي';
+
+  @override
+  String get passwordUpdateText => 'تحديث كلمة المرور';
+
+  @override
+  String get showMoreText => 'إظهار المزيد';
+
+  @override
+  String get question_1 => 'أي طبق تقليدي خالٍ من الغلوتين بشكل طبيعي؟';
+
+  @override
+  String get options_1 => 'بيتزا, تماليس, لازانيا, كرواسان';
+
+  @override
+  String get question_2 => 'أي نوع من الحبوب يحتوي على الغلوتين؟';
+
+  @override
+  String get options_2 => 'الأرز, الكينوا, القمح, الذرة';
+
+  @override
+  String get question_3 => 'ما هو مرض السيلياك؟';
+
+  @override
+  String get options_3 => 'حساسية من الغلوتين, اضطراب مناعي ذاتي, عدوى فيروسية, نوع من الإنفلونزا';
+
+  @override
+  String get question_4 => 'أي من هذه الأطعمة آمن في نظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_4 => 'الشعير, الجاودار, الشوفان (معتمد خالٍ من الغلوتين), القمح';
+
+  @override
+  String get question_5 => 'ما دور الغلوتين في الخَبز؟';
+
+  @override
+  String get options_5 => 'يضيف الحلاوة, يمنح المرونة, يزيد من الرطوبة, يقلل السعرات الحرارية';
+
+  @override
+  String get question_6 => 'أي من هذه الأطعمة خالٍ من الغلوتين بشكل طبيعي؟';
+
+  @override
+  String get options_6 => 'الإسبلت, صلصة الصويا, الحنطة السوداء, الكسكسي';
+
+  @override
+  String get question_7 => 'ما هو أحد أنواع الدقيق الخالي من الغلوتين؟';
+
+  @override
+  String get options_7 => 'دقيق اللوز, دقيق الجاودار, دقيق الإسبلت, دقيق القمح الصلب';
+
+  @override
+  String get question_8 => 'أي نوع من المعكرونة خالٍ من الغلوتين؟';
+
+  @override
+  String get options_8 => 'معكرونة القمح الكامل, نودلز البيض, نودلز الأرز, معكرونة السيمولينا';
+
+  @override
+  String get question_9 => 'أي نوع من البيرة آمن في نظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_9 => 'بيرة القمح, بيرة الشعير, بيرة الأرز, بيرة اللاجر';
+
+  @override
+  String get question_10 => 'أي من هذه المكونات يجب تجنبها في نظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_10 => 'صمغ الزانثان, مستخلص الشعير, نشا التابيوكا, دقيق الذرة';
+
+  @override
+  String get question_11 => 'ماذا يعني \'معتمد خالٍ من الغلوتين\'؟';
+
+  @override
+  String get options_11 => 'يحتوي على بعض القمح, يحتوي على أقل من 20 جزءًا في المليون من الغلوتين, مصنوع من الحبوب الكاملة, مخصص لمرضى السيلياك';
+
+  @override
+  String get question_12 => 'أي من هذه الأطعمة ليس خاليًا من الغلوتين؟';
+
+  @override
+  String get options_12 => 'الأرز, الكينوا, الإسبلت, الذرة';
+
+  @override
+  String get question_13 => 'أي جزء من القمح يحتوي على الغلوتين؟';
+
+  @override
+  String get options_13 => 'النخالة, الجنين, السويداء, جميع ما سبق';
+
+  @override
+  String get question_14 => 'أي من هذه الحبوب يحتوي على الغلوتين؟';
+
+  @override
+  String get options_14 => 'الذرة الرفيعة, الدخن, كاموت, التيف';
+
+  @override
+  String get question_15 => 'يمكن العثور على الغلوتين في:';
+
+  @override
+  String get options_15 => 'الأرز, صلصة الصويا, الحنطة السوداء, الكينوا';
+
+  @override
+  String get question_16 => 'أي من هذه المكثفات خالٍ من الغلوتين؟';
+
+  @override
+  String get options_16 => 'الدقيق, نشا الذرة, الرو, نشا القمح';
+
+  @override
+  String get question_17 => 'أي من هذه ليست من أعراض حساسية الغلوتين؟';
+
+  @override
+  String get options_17 => 'الصداع, آلام المفاصل, تحسين الهضم, التعب';
+
+  @override
+  String get question_18 => 'أي بلد لديه أعلى وعي بالنظام الغذائي الخالي من الغلوتين؟';
+
+  @override
+  String get options_18 => 'الولايات المتحدة, إيطاليا, اليابان, الهند';
+
+  @override
+  String get question_19 => 'أي من هذه العلامات التجارية تقدم منتجات خالية من الغلوتين؟';
+
+  @override
+  String get options_19 => 'كيلوجز, أودي, نستله, أوريو';
+
+  @override
+  String get question_20 => 'هل الفشار خالٍ من الغلوتين؟';
+
+  @override
+  String get options_20 => 'نعم, لا, فقط الفشار الهوائي, فقط الفشار المنكّه';
+
+  @override
+  String get question_21 => 'هل الفشار خالٍ من الغلوتين؟';
+
+  @override
+  String get options_21 => 'نعم,لا,فقط الفشار الهوائي,فقط الفشار المنكّه';
+
+  @override
+  String get question_22 => 'أي سلسلة مطاعم وجبات سريعة تقدم خيارات خالية من الغلوتين؟';
+
+  @override
+  String get options_22 => 'ماكدونالدز,تشيبوتلي,KFC,دومينوز';
+
+  @override
+  String get question_23 => 'ما هو التلوث المتبادل؟';
+
+  @override
+  String get options_23 => 'الطهي بمكونات خالية من الغلوتين,عندما يلامس الغلوتين الطعام الخالي من الغلوتين,عملية معتمدة خالية من الغلوتين,نوع من القمح';
+
+  @override
+  String get question_24 => 'أي من حبوب الإفطار التالية خالٍ من الغلوتين؟';
+
+  @override
+  String get options_24 => 'كورن فليكس,رايس كريسبيز,تشيكس (الأرز),ويتابيكس';
+
+  @override
+  String get question_25 => 'أي من هذه الشوكولاتة خالٍ من الغلوتين؟';
+
+  @override
+  String get options_25 => 'تويكس,سنيكرز,كيت كات,أوريو';
+
+  @override
+  String get question_26 => 'أي من هذه المكونات يحتوي على الغلوتين؟';
+
+  @override
+  String get options_26 => 'صلصة الصويا,دقيق جوز الهند,دقيق اللوز,بذور الشيا';
+
+  @override
+  String get question_27 => 'ما هو البديل الخالي من الغلوتين للبقسماط؟';
+
+  @override
+  String get options_27 => 'دقيق الشوفان,دقيق الأرز,المكسرات المطحونة,الدقيق متعدد الاستخدامات';
+
+  @override
+  String get question_28 => 'أي من هذه الأعراض تدل على مرض السيلياك؟';
+
+  @override
+  String get options_28 => 'الطفح الجلدي,زيادة الوزن,زيادة الشهية,ضعف المناعة';
+
+  @override
+  String get question_29 => 'أي من هذه الوجبات الخفيفة خالٍ من الغلوتين؟';
+
+  @override
+  String get options_29 => 'المقرمشات المملحة,رقائق البطاطس (المصنوعة من الذرة),ألواح الجرانولا,بسكويت ريتز';
+
+  @override
+  String get question_30 => 'أي رياضي مشهور يروج لنظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_30 => 'سيرينا ويليامز,توم برادي,ليبرون جيمس,كريستيانو رونالدو';
+
+  @override
+  String get question_31 => 'أي نوع من قشرة البيتزا خالٍ من الغلوتين؟';
+
+  @override
+  String get options_31 => 'القمح الكامل,القرنبيط,الساوردو,الفوكاشيا';
+
+  @override
+  String get question_32 => 'أي بديل للمكرونة خالٍ من الغلوتين؟';
+
+  @override
+  String get options_32 => 'المكرونة المصنوعة من القمح الكامل,مكرونة الحمص,المكرونة المصنوعة من السميد,النودلز بالبيض';
+
+  @override
+  String get question_33 => 'أي من هذه التوابل يحتوي على الغلوتين؟';
+
+  @override
+  String get options_33 => 'الكاتشب,الخردل,صلصة الترياكي,المايونيز';
+
+  @override
+  String get question_34 => 'هل الكينوا خالية من الغلوتين؟';
+
+  @override
+  String get options_34 => 'نعم,لا,فقط الكينوا العضوية,فقط بكميات قليلة';
+
+  @override
+  String get question_35 => 'ما هو المكون الأساسي في الخبز الخالي من الغلوتين؟';
+
+  @override
+  String get options_35 => 'دقيق اللوز,دقيق القمح,نشا الذرة,الشوفان';
+
+  @override
+  String get question_36 => 'أي من هذه الحبوب خالٍ من الغلوتين؟';
+
+  @override
+  String get options_36 => 'الجاودار,الشعير,الأمارانث,الإسبلت';
+
+  @override
+  String get question_37 => 'أي مكون في الحساء قد يحتوي على الغلوتين؟';
+
+  @override
+  String get options_37 => 'مرق الدجاج,نودلز الأرز,مرق الخضار,حليب الصويا';
+
+  @override
+  String get question_38 => 'أي من هذه الفيتامينات قد يكون منخفضًا في النظام الغذائي الخالي من الغلوتين؟';
+
+  @override
+  String get options_38 => 'فيتامين C,فيتامين D,الحديد,أوميغا 3';
+
+  @override
+  String get question_39 => 'هل يمكن العثور على الغلوتين في الأدوية؟';
+
+  @override
+  String get options_39 => 'نعم,لا,فقط في اللقاحات,فقط في الأدوية السائلة';
+
+  @override
+  String get question_40 => 'أي بديل للدقيق يحتوي على أعلى نسبة بروتين؟';
+
+  @override
+  String get options_40 => 'دقيق الذرة,دقيق التابيوكا,دقيق الحمص,دقيق الأرز';
+
+  @override
+  String get question_41 => 'أي نوع من الأرز خالٍ من الغلوتين؟';
+
+  @override
+  String get options_41 => 'الأرز الأبيض,الأرز البني,كلاهما,لا شيء منهما';
+
+  @override
+  String get question_42 => 'ما هي الفائدة الصحية الرئيسية لنظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_42 => 'فقدان الوزن,تحسين الهضم لمن يعانون من حساسية الغلوتين,زيادة الطاقة للجميع,تقليل خطر الإصابة بالسكري';
+
+  @override
+  String get question_43 => 'ما هو أفضل مكان للتحقق مما إذا كان الطعام خالٍ من الغلوتين؟';
+
+  @override
+  String get options_43 => 'موقع الشركة المصنعة,قائمة المكونات على العبوة,التقييمات عبر الإنترنت,سؤال صديق';
+
+  @override
+  String get question_44 => 'ما هو مرض السيلياك؟';
+
+  @override
+  String get options_44 => 'حساسية الغلوتين,حالة مناعية ذاتية,عدوى بكتيرية,حالة نفسية';
+
+  @override
+  String get question_45 => 'أي من هذه المشروبات خالٍ من الغلوتين؟';
+
+  @override
+  String get options_45 => 'الجعة (البيرة),الويسكي,النبيذ,مشروب الشعير';
+
+  @override
+  String get question_46 => 'أي من هذه الفواكه المجففة قد تحتوي على الغلوتين؟';
+
+  @override
+  String get options_46 => 'الزبيب,المشمش المجفف,التمر,التين المجفف';
+
+  @override
+  String get question_47 => 'هل البطاطا الحلوة خالية من الغلوتين؟';
+
+  @override
+  String get options_47 => 'نعم,لا,فقط عند طهيها بطريقة معينة,فقط عند شرائها طازجة';
+
+  @override
+  String get question_48 => 'ما هو البديل الخالي من الغلوتين للصويا صوص؟';
+
+  @override
+  String get options_48 => 'تماري,خل البلسميك,زيت الزيتون,صلصة ورشسترشاير';
+
+  @override
+  String get question_49 => 'ما هو التحدي الرئيسي في تحضير المخبوزات الخالية من الغلوتين؟';
+
+  @override
+  String get options_49 => 'النكهة,القوام,مدة الصلاحية,ارتفاع التكلفة';
+
+  @override
+  String get question_50 => 'هل جميع منتجات الشوفان خالية من الغلوتين؟';
+
+  @override
+  String get options_50 => 'نعم,لا,فقط العضوية منها,فقط المستوردة';
+
+  @override
+  String get question_51 => 'أي نوع من المكسرات يمكن أن يحتوي على الغلوتين؟';
+
+  @override
+  String get options_51 => 'اللوز,الكاجو,الفول السوداني المحمص بنكهات,البندق';
+
+  @override
+  String get question_52 => 'أي نوع من الزيتون خالٍ من الغلوتين؟';
+
+  @override
+  String get options_52 => 'الزيتون الأخضر,الزيتون الأسود,كلاهما,لا شيء منهما';
+
+  @override
+  String get question_53 => 'أي عنصر يجب تجنبه في المنتجات المعلبة عند اتباع نظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_53 => 'السكر,الملح,نشا القمح,حمض الستريك';
+
+  @override
+  String get question_54 => 'أي من هذه المنتجات قد تحتوي على غلوتين مخفي؟';
+
+  @override
+  String get options_54 => 'الزبادي,الجبن,الحساء المعلب,زبدة الفول السوداني';
+
+  @override
+  String get question_55 => 'ما هو أفضل نوع من الخبز للأشخاص الذين يعانون من مرض السيلياك؟';
+
+  @override
+  String get options_55 => 'الخبز الأبيض,خبز الحبوب الكاملة,الخبز الخالي من الغلوتين,خبز الساوردو';
+
+  @override
+  String get question_56 => 'أي نوع من الحلوى يحتوي عادة على الغلوتين؟';
+
+  @override
+  String get options_56 => 'حلوى الجيلي,المارشميلو,حلوى العرقسوس,الشوكولاتة الداكنة';
+
+  @override
+  String get question_57 => 'أي من هذه المطاعم من المرجح أن تحتوي أطباقها على غلوتين؟';
+
+  @override
+  String get options_57 => 'المطاعم الإيطالية,المطاعم المكسيكية,المطاعم اليابانية,المطاعم النباتية';
+
+  @override
+  String get question_58 => 'ما هو التأثير الأساسي لتناول الغلوتين عند مرضى السيلياك؟';
+
+  @override
+  String get options_58 => 'رد فعل تحسسي خفيف,اضطرابات في الجهاز الهضمي والتهاب الأمعاء,زيادة الوزن,الشعور بالتعب الشديد فقط';
+
+  @override
+  String get question_59 => 'أي نوع من الكيك يمكن أن يكون خاليًا من الغلوتين؟';
+
+  @override
+  String get options_59 => 'كيك الفانيليا العادي,كيك الجزر المصنوع من دقيق اللوز,كيك الشوكولاتة العادي,كيك الباندا سبونج';
+
+  @override
+  String get question_60 => 'ما هي القاعدة الأساسية عند تناول الطعام في الخارج مع حساسية الغلوتين؟';
+
+  @override
+  String get options_60 => 'افتراض أن كل الطعام آمن,الاعتماد على التوصيات عبر الإنترنت,التحقق من المكونات مع المطعم,عدم أكل أي شيء';
+
+  @override
+  String get question_61 => 'أي نوع من الدقيق خالٍ من الغلوتين؟';
+
+  @override
+  String get options_61 => 'دقيق القمح,دقيق اللوز,دقيق الشعير,دقيق الجاودار';
+
+  @override
+  String get question_62 => 'ما هو أحد البدائل الشائعة للمعكرونة العادية للأشخاص الذين يتبعون نظامًا غذائيًا خاليًا من الغلوتين؟';
+
+  @override
+  String get options_62 => 'معكرونة القمح الكامل,معكرونة الأرز,معكرونة الشعير,معكرونة الجاودار';
+
+  @override
+  String get question_63 => 'أي نوع من الحلويات التالية خالٍ من الغلوتين بشكل طبيعي؟';
+
+  @override
+  String get options_63 => 'كعكة الشوكولاتة,حلوى الماكرون,الكرواسون,التيراميسو';
+
+  @override
+  String get question_64 => 'ما هو أحد مصادر الغلوتين غير المتوقعة في المنتجات الغذائية؟';
+
+  @override
+  String get options_64 => 'اللحوم الطازجة,المياه المعدنية,الصلصات الجاهزة,الخضروات الطازجة';
+
+  @override
+  String get question_65 => 'أي من هذه الحبوب خالية من الغلوتين؟';
+
+  @override
+  String get options_65 => 'القمح,الكينوا,الشعير,الجاودار';
+
+  @override
+  String get question_66 => 'لماذا يحتاج الأشخاص الذين يعانون من مرض السيلياك إلى تجنب التلوث المتبادل بالغلوتين؟';
+
+  @override
+  String get options_66 => 'لأن الغلوتين يسبب زيادة الوزن,لأنه قد يؤدي إلى رد فعل مناعي شديد,لأنه يجعل الطعام يفسد بسرعة أكبر,لأنه يغير الطعم';
+
+  @override
+  String get question_67 => 'ما هو أحد المكونات التي يجب تجنبها عند اتباع نظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_67 => 'نشا الذرة,الجيلاتين,جلوتين القمح,زيت الزيتون';
+
+  @override
+  String get question_68 => 'أي من هذه البقوليات خالٍ من الغلوتين بشكل طبيعي؟';
+
+  @override
+  String get options_68 => 'العدس,الحمص,الفول السوداني,كل ما سبق';
+
+  @override
+  String get question_69 => 'ما هو أحد الأطعمة التي يمكن أن تحتوي على غلوتين غير معلن؟';
+
+  @override
+  String get options_69 => 'الأرز الأبيض,المشروبات الغازية,اللحوم المصنعة,المياه المعدنية';
+
+  @override
+  String get question_70 => 'ما هو العنصر الذي يجب أن يبحث عنه الأشخاص الذين يتبعون نظامًا غذائيًا خاليًا من الغلوتين في ملصقات الطعام؟';
+
+  @override
+  String get options_70 => 'سكر القصب,دقيق القمح,ملح البحر,زيت عباد الشمس';
+
+  @override
+  String get question_71 => 'ما هو السبب الرئيسي لتجنب الأشخاص المصابين بالسيلياك للأطعمة التي تحتوي على غلوتين؟';
+
+  @override
+  String get options_71 => 'لإنقاص الوزن,لتحسين الطاقة,لتجنب تلف الأمعاء,لتحسين المزاج';
+
+  @override
+  String get question_72 => 'ما هو أحد المطاعم التي يمكن أن يكون لديها خيارات خالية من الغلوتين؟';
+
+  @override
+  String get options_72 => 'مطعم بيتزا تقليدي,مطعم يقدم أطعمة مشوية,محل معجنات,مطعم ياباني للسوشي';
+
+  @override
+  String get question_73 => 'أي من هذه الصلصات يمكن أن تحتوي على الغلوتين؟';
+
+  @override
+  String get options_73 => 'صلصة الصويا التقليدية,الكاتشب,صلصة الخردل,صلصة الفلفل الحار';
+
+  @override
+  String get question_74 => 'ما هو أحد بدائل الخبز العادي في النظام الغذائي الخالي من الغلوتين؟';
+
+  @override
+  String get options_74 => 'خبز القمح الكامل,خبز الشوفان العادي,خبز دقيق الأرز,خبز الشعير';
+
+  @override
+  String get question_75 => 'أي نوع من اللحوم المصنعة يمكن أن يحتوي على الغلوتين؟';
+
+  @override
+  String get options_75 => 'الدجاج الطازج,اللحم البقري المشوي,النقانق المصنعة,شرائح السمك الطازجة';
+
+  @override
+  String get question_76 => 'ما هو أحد المخاطر المحتملة لتناول طعام يحتوي على الغلوتين عن طريق الخطأ لمرضى السيلياك؟';
+
+  @override
+  String get options_76 => 'زيادة الوزن,تلف الأمعاء,تحسن في الهضم,زيادة الطاقة';
+
+  @override
+  String get question_77 => 'أي نوع من الزيوت خالٍ من الغلوتين؟';
+
+  @override
+  String get options_77 => 'زيت الزيتون,زيت الذرة,زيت جوز الهند,كل ما سبق';
+
+  @override
+  String get question_78 => 'أي من هذه المنتجات يمكن أن تحتوي على غلوتين مضاف؟';
+
+  @override
+  String get options_78 => 'المكملات الغذائية,الزبادي الطبيعي,القهوة السوداء,الشاي الأخضر';
+
+  @override
+  String get question_79 => 'ما هو أحد أنواع المأكولات السريعة التي تكون عادة خالية من الغلوتين؟';
+
+  @override
+  String get options_79 => 'البرغر العادي,أطباق الأرز,البيتزا التقليدية,الكرواسون';
+
+  @override
+  String get question_80 => 'أي من هذه البذور خالية من الغلوتين بشكل طبيعي؟';
+
+  @override
+  String get options_80 => 'بذور الكتان,بذور السمسم,بذور الشيا,كل ما سبق';
+
+  @override
+  String get question_81 => 'ما هو أحد أنواع الحليب الخالية من الغلوتين؟';
+
+  @override
+  String get options_81 => 'حليب البقر العادي,حليب اللوز,حليب الشعير,حليب الجاودار';
+
+  @override
+  String get question_82 => 'أي من هذه النشويات خالية من الغلوتين؟';
+
+  @override
+  String get options_82 => 'نشا الذرة,دقيق الجاودار,دقيق الشعير,دقيق القمح';
+
+  @override
+  String get question_83 => 'ما هو أحد العوامل التي يجب مراعاتها عند تناول الطعام في الخارج عند اتباع نظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_83 => 'تجنب المشروبات الغازية,سؤال المطعم عن المكونات,تجنب اللحوم,تجنب الخضروات';
+
+  @override
+  String get question_84 => 'أي من هذه المكسرات خالٍ من الغلوتين بشكل طبيعي؟';
+
+  @override
+  String get options_84 => 'اللوز,الكاجو,الجوز,كل ما سبق';
+
+  @override
+  String get question_85 => 'ما هو أحد أعراض استهلاك الغلوتين لدى الأشخاص المصابين بمرض السيلياك؟';
+
+  @override
+  String get options_85 => 'تحسن الهضم,الانتفاخ وآلام المعدة,زيادة الطاقة,تحسن المزاج';
+
+  @override
+  String get question_86 => 'أي من هذه الحبوب يستخدم غالبًا كبديل خالٍ من الغلوتين؟';
+
+  @override
+  String get options_86 => 'القمح,الأرز البني,الشعير,الجاودار';
+
+  @override
+  String get question_87 => 'ما هو أحد مصادر الغلوتين في بعض أنواع القهوة الجاهزة؟';
+
+  @override
+  String get options_87 => 'السكر,النكهات المضافة,القهوة السوداء,الماء';
+
+  @override
+  String get question_88 => 'أي من هذه الأنظمة الغذائية يجب أن يتبعها مرضى السيلياك؟';
+
+  @override
+  String get options_88 => 'نظام غني بالبروتين,نظام خالٍ من الغلوتين,نظام نباتي,نظام قليل الدهون';
+
+  @override
+  String get question_89 => 'ما هو أحد التحديات التي يواجهها الأشخاص الذين يتبعون نظامًا غذائيًا خالٍ من الغلوتين؟';
+
+  @override
+  String get options_89 => 'سهولة العثور على المنتجات,ارتفاع تكلفة المنتجات,زيادة خيارات الطعام,تحسن في الهضم';
+
+  @override
+  String get question_90 => 'ما هو أحد بدائل الطحين الخالي من الغلوتين؟';
+
+  @override
+  String get options_90 => 'دقيق اللوز,دقيق القمح,دقيق الجاودار,دقيق الشعير';
+
+  @override
+  String get question_91 => 'أي من هذه المكونات يُستخدم غالبًا في الخبز الخالي من الغلوتين؟';
+
+  @override
+  String get options_91 => 'دقيق القمح,دقيق الذرة,دقيق الجاودار,دقيق الشعير';
+
+  @override
+  String get question_92 => 'أي من هذه الحبوب غير مسموح بها في النظام الغذائي الخالي من الغلوتين؟';
+
+  @override
+  String get options_92 => 'الأرز,الذرة,الجاودار,الدخن';
+
+  @override
+  String get question_93 => 'أي من هذه المأكولات يمكن أن تحتوي على غلوتين مخفي؟';
+
+  @override
+  String get options_93 => 'الخضروات الطازجة,الصلصات الجاهزة,الفواكه الطازجة,اللحوم غير المصنعة';
+
+  @override
+  String get question_94 => 'ما هو أحد الأسباب التي تجعل بعض الأطعمة المصنعة تحتوي على الغلوتين؟';
+
+  @override
+  String get options_94 => 'لإضفاء نكهة,لتحسين القوام,لإضافة حلاوة,لزيادة المحتوى المائي';
+
+  @override
+  String get question_95 => 'أي من هذه الأطعمة مناسب للأشخاص الذين يتبعون نظامًا غذائيًا خالٍ من الغلوتين؟';
+
+  @override
+  String get options_95 => 'الخبز العادي,المعكرونة العادية,الكينوا,دقيق الشعير';
+
+  @override
+  String get question_96 => 'ما هو أحد المصادر الشائعة للغلوتين في الوجبات الخفيفة؟';
+
+  @override
+  String get options_96 => 'رقائق البطاطس الطبيعية,الفشار,البسكويت التقليدي,المكسرات الطبيعية';
+
+  @override
+  String get question_97 => 'أي من هذه البدائل يُستخدم في الطهي الخالي من الغلوتين؟';
+
+  @override
+  String get options_97 => 'دقيق الأرز,دقيق الجاودار,دقيق الشعير,دقيق القمح';
+
+  @override
+  String get question_98 => 'لماذا قد يحتاج الشخص إلى استشارة طبيب قبل اتباع نظام غذائي خالٍ من الغلوتين؟';
+
+  @override
+  String get options_98 => 'للتأكد من أنه ضروري لحالته الصحية,لزيادة نسبة الغلوتين في نظامه الغذائي,لتقليل استهلاك الخضروات,للحصول على المزيد من الدهون';
+
+  @override
+  String get question_99 => 'ما هو أحد الأطباق الشائعة التي تكون خالية من الغلوتين بشكل طبيعي؟';
+
+  @override
+  String get options_99 => 'الأرز مع الخضروات,المعكرونة التقليدية,الخبز الفرنسي,الكعك';
+
+  @override
+  String get question_100 => 'ما هو أحد الفوائد الصحية المحتملة للأشخاص المصابين بمرض السيلياك عند اتباع نظام خالٍ من الغلوتين؟';
+
+  @override
+  String get options_100 => 'تحسن في صحة الأمعاء,زيادة مشاكل الجهاز الهضمي,انخفاض مستوى الطاقة,زيادة الأعراض الهضمية';
 }

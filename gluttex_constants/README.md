@@ -89,7 +89,9 @@ Generate localisation files:
   > 
   > flutter gen-l10n
   >
-  >
+
+Add these as methods:
+
 
 ## Benefits
 

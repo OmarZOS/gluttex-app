@@ -38,7 +38,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
           decoration: InputDecoration(
               hintText: AppLocalizations.of(context)!.searchTxt,
               border: InputBorder.none,
-              icon: Icon(Icons.search_outlined)),
+              icon: const Icon(Icons.search_outlined)),
         ),
         actions: <Widget>[
           IconButton(

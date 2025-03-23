@@ -6,6 +6,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
@@ -199,23 +200,28 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
                     final product = Product(
-                      id_product: 0,
-                      product_provider_id: 1,
-                      product_category_id: _product_type_id ?? 0,
-                      id_product_category: _product_type_id ?? 0,
-                      id_product_image: 0,
-                      product_ref_id: 0,
-                      product_name: _productName,
-                      product_brand: _productBrand,
-                      product_barcode: _productBarcode,
-                      product_image_data: _productImage,
-                      product_category_desc: '',
-                      product_price: _productPrice ?? 0.0,
-                      product_quantity: _productQuantity ?? 0,
-                      product_description: _productDescription,
-                      product_created_at: null,
-                      product_last_updated: null,
-                    );
+                        id_product: 0,
+                        product_provider_id: 1,
+                        product_category_id: _product_type_id ?? 0,
+                        id_product_category: _product_type_id ?? 0,
+                        id_product_image: 0,
+                        product_ref_id: 0,
+                        product_name: _productName,
+                        product_brand: _productBrand,
+                        product_barcode: _productBarcode,
+                        product_image_data: _productImage,
+                        product_image_url: null,
+                        product_category_desc: '',
+                        product_price: _productPrice ?? 0.0,
+                        product_quantity: _productQuantity ?? 0,
+                        product_description: _productDescription,
+                        product_created_at: null,
+                        product_last_updated: null,
+                        product_owner_id:
+                            Provider.of<AppUserNotifier>(context, listen: false)
+                                    .appUser!
+                                    .id_app_user ??
+                                1);
                     // Handle product submission
                     int? statusCode;
                     Response response = Response();
@@ -232,7 +238,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                               AppLocalizations.of(context)!.putSuccess;
                           await Provider.of<ProductNotifier>(context,
                                   listen: false)
-                              .fetchProducts();
+                              .fetchProducts(0);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(response.text),

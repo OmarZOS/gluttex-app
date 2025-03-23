@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
+import 'package:gluttex_core/business/Cart.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:locator/locator.dart';
+import 'package:provider/provider.dart';
 
 class OrderNowScreen extends StatefulWidget {
   final Product product;
@@ -23,10 +26,18 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
       TextEditingController(text: "1");
   double taxRate = 0.19; // Example tax rate
   double discount = 0.0; // Example discount
-
+  int? ordering_user_id;
   double get totalPrice =>
       widget.product.product_price ??
       0.0 + ((widget.product.product_price ?? 0.0) * taxRate) - discount;
+
+  @override
+  Future<void> initState() async {
+    super.initState();
+    ordering_user_id = Provider.of<AppUserNotifier>(context, listen: false)
+        .appUser!
+        .id_app_user;
+  }
 
   @override
   void dispose() {
@@ -56,7 +67,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             // Product details
             Text(
               widget.product.product_name ?? "",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Divider(),
@@ -65,7 +76,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(AppLocalizations.of(context)!.productQuantity,
-                    style: TextStyle(fontSize: 16)),
+                    style: const TextStyle(fontSize: 16)),
                 Row(
                   children: [
                     IconButton(
@@ -98,41 +109,28 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             const Divider(),
             // Price breakdown
             Text(
-                "${AppLocalizations.of(context)!.subtotalTxt}\$${(widget.product.product_price ?? 0.0).toStringAsFixed(2)}"),
+                "${AppLocalizations.of(context)!.subtotalTxt} ${(widget.product.product_price ?? 0.0).toStringAsFixed(2)}"),
             Text(
-                "${AppLocalizations.of(context)!.taxTxt}\$${((widget.product.product_price ?? 0.0) * taxRate).toStringAsFixed(2)}"),
+                "${AppLocalizations.of(context)!.taxTxt} ${((widget.product.product_price ?? 0.0) * taxRate).toStringAsFixed(2)}"),
             if (discount > 0)
               Text(
-                  "${AppLocalizations.of(context)!.discountText}-\$${discount.toStringAsFixed(2)}"),
+                  "${AppLocalizations.of(context)!.discountText}- ${discount.toStringAsFixed(2)}"),
             const Divider(),
             Text(
-              "${AppLocalizations.of(context)!.totalTxt}\$${((int.tryParse(_quantityController.text) ?? 1) * (widget.product.product_price ?? 0.0 + ((widget.product.product_price ?? 0.0) * taxRate) - discount)).toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              "${AppLocalizations.of(context)!.totalTxt} ${((int.tryParse(_quantityController.text) ?? 1) * (widget.product.product_price ?? 0.0 + ((widget.product.product_price ?? 0.0) * taxRate) - discount)).toStringAsFixed(2)}",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const Spacer(),
             // Order button
             ElevatedButton(
               onPressed: () async {
-                Map<String, dynamic> data = {
-                  "ordered_items": [
-                    {
-                      "id_ordered_item": 0,
-                      "ordered_product_id": widget.product.id_product ?? 0,
-                      "order_ref": 0,
-                      "product_discount": discount,
-                      "ordered_quantity":
-                          int.tryParse(_quantityController.text) ?? 1,
-                      "unit_price": widget.product.product_price ?? 0.0,
-                      "applied_vat": taxRate
-                    }
-                  ],
-                  "submitted_order": {
-                    "id_placed_order": 0,
-                    "ordered_timestamp": "string",
-                    "order_discount": 0,
-                    "ordering_user_id": 1
-                  }
-                };
+                Map<String, dynamic> data = Cart.buildSingleOrderData(
+                  product: widget.product,
+                  quantity: int.tryParse(_quantityController.text) ?? 1,
+                  orderingUserId: ordering_user_id!,
+                  discount: discount,
+                  taxRate: taxRate,
+                );
 
                 String url = GluttexConstants.apiBaseUrl +
                     GluttexConstants.addOrderEndpoint;

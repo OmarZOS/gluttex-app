@@ -3,6 +3,7 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AuthService.dart';
 import 'package:gluttex_core/app/UserService.dart';
+import 'package:gluttex_core/business/services/OrderService.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
@@ -13,6 +14,7 @@ import 'package:gluttex_impl_app/gluttex_impl_app.dart';
 import 'package:gluttex_impl_app/gluttex_impl_auth.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/cart_change_notifier.dart';
+import 'package:gluttex_impl_business/gluttex_impl_order.dart';
 import 'package:gluttex_impl_business/gluttex_impl_product.dart';
 import 'package:gluttex_impl_business/gluttex_impl_recipe.dart';
 import 'package:gluttex_impl_business/gluttex_impl_supplier.dart';
@@ -33,6 +35,7 @@ void setupLocator() {
   GluttexLocator.registerSingletonService<SupplierService>(
       SupplierServiceImpl());
   GluttexLocator.registerSingletonService<ProductService>(ProductServiceImpl());
+  GluttexLocator.registerSingletonService<OrderService>(OrderServiceImpl());
   GluttexLocator.registerSingletonService<AuthService>(AuthServiceImpl());
 }
 
@@ -40,9 +43,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final localeProvider = LocaleProvider();
   await localeProvider.loadSavedLocale();
+  await localeProvider.getThemePreference();
   // await localeProvider.setLanguagePreference("ar");
 
   setupLocator();
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(GluttexApp(localeProvider));
 }
 
@@ -84,6 +89,15 @@ class GluttexApp extends StatelessWidget {
             // home: const HomePage(),
             navigatorKey: globalNavigatorKey,
             onGenerateRoute: AppRouter.generateRoute,
+            theme: ThemeData(
+              brightness: Brightness.light,
+              primarySwatch: Colors.blue,
+            ),
+            darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              primarySwatch: Colors.blueGrey,
+            ),
+            themeMode: localeProvider.themeMode,
           );
         },
       ),

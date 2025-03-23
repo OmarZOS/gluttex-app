@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
 class CounterWithFavBtn extends StatelessWidget {
   const CounterWithFavBtn({super.key});
 
@@ -19,7 +18,10 @@ class CounterWithFavBtn extends StatelessWidget {
             color: Color.fromARGB(255, 255, 255, 255),
             shape: BoxShape.circle,
           ),
-          child: SvgPicture.asset("assets/icons/heart_disabled.svg"),
+          child: SvgPicture.asset(
+            "assets/icons/heart_disabled.svg",
+            package: "medicom_catalog",
+          ),
         )
       ],
     );

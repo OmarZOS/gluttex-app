@@ -16,7 +16,7 @@ abstract class RecipeService {
     return null;
   }
 
-  Future<List<Recipe>?>? getAllRecipes() async {
+  Future<List<Recipe>?>? getAllRecipes(int page, int limit) async {
     return null;
   }
 

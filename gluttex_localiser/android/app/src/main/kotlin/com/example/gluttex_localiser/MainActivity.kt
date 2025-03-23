@@ -1,4 +1,4 @@
-package com.example.gluttex_localiser
+package com.gluttex.gluttex_localiser
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_play/components/game.dart';
+import 'package:gluttex_play/components/sa7ti.dart';
 import 'package:gluttex_play/components/snake.dart';
 
 class GameListScreen extends StatelessWidget {
   final List<Game> games = [
     Game(name: 'Snake', screen: const SnakeGame()),
-    Game(name: 'Game 2', screen: const SnakeGame()),
+    Game(name: 'Gluten-Quiz', screen: GlutenFreeQuiz()),
     Game(name: 'Game 3', screen: const SnakeGame()),
     // Add more games as needed
   ];

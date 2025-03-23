@@ -1,6 +1,5 @@
 library gluttex_impl_app;
 
-
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/AuthService.dart';
@@ -82,12 +81,7 @@ class AuthServiceImpl implements AuthService {
   @override
   Future<dynamic> signUpWithData(Map<String, dynamic> data) async {
     String destination =
-        GluttexConstants.apiBaseUrl + GluttexConstants.addAppUserEndpoint;
-    // Map<String, dynamic> data = {
-    //   "id_app_user": 0,
-    //   "app_user_name": username,
-    //   "app_user_password": password,
-    // };
+        GluttexConstants.apiBaseUrl + GluttexConstants.signUpEndpoint;
 
     dynamic appUserData;
     appUserData =

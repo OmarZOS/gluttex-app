@@ -4,6 +4,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Cart.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/cart_change_notifier.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
@@ -14,35 +15,22 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartItems = Provider.of<CartChangeNotifier>(context).cart.items;
-
+    final orderingUserId =
+        Provider.of<AppUserNotifier>(context).appUser!.id_app_user;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cart'),
+        title: Text(AppLocalizations.of(context)!.cartText),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          List<dynamic> orderedItems = [];
-          for (CartItem item in cartItems) {
-            orderedItems.add({
-              "id_ordered_item": 0,
-              "ordered_product_id": item.product.id_product ?? 0,
-              "order_ref": 0,
-              "product_discount": 0,
-              "ordered_quantity": item.quantity,
-              "unit_price": item.product.product_price ?? 0.0,
-              "applied_vat": 0.0
-            });
-          }
-          Map<String, dynamic> data = {
-            "ordered_items": orderedItems,
-            "submitted_order": {"ordering_user_id": 1}
-          };
+          Map<String, dynamic> orderedItems =
+              Cart.buildOrderData(cartItems, orderingUserId!);
 
           String url =
               GluttexConstants.apiBaseUrl + GluttexConstants.addOrderEndpoint;
 
-          int? statusCode =
-              await GluttexLocator.get<StorageService>().insert(url, data);
+          int? statusCode = await GluttexLocator.get<StorageService>()
+              .insert(url, orderedItems);
 
           Response response = Response();
 

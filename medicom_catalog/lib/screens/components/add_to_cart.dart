@@ -34,6 +34,7 @@ class AddToCart extends StatelessWidget {
             child: IconButton(
               icon: SvgPicture.asset(
                 "assets/icons/add_to_cart.svg",
+                package: "medicom_catalog",
               ),
               onPressed: onAddToCartPressed, // Trigger the sliding panel
             ),

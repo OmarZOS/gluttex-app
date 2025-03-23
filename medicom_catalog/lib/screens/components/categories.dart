@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations_ar.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 
 // We need satefull widget for our categories
@@ -11,7 +13,7 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
-  List<String> categories = ["Hand bag", "Jewellery", "Footwear", "Dresses"];
+  // List<String> categories = ["Hand bag", "Jewellery", "Footwear", "Dresses"];
   // By default our first item will be selected
   int selectedIndex = 0;
   @override
@@ -23,7 +25,7 @@ class _CategoriesState extends State<Categories> {
         height: 25,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: categories.length,
+          // itemCount: categories.length,
           itemBuilder: (context, index) => buildCategory(index),
         ),
       ),
@@ -44,7 +46,9 @@ class _CategoriesState extends State<Categories> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              categories[index],
+              AppLocalizations.of(context)!
+                  .productCategoryTextList
+                  .split(",")[index],
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: selectedIndex == index

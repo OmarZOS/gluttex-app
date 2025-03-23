@@ -21,6 +21,7 @@ class ProductEditFormScreen extends StatefulWidget {
   final int? initialProductTypeId;
   final double? initialProductPrice;
   final int? initialProductQuantity;
+  final int? initialProductOwner;
 
   final int? initialProduct_provider_id;
   final int? initialProduct_category_id;
@@ -37,6 +38,7 @@ class ProductEditFormScreen extends StatefulWidget {
       this.initialProductTypeId,
       this.initialProductPrice,
       this.initialProductQuantity,
+      this.initialProductOwner,
       this.initialProduct_provider_id,
       this.initialProduct_category_id,
       this.initialIdProduct,
@@ -58,7 +60,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
   int? _productTypeId;
   double? _productPrice;
   int? _productQuantity;
-
+  int? _product_owner_id;
   int? _product_provider_id;
   int? _product_category_id;
   int? _id_product;
@@ -79,7 +81,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
     _productTypeId = widget.initialProductTypeId ?? 1;
     _productPrice = widget.initialProductPrice;
     _productQuantity = widget.initialProductQuantity;
-
+    _product_owner_id == widget.initialProductOwner;
     _productDescription = widget.initialProductDescription;
     _product_provider_id = widget.initialProduct_provider_id;
     _product_category_id = widget.initialProduct_category_id;
@@ -267,6 +269,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                     final product = Product(
                       id_product: _id_product,
                       product_provider_id: _product_provider_id,
+                      product_owner_id: _product_owner_id,
                       product_category_id:
                           _productTypeId ?? _product_category_id,
                       id_product_category: _productTypeId,
@@ -276,6 +279,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                       product_brand: _productBrand,
                       product_barcode: _productBarcode,
                       product_image_data: _productImage,
+                      product_image_url: null,
                       product_category_desc: '',
                       product_price: _productPrice ?? 0,
                       product_quantity: _productQuantity ?? 0,
@@ -297,7 +301,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                             AppLocalizations.of(context)!.putSuccess;
                         await Provider.of<ProductNotifier>(context,
                                 listen: false)
-                            .fetchProducts();
+                            .fetchProducts(0);
                         Navigator.pop(context, product);
                         break;
                       case 406:

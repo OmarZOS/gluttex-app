@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
 import 'package:locator/locator.dart';
@@ -17,6 +18,12 @@ class RecipeNotifier extends ChangeNotifier {
             ingredient_name: ingredient.ingredient_name,
             ingredient_icon: ""); // remove the icon data from the object
       }).toList();
+
+  bool isLoading = false;
+  int currentPage = 0;
+  final int itemsPerPage =
+      GluttexConstants.itemsPerPage; // Number of items per page
+
   // Getter method to retrieve an ingredient by its id
   RecipeIngredient? getIngredientById(int id) {
     try {
@@ -34,18 +41,18 @@ class RecipeNotifier extends ChangeNotifier {
     fetchIngredients();
   }
 
-  Future<void> getRecipeImage(Recipe recipe) async {
-    Uint8List? image =
-        await _recipeService.getRecipeImage('${recipe.id_recipe_image}');
-    // await fetchRecipes();
-    // log("Changing recipe image");
-    // log('${_recipes.where((element) => element.id_recipe == recipe.id_recipe)}');
-    _recipes
-        .where((element) => element.id_recipe == recipe.id_recipe)
-        .first
-        .recipe_image_data = image;
-    notifyListeners();
-  }
+  // Future<void> getRecipeImage(Recipe recipe) async {
+  //   Uint8List? image =
+  //       await _recipeService.getRecipeImage('${recipe.id_recipe_image}');
+  //   // await fetchRecipes();
+  //   // log("Changing recipe image");
+  //   // log('${_recipes.where((element) => element.id_recipe == recipe.id_recipe)}');
+  //   _recipes
+  //       .where((element) => element.id_recipe == recipe.id_recipe)
+  //       .first
+  //       .recipe_image_data = image;
+  //   notifyListeners();
+  // }
 
   Future<void> fetchIngredients() async {
     var recipeIngredients = await _recipeService.getAllIngredients();
@@ -55,13 +62,13 @@ class RecipeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchRecipes() async {
-    var recipes = await _recipeService.getAllRecipes();
+  // Future<void> fetchRecipes() async {
+  //   var recipes = await _recipeService.getAllRecipes();
 
-    // log('${recipes}');
-    _recipes = recipes ?? [];
-    notifyListeners();
-  }
+  //   // log('${recipes}');
+  //   _recipes = recipes ?? [];
+  //   notifyListeners();
+  // }
 
   Future<int?> addRecipe(Recipe recipe) async {
     int? status = await _recipeService.addRecipe(recipe);
@@ -79,5 +86,30 @@ class RecipeNotifier extends ChangeNotifier {
     int? status = await _recipeService.deleteRecipe(idRecipe);
     await fetchRecipes();
     return status;
+  }
+
+  Future<void> fetchRecipes({bool reset = false}) async {
+    if (isLoading) return;
+
+    if (reset) {
+      currentPage = 0;
+      recipes.clear();
+    }
+
+    isLoading = true;
+    notifyListeners();
+
+    // Example API call for paginated Recipes
+    final fetchedRecipes = await _recipeService.getAllRecipes(
+      currentPage * itemsPerPage,
+      itemsPerPage,
+    );
+
+    recipes.addAll(fetchedRecipes!.where((newRecipe) => !recipes.any(
+        (existingRecipe) => existingRecipe.id_recipe == newRecipe.id_recipe)));
+
+    currentPage++;
+    isLoading = false;
+    notifyListeners();
   }
 }

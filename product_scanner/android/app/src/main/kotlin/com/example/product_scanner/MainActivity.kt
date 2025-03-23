@@ -1,4 +1,4 @@
-package com.example.product_scanner
+package com.gluttex.product_scanner
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -191,21 +191,23 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                               String quantity = _selectedIngredients[key]!;
 
                               // Return the IngredientCard with the correct data
+                              RecipeIngredient selected_ingredient =
+                                  Provider.of<RecipeNotifier>(context,
+                                          listen: false)
+                                      .getIngredientById(key)!;
+
                               return IngredientCard(
                                 onClicked: () {
                                   setState(() {
                                     _selectedIngredients.remove(key);
                                   });
                                 },
-                                name: Provider.of<RecipeNotifier>(context,
-                                        listen: false)
-                                    .getIngredientById(key)!
-                                    .ingredient_name,
+                                name: AppLocalizations.of(context)!
+                                        .ingredientTextList
+                                        .split(",")[
+                                    selected_ingredient.id_ingredient - 1],
                                 quantity: quantity,
-                                icon: Provider.of<RecipeNotifier>(context,
-                                        listen: false)
-                                    .getIngredientById(key)!
-                                    .ingredient_icon,
+                                icon: selected_ingredient.ingredient_icon,
                               );
                             },
                           ),
@@ -261,11 +263,12 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                       id_recipe_image: _id_recipe_image,
                       recipe_name: _recipeName,
                       recipe_image_data: _recipeImage,
+                      recipe_image_url: null,
                       recipe_description: _recipeDescription,
                       recipe_created_at: null,
                       recipe_last_updated: null,
                       recipe_instruction: _recipeInstruction,
-                      recipe_preparation_time: preparationTime.toString(),
+                      recipe_preparation_time: preparationTime,
                       recipe_category_desc: "",
                       recipe_ingredients: _selectedIngredients,
                     );

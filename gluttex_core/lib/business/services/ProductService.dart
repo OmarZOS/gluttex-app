@@ -12,7 +12,8 @@ abstract class ProductService {
     return null;
   }
 
-  Future<List<Product>?>? getAllProducts() async {
+  Future<List<Product>?>? getAllProducts(
+      int category, int page, int limit) async {
     return null;
   }
 
@@ -24,7 +25,7 @@ abstract class ProductService {
     return null;
   }
 
-  Future<int?> addProduct(Product Product) async {
+  Future<int?> addProduct(Product product) async {
     return null;
   }
 

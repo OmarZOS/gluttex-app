@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class Supplier {
   final int idprovider_details_id;
   final int id_product_provider;
@@ -22,6 +24,22 @@ class Supplier {
       required this.product_provider_type_id});
 
   factory Supplier.fromJson(Map<String, dynamic> json) {
+    double longitude = 0.0;
+    double latitude = 0.0;
+
+    if (json["product_provider_location"] != null) {
+      // Remove "POINT(" and ")"
+      var point = json["product_provider_location"]["position_wkt"]
+          .replaceAll("POINT(", "")
+          .replaceAll(")", "");
+
+      // Split by space
+      List<String> coords = point.split(" ");
+
+      longitude = double.parse(coords[0]);
+      latitude = double.parse(coords[1]);
+    }
+
     return Supplier(
         idprovider_details_id: json['idprovider_details_id'] ?? 0,
         id_product_provider: json['id_product_provider'] ?? 0,
@@ -29,10 +47,8 @@ class Supplier {
         provider_name: json['product_provider_details']['provider_name'] ?? "",
         provider_contact_info:
             json['product_provider_details']['provider_contact_info'] ?? "",
-        location_latitude:
-            json["product_provider_location"]['location_latitude'] ?? 0.0,
-        location_longitude:
-            json["product_provider_location"]['location_longitude'] ?? 0.0,
+        location_latitude: latitude,
+        location_longitude: longitude,
         product_provider_type_id:
             json['product_provider_type']['id_product_provider_type'] ?? 0,
         location_name:
@@ -60,15 +76,15 @@ class Supplier {
   }
 }
 
-class Category {
+class SupplierCategory {
   final int product_provider_type_id;
   final String product_category_desc;
-  Category(
+  SupplierCategory(
       {required this.product_provider_type_id,
       required this.product_category_desc});
 
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
+  factory SupplierCategory.fromJson(Map<String, dynamic> json) {
+    return SupplierCategory(
         product_provider_type_id: json['id_product_provider_type'] ?? 0,
         product_category_desc: json['product_provider_type_desc'] ?? "");
   }

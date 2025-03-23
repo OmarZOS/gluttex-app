@@ -8,7 +8,7 @@ import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:provider/provider.dart';
 
 bool is_recipe_owner(BuildContext context, int ownerId) {
-  return true;
+  // return true;
   return Provider.of<AppUserNotifier>(context, listen: false)
           .appUser!
           .id_app_user ==
@@ -24,12 +24,12 @@ class RecipeOwner extends StatelessWidget {
   Widget build(BuildContext context) {
     final double cardHeight = MediaQuery.of(context).size.height / 4;
 
-    if (recipe.id_recipe_image != null &&
-        recipe.id_recipe_image != 0 &&
-        recipe.recipe_image_data == null) {
-      Provider.of<RecipeNotifier>(context, listen: false)
-          .getRecipeImage(recipe);
-    }
+    // if (recipe.id_recipe_image != null &&
+    //     recipe.id_recipe_image != 0 &&
+    //     recipe.recipe_image_data == null) {
+    //   Provider.of<RecipeNotifier>(context, listen: false)
+    //       .getRecipeImage(recipe);
+    // }
     return InkWell(
       onTap: () => Navigator.push(
         context,
@@ -52,8 +52,9 @@ class RecipeOwner extends StatelessWidget {
                         .infinity, // Make the container take up the full width
                     child: recipe.recipe_image_data != null &&
                             recipe.recipe_image_data!.isNotEmpty
-                        ? Image.memory(
-                            recipe.recipe_image_data!,
+                        ? Image.network(
+                            GluttexConstants.fsBaseUrl +
+                                recipe.recipe_image_url!,
                             fit: BoxFit.fill, // Fit the image within the space
                           )
                         : Container(
@@ -93,22 +94,3 @@ class RecipeOwner extends StatelessWidget {
     );
   }
 }
-
-// Widget _buildRecipeGrid(List<Recipe> recipes) {
-//   if (recipes.isEmpty) {
-//     return Center(child: Text(AppLocalizations.of(context)!.noRecipesFound));
-//   }
-
-//   return GridView.builder(
-//     itemCount: recipes.length,
-//     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//       crossAxisCount: 2,
-//       mainAxisSpacing: GluttexConstants.kDefaultPaddin,
-//       crossAxisSpacing: GluttexConstants.kDefaultPaddin,
-//       childAspectRatio: 0.5, // Adjust childAspectRatio to fit your layout needs
-//     ),
-//     itemBuilder: (context, index) => RecipeOwner(
-//       recipe: recipes[index],
-//     ),
-//   );
-// }

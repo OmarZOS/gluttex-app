@@ -3,11 +3,11 @@
 import '../Supplier.dart';
 
 abstract class SupplierService {
-  Future<List<Category>> getCategories() async {
+  Future<List<SupplierCategory>> getCategories() async {
     throw UnimplementedError();
   }
 
-  Future<Category?> getCategoryById(int categoryId) {
+  Future<SupplierCategory?> getCategoryById(int categoryId) {
     throw UnimplementedError();
     // throw UnimplementedError();
   }
@@ -16,7 +16,7 @@ abstract class SupplierService {
     throw UnimplementedError();
   }
 
-  Future<List<Supplier>> getAllSuppliers() async {
+  Future<List<Supplier>> getAllSuppliers(int offset, int itemsPerPage) async {
     throw UnimplementedError();
   }
 

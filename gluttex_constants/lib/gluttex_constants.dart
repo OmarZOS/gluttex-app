@@ -7,47 +7,49 @@ final GlobalKey<NavigatorState> globalNavigatorKey =
 
 class GluttexConstants {
   // API endpoints
-  static const String apiBaseUrl = 'http://192.168.14.158:9000';
-  // static const String authApiBaseUrl = 'http://localhost:9090';
+  static const String apiBaseUrl = 'http://134.199.240.34/api';
+  static const String fsBaseUrl = 'http://134.199.240.34';
 
-  static const String addAppUserEndpoint = '/appUser/add';
-  static const String deleteAppUserEndpoint = '/appUser/delete';
-  static const String getAllAppUsersEndpoint = '/appUser';
-  static const String appUserEndpoint = '/appUser';
-  static const String getAppUserCategoriesEndpoint = '/appUser/Category/all';
+  // static const String authApiBaseUrl = 'http://localhost:9090';
+  static const String addAppUserEndpoint = '/app_user';
+  static const String deleteAppUserEndpoint = '/app_user/delete';
+  static const String getAllAppUsersEndpoint = '/app_user';
+  static const String appUserEndpoint = '/app_user';
+  static const String getAppUserCategoriesEndpoint = '/app_user/categorie/all';
 
   static const String addProductEndpoint = '/product/add';
-  static const String deleteProductEndpoint = '/Product/delete';
-  static const String getAllProductsEndpoint = '/Product/all';
+  static const String deleteProductEndpoint = '/product/delete';
+  static const String getAllProductsEndpoint = '/product/all';
   static const String productEndpoint = '/product';
-  static const String getProductCategoriesEndpoint = '/product/Category/all';
+  static const String getProductCategoriesEndpoint = '/product/category/all';
+  static const String getAllProductsByCategoryEndpoint = '/product/category';
   static const String getProductImageEndpoint = '/image/product';
-  static const String getProductFeedEndpoint = '/products/observer';
+  static const String getProductFeedEndpoint = '/product/observer';
 
   static const String addOrderEndpoint = '/business/order/add';
-  // static const String deleteOrderEndpoint = '/Order/delete';
-  // static const String getAllOrdersEndpoint = '/Order/all';
-  // static const String orderEndpoint = '/Order';
+  static const String getAllOrdersEndpoint = '/business/user/orders/all';
 
   static const String addSupplierEndpoint = '/supplier/add';
   static const String deleteSupplierEndpoint = '/supplier/delete';
-  static const String getAllSuppliersEndpoint = '/Supplier/all';
+  static const String getAllSuppliersEndpoint = '/supplier/all';
   static const String supplierEndpoint = '/supplier';
-  static const String getSupplierCategoriesEndpoint = '/Supplier/Category/all';
+  static const String getSupplierCategoriesEndpoint = '/supplier/category/all';
   static const String getRecipeImageEndpoint = '/image/recipe';
 
   static const String addRecipeEndpoint = '/recipe/add';
-  static const String getIngredientEndpoint = '/recipe/Ingredients/all';
-  static const String deleteRecipeEndpoint = '/Recipe/delete';
-  static const String getAllRecipesEndpoint = '/Recipe/all';
+  static const String getIngredientEndpoint = '/recipe/ingredients/all';
+  static const String deleteRecipeEndpoint = '/recipe/delete';
+  static const String getAllRecipesEndpoint = '/recipe/all';
   static const String recipeEndpoint = '/recipe';
-  static const String getRecipeCategoriesEndpoint = '/recipe/Category/all';
+  static const String getRecipeCategoriesEndpoint = '/recipe/category/all';
 
   static const String loginEndpoint = '/authentication/token';
-  static const String productsEndpoint = '/products';
+  static const String signUpEndpoint = '/app_user/add';
+  static const String productsEndpoint = '/product';
+
+  static const int itemsPerPage = 6;
 
   // Texts
-
   static const String notFoundError = 'Object not found';
   static const String getFailure = 'Failed to load item';
   static const String serverError = 'Failed to connect to the server';

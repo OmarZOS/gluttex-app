@@ -7,162 +7,266 @@ void main() {
   runApp(const SnakeGame());
 }
 
-class SnakeGame extends StatefulWidget {
+class SnakeGame extends StatelessWidget {
   const SnakeGame({super.key});
 
   @override
-  _SnakeGameState createState() => _SnakeGameState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: GameScreen(),
+    );
+  }
 }
 
-class _SnakeGameState extends State<SnakeGame> {
-  static const int ROWS = 20;
-  static const int COLUMNS = 20;
-  static const int CELL_SIZE = 20;
-  static const int START_LENGTH = 5;
-  static const Duration GAME_SPEED = Duration(milliseconds: 300);
+class GameScreen extends StatefulWidget {
+  @override
+  _GameScreenState createState() => _GameScreenState();
+}
 
-  List<Offset> snake = [];
-  Offset fruit = const Offset(0, 0);
-  Direction direction = Direction.right;
-  bool isPlaying = false;
+class _GameScreenState extends State<GameScreen> {
+  static const int rows = 20; // 网格行数
+  static const int cols = 20; // 网格列数
+  double cellSize = 0.0; // 动态计算的单元格大小
+
+  List<Offset> snake = [const Offset(10, 10)];
+  Offset healthyFood = Offset.zero;
+  List<String> healthyFoodAssets = [
+    'assets/images/strawberry.svg',
+    'assets/images/apple_pie.svg',
+    'assets/images/watermelon.svg',
+  ];
+  List<String> unhealthyFoodAssets = [
+    'assets/images/bread.svg',
+    'assets/images/pizza.svg',
+  ];
+
+  int healthyFoodListLength = 0;
+  int unhealthyFoodListLength = 0;
+
+  int healthyFoodIndex = 0;
+  int unhealthyFoodIndex = 0;
+
+  Offset unhealthyFood = Offset.zero;
+  String direction = 'up';
+  bool isGameOver = false;
+  bool isPaused = false;
+  int score = 0;
+  Timer? gameLoop;
 
   @override
   void initState() {
     super.initState();
+    healthyFoodListLength = healthyFoodAssets.length;
+    unhealthyFoodListLength = unhealthyFoodAssets.length;
+    spawnFood();
     startGame();
   }
 
   void startGame() {
-    snake.clear();
-    snake.add(const Offset(ROWS / 2, COLUMNS / 2));
-    for (int i = 1; i < START_LENGTH; i++) {
-      snake.add(Offset(ROWS / 2 - i, COLUMNS / 2));
-    }
-    spawnFruit();
-    isPlaying = true;
-    Timer.periodic(GAME_SPEED, (Timer timer) {
-      if (!isPlaying) {
-        timer.cancel();
-      } else {
+    gameLoop = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      if (!isGameOver && !isPaused) {
         moveSnake();
       }
     });
   }
 
+  void spawnFood() {
+    Random random = Random();
+
+    healthyFoodIndex = random.nextInt(healthyFoodListLength);
+    unhealthyFoodIndex = random.nextInt(unhealthyFoodListLength);
+
+    healthyFood = Offset(
+      random.nextInt(cols).toDouble(),
+      random.nextInt(rows).toDouble(),
+    );
+    do {
+      unhealthyFood = Offset(
+        random.nextInt(cols).toDouble(),
+        random.nextInt(rows).toDouble(),
+      );
+    } while (unhealthyFood == healthyFood); // 避免食物重叠
+  }
+
   void moveSnake() {
     setState(() {
-      Offset head = snake.first;
+      Offset newHead = snake.first;
       switch (direction) {
-        case Direction.up:
-          head = Offset(head.dx, head.dy - 1);
+        case 'up':
+          newHead += const Offset(0, -1);
           break;
-        case Direction.down:
-          head = Offset(head.dx, head.dy + 1);
+        case 'down':
+          newHead += const Offset(0, 1);
           break;
-        case Direction.left:
-          head = Offset(head.dx - 1, head.dy);
+        case 'left':
+          newHead += const Offset(-1, 0);
           break;
-        case Direction.right:
-          head = Offset(head.dx + 1, head.dy);
+        case 'right':
+          newHead += const Offset(1, 0);
           break;
       }
-      if (head.dx < 0 ||
-          head.dx >= ROWS ||
-          head.dy < 0 ||
-          head.dy >= COLUMNS ||
-          snake.contains(head)) {
-        isPlaying = false;
+
+      // 处理边界穿越
+      if (newHead.dx >= cols) newHead = Offset(0, newHead.dy);
+      if (newHead.dx < 0) newHead = Offset(cols - 1, newHead.dy);
+      if (newHead.dy >= rows) newHead = Offset(newHead.dx, 0);
+      if (newHead.dy < 0) newHead = Offset(newHead.dx, rows - 1);
+
+      // 检查是否撞到自己
+      if (snake.contains(newHead)) {
+        isGameOver = true;
+        gameLoop?.cancel();
+        showGameOverDialog();
         return;
       }
-      snake.insert(0, head);
-      if (head == fruit) {
-        spawnFruit();
+
+      snake.insert(0, newHead);
+
+      // 检查是否吃到食物
+      if (newHead == healthyFood) {
+        score++;
+        spawnFood();
+      } else if (newHead == unhealthyFood) {
+        isGameOver = true;
+        gameLoop?.cancel();
+        showGameOverDialog();
+        return;
       } else {
-        snake.removeLast();
+        snake.removeLast(); // 如果没有吃到食物，移除尾部
       }
     });
   }
 
-  void spawnFruit() {
+  void showGameOverDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Game over'),
+        content: Text('Your score: $score. Do you want to start over?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              resetGame();
+            },
+            child: const Text('Restart'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void resetGame() {
     setState(() {
-      fruit = Offset(Random().nextInt(ROWS).toDouble(),
-          Random().nextInt(COLUMNS).toDouble());
+      snake = [const Offset(10, 10)];
+      direction = 'up';
+      isGameOver = false;
+      score = 0;
+      spawnFood();
+      startGame();
+    });
+  }
+
+  void togglePause() {
+    setState(() {
+      isPaused = !isPaused;
+      if (isPaused) {
+        gameLoop?.cancel();
+      } else {
+        startGame();
+      }
     });
   }
 
   @override
+  void dispose() {
+    gameLoop?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // 动态计算单元格大小
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    cellSize = min(screenWidth / cols, screenHeight / rows);
+
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back)),
+        title: Text('Snake Game - Score: $score'),
+        actions: [
+          IconButton(
+            icon: Icon(isPaused ? Icons.play_arrow : Icons.pause),
+            onPressed: togglePause,
+          ),
+        ],
       ),
       body: GestureDetector(
         onVerticalDragUpdate: (details) {
-          if (details.delta.dy > 0 && direction != Direction.up) {
-            direction = Direction.down;
-          } else if (details.delta.dy < 0 && direction != Direction.down) {
-            direction = Direction.up;
+          if (details.delta.dy > 0 && direction != 'up') {
+            direction = 'down';
+          } else if (details.delta.dy < 0 && direction != 'down') {
+            direction = 'up';
           }
         },
         onHorizontalDragUpdate: (details) {
-          if (details.delta.dx > 0 && direction != Direction.left) {
-            direction = Direction.right;
-          } else if (details.delta.dx < 0 && direction != Direction.right) {
-            direction = Direction.left;
+          if (details.delta.dx > 0 && direction != 'left') {
+            direction = 'right';
+          } else if (details.delta.dx < 0 && direction != 'right') {
+            direction = 'left';
           }
         },
         child: Container(
-          color: Colors.grey[300],
-          child: GridView.builder(
-            itemCount: ROWS * COLUMNS,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: ROWS,
-            ),
-            itemBuilder: (BuildContext context, int index) {
-              int row = index ~/ ROWS;
-              int col = index % ROWS;
-              Offset cell = Offset(row.toDouble(), col.toDouble());
-              if (snake.contains(cell)) {
-                return Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
+          color: Colors.black,
+          child: Center(
+            child: SizedBox(
+              width: cols * cellSize,
+              height: rows * cellSize,
+              child: Stack(
+                children: [
+                  // 蛇
+                  for (Offset segment in snake)
+                    Positioned(
+                      left: segment.dx * cellSize,
+                      top: segment.dy * cellSize,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                        width: cellSize,
+                        height: cellSize,
+                      ),
+                    ),
+                  // 健康食物
+                  Positioned(
+                    left: healthyFood.dx * cellSize,
+                    top: healthyFood.dy * cellSize,
+                    child: SvgPicture.asset(
+                      healthyFoodAssets[healthyFoodIndex],
+                      package: "gluttex_play",
+                      height: cellSize,
+                      width: cellSize,
+                    ),
                   ),
-                );
-              } else if (fruit == cell) {
-                return SvgPicture.asset(
-                  'assets/images/apple_pie.svg',
-                  // height: 100.0,
-                  // width: 100.0,
-                  // color: Colors.red,
-                )
-                    // Container(
-
-                    //   decoration: BoxDecoration(
-                    //     color: Colors.red,
-                    //     shape: BoxShape.circle,
-                    //     icon:Icon(Icons.g_mobiledata)
-                    //   ),
-                    // )
-                    ;
-              } else {
-                return Container();
-              }
-            },
+                  // 不健康食物
+                  Positioned(
+                    left: unhealthyFood.dx * cellSize,
+                    top: unhealthyFood.dy * cellSize,
+                    child: SvgPicture.asset(
+                      unhealthyFoodAssets[unhealthyFoodIndex],
+                      package: "gluttex_play",
+                      height: cellSize,
+                      width: cellSize,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
-}
-
-enum Direction {
-  up,
-  down,
-  left,
-  right,
 }

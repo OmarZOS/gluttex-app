@@ -1,4 +1,4 @@
-package com.example.gluttex_medical
+package com.gluttex.gluttex_medical
 
 import io.flutter.embedding.android.FlutterActivity
 

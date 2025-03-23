@@ -41,7 +41,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   @override
   void initState() {
     super.initState();
-    _addContactField();
   }
 
   @override
@@ -190,7 +189,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                     return null;
                   }),
               const SizedBox(height: 16.0),
-              FutureBuilder<List<Category>>(
+              FutureBuilder<List<SupplierCategory>>(
                 future: GluttexLocator.get<SupplierService>().getCategories(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {

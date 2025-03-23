@@ -25,6 +25,56 @@ class Cart {
     _items.remove(productId);
   }
 
+  static Map<String, dynamic> buildSingleOrderData({
+    required Product product,
+    required int quantity,
+    required int orderingUserId,
+    double discount = 0.0,
+    double taxRate = 0.0,
+  }) {
+    return {
+      "ordered_items": [
+        {
+          "id_ordered_item": 0,
+          "ordered_product_id": product.id_product ?? 0,
+          "order_ref": 0,
+          "product_discount": discount,
+          "ordered_quantity": quantity,
+          "unit_price": product.product_price ?? 0.0,
+          "applied_vat": taxRate
+        }
+      ],
+      "submitted_order": {
+        "id_placed_order": 0,
+        "ordered_timestamp": "",
+        "order_discount": 0,
+        "ordering_user_id": orderingUserId
+      }
+    };
+  }
+
+  static Map<String, dynamic> buildOrderData(
+      List<CartItem> cartItems, int orderingUserId) {
+    List<Map<String, dynamic>> orderedItems = [];
+
+    for (CartItem item in cartItems) {
+      orderedItems.add({
+        "id_ordered_item": 0,
+        "ordered_product_id": item.product.id_product ?? 0,
+        "order_ref": 0,
+        "product_discount": 0,
+        "ordered_quantity": item.quantity,
+        "unit_price": item.product.product_price ?? 0.0,
+        "applied_vat": 0.0
+      });
+    }
+
+    return {
+      "ordered_items": orderedItems,
+      "submitted_order": {"ordering_user_id": orderingUserId}
+    };
+  }
+
   // Update product quantity
   void updateQuantity(int productId, int quantity) {
     if (_items.containsKey(productId)) {

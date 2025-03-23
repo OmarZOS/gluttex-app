@@ -1,12 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_localiser/components/supplier_icon.dart';
 
 class CategoryPicker extends StatefulWidget {
   final ValueChanged<int> onCategoryChanged;
-  final List<Category> categories;
+  final List<SupplierCategory> categories;
 
   const CategoryPicker({
     Key? key,
@@ -28,7 +28,9 @@ class _CategoryPickerState extends State<CategoryPicker> {
         ListTile(
           // tileColor: Colors.blue[50],
           title: Text(
-            widget.categories[_selectedCategoryIndex].product_category_desc,
+            AppLocalizations.of(context)!
+                .providerCategoryTextList
+                .split(",")[_selectedCategoryIndex],
           ),
           onTap: () {
             _showPicker(context);
@@ -61,8 +63,13 @@ class _CategoryPickerState extends State<CategoryPicker> {
                 widget.categories[index].product_provider_type_id,
               );
             },
-            children: widget.categories.map((Category category) {
-              return Center(child: Text(category.product_category_desc));
+            children: widget.categories.map((SupplierCategory category) {
+              return Center(
+                  child: Text(
+                AppLocalizations.of(context)!
+                    .providerCategoryTextList
+                    .split(",")[category.product_provider_type_id - 1],
+              ));
             }).toList(),
           ),
         );
