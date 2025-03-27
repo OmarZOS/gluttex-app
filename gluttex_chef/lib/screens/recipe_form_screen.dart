@@ -1,19 +1,14 @@
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:gluttex_chef/components/category_picker.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/components/ingredient_popup.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
-import 'package:gluttex_impl_business/recipe_change_notifier.dart';
-import 'package:gluttex_chef/tools/image_picker.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
-import 'package:gluttex_core/app/Response.dart';
-import 'package:gluttex_core/business/services/RecipeService.dart';
+import 'package:gluttex_impl_business/recipe_change_notifier.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
 
 class RecipeFormScreen extends StatefulWidget {
@@ -25,305 +20,377 @@ class RecipeFormScreen extends StatefulWidget {
 
 class _RecipeFormScreenState extends State<RecipeFormScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _instructionsController = TextEditingController();
 
-  String? _recipeName;
   Uint8List? _recipeImage;
-  int? _recipe_category_id;
-  int? _id_recipe;
-  int? _id_recipe_image;
-  String? _recipeDescription;
-  String? _recipeInstruction;
-  String? _recipePreparationTime;
-  DateTime? recipe_created_at;
-  DateTime? recipe_last_updated;
+  int? _recipeCategoryId;
+  Duration _preparationTime = Duration.zero;
   final Map<int, String> _selectedIngredients = {};
+  bool _isSubmitting = false;
 
-  Duration preparationTime = Duration.zero;
+  @override
+  void initState() {
+    super.initState();
+    if (Provider.of<RecipeNotifier>(context, listen: false)
+        .recipeIngredients
+        .isEmpty)
+      Provider.of<RecipeNotifier>(context, listen: false).fetchIngredients();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _instructionsController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
 
-    if (pickedFile != null) {
-      Uint8List imageData = await pickedFile.readAsBytes();
-      Uint8List resizedImage = resizeImage(
-          imageData,
-          MediaQuery.of(context).size.width.floor(),
-          MediaQuery.of(context).size.width.floor());
-      setState(() {
-        _recipeImage = resizedImage;
-      });
+      if (pickedFile != null) {
+        final imageData = await pickedFile.readAsBytes();
+        setState(() => _recipeImage = imageData);
+      }
+    } catch (e) {
+      _showSnackBar(
+          AppLocalizations.of(context)!.noImageSelectedTxt, Colors.red);
     }
   }
 
   void _selectDuration(BuildContext context) {
-    showCupertinoModalPopup<void>(
+    showCupertinoModalPopup(
       context: context,
-      builder: (BuildContext context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.7,
-          // color: Colors.white,
-          child: CupertinoTimerPicker(
-            mode: CupertinoTimerPickerMode.hm,
-            onTimerDurationChanged: (Duration newDuration) {
-              setState(() {
-                preparationTime = newDuration;
-                _recipePreparationTime = ((newDuration.inHours != 0)
-                        ? AppLocalizations.of(context)!
-                            .hoursTextValue(newDuration.inHours.toString())
-                        : '') +
-                    ((newDuration.inMinutes.remainder(60) != 0)
-                        ? AppLocalizations.of(context)!.minutesTextValue(
-                            newDuration.inMinutes.remainder(60).toString())
-                        : '.');
-              });
-            },
-          ),
-        );
-      },
+      builder: (context) => Container(
+        height: 300,
+        padding: const EdgeInsets.only(top: 20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).canvasColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            CupertinoTimerPicker(
+              mode: CupertinoTimerPickerMode.hm,
+              initialTimerDuration: _preparationTime,
+              onTimerDurationChanged: (Duration newDuration) {
+                setState(() {
+                  _preparationTime = newDuration;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.confirmTxt),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  void _onCategoryChanged(int identifier) {
-    _recipe_category_id = identifier;
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_isSubmitting) return;
+
+    _formKey.currentState!.save();
+    setState(() => _isSubmitting = true);
+
+    try {
+      final recipe = Recipe(
+        id_recipe: null,
+        recipe_owner_id: Provider.of<AppUserNotifier>(context, listen: false)
+                .appUser
+                ?.id_app_user ??
+            1,
+        recipe_category_id: _recipeCategoryId ?? 0,
+        id_recipe_image: null,
+        recipe_name: _nameController.text,
+        recipe_image_data: _recipeImage,
+        recipe_image_url: null,
+        recipe_description: _descriptionController.text,
+        recipe_created_at: null,
+        recipe_last_updated: null,
+        recipe_instruction: _instructionsController.text,
+        recipe_preparation_time: _preparationTime,
+        recipe_category_desc: "",
+        recipe_ingredients: _selectedIngredients,
+      );
+
+      final statusCode =
+          await Provider.of<RecipeNotifier>(context, listen: false)
+              .addRecipe(recipe);
+
+      _handleResponse(statusCode, recipe);
+    } catch (e) {
+      _showSnackBar(
+          '${AppLocalizations.of(context)!.serverError}: $e', Colors.red);
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  void _handleResponse(int? statusCode, Recipe recipe) {
+    final loc = AppLocalizations.of(context)!;
+    String message;
+    Color color;
+
+    switch (statusCode) {
+      case 200:
+        message = loc.putSuccess;
+        color = Colors.green;
+        Provider.of<RecipeNotifier>(context, listen: false).fetchRecipes(0);
+        Navigator.pop(context, recipe);
+        break;
+      case 406:
+      case 422:
+        message = '${loc.putFailure} (Error $statusCode)';
+        color = Colors.amber;
+        break;
+      default:
+        message = '${loc.serverError} (Error $statusCode)';
+        color = Colors.red;
+    }
+
+    _showSnackBar(message, color);
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.insertRecipeText),
+        title: Text(loc.insertRecipeText),
+        elevation: 0,
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.recipeNameText),
-                onSaved: (value) => _recipeName = value,
+              _buildImageSection(loc),
+              const SizedBox(height: 24),
+              _buildTextField(
+                controller: _nameController,
+                label: loc.recipeNameText,
+                validator: (value) => value?.isEmpty ?? true
+                    ? loc.pleaseInputRecipeNameMsg
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _descriptionController,
+                label: loc.recipeDescriptionText,
+                maxLines: 3,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputRecipeNameMsg;
-                  }
+                  if (value?.isEmpty ?? true)
+                    return loc.pleaseInputRecipeDescriptionMsg;
+                  if (value!.length >= 300)
+                    return loc.descriptionCharacterConstraintMsg;
                   return null;
                 },
               ),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)!.recipeDescriptionText),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputRecipeDescriptionMsg;
-                  }
-
-                  if ((value).length >= 300) {
-                    return AppLocalizations.of(context)!
-                        .descriptionCharacterConstraintMsg;
-                  }
-                  return null;
-                },
-                onSaved: (value) => _recipeDescription = value,
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _instructionsController,
+                label: loc.recipeinstructiontext,
+                maxLines: 5,
               ),
-              TextFormField(
-                maxLines: null, // Allow for multiline input
-                keyboardType:
-                    TextInputType.multiline, // Show multiline keyboard
-                decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)!.recipeinstructiontext),
-                // keyboardType: TextInputType.number,
-                // validator: (value) {
-                //   return null;
-                // },
-                onSaved: (value) => _recipeInstruction = value,
+              const SizedBox(height: 16),
+              CategoryPicker(
+                category_id: 0,
+                categories: Provider.of<RecipeNotifier>(context).categories,
+                onCategoryChanged: (id) => _recipeCategoryId = id,
               ),
-              const SizedBox(height: 16.0),
-              FutureBuilder<List<RecipeCategory>?>(
-                future: GluttexLocator.get<RecipeService>().getCategories(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(); // Show a loading indicator while waiting
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text(
-                        AppLocalizations.of(context)!.categoriesNotFoundTxt);
-                  } else {
-                    return CategoryPicker(
-                      category_id: _recipe_category_id ?? 1,
-                      categories: snapshot.data!,
-                      onCategoryChanged: (selectedCategoryId) {
-                        _onCategoryChanged(selectedCategoryId);
-                      },
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 16.0),
-              ListTile(
-                title: Text(
-                  AppLocalizations.of(context)!.preparationTimeText(
-                      preparationTime.inHours.toString(),
-                      preparationTime.inMinutes.remainder(60).toString()),
-                ),
-                trailing: const Icon(Icons.timer),
-                onTap: () => _selectDuration(context),
-              ),
-              Column(
-                children: [
-                  // Other form fields...
-                  (_selectedIngredients.isNotEmpty)
-                      ? SizedBox(
-                          height: 120,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _selectedIngredients.length,
-                            itemBuilder: (context, index) {
-                              // Extract the key and corresponding value
-                              int key =
-                                  _selectedIngredients.keys.elementAt(index);
-                              String quantity = _selectedIngredients[key]!;
-
-                              // Return the IngredientCard with the correct data
-                              RecipeIngredient selected_ingredient =
-                                  Provider.of<RecipeNotifier>(context,
-                                          listen: false)
-                                      .getIngredientById(key)!;
-
-                              return IngredientCard(
-                                onClicked: () {
-                                  setState(() {
-                                    _selectedIngredients.remove(key);
-                                  });
-                                },
-                                name: AppLocalizations.of(context)!
-                                        .ingredientTextList
-                                        .split(",")[
-                                    selected_ingredient.id_ingredient - 1],
-                                quantity: quantity,
-                                icon: selected_ingredient.ingredient_icon,
-                              );
-                            },
-                          ),
-                        )
-                      : Container(),
-
-                  const SizedBox(height: 16.0),
-                  ListTile(
-                    title: Text(AppLocalizations.of(context)!.addIngredientMsg),
-                    trailing: const Icon(Icons.add),
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          // AlertDialog(title: Text('Select Ingredient'));
-                          return IngredientPopup(
-                              onIngredientSelected: (ingredient, quantity) {
-                            // Handle adding the selected ingredient and quantity to the form
-                            setState(() {
-                              _selectedIngredients[ingredient] = quantity;
-                            });
-                          });
-                        },
-                      );
-                    },
+              const SizedBox(height: 16),
+              _buildDurationPicker(loc),
+              const SizedBox(height: 16),
+              _buildIngredientsSection(loc),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _isSubmitting ? null : _submitForm,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16.0),
-              _recipeImage != null
-                  ? Image.memory(_recipeImage!,
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.width)
-                  : Text(AppLocalizations.of(context)!.noImageSelectedTxt),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: Text(AppLocalizations.of(context)!.pickImageMsg),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    final recipe = Recipe(
-                      id_recipe: _id_recipe,
-                      recipe_owner_id:
-                          Provider.of<AppUserNotifier>(context, listen: false)
-                                  .appUser!
-                                  .id_app_user ??
-                              1,
-                      recipe_category_id: _recipe_category_id,
-                      id_recipe_image: _id_recipe_image,
-                      recipe_name: _recipeName,
-                      recipe_image_data: _recipeImage,
-                      recipe_image_url: null,
-                      recipe_description: _recipeDescription,
-                      recipe_created_at: null,
-                      recipe_last_updated: null,
-                      recipe_instruction: _recipeInstruction,
-                      recipe_preparation_time: preparationTime,
-                      recipe_category_desc: "",
-                      recipe_ingredients: _selectedIngredients,
-                    );
-
-                    // Handle recipe submission
-
-                    int? statusCode = await Provider.of<RecipeNotifier>(context,
-                            listen: false)
-                        .addRecipe(recipe);
-
-                    Response response = Response();
-
-                    switch (statusCode) {
-                      case 200:
-                        response.color = Colors.green;
-                        response.text =
-                            AppLocalizations.of(context)!.putSuccess;
-                        await Provider.of<RecipeNotifier>(context,
-                                listen: false)
-                            .fetchRecipes();
-                        Navigator.pop(context, recipe);
-                        break;
-                      case 406:
-                        response.color = Colors.amberAccent;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                        break;
-                      case 422:
-                        response.color = Colors.amberAccent;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                        break;
-
-                      default:
-                        response.color = Colors.red;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
-                    }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(response.text),
-                        backgroundColor: response.color,
-                      ),
-                    );
-
-                    // You can use a provider or any state management to save the recipe
-                  }
-                },
-                child: Text(AppLocalizations.of(context)!.submitText),
+                ),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator()
+                    : Text(loc.submitText),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? Function(String?)? validator,
+    int? maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
+      ),
+      validator: validator,
+      maxLines: maxLines,
+    );
+  }
+
+  Widget _buildImageSection(AppLocalizations loc) {
+    return Column(
+      children: [
+        Container(
+          height: 200,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: _recipeImage != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    _recipeImage!,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.image, size: 50, color: Colors.grey.shade400),
+                      Text(loc.noImageSelectedTxt),
+                    ],
+                  ),
+                ),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.camera_alt),
+          label: Text(loc.pickImageMsg),
+          style: OutlinedButton.styleFrom(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+          onPressed: _pickImage,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDurationPicker(AppLocalizations loc) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      child: ListTile(
+        title: Text(
+          AppLocalizations.of(context)!.preparationTimeText(
+              _preparationTime.inHours.toString(),
+              _preparationTime.inMinutes.remainder(60).toString()),
+        ),
+        trailing: const Icon(Icons.timer),
+        onTap: () => _selectDuration(context),
+      ),
+    );
+  }
+
+  Widget _buildIngredientsSection(AppLocalizations loc) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          loc.ingredientSelect,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        if (_selectedIngredients.isNotEmpty)
+          SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _selectedIngredients.length,
+              itemBuilder: (context, index) {
+                final key = _selectedIngredients.keys.elementAt(index);
+                final quantity = _selectedIngredients[key]!;
+                final ingredient =
+                    Provider.of<RecipeNotifier>(context, listen: false)
+                        .recipeIngredients[key - 1];
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: IngredientCard(
+                    onClicked: () =>
+                        setState(() => _selectedIngredients.remove(key)),
+                    name: loc.ingredientTextList
+                        .split(",")[ingredient.id_ingredient - 1],
+                    quantity: quantity,
+                    icon: ingredient.ingredient_icon,
+                  ),
+                );
+              },
+            ),
+          ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.add),
+          label: Text(loc.addIngredientMsg),
+          style: OutlinedButton.styleFrom(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+          onPressed: () => showDialog(
+            context: context,
+            builder: (context) => IngredientPopup(
+              onIngredientSelected: (ingredient, quantity) {
+                setState(() => _selectedIngredients[ingredient] = quantity);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

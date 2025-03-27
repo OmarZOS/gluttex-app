@@ -437,13 +437,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get productCategoryTextList => 'منتجات مخبوزة, معلبات, حبوب, معكرونة, وجبات خفيفة, مشروبات, حلويات';
+  String get productCategoryTextList => 'المخبوزات,مربى,الحبوب,المعكرونة,الوجبات الخفيفة,المشروبات,الحلويات,الأطعمة المجمدة,مكونات,معلبات';
 
   @override
   String get allText => 'الكل';
 
   @override
-  String get providerCategoryTextList => 'مطعم, مخبز, مصنع, سوبرماركت';
+  String get providerCategoryTextList => 'مطعم, مخبز, مصنع, سوبرماركت,محل بقالة,ممون';
 
   @override
   String get recipeCategoryTextList => 'مقبلات ووجبات خفيفة, شوربات ومرق, سلطات, الأطباق الرئيسية, الأطباق الجانبية, المعكرونة والشعيرية, الأطباق المطهية, الإفطار والغداء المتأخر, الخبز والمعجنات, الحلويات, المشروبات, الصلصات والإضافات, المأكولات العالمية, حمية الصحية والخاصة, المناسبات والمواسم, الأطفال والعائلة, الطهي البطيء والإنستانت بوت, وصفات سريعة وسهلة, وصفات في إناء واحد, الشواء والباربكيو';
@@ -1087,4 +1087,177 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get options_100 => 'تحسن في صحة الأمعاء,زيادة مشاكل الجهاز الهضمي,انخفاض مستوى الطاقة,زيادة الأعراض الهضمية';
+
+  @override
+  String get selectGameMessage => 'اختر لعبة';
+
+  @override
+  String get snakeTitle => 'لعبة الثعبان';
+
+  @override
+  String get quizTitle => 'مسابقة';
+
+  @override
+  String get comingSoon => 'قريبًا';
+
+  @override
+  String get gameOver => 'انتهت اللعبة';
+
+  @override
+  String scoreStartOverMessage(Object score_start_over) {
+    return 'نتيجتك: $score_start_over. هل تريد البدء من جديد؟';
+  }
+
+  @override
+  String get restartText => 'إعادة التشغيل';
+
+  @override
+  String currentScore(Object snake_score) {
+    return 'لعبة الثعبان - النتيجة: $snake_score';
+  }
+
+  @override
+  String get quizCompleted => 'تم إكمال المسابقة';
+
+  @override
+  String quizScore(Object quiz_final_score) {
+    return 'نتيجتك: $quiz_final_score / 20';
+  }
+
+  @override
+  String get playAgain => 'العب مرة أخرى';
+
+  @override
+  String get glutenQuizTitle => 'مسابقة خالية من الغلوتين';
+
+  @override
+  String progressQuiz(Object quiz_progress) {
+    return 'السؤال $quiz_progress/20';
+  }
+
+  @override
+  String get copiedToClipboardText => 'تم النسخ إلى الحافظة';
+
+  @override
+  String get tapForDetailsText => 'اضغط لمزيد من التفاصيل';
+
+  @override
+  String get orText => 'أو';
+
+  @override
+  String get noAccountText => 'ليس لديك حساب؟';
+
+  @override
+  String get forgotPasswordText => 'هل نسيت كلمة المرور؟';
+
+  @override
+  String get heightText => 'الارتفاع';
+
+  @override
+  String get widthText => 'العرض';
+
+  @override
+  String get imageProcessingErrorText => 'خطأ في معالجة الصورة';
+
+  @override
+  String get accountText => 'الحساب';
+
+  @override
+  String get appearanceText => 'المظهر';
+
+  @override
+  String get aboutAppTab => 'حول التطبيق';
+
+  @override
+  String get appPurposeContent => 'تم تصميم هذا التطبيق لمساعدة الأشخاص المصابين بمرض الاضطرابات الهضمية أو عدم تحمل الغلوتين من خلال توفير منصة تجارة إلكترونية آمنة، ووصفات مناسبة، وألعاب تعليمية وموارد للحفاظ على نمط حياة خالٍ من الغلوتين بأمان.';
+
+  @override
+  String get featuresTitle => 'الميزات الرئيسية';
+
+  @override
+  String get feature1 => '🛒  متجر إلكتروني خالٍ من الغلوتين  - تسوق بثقة منتجات معتمدة خالية من الغلوتين مع توصيل مباشر.';
+
+  @override
+  String get feature2 => '🎮  ألعاب تعليمية مصغرة  - تعلم كيفية تحديد الأطعمة الآمنة بطريقة ممتعة مع ألعابنا التفاعلية.';
+
+  @override
+  String get feature3 => '🍽  وصفات خالية من الغلوتين  - اكتشف أفكار وجبات لذيذة وآمنة أعدها خبراء التغذية.';
+
+  @override
+  String get feature4 => '📍  دليل المحلات التجارية  - اعثر على متاجر البقالة والمطاعم المعتمدة الخالية من الغلوتين بالقرب منك.';
+
+  @override
+  String get contactUsTitle => 'اتصل بنا';
+
+  @override
+  String get contactEmail => 'gluttex.team@gmail.com';
+
+  @override
+  String get contactPhone => '+213-XXX-XXX-XXX';
+
+  @override
+  String get illnessOverviewContent => 'مرض الاضطرابات الهضمية هو اضطراب مناعي ذاتي حيث يؤدي تناول الغلوتين إلى تلف في الأمعاء الدقيقة. يمكن أن يسبب مشاكل في الجهاز الهضمي، ونقصًا في التغذية، ومضاعفات أخرى. تجنب الغلوتين تمامًا هو العلاج الفعال الوحيد.';
+
+  @override
+  String get symptom1 => '💨  مشاكل في الجهاز الهضمي  - انتفاخ، إسهال، إمساك، غثيان وقيء.';
+
+  @override
+  String get symptom2 => '⚡  التعب المزمن  - بسبب سوء امتصاص العناصر الغذائية الأساسية.';
+
+  @override
+  String get symptom3 => '🦴  مضاعفات عظمية  - زيادة خطر الإصابة بهشاشة العظام بسبب سوء امتصاص الكالسيوم وفيتامين د.';
+
+  @override
+  String get treatmentContent => 'يعتمد العلاج على نظام غذائي صارم خالٍ من الغلوتين مدى الحياة. يجب على المرضى تجنب القمح، الشعير، الجاودار ومشتقاتها. يساعد الدعم الغذائي وأدوات مثل Gluttex في منع الأخطاء غير المقصودة.';
+
+  @override
+  String get resource1 => '📖  جمعية مرضى حساسية الغلوتين  - [www.celiac.org](https://www.celiac.org)';
+
+  @override
+  String get resource2 => '📱  دليل تسوق تفاعلي  - ميزة مدمجة في التطبيق لفحص قوائم المكونات المشبوهة.';
+
+  @override
+  String get resource3 => '👩‍⚕️  دليل المتخصصين  - اعثر على أطباء الجهاز الهضمي وأخصائيي التغذية المتخصصين بالقرب منك.';
+
+  @override
+  String get resourcesTitle => 'موارد مفيدة';
+
+  @override
+  String get userCredentialsText => 'بيانات تسجيل الدخول الخاصة بك تتضمن بريدك الإلكتروني وكلمة المرور. تأكد من الحفاظ عليها آمنة ولا تشاركها مع أي شخص.';
+
+  @override
+  String get processingRequest => 'جاري معالجة طلبك...';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get basicInformation => 'المعلومات الأساسية';
+
+  @override
+  String get locationInformation => 'معلومات الموقع';
+
+  @override
+  String get contactInformation => 'معلومات الاتصال';
+
+  @override
+  String get saveSupplier => 'حفظ المورد';
+
+  @override
+  String get healthText => 'الصحة';
+
+  @override
+  String get illnessOverviewTitle => 'ما هو مرض السيلياك؟';
+
+  @override
+  String get symptomsTitle => 'الأعراض الشائعة';
+
+  @override
+  String get illnessInfoTab => 'معلومات';
+
+  @override
+  String get appPurposeTitle => 'مهمتنا';
+
+  @override
+  String get treatmentTitle => 'العلاج والإدارة';
 }

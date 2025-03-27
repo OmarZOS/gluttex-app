@@ -49,7 +49,7 @@ class ProductTitleWithImage extends StatelessWidget {
               const SizedBox(width: GluttexConstants.kDefaultPaddin),
               Expanded(
                 child: Hero(
-                    tag: "${product.id_product}",
+                    tag: "${product.id_product}-",
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(
                           100), // Adjust the radius as needed

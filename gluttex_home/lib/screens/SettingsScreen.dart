@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
 import 'package:provider/provider.dart';
 
@@ -9,73 +8,112 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
-    // final themeProvider = Provider.of<ThemeNotifier>(context, listen: false);
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.settingsTitle),
+        elevation: 0,
       ),
-      body: ListView(
-        children: [
-          Padding(padding: EdgeInsets.all(16.0)),
-          // Language Selection
-          ListTile(
-            title: Text(AppLocalizations.of(context)!.languageText),
-            // subtitle: Text(AppLocalizations.of(context)!
-            //     .currentLanguage(localeProvider.languagePreference ?? "")),
-            trailing: const Icon(Icons.language),
-            onTap: () {
-              _showLanguageDialog(context, localeProvider);
-            },
-          ),
-
-          const Padding(padding: EdgeInsets.all(8.0)),
-          // Dark Mode Toggle
-          ListTile(
-            title: Text(AppLocalizations.of(context)!.darkModeText),
-            trailing: Consumer<LocaleProvider>(
-              builder: (context, mylocaleProvider, _) {
-                if (mylocaleProvider.isDarkMode == null) {
-                  final brightness = MediaQuery.of(context).platformBrightness;
-                  mylocaleProvider.isDarkMode = brightness == Brightness.dark;
-                }
-                return Switch(
-                  value: mylocaleProvider.isDarkMode ?? true,
-                  onChanged: (bool value) {
-                    mylocaleProvider.toggleTheme();
-                  },
-                );
-              },
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _SettingsSection(
+                  title: AppLocalizations.of(context)!.appearanceText,
+                  children: [
+                    _LanguageTile(
+                        localeProvider: Provider.of<LocaleProvider>(context,
+                            listen: false)),
+                    const SizedBox(height: 8),
+                    _ThemeModeTile(),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _SettingsSection(
+                  title: AppLocalizations.of(context)!.accountText,
+                  children: [
+                    _ProfileUpdateTile(),
+                    const SizedBox(height: 8),
+                    _PasswordUpdateTile(),
+                  ],
+                ),
+              ]),
             ),
           ),
-
-          const Divider(),
-
-          // // Profile Information Update
-          // ListTile(
-          //   title: Text(AppLocalizations.of(context)!.profileUpdateText),
-          //   trailing: const Icon(Icons.person),
-          //   onTap: () {
-          //     _navigateToProfileUpdateScreen(context);
-          //   },
-          // ),
-
-          // // Password Update
-          // ListTile(
-          //   title: Text(AppLocalizations.of(context)!.passwordUpdateText),
-          //   trailing: const Icon(Icons.lock),
-          //   onTap: () {
-          //     _navigateToPasswordUpdateScreen(context);
-          //   },
-          // ),
         ],
       ),
     );
   }
+}
 
-  void _showLanguageDialog(
-      BuildContext context, LocaleProvider localeProvider) {
+class _SettingsSection extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _SettingsSection({
+    required this.title,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(children: children),
+        ),
+      ],
+    );
+  }
+}
+
+class _LanguageTile extends StatelessWidget {
+  final LocaleProvider localeProvider;
+
+  const _LanguageTile({required this.localeProvider});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.language),
+      ),
+      title: Text(AppLocalizations.of(context)!.languageText),
+      // subtitle: Text(
+      //   AppLocalizations.of(context)!
+      //       .currentLanguage(localeProvider.languagePreference ?? ""),
+      //   style: Theme.of(context).textTheme.bodySmall,
+      // ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => _showLanguageDialog(context),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -84,29 +122,22 @@ class SettingsScreen extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                title: const Text('English'),
-                onTap: () async {
-                  await localeProvider.setLanguagePreference('en');
-                  localeProvider.setLocale(const Locale('en'));
-                  Navigator.pop(context);
-                },
+              _LanguageOption(
+                language: 'English',
+                locale: const Locale('en'),
+                localeProvider: localeProvider,
               ),
-              ListTile(
-                title: const Text('Français'),
-                onTap: () async {
-                  await localeProvider.setLanguagePreference('fr');
-                  localeProvider.setLocale(const Locale('fr'));
-                  Navigator.pop(context);
-                },
+              const Divider(height: 1),
+              _LanguageOption(
+                language: 'Français',
+                locale: const Locale('fr'),
+                localeProvider: localeProvider,
               ),
-              ListTile(
-                title: const Text('العربية'),
-                onTap: () async {
-                  await localeProvider.setLanguagePreference('ar');
-                  localeProvider.setLocale(const Locale('ar'));
-                  Navigator.pop(context);
-                },
+              const Divider(height: 1),
+              _LanguageOption(
+                language: 'العربية',
+                locale: const Locale('ar'),
+                localeProvider: localeProvider,
               ),
             ],
           ),
@@ -114,21 +145,109 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  void _navigateToProfileUpdateScreen(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ProfileUpdateScreen(),
+class _LanguageOption extends StatelessWidget {
+  final String language;
+  final Locale locale;
+  final LocaleProvider localeProvider;
+
+  const _LanguageOption({
+    required this.language,
+    required this.locale,
+    required this.localeProvider,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(language),
+      trailing: localeProvider.languagePreference == locale.languageCode
+          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+          : null,
+      onTap: () async {
+        await localeProvider.setLanguagePreference(locale.languageCode);
+        localeProvider.setLocale(locale);
+        Navigator.pop(context);
+      },
+    );
+  }
+}
+
+class _ThemeModeTile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LocaleProvider>(
+      builder: (context, localeProvider, _) {
+        final isDarkMode = localeProvider.isDarkMode ??
+            MediaQuery.of(context).platformBrightness == Brightness.dark;
+
+        return ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isDarkMode ? Icons.dark_mode : Icons.light_mode,
+            ),
+          ),
+          title: Text(AppLocalizations.of(context)!.darkModeText),
+          trailing: Switch.adaptive(
+            value: isDarkMode,
+            onChanged: (value) => localeProvider.toggleTheme(),
+            activeColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ProfileUpdateTile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.person),
+      ),
+      title: Text(AppLocalizations.of(context)!.profileUpdateText),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProfileUpdateScreen(),
+        ),
       ),
     );
   }
+}
 
-  void _navigateToPasswordUpdateScreen(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const PasswordUpdateScreen(),
+class _PasswordUpdateTile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.lock),
+      ),
+      title: Text(AppLocalizations.of(context)!.passwordUpdateText),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PasswordUpdateScreen(),
+        ),
       ),
     );
   }
@@ -140,9 +259,10 @@ class ProfileUpdateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text(AppLocalizations.of(context)!.profileUpdateText)),
-      body: Center(child: Text('Profile update form goes here')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.profileUpdateText),
+      ),
+      body: Center(child: Text(AppLocalizations.of(context)!.comingSoon)),
     );
   }
 }
@@ -153,9 +273,10 @@ class PasswordUpdateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text(AppLocalizations.of(context)!.passwordUpdateText)),
-      body: Center(child: Text('Password update form goes here')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.passwordUpdateText),
+      ),
+      body: Center(child: Text(AppLocalizations.of(context)!.comingSoon)),
     );
   }
 }

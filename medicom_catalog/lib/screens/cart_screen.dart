@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Cart.dart';
-import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/cart_change_notifier.dart';
-import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
 
 class CartScreen extends StatelessWidget {
@@ -14,97 +10,126 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cartItems = Provider.of<CartChangeNotifier>(context).cart.items;
-    final orderingUserId =
-        Provider.of<AppUserNotifier>(context).appUser!.id_app_user;
+    final localizations = AppLocalizations.of(context)!;
+    final cartNotifier = Provider.of<CartChangeNotifier>(context);
+    final userNotifier = Provider.of<AppUserNotifier>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.cartText),
+        title: Text(localizations.cartText),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          Map<String, dynamic> orderedItems =
-              Cart.buildOrderData(cartItems, orderingUserId!);
+      floatingActionButton:
+          _buildCheckoutButton(context, cartNotifier, userNotifier),
+      body: _buildCartContent(context, cartNotifier),
+    );
+  }
 
-          String url =
-              GluttexConstants.apiBaseUrl + GluttexConstants.addOrderEndpoint;
+  Widget _buildCheckoutButton(
+    BuildContext context,
+    CartChangeNotifier cartNotifier,
+    AppUserNotifier userNotifier,
+  ) {
+    return FloatingActionButton(
+      onPressed: cartNotifier.cart.items.isEmpty
+          ? null
+          : () => _processOrder(context, cartNotifier, userNotifier),
+      backgroundColor: cartNotifier.cart.items.isEmpty
+          ? Colors.grey
+          : Theme.of(context).primaryColor,
+      child: Icon(
+        Icons.done_outline_rounded,
+        color:
+            cartNotifier.cart.items.isEmpty ? Colors.grey[400] : Colors.white,
+      ),
+    );
+  }
 
-          int? statusCode = await GluttexLocator.get<StorageService>()
-              .insert(url, orderedItems);
+  Future<void> _processOrder(
+    BuildContext context,
+    CartChangeNotifier cartNotifier,
+    AppUserNotifier userNotifier,
+  ) async {
+    final localizations = AppLocalizations.of(context)!;
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-          Response response = Response();
+    try {
+      final orderData = Cart.buildOrderData(
+          cartNotifier.cart.items, userNotifier.appUser!.id_app_user!);
 
-          switch (statusCode) {
-            case 200:
-              response.color = Colors.green;
-              response.text = AppLocalizations.of(context)!.putSuccess;
-              Navigator.pop(context);
-              break;
-            case 406:
-              response.color = Colors.amberAccent;
-              response.text =
-                  'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-              break;
-            case 422:
-              response.color = Colors.amberAccent;
-              response.text =
-                  'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-              break;
+      final response = await cartNotifier.submitOrder(orderData);
 
-            default:
-              response.color = Colors.red;
-              response.text =
-                  'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
-          }
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response.text),
-              backgroundColor: response.color,
-            ),
-          );
-        },
-        child: const Icon(
-          Icons.done_outline_rounded,
-          color: Colors.green,
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(response.message),
+          backgroundColor: response.isSuccess ? Colors.green : Colors.amber,
         ),
-      ),
-      body: cartItems.isEmpty
-          ? Center(
-              child: Text(
-                AppLocalizations.of(context)!.emptyCartTxt,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      );
+
+      if (response.isSuccess) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('${localizations.serverError}: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Widget _buildCartContent(
+      BuildContext context, CartChangeNotifier cartNotifier) {
+    final localizations = AppLocalizations.of(context)!;
+
+    if (cartNotifier.cart.items.isEmpty) {
+      return Center(
+        child: Text(
+          localizations.emptyCartTxt,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-            )
-          : ListView.builder(
-              itemCount: cartItems.length,
-              itemBuilder: (context, index) {
-                final product = cartItems[index].product;
-                return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    leading: const Icon(Icons.food_bank_sharp),
-                    title: Text(product.product_name ??
-                        AppLocalizations.of(context)!.missingText),
-                    subtitle: Text(
-                      AppLocalizations.of(context)!.orderAmountText(
-                          cartItems[index].quantity.toString()),
-                    ),
-                    trailing: IconButton(
-                      onPressed: () {
-                        Provider.of<CartChangeNotifier>(context, listen: false)
-                            .removeItem(product);
-                      },
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(8),
+      itemCount: cartNotifier.cart.items.length,
+      itemBuilder: (context, index) {
+        final item = cartNotifier.cart.items[index];
+        return _buildCartItem(context, item, cartNotifier);
+      },
+    );
+  }
+
+  Widget _buildCartItem(
+    BuildContext context,
+    CartItem item,
+    CartChangeNotifier cartNotifier,
+  ) {
+    final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: ListTile(
+        leading: const Icon(Icons.food_bank, size: 36),
+        title: Text(
+          item.product.product_name ?? localizations.missingText,
+          style: theme.textTheme.bodyLarge,
+        ),
+        subtitle: Text(
+          localizations.orderAmountText(item.quantity.toString()),
+          style: theme.textTheme.bodyMedium,
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline, color: Colors.red),
+          onPressed: () => cartNotifier.removeItem(item.product),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      ),
     );
   }
 }

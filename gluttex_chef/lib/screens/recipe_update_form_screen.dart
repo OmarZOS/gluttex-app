@@ -89,6 +89,10 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
     _recipePreparationTime = widget.initialRecipePreparationTime;
     _selectedIngredients = widget.initialIngredients ?? {};
     preparationTime = _recipePreparationTime!;
+    if (Provider.of<RecipeNotifier>(context, listen: false)
+        .recipeIngredients
+        .isEmpty)
+      Provider.of<RecipeNotifier>(context, listen: false).fetchIngredients();
   }
 
   Future<void> _pickImage() async {
@@ -192,25 +196,11 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                 onSaved: (value) => _recipeInstruction = value,
               ),
               const SizedBox(height: 16.0),
-              FutureBuilder<List<RecipeCategory>?>(
-                future: GluttexLocator.get<RecipeService>().getCategories(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(); // Show a loading indicator while waiting
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text(
-                        AppLocalizations.of(context)!.categoriesNotFoundTxt);
-                  } else {
-                    return CategoryPicker(
-                      category_id: _recipe_category_id ?? 1,
-                      categories: snapshot.data!,
-                      onCategoryChanged: (selectedCategoryId) {
-                        _onCategoryChanged(selectedCategoryId);
-                      },
-                    );
-                  }
+              CategoryPicker(
+                category_id: _recipe_category_id ?? 0,
+                categories: Provider.of<RecipeNotifier>(context).categories!,
+                onCategoryChanged: (selectedCategoryId) {
+                  _onCategoryChanged(selectedCategoryId);
                 },
               ),
               const SizedBox(height: 16.0),
@@ -248,12 +238,12 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                                 },
                                 name: Provider.of<RecipeNotifier>(context,
                                         listen: false)
-                                    .getIngredientById(key)!
+                                    .recipeIngredients[key]
                                     .ingredient_name,
                                 quantity: quantity,
                                 icon: Provider.of<RecipeNotifier>(context,
                                         listen: false)
-                                    .getIngredientById(key)!
+                                    .recipeIngredients[key]
                                     .ingredient_icon,
                               );
                             },
@@ -329,7 +319,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                             AppLocalizations.of(context)!.putSuccess;
                         await Provider.of<RecipeNotifier>(context,
                                 listen: false)
-                            .fetchRecipes();
+                            .fetchRecipes(0);
                         Navigator.pop(context, recipe);
                         break;
                       case 406:

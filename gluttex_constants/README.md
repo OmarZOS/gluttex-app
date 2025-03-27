@@ -87,7 +87,7 @@ class MyHomePage extends StatelessWidget {
 Generate localisation files:
 
   > 
-  > flutter gen-l10n
+  > flutter gen-l10n --untranslated-messages-file=missing.txt
   >
 
 Add these as methods:

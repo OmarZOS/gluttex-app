@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 
 class CategoryPicker extends StatefulWidget {
   final ValueChanged<int> onCategoryChanged;
-  final List<RecipeCategory> categories;
+  final List<String> categories;
   final int category_id;
 
   const CategoryPicker({
@@ -24,10 +25,9 @@ class _CategoryPickerState extends State<CategoryPicker> {
 
   @override
   void initState() {
-    _selectedCategoryIndex = widget.categories.indexWhere(
-        (category) => category.recipe_category_id == widget.category_id);
+    _selectedCategoryIndex = widget.category_id;
     widget.onCategoryChanged(
-      widget.categories[_selectedCategoryIndex].recipe_category_id,
+      widget.category_id,
     );
     super.initState();
   }
@@ -44,9 +44,13 @@ class _CategoryPickerState extends State<CategoryPicker> {
           onTap: () {
             _showPicker(context);
           },
-          // trailing: getRecipecategoryIcon(
-          //   widget.categories[_selectedCategoryIndex].recipe_provider_type_id,
-          // ),
+          trailing: SvgPicture.asset(
+            'assets/icons/${_selectedCategoryIndex + 1}.svg',
+            color: Theme.of(context).colorScheme.primary,
+            width: 40,
+            height: 40,
+            package: "gluttex_chef",
+          ),
         ),
       ],
     );
@@ -69,14 +73,11 @@ class _CategoryPickerState extends State<CategoryPicker> {
               // //log('${widget.categories[index].recipe_provider_type_id}');
 
               widget.onCategoryChanged(
-                widget.categories[index].recipe_category_id,
+                index,
               );
             },
-            children: widget.categories.map((RecipeCategory category) {
-              return Center(
-                  child: Text(AppLocalizations.of(context)!
-                      .recipeCategoryTextList
-                      .split(",")[category.recipe_category_id - 1]));
+            children: widget.categories.map((String category) {
+              return Center(child: Text(category));
             }).toList(),
           ),
         );

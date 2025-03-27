@@ -74,421 +74,6 @@ abstract class AppLocalizations {
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
       _AppLocalizationsDelegate();
-  String getLocalizedQuestion(int number) {
-    switch (number) {
-      case 1:
-        return question_1;
-      case 2:
-        return question_2;
-      case 3:
-        return question_3;
-      case 4:
-        return question_4;
-      case 5:
-        return question_5;
-      case 6:
-        return question_6;
-      case 7:
-        return question_7;
-      case 8:
-        return question_8;
-      case 9:
-        return question_9;
-      case 10:
-        return question_10;
-      case 11:
-        return question_11;
-      case 12:
-        return question_12;
-      case 13:
-        return question_13;
-      case 14:
-        return question_14;
-      case 15:
-        return question_15;
-      case 16:
-        return question_16;
-      case 17:
-        return question_17;
-      case 18:
-        return question_18;
-      case 19:
-        return question_19;
-      case 20:
-        return question_20;
-      case 21:
-        return question_21;
-      case 22:
-        return question_22;
-      case 23:
-        return question_23;
-      case 24:
-        return question_24;
-      case 25:
-        return question_25;
-      case 26:
-        return question_26;
-      case 27:
-        return question_27;
-      case 28:
-        return question_28;
-      case 29:
-        return question_29;
-      case 30:
-        return question_30;
-      case 31:
-        return question_31;
-      case 32:
-        return question_32;
-      case 33:
-        return question_33;
-      case 34:
-        return question_34;
-      case 35:
-        return question_35;
-      case 36:
-        return question_36;
-      case 37:
-        return question_37;
-      case 38:
-        return question_38;
-      case 39:
-        return question_39;
-      case 40:
-        return question_40;
-      case 41:
-        return question_41;
-      case 42:
-        return question_42;
-      case 43:
-        return question_43;
-      case 44:
-        return question_44;
-      case 45:
-        return question_45;
-      case 46:
-        return question_46;
-      case 47:
-        return question_47;
-      case 48:
-        return question_48;
-      case 49:
-        return question_49;
-      case 50:
-        return question_50;
-      case 51:
-        return question_51;
-      case 52:
-        return question_52;
-      case 53:
-        return question_53;
-      case 54:
-        return question_54;
-      case 55:
-        return question_55;
-      case 56:
-        return question_56;
-      case 57:
-        return question_57;
-      case 58:
-        return question_58;
-      case 59:
-        return question_59;
-      case 60:
-        return question_60;
-      case 61:
-        return question_61;
-      case 62:
-        return question_62;
-      case 63:
-        return question_63;
-      case 64:
-        return question_64;
-      case 65:
-        return question_65;
-      case 66:
-        return question_66;
-      case 67:
-        return question_67;
-      case 68:
-        return question_68;
-      case 69:
-        return question_69;
-      case 70:
-        return question_70;
-      case 71:
-        return question_71;
-      case 72:
-        return question_72;
-      case 73:
-        return question_73;
-      case 74:
-        return question_74;
-      case 75:
-        return question_75;
-      case 76:
-        return question_76;
-      case 77:
-        return question_77;
-      case 78:
-        return question_78;
-      case 79:
-        return question_79;
-      case 80:
-        return question_80;
-      case 81:
-        return question_81;
-      case 82:
-        return question_82;
-      case 83:
-        return question_83;
-      case 84:
-        return question_84;
-      case 85:
-        return question_85;
-      case 86:
-        return question_86;
-      case 87:
-        return question_87;
-      case 88:
-        return question_88;
-      case 89:
-        return question_89;
-      case 90:
-        return question_90;
-      case 91:
-        return question_91;
-      case 92:
-        return question_92;
-      case 93:
-        return question_93;
-      case 94:
-        return question_94;
-      case 95:
-        return question_95;
-      case 96:
-        return question_96;
-      case 97:
-        return question_97;
-      case 98:
-        return question_98;
-      case 99:
-        return question_99;
-      case 100:
-        return question_100;
-
-      default:
-        return errorOccurred;
-    }
-  }
-
-  String getLocalizedAnswerList(int number) {
-    switch (number) {
-      case 1:
-        return options_1;
-      case 2:
-        return options_2;
-      case 3:
-        return options_3;
-      case 4:
-        return options_4;
-      case 5:
-        return options_5;
-      case 6:
-        return options_6;
-      case 7:
-        return options_7;
-      case 8:
-        return options_8;
-      case 9:
-        return options_9;
-      case 10:
-        return options_10;
-      case 11:
-        return options_11;
-      case 12:
-        return options_12;
-      case 13:
-        return options_13;
-      case 14:
-        return options_14;
-      case 15:
-        return options_15;
-      case 16:
-        return options_16;
-      case 17:
-        return options_17;
-      case 18:
-        return options_18;
-      case 19:
-        return options_19;
-      case 20:
-        return options_20;
-      case 21:
-        return options_21;
-      case 22:
-        return options_22;
-      case 23:
-        return options_23;
-      case 24:
-        return options_24;
-      case 25:
-        return options_25;
-      case 26:
-        return options_26;
-      case 27:
-        return options_27;
-      case 28:
-        return options_28;
-      case 29:
-        return options_29;
-      case 30:
-        return options_30;
-      case 31:
-        return options_31;
-      case 32:
-        return options_32;
-      case 33:
-        return options_33;
-      case 34:
-        return options_34;
-      case 35:
-        return options_35;
-      case 36:
-        return options_36;
-      case 37:
-        return options_37;
-      case 38:
-        return options_38;
-      case 39:
-        return options_39;
-      case 40:
-        return options_40;
-      case 41:
-        return options_41;
-      case 42:
-        return options_42;
-      case 43:
-        return options_43;
-      case 44:
-        return options_44;
-      case 45:
-        return options_45;
-      case 46:
-        return options_46;
-      case 47:
-        return options_47;
-      case 48:
-        return options_48;
-      case 49:
-        return options_49;
-      case 50:
-        return options_50;
-      case 51:
-        return options_51;
-      case 52:
-        return options_52;
-      case 53:
-        return options_53;
-      case 54:
-        return options_54;
-      case 55:
-        return options_55;
-      case 56:
-        return options_56;
-      case 57:
-        return options_57;
-      case 58:
-        return options_58;
-      case 59:
-        return options_59;
-      case 60:
-        return options_60;
-      case 61:
-        return options_61;
-      case 62:
-        return options_62;
-      case 63:
-        return options_63;
-      case 64:
-        return options_64;
-      case 65:
-        return options_65;
-      case 66:
-        return options_66;
-      case 67:
-        return options_67;
-      case 68:
-        return options_68;
-      case 69:
-        return options_69;
-      case 70:
-        return options_70;
-      case 71:
-        return options_71;
-      case 72:
-        return options_72;
-      case 73:
-        return options_73;
-      case 74:
-        return options_74;
-      case 75:
-        return options_75;
-      case 76:
-        return options_76;
-      case 77:
-        return options_77;
-      case 78:
-        return options_78;
-      case 79:
-        return options_79;
-      case 80:
-        return options_80;
-      case 81:
-        return options_81;
-      case 82:
-        return options_82;
-      case 83:
-        return options_83;
-      case 84:
-        return options_84;
-      case 85:
-        return options_85;
-      case 86:
-        return options_86;
-      case 87:
-        return options_87;
-      case 88:
-        return options_88;
-      case 89:
-        return options_89;
-      case 90:
-        return options_90;
-      case 91:
-        return options_91;
-      case 92:
-        return options_92;
-      case 93:
-        return options_93;
-      case 94:
-        return options_94;
-      case 95:
-        return options_95;
-      case 96:
-        return options_96;
-      case 97:
-        return options_97;
-      case 98:
-        return options_98;
-      case 99:
-        return options_99;
-      case 100:
-        return options_100;
-
-      default:
-        return errorOccurred;
-    }
-  }
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -1295,6 +880,420 @@ abstract class AppLocalizations {
   /// **'No preparation time available.'**
   String get noPreparationTimeText;
 
+  String getLocalizedQuestion(int index) {
+    switch (index) {
+      case 1:
+        return question_1;
+      case 2:
+        return question_2;
+      case 3:
+        return question_3;
+      case 4:
+        return question_4;
+      case 5:
+        return question_5;
+      case 6:
+        return question_6;
+      case 7:
+        return question_7;
+      case 8:
+        return question_8;
+      case 9:
+        return question_9;
+      case 10:
+        return question_10;
+      case 11:
+        return question_11;
+      case 12:
+        return question_12;
+      case 13:
+        return question_13;
+      case 14:
+        return question_14;
+      case 15:
+        return question_15;
+      case 16:
+        return question_16;
+      case 17:
+        return question_17;
+      case 18:
+        return question_18;
+      case 19:
+        return question_19;
+      case 20:
+        return question_20;
+      case 21:
+        return question_21;
+      case 22:
+        return question_22;
+      case 23:
+        return question_23;
+      case 24:
+        return question_24;
+      case 25:
+        return question_25;
+      case 26:
+        return question_26;
+      case 27:
+        return question_27;
+      case 28:
+        return question_28;
+      case 29:
+        return question_29;
+      case 30:
+        return question_30;
+      case 31:
+        return question_31;
+      case 32:
+        return question_32;
+      case 33:
+        return question_33;
+      case 34:
+        return question_34;
+      case 35:
+        return question_35;
+      case 36:
+        return question_36;
+      case 37:
+        return question_37;
+      case 38:
+        return question_38;
+      case 39:
+        return question_39;
+      case 40:
+        return question_40;
+      case 41:
+        return question_41;
+      case 42:
+        return question_42;
+      case 43:
+        return question_43;
+      case 44:
+        return question_44;
+      case 45:
+        return question_45;
+      case 46:
+        return question_46;
+      case 47:
+        return question_47;
+      case 48:
+        return question_48;
+      case 49:
+        return question_49;
+      case 50:
+        return question_50;
+      case 51:
+        return question_51;
+      case 52:
+        return question_52;
+      case 53:
+        return question_53;
+      case 54:
+        return question_54;
+      case 55:
+        return question_55;
+      case 56:
+        return question_56;
+      case 57:
+        return question_57;
+      case 58:
+        return question_58;
+      case 59:
+        return question_59;
+      case 60:
+        return question_60;
+      case 61:
+        return question_61;
+      case 62:
+        return question_62;
+      case 63:
+        return question_63;
+      case 64:
+        return question_64;
+      case 65:
+        return question_65;
+      case 66:
+        return question_66;
+      case 67:
+        return question_67;
+      case 68:
+        return question_68;
+      case 69:
+        return question_69;
+      case 70:
+        return question_70;
+      case 71:
+        return question_71;
+      case 72:
+        return question_72;
+      case 73:
+        return question_73;
+      case 74:
+        return question_74;
+      case 75:
+        return question_75;
+      case 76:
+        return question_76;
+      case 77:
+        return question_77;
+      case 78:
+        return question_78;
+      case 79:
+        return question_79;
+      case 80:
+        return question_80;
+      case 81:
+        return question_81;
+      case 82:
+        return question_82;
+      case 83:
+        return question_83;
+      case 84:
+        return question_84;
+      case 85:
+        return question_85;
+      case 86:
+        return question_86;
+      case 87:
+        return question_87;
+      case 88:
+        return question_88;
+      case 89:
+        return question_89;
+      case 90:
+        return question_90;
+      case 91:
+        return question_91;
+      case 92:
+        return question_92;
+      case 93:
+        return question_93;
+      case 94:
+        return question_94;
+      case 95:
+        return question_95;
+      case 96:
+        return question_96;
+      case 97:
+        return question_97;
+      case 98:
+        return question_98;
+      case 99:
+        return question_99;
+      case 100:
+        return question_100;
+      default:
+        return notFoundError;
+    }
+  }
+
+  String getLocalizedAnswerList(int index) {
+    switch (index) {
+      case 1:
+        return options_1;
+      case 2:
+        return options_2;
+      case 3:
+        return options_3;
+      case 4:
+        return options_4;
+      case 5:
+        return options_5;
+      case 6:
+        return options_6;
+      case 7:
+        return options_7;
+      case 8:
+        return options_8;
+      case 9:
+        return options_9;
+      case 10:
+        return options_10;
+      case 11:
+        return options_11;
+      case 12:
+        return options_12;
+      case 13:
+        return options_13;
+      case 14:
+        return options_14;
+      case 15:
+        return options_15;
+      case 16:
+        return options_16;
+      case 17:
+        return options_17;
+      case 18:
+        return options_18;
+      case 19:
+        return options_19;
+      case 20:
+        return options_20;
+      case 21:
+        return options_21;
+      case 22:
+        return options_22;
+      case 23:
+        return options_23;
+      case 24:
+        return options_24;
+      case 25:
+        return options_25;
+      case 26:
+        return options_26;
+      case 27:
+        return options_27;
+      case 28:
+        return options_28;
+      case 29:
+        return options_29;
+      case 30:
+        return options_30;
+      case 31:
+        return options_31;
+      case 32:
+        return options_32;
+      case 33:
+        return options_33;
+      case 34:
+        return options_34;
+      case 35:
+        return options_35;
+      case 36:
+        return options_36;
+      case 37:
+        return options_37;
+      case 38:
+        return options_38;
+      case 39:
+        return options_39;
+      case 40:
+        return options_40;
+      case 41:
+        return options_41;
+      case 42:
+        return options_42;
+      case 43:
+        return options_43;
+      case 44:
+        return options_44;
+      case 45:
+        return options_45;
+      case 46:
+        return options_46;
+      case 47:
+        return options_47;
+      case 48:
+        return options_48;
+      case 49:
+        return options_49;
+      case 50:
+        return options_50;
+      case 51:
+        return options_51;
+      case 52:
+        return options_52;
+      case 53:
+        return options_53;
+      case 54:
+        return options_54;
+      case 55:
+        return options_55;
+      case 56:
+        return options_56;
+      case 57:
+        return options_57;
+      case 58:
+        return options_58;
+      case 59:
+        return options_59;
+      case 60:
+        return options_60;
+      case 61:
+        return options_61;
+      case 62:
+        return options_62;
+      case 63:
+        return options_63;
+      case 64:
+        return options_64;
+      case 65:
+        return options_65;
+      case 66:
+        return options_66;
+      case 67:
+        return options_67;
+      case 68:
+        return options_68;
+      case 69:
+        return options_69;
+      case 70:
+        return options_70;
+      case 71:
+        return options_71;
+      case 72:
+        return options_72;
+      case 73:
+        return options_73;
+      case 74:
+        return options_74;
+      case 75:
+        return options_75;
+      case 76:
+        return options_76;
+      case 77:
+        return options_77;
+      case 78:
+        return options_78;
+      case 79:
+        return options_79;
+      case 80:
+        return options_80;
+      case 81:
+        return options_81;
+      case 82:
+        return options_82;
+      case 83:
+        return options_83;
+      case 84:
+        return options_84;
+      case 85:
+        return options_85;
+      case 86:
+        return options_86;
+      case 87:
+        return options_87;
+      case 88:
+        return options_88;
+      case 89:
+        return options_89;
+      case 90:
+        return options_90;
+      case 91:
+        return options_91;
+      case 92:
+        return options_92;
+      case 93:
+        return options_93;
+      case 94:
+        return options_94;
+      case 95:
+        return options_95;
+      case 96:
+        return options_96;
+      case 97:
+        return options_97;
+      case 98:
+        return options_98;
+      case 99:
+        return options_99;
+      case 100:
+        return options_100;
+      default:
+        return notFoundError;
+    }
+  }
+
   /// No description provided for @productsText.
   ///
   /// In en, this message translates to:
@@ -1358,7 +1357,7 @@ abstract class AppLocalizations {
   /// No description provided for @productCategoryTextList.
   ///
   /// In en, this message translates to:
-  /// **'Baked Goods,Spreads,Cereals,Pasta,Snacks,Beverages,Desserts'**
+  /// **'Baked Goods,Spreads,Cereals,Pasta,Snacks,Beverages,Desserts,Frozen Foods,Baking Ingredients,Packaged Goods'**
   String get productCategoryTextList;
 
   /// No description provided for @allText.
@@ -1370,7 +1369,7 @@ abstract class AppLocalizations {
   /// No description provided for @providerCategoryTextList.
   ///
   /// In en, this message translates to:
-  /// **'Restaurant,Bakery,Factory,Supermarket'**
+  /// **'Restaurant,Bakery,Factory,Supermarket,Grocery Store,Distributor'**
   String get providerCategoryTextList;
 
   /// No description provided for @recipeCategoryTextList.
@@ -2650,6 +2649,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Seitan,Tempeh,Lentils,Couscous'**
   String get options_100;
+
+  /// No description provided for @selectGameMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a game'**
+  String get selectGameMessage;
+
+  /// No description provided for @snakeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Snake'**
+  String get snakeTitle;
+
+  /// No description provided for @quizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get quizTitle;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get comingSoon;
+
+  /// No description provided for @gameOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Game Over'**
+  String get gameOver;
+
+  /// No description provided for @scoreStartOverMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your score: {score_start_over}. Do you want to start over?'**
+  String scoreStartOverMessage(Object score_start_over);
+
+  /// No description provided for @restartText.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get restartText;
+
+  /// No description provided for @currentScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Snake Game - Score: {snake_score}'**
+  String currentScore(Object snake_score);
+
+  /// No description provided for @quizCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Completed'**
+  String get quizCompleted;
+
+  /// No description provided for @quizScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Your score: {quiz_final_score} / 20'**
+  String quizScore(Object quiz_final_score);
+
+  /// No description provided for @playAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Again'**
+  String get playAgain;
+
+  /// No description provided for @glutenQuizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gluten-Free Quiz'**
+  String get glutenQuizTitle;
+
+  /// No description provided for @progressQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {quiz_progress}/20'**
+  String progressQuiz(Object quiz_progress);
+
+  /// No description provided for @copiedToClipboardText.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboardText;
+
+  /// No description provided for @tapForDetailsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap for details'**
+  String get tapForDetailsText;
+
+  /// No description provided for @orText.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get orText;
+
+  /// No description provided for @noAccountText.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get noAccountText;
+
+  /// No description provided for @forgotPasswordText.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPasswordText;
+
+  /// No description provided for @heightText.
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get heightText;
+
+  /// No description provided for @widthText.
+  ///
+  /// In en, this message translates to:
+  /// **'Width'**
+  String get widthText;
+
+  /// No description provided for @imageProcessingErrorText.
+  ///
+  /// In en, this message translates to:
+  /// **'Image processing error'**
+  String get imageProcessingErrorText;
+
+  /// No description provided for @accountText.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountText;
+
+  /// No description provided for @appearanceText.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearanceText;
+
+  /// No description provided for @aboutAppTab.
+  ///
+  /// In en, this message translates to:
+  /// **'About App'**
+  String get aboutAppTab;
+
+  /// No description provided for @appPurposeContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This app is designed to help people with celiac disease or gluten intolerance by providing a secure e-commerce platform, adapted recipes, educational games, and resources to maintain a safe gluten-free lifestyle.'**
+  String get appPurposeContent;
+
+  /// No description provided for @featuresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Features'**
+  String get featuresTitle;
+
+  /// No description provided for @feature1.
+  ///
+  /// In en, this message translates to:
+  /// **'🛒 **Gluten-Free Online Store** - Shop with confidence for certified gluten-free products with direct delivery.'**
+  String get feature1;
+
+  /// No description provided for @feature2.
+  ///
+  /// In en, this message translates to:
+  /// **'🎮 **Educational Mini-Games** - Learn to identify safe foods in a fun way with our interactive games.'**
+  String get feature2;
+
+  /// No description provided for @feature3.
+  ///
+  /// In en, this message translates to:
+  /// **'🍽 **Gluten-Free Recipes** - Discover delicious and safe meal ideas created by nutrition experts.'**
+  String get feature3;
+
+  /// No description provided for @feature4.
+  ///
+  /// In en, this message translates to:
+  /// **'📍 **Local Business Directory** - Find certified gluten-free grocery stores and restaurants near you.'**
+  String get feature4;
+
+  /// No description provided for @contactUsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Us'**
+  String get contactUsTitle;
+
+  /// No description provided for @contactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'gluttex.team@gmail.com'**
+  String get contactEmail;
+
+  /// No description provided for @contactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'+213-XXX-XXX-XXX'**
+  String get contactPhone;
+
+  /// No description provided for @illnessOverviewContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Celiac disease is an autoimmune disorder where gluten ingestion damages the small intestine. It can cause digestive problems, nutritional deficiencies, and other complications. Strict lifelong gluten avoidance is the only effective treatment.'**
+  String get illnessOverviewContent;
+
+  /// No description provided for @symptom1.
+  ///
+  /// In en, this message translates to:
+  /// **'💨 **Digestive Issues** - Bloating, diarrhea, constipation, nausea and vomiting.'**
+  String get symptom1;
+
+  /// No description provided for @symptom2.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ **Chronic Fatigue** - Caused by malabsorption of essential nutrients.'**
+  String get symptom2;
+
+  /// No description provided for @symptom3.
+  ///
+  /// In en, this message translates to:
+  /// **'🦴 **Bone Complications** - Increased risk of osteoporosis due to poor calcium and vitamin D absorption.'**
+  String get symptom3;
+
+  /// No description provided for @treatmentContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment requires strict lifelong gluten-free diet. Patients must avoid wheat, barley, rye and their derivatives. Nutritional support and tools like Gluttex help prevent accidental exposure.'**
+  String get treatmentContent;
+
+  /// No description provided for @resource1.
+  ///
+  /// In en, this message translates to:
+  /// **'📖 **Celiac Disease Foundation** - [www.celiac.org](https://www.celiac.org)'**
+  String get resource1;
+
+  /// No description provided for @resource2.
+  ///
+  /// In en, this message translates to:
+  /// **'📱 **Interactive Shopping Guide** - Built-in app feature to scan suspicious ingredient lists.'**
+  String get resource2;
+
+  /// No description provided for @resource3.
+  ///
+  /// In en, this message translates to:
+  /// **'👩‍⚕️ **Specialist Directory** - Find gastroenterologists and nutritionists specializing in celiac disease near you.'**
+  String get resource3;
+
+  /// No description provided for @resourcesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Useful Resources'**
+  String get resourcesTitle;
+
+  /// No description provided for @userCredentialsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Your login credentials include your email and password. Make sure to keep them secure and do not share them with anyone.'**
+  String get userCredentialsText;
+
+  /// No description provided for @processingRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing your request...'**
+  String get processingRequest;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @basicInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Information'**
+  String get basicInformation;
+
+  /// No description provided for @locationInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Information'**
+  String get locationInformation;
+
+  /// No description provided for @contactInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Information'**
+  String get contactInformation;
+
+  /// No description provided for @saveSupplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Supplier'**
+  String get saveSupplier;
+
+  /// No description provided for @healthText.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get healthText;
+
+  /// No description provided for @illnessOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is Celiac Disease?'**
+  String get illnessOverviewTitle;
+
+  /// No description provided for @symptomsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Symptoms'**
+  String get symptomsTitle;
+
+  /// No description provided for @illnessInfoTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Informations'**
+  String get illnessInfoTab;
+
+  /// No description provided for @appPurposeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mission'**
+  String get appPurposeTitle;
+
+  /// No description provided for @treatmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment & Management'**
+  String get treatmentTitle;
 }
 
 class _AppLocalizationsDelegate

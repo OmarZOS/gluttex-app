@@ -437,13 +437,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get productCategoryTextList => 'Baked Goods,Spreads,Cereals,Pasta,Snacks,Beverages,Desserts';
+  String get productCategoryTextList => 'Baked Goods,Spreads,Cereals,Pasta,Snacks,Beverages,Desserts,Frozen Foods,Baking Ingredients,Packaged Goods';
 
   @override
   String get allText => 'All';
 
   @override
-  String get providerCategoryTextList => 'Restaurant,Bakery,Factory,Supermarket';
+  String get providerCategoryTextList => 'Restaurant,Bakery,Factory,Supermarket,Grocery Store,Distributor';
 
   @override
   String get recipeCategoryTextList => 'Appetizers & Snacks,Soups & Stews,Salads,Main Courses,Side Dishes,Pasta & Noodles,Casseroles,Breakfast & Brunch,Breads & Baking,Desserts,Drinks & Beverages,Sauces & Condiments,International Cuisine,Healthy & Special Diets,Holiday & Seasonal,Kids & Family,Slow Cooker & Instant Pot,Quick & Easy,One-Pan Recipes,Grilling & BBQ';
@@ -1087,4 +1087,177 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get options_100 => 'Seitan,Tempeh,Lentils,Couscous';
+
+  @override
+  String get selectGameMessage => 'Select a game';
+
+  @override
+  String get snakeTitle => 'Snake';
+
+  @override
+  String get quizTitle => 'Quiz';
+
+  @override
+  String get comingSoon => 'Coming Soon';
+
+  @override
+  String get gameOver => 'Game Over';
+
+  @override
+  String scoreStartOverMessage(Object score_start_over) {
+    return 'Your score: $score_start_over. Do you want to start over?';
+  }
+
+  @override
+  String get restartText => 'Restart';
+
+  @override
+  String currentScore(Object snake_score) {
+    return 'Snake Game - Score: $snake_score';
+  }
+
+  @override
+  String get quizCompleted => 'Quiz Completed';
+
+  @override
+  String quizScore(Object quiz_final_score) {
+    return 'Your score: $quiz_final_score / 20';
+  }
+
+  @override
+  String get playAgain => 'Play Again';
+
+  @override
+  String get glutenQuizTitle => 'Gluten-Free Quiz';
+
+  @override
+  String progressQuiz(Object quiz_progress) {
+    return 'Question $quiz_progress/20';
+  }
+
+  @override
+  String get copiedToClipboardText => 'Copied to clipboard';
+
+  @override
+  String get tapForDetailsText => 'Tap for details';
+
+  @override
+  String get orText => 'or';
+
+  @override
+  String get noAccountText => 'Don\'t have an account?';
+
+  @override
+  String get forgotPasswordText => 'Forgot password?';
+
+  @override
+  String get heightText => 'Height';
+
+  @override
+  String get widthText => 'Width';
+
+  @override
+  String get imageProcessingErrorText => 'Image processing error';
+
+  @override
+  String get accountText => 'Account';
+
+  @override
+  String get appearanceText => 'Appearance';
+
+  @override
+  String get aboutAppTab => 'About App';
+
+  @override
+  String get appPurposeContent => 'This app is designed to help people with celiac disease or gluten intolerance by providing a secure e-commerce platform, adapted recipes, educational games, and resources to maintain a safe gluten-free lifestyle.';
+
+  @override
+  String get featuresTitle => 'Key Features';
+
+  @override
+  String get feature1 => '🛒 **Gluten-Free Online Store** - Shop with confidence for certified gluten-free products with direct delivery.';
+
+  @override
+  String get feature2 => '🎮 **Educational Mini-Games** - Learn to identify safe foods in a fun way with our interactive games.';
+
+  @override
+  String get feature3 => '🍽 **Gluten-Free Recipes** - Discover delicious and safe meal ideas created by nutrition experts.';
+
+  @override
+  String get feature4 => '📍 **Local Business Directory** - Find certified gluten-free grocery stores and restaurants near you.';
+
+  @override
+  String get contactUsTitle => 'Contact Us';
+
+  @override
+  String get contactEmail => 'gluttex.team@gmail.com';
+
+  @override
+  String get contactPhone => '+213-XXX-XXX-XXX';
+
+  @override
+  String get illnessOverviewContent => 'Celiac disease is an autoimmune disorder where gluten ingestion damages the small intestine. It can cause digestive problems, nutritional deficiencies, and other complications. Strict lifelong gluten avoidance is the only effective treatment.';
+
+  @override
+  String get symptom1 => '💨 **Digestive Issues** - Bloating, diarrhea, constipation, nausea and vomiting.';
+
+  @override
+  String get symptom2 => '⚡ **Chronic Fatigue** - Caused by malabsorption of essential nutrients.';
+
+  @override
+  String get symptom3 => '🦴 **Bone Complications** - Increased risk of osteoporosis due to poor calcium and vitamin D absorption.';
+
+  @override
+  String get treatmentContent => 'Treatment requires strict lifelong gluten-free diet. Patients must avoid wheat, barley, rye and their derivatives. Nutritional support and tools like Gluttex help prevent accidental exposure.';
+
+  @override
+  String get resource1 => '📖 **Celiac Disease Foundation** - [www.celiac.org](https://www.celiac.org)';
+
+  @override
+  String get resource2 => '📱 **Interactive Shopping Guide** - Built-in app feature to scan suspicious ingredient lists.';
+
+  @override
+  String get resource3 => '👩‍⚕️ **Specialist Directory** - Find gastroenterologists and nutritionists specializing in celiac disease near you.';
+
+  @override
+  String get resourcesTitle => 'Useful Resources';
+
+  @override
+  String get userCredentialsText => 'Your login credentials include your email and password. Make sure to keep them secure and do not share them with anyone.';
+
+  @override
+  String get processingRequest => 'Processing your request...';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get basicInformation => 'Basic Information';
+
+  @override
+  String get locationInformation => 'Location Information';
+
+  @override
+  String get contactInformation => 'Contact Information';
+
+  @override
+  String get saveSupplier => 'Save Supplier';
+
+  @override
+  String get healthText => 'Health';
+
+  @override
+  String get illnessOverviewTitle => 'What is Celiac Disease?';
+
+  @override
+  String get symptomsTitle => 'Common Symptoms';
+
+  @override
+  String get illnessInfoTab => 'Informations';
+
+  @override
+  String get appPurposeTitle => 'Mission';
+
+  @override
+  String get treatmentTitle => 'Treatment & Management';
 }

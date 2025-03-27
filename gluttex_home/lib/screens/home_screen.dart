@@ -4,6 +4,7 @@ import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
 import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
+import 'package:gluttex_medical/screens/informations_screen.dart';
 import 'package:gluttex_play/screens/game_catalog.dart';
 import 'package:medicom_catalog/screens/catalog_screen.dart';
 
@@ -22,7 +23,8 @@ class _HomePageState extends State<HomePage> {
     const SlidingSuppliersWidget(),
     const RecipeCatalogScreen(),
     // CeliacScreen(),
-    GameListScreen(),
+    GameSelectionScreen(),
+    const HealthInfoScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -70,15 +72,15 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.restaurant_menu_outlined),
             label: AppLocalizations.of(context)!.recipesText,
           ),
-          // BottomNavigationBarItem(
-          //   backgroundColor: Color.fromARGB(255, 136, 68, 102),
-          //   icon: Icon(Icons.monitor_heart_outlined),
-          //   label: 'Health',
-          // ),
           BottomNavigationBarItem(
             backgroundColor: Color.fromARGB(255, 67, 72, 133),
             icon: const Icon(CupertinoIcons.gamecontroller_alt_fill),
             label: AppLocalizations.of(context)!.gamesText,
+          ),
+          BottomNavigationBarItem(
+            backgroundColor: const Color.fromARGB(255, 136, 68, 102),
+            icon: const Icon(Icons.health_and_safety),
+            label: AppLocalizations.of(context)!.healthText,
           ),
         ],
         currentIndex: _selectedIndex,

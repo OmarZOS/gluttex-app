@@ -57,6 +57,7 @@ dependencies:
   image_picker: ^0.8.4+4
   provider: ^6.1.2
   geolocator: ^13.0.3
+  flutter_svg: ^2.0.17
   # geolocator: ^10.0.0
   # image: ^3.3.0
 
@@ -84,7 +85,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - ./assets/images/
+    - ./assets/icons/
   
   #   - images/a_dot_ham.jpeg
 

@@ -437,13 +437,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get productCategoryTextList => 'Produits de boulangerie, Tartinades, Céréales, Pâtes, Collations, Boissons, Desserts';
+  String get productCategoryTextList => 'Produits de boulangerie,Tartinables,Céréales,Pâtes,Snacks,Boissons,Desserts,Produits surgelés,Ingrédients de pâtisserie,Produits emballés';
 
   @override
   String get allText => 'Tout';
 
   @override
-  String get providerCategoryTextList => 'Restaurant, Boulangerie, Usine, Supermarché';
+  String get providerCategoryTextList => 'Restaurant, Boulangerie, Usine, Supermarché,Alimentation,Fournisseur';
 
   @override
   String get recipeCategoryTextList => 'Apéritifs & Collations, Soupes & Ragoûts, Salades, Plats Principaux, Accompagnements, Pâtes & Nouilles, Gratinés, Petit-Déjeuner & Brunch, Pains & Pâtisseries, Desserts, Boissons, Sauces & Condiments, Cuisine Internationale, Régimes Sains & Spéciaux, Fêtes & Saisons, Enfants & Famille, Cuiseur Lent & Instantané, Rapide & Facile, Recettes en Une Seule Poêle, Grillades & BBQ';
@@ -1087,4 +1087,177 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get options_100 => 'Farine d’amande,Farine de blé,Farine d’orge,Farine de seigle';
+
+  @override
+  String get selectGameMessage => 'Sélectionnez un jeu';
+
+  @override
+  String get snakeTitle => 'Serpent';
+
+  @override
+  String get quizTitle => 'Quiz';
+
+  @override
+  String get comingSoon => 'Bientôt disponible';
+
+  @override
+  String get gameOver => 'Game Over';
+
+  @override
+  String scoreStartOverMessage(Object score_start_over) {
+    return 'Votre score : $score_start_over. Voulez-vous recommencer ?';
+  }
+
+  @override
+  String get restartText => 'Recommencer';
+
+  @override
+  String currentScore(Object snake_score) {
+    return 'Jeu du serpent - Score : $snake_score';
+  }
+
+  @override
+  String get quizCompleted => 'Quiz terminé';
+
+  @override
+  String quizScore(Object quiz_final_score) {
+    return 'Votre score : $quiz_final_score / 20';
+  }
+
+  @override
+  String get playAgain => 'Rejouer';
+
+  @override
+  String get glutenQuizTitle => 'Quiz Sans Gluten';
+
+  @override
+  String progressQuiz(Object quiz_progress) {
+    return 'Question $quiz_progress/20';
+  }
+
+  @override
+  String get copiedToClipboardText => 'Copié dans le presse-papiers';
+
+  @override
+  String get tapForDetailsText => 'Appuyez pour plus de détails';
+
+  @override
+  String get orText => 'ou';
+
+  @override
+  String get noAccountText => 'Vous n\'avez pas de compte ?';
+
+  @override
+  String get forgotPasswordText => 'Mot de passe oublié ?';
+
+  @override
+  String get heightText => 'Hauteur';
+
+  @override
+  String get widthText => 'Largeur';
+
+  @override
+  String get imageProcessingErrorText => 'Erreur de traitement de l\'image';
+
+  @override
+  String get accountText => 'Compte';
+
+  @override
+  String get appearanceText => 'Apparence';
+
+  @override
+  String get aboutAppTab => 'À propos';
+
+  @override
+  String get appPurposeContent => 'Cette application est conçue pour aider les personnes atteintes de la maladie cœliaque ou d\'intolérance au gluten en fournissant une plateforme e-commerce sécurisée, des recettes adaptées, des jeux éducatifs et des ressources pour maintenir un mode de vie sans gluten en toute sécurité.';
+
+  @override
+  String get featuresTitle => 'Fonctionnalités principales';
+
+  @override
+  String get feature1 => '🛒  Boutique en ligne sans gluten  - Achetez en toute confiance des produits certifiés sans gluten avec livraison directe.';
+
+  @override
+  String get feature2 => '🎮  Mini-jeux éducatifs  - Apprenez à identifier les aliments sûrs de manière ludique avec nos jeux interactifs.';
+
+  @override
+  String get feature3 => '🍽  Recettes sans gluten  - Découvrez des idées de repas délicieuses et sécurisées élaborées par des experts nutritionnistes.';
+
+  @override
+  String get feature4 => '📍  Annuaire des commerces  - Trouvez des épiceries et restaurants certifiés sans gluten près de chez vous.';
+
+  @override
+  String get contactUsTitle => 'Nous contacter';
+
+  @override
+  String get contactEmail => 'gluttex.team@gmail.com';
+
+  @override
+  String get contactPhone => '+213-XXX-XXX-XXX';
+
+  @override
+  String get illnessOverviewContent => 'La maladie cœliaque est un trouble auto-immun où l\'ingestion de gluten provoque des dommages à l\'intestin grêle. Elle peut entraîner des problèmes digestifs, des carences nutritionnelles et d\'autres complications. L\'éviction totale du gluten est le seul traitement efficace.';
+
+  @override
+  String get symptom1 => '💨  Problèmes digestifs  - Ballonnements, diarrhée, constipation, nausées et vomissements.';
+
+  @override
+  String get symptom2 => '⚡  Fatigue chronique  - Causée par la malabsorption des nutriments essentiels.';
+
+  @override
+  String get symptom3 => '🦴  Complications osseuses  - Risque accru d\'ostéoporose dû à la mauvaise absorption du calcium et de la vitamine D.';
+
+  @override
+  String get treatmentContent => 'Le traitement repose sur un régime sans gluten strict à vie. Les patients doivent éviter le blé, l\'orge, le seigle et leurs dérivés. Un accompagnement nutritionnel et des outils comme Gluttex aident à prévenir les écarts involontaires.';
+
+  @override
+  String get resource1 => '📖  Celiac Disease Foundation  - [www.celiac.org](https://www.celiac.org)';
+
+  @override
+  String get resource2 => '📱  Interactive Shopping Guide  - Built-in app feature to scan suspicious ingredient lists.';
+
+  @override
+  String get resource3 => '👩‍⚕️  Specialist Directory  - Find gastroenterologists and nutritionists specializing in celiac disease near you.';
+
+  @override
+  String get resourcesTitle => 'Ressources utiles';
+
+  @override
+  String get userCredentialsText => 'Vos informations de connexion comprennent votre e-mail et votre mot de passe. Assurez-vous de les garder en sécurité et de ne les partager avec personne.';
+
+  @override
+  String get processingRequest => 'Traitement de votre demande...';
+
+  @override
+  String get save => 'Enregistrer';
+
+  @override
+  String get basicInformation => 'Informations de base';
+
+  @override
+  String get locationInformation => 'Informations sur l\'emplacement';
+
+  @override
+  String get contactInformation => 'Informations de contact';
+
+  @override
+  String get saveSupplier => 'Enregistrer le fournisseur';
+
+  @override
+  String get healthText => 'Santé';
+
+  @override
+  String get illnessOverviewTitle => 'Qu\'est-ce que la maladie cœliaque ?';
+
+  @override
+  String get symptomsTitle => 'Symptômes courants';
+
+  @override
+  String get illnessInfoTab => 'Informations sur la maladie cœliaque';
+
+  @override
+  String get appPurposeTitle => 'À propos de cette application';
+
+  @override
+  String get treatmentTitle => 'Traitement et gestion';
 }

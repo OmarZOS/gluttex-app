@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 
 void main() {
   runApp(const SnakeGame());
@@ -52,6 +53,7 @@ class _GameScreenState extends State<GameScreen> {
   bool isGameOver = false;
   bool isPaused = false;
   int score = 0;
+
   Timer? gameLoop;
 
   @override
@@ -142,15 +144,16 @@ class _GameScreenState extends State<GameScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Game over'),
-        content: Text('Your score: $score. Do you want to start over?'),
+        title: Text(AppLocalizations.of(context)!.gameOver),
+        content:
+            Text(AppLocalizations.of(context)!.scoreStartOverMessage(score)),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               resetGame();
             },
-            child: const Text('Restart'),
+            child: Text(AppLocalizations.of(context)!.restartText),
           ),
         ],
       ),
@@ -191,10 +194,11 @@ class _GameScreenState extends State<GameScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     cellSize = min(screenWidth / cols, screenHeight / rows);
-
+    String? titleText =
+        AppLocalizations.of(context)?.currentScore(score) ?? 'Score: $score';
     return Scaffold(
       appBar: AppBar(
-        title: Text('Snake Game - Score: $score'),
+        title: Text(titleText),
         actions: [
           IconButton(
             icon: Icon(isPaused ? Icons.play_arrow : Icons.pause),

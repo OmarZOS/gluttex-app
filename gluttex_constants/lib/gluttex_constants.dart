@@ -6,6 +6,164 @@ final GlobalKey<NavigatorState> globalNavigatorKey =
     GlobalKey<NavigatorState>();
 
 class GluttexConstants {
+  final List<Map<String, dynamic>> _cardColors = [
+    // Vibrant colors (0-11)
+    {
+      'name': 'Coral',
+      'rgb': [255, 111, 97],
+      'opacity': 1.0
+    },
+    // {
+    //   'name': 'Peach',
+    //   'rgb': [255, 179, 71],
+    //   'opacity': 1.0
+    // },
+    // {
+    //   'name': 'Lemon',
+    //   'rgb': [255, 215, 0],
+    //   'opacity': 1.0
+    // },
+    // {
+    //   'name': 'Mint',
+    //   'rgb': [152, 255, 152],
+    //   'opacity': 1.0
+    // },
+    {
+      'name': 'Teal',
+      'rgb': [0, 150, 136],
+      'opacity': 1.0
+    },
+    // {
+    //   'name': 'SkyBlue',
+    //   'rgb': [135, 206, 235],
+    //   'opacity': 1.0
+    // },
+    {
+      'name': 'Lavender',
+      'rgb': [150, 123, 182],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Lilac',
+      'rgb': [200, 162, 200],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Blush',
+      'rgb': [254, 130, 140],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Salmon',
+      'rgb': [255, 140, 105],
+      'opacity': 1.0
+    },
+    // {
+    //   'name': 'Aqua',
+    //   'rgb': [0, 255, 255],
+    //   'opacity': 1.0
+    // },
+    {
+      'name': 'Goldenrod',
+      'rgb': [218, 165, 32],
+      'opacity': 1.0
+    },
+
+    // Muted tones (12-21)
+    {
+      'name': 'Sage',
+      'rgb': [188, 184, 138],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Taupe',
+      'rgb': [179, 139, 109],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Slate',
+      'rgb': [112, 128, 144],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Mauve',
+      'rgb': [224, 176, 255],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Sand',
+      'rgb': [244, 164, 96],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Olive',
+      'rgb': [128, 128, 0],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Rose',
+      'rgb': [192, 128, 129],
+      'opacity': 1.0
+    },
+    {
+      'name': 'PowderBlue',
+      'rgb': [176, 224, 230],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Wheat',
+      'rgb': [245, 222, 179],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Pewter',
+      'rgb': [137, 148, 153],
+      'opacity': 1.0
+    },
+
+    // Deep tones (22-29)
+    {
+      'name': 'Emerald',
+      'rgb': [80, 200, 120],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Ruby',
+      'rgb': [224, 17, 95],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Sapphire',
+      'rgb': [15, 82, 186],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Amethyst',
+      'rgb': [153, 102, 204],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Forest',
+      'rgb': [34, 139, 34],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Wine',
+      'rgb': [114, 47, 55],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Navy',
+      'rgb': [0, 0, 128],
+      'opacity': 1.0
+    },
+    {
+      'name': 'Charcoal',
+      'rgb': [54, 69, 79],
+      'opacity': 1.0
+    },
+  ];
+
   // API endpoints
   static const String apiBaseUrl = 'http://134.199.240.34/api';
   static const String fsBaseUrl = 'http://134.199.240.34';
@@ -42,6 +200,7 @@ class GluttexConstants {
   static const String getAllRecipesEndpoint = '/recipe/all';
   static const String recipeEndpoint = '/recipe';
   static const String getRecipeCategoriesEndpoint = '/recipe/category/all';
+  static const String getRecipeByCategoriesEndpoint = '/recipe/category';
 
   static const String loginEndpoint = '/authentication/token';
   static const String signUpEndpoint = '/app_user/add';
@@ -60,6 +219,22 @@ class GluttexConstants {
   static const kTextLightColor = Color(0xFFACACAC);
 
   static const kDefaultPaddin = 20.0;
+
+  Color getCardColor(int index, bool bool, {bool isDarkMode = false}) {
+    final clampedIndex = index % _cardColors.length;
+    final color = _cardColors[clampedIndex];
+
+    final baseColor = Color.fromRGBO(
+      color['rgb'][0] as int,
+      color['rgb'][1] as int,
+      color['rgb'][2] as int,
+      color['opacity'] as double,
+    );
+
+    return isDarkMode
+        ? baseColor.withOpacity((color['opacity'] as double) * 0.5)
+        : baseColor;
+  }
 }
 
 class AppRoutes {

@@ -37,7 +37,7 @@ class _CeliacScreenState extends State<CeliacScreen> {
           children: [
             SymptomScreen(),
             SerologyScreen(),
-            InformationScreen(),
+            HealthInfoScreen(),
           ],
         ),
       ),

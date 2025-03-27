@@ -1,5 +1,6 @@
-import 'dart:typed_data';
-
+import 'dart:collection';
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
@@ -8,108 +9,130 @@ import 'package:locator/locator.dart';
 
 class RecipeNotifier extends ChangeNotifier {
   final RecipeService _recipeService = GluttexLocator.get<RecipeService>();
-  List<Recipe> _recipes = [];
-  List<RecipeIngredient> _recipeIngredients = [];
-  List<Recipe> get recipes => _recipes;
-  List<RecipeIngredient> get recipeIngredients =>
-      _recipeIngredients.map((ingredient) {
-        return RecipeIngredient(
-            id_ingredient: ingredient.id_ingredient,
-            ingredient_name: ingredient.ingredient_name,
-            ingredient_icon: ""); // remove the icon data from the object
-      }).toList();
 
+  final Map<int, Recipe> _recipes = {};
+  final Map<int, RecipeIngredient> _recipeIngredients = {};
   bool isLoading = false;
   int currentPage = 0;
-  final int itemsPerPage =
-      GluttexConstants.itemsPerPage; // Number of items per page
+  int currentCategory = 0; // Track the current category
+  final int itemsPerPage = GluttexConstants.itemsPerPage;
+  List<String> get categories => _recipeCategories;
+  List<String> _recipeCategories = [];
+  set recipeCategories(List<String> value) {
+    _recipeCategories = value;
+  }
 
-  // Getter method to retrieve an ingredient by its id
-  RecipeIngredient? getIngredientById(int id) {
+  List<Recipe> get recipes => _recipes.values.toList();
+  List<RecipeIngredient> get recipeIngredients =>
+      _recipeIngredients.values.toList();
+
+  RecipeNotifier() {
+    // fetchRecipes(0);
+    // fetchIngredients();
+  }
+
+  /// Fetches all ingredients and stores them in a map for fast lookups
+  Future<void> fetchIngredients() async {
     try {
-      return _recipeIngredients.firstWhere(
-        (ingredient) => ingredient.id_ingredient == id,
-        // orElse: () => null, // Returns null if the ingredient is not found
-      );
+      final fetchedIngredients = await _recipeService.getAllIngredients();
+      if (fetchedIngredients != null) {
+        _recipeIngredients.clear();
+        for (var ingredient in fetchedIngredients) {
+          _recipeIngredients[ingredient.id_ingredient] = ingredient;
+        }
+        notifyListeners();
+      }
     } catch (e) {
-      return null;
+      log("Failed to fetch ingredients: $e");
     }
   }
 
-  RecipeNotifier() {
-    fetchRecipes();
-    fetchIngredients();
-  }
-
-  // Future<void> getRecipeImage(Recipe recipe) async {
-  //   Uint8List? image =
-  //       await _recipeService.getRecipeImage('${recipe.id_recipe_image}');
-  //   // await fetchRecipes();
-  //   // log("Changing recipe image");
-  //   // log('${_recipes.where((element) => element.id_recipe == recipe.id_recipe)}');
-  //   _recipes
-  //       .where((element) => element.id_recipe == recipe.id_recipe)
-  //       .first
-  //       .recipe_image_data = image;
-  //   notifyListeners();
-  // }
-
-  Future<void> fetchIngredients() async {
-    var recipeIngredients = await _recipeService.getAllIngredients();
-
-    // log('${recipes}');
-    _recipeIngredients = recipeIngredients ?? [];
-    notifyListeners();
-  }
-
-  // Future<void> fetchRecipes() async {
-  //   var recipes = await _recipeService.getAllRecipes();
-
-  //   // log('${recipes}');
-  //   _recipes = recipes ?? [];
-  //   notifyListeners();
-  // }
-
-  Future<int?> addRecipe(Recipe recipe) async {
-    int? status = await _recipeService.addRecipe(recipe);
-    await fetchRecipes();
-    return status;
-  }
-
-  Future<int?> updateRecipe(Recipe recipe) async {
-    int? status = await _recipeService.updateRecipe(recipe);
-    await fetchRecipes();
-    return status;
-  }
-
-  Future<int?> deleteRecipe(String idRecipe) async {
-    int? status = await _recipeService.deleteRecipe(idRecipe);
-    await fetchRecipes();
-    return status;
-  }
-
-  Future<void> fetchRecipes({bool reset = false}) async {
+  /// Fetches paginated recipes and prevents duplicates
+  Future<void> fetchRecipes(int categoryId, {bool reset = false}) async {
     if (isLoading) return;
 
-    if (reset) {
+    if (reset || currentCategory != categoryId) {
+      currentCategory = categoryId;
       currentPage = 0;
-      recipes.clear();
+      if (reset) {
+        _recipes.clear(); // Only clear recipes if reset is true
+      }
     }
 
     isLoading = true;
     notifyListeners();
 
-    // Example API call for paginated Recipes
-    final fetchedRecipes = await _recipeService.getAllRecipes(
-      currentPage * itemsPerPage,
-      itemsPerPage,
-    );
+    try {
+      final fetchedRecipes = await _recipeService.getAllRecipes(
+          categoryId, currentPage * itemsPerPage, itemsPerPage);
 
-    recipes.addAll(fetchedRecipes!.where((newRecipe) => !recipes.any(
-        (existingRecipe) => existingRecipe.id_recipe == newRecipe.id_recipe)));
+      if (fetchedRecipes != null && fetchedRecipes.isNotEmpty) {
+        for (var recipe in fetchedRecipes) {
+          _recipes[recipe.id_recipe!] = recipe;
+        }
+        currentPage++;
+        notifyListeners();
+      }
+    } catch (e) {
+      log("Failed to fetch recipes: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 
-    currentPage++;
-    isLoading = false;
-    notifyListeners();
+  /// Adds a new recipe and updates the local state without refetching all recipes
+  Future<int?> addRecipe(Recipe recipe) async {
+    try {
+      int? status = await _recipeService.addRecipe(recipe);
+      if (status != null) {
+        _recipes[recipe.id_recipe!] = recipe;
+        notifyListeners();
+      }
+      return status;
+    } catch (e) {
+      log("Failed to add recipe: $e");
+      return null;
+    }
+  }
+
+  /// Updates a recipe and updates the local state efficiently
+  Future<int?> updateRecipe(Recipe recipe) async {
+    try {
+      int? status = await _recipeService.updateRecipe(recipe);
+      if (status != null && _recipes.containsKey(recipe.id_recipe)) {
+        _recipes[recipe.id_recipe!] = recipe;
+        notifyListeners();
+      }
+      return status;
+    } catch (e) {
+      log("Failed to update recipe: $e");
+      return null;
+    }
+  }
+
+  /// Deletes a recipe and updates the local state efficiently
+  Future<int?> deleteRecipe(int idRecipe) async {
+    try {
+      int? status = await _recipeService.deleteRecipe(idRecipe.toString());
+      if (status != null) {
+        _recipes.remove(idRecipe);
+        notifyListeners();
+      }
+      return status;
+    } catch (e) {
+      log("Failed to delete recipe: $e");
+      return null;
+    }
+  }
+
+  /// Helper method to filter recipes by category
+  List<Recipe> filterRecipesByCategory(int categoryId) {
+    if (categoryId == 0) {
+      return _recipes.values.toList(); // Return all recipes for "All" category
+    }
+    return _recipes.values
+        .where((recipe) => recipe.recipe_category_id == categoryId)
+        .toList();
   }
 }

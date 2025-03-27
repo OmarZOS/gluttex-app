@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -20,61 +21,58 @@ class CatalogScreen extends StatefulWidget {
 class _CatalogScreenState extends State<CatalogScreen> {
   final TextEditingController _searchController = TextEditingController();
   late List<String> _categories = [];
-  // late String _selectedCategory = AppLocalizations.of(context)!.allText;
   late int _selectedCategoryId = 0;
   final ScrollController _scrollController = ScrollController();
-  bool _showMoreButton = false;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
     _searchController.addListener(_filterProducts);
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeCategories();
+  }
+
+  void _initializeCategories() {
+    final categs =
+        AppLocalizations.of(context)!.productCategoryTextList.split(",");
+    _categories = [AppLocalizations.of(context)!.allText, ...categs];
+
+    Provider.of<ProductNotifier>(context, listen: false).productCategories =
+        categs;
   }
 
   void _filterProducts() {
     setState(() {});
   }
 
-  void _selectCategory(int index, String category) {
+  void _selectCategory(int index) {
     setState(() {
       _selectedCategoryId = index;
-      // _selectedCategory = category;
     });
+    Provider.of<ProductNotifier>(context, listen: false)
+        .fetchProducts(_selectedCategoryId);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !Provider.of<ProductNotifier>(context, listen: false).isLoading) {
+      Provider.of<ProductNotifier>(context, listen: false)
+          .fetchProducts(_selectedCategoryId);
+    }
   }
 
   @override
   void dispose() {
     _searchController.removeListener(_filterProducts);
-    _searchController.dispose();
+    _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _scrollListener() {
-    // Check if user reached the end of scrolling
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent -
-            GluttexConstants.kDefaultPaddin) {
-      if (!_showMoreButton) {
-        setState(() {
-          _showMoreButton = true;
-        });
-      }
-    } else {
-      if (_showMoreButton) {
-        setState(() {
-          _showMoreButton = false;
-        });
-      }
-    }
-  }
-
-  void _loadMoreProducts() {
-    Provider.of<ProductNotifier>(context, listen: false)
-        .fetchProducts(_selectedCategoryId);
-    _showMoreButton = false;
-    setState(() {});
   }
 
   @override
@@ -82,15 +80,16 @@ class _CatalogScreenState extends State<CatalogScreen> {
     return Scaffold(
       floatingActionButton: SpeedDial(
         animatedIcon: AnimatedIcons.menu_close,
-        backgroundColor: Theme.of(context).secondaryHeaderColor,
-        foregroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).colorScheme.onSecondary,
         overlayOpacity: 0.5,
         spacing: 10,
         children: [
           SpeedDialChild(
-            child: const Icon(Icons.shopping_basket),
+            child: Icon(Icons.shopping_basket,
+                color: Theme.of(context).colorScheme.onSecondary),
             label: AppLocalizations.of(context)?.ordersText,
-            backgroundColor: Theme.of(context).secondaryHeaderColor,
+            backgroundColor: Theme.of(context).colorScheme.secondary,
             onTap: () {
               Navigator.push(
                 context,
@@ -99,9 +98,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
             },
           ),
           SpeedDialChild(
-            child: const Icon(Icons.shopping_cart),
+            child: Icon(Icons.shopping_cart,
+                color: Theme.of(context).colorScheme.onSecondary),
             label: AppLocalizations.of(context)?.cartText,
-            backgroundColor: Theme.of(context).secondaryHeaderColor,
+            backgroundColor: Theme.of(context).colorScheme.secondary,
             onTap: () {
               Navigator.push(
                 context,
@@ -118,12 +118,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context)?.searchTxt,
             border: InputBorder.none,
-            icon: const Icon(Icons.search_outlined),
+            icon: Icon(Icons.search_outlined,
+                color: Theme.of(context).colorScheme.onSurface),
           ),
         ),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.add),
+            icon:
+                Icon(Icons.add, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () {
               Navigator.push(
                 context,
@@ -135,134 +137,117 @@ class _CatalogScreenState extends State<CatalogScreen> {
           const SizedBox(width: GluttexConstants.kDefaultPaddin / 2),
         ],
       ),
-      body: Stack(
-        children: [
-          Consumer<ProductNotifier>(
-            builder: (context, productNotifier, child) {
-              final products = productNotifier.products;
-              var filteredProducts = products.where((product) {
-                var query = _searchController.text.toLowerCase();
-                var matchesCategory = (_selectedCategoryId == 0) ||
-                    ((product.product_category_id ?? 1)) == _selectedCategoryId;
-                return (product.product_name?.toLowerCase().contains(query) ??
-                        false) &&
-                    matchesCategory;
-              }).toList();
+      body: Consumer<ProductNotifier>(
+        builder: (context, productNotifier, child) {
+          final products =
+              productNotifier.filterProductsByCategory(_selectedCategoryId);
+          var filteredProducts = products.where((product) {
+            var query = _searchController.text.toLowerCase();
+            return (product.product_name?.toLowerCase().contains(query) ??
+                false);
+          }).toList();
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _buildCategoryRow(),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: GluttexConstants.kDefaultPaddin),
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          await productNotifier
-                              .fetchProducts(_selectedCategoryId, reset: true);
-                        },
-                        child: _buildProductGrid(filteredProducts),
-                      ),
-                    ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _buildCategoryRow(),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: GluttexConstants.kDefaultPaddin),
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await productNotifier.fetchProducts(_selectedCategoryId,
+                          reset: true);
+                    },
+                    child: _buildProductGrid(filteredProducts, productNotifier),
                   ),
-                  // Show More Button (ONLY When Reached Bottom)
-                  if (_showMoreButton)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AnimatedOpacity(
-                            opacity: 0.9,
-                            duration: const Duration(milliseconds: 300),
-                            child: ElevatedButton.icon(
-                              onPressed: _loadMoreProducts,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).hintColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                              ),
-                              icon: Icon(Icons.expand_more,
-                                  color: Theme.of(context).indicatorColor),
-                              label: Text(
-                                AppLocalizations.of(context)?.showMoreText ??
-                                    "Show More",
-                                style: TextStyle(
-                                    color: Theme.of(context).indicatorColor,
-                                    fontSize: 16),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   Widget _buildCategoryRow() {
-    return Consumer<ProductNotifier>(
-        builder: (context, productNotifier, child) {
-      if (_categories.isEmpty) {
-        _categories.add(AppLocalizations.of(context)!.allText);
-        _categories.addAll(
-            AppLocalizations.of(context)!.productCategoryTextList.split(","));
-        _selectedCategoryId = 0;
-      }
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: _categories.map((category) {
-            bool isSelected =
-                _selectedCategoryId == _categories.indexOf(category);
-            return GestureDetector(
-              onTap: () =>
-                  _selectCategory(_categories.indexOf(category), category),
-              child: Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: GluttexConstants.kDefaultPaddin / 2,
-                  vertical: GluttexConstants.kDefaultPaddin / 4,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: GluttexConstants.kDefaultPaddin,
-                  vertical: GluttexConstants.kDefaultPaddin / 2,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Theme.of(context).primaryColorDark
-                      : Theme.of(context).primaryColorLight,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  category,
-                  style: const TextStyle(
-                    // color: isSelected ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _categories.map((category) {
+          int index = _categories.indexOf(category);
+          bool isSelected = _selectedCategoryId == index;
+          String? iconPath = 'assets/icons/$index.svg';
+
+          return GestureDetector(
+            onTap: () => _selectCategory(_categories.indexOf(category)),
+            child: Container(
+              margin: const EdgeInsets.symmetric(
+                horizontal: GluttexConstants.kDefaultPaddin / 2,
+                vertical: GluttexConstants.kDefaultPaddin / 4,
               ),
-            );
-          }).toList(),
-        ),
-      );
-    });
+              padding: const EdgeInsets.symmetric(
+                horizontal: GluttexConstants.kDefaultPaddin / 2,
+                vertical: GluttexConstants.kDefaultPaddin / 3,
+              ),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // SVG Icon
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: SvgPicture.asset(
+                      iconPath,
+                      package: "medicom_catalog",
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Category Text
+                  Text(
+                    category,
+                    style: TextStyle(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 
-  Widget _buildProductGrid(List<Product> products) {
-    if (products.isEmpty) {
+  Widget _buildProductGrid(
+      List<Product> products, ProductNotifier productNotifier) {
+    if (products.isEmpty && !productNotifier.isLoading) {
       return Center(
-        child: Text(AppLocalizations.of(context)?.noProductsFound ?? ""),
+        child: Text(
+          AppLocalizations.of(context)?.noProductsFound ?? "",
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
       );
     }
 
@@ -282,6 +267,16 @@ class _CatalogScreenState extends State<CatalogScreen> {
             },
           ),
         ),
+        // Loading Indicator
+        if (productNotifier.isLoading)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
       ],
     );
   }

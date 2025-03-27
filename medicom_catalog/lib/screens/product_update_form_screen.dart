@@ -229,25 +229,11 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                 onSaved: (value) => _productDescription = value,
               ),
               const SizedBox(height: 16.0),
-              FutureBuilder<List<ProductCategory>?>(
-                future: GluttexLocator.get<ProductService>().getCategories(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(); // Show a loading indicator while waiting
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text(
-                        AppLocalizations.of(context)!.categoriesNotFoundTxt);
-                  } else {
-                    return CategoryPicker(
-                      category_id: _productTypeId ?? 1,
-                      categories: snapshot.data!,
-                      onCategoryChanged: (selectedCategoryId) {
-                        _onCategoryChanged(selectedCategoryId);
-                      },
-                    );
-                  }
+              CategoryPicker(
+                category_id: _product_category_id ?? 1,
+                categories: Provider.of<ProductNotifier>(context).categories!,
+                onCategoryChanged: (selectedCategoryId) {
+                  _onCategoryChanged(selectedCategoryId);
                 },
               ),
               const SizedBox(height: 16.0),

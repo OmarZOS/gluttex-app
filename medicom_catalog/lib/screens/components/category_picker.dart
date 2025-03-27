@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_core/business/Product.dart';
-import 'package:medicom_catalog/screens/components/product_category_assets.dart';
 
 class CategoryPicker extends StatefulWidget {
   final ValueChanged<int> onCategoryChanged;
-  final List<ProductCategory> categories;
+  final List<String> categories;
   final int category_id;
 
   const CategoryPicker({
-    Key? key,
+    super.key,
     required this.onCategoryChanged,
     required this.categories,
     required this.category_id,
-  }) : super(key: key);
+  });
 
   @override
   _CategoryPickerState createState() => _CategoryPickerState();
@@ -25,10 +24,9 @@ class _CategoryPickerState extends State<CategoryPicker> {
 
   @override
   void initState() {
-    _selectedCategoryIndex = widget.categories.indexWhere(
-        (category) => category.product_provider_type_id == widget.category_id);
+    _selectedCategoryIndex = widget.category_id;
     widget.onCategoryChanged(
-      widget.categories[_selectedCategoryIndex].product_provider_type_id,
+      widget.category_id,
     );
     super.initState();
   }
@@ -39,16 +37,18 @@ class _CategoryPickerState extends State<CategoryPicker> {
       children: [
         ListTile(
           // tileColor: Colors.blue[50],
-          title: Text(
-            AppLocalizations.of(context)!
-                .productCategoryTextList
-                .split(",")[_selectedCategoryIndex],
-          ),
+          title: Text(AppLocalizations.of(context)!
+              .productCategoryTextList
+              .split(",")[_selectedCategoryIndex]),
           onTap: () {
             _showPicker(context);
           },
-          trailing: getProductcategoryIcon(
-            widget.categories[_selectedCategoryIndex].product_provider_type_id,
+          trailing: SvgPicture.asset(
+            'assets/icons/${_selectedCategoryIndex + 1}.svg',
+            color: Theme.of(context).colorScheme.primary,
+            width: 40,
+            height: 40,
+            package: "medicom_catalog",
           ),
         ),
       ],
@@ -69,17 +69,13 @@ class _CategoryPickerState extends State<CategoryPicker> {
                   _selectedCategoryIndex = index;
                 });
               }
-              // //log('${widget.categories[index].product_provider_type_id}');
 
               widget.onCategoryChanged(
-                widget.categories[index].product_provider_type_id,
+                index,
               );
             },
-            children: widget.categories.map((ProductCategory category) {
-              return Center(
-                  child: Text(AppLocalizations.of(context)!
-                      .productCategoryTextList
-                      .split(",")[category.product_provider_type_id - 1]));
+            children: widget.categories.map((String category) {
+              return Center(child: Text(category));
             }).toList(),
           ),
         );

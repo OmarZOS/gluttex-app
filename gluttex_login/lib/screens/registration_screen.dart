@@ -231,47 +231,47 @@ class _RegistrationFormState extends State<RegistrationForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.registerationFormText),
+        centerTitle: true,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.usernameText),
-                onSaved: (value) {
-                  appUserName = value;
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.pleaseInputusernameMsg;
-                  }
-                  return null;
-                },
+              // User Credentials Section
+              _buildSectionHeader(
+                  context, AppLocalizations.of(context)!.userCredentialsText),
+              _buildTextField(
+                context,
+                label: AppLocalizations.of(context)!.usernameText,
+                onSaved: (value) => appUserName = value,
+                validator: (value) => value?.isEmpty ?? true
+                    ? AppLocalizations.of(context)!.pleaseInputusernameMsg
+                    : null,
               ),
-              const Padding(padding: EdgeInsets.all(8.0)),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.passwordText),
+              const SizedBox(height: 16),
+              _buildTextField(
+                context,
+                label: AppLocalizations.of(context)!.passwordText,
                 obscureText: true,
-                onSaved: (value) {
-                  appUserPassword = value;
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.pleaseInputpasswordMsg;
-                  }
-                  return null;
-                },
+                onSaved: (value) => appUserPassword = value,
+                validator: (value) => value?.isEmpty ?? true
+                    ? AppLocalizations.of(context)!.pleaseInputpasswordMsg
+                    : null,
               ),
-              DropdownButtonFormField<int>(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.userTypeText),
+              const SizedBox(height: 16),
+              _buildDropdown<int>(
+                context,
+                label: AppLocalizations.of(context)!.userTypeText,
                 items: [
                   {
                     'value': 1,
@@ -281,129 +281,103 @@ class _RegistrationFormState extends State<RegistrationForm> {
                     'value': 3,
                     'label': AppLocalizations.of(context)!.cookingChefText
                   }
-                ].map((Map<String, dynamic> item) {
-                  return DropdownMenuItem<int>(
-                    value: item['value'],
-                    child: Text(item['label']),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  appUserTypeId = value;
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return AppLocalizations.of(context)!.pleaseInputUserTypeMsg;
-                  }
-                  return null;
-                },
+                ],
+                onChanged: (value) => appUserTypeId = value,
+                validator: (value) => value == null
+                    ? AppLocalizations.of(context)!.pleaseInputUserTypeMsg
+                    : null,
               ),
-              const Padding(padding: EdgeInsets.all(8.0)),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.firstNameText),
-                onSaved: (value) {
-                  personFirstName = value;
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputFirstNameMsg;
-                  }
-                  return null;
-                },
+              const SizedBox(height: 24),
+
+              // Personal Information Section
+              _buildSectionHeader(
+                  context, AppLocalizations.of(context)!.personalInfoText),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      context,
+                      label: AppLocalizations.of(context)!.firstNameText,
+                      onSaved: (value) => personFirstName = value,
+                      validator: (value) => value?.isEmpty ?? true
+                          ? AppLocalizations.of(context)!
+                              .pleaseInputFirstNameMsg
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      context,
+                      label: AppLocalizations.of(context)!.lastNameText,
+                      onSaved: (value) => personLastName = value,
+                      validator: (value) => value?.isEmpty ?? true
+                          ? AppLocalizations.of(context)!.pleaseInputLastNameMsg
+                          : null,
+                    ),
+                  ),
+                ],
               ),
-              const Padding(padding: EdgeInsets.all(8.0)),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.lastNameText),
-                onSaved: (value) {
-                  personLastName = value;
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.pleaseInputLastNameMsg;
-                  }
-                  return null;
-                },
-              ),
-              const Padding(padding: EdgeInsets.all(8.0)),
-              TextFormField(
+              const SizedBox(height: 16),
+              _buildTextField(
+                context,
+                label: AppLocalizations.of(context)!.birthdayText,
                 controller: _birthDateController,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.birthdayText,
-                  suffixIcon: Icon(Icons.calendar_today),
-                ),
                 readOnly: true,
                 onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
+                  final pickedDate = await showDatePicker(
                     context: context,
                     initialDate: selectedDate ?? DateTime.now(),
                     firstDate: DateTime(1900),
                     lastDate: DateTime.now(),
                   );
-
                   if (pickedDate != null) {
                     setState(() {
                       selectedDate = pickedDate;
-                      _birthDateController.text = "${pickedDate.toLocal()}"
-                          .split(' ')[0]; // Formatting the date as yyyy-MM-dd
+                      _birthDateController.text =
+                          "${pickedDate.toLocal()}".split(' ')[0];
                     });
                   }
                 },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputBirthdateMsg;
-                  }
-                  return null;
-                },
+                suffixIcon: const Icon(Icons.calendar_today),
+                validator: (value) => value?.isEmpty ?? true
+                    ? AppLocalizations.of(context)!.pleaseInputBirthdateMsg
+                    : null,
               ),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.genderText),
+              const SizedBox(height: 16),
+              _buildDropdown<String>(
+                context,
+                label: AppLocalizations.of(context)!.genderText,
                 items: AppLocalizations.of(context)!
                     .genderTextList
                     .split(",")
-                    .map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  personGender = value;
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return AppLocalizations.of(context)!.pleaseInputgenderMsg;
-                  }
-                  return null;
-                },
+                    .map((value) => {'value': value, 'label': value})
+                    .toList(),
+                onChanged: (value) => personGender = value,
+                validator: (value) => value == null
+                    ? AppLocalizations.of(context)!.pleaseInputgenderMsg
+                    : null,
               ),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.nationalityText),
-                items: countries.map((country) {
-                  return DropdownMenuItem<String>(
-                    value: country['name'],
-                    child: Text("${country['native']}"),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  personNationality = value;
-                },
+              const SizedBox(height: 16),
+              _buildDropdown<String>(
+                context,
+                label: AppLocalizations.of(context)!.nationalityText,
+                items: countries
+                    .map((country) => {
+                          'value': country['name']!,
+                          'label': country['native']!
+                        })
+                    .toList(),
+                onChanged: (value) => personNationality = value,
                 value: personNationality,
-                validator: (value) {
-                  if (value == null) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputnationalityMsg;
-                  }
-                  return null;
-                },
+                validator: (value) => value == null
+                    ? AppLocalizations.of(context)!.pleaseInputnationalityMsg
+                    : null,
               ),
-              DropdownButtonFormField<int>(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.bloodTypeText),
+              const SizedBox(height: 16),
+              _buildDropdown<int>(
+                context,
+                label: AppLocalizations.of(context)!.bloodTypeText,
                 items: [
                   {'value': 1, 'label': 'O+'},
                   {'value': 2, 'label': 'A+'},
@@ -413,170 +387,49 @@ class _RegistrationFormState extends State<RegistrationForm> {
                   {'value': 6, 'label': 'A-'},
                   {'value': 7, 'label': 'B-'},
                   {'value': 8, 'label': 'AB-'},
-                ].map((Map<String, dynamic> item) {
-                  return DropdownMenuItem<int>(
-                    value: item['value'],
-                    child: Text(item['label']),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  bloodTypeId = value;
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputBloodTypeMsg;
-                  }
-                  return null;
-                },
+                ],
+                onChanged: (value) => bloodTypeId = value,
+                validator: (value) => value == null
+                    ? AppLocalizations.of(context)!.pleaseInputBloodTypeMsg
+                    : null,
               ),
-              // Padding(padding: const EdgeInsets.all(8.0)),
-              // TextFormField(
-              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.latitudeText),
-              //   keyboardType: TextInputType.number,
-              //   onSaved: (value) {
-              //     locationLatitude = double.tryParse(value ?? '');
-              //   },
-              // ),
-              // Padding(padding: const EdgeInsets.all(8.0)),
-              // TextFormField(
-              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.longitudeText),
-              //   keyboardType: TextInputType.number,
-              //   onSaved: (value) {
-              //     locationLongitude = double.tryParse(value ?? '');
-              //   },
-              // ),
-              // Padding(padding: const EdgeInsets.all(8.0)),
-              // TextFormField(
-              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.locationNameText),
-              //   onSaved: (value) {
-              //     locationName = value;
-              //   },
-              // ),
-              // Padding(padding: const EdgeInsets.all(8.0)),
-              // TextFormField(
-              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.streetText),
-              //   onSaved: (value) {
-              //     addressStreet = value;
-              //   },
-              // ),
-              // Padding(padding: const EdgeInsets.all(8.0)),
-              // TextFormField(
-              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.cityText),
-              //   onSaved: (value) {
-              //     addressCity = value;
-              //   },
-              // ),
-              // Padding(padding: const EdgeInsets.all(8.0)),
-              // TextFormField(
-              //   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.postalCodeText),
-              //   onSaved: (value) {
-              //     addressPostalCode = value;
-              //   },
-              // ),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!
-                      .countryText, // Replace with localized text if needed
-                ),
+              const SizedBox(height: 24),
+
+              // Location Information Section
+              _buildSectionHeader(
+                  context, AppLocalizations.of(context)!.locationInfoText),
+              _buildDropdown<String>(
+                context,
+                label: AppLocalizations.of(context)!.countryText,
+                items: countries
+                    .map((country) => {
+                          'value': country['name']!,
+                          'label': country['native']!
+                        })
+                    .toList(),
+                onChanged: (value) => setState(() => addressCountry = value),
                 value: addressCountry,
-                items: countries.map((country) {
-                  return DropdownMenuItem<String>(
-                    value: country['name'],
-                    child: Text("${country['native']}"),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    addressCountry = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputCountryMsg; // Replace with localized text if needed
-                  }
-                  return null;
-                },
+                validator: (value) => value == null
+                    ? AppLocalizations.of(context)!.pleaseInputCountryMsg
+                    : null,
               ),
+              const SizedBox(height: 32),
 
-              const SizedBox(height: 20),
+              // Submit Button
               ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    // sendRegistrationData();
-
-                    var payload = {
-                      "user": {
-                        "id_app_user": 0,
-                        "app_user_person_id": 0,
-                        "app_user_name": appUserName ?? "",
-                        "app_user_password": appUserPassword ?? "",
-                        "app_user_type_id": appUserTypeId ?? 1,
-                        "app_user_preferences": "", // ✅ Added
-                        "app_user_image": "" // ✅ Added
-                      },
-                      "person": {
-                        "id_person": 0,
-                        "person_details_id": 0, // ✅ Ensure this field exists
-                        "id_person_details": 0, // ✅ Kept only one
-                        "person_first_name": personFirstName ?? "",
-                        "person_last_name": personLastName ?? "",
-                        "person_birth_date":
-                            _birthDateController.text.isNotEmpty
-                                ? _birthDateController.text
-                                : "2000-01-01", // ✅ Ensured valid date format
-                        "person_gender": personGender ?? "", // ✅ Ensured string
-                        "person_nationality": personNationality ?? "Unknown",
-                        "id_blood_type": bloodTypeId ?? 0
-                      },
-                      "location": {
-                        "id_location": 0,
-                        "id_address": 0, // ✅ Ensure this field exists
-                        "location_address_id": 0, // ✅ Removed "id_address"
-                        "location_latitude": locationLatitude ?? 0.0,
-                        "location_longitude": locationLongitude ?? 0.0,
-                        "location_name": locationName ?? "",
-                        "address_street": addressStreet ?? "",
-                        "address_city": addressCity ?? "",
-                        "address_postal_code": addressPostalCode ?? "00000",
-                        "address_country": addressCountry ?? "Unknown"
-                      }
-                    };
-
-                    log(payload.toString());
-
-                    try {
-                      dynamic data = await Provider.of<AppUserNotifier>(context,
-                              listen: false)
-                          .signUpWithData(payload);
-
-                      if (data != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(data.toString())),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              backgroundColor: Colors.green,
-                              content: Text(AppLocalizations.of(context)!
-                                  .loginSuccessfullMsg)),
-                        );
-                      }
-
-                      Navigator.of(context).pop();
-                    } catch (error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            backgroundColor: Colors.red,
-                            content: Text(error.toString())),
-                      );
-                    }
-                  }
-                },
-                child: Text(AppLocalizations.of(context)!.registerText),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: _submitForm,
+                child: Text(
+                  AppLocalizations.of(context)!.registerText,
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -584,9 +437,147 @@ class _RegistrationFormState extends State<RegistrationForm> {
     );
   }
 
-  void sendRegistrationData() async {
-    // Build the payload
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0, top: 8.0),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+      ),
+    );
+  }
 
-    // Send the data to the server
+  Widget _buildTextField(
+    BuildContext context, {
+    required String label,
+    TextEditingController? controller,
+    String? Function(String?)? validator,
+    void Function(String?)? onSaved,
+    void Function()? onTap,
+    bool readOnly = false,
+    bool obscureText = false,
+    Widget? suffixIcon,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        filled: true,
+        suffixIcon: suffixIcon,
+      ),
+      validator: validator,
+      onSaved: onSaved,
+      onTap: onTap,
+      readOnly: readOnly,
+      obscureText: obscureText,
+    );
+  }
+
+  Widget _buildDropdown<T>(
+    BuildContext context, {
+    required String label,
+    required List<Map<String, dynamic>> items,
+    required void Function(T?) onChanged,
+    String? Function(T?)? validator,
+    T? value,
+  }) {
+    return DropdownButtonFormField<T>(
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        filled: true,
+      ),
+      items: items.map((item) {
+        return DropdownMenuItem<T>(
+          value: item['value'],
+          child: Text(item['label']),
+        );
+      }).toList(),
+      onChanged: onChanged,
+      validator: validator,
+      value: value,
+      isExpanded: true,
+    );
+  }
+
+  void _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      var payload = {
+        "user": {
+          "id_app_user": 0,
+          "app_user_person_id": 0,
+          "app_user_name": appUserName ?? "",
+          "app_user_password": appUserPassword ?? "",
+          "app_user_type_id": appUserTypeId ?? 1,
+          "app_user_preferences": "",
+          "app_user_image": ""
+        },
+        "person": {
+          "id_person": 0,
+          "person_details_id": 0,
+          "id_person_details": 0,
+          "person_first_name": personFirstName ?? "",
+          "person_last_name": personLastName ?? "",
+          "person_birth_date": _birthDateController.text.isNotEmpty
+              ? _birthDateController.text
+              : "2000-01-01",
+          "person_gender": personGender ?? "",
+          "person_nationality": personNationality ?? "Unknown",
+          "id_blood_type": bloodTypeId ?? 0
+        },
+        "location": {
+          "id_location": 0,
+          "id_address": 0,
+          "location_address_id": 0,
+          "location_latitude": locationLatitude ?? 0.0,
+          "location_longitude": locationLongitude ?? 0.0,
+          "location_name": locationName ?? "",
+          "address_street": addressStreet ?? "",
+          "address_city": addressCity ?? "",
+          "address_postal_code": addressPostalCode ?? "00000",
+          "address_country": addressCountry ?? "Unknown"
+        }
+      };
+
+      log(payload.toString());
+
+      try {
+        dynamic data =
+            await Provider.of<AppUserNotifier>(context, listen: false)
+                .signUpWithData(payload);
+
+        if (data != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data.toString())),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.green,
+              content: Text(AppLocalizations.of(context)!.loginSuccessfullMsg),
+            ),
+          );
+        }
+
+        Navigator.of(context).pop();
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(error.toString()),
+          ),
+        );
+      }
+    }
   }
 }

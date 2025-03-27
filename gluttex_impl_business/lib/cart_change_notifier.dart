@@ -7,53 +7,111 @@ import 'package:locator/locator.dart';
 
 class CartChangeNotifier with ChangeNotifier {
   final OrderService _orderService = GluttexLocator.get<OrderService>();
-  final List<Order> _orders = [];
-  bool isLoading = false;
-  int _cartItemCount = 0;
-  final Cart cart = Cart();
+  final Set<Order> _orders = {};
+  final Cart _cart = Cart();
+  bool _isLoading = false;
+  String? _lastError;
 
-  int get cartItemCount => _cartItemCount;
-  List<Order> get orders => _orders;
+  // Public getters
+  List<Order> get orders => List.unmodifiable(_orders);
+  List<CartItem> get cartItems => List.unmodifiable(_cart.items);
+  Cart get cart => _cart;
+
+  int get cartItemCount =>
+      _cart.items.fold(0, (sum, item) => sum + item.quantity);
+  bool get isLoading => _isLoading;
+  String? get lastError => _lastError;
+  double get cartTotal => _cart.items.fold(
+      0,
+      (total, item) =>
+          total + (item.product.product_price ?? 0) * item.quantity);
 
   Future<void> fetchOrders({bool reset = false, required int appUserId}) async {
-    if (isLoading) return;
+    if (_isLoading) return;
 
-    if (reset) {
-      _orders.clear();
-    }
-
-    isLoading = true;
+    _isLoading = true;
+    _lastError = null;
     notifyListeners();
 
     try {
-      final fetchedOrders = await _orderService.getAllOrders(appUserId);
-      _orders.clear();
-      _orders.addAll(fetchedOrders);
-    } catch (e) {
-      print("Error fetching orders: $e");
-    }
+      if (reset) _orders.clear();
 
-    isLoading = false;
-    notifyListeners();
+      final fetchedOrders = await _orderService.getAllOrders(appUserId);
+      if (fetchedOrders.isNotEmpty) {
+        _orders
+          ..clear()
+          ..addAll(fetchedOrders);
+      }
+    } catch (e, stackTrace) {
+      _lastError = 'Failed to fetch orders: ${e.toString()}';
+      debugPrint('Error fetching orders: $e\n$stackTrace');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  Future<int?> addOrder(Order order, int appUserId) async {
-    int? status = await _orderService.addOrder(order);
-    if (status != null) {
-      await fetchOrders(appUserId: appUserId);
+  Future<OrderResult> submitOrder(Map<String, dynamic> orderData) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final order = Order.fromJson(orderData);
+      final status = await _orderService.addOrder(order);
+
+      if (status == 200) {
+        _cart.clear();
+        await fetchOrders(appUserId: orderData['id_app_user'] as int);
+        return OrderResult.success('Order placed successfully');
+      } else {
+        return OrderResult.failure('Failed to place order (Status: $status)');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Order submission error: $e\n$stackTrace');
+      return OrderResult.failure('Order failed: ${e.toString()}');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-    return status;
   }
 
   void addItem(Product product, [int quantity = 1]) {
-    cart.addProduct(product, quantity);
-    _cartItemCount = cart.items.length;
+    _cart.addProduct(product, quantity);
+    _lastError = null;
     notifyListeners();
   }
 
   void removeItem(Product product) {
-    cart.removeProduct(product.id_product ?? 0);
-    _cartItemCount = cart.items.length;
+    _cart.removeProduct(product.id_product ?? 0);
     notifyListeners();
   }
+
+  void updateQuantity(Product product, int newQuantity) {
+    if (newQuantity > 0) {
+      _cart.updateQuantity(product.id_product ?? 0, newQuantity);
+    } else {
+      removeItem(product);
+    }
+    notifyListeners();
+  }
+
+  void clearCart() {
+    _cart.clear();
+    notifyListeners();
+  }
+
+  void clearError() {
+    _lastError = null;
+    notifyListeners();
+  }
+}
+
+class OrderResult {
+  final bool isSuccess;
+  final String message;
+
+  OrderResult._(this.isSuccess, this.message);
+
+  factory OrderResult.success(String message) => OrderResult._(true, message);
+  factory OrderResult.failure(String message) => OrderResult._(false, message);
 }

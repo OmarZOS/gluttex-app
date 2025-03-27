@@ -5,7 +5,7 @@ class IngredientCard extends StatelessWidget {
   final String name;
   final String quantity;
   final String icon;
-  final Function onClicked;
+  final VoidCallback onClicked;
 
   const IngredientCard({
     super.key,
@@ -17,61 +17,88 @@ class IngredientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        onClicked(); // Call the passed function when tapped
-      },
-      child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          margin: const EdgeInsets.all(8),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onClicked,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon Container
               Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent.withOpacity(0.1),
-                    shape: BoxShape.circle,
+                width: 48,
+                height: 48,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isDarkMode
+                      ? theme.colorScheme.primary.withOpacity(0.2)
+                      : theme.colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: SvgPicture.string(
+                  icon,
+                  width: 28,
+                  height: 28,
+                  colorFilter: ColorFilter.mode(
+                    theme.colorScheme.primary,
+                    BlendMode.srcIn,
                   ),
-                  child: SvgPicture.string(
-                    icon,
-                    width: 40, // Set the desired width
-                    height: 40, // Set the desired height
-                    placeholderBuilder: (BuildContext context) =>
-                        const CircularProgressIndicator(),
-                  )),
+                  placeholderBuilder: (context) => SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Text Content
               Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          quantity,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+                  Text(
+                    name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    quantity,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
                 ],
-              )
-            ]),
-          )),
+              ),
+
+              // Spacer and close icon
+              const SizedBox(width: 8),
+              Icon(
+                Icons.close,
+                size: 20,
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

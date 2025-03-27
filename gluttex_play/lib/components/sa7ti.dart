@@ -56,11 +56,11 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Quiz Completed!",
+          AppLocalizations.of(context)!.quizCompleted,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          "Your score: $_score / 20",
+          AppLocalizations.of(context)!.quizScore(_score),
           style: TextStyle(fontSize: 18),
         ),
         actions: [
@@ -74,7 +74,7 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
               });
             },
             child: Text(
-              "Play Again",
+              AppLocalizations.of(context)!.playAgain,
               style: TextStyle(color: Colors.blue),
             ),
           ),
@@ -88,7 +88,7 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Gluten-Free Quiz",
+          AppLocalizations.of(context)!.glutenQuizTitle,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.blueAccent,
@@ -116,7 +116,8 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
               SizedBox(height: 20),
               // 问题编号
               Text(
-                "Question ${_currentQuestionIndex + 1}/20",
+                AppLocalizations.of(context)!
+                    .progressQuiz(_currentQuestionIndex + 1),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

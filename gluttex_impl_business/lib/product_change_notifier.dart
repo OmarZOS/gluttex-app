@@ -1,7 +1,5 @@
-import 'dart:developer';
-import 'dart:typed_data';
 import 'dart:async';
-
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -10,138 +8,126 @@ import 'package:locator/locator.dart';
 
 class ProductNotifier extends ChangeNotifier {
   final ProductService _productService = GluttexLocator.get<ProductService>();
-  final List<Product> _products = [];
-  late List<ProductCategory> _categories = [];
-  List<ProductCategory> get categories => _categories;
-  Timer? _pollingTimer; // Timer for polling updates
-  List<Product> get products => _products;
-
+  final Map<int, Product> _products = {}; // Optimized for fast lookups
+  List<String> _categories = [];
+  Timer? _pollingTimer;
   bool isLoading = false;
   int currentPage = 0;
   int currentCategory = 0;
-  final int itemsPerPage =
-      GluttexConstants.itemsPerPage; // Number of items per page
+  final int itemsPerPage = GluttexConstants.itemsPerPage;
+  List<String> get categories => _productCategories;
+  List<String> _productCategories = [];
+  set productCategories(List<String> value) {
+    _productCategories = value;
+  }
+
+  List<Product> get products => _products.values.toList();
 
   ProductNotifier() {
-    getCategories();
     fetchProducts(0);
   }
 
-  // Future<void> fetchProducts() async {
-  //   var products = await _productService.getAllProducts();
-  //   _products = products ?? [];
-  //   notifyListeners();
-  // }
-
-  Future<void> getCategories() async {
-    var categories = await _productService.getCategories();
-    _categories = categories ?? [];
-    notifyListeners();
-  }
-
-  Future<int?> getProduct(Product product) async {
-    int? status = await _productService.addProduct(product);
-    await fetchProducts(0);
-    return status;
-  }
-
-  Future<int?> addProduct(Product product) async {
-    int? status = await _productService.addProduct(product);
-    await fetchProducts(0);
-    return status;
-  }
-
-  // Future<void> getProductImage(Product product) async {
-  //   Uint8List? image =
-  //       await _productService.getProductImage('${product.id_product_image}');
-  //   // await fetchProducts();
-  //   // log("Changing product image");
-  //   // log('${_products.where((element) => element.id_product == product.id_product)}');
-  //   _products
-  //       .where((element) => element.id_product == product.id_product)
-  //       .first
-  //       .product_image_data = image;
-  //   notifyListeners();
-  // }
-
-  Future<int?> updateProduct(Product product) async {
-    int? status = await _productService.updateProduct(product);
-    await fetchProducts(0, reset: true);
-    return status;
+  Future<int?> addOrUpdateProduct(Product product) async {
+    try {
+      int? status = product.id_product == null
+          ? await _productService.addProduct(product)
+          : await _productService.updateProduct(product);
+      if (status != null) {
+        await fetchProducts(currentCategory, reset: true);
+      }
+      return status;
+    } catch (e) {
+      log("Failed to add/update product: $e");
+      return null;
+    }
   }
 
   Future<int?> deleteProduct(String idProduct) async {
-    int? status = await _productService.deleteProduct(idProduct);
-    await fetchProducts(0);
-    return status;
+    try {
+      int? status = await _productService.deleteProduct(idProduct);
+      if (status != null) {
+        _products.remove(int.parse(idProduct));
+        notifyListeners();
+      }
+      return status;
+    } catch (e) {
+      log("Failed to delete product: $e");
+      return null;
+    }
   }
 
-  void startPollingProductUpdates(Product product) async {
-    // Poll every 5 seconds
-    log("Polling product updates");
+  void startPollingProductUpdates(Product product) {
+    _pollingTimer?.cancel(); // Ensure only one timer runs at a time
+    log("Polling product updates...");
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       await focusOnProduct(product);
     });
   }
 
-  Future<void> stopPollingProductUpdates() async {
+  void stopPollingProductUpdates() {
     _pollingTimer?.cancel();
   }
 
-  void updateProductById(int productId, int updatedvalue) {
-    int index =
-        _products.indexWhere((element) => productId == element.id_product);
-    if (index != -1) {
-      _products[index] = _products[index].copyWith(
-        product_quantity: updatedvalue,
-      );
-    }
-    notifyListeners();
-  }
-
   Future<void> focusOnProduct(Product product) async {
-    Product updatedvalue =
-        await _productService.focusOnProduct(product.id_product.toString());
-    // log(updatedvalue);
-    int index = _products
-        .indexWhere((element) => product.id_product == element.id_product);
-    if (index != -1) {
-      _products[index] = _products[index].copyWith(
-        product_quantity: updatedvalue.product_quantity,
-      );
+    try {
+      Product updatedProduct =
+          await _productService.focusOnProduct(product.id_product.toString());
+      if (_products.containsKey(updatedProduct.id_product)) {
+        if (_products[updatedProduct.id_product]?.product_quantity !=
+            updatedProduct.product_quantity) {
+          _products[updatedProduct.id_product!] = updatedProduct;
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      log("Failed to focus on product: $e");
     }
-    notifyListeners();
   }
 
   Future<void> fetchProducts(int categoryId, {bool reset = false}) async {
     if (isLoading) return;
 
-    if (reset) {
-      currentPage = 0;
-      products.clear();
-    }
-
-    if (currentCategory != categoryId) {
+    if (reset || currentCategory != categoryId) {
       currentCategory = categoryId;
       currentPage = 0;
+      if (reset) {
+        _products.clear(); // Only clear products if reset is true
+      }
     }
 
     isLoading = true;
     notifyListeners();
 
-    // Example API call for paginated products
-    final fetchedProducts = await _productService.getAllProducts(
-      categoryId,
-      currentPage * itemsPerPage,
-      itemsPerPage,
-    );
+    try {
+      final fetchedProducts = await _productService.getAllProducts(
+        categoryId,
+        currentPage * itemsPerPage,
+        itemsPerPage,
+      );
 
-    products.addAll(fetchedProducts!.where((newProduct) => !products.any(
-        (existingProduct) =>
-            existingProduct.id_product == newProduct.id_product)));
+      if (fetchedProducts != null && fetchedProducts.isNotEmpty) {
+        for (var product in fetchedProducts) {
+          _products[product.id_product!] = product;
+        }
+        currentPage++;
+        notifyListeners();
+      }
+    } catch (e) {
+      log("Failed to fetch products: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 
-    currentPage++;
-    isLoading = false;
-    notifyListeners();
+  // Helper method to filter products by category
+  List<Product> filterProductsByCategory(int categoryId) {
+    if (categoryId == 0) {
+      return _products.values
+          .toList(); // Return all products for "All" category
+    }
+    return _products.values
+        .where((product) => product.product_category_id == categoryId)
+        .toList();
   }
 }

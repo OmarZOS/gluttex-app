@@ -2,18 +2,12 @@ import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
-import 'package:gluttex_core/app/Response.dart';
-import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:locator/locator.dart';
 import 'package:medicom_catalog/screens/components/category_picker.dart';
 import 'package:provider/provider.dart';
-
-import 'components/image_picker.dart';
 
 class ProductFormScreen extends StatefulWidget {
   const ProductFormScreen({super.key});
@@ -24,267 +18,287 @@ class ProductFormScreen extends StatefulWidget {
 
 class _ProductFormScreenState extends State<ProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  String? _productName;
-  String? _productBrand;
-  String? _productBarcode;
-  Uint8List? _productImage;
-  int? _product_type_id;
-  double? _productPrice;
-  int? _productQuantity;
+  final _productNameController = TextEditingController();
+  final _productBrandController = TextEditingController();
+  final _productBarcodeController = TextEditingController();
+  final _productPriceController = TextEditingController();
+  final _productQuantityController = TextEditingController();
+  final _productDescriptionController = TextEditingController();
 
-  String? _productDescription;
+  Uint8List? _productImage;
+  int? _productTypeId;
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _productNameController.dispose();
+    _productBrandController.dispose();
+    _productBarcodeController.dispose();
+    _productPriceController.dispose();
+    _productQuantityController.dispose();
+    _productDescriptionController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
 
-    if (pickedFile != null) {
-      Uint8List imageData = await pickedFile.readAsBytes();
-      Uint8List resizedImage = resizeImage(imageData, 195, 195);
-      setState(() {
-        _productImage = resizedImage;
-      });
+      if (pickedFile != null) {
+        final imageData = await pickedFile.readAsBytes();
+        setState(() {
+          _productImage = imageData;
+        });
+      }
+    } catch (e) {
+      log("Image picker error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.noImageSelectedTxt),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  void _onCategoryChanged(int identifier) {
-    _product_type_id = identifier;
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_isSubmitting) return;
+
+    _formKey.currentState!.save();
+    setState(() => _isSubmitting = true);
+
+    try {
+      final product = Product(
+        id_product: 0,
+        product_provider_id: 1,
+        product_category_id: _productTypeId ?? 0,
+        id_product_category: _productTypeId ?? 0,
+        id_product_image: 0,
+        product_ref_id: 0,
+        product_name: _productNameController.text,
+        product_brand: _productBrandController.text,
+        product_barcode: _productBarcodeController.text,
+        product_image_data: _productImage,
+        product_image_url: null,
+        product_category_desc: '',
+        product_price: double.tryParse(_productPriceController.text) ?? 0.0,
+        product_quantity: int.tryParse(_productQuantityController.text) ?? 0,
+        product_description: _productDescriptionController.text,
+        product_created_at: null,
+        product_last_updated: null,
+        product_owner_id: Provider.of<AppUserNotifier>(context, listen: false)
+                .appUser!
+                .id_app_user ??
+            1,
+      );
+
+      final statusCode =
+          await Provider.of<ProductNotifier>(context, listen: false)
+              .addOrUpdateProduct(product);
+
+      _handleResponse(statusCode);
+    } catch (e, stacktrace) {
+      log("Form submission error: $stacktrace");
+      _showSnackBar(
+        '${AppLocalizations.of(context)!.serverError}: $e',
+        Colors.red,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  void _handleResponse(int? statusCode) {
+    final loc = AppLocalizations.of(context)!;
+    String message;
+    Color color;
+
+    switch (statusCode) {
+      case 200:
+        message = loc.putSuccess;
+        color = Colors.green;
+        Provider.of<ProductNotifier>(context, listen: false).fetchProducts(0);
+        Navigator.pop(context);
+        break;
+      case 406:
+      case 422:
+        message = '${loc.putFailure} (Error $statusCode)';
+        color = Colors.amber;
+        break;
+      default:
+        message = '${loc.serverError} (Error $statusCode)';
+        color = Colors.red;
+    }
+
+    _showSnackBar(message, color);
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.addProductTxt),
+        title: Text(loc.addProductTxt),
+        elevation: 0,
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(
-          Icons.shopify_sharp,
-          // color: Colors.yellow[50],
-        ),
-        onPressed: () {},
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.productNameTxt),
-                onSaved: (value) => _productName = value ?? "",
+              _buildTextField(
+                controller: _productNameController,
+                label: loc.productNameTxt,
+                validator: (value) => value?.isEmpty ?? true
+                    ? loc.pleaseInputProductNameMsg
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _productBrandController,
+                label: loc.productBrandTxt,
+                validator: (value) => value?.isEmpty ?? true
+                    ? loc.pleaseInputProductBrandMsg
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _productBarcodeController,
+                label: loc.productBarcodeTxt,
+                validator: (value) => value?.isEmpty ?? true
+                    ? loc.pleaseInputProductBarcodeMsg
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _productPriceController,
+                label: loc.productPriceTxt,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputProductNameMsg;
-                  }
+                  if (value?.isEmpty ?? true)
+                    return loc.pleaseInputProductPriceMsg;
+                  final numValue = double.tryParse(value!);
+                  if (numValue == null) return loc.pleaseInputvalidnumberMsg;
+                  if (numValue >= 1000000) return loc.numberConstraintMsg;
                   return null;
                 },
               ),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.productBrandTxt),
-                onSaved: (value) => _productBrand = value ?? "",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputProductBrandMsg;
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.productBarcodeTxt),
-                onSaved: (value) => _productBarcode = value ?? "",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputProductBarcodeMsg;
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.productPriceTxt),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _productQuantityController,
+                label: loc.productQuantityText,
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputProductPriceMsg;
-                  }
-                  if (double.tryParse(value) == null) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputvalidnumberMsg;
-                  }
-                  if (double.tryParse(value)! >= 1000000) {
-                    return AppLocalizations.of(context)!.numberConstraintMsg;
-                  }
-                  return null;
-                },
-                onSaved: (value) =>
-                    _productPrice = double.tryParse(value ?? "0.0"),
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)!.productQuantityText),
-                keyboardType: TextInputType.number,
-                onSaved: (value) =>
-                    _productQuantity = int.tryParse(value ?? "0"),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.productQuantityText;
-                  }
-                  if (int.tryParse(value) == null) {
-                    return AppLocalizations.of(context)!
-                        .pleaseInputProductQuantityMsg;
-                  }
+                  if (value?.isEmpty ?? true)
+                    return loc.pleaseInputProductQuantityMsg;
+                  if (int.tryParse(value!) == null)
+                    return loc.pleaseInputvalidnumberMsg;
                   return null;
                 },
               ),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)!.productDescriptionText),
-                // keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value != null) {
-                    if ((value).length >= 300) {
-                      return AppLocalizations.of(context)!
-                          .descriptionCharacterConstraintMsg;
-                    }
-                  }
-                  return null;
-                },
-                onSaved: (value) => _productDescription = value,
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _productDescriptionController,
+                label: loc.productDescriptionText,
+                maxLines: 3,
+                validator: (value) => (value?.length ?? 0) >= 300
+                    ? loc.descriptionCharacterConstraintMsg
+                    : null,
               ),
-              const SizedBox(height: 16.0),
-              FutureBuilder<List<ProductCategory>?>(
-                future: GluttexLocator.get<ProductService>().getCategories(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(); // Show a loading indicator while waiting
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text(
-                        AppLocalizations.of(context)!.categoriesNotFoundTxt);
-                  } else {
-                    return CategoryPicker(
-                      category_id: _product_type_id ?? 1,
-                      categories: snapshot.data!,
-                      onCategoryChanged: (selectedCategoryId) {
-                        _onCategoryChanged(selectedCategoryId);
-                        //log('Selected category ID: $selectedCategoryId');
-                      },
-                    );
-                  }
-                },
+              const SizedBox(height: 24),
+              CategoryPicker(
+                category_id: 0,
+                categories: Provider.of<ProductNotifier>(context).categories,
+                onCategoryChanged: (id) => _productTypeId = id,
               ),
-              const SizedBox(height: 20),
-              _productImage != null
-                  ? Image.memory(_productImage!,
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.width)
-                  : Text(AppLocalizations.of(context)!.noImageSelectedTxt),
+              const SizedBox(height: 24),
+              _buildImageSection(loc),
+              const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _pickImage,
-                child: Text(AppLocalizations.of(context)!.pickImageMsg),
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    final product = Product(
-                        id_product: 0,
-                        product_provider_id: 1,
-                        product_category_id: _product_type_id ?? 0,
-                        id_product_category: _product_type_id ?? 0,
-                        id_product_image: 0,
-                        product_ref_id: 0,
-                        product_name: _productName,
-                        product_brand: _productBrand,
-                        product_barcode: _productBarcode,
-                        product_image_data: _productImage,
-                        product_image_url: null,
-                        product_category_desc: '',
-                        product_price: _productPrice ?? 0.0,
-                        product_quantity: _productQuantity ?? 0,
-                        product_description: _productDescription,
-                        product_created_at: null,
-                        product_last_updated: null,
-                        product_owner_id:
-                            Provider.of<AppUserNotifier>(context, listen: false)
-                                    .appUser!
-                                    .id_app_user ??
-                                1);
-                    // Handle product submission
-                    int? statusCode;
-                    Response response = Response();
-                    try {
-                      int? statusCode = await Provider.of<ProductNotifier>(
-                              context,
-                              listen: false)
-                          .addProduct(product);
-
-                      switch (statusCode) {
-                        case 200:
-                          response.color = Colors.green;
-                          response.text =
-                              AppLocalizations.of(context)!.putSuccess;
-                          await Provider.of<ProductNotifier>(context,
-                                  listen: false)
-                              .fetchProducts(0);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(response.text),
-                              backgroundColor: response.color,
-                            ),
-                          );
-                          Navigator.pop(context);
-                          break;
-                        case 406:
-                          response.color = Colors.amberAccent;
-                          response.text =
-                              'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                          break;
-                        case 422:
-                          response.color = Colors.amberAccent;
-                          response.text =
-                              'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                          break;
-
-                        default:
-                          response.color = Colors.red;
-                          response.text =
-                              'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
-                      }
-                    } catch (e, stacktrace) {
-                      log("$stacktrace");
-                      response.color = Colors.red;
-                      response.text =
-                          'Error ${statusCode!}: ${AppLocalizations.of(context)!.serverError}';
-                    }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(response.text),
-                        backgroundColor: response.color,
-                      ),
-                    );
-                    // You can use a provider or any state management to save the product
-                  }
-                },
-                child: Text(AppLocalizations.of(context)!.submitText),
+                onPressed: _isSubmitting ? null : _submitForm,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator()
+                    : Text(loc.submitText),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    int? maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      validator: validator,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+    );
+  }
+
+  Widget _buildImageSection(AppLocalizations loc) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_productImage != null)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(
+              _productImage!,
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          )
+        else
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(child: Text(loc.noImageSelectedTxt)),
+          ),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.image),
+          label: Text(loc.pickImageMsg),
+          onPressed: _pickImage,
+        ),
+      ],
     );
   }
 }
