@@ -1,356 +1,275 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_core/app/Response.dart';
-import 'package:gluttex_core/app/UserService.dart';
+import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_home/screens/category_picker.dart';
-import 'package:gluttex_home/screens/tools/image_picker.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
 
 class AppUserEditFormScreen extends StatefulWidget {
-  final int? initial_id_app_user;
-  final int? initial_app_user_person_id;
-  final int? initial_app_user_type_id;
-  final int? initial_id_app_user_type;
-  final int? initial_idPerson;
-  final int? initial_personDetailsId;
-  final int? initial_idBloodType;
-  final String? initial_bloodTypeDesc;
-  final int? initial_idLocation;
-  final int? initial_locationAddressId;
-  final String? initial_app_user_name;
-  final String? initial_app_user_password;
-  final String? initial_app_user_preferences;
-  final String? initial_app_user_type_desc;
-  final Uint8List? initial_app_user_image;
-  final String? initial_personFirstName;
-  final String? initial_personLastName;
-  final String? initial_personBirthDate;
-  final String? initial_personGender;
-  final String? initial_personNationality;
-  final double? initial_locationLatitude;
-  final double? initial_locationLongitude;
-  final String? initial_locationName;
-  final String? initial_addressStreet;
-  final String? initial_addressCity;
-  final String? initial_addressPostalCode;
-  final String? initial_addressCountry;
+  final AppUser? appUser;
 
-  const AppUserEditFormScreen(
-      {super.key,
-      required this.initial_id_app_user,
-      required this.initial_app_user_person_id,
-      required this.initial_app_user_type_id,
-      required this.initial_id_app_user_type,
-      required this.initial_idPerson,
-      required this.initial_personDetailsId,
-      required this.initial_idBloodType,
-      required this.initial_idLocation,
-      required this.initial_locationAddressId,
-      required this.initial_app_user_name,
-      required this.initial_app_user_password,
-      required this.initial_app_user_preferences,
-      required this.initial_app_user_type_desc,
-      required this.initial_app_user_image,
-      required this.initial_personFirstName,
-      required this.initial_personLastName,
-      required this.initial_personBirthDate,
-      required this.initial_personGender,
-      required this.initial_personNationality,
-      required this.initial_locationLatitude,
-      required this.initial_locationLongitude,
-      required this.initial_locationName,
-      required this.initial_addressStreet,
-      required this.initial_addressCity,
-      required this.initial_addressPostalCode,
-      required this.initial_addressCountry,
-      required this.initial_bloodTypeDesc});
+  const AppUserEditFormScreen({super.key, required this.appUser});
 
   @override
-  _AppUserEditFormScreenState createState() => _AppUserEditFormScreenState();
+  State<AppUserEditFormScreen> createState() => _AppUserEditFormScreenState();
 }
 
 class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  late int? _id_app_user;
-  late int? _app_user_person_id;
-  late int? _app_user_type_id;
-  late int? _id_app_user_type;
-  late int? _idPerson;
-  late int? _personDetailsId;
-  late int? _idBloodType;
-  late String? _bloodTypeDesc;
-  late int? _idLocation;
-  late int? _locationAddressId;
-  late String? _app_user_name;
-  late String? _app_user_password;
-  late String? _app_user_preferences;
-  late String? _app_user_type_desc;
-  late Uint8List? _app_user_image;
-  late String? _personFirstName;
-  late String? _personLastName;
-  late String? _personBirthDate;
-  late String? _personGender;
-  late String? _personNationality;
-  late double? _locationLatitude;
-  late double? _locationLongitude;
-  late String? _locationName;
-  late String? _addressStreet;
-  late String? _addressCity;
-  late String? _addressPostalCode;
-  late String? _addressCountry;
+  late AppUser _editedUser;
+  bool _isLoading = false;
+  bool _imageChanged = false;
 
   @override
   void initState() {
     super.initState();
-
-    _id_app_user = widget.initial_id_app_user;
-    _app_user_person_id = widget.initial_app_user_person_id;
-    _app_user_type_id = widget.initial_app_user_type_id;
-    _id_app_user_type = widget.initial_id_app_user_type;
-    _idPerson = widget.initial_idPerson;
-    _personDetailsId = widget.initial_personDetailsId;
-    _idBloodType = widget.initial_idBloodType;
-    _idLocation = widget.initial_idLocation;
-    _locationAddressId = widget.initial_locationAddressId;
-    _app_user_name = widget.initial_app_user_name;
-    _app_user_password = widget.initial_app_user_password;
-    _app_user_preferences = widget.initial_app_user_preferences;
-    _app_user_type_desc = widget.initial_app_user_type_desc;
-    _app_user_image = widget.initial_app_user_image;
-    _personFirstName = widget.initial_personFirstName;
-    _personLastName = widget.initial_personLastName;
-    _personBirthDate = widget.initial_personBirthDate;
-    _personGender = widget.initial_personGender;
-    _personNationality = widget.initial_personNationality;
-    _locationLatitude = widget.initial_locationLatitude;
-    _locationLongitude = widget.initial_locationLongitude;
-    _locationName = widget.initial_locationName;
-    _addressStreet = widget.initial_addressStreet;
-    _addressCity = widget.initial_addressCity;
-    _addressPostalCode = widget.initial_addressPostalCode;
-    _addressCountry = widget.initial_addressCountry;
-    _bloodTypeDesc = widget.initial_bloodTypeDesc;
-
-    // Initialize state variables with initial values from the widget
-
-    // id_app_user = widget.initialAppUserName;
-    // _app_user_image = widget.initialAppUserImage;
-    // _appUserDescription = widget.initialAppUserDescription;
-    // _appUserInstruction = widget.initialAppUserInstruction;
-    // _appUser_category_id = widget.initialAppUser_category_id;
-    // _id_appUser = widget.initialIdAppUser;
-    // _id_appUser_image = widget.initialIdAppUserImage;
-    // _appUserPreparationTime = widget.initialAppUserPreparationTime;
-    // preparationTime = ParseDurationString(_appUserPreparationTime ?? "");
+    _editedUser = widget.appUser!.copyWith(); // Create a deep copy
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 1024,
+      );
 
-    if (pickedFile != null) {
-      Uint8List imageData = await pickedFile.readAsBytes();
-      Uint8List resizedImage = resizeImage(
-          imageData,
-          MediaQuery.of(context).size.width.floor(),
-          MediaQuery.of(context).size.width.floor());
-      setState(() {
-        _app_user_image = resizedImage;
-      });
+      if (pickedFile != null) {
+        setState(() {
+          _imageChanged = true;
+          _editedUser = _editedUser.copyWith(
+              // app_user_image: Uint8List.fromList(await pickedFile.readAsBytes()),
+              );
+        });
+      }
+    } on PlatformException catch (e) {
+      _showErrorSnackbar('Failed to pick image: ${e.message}');
     }
   }
 
-  void _onCategoryChanged(int identifier) {
-    _app_user_type_id = identifier;
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    _formKey.currentState!.save();
+    setState(() => _isLoading = true);
+
+    try {
+      await GluttexLocator.get<AppUserService>().updateAppUser(_editedUser);
+      await Provider.of<AppUserNotifier>(context, listen: false)
+          .fetchAppUser('${_editedUser.id_app_user}');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.putSuccess),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context, _editedUser);
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackbar(AppLocalizations.of(context)!.putFailure);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Update AppUser'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(
-          Icons.shopify_sharp,
-          // color: Colors.yellow[50],
-        ),
-        onPressed: () {},
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                initialValue: _app_user_name,
-                decoration: const InputDecoration(labelText: 'AppUser Name'),
-                onSaved: (value) => _app_user_name = value,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a appUser description';
-                  }
-
-                  if ((value).length >= 300) {
-                    return 'Character limit: 300.';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                initialValue: _personLastName,
-                decoration: const InputDecoration(labelText: 'AppUser Name'),
-                onSaved: (value) => _personLastName = value,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a appUser description';
-                  }
-
-                  if ((value).length >= 300) {
-                    return 'Character limit: 300.';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                initialValue: _personFirstName ?? "",
-                decoration:
-                    const InputDecoration(labelText: 'AppUser Description'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a appUser description';
-                  }
-
-                  if ((value).length >= 300) {
-                    return 'Character limit: 300.';
-                  }
-                  return null;
-                },
-                onSaved: (value) => _personFirstName = value,
-              ),
-              const SizedBox(height: 16.0),
-              FutureBuilder<List<AppUserCategory>?>(
-                future: GluttexLocator.get<AppUserService>().getCategories(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(); // Show a loading indicator while waiting
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('Categories not found');
-                  } else {
-                    return CategoryPicker(
-                      category_id: _id_app_user_type ?? 1,
-                      categories: snapshot.data!,
-                      onCategoryChanged: (selectedCategoryId) {
-                        _onCategoryChanged(selectedCategoryId);
-                      },
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 16.0),
-              _app_user_image != null
-                  ? Image.memory(_app_user_image!,
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.width)
-                  : const Text('No image selected'),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: const Text('Pick Image'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    final appUser = AppUser(
-                      id_app_user: _id_app_user ?? 0,
-                      app_user_person_id: _app_user_person_id ?? 0,
-                      app_user_type_id: _app_user_type_id ?? 0,
-                      app_user_name: _app_user_name ?? "",
-                      app_user_password: _app_user_password ?? "",
-                      app_user_preferences: _app_user_preferences ?? "",
-                      app_user_type_desc: _app_user_type_desc ?? "",
-                      app_user_image: _app_user_image,
-                      idPerson: _idPerson ?? 0,
-                      personDetailsId: _personDetailsId ?? 0,
-                      personFirstName: _personFirstName ?? "",
-                      personLastName: _personLastName ?? "",
-                      personBirthDate: _personBirthDate ?? "",
-                      personGender: _personGender ?? "",
-                      personNationality: _personNationality ?? "",
-                      idBloodType: _idBloodType ?? 0,
-                      idLocation: _idLocation ?? 0,
-                      locationLatitude: _locationLatitude ?? 0.0,
-                      locationLongitude: _locationLongitude ?? 0.0,
-                      locationName: _locationName ?? "",
-                      locationAddressId: _locationAddressId ?? 0,
-                      addressStreet: _addressStreet ?? "",
-                      addressCity: _addressCity ?? "",
-                      addressPostalCode: _addressPostalCode ?? "",
-                      addressCountry: _addressCountry ?? "",
-                      bloodTypeDesc: _bloodTypeDesc ?? "",
-                    );
-
-                    // Handle appUser submission
-                    int? statusCode = await GluttexLocator.get<AppUserService>()
-                        .updateAppUser(appUser);
-
-                    Response response = Response();
-
-                    switch (statusCode) {
-                      case 200:
-                        response.color = Colors.green;
-                        response.text =
-                            AppLocalizations.of(context)!.putSuccess;
-                        await Provider.of<AppUserNotifier>(context,
-                                listen: false)
-                            .fetchAppUser('$_id_app_user');
-                        Navigator.pop(context, appUser);
-                        break;
-                      case 406:
-                        response.color = Colors.amberAccent;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                        break;
-                      case 422:
-                        response.color = Colors.amberAccent;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                        break;
-
-                      default:
-                        response.color = Colors.red;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
-                    }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(response.text),
-                        backgroundColor: response.color,
-                      ),
-                    );
-
-                    // You can use a provider or any state management to save the appUser
-                  }
-                },
-                child: Text(AppLocalizations.of(context)!.submitText),
-              ),
-            ],
+        title: Text(loc.personalInformation),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: null,
+            // onPressed: _isLoading ? null : _submitForm,
           ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Profile Picture Section
+                    _buildProfilePictureSection(theme),
+                    const SizedBox(height: 24),
+
+                    // Personal Info Section
+                    _buildSectionHeader(loc.personalInformation, theme),
+                    _buildTextFormField(
+                      label: loc.firstName,
+                      initialValue: _editedUser.personFirstName,
+                      onSaved: (v) => _editedUser =
+                          _editedUser.copyWith(personFirstName: v),
+                    ),
+                    _buildTextFormField(
+                      label: loc.lastName,
+                      initialValue: _editedUser.personLastName,
+                      onSaved: (v) =>
+                          _editedUser = _editedUser.copyWith(personLastName: v),
+                    ),
+
+                    // Account Info Section
+                    _buildSectionHeader(loc.accountInformation, theme),
+                    _buildTextFormField(
+                      label: loc.username,
+                      initialValue: _editedUser.app_user_name,
+                      onSaved: (v) =>
+                          _editedUser = _editedUser.copyWith(app_user_name: v),
+                    ),
+
+                    // Category Picker
+                    // _buildCategoryPicker(),
+
+                    // Submit Button
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: _submitForm,
+                      child: Text(loc.saveChanges),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildProfilePictureSection(ThemeData theme) {
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            CircleAvatar(
+              radius: 60,
+              backgroundImage: _editedUser.app_user_image != null
+                  ? MemoryImage(_editedUser.app_user_image!)
+                  : const AssetImage('assets/default_avatar.png')
+                      as ImageProvider,
+            ),
+            FloatingActionButton.small(
+              heroTag: null,
+              onPressed: _pickImage,
+              child: const Icon(Icons.camera_alt),
+            ),
+          ],
+        ),
+        if (_imageChanged)
+          TextButton(
+            onPressed: () => setState(() {
+              _editedUser = _editedUser.copyWith(app_user_image: null);
+              _imageChanged = false;
+            }),
+            child: Text(
+              "AppLocalizations.of(context)!.removePhoto",
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        title,
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
+
+  Widget _buildTextFormField({
+    required String label,
+    required String? initialValue,
+    required void Function(String?) onSaved,
+    int maxLength = 300,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        initialValue: initialValue,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          counterText: '',
+        ),
+        maxLength: maxLength,
+        validator: (value) {
+          if (value?.isEmpty ?? true)
+            return AppLocalizations.of(context)!.fieldRequired;
+          return null;
+        },
+        onSaved: onSaved,
+      ),
+    );
+  }
+
+  // Widget _buildCategoryPicker() {
+  //   return FutureBuilder<List<AppUserCategory>?>(
+  //     future: Provider.of<AppUserNotifier>(context, listen: false)
+  //         .categories,
+  //     builder: (context, snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.waiting) {
+  //         return const LinearProgressIndicator();
+  //       }
+
+  //       if (snapshot.hasError) {
+  //         return Text("AppLocalizations.of(context)!.loadError");
+  //       }
+
+  //       if (!snapshot.hasData || snapshot.data!.isEmpty) {
+  //         return Text("AppLocalizations.of(context)!.noCategories");
+  //       }
+
+  //       return Padding(
+  //         padding: const EdgeInsets.only(bottom: 16),
+  //         child: CategoryPicker(
+  //           category_id: _editedUser.app_user_type_id ?? 1,
+  //           categories: snapshot.data!,
+  //           onCategoryChanged: (id) {
+  //             setState(() {
+  //               _editedUser = _editedUser.copyWith(app_user_type_id: id);
+  //             });
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 }

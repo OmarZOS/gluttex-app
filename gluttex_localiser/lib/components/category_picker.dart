@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_localiser/components/supplier_icon.dart';
 
 class CategoryPicker extends StatefulWidget {
   final ValueChanged<int> onCategoryChanged;
@@ -65,7 +64,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "localizations.categ",
+                      localizations.categoryText, //
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),

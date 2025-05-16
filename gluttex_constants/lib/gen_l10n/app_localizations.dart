@@ -490,396 +490,6 @@ abstract class AppLocalizations {
   /// **'Please enter a valid number'**
   String get pleaseInputvalidnumberMsg;
 
-  /// No description provided for @pleaseInputProductDescriptionMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a product description'**
-  String get pleaseInputProductDescriptionMsg;
-
-  /// No description provided for @pleaseInputProductQuantityMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a product quantity'**
-  String get pleaseInputProductQuantityMsg;
-
-  /// No description provided for @recipeNameText.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe Name'**
-  String get recipeNameText;
-
-  /// No description provided for @pleaseInputRecipeNameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a recipe name'**
-  String get pleaseInputRecipeNameMsg;
-
-  /// No description provided for @recipeDescriptionText.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe description'**
-  String get recipeDescriptionText;
-
-  /// No description provided for @pleaseInputRecipeDescriptionMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a recipe description'**
-  String get pleaseInputRecipeDescriptionMsg;
-
-  /// No description provided for @recipeinstructiontext.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe instructions'**
-  String get recipeinstructiontext;
-
-  /// No description provided for @instructionsText.
-  ///
-  /// In en, this message translates to:
-  /// **'Instructions'**
-  String get instructionsText;
-
-  /// No description provided for @numberConstraintMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a number between 0 and 999999'**
-  String get numberConstraintMsg;
-
-  /// No description provided for @productQuantityText.
-  ///
-  /// In en, this message translates to:
-  /// **'Product Quantity'**
-  String get productQuantityText;
-
-  /// No description provided for @productDescriptionText.
-  ///
-  /// In en, this message translates to:
-  /// **'Product Description'**
-  String get productDescriptionText;
-
-  /// No description provided for @descriptionCharacterConstraintMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Character limit: 300.'**
-  String get descriptionCharacterConstraintMsg;
-
-  /// No description provided for @pickImageMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick Image'**
-  String get pickImageMsg;
-
-  /// No description provided for @submitText.
-  ///
-  /// In en, this message translates to:
-  /// **'Submit'**
-  String get submitText;
-
-  /// No description provided for @productNameTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Product Name'**
-  String get productNameTxt;
-
-  /// No description provided for @productBrandTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Product Brand'**
-  String get productBrandTxt;
-
-  /// No description provided for @productBarcodeTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Product Barcode'**
-  String get productBarcodeTxt;
-
-  /// No description provided for @productPriceTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Product Price'**
-  String get productPriceTxt;
-
-  /// No description provided for @categoriesNotFoundTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories not found'**
-  String get categoriesNotFoundTxt;
-
-  /// No description provided for @noImageSelectedTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'No image selected'**
-  String get noImageSelectedTxt;
-
-  /// No description provided for @addProductTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Product'**
-  String get addProductTxt;
-
-  /// No description provided for @orderNowTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Order Now'**
-  String get orderNowTxt;
-
-  /// No description provided for @subtotalTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Subtotal'**
-  String get subtotalTxt;
-
-  /// No description provided for @totalTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get totalTxt;
-
-  /// No description provided for @confirmOrderTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Order'**
-  String get confirmOrderTxt;
-
-  /// No description provided for @searchTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Search'**
-  String get searchTxt;
-
-  /// No description provided for @emptyCartTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Your cart is empty!'**
-  String get emptyCartTxt;
-
-  /// No description provided for @taxTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Tax'**
-  String get taxTxt;
-
-  /// No description provided for @discountText.
-  ///
-  /// In en, this message translates to:
-  /// **'Discount'**
-  String get discountText;
-
-  /// No description provided for @cancelTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get cancelTxt;
-
-  /// No description provided for @confirmTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm'**
-  String get confirmTxt;
-
-  /// No description provided for @confirmationTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'confirmation'**
-  String get confirmationTxt;
-
-  /// No description provided for @addSupplierTxt.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Supplier'**
-  String get addSupplierTxt;
-
-  /// No description provided for @addBusinessNameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a business name'**
-  String get addBusinessNameMsg;
-
-  /// No description provided for @supplierNameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Supplier Name'**
-  String get supplierNameMsg;
-
-  /// No description provided for @insertCoordinatesMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Insert coordinates'**
-  String get insertCoordinatesMsg;
-
-  /// No description provided for @addContactInfoMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Contact Info'**
-  String get addContactInfoMsg;
-
-  /// No description provided for @contactInfoMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Contact information'**
-  String get contactInfoMsg;
-
-  /// No description provided for @pleaseInputContactInfoMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter contact info'**
-  String get pleaseInputContactInfoMsg;
-
-  /// No description provided for @latitudeMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Latitude'**
-  String get latitudeMsg;
-
-  /// No description provided for @longitudeMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Longitude'**
-  String get longitudeMsg;
-
-  /// No description provided for @setLocationMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Set Location'**
-  String get setLocationMsg;
-
-  /// No description provided for @updateRecipeMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Update Recipe'**
-  String get updateRecipeMsg;
-
-  /// No description provided for @addIngredientMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Ingredient'**
-  String get addIngredientMsg;
-
-  /// No description provided for @deleteSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Successfully deleted item'**
-  String get deleteSuccess;
-
-  /// No description provided for @putSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Successfully added item'**
-  String get putSuccess;
-
-  /// No description provided for @updateSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Successfully updated item'**
-  String get updateSuccess;
-
-  /// No description provided for @serverError.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to connect to the server'**
-  String get serverError;
-
-  /// No description provided for @notFoundError.
-  ///
-  /// In en, this message translates to:
-  /// **'Object not found'**
-  String get notFoundError;
-
-  /// No description provided for @deleteFailure.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to delete storage item'**
-  String get deleteFailure;
-
-  /// No description provided for @getFailure.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load item'**
-  String get getFailure;
-
-  /// No description provided for @putFailure.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to add item'**
-  String get putFailure;
-
-  /// No description provided for @updateFailure.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to update item'**
-  String get updateFailure;
-
-  /// No description provided for @price.
-  ///
-  /// In en, this message translates to:
-  /// **'{price} DA'**
-  String price(Object price);
-
-  /// No description provided for @ingredientSelect.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Ingredient'**
-  String get ingredientSelect;
-
-  /// No description provided for @ingredientSearch.
-  ///
-  /// In en, this message translates to:
-  /// **'Search Ingredient'**
-  String get ingredientSearch;
-
-  /// No description provided for @ingredientQuantity.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter Quantity'**
-  String get ingredientQuantity;
-
-  /// No description provided for @addText.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get addText;
-
-  /// No description provided for @hoursTextValue.
-  ///
-  /// In en, this message translates to:
-  /// **'{hours} hours'**
-  String hoursTextValue(Object hours);
-
-  /// No description provided for @minutesTextValue.
-  ///
-  /// In en, this message translates to:
-  /// **'{minutes} minutes.'**
-  String minutesTextValue(Object minutes);
-
-  /// No description provided for @insertRecipeText.
-  ///
-  /// In en, this message translates to:
-  /// **'Insert Recipe'**
-  String get insertRecipeText;
-
-  /// No description provided for @preparationTimeText.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparation Time: {hours} hours, {minutes} minutes'**
-  String preparationTimeText(Object hours, Object minutes);
-
-  /// No description provided for @noDescriptionAvailableText.
-  ///
-  /// In en, this message translates to:
-  /// **'No description available.'**
-  String get noDescriptionAvailableText;
-
-  /// No description provided for @noInstructionsAvailableText.
-  ///
-  /// In en, this message translates to:
-  /// **'No instructions available.'**
-  String get noInstructionsAvailableText;
-
-  /// No description provided for @noPreparationTimeText.
-  ///
-  /// In en, this message translates to:
-  /// **'No preparation time available.'**
-  String get noPreparationTimeText;
-
   String getLocalizedQuestion(int index) {
     switch (index) {
       case 1:
@@ -1293,6 +903,396 @@ abstract class AppLocalizations {
         return notFoundError;
     }
   }
+
+  /// No description provided for @pleaseInputProductDescriptionMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a product description'**
+  String get pleaseInputProductDescriptionMsg;
+
+  /// No description provided for @pleaseInputProductQuantityMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a product quantity'**
+  String get pleaseInputProductQuantityMsg;
+
+  /// No description provided for @recipeNameText.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Name'**
+  String get recipeNameText;
+
+  /// No description provided for @pleaseInputRecipeNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a recipe name'**
+  String get pleaseInputRecipeNameMsg;
+
+  /// No description provided for @recipeDescriptionText.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe description'**
+  String get recipeDescriptionText;
+
+  /// No description provided for @pleaseInputRecipeDescriptionMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a recipe description'**
+  String get pleaseInputRecipeDescriptionMsg;
+
+  /// No description provided for @recipeinstructiontext.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe instructions'**
+  String get recipeinstructiontext;
+
+  /// No description provided for @instructionsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get instructionsText;
+
+  /// No description provided for @numberConstraintMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a number between 0 and 999999'**
+  String get numberConstraintMsg;
+
+  /// No description provided for @productQuantityText.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Quantity'**
+  String get productQuantityText;
+
+  /// No description provided for @productDescriptionText.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Description'**
+  String get productDescriptionText;
+
+  /// No description provided for @descriptionCharacterConstraintMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Character limit: 300.'**
+  String get descriptionCharacterConstraintMsg;
+
+  /// No description provided for @pickImageMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Image'**
+  String get pickImageMsg;
+
+  /// No description provided for @submitText.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submitText;
+
+  /// No description provided for @productNameTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Name'**
+  String get productNameTxt;
+
+  /// No description provided for @productBrandTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Brand'**
+  String get productBrandTxt;
+
+  /// No description provided for @productBarcodeTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Barcode'**
+  String get productBarcodeTxt;
+
+  /// No description provided for @productPriceTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Price'**
+  String get productPriceTxt;
+
+  /// No description provided for @categoriesNotFoundTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories not found'**
+  String get categoriesNotFoundTxt;
+
+  /// No description provided for @noImageSelectedTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'No image selected'**
+  String get noImageSelectedTxt;
+
+  /// No description provided for @addProductTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Product'**
+  String get addProductTxt;
+
+  /// No description provided for @orderNowTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Now'**
+  String get orderNowTxt;
+
+  /// No description provided for @subtotalTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get subtotalTxt;
+
+  /// No description provided for @totalTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalTxt;
+
+  /// No description provided for @confirmOrderTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Order'**
+  String get confirmOrderTxt;
+
+  /// No description provided for @searchTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchTxt;
+
+  /// No description provided for @emptyCartTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart is empty!'**
+  String get emptyCartTxt;
+
+  /// No description provided for @taxTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get taxTxt;
+
+  /// No description provided for @discountText.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get discountText;
+
+  /// No description provided for @cancelTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelTxt;
+
+  /// No description provided for @confirmTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirmTxt;
+
+  /// No description provided for @confirmationTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'confirmation'**
+  String get confirmationTxt;
+
+  /// No description provided for @addSupplierTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Supplier'**
+  String get addSupplierTxt;
+
+  /// No description provided for @addBusinessNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a business name'**
+  String get addBusinessNameMsg;
+
+  /// No description provided for @supplierNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier Name'**
+  String get supplierNameMsg;
+
+  /// No description provided for @insertCoordinatesMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert coordinates'**
+  String get insertCoordinatesMsg;
+
+  /// No description provided for @addContactInfoMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Contact Info'**
+  String get addContactInfoMsg;
+
+  /// No description provided for @contactInfoMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact information'**
+  String get contactInfoMsg;
+
+  /// No description provided for @pleaseInputContactInfoMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter contact info'**
+  String get pleaseInputContactInfoMsg;
+
+  /// No description provided for @latitudeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get latitudeMsg;
+
+  /// No description provided for @longitudeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get longitudeMsg;
+
+  /// No description provided for @setLocationMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Location'**
+  String get setLocationMsg;
+
+  /// No description provided for @updateRecipeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Recipe'**
+  String get updateRecipeMsg;
+
+  /// No description provided for @addIngredientMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Ingredient'**
+  String get addIngredientMsg;
+
+  /// No description provided for @deleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully deleted item'**
+  String get deleteSuccess;
+
+  /// No description provided for @putSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully added item'**
+  String get putSuccess;
+
+  /// No description provided for @updateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully updated item'**
+  String get updateSuccess;
+
+  /// No description provided for @serverError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to connect to the server'**
+  String get serverError;
+
+  /// No description provided for @notFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'Object not found'**
+  String get notFoundError;
+
+  /// No description provided for @deleteFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete storage item'**
+  String get deleteFailure;
+
+  /// No description provided for @getFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load item'**
+  String get getFailure;
+
+  /// No description provided for @putFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add item'**
+  String get putFailure;
+
+  /// No description provided for @updateFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update item'**
+  String get updateFailure;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} DA'**
+  String price(Object price);
+
+  /// No description provided for @ingredientSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Ingredient'**
+  String get ingredientSelect;
+
+  /// No description provided for @ingredientSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Ingredient'**
+  String get ingredientSearch;
+
+  /// No description provided for @ingredientQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Quantity'**
+  String get ingredientQuantity;
+
+  /// No description provided for @addText.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addText;
+
+  /// No description provided for @hoursTextValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours'**
+  String hoursTextValue(Object hours);
+
+  /// No description provided for @minutesTextValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes.'**
+  String minutesTextValue(Object minutes);
+
+  /// No description provided for @insertRecipeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert Recipe'**
+  String get insertRecipeText;
+
+  /// No description provided for @preparationTimeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation Time: {hours} hours, {minutes} minutes'**
+  String preparationTimeText(Object hours, Object minutes);
+
+  /// No description provided for @noDescriptionAvailableText.
+  ///
+  /// In en, this message translates to:
+  /// **'No description available.'**
+  String get noDescriptionAvailableText;
+
+  /// No description provided for @noInstructionsAvailableText.
+  ///
+  /// In en, this message translates to:
+  /// **'No instructions available.'**
+  String get noInstructionsAvailableText;
+
+  /// No description provided for @noPreparationTimeText.
+  ///
+  /// In en, this message translates to:
+  /// **'No preparation time available.'**
+  String get noPreparationTimeText;
 
   /// No description provided for @productsText.
   ///
@@ -2979,6 +2979,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Treatment & Management'**
   String get treatmentTitle;
+
+  /// No description provided for @internal_server_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal server error. Please try again later.'**
+  String get internal_server_error;
+
+  /// No description provided for @http_exception.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP request failed. Check your connection.'**
+  String get http_exception;
+
+  /// No description provided for @integrity_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Data integrity violation. The operation cannot be completed.'**
+  String get integrity_error;
+
+  /// No description provided for @data_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid data format. Please verify your input.'**
+  String get data_error;
+
+  /// No description provided for @operational_error.
+  ///
+  /// In en, this message translates to:
+  /// **'An operational error occurred. Contact support if the issue persists.'**
+  String get operational_error;
+
+  /// No description provided for @programming_error.
+  ///
+  /// In en, this message translates to:
+  /// **'A programming error occurred. Developers have been notified.'**
+  String get programming_error;
+
+  /// No description provided for @database_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Database operation failed. Try again or contact support.'**
+  String get database_error;
+
+  /// No description provided for @internal_error.
+  ///
+  /// In en, this message translates to:
+  /// **'An internal system error occurred.'**
+  String get internal_error;
+
+  /// No description provided for @interface_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface communication failed. Check configurations.'**
+  String get interface_error;
+
+  /// No description provided for @statement_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid SQL statement. Syntax or logic error detected.'**
+  String get statement_error;
+
+  /// No description provided for @incorrect_credentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect username or password'**
+  String get incorrect_credentials;
+
+  /// No description provided for @sqlalchemy_error.
+  ///
+  /// In en, this message translates to:
+  /// **'SQLAlchemy database error. Check query or connection.'**
+  String get sqlalchemy_error;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePassword;
+
+  /// No description provided for @passwordChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new password'**
+  String get passwordChangeTitle;
+
+  /// No description provided for @passwordChangeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new password must be different from previous passwords'**
+  String get passwordChangeSubtitle;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @currentPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current password'**
+  String get currentPasswordHint;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @newPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your new password'**
+  String get newPasswordHint;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your new password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @changePasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePasswordButton;
+
+  /// No description provided for @passwordRequirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain:'**
+  String get passwordRequirements;
+
+  /// No description provided for @passwordLengthRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get passwordLengthRequirement;
+
+  /// No description provided for @passwordUppercaseRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 1 uppercase letter'**
+  String get passwordUppercaseRequirement;
+
+  /// No description provided for @passwordNumberRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 1 number'**
+  String get passwordNumberRequirement;
+
+  /// No description provided for @passwordChangeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully!'**
+  String get passwordChangeSuccess;
+
+  /// No description provided for @weakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak password'**
+  String get weakPassword;
+
+  /// No description provided for @mediumPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium strength'**
+  String get mediumPassword;
+
+  /// No description provided for @strongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong password'**
+  String get strongPassword;
+
+  /// No description provided for @categoryText.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get categoryText;
+
+  /// No description provided for @currentPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is required'**
+  String get currentPasswordRequired;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @newPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'New password is required'**
+  String get newPasswordRequired;
+
+  /// No description provided for @passwordUppercaseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Must contain at least one uppercase letter'**
+  String get passwordUppercaseError;
+
+  /// No description provided for @passwordNumberError.
+  ///
+  /// In en, this message translates to:
+  /// **'Must contain at least one number'**
+  String get passwordNumberError;
+
+  /// No description provided for @passwordSameAsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'New password must be different from current password'**
+  String get passwordSameAsCurrent;
+
+  /// No description provided for @confirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your new password'**
+  String get confirmPasswordRequired;
+
+  /// No description provided for @passwordsDontMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDontMatch;
+
+  /// No description provided for @changePhotoText.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Profile Photo'**
+  String get changePhotoText;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @profileUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdateSuccess;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @personalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInformation;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastName;
+
+  /// No description provided for @accountInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Information'**
+  String get accountInformation;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @logoutText.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logoutText;
+
+  /// No description provided for @continueAsGuestText.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as Guest'**
+  String get continueAsGuestText;
 }
 
 class _AppLocalizationsDelegate

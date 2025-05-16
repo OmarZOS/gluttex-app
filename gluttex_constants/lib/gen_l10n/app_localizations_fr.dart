@@ -1260,4 +1260,157 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get treatmentTitle => 'Traitement et gestion';
+
+  @override
+  String get internal_server_error => 'Erreur interne du serveur. Veuillez réessayer plus tard.';
+
+  @override
+  String get http_exception => 'Échec de la requête HTTP. Vérifiez votre connexion.';
+
+  @override
+  String get integrity_error => 'Violation d\'intégrité des données. L\'opération ne peut pas être terminée.';
+
+  @override
+  String get data_error => 'Format de données invalide. Vérifiez votre saisie.';
+
+  @override
+  String get operational_error => 'Une erreur opérationnelle est survenue. Contactez le support si le problème persiste.';
+
+  @override
+  String get programming_error => 'Une erreur de programmation est survenue. Les développeurs ont été informés.';
+
+  @override
+  String get database_error => 'Échec de l\'opération de base de données. Réessayez ou contactez le support.';
+
+  @override
+  String get internal_error => 'Une erreur interne du système est survenue.';
+
+  @override
+  String get interface_error => 'Échec de la communication de l\'interface. Vérifiez les configurations.';
+
+  @override
+  String get statement_error => 'Instruction SQL invalide. Erreur de syntaxe ou de logique détectée.';
+
+  @override
+  String get incorrect_credentials => 'Identifiant ou mot de passe incorrect';
+
+  @override
+  String get sqlalchemy_error => 'Erreur de base de données SQLAlchemy. Vérifiez la requête ou la connexion.';
+
+  @override
+  String get changePassword => 'Changer le mot de passe';
+
+  @override
+  String get passwordChangeTitle => 'Créer un nouveau mot de passe';
+
+  @override
+  String get passwordChangeSubtitle => 'Votre nouveau mot de passe doit être différent des mots de passe précédents';
+
+  @override
+  String get currentPassword => 'Mot de passe actuel';
+
+  @override
+  String get currentPasswordHint => 'Entrez votre mot de passe actuel';
+
+  @override
+  String get newPassword => 'Nouveau mot de passe';
+
+  @override
+  String get newPasswordHint => 'Entrez votre nouveau mot de passe';
+
+  @override
+  String get confirmPassword => 'Confirmer le mot de passe';
+
+  @override
+  String get confirmPasswordHint => 'Entrez à nouveau votre nouveau mot de passe';
+
+  @override
+  String get changePasswordButton => 'Changer le mot de passe';
+
+  @override
+  String get passwordRequirements => 'Le mot de passe doit contenir:';
+
+  @override
+  String get passwordLengthRequirement => 'Au moins 8 caractères';
+
+  @override
+  String get passwordUppercaseRequirement => 'Au moins 1 majuscule';
+
+  @override
+  String get passwordNumberRequirement => 'Au moins 1 chiffre';
+
+  @override
+  String get passwordChangeSuccess => 'Mot de passe changé avec succès!';
+
+  @override
+  String get weakPassword => 'Mot de passe faible';
+
+  @override
+  String get mediumPassword => 'Solidité moyenne';
+
+  @override
+  String get strongPassword => 'Mot de passe fort';
+
+  @override
+  String get categoryText => 'Catégorie';
+
+  @override
+  String get currentPasswordRequired => 'Le mot de passe actuel est requis';
+
+  @override
+  String get passwordTooShort => 'Mot de passe trop court (8 caractères minimum)';
+
+  @override
+  String get newPasswordRequired => 'Le nouveau mot de passe est requis';
+
+  @override
+  String get passwordUppercaseError => 'Doit contenir au moins une majuscule';
+
+  @override
+  String get passwordNumberError => 'Doit contenir au moins un chiffre';
+
+  @override
+  String get passwordSameAsCurrent => 'Doit être différent du mot de passe actuel';
+
+  @override
+  String get confirmPasswordRequired => 'La confirmation du mot de passe est requise';
+
+  @override
+  String get passwordsDontMatch => 'Les mots de passe ne correspondent pas';
+
+  @override
+  String get changePhotoText => 'Changer la photo';
+
+  @override
+  String get fieldRequired => 'Ce champ est requis';
+
+  @override
+  String get profileUpdateSuccess => 'Profil mis à jour avec succès';
+
+  @override
+  String get editProfile => 'Modifier le profil';
+
+  @override
+  String get personalInformation => 'Informations personnelles';
+
+  @override
+  String get firstName => 'Prénom';
+
+  @override
+  String get lastName => 'Nom de famille';
+
+  @override
+  String get accountInformation => 'Informations du compte';
+
+  @override
+  String get username => 'Nom d\'utilisateur';
+
+  @override
+  String get saveChanges => 'Enregistrer les modifications';
+
+  @override
+  String get logoutText => 'Déconnexion';
+
+  @override
+  String get continueAsGuestText => 'Continuer en tant qu\'invité';
 }

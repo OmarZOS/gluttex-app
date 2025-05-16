@@ -5,6 +5,8 @@ import 'package:gluttex_chef/components/category_picker.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/components/ingredient_popup.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
+import 'package:gluttex_core/app/ResponseHandler.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_chef/tools/duration.dart';
 import 'package:gluttex_chef/tools/image_picker.dart';
@@ -79,7 +81,6 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
     // Initialize state variables with initial values from the widget
     _recipeName = widget.initialRecipeName;
     _recipeImage = widget.initialRecipeImage;
-
     _recipeDescription = widget.initialRecipeDescription;
 
     _recipeInstruction = widget.initialRecipeInstruction;
@@ -89,10 +90,6 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
     _recipePreparationTime = widget.initialRecipePreparationTime;
     _selectedIngredients = widget.initialIngredients ?? {};
     preparationTime = _recipePreparationTime!;
-    if (Provider.of<RecipeNotifier>(context, listen: false)
-        .recipeIngredients
-        .isEmpty)
-      Provider.of<RecipeNotifier>(context, listen: false).fetchIngredients();
   }
 
   Future<void> _pickImage() async {
@@ -198,7 +195,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
               const SizedBox(height: 16.0),
               CategoryPicker(
                 category_id: _recipe_category_id ?? 0,
-                categories: Provider.of<RecipeNotifier>(context).categories!,
+                categories: Provider.of<RecipeNotifier>(context).categories,
                 onCategoryChanged: (selectedCategoryId) {
                   _onCategoryChanged(selectedCategoryId);
                 },
@@ -305,46 +302,28 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                       recipe_category_desc: "",
                       recipe_ingredients: {},
                     );
+                    try {
+                      await GluttexLocator.get<RecipeService>()
+                          .updateRecipe(recipe);
 
-                    // Handle recipe submission
-                    int? statusCode = await GluttexLocator.get<RecipeService>()
-                        .updateRecipe(recipe);
+                      ResponseHandler.handleResponse(
+                        context: context,
+                        statusCode: 200,
+                        responseCode: "SUCCESS",
+                        finalMessage: AppLocalizations.of(context)!.putSuccess,
+                      );
+                      await Provider.of<RecipeNotifier>(context, listen: false)
+                          .fetchRecipes(0);
+                    } on GluttexException catch (e) {
+                      // Handle recipe submission
 
-                    Response response = Response();
-
-                    switch (statusCode) {
-                      case 200:
-                        response.color = Colors.green;
-                        response.text =
-                            AppLocalizations.of(context)!.putSuccess;
-                        await Provider.of<RecipeNotifier>(context,
-                                listen: false)
-                            .fetchRecipes(0);
-                        Navigator.pop(context, recipe);
-                        break;
-                      case 406:
-                        response.color = Colors.amberAccent;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                        break;
-                      case 422:
-                        response.color = Colors.amberAccent;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                        break;
-
-                      default:
-                        response.color = Colors.red;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
+                      ResponseHandler.handleResponse(
+                        context: context,
+                        statusCode: e.statusCode ?? 300,
+                        responseCode: e.message,
+                        finalMessage: AppLocalizations.of(context)!.putFailure,
+                      );
                     }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(response.text),
-                        backgroundColor: response.color,
-                      ),
-                    );
 
                     // You can use a provider or any state management to save the recipe
                   }

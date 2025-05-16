@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_chef/components/RecipeCard.dart';
@@ -19,22 +21,24 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late List<String> _categories = [];
+  late RecipeNotifier notifier;
   int _selectedCategoryId = 0;
   bool _isSearching = false;
 
   @override
   void initState() {
+    notifier = Provider.of<RecipeNotifier>(context, listen: false);
     super.initState();
-    RecipeNotifier notifier =
-        Provider.of<RecipeNotifier>(context, listen: false);
     _searchController.addListener(_onSearchChanged);
     _scrollController.addListener(_scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifier.fetchRecipes(_selectedCategoryId);
     });
     if (notifier.recipeIngredients.isEmpty) {
+      log("Fetching ingredients again");
       notifier.fetchIngredients();
     }
+    log("$notifier.recipeIngredients");
   }
 
   @override
@@ -47,8 +51,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
     final categs =
         AppLocalizations.of(context)!.recipeCategoryTextList.split(",");
     _categories = [AppLocalizations.of(context)!.allText, ...categs];
-    Provider.of<RecipeNotifier>(context, listen: false).recipeCategories =
-        categs;
+    notifier.recipeCategories = categs;
   }
 
   void _onSearchChanged() {
@@ -57,22 +60,19 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
 
   void _selectCategory(int index) {
     setState(() => _selectedCategoryId = index);
-    Provider.of<RecipeNotifier>(context, listen: false)
-        .fetchRecipes(_selectedCategoryId, reset: true);
+    notifier.fetchRecipes(_selectedCategoryId, reset: true);
   }
 
   void _scrollListener() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 100 &&
-        !Provider.of<RecipeNotifier>(context, listen: false).isLoading) {
-      Provider.of<RecipeNotifier>(context, listen: false)
-          .fetchRecipes(_selectedCategoryId);
+        !notifier.isLoading) {
+      notifier.fetchRecipes(_selectedCategoryId);
     }
   }
 
   Future<void> _refreshRecipes() async {
-    await Provider.of<RecipeNotifier>(context, listen: false)
-        .fetchRecipes(_selectedCategoryId, reset: true);
+    await notifier.fetchRecipes(_selectedCategoryId, reset: true);
   }
 
   @override

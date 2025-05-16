@@ -26,22 +26,33 @@ class RecipeNotifier extends ChangeNotifier {
   List<RecipeIngredient> get recipeIngredients =>
       _recipeIngredients.values.toList();
 
+  Future<void> initialize() async {
+    await fetchIngredients();
+    // await fetchRecipes(0);
+  }
+
   RecipeNotifier() {
-    // fetchRecipes(0);
-    // fetchIngredients();
+    initialize();
   }
 
   /// Fetches all ingredients and stores them in a map for fast lookups
   Future<void> fetchIngredients() async {
     try {
-      final fetchedIngredients = await _recipeService.getAllIngredients();
-      if (fetchedIngredients != null) {
-        _recipeIngredients.clear();
-        for (var ingredient in fetchedIngredients) {
-          _recipeIngredients[ingredient.id_ingredient] = ingredient;
+      if (_recipeIngredients.isEmpty) {
+        final fetchedIngredients = await _recipeService.getAllIngredients();
+        if (fetchedIngredients != null) {
+          // _recipeIngredients.clear();
+          log("Adding to ingredients: ${fetchedIngredients.length} elements");
+          for (var ingredient in fetchedIngredients) {
+            _recipeIngredients[ingredient.id_ingredient] = ingredient;
+          }
+          log("Just added: ${_recipeIngredients.values.length} elements");
         }
-        notifyListeners();
       }
+      log("Gonna fetch ingredients");
+      log("${_recipeIngredients.toString()}");
+      log("Fetched ingredients");
+      notifyListeners();
     } catch (e) {
       log("Failed to fetch ingredients: $e");
     }
@@ -82,47 +93,30 @@ class RecipeNotifier extends ChangeNotifier {
   }
 
   /// Adds a new recipe and updates the local state without refetching all recipes
-  Future<int?> addRecipe(Recipe recipe) async {
-    try {
-      int? status = await _recipeService.addRecipe(recipe);
-      if (status != null) {
-        _recipes[recipe.id_recipe!] = recipe;
-        notifyListeners();
-      }
-      return status;
-    } catch (e) {
-      log("Failed to add recipe: $e");
-      return null;
+  Future<void> addRecipe(Recipe recipe) async {
+    int? status = await _recipeService.addRecipe(recipe);
+    if (status != null) {
+      _recipes[recipe.id_recipe!] = recipe;
+      notifyListeners();
     }
+    // return status;
   }
 
   /// Updates a recipe and updates the local state efficiently
-  Future<int?> updateRecipe(Recipe recipe) async {
-    try {
-      int? status = await _recipeService.updateRecipe(recipe);
-      if (status != null && _recipes.containsKey(recipe.id_recipe)) {
-        _recipes[recipe.id_recipe!] = recipe;
-        notifyListeners();
-      }
-      return status;
-    } catch (e) {
-      log("Failed to update recipe: $e");
-      return null;
+  Future<void> updateRecipe(Recipe recipe) async {
+    int? status = await _recipeService.updateRecipe(recipe);
+    if (status != null && _recipes.containsKey(recipe.id_recipe)) {
+      _recipes[recipe.id_recipe!] = recipe;
+      notifyListeners();
     }
   }
 
   /// Deletes a recipe and updates the local state efficiently
-  Future<int?> deleteRecipe(int idRecipe) async {
-    try {
-      int? status = await _recipeService.deleteRecipe(idRecipe.toString());
-      if (status != null) {
-        _recipes.remove(idRecipe);
-        notifyListeners();
-      }
-      return status;
-    } catch (e) {
-      log("Failed to delete recipe: $e");
-      return null;
+  Future<void> deleteRecipe(int idRecipe) async {
+    int? status = await _recipeService.deleteRecipe(idRecipe.toString());
+    if (status != null) {
+      _recipes.remove(idRecipe);
+      notifyListeners();
     }
   }
 

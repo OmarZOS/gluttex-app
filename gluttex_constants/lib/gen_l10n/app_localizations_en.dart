@@ -1260,4 +1260,157 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get treatmentTitle => 'Treatment & Management';
+
+  @override
+  String get internal_server_error => 'Internal server error. Please try again later.';
+
+  @override
+  String get http_exception => 'HTTP request failed. Check your connection.';
+
+  @override
+  String get integrity_error => 'Data integrity violation. The operation cannot be completed.';
+
+  @override
+  String get data_error => 'Invalid data format. Please verify your input.';
+
+  @override
+  String get operational_error => 'An operational error occurred. Contact support if the issue persists.';
+
+  @override
+  String get programming_error => 'A programming error occurred. Developers have been notified.';
+
+  @override
+  String get database_error => 'Database operation failed. Try again or contact support.';
+
+  @override
+  String get internal_error => 'An internal system error occurred.';
+
+  @override
+  String get interface_error => 'Interface communication failed. Check configurations.';
+
+  @override
+  String get statement_error => 'Invalid SQL statement. Syntax or logic error detected.';
+
+  @override
+  String get incorrect_credentials => 'Incorrect username or password';
+
+  @override
+  String get sqlalchemy_error => 'SQLAlchemy database error. Check query or connection.';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get passwordChangeTitle => 'Create a new password';
+
+  @override
+  String get passwordChangeSubtitle => 'Your new password must be different from previous passwords';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get currentPasswordHint => 'Enter your current password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get newPasswordHint => 'Enter your new password';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get confirmPasswordHint => 'Re-enter your new password';
+
+  @override
+  String get changePasswordButton => 'Change Password';
+
+  @override
+  String get passwordRequirements => 'Password must contain:';
+
+  @override
+  String get passwordLengthRequirement => 'At least 8 characters';
+
+  @override
+  String get passwordUppercaseRequirement => 'At least 1 uppercase letter';
+
+  @override
+  String get passwordNumberRequirement => 'At least 1 number';
+
+  @override
+  String get passwordChangeSuccess => 'Password changed successfully!';
+
+  @override
+  String get weakPassword => 'Weak password';
+
+  @override
+  String get mediumPassword => 'Medium strength';
+
+  @override
+  String get strongPassword => 'Strong password';
+
+  @override
+  String get categoryText => 'Category';
+
+  @override
+  String get currentPasswordRequired => 'Current password is required';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 8 characters';
+
+  @override
+  String get newPasswordRequired => 'New password is required';
+
+  @override
+  String get passwordUppercaseError => 'Must contain at least one uppercase letter';
+
+  @override
+  String get passwordNumberError => 'Must contain at least one number';
+
+  @override
+  String get passwordSameAsCurrent => 'New password must be different from current password';
+
+  @override
+  String get confirmPasswordRequired => 'Please confirm your new password';
+
+  @override
+  String get passwordsDontMatch => 'Passwords do not match';
+
+  @override
+  String get changePhotoText => 'Change Profile Photo';
+
+  @override
+  String get fieldRequired => 'Field is required';
+
+  @override
+  String get profileUpdateSuccess => 'Profile updated successfully';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get personalInformation => 'Personal Information';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get accountInformation => 'Account Information';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get logoutText => 'Logout';
+
+  @override
+  String get continueAsGuestText => 'Continue as Guest';
 }

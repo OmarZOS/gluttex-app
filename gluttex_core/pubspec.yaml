@@ -10,8 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  fluttertoast: ^8.2.12
   locator:
     path: ../locator
+  gluttex_constants:
+    path: ../gluttex_constants
 
 dev_dependencies:
   flutter_test:

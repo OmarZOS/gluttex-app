@@ -2,11 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
 import 'package:gluttex_medical/screens/informations_screen.dart';
 import 'package:gluttex_play/screens/game_catalog.dart';
 import 'package:medicom_catalog/screens/catalog_screen.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,6 +34,17 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final notifier = Provider.of<AppUserNotifier>(context);
+    if (notifier.appUser == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
+      });
+    }
   }
 
   @override

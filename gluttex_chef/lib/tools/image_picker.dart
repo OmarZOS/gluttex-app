@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_core/app/Services/SnackbarService.dart';
 import 'package:image/image.dart' as img;
 import 'package:custom_image_crop/custom_image_crop.dart';
 import 'package:flutter/material.dart';
@@ -54,19 +55,11 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
       final imageBytes = croppedImage as Uint8List;
       widget.onImageEdited(imageBytes);
     } catch (e) {
-      _showErrorSnackBar(
-          AppLocalizations.of(context)!.imageProcessingErrorText);
+      SnackbarService.showSnackbar(
+          context: context,
+          backgroundColor: Colors.red,
+          message: AppLocalizations.of(context)!.imageProcessingErrorText);
     }
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   Widget _buildShapeSelector() {
@@ -132,8 +125,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                         child: TextFormField(
                           initialValue: '9',
                           decoration: InputDecoration(
-                            labelText:
-                                "AppLocalizations.of(context)!.heightText",
+                            labelText: AppLocalizations.of(context)!.heightText,
                             border: const OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.number,

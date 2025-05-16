@@ -1,5 +1,5 @@
 // UserService.dart
-import 'AppUser.dart';
+import '../AppUser.dart';
 
 // AppUserService.dart
 abstract class AppUserService {

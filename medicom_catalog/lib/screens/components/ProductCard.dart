@@ -46,8 +46,8 @@ class ProductCard extends StatelessWidget {
                 child: Container(
                   color: Theme.of(context)
                       .colorScheme
-                      .surfaceVariant
-                      .withOpacity(0.1),
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.1),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: product.product_image_url != null
@@ -142,7 +142,10 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildFallbackImage(BuildContext context, int categoryId) {
     return Container(
-      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+      color: Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withValues(alpha: 0.3),
       child: Center(
         child: SvgPicture.asset(
           'assets/icons/$categoryId.svg',
@@ -157,7 +160,7 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildPlaceholder(BuildContext context) {
     return Container(
-      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
       child: Center(
         child: Icon(
           Icons.image_outlined,

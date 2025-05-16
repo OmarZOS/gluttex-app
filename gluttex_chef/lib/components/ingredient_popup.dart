@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
@@ -10,19 +11,21 @@ class IngredientPopup extends StatefulWidget {
   const IngredientPopup({super.key, required this.onIngredientSelected});
 
   @override
-  _IngredientPopupState createState() => _IngredientPopupState();
+  State<IngredientPopup> createState() => _IngredientPopupState();
 }
 
 class _IngredientPopupState extends State<IngredientPopup> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   List<RecipeIngredient> _filteredIngredients = [];
-  bool _isLoading = false;
+  bool _isLoading = true;
+  String? _error;
+  late RecipeNotifier _notifier;
 
   @override
   void initState() {
     super.initState();
-
+    _notifier = Provider.of<RecipeNotifier>(context, listen: false);
     _loadIngredients();
   }
 
@@ -34,25 +37,43 @@ class _IngredientPopupState extends State<IngredientPopup> {
   }
 
   Future<void> _loadIngredients() async {
-    setState(() => _isLoading = true);
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
 
-    _filterIngredients('');
-    setState(() => _isLoading = false);
+      // Ensure ingredients are loaded
+      if (_notifier.recipeIngredients.isEmpty) {
+        await _notifier.fetchIngredients();
+      }
+
+      _filterIngredients('');
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _filterIngredients(String query) {
-    final ingredients =
-        Provider.of<RecipeNotifier>(context, listen: false).recipeIngredients;
+    final ingredients = _notifier.recipeIngredients;
 
     setState(() {
       _filteredIngredients = ingredients.where((ingredient) {
-        final name = AppLocalizations.of(context)!
-            .ingredientTextList
-            .split(',')[ingredient.id_ingredient - 1]
-            .toLowerCase();
-        return name.contains(query.toLowerCase());
+        final name = _getIngredientName(ingredient.id_ingredient);
+        return name.toLowerCase().contains(query.toLowerCase());
       }).toList();
     });
+  }
+
+  String _getIngredientName(int id) {
+    try {
+      final names = AppLocalizations.of(context)!.ingredientTextList.split(',');
+      return names[id % names.length - 1]; // Safe fallback
+    } catch (e) {
+      return 'Ingredient $id';
+    }
   }
 
   Future<void> _showQuantityDialog(RecipeIngredient ingredient) async {
@@ -63,13 +84,9 @@ class _IngredientPopupState extends State<IngredientPopup> {
         content: TextField(
           controller: _quantityController,
           autofocus: true,
-          keyboardType: TextInputType.text,
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context)!.ingredientQuantity,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            filled: true,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
@@ -91,8 +108,71 @@ class _IngredientPopupState extends State<IngredientPopup> {
 
     if (quantity != null && quantity.isNotEmpty) {
       widget.onIngredientSelected(ingredient.id_ingredient, quantity);
-      _quantityController.clear();
+      if (mounted) Navigator.pop(context);
     }
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.notFoundError,
+            style: const TextStyle(color: Colors.red),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _loadIngredients,
+            child: Text(AppLocalizations.of(context)!.notFoundError),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Text(
+        AppLocalizations.of(context)!.notFoundError,
+      ),
+    );
+  }
+
+  Widget _buildIngredientList() {
+    return ListView.builder(
+      itemCount: _filteredIngredients.length,
+      itemBuilder: (context, index) {
+        final ingredient = _filteredIngredients[index];
+        final name = _getIngredientName(ingredient.id_ingredient);
+
+        return ListTile(
+          leading: SvgPicture.string(
+            ingredient.ingredient_icon,
+            width: 28,
+            height: 28,
+            placeholderBuilder: (context) => const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                // color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          title: Text(name),
+          // subtitle: Textrr(ingredient.),
+          trailing: const Icon(Icons.add),
+          onTap: () => _showQuantityDialog(ingredient),
+        );
+      },
+    );
   }
 
   @override
@@ -101,12 +181,12 @@ class _IngredientPopupState extends State<IngredientPopup> {
     final theme = Theme.of(context);
 
     return Dialog(
+      insetPadding: const EdgeInsets.all(16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.9,
           maxHeight: MediaQuery.of(context).size.height * 0.8,
         ),
         child: Padding(
@@ -117,64 +197,27 @@ class _IngredientPopupState extends State<IngredientPopup> {
             children: [
               Text(
                 loc.ingredientSelect,
-                style: theme.textTheme.headlineSmall,
+                style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _searchController,
-                onChanged: _filterIngredients,
                 decoration: InputDecoration(
-                  hintText: loc.ingredientSearch,
+                  hintText: loc.searchTxt,
                   prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
+                  border: const OutlineInputBorder(),
                 ),
+                onChanged: _filterIngredients,
               ),
               const SizedBox(height: 16),
               Expanded(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _filteredIngredients.isEmpty
-                        ? Center(
-                            child: Text(
-                              loc.notFoundError,
-                              style: theme.textTheme.bodyLarge,
-                            ),
-                          )
-                        : ListView.separated(
-                            itemCount: _filteredIngredients.length,
-                            separatorBuilder: (_, __) =>
-                                const Divider(height: 1),
-                            itemBuilder: (context, index) {
-                              final ingredient = _filteredIngredients[index];
-                              final name = loc.ingredientTextList
-                                  .split(',')[ingredient.id_ingredient - 1];
-
-                              return ListTile(
-                                contentPadding: EdgeInsets.zero,
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      theme.colorScheme.primaryContainer,
-                                  child: Text(
-                                    name[0].toUpperCase(),
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
-                                      color:
-                                          theme.colorScheme.onPrimaryContainer,
-                                    ),
-                                  ),
-                                ),
-                                title: Text(
-                                  name,
-                                  style: theme.textTheme.titleMedium,
-                                ),
-                                trailing: const Icon(Icons.add),
-                                onTap: () => _showQuantityDialog(ingredient),
-                              );
-                            },
-                          ),
+                    ? _buildLoadingState()
+                    : _error != null
+                        ? _buildErrorState()
+                        : _filteredIngredients.isEmpty
+                            ? _buildEmptyState()
+                            : _buildIngredientList(),
               ),
               const SizedBox(height: 16),
               Row(

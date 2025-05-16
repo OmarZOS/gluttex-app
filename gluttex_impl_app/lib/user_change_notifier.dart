@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_core/app/AuthService.dart';
-import 'package:gluttex_core/app/UserService.dart';
+import 'package:gluttex_core/app/Services/AuthService.dart';
+import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:locator/locator.dart';
 
 class AppUserNotifier extends ChangeNotifier {
@@ -18,6 +18,15 @@ class AppUserNotifier extends ChangeNotifier {
     var appUser = await _appUserService.getAppUser(userId);
     _appUser = appUser;
     notifyListeners();
+  }
+
+  void logout() {
+    _appUser = null;
+    notifyListeners();
+  }
+
+  Future<void> signInAsGuest() async {
+    _appUser = AppUser.empty();
   }
 
   Future<int?> addAppUser(AppUser appUser) async {
@@ -50,16 +59,15 @@ class AppUserNotifier extends ChangeNotifier {
   }
 
   // Sign in with email and password
-  Future<dynamic> signInWithUsernameAndPassword(
+  Future<void> signInWithUsernameAndPassword(
       String username, String password) async {
     dynamic appUserData =
         await _authService.signInWithUsernameAndPassword(username, password);
 
     if (appUserData['app_user_id'] != null) {
       token = appUserData['access_token'];
-      log("Fetching : " + appUserData['app_user_id'].toString());
+      // log("Fetching : " + appUserData['app_user_id'].toString());
       await fetchAppUser(appUserData['app_user_id'].toString());
-      // log(data.toString());
       return;
     }
     return appUserData;

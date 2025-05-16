@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_core/app/Services/SnackbarService.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_localiser/screens/business_form_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -334,12 +335,9 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
             onLongPress: () {
               Clipboard.setData(
                   ClipboardData(text: supplier.providerContactInfo));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(loc.copiedToClipboardText),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+
+              SnackbarService.showSnackbar(
+                  context: context, message: loc.copiedToClipboardText);
             },
           ),
           const SizedBox(height: 24),

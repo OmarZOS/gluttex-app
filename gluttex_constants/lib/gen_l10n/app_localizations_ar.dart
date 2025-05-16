@@ -1260,4 +1260,157 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get treatmentTitle => 'العلاج والإدارة';
+
+  @override
+  String get internal_server_error => 'خطأ داخلي في الخادم. يرجى المحاولة مرة أخرى لاحقًا.';
+
+  @override
+  String get http_exception => 'فشل طلب HTTP. تحقق من اتصالك بالإنترنت.';
+
+  @override
+  String get integrity_error => 'انتهاك تكامل البيانات. لا يمكن إتمام العملية.';
+
+  @override
+  String get data_error => 'تنسيق بيانات غير صالح. يرجى التحقق من المدخلات.';
+
+  @override
+  String get operational_error => 'حدث خطأ تشغيلي. تواصل مع الدعم إذا استمرت المشكلة.';
+
+  @override
+  String get programming_error => 'حدث خطأ برمجي. تم إخطار المطورين.';
+
+  @override
+  String get database_error => 'فشلت عملية قاعدة البيانات. حاول مرة أخرى أو تواصل مع الدعم.';
+
+  @override
+  String get internal_error => 'حدث خطأ داخلي في النظام.';
+
+  @override
+  String get interface_error => 'فشل اتصال الواجهة. تحقق من الإعدادات.';
+
+  @override
+  String get statement_error => 'بيان SQL غير صالح. اكتشاف خطأ في الصيغة أو المنطق.';
+
+  @override
+  String get incorrect_credentials => 'اسم المستخدم أو كلمة المرور غير صحيحة';
+
+  @override
+  String get sqlalchemy_error => 'خطأ في قاعدة بيانات SQLAlchemy. تحقق من الاستعلام أو الاتصال.';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get passwordChangeTitle => 'إنشاء كلمة مرور جديدة';
+
+  @override
+  String get passwordChangeSubtitle => 'يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمات المرور السابقة';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get currentPasswordHint => 'أدخل كلمة المرور الحالية';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get newPasswordHint => 'أدخل كلمة المرور الجديدة';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get confirmPasswordHint => 'أعد إدخال كلمة المرور الجديدة';
+
+  @override
+  String get changePasswordButton => 'تغيير كلمة المرور';
+
+  @override
+  String get passwordRequirements => 'يجب أن تحتوي كلمة المرور على:';
+
+  @override
+  String get passwordLengthRequirement => '8 أحرف على الأقل';
+
+  @override
+  String get passwordUppercaseRequirement => 'حرف كبير واحد على الأقل';
+
+  @override
+  String get passwordNumberRequirement => 'رقم واحد على الأقل';
+
+  @override
+  String get passwordChangeSuccess => 'تم تغيير كلمة المرور بنجاح!';
+
+  @override
+  String get weakPassword => 'كلمة مرور ضعيفة';
+
+  @override
+  String get mediumPassword => 'قوة متوسطة';
+
+  @override
+  String get strongPassword => 'كلمة مرور قوية';
+
+  @override
+  String get categoryText => 'الفئة';
+
+  @override
+  String get currentPasswordRequired => 'كلمة المرور الحالية مطلوبة';
+
+  @override
+  String get passwordTooShort => 'كلمة المرور قصيرة جداً (8 أحرف على الأقل)';
+
+  @override
+  String get newPasswordRequired => 'كلمة المرور الجديدة مطلوبة';
+
+  @override
+  String get passwordUppercaseError => 'يجب أن تحتوي على حرف كبير واحد على الأقل';
+
+  @override
+  String get passwordNumberError => 'يجب أن تحتوي على رقم واحد على الأقل';
+
+  @override
+  String get passwordSameAsCurrent => 'يجب أن تكون مختلفة عن كلمة المرور الحالية';
+
+  @override
+  String get confirmPasswordRequired => 'تأكيد كلمة المرور مطلوب';
+
+  @override
+  String get passwordsDontMatch => 'كلمات المرور غير متطابقة';
+
+  @override
+  String get changePhotoText => 'تغيير الصورة';
+
+  @override
+  String get fieldRequired => 'هذا الحقل مطلوب';
+
+  @override
+  String get profileUpdateSuccess => 'تم تحديث الملف الشخصي بنجاح';
+
+  @override
+  String get editProfile => 'تعديل الملف الشخصي';
+
+  @override
+  String get personalInformation => 'المعلومات الشخصية';
+
+  @override
+  String get firstName => 'الاسم الأول';
+
+  @override
+  String get lastName => 'اسم العائلة';
+
+  @override
+  String get accountInformation => 'معلومات الحساب';
+
+  @override
+  String get username => 'اسم المستخدم';
+
+  @override
+  String get saveChanges => 'حفظ التغييرات';
+
+  @override
+  String get logoutText => 'تسجيل الخروج';
+
+  @override
+  String get continueAsGuestText => 'المتابعة كضيف';
 }

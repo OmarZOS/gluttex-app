@@ -6,7 +6,9 @@ import 'package:gluttex_chef/screens/recipe_update_form_screen.dart';
 import 'package:gluttex_chef/tools/confirmation_dialogue.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/Response.dart';
+import 'package:gluttex_core/app/ResponseHandler.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:provider/provider.dart';
@@ -24,10 +26,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
   late Recipe _recipe;
   final double _imageHeightRatio = 0.35;
 
+  late RecipeNotifier notifier;
+
   @override
   void initState() {
     super.initState();
     _recipe = widget.recipe;
+    notifier = Provider.of<RecipeNotifier>(context, listen: false);
   }
 
   @override
@@ -145,8 +150,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          Provider.of<RecipeNotifier>(context, listen: false)
-              .categories[_recipe.recipe_category_id! - 1],
+          notifier.categories[_recipe.recipe_category_id! - 1],
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withOpacity(0.7),
           ),
@@ -205,9 +209,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             itemBuilder: (context, index) {
               final key = _recipe.recipe_ingredients!.keys.elementAt(index);
               final quantity = _recipe.recipe_ingredients![key]!;
-              final currentIngredient =
-                  Provider.of<RecipeNotifier>(context, listen: false)
-                      .recipeIngredients[key];
+              final currentIngredient = notifier.recipeIngredients[key];
 
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
@@ -276,31 +278,22 @@ class _DetailsScreenState extends State<DetailsScreen> {
       context,
       AppLocalizations.of(context)!.recipedeletionConfirmationMessage,
       () async {
-        final statusCode =
-            await Provider.of<RecipeNotifier>(context, listen: false)
-                .deleteRecipe(_recipe.id_recipe!);
-
-        final response = Response();
-
-        if (statusCode == 200) {
-          response.color = Colors.green;
-          response.text = AppLocalizations.of(context)!.deleteSuccess;
-          Navigator.pop(context);
-        } else if (statusCode == 406 || statusCode == 422) {
-          response.color = Colors.amber;
-          response.text = AppLocalizations.of(context)!.deleteFailure;
-        } else {
-          response.color = Colors.red;
-          response.text = AppLocalizations.of(context)!.serverError;
+        try {
+          await notifier.deleteRecipe(_recipe.id_recipe!);
+          ResponseHandler.handleResponse(
+            context: context,
+            statusCode: 200,
+            responseCode: "SUCCESS",
+            finalMessage: AppLocalizations.of(context)!.deleteSuccess,
+          );
+        } on GluttexException catch (e) {
+          ResponseHandler.handleResponse(
+            context: context,
+            statusCode: e.statusCode ?? 300,
+            responseCode: e.message,
+            finalMessage: AppLocalizations.of(context)!.deleteFailure,
+          );
         }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response.text),
-            backgroundColor: response.color,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
       },
     );
   }

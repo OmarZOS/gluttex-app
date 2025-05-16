@@ -8,6 +8,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
 
 class StorageServiceImpl implements StorageService {
   final Dio _dio;
@@ -21,8 +22,8 @@ class StorageServiceImpl implements StorageService {
       final response = await _dio.delete("$destination/$id");
       return response.statusCode;
     } on DioException catch (e, stacktrace) {
-      developer.log('$stacktrace');
-      return 505;
+      throw GluttexException(e.response?.data["error_code"],
+          statusCode: e.response?.statusCode, error: e);
     }
   }
 
@@ -41,7 +42,8 @@ class StorageServiceImpl implements StorageService {
       log('$e');
       log('$stacktrace');
       log('$destination/$id');
-      throw Exception(GluttexConstants.serverError);
+      throw GluttexException(e.response?.data["error_code"],
+          statusCode: e.response?.statusCode, error: e);
     }
   }
 
@@ -61,7 +63,8 @@ class StorageServiceImpl implements StorageService {
       // log("${destination}");
       developer.log('$e');
       developer.log('$stacktrace');
-      throw Exception(GluttexConstants.serverError);
+      throw GluttexException(e.response?.data["error_code"],
+          statusCode: e.response?.statusCode, error: e);
     }
   }
 
@@ -69,7 +72,7 @@ class StorageServiceImpl implements StorageService {
   Future<int?> insert(String destination, Map<String, dynamic> data) async {
     try {
       // Log the request data
-      log('Request data: ${json.encode(data)}');
+      // log('Request data: ${json.encode(data)}');
 
       // Make the PUT request
       final response = await _dio.put(
@@ -91,8 +94,8 @@ class StorageServiceImpl implements StorageService {
       log('Error: $e');
       log('Stack trace: $stacktrace');
 
-      // Return server error message
-      return e.response?.statusCode;
+      throw GluttexException(e.response?.data["error_code"],
+          statusCode: e.response?.statusCode, error: e);
     } catch (e) {
       return 500;
     }
@@ -114,8 +117,8 @@ class StorageServiceImpl implements StorageService {
       log('Error: $e');
       log('Stack trace: $stacktrace');
 
-      // Return server error message
-      return e.response?.statusCode;
+      throw GluttexException(e.response?.data["error_code"],
+          statusCode: e.response?.statusCode, error: e);
     }
   }
 
@@ -146,7 +149,8 @@ class StorageServiceImpl implements StorageService {
       return response.data;
     } on DioException catch (e) {
       log('Dio Error: ${e.response?.data ?? e.message}'); // ✅ Better error logging
-      throw Exception(e.response?.data ?? e.message);
+      throw GluttexException(e.response?.data["error_code"],
+          statusCode: e.response?.statusCode, error: e);
     } catch (e) {
       log('Unexpected Error: $e'); // ✅ Catch other errors
       throw Exception('Unexpected error occurred.');
@@ -168,14 +172,18 @@ class StorageServiceImpl implements StorageService {
               }));
       if (response.statusCode == 406) {
         log(response.data.toString());
-        throw Exception(response.data["detail"]);
+        GluttexException("INCORRECT_CREDENTIALS",
+            statusCode: 406, error: response.data.toString());
       }
       log(response.data.toString());
       return response.data;
     } on DioException catch (e) {
       // Return server error message
-      log(e.message.toString());
-      throw Exception(e.message);
+      log('${e.response}');
+      String error_code = getErrorCode(e);
+
+      throw GluttexException(error_code,
+          statusCode: e.response?.statusCode ?? 501, error: "");
     }
   }
 
@@ -195,8 +203,36 @@ class StorageServiceImpl implements StorageService {
       log('Error: $e');
       log('Stack trace: $stacktrace');
 
-      // Return server error message
-      return 'Stack trace: $stacktrace';
+      throw GluttexException(e.response?.data["error_code"],
+          statusCode: e.response?.statusCode, error: e);
     }
+  }
+
+  String getErrorCode(DioException e) {
+    try {
+      // Check if response exists and has data
+      if (e.response?.data != null) {
+        final responseData = e.response!.data;
+
+        // Handle case where data is a Map
+        if (responseData is Map<String, dynamic>) {
+          return responseData['error_code']?.toString() ??
+              'INCORRECT_CREDENTIALS';
+        }
+        // Handle case where data is a String (might be JSON encoded)
+        else if (responseData is String) {
+          try {
+            final decoded = jsonDecode(responseData) as Map<String, dynamic>;
+            return decoded['error_code']?.toString() ?? 'UNKNOWN_ERROR';
+          } catch (_) {
+            return 'HTTP_EXCEPTION';
+          }
+        }
+      }
+    } catch (e) {
+      developer.log('Error extracting error_code', error: e);
+    }
+
+    return 'HTTP_EXCEPTION';
   }
 }

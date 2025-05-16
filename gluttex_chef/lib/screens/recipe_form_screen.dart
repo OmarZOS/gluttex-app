@@ -5,6 +5,9 @@ import 'package:gluttex_chef/components/category_picker.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/components/ingredient_popup.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
+import 'package:gluttex_core/app/ResponseHandler.dart';
+import 'package:gluttex_core/app/Services/SnackbarService.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
@@ -24,6 +27,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   final _descriptionController = TextEditingController();
   final _instructionsController = TextEditingController();
 
+  late RecipeNotifier _recipeNotifier;
   Uint8List? _recipeImage;
   int? _recipeCategoryId;
   Duration _preparationTime = Duration.zero;
@@ -33,10 +37,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   @override
   void initState() {
     super.initState();
-    if (Provider.of<RecipeNotifier>(context, listen: false)
-        .recipeIngredients
-        .isEmpty)
-      Provider.of<RecipeNotifier>(context, listen: false).fetchIngredients();
+    _recipeNotifier = Provider.of<RecipeNotifier>(context, listen: false);
   }
 
   @override
@@ -62,8 +63,10 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
         setState(() => _recipeImage = imageData);
       }
     } catch (e) {
-      _showSnackBar(
-          AppLocalizations.of(context)!.noImageSelectedTxt, Colors.red);
+      SnackbarService.showSnackbar(
+          context: context,
+          message: AppLocalizations.of(context)!.noImageSelectedTxt,
+          backgroundColor: Colors.red);
     }
   }
 
@@ -127,53 +130,26 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
         recipe_ingredients: _selectedIngredients,
       );
 
-      final statusCode =
-          await Provider.of<RecipeNotifier>(context, listen: false)
-              .addRecipe(recipe);
+      await _recipeNotifier.addRecipe(recipe);
 
-      _handleResponse(statusCode, recipe);
-    } catch (e) {
-      _showSnackBar(
-          '${AppLocalizations.of(context)!.serverError}: $e', Colors.red);
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 200,
+        responseCode: "PUT_SUCCESS",
+        finalMessage: AppLocalizations.of(context)!.putSuccess,
+      );
+
+      // _handleResponse(statusCode, recipe);
+    } on GluttexException catch (e) {
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: e.statusCode ?? 300,
+        responseCode: e.message,
+        finalMessage: e.message,
+      );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
-  }
-
-  void _handleResponse(int? statusCode, Recipe recipe) {
-    final loc = AppLocalizations.of(context)!;
-    String message;
-    Color color;
-
-    switch (statusCode) {
-      case 200:
-        message = loc.putSuccess;
-        color = Colors.green;
-        Provider.of<RecipeNotifier>(context, listen: false).fetchRecipes(0);
-        Navigator.pop(context, recipe);
-        break;
-      case 406:
-      case 422:
-        message = '${loc.putFailure} (Error $statusCode)';
-        color = Colors.amber;
-        break;
-      default:
-        message = '${loc.serverError} (Error $statusCode)';
-        color = Colors.red;
-    }
-
-    _showSnackBar(message, color);
-  }
-
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
   }
 
   @override
@@ -225,7 +201,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               const SizedBox(height: 16),
               CategoryPicker(
                 category_id: 0,
-                categories: Provider.of<RecipeNotifier>(context).categories,
+                categories: _recipeNotifier.categories,
                 onCategoryChanged: (id) => _recipeCategoryId = id,
               ),
               const SizedBox(height: 16),
@@ -354,9 +330,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               itemBuilder: (context, index) {
                 final key = _selectedIngredients.keys.elementAt(index);
                 final quantity = _selectedIngredients[key]!;
-                final ingredient =
-                    Provider.of<RecipeNotifier>(context, listen: false)
-                        .recipeIngredients[key - 1];
+                final ingredient = _recipeNotifier.recipeIngredients[key - 1];
 
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),

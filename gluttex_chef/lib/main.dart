@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
-import 'package:gluttex_core/app/UserService.dart';
+import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';

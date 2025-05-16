@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/app/AuthService.dart';
-import 'package:gluttex_core/app/UserService.dart';
+import 'package:gluttex_core/app/Services/AuthService.dart';
+import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/business/services/OrderService.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_home/gluttex_router.dart';
-import 'package:gluttex_home/screens/home_screen.dart';
 import 'package:gluttex_impl_app/gluttex_impl_app.dart';
 import 'package:gluttex_impl_app/gluttex_impl_auth.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';

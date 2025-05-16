@@ -49,16 +49,11 @@ class IngredientCard extends StatelessWidget {
                   icon,
                   width: 28,
                   height: 28,
-                  colorFilter: ColorFilter.mode(
-                    theme.colorScheme.primary,
-                    BlendMode.srcIn,
-                  ),
-                  placeholderBuilder: (context) => SizedBox(
+                  placeholderBuilder: (context) => const SizedBox(
                     width: 28,
                     height: 28,
-                    child: CircularProgressIndicator(
+                    child: const CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
