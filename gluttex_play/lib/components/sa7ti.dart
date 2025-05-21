@@ -75,7 +75,7 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
             },
             child: Text(
               AppLocalizations.of(context)!.playAgain,
-              style: TextStyle(color: Colors.blue),
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
             ),
           ),
         ],
@@ -91,7 +91,7 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
           AppLocalizations.of(context)!.glutenQuizTitle,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         elevation: 0,
       ),
       body: Container(
@@ -99,7 +99,10 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.blueAccent, Colors.lightBlueAccent],
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary
+            ],
           ),
         ),
         child: Padding(
@@ -126,20 +129,24 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
               ),
               SizedBox(height: 10),
               // 问题文本
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.getLocalizedQuestion(
-                        _selectedQuestions[_currentQuestionIndex]),
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
+              // Card(
+              //   elevation: 5,
+              //   shape: RoundedRectangleBorder(
+              //     borderRadius: BorderRadius.circular(10),
+              //   ),
+              //   child:
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  AppLocalizations.of(context)!.getLocalizedQuestion(
+                      _selectedQuestions[_currentQuestionIndex]),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white),
                 ),
               ),
+              // ),
               SizedBox(height: 20),
               // 选项按钮
               ...AppLocalizations.of(context)!
@@ -181,7 +188,9 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
                       option,
                       style: TextStyle(
                         fontSize: 16,
-                        color: _isAnswerSelected ? Colors.white : Colors.blue,
+                        color: _isAnswerSelected
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.secondary,
                       ),
                     ),
                   ),

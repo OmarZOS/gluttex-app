@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Cart.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
@@ -35,12 +36,14 @@ class CartScreen extends StatelessWidget {
           : () => _processOrder(context, cartNotifier, userNotifier),
       backgroundColor: cartNotifier.cart.items.isEmpty
           ? Colors.grey
-          : Theme.of(context).primaryColor,
+          : Theme.of(context).colorScheme.primary,
       child: Icon(
-        Icons.done_outline_rounded,
-        color:
-            cartNotifier.cart.items.isEmpty ? Colors.grey[400] : Colors.white,
+        Icons.done,
+        color: cartNotifier.cart.items.isEmpty
+            ? Colors.grey[400]
+            : Theme.of(context).colorScheme.onPrimary,
       ),
+      elevation: 4,
     );
   }
 
@@ -110,25 +113,64 @@ class CartScreen extends StatelessWidget {
   ) {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: ListTile(
-        leading: const Icon(Icons.food_bank, size: 36),
-        title: Text(
-          item.product.product_name ?? localizations.missingText,
-          style: theme.textTheme.bodyLarge,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: ListTile(
+          leading: SvgPicture.asset(
+            'assets/icons/${item.product.product_category_id}.svg',
+            package: "medicom_catalog",
+            color: colorScheme.primary,
+            width: 36,
+          ),
+          title: Text(
+            item.product.product_name ?? localizations.missingText,
+            style: theme.textTheme.bodyLarge,
+          ),
+          subtitle: Row(
+            children: [
+              // Decrease quantity button
+              IconButton(
+                icon: const Icon(Icons.remove, color: Colors.red, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () => cartNotifier.updateQuantity(
+                    item.product, item.quantity - 1),
+              ),
+
+              // Quantity display
+              Container(
+                width: 36,
+                alignment: Alignment.center,
+                child: Text(
+                  item.quantity.toString(),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+              // Increase quantity button
+              IconButton(
+                icon: const Icon(Icons.add, color: Colors.green, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () => cartNotifier.updateQuantity(
+                    item.product, item.quantity + 1),
+              ),
+            ],
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            onPressed: () => cartNotifier.removeItem(item.product),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          minVerticalPadding: 0,
         ),
-        subtitle: Text(
-          localizations.orderAmountText(item.quantity.toString()),
-          style: theme.textTheme.bodyMedium,
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline, color: Colors.red),
-          onPressed: () => cartNotifier.removeItem(item.product),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       ),
     );
   }

@@ -165,8 +165,8 @@ class GluttexConstants {
   ];
 
   // API endpoints
-  static const String apiBaseUrl = 'http://134.199.240.34/api';
-  static const String fsBaseUrl = 'http://134.199.240.34';
+  static const String apiBaseUrl = 'https://gluttex.com/api';
+  static const String fsBaseUrl = 'https://gluttex.com';
 
   // static const String authApiBaseUrl = 'http://localhost:9090';
   static const String addAppUserEndpoint = '/app_user';
@@ -207,6 +207,9 @@ class GluttexConstants {
   static const String productsEndpoint = '/product';
 
   static const int itemsPerPage = 6;
+
+  static const int cookingChefDBId = 3;
+  static const int supplierDBId = 4;
 
   // Texts
   static const String notFoundError = 'Object not found';

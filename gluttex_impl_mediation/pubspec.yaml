@@ -19,6 +19,7 @@ dependencies:
   sqflite: ^2.0.0+4
   path: ^1.8.0
   shared_preferences: ^2.0.0
+  flutter_pdfview: ^1.4.0+1
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +35,8 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
+  # assets:
+  #   - ./assets/docs/
   # To add assets to your package, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -23,6 +23,18 @@ class Supplier {
     required this.productProviderTypeId,
   });
 
+  factory Supplier.empty() => Supplier(
+        idProviderDetails: 0,
+        idProductProvider: 0,
+        productProviderDetailsId: 0,
+        providerName: "",
+        providerContactInfo: "",
+        locationLatitude: 0.0,
+        locationLongitude: 0.0,
+        locationName: "",
+        productProviderTypeId: 0,
+      );
+
   factory Supplier.fromJson(Map<String, dynamic> json) {
     double longitude = 0.0, latitude = 0.0;
 

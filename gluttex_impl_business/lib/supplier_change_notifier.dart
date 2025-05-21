@@ -11,16 +11,49 @@ class SupplierChangeNotifier extends ChangeNotifier {
   final List<Supplier> _suppliers = [];
   List<Supplier> _filteredSuppliers = [];
   bool _isLoading = false;
+  bool get isLoading => _isLoading;
   int _currentPage = 0;
   static const int _itemsPerPage = 50;
   Position? _currentLocation;
 
   List<Supplier> get suppliers => _filteredSuppliers;
-  bool get isLoading => _isLoading;
   Position? get currentLocation => _currentLocation;
 
   SupplierChangeNotifier() {
     fetchSuppliers();
+  }
+
+  Future<Supplier?> getSupplierById(int id) async {
+    // First check if supplier exists in local list
+    final existingSupplier = _suppliers.firstWhere(
+      (supplier) => supplier.idProductProvider == id,
+      orElse: () => Supplier.empty(), // Returns empty supplier if not found
+    );
+
+    // Return if found (and not empty)
+    if (existingSupplier.idProductProvider != null) {
+      return existingSupplier;
+    }
+
+    // If not found locally, fetch from API
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final supplier = await _supplierService.getSupplier(id.toString());
+      if (supplier != null) {
+        // Add to local cache
+        _suppliers.add(supplier);
+        _filteredSuppliers = List.from(_suppliers);
+      }
+      return supplier;
+    } catch (e) {
+      debugPrint("Error fetching supplier by ID: $e");
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> fetchSuppliers({bool reset = false}) async {

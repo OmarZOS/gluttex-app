@@ -4,19 +4,21 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_core/business/Supplier.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:gluttex_impl_business/cart_change_notifier.dart';
+import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
 import 'package:medicom_catalog/screens/components/ProductOwner.dart';
 import 'package:medicom_catalog/screens/components/add_to_cart.dart';
 import 'package:medicom_catalog/screens/components/quantity_and_ref.dart';
-import 'package:medicom_catalog/screens/components/counter_with_fav_btn.dart';
 import 'package:medicom_catalog/screens/components/description.dart';
 import 'package:medicom_catalog/screens/components/dialogue/confirmation_dialogue.dart';
-import 'package:medicom_catalog/screens/components/product_title_with_image.dart';
 import 'package:medicom_catalog/screens/product_update_form_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:gluttex_impl_business/supplier_change_notifier.dart';
 
 class DetailsScreen extends StatefulWidget {
   final Product product;
@@ -57,73 +59,210 @@ class _DetailsScreenState extends State<DetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-
+    final bool isRTL = Provider.of<LocaleProvider>(context, listen: false)
+            .locale!
+            .languageCode ==
+        "ar";
     return Scaffold(
-      floatingActionButton: _buildFloatingCartButton(context),
+      floatingActionButton:
+          ((Provider.of<AppUserNotifier>(context, listen: false).isLoggedIn))
+              ? _buildFloatingCartButton(context)
+              : null,
       appBar: _buildAppBar(context),
       body: SlidingUpPanel(
         controller: _panelController,
-        minHeight: _panelMinHeight,
-        maxHeight: _panelMaxHeight,
+        minHeight:
+            (Provider.of<AppUserNotifier>(context, listen: false).isLoggedIn)
+                ? _panelMinHeight
+                : 0,
+        maxHeight:
+            (Provider.of<AppUserNotifier>(context, listen: false).isLoggedIn)
+                ? _panelMaxHeight
+                : 0,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         color: theme.colorScheme.surface,
         backdropEnabled: true,
         backdropOpacity: 0.5,
         backdropColor: Colors.black,
         panel: _buildSlidingPanel(context),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                height: size.height,
-                child: Stack(
-                  children: [
-                    // Background content
-                    Container(
-                      margin: EdgeInsets.only(top: size.height * 0.3),
-                      padding: EdgeInsets.only(
-                        top: size.height * 0.12,
-                        left: GluttexConstants.kDefaultPaddin,
-                        right: GluttexConstants.kDefaultPaddin,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.background,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(24),
-                        ),
-                      ),
-                      child: Column(
+        body: Column(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.only(
+                  top: GluttexConstants.kDefaultPaddin,
+                  left: GluttexConstants.kDefaultPaddin,
+                  right: GluttexConstants.kDefaultPaddin,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.background,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Stack(
                         children: [
-                          Consumer<ProductNotifier>(
-                            builder: (context, productNotifier, child) {
-                              return QuantityAndRef(
-                                product: productNotifier.products.firstWhere(
-                                  (element) =>
-                                      element.id_product == _product.id_product,
-                                  orElse: () => _product,
+                          // Background Image
+                          if (_product.product_image_url != null &&
+                              _product.product_image_url!.isNotEmpty)
+                            Align(
+                              alignment: isRTL
+                                  ? Alignment.topLeft
+                                  : Alignment.topRight,
+                              child: FractionallySizedBox(
+                                widthFactor: 0.65,
+                                child: Opacity(
+                                  opacity: 1,
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topRight: isRTL
+                                            ? const Radius.circular(40)
+                                            : Radius.zero,
+                                        bottomRight: isRTL
+                                            ? const Radius.circular(40)
+                                            : Radius.zero,
+                                        topLeft: isRTL
+                                            ? Radius.zero
+                                            : const Radius.circular(40),
+                                        bottomLeft: isRTL
+                                            ? Radius.zero
+                                            : const Radius.circular(40),
+                                      ),
+                                      child: Hero(
+                                        tag:
+                                            "product-image-${_product.id_product}",
+                                        child: Image.network(
+                                          GluttexConstants.fsBaseUrl +
+                                              _product.product_image_url!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Icon(Icons.broken_image,
+                                                      size: 64),
+                                          loadingBuilder: (context, child,
+                                              loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          },
+                                        ),
+                                      )),
                                 ),
-                              );
-                            },
-                          ),
-                          const SizedBox(
-                              height: GluttexConstants.kDefaultPaddin / 2),
-                          Description(product: _product),
-                          const SizedBox(
-                              height: GluttexConstants.kDefaultPaddin / 2),
-                          AddToCart(
-                            product: widget.product,
-                            onAddToCartPressed: _panelController.open,
+                              ),
+                            ),
+
+                          // Foreground Content
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: GluttexConstants.kDefaultPaddin,
+                              vertical: GluttexConstants.kDefaultPaddin,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                // const SizedBox(
+                                //     height:
+                                //         GluttexConstants.kDefaultPaddin * 1.2),
+                                Text(_product.product_brand ?? ""),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _product.product_name ?? "",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                const SizedBox(
+                                    height: GluttexConstants.kDefaultPaddin),
+                                RichText(
+                                  text: TextSpan(
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                    children: [
+                                      TextSpan(
+                                        text:
+                                            "${AppLocalizations.of(context)!.priceText}\n",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge!
+                                            .copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface),
+                                      ),
+                                      TextSpan(
+                                        text: AppLocalizations.of(context)!
+                                            .price(_product.product_price
+                                                .toString()),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall!
+                                            .copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    // Product title and image
-                    ProductTitleWithImage(product: _product),
-                  ],
+                      Consumer<ProductNotifier>(
+                        builder: (context, productNotifier, child) {
+                          return QuantityAndRef(
+                            product: productNotifier.products.firstWhere(
+                              (element) =>
+                                  element.id_product == _product.id_product,
+                              orElse: () => _product,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(
+                          height: GluttexConstants.kDefaultPaddin / 2),
+                      Description(product: _product),
+                      const SizedBox(
+                          height: GluttexConstants.kDefaultPaddin / 2),
+                      if ((Provider.of<AppUserNotifier>(context, listen: false)
+                          .isLoggedIn))
+                        AddToCart(
+                          product: _product,
+                          onAddToCartPressed: _panelController.open,
+                        ),
+                      const SizedBox(
+                          height: GluttexConstants.kDefaultPaddin / 2),
+                      FutureBuilder<Widget>(
+                        future: _buildProviderTile(context),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return const Text('Error loading provider tile');
+                          } else {
+                            return snapshot.data!;
+                          }
+                        },
+                      ),
+                      const SizedBox(
+                          height: GluttexConstants.kDefaultPaddin * 8),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -390,6 +529,164 @@ class _DetailsScreenState extends State<DetailsScreen> {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
+    );
+  }
+
+  Future<Widget> _buildProviderTile(BuildContext context) async {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final Supplier? provider =
+        await Provider.of<SupplierChangeNotifier>(context, listen: false)
+            .getSupplierById(_product.product_provider_id ?? 0);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(
+        horizontal: GluttexConstants.kDefaultPaddin / 8,
+        vertical: 8,
+      ),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.providedBy,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                // Provider Avatar/Logo
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: provider != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: SvgPicture.asset(
+                            'assets/icons/${provider.productProviderTypeId}.svg',
+                            package: "gluttex_localiser",
+                            color: Theme.of(context).colorScheme.primary,
+                            fit: BoxFit.cover,
+                          ))
+                      : _buildDefaultProviderIcon(),
+                ),
+                const SizedBox(width: 12),
+
+                // Provider Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        provider?.providerName ??
+                            AppLocalizations.of(context)!.unknownProvider,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (provider?.locationName != null) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 16,
+                              color: colorScheme.onSurface.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              provider!.locationName!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Contact Button
+                // IconButton(
+                //   icon: Icon(
+                //     Icons.contact_support_outlined,
+                //     color: colorScheme.primary,
+                //   ),
+                //   onPressed: () => _showContactOptions(context, provider),
+                // ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultProviderIcon() {
+    return Center(
+      child: Icon(
+        Icons.store_outlined,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+
+  void _showContactOptions(BuildContext context, Supplier? provider) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ListTile(
+              //   leading: const Icon(Icons.phone),
+              //   title: Text(AppLocalizations.of(context)!.callProvider),
+              //   onTap: () {
+              //     Navigator.pop(context);
+              //     // if (provider?.phone != null) {
+              //     //   // Implement phone call functionality
+              //     // }
+              //   },
+              // ),
+              // ListTile(
+              //   leading: const Icon(Icons.email),
+              //   // title: Text("AppLocalizations.of(context)!.emailProvider"),
+              //   onTap: () {
+              //     Navigator.pop(context);
+              //     // if (provider?.email != null) {
+              //     //   // Implement email functionality
+              //     // }
+              //   },
+              // ),
+              ListTile(
+                leading: const Icon(Icons.map_outlined),
+                title: Text(AppLocalizations.of(context)!.viewOnMap),
+                onTap: () {
+                  Navigator.pop(context);
+                  // if (provider?.location != null) {
+                  //   // Implement map view functionality
+                  // }
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

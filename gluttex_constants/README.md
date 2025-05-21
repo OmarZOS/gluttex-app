@@ -80,6 +80,7 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
+
 ```
 
 ### Environment Configuration
@@ -90,7 +91,6 @@ Generate localisation files:
   > flutter gen-l10n --untranslated-messages-file=missing.txt
   >
 
-Add these as methods:
 
 
 ## Benefits

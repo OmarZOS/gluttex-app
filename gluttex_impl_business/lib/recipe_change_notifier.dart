@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
 import 'package:locator/locator.dart';
@@ -18,6 +20,10 @@ class RecipeNotifier extends ChangeNotifier {
   final int itemsPerPage = GluttexConstants.itemsPerPage;
   List<String> get categories => _recipeCategories;
   List<String> _recipeCategories = [];
+  final List<AppUser> _users = [];
+  List<AppUser> get users => _users;
+  bool _isLoading = false;
+  bool get userIsLoading => _isLoading;
   set recipeCategories(List<String> value) {
     _recipeCategories = value;
   }
@@ -88,6 +94,39 @@ class RecipeNotifier extends ChangeNotifier {
       log("Failed to fetch recipes: $e");
     } finally {
       isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<AppUser?> getUserById(int id) async {
+    // First check if supplier exists in local list
+    final existingUser = _users.firstWhere(
+      (user) => user.id_app_user == id,
+      orElse: () => AppUser.empty(), // Returns empty user if not found
+    );
+
+    // Return if found (and not empty)
+    if (existingUser.id_app_user != 0) {
+      return existingUser;
+    }
+
+    // If not found locally, fetch from API
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final result_user =
+          await GluttexLocator.get<AppUserService>().getAppUser(id.toString());
+      if (result_user != null) {
+        // Add to local cache
+        _users.add(result_user);
+      }
+      return result_user;
+    } catch (e) {
+      debugPrint("Error fetching user by ID: $e");
+      return null;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

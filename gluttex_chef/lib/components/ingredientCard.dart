@@ -74,22 +74,24 @@ class IngredientCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    quantity,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                  ),
+                  quantity != ""
+                      ? Text(
+                          quantity,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                        )
+                      : Container(),
                 ],
               ),
 
               // Spacer and close icon
               const SizedBox(width: 8),
-              Icon(
-                Icons.close,
-                size: 20,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
+              // Icon(
+              //   Icons.close,
+              //   size: 20,
+              //   color: theme.colorScheme.onSurface.withOpacity(0.6),
+              // ),
             ],
           ),
         ),

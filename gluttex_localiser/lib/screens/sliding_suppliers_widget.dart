@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Services/SnackbarService.dart';
 import 'package:gluttex_core/business/Supplier.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_localiser/screens/business_form_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gluttex_impl_business/supplier_change_notifier.dart';
@@ -37,6 +39,17 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
     super.dispose();
   }
 
+// Helper method for consistent borders
+  OutlineInputBorder _buildOutlineInputBorder({Color? borderColor}) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(
+        color: borderColor ?? Theme.of(context).dividerColor,
+        width: 1.2,
+      ),
+    );
+  }
+
   Future<void> _fetchLocation() async {
     await Provider.of<SupplierChangeNotifier>(context, listen: false)
         .getCurrentLocation();
@@ -64,35 +77,111 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.add_business),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SupplierFormScreen(),
-              ),
-            );
-          },
-          tooltip: 'Add Supplier', // Optional accessibility hint
-        ),
-        title: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            hintText: loc.searchTxt,
-            border: InputBorder.none,
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.close),
+      floatingActionButton: [
+        GluttexConstants.cookingChefDBId,
+        GluttexConstants.supplierDBId
+      ].contains(// Cooking Chef and Supplier id in the database
+              Provider.of<AppUserNotifier>(context).appUser?.app_user_type_id)
+          ? FloatingActionButton(
               onPressed: () {
-                _searchController.clear();
-                _handleSearch('');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SupplierFormScreen(),
+                  ),
+                );
               },
+              child: const Icon(Icons.add_business),
+            )
+          : null,
+      appBar: AppBar(
+        // leading: ,
+        title: Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).dividerColor,
+              width: 1,
             ),
           ),
-          onSubmitted: _handleSearch,
+          child: TextField(
+            controller: _searchController,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)?.searchTxt,
+              prefixIcon: Icon(Icons.search_outlined,
+                  color: Theme.of(context).colorScheme.onSurface),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+            ),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
+
+        // TextField(
+        //   controller: _searchController,
+        //   decoration: InputDecoration(
+        //     hintText: loc.searchTxt,
+        //     hintStyle: TextStyle(
+        //       color: Theme.of(context).hintColor.withOpacity(0.6),
+        //     ),
+        //     border: _buildOutlineInputBorder(), // Custom border (see below)
+        //     enabledBorder: _buildOutlineInputBorder(),
+        //     focusedBorder: _buildOutlineInputBorder(
+        //       borderColor: Theme.of(context).primaryColor, // Green for focus
+        //     ),
+        //     filled: true,
+        //     fillColor:
+        //         Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+        //     contentPadding:
+        //         const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        //     prefixIcon: Icon(
+        //       Icons.search,
+        //       color: Theme.of(context).hintColor.withOpacity(0.7),
+        //     ),
+        //     suffixIcon: _searchController.text.isEmpty
+        //         ? null // Hide clear button when empty
+        //         : IconButton(
+        //             icon: Icon(
+        //               Icons.close,
+        //               color: Theme.of(context).hintColor.withOpacity(0.7),
+        //             ),
+        //             splashRadius: 20, // Smaller splash area
+        //             onPressed: () {
+        //               _searchController.clear();
+        //               _handleSearch('');
+        //               FocusScope.of(context)
+        //                   .unfocus(); // Optional: Close keyboard
+        //             },
+        //           ),
+        //   ),
+        //   style: TextStyle(
+        //     color: Theme.of(context).colorScheme.onSurface,
+        //   ),
+        //   cursorColor: Theme.of(context).primaryColor, // Green cursor
+        //   textInputAction:
+        //       TextInputAction.search, // Android/iOS "search" keyboard button
+        //   onSubmitted: _handleSearch,
+        //   onChanged: (value) {
+        //     setState(() {}); // Rebuild to show/hide clear button
+        //   },
+        // ),
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.add_business),
+        //     onPressed: () {
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(
+        //           builder: (context) => const SupplierFormScreen(),
+        //         ),
+        //       );
+        //     },
+        //     tooltip: 'Add Supplier', // Optional accessibility hint
+        //   )
+        // ],
       ),
       body: Consumer<SupplierChangeNotifier>(
         builder: (context, supplierNotifier, child) {
@@ -209,7 +298,11 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             loc.providersText,
-            style: theme.textTheme.titleLarge,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -253,8 +346,8 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                               child: SvgPicture.asset(
                                 'assets/icons/${supplier.productProviderTypeId}.svg',
                                 package: "gluttex_localiser",
-                                width: 40,
-                                height: 40,
+                                width: 35,
+                                height: 35,
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -348,6 +441,8 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
             ),
             child: Text(loc.cancelTxt),
           ),

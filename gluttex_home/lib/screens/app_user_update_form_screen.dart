@@ -2,9 +2,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
-import 'package:gluttex_home/screens/category_picker.dart';
+import 'package:gluttex_home/screens/components/category_picker.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
@@ -180,23 +181,28 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                       as ImageProvider,
             ),
             FloatingActionButton.small(
-              heroTag: null,
+              // heroTag: null,
               onPressed: _pickImage,
               child: const Icon(Icons.camera_alt),
             ),
           ],
         ),
         if (_imageChanged)
-          TextButton(
-            onPressed: () => setState(() {
-              _editedUser = _editedUser.copyWith(app_user_image: null);
-              _imageChanged = false;
-            }),
-            child: Text(
-              "AppLocalizations.of(context)!.removePhoto",
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
-            ),
-          ),
+          Column(
+            children: [
+              const SizedBox(height: GluttexConstants.kDefaultPaddin),
+              TextButton(
+                onPressed: () => setState(() {
+                  _editedUser = _editedUser.copyWith(app_user_image: null);
+                  _imageChanged = false;
+                }),
+                child: Text(
+                  AppLocalizations.of(context)!.removePhoto,
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
+                ),
+              ),
+            ],
+          )
       ],
     );
   }

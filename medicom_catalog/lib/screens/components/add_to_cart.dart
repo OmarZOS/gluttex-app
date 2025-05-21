@@ -86,6 +86,7 @@ class AddToCart extends StatelessWidget {
           style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
+            color: theme.colorScheme.onPrimary,
           ),
           key: ValueKey(AppLocalizations.of(context)!.orderNowTxt),
         ),

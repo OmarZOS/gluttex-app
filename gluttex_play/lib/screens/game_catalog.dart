@@ -7,84 +7,83 @@ class GameSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text(AppLocalizations.of(context)!.selectGameMessage)),
+      // appBar:
+      //     AppBar(title: Text(AppLocalizations.of(context)!.selectGameMessage)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
+        child: ListView(
           children: [
+            const SizedBox(height: 8), // Top spacing
             _buildGameCard(
               context,
               title: AppLocalizations.of(context)!.snakeTitle,
               imagePath: "assets/images/snake.jpg",
               onTap: () {
-                // Navigate to Snake game
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SnakeGame()),
                 );
               },
             ),
+            const SizedBox(height: 16), // Spacing between cards
             _buildGameCard(
               context,
               title: AppLocalizations.of(context)!.quizTitle,
               imagePath: "assets/images/quiz.jpg",
               onTap: () {
-                // Navigate to Quiz game
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => GlutenFreeQuiz()),
                 );
               },
             ),
-            _buildGameCard(
-              context,
-              title: AppLocalizations.of(context)!.comingSoon,
-              imagePath: "assets/images/coming_soon.jpeg",
-              onTap: () {
-                // Disabled
-              },
-            ),
-            // _buildDisabledCard(),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildGameCard(BuildContext context,
-      {required String title, required String imagePath, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        children: [
-          Opacity(
-            opacity: 0.5, // Set image opacity to 50%
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                image: DecorationImage(
-                  image: AssetImage(imagePath, package: "gluttex_play"),
-                  fit: BoxFit.cover,
+  Widget _buildGameCard(
+    BuildContext context, {
+    required String title,
+    required String imagePath,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch, // Stretch horizontally
+          children: [
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+              child: AspectRatio(
+                aspectRatio: 16 / 9, // Standard widescreen ratio
+                child: Image.asset(
+                  imagePath,
+                  package: "gluttex_play",
+                  fit: BoxFit.cover, // Fill space without distortion
                 ),
               ),
             ),
-          ),
-          Center(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                backgroundColor: Colors.black54, // Background for readability
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

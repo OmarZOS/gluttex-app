@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_home/screens/PasswordChangeScreen.dart';
+import 'package:gluttex_home/screens/PdfViewerScreen.dart';
 import 'package:gluttex_home/screens/app_user_update_form_screen.dart';
-import 'package:gluttex_home/screens/home_screen.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
-import 'package:gluttex_login/screens/login_screen.dart';
+import 'package:gluttex_medical/screens/informations_screen.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -41,9 +41,19 @@ class SettingsScreen extends StatelessWidget {
                 _SettingsSection(
                   title: AppLocalizations.of(context)!.accountText,
                   children: [
-                    _ProfileUpdateTile(),
+                    if ((Provider.of<AppUserNotifier>(context, listen: false)
+                        .isLoggedIn))
+                      Column(
+                        children: [
+                          _ProfileUpdateTile(),
+                          const SizedBox(height: 8),
+                          _PasswordUpdateTile(),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    _LegalDocumentsTile(),
                     const SizedBox(height: 8),
-                    _PasswordUpdateTile(),
+                    _AboutTile(),
                     const SizedBox(height: 8),
                     _LogOutTile()
                   ],
@@ -275,23 +285,143 @@ class _LogOutTile extends StatelessWidget {
           ),
           child: const Icon(Icons.logout),
         ),
-        title: Text(AppLocalizations.of(context)!.logoutText),
+        title: Text(
+            Provider.of<AppUserNotifier>(context, listen: false).isLoggedIn
+                ? AppLocalizations.of(context)!.logoutText
+                : AppLocalizations.of(context)!.loginText),
         // trailing: const Icon(Icons.chevron_right),
         onTap: () =>
             {Provider.of<AppUserNotifier>(context, listen: false).logout()});
   }
 }
 
-class ProfileUpdateScreen extends StatelessWidget {
-  const ProfileUpdateScreen({super.key});
-
+class _LegalDocumentsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.description),
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      title: Text(AppLocalizations.of(context)!.legalDocumentsTitle),
+      onTap: () => _showLegalDocumentsDialog(context),
+    );
+  }
+
+  void _showLegalDocumentsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.legalDocumentsTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDocumentOption(
+              context,
+              icon: Icons.privacy_tip,
+              title: AppLocalizations.of(context)!.privacyPolicy,
+              onTap: () => _openPdfViewer(
+                context,
+                screenTitle: AppLocalizations.of(context)!.privacyPolicy,
+                title: AppLocalizations.of(context)!.privacyPolicy,
+                docType: "policy",
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildDocumentOption(
+              context,
+              icon: Icons.assignment,
+              title: AppLocalizations.of(context)!.termsOfUse,
+              onTap: () => _openPdfViewer(context,
+                  title: AppLocalizations.of(context)!.termsOfUse,
+                  docType: 'terms',
+                  screenTitle: AppLocalizations.of(context)!.termsOfUse
+                  // assetPath: 'assets/documents/terms_of_use.pdf',
+                  ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: Text(AppLocalizations.of(context)!.close),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentOption(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+      title: Text(title),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
+    );
+  }
+
+  void _openPdfViewer(BuildContext context,
+      {required String title,
+      required String docType,
+      required String screenTitle}) {
+    final locale = Localizations.localeOf(context).languageCode; //
+
+    final pdfPath = 'assets/docs/${docType}_${locale}.pdf';
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PdfViewerScreen(
+          assetPath: pdfPath, // Must match pubspec.yaml
+          screenTitle: screenTitle,
+        ),
+      ),
+    );
+  }
+}
+
+void _showLegalDocumentsDialog(BuildContext context) {
+  _showLegalDocumentsDialog(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.profileUpdateText),
       ),
       body: Center(child: Text(AppLocalizations.of(context)!.comingSoon)),
+    );
+  }
+}
+
+class _AboutTile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.question_mark),
+      ),
+      title: Text(AppLocalizations.of(context)!.aboutProvider),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HealthInfoScreen(),
+        ),
+      ),
     );
   }
 }

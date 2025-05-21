@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
 import 'package:medicom_catalog/screens/components/ProductCard.dart';
@@ -78,64 +79,111 @@ class _CatalogScreenState extends State<CatalogScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        foregroundColor: Theme.of(context).colorScheme.onSecondary,
-        overlayOpacity: 0.5,
-        spacing: 10,
-        children: [
-          SpeedDialChild(
-            child: Icon(Icons.shopping_basket,
-                color: Theme.of(context).colorScheme.onSecondary),
-            label: AppLocalizations.of(context)?.ordersText,
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => OrdersScreen()),
-              );
-            },
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.shopping_cart,
-                color: Theme.of(context).colorScheme.onSecondary),
-            label: AppLocalizations.of(context)?.cartText,
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CartScreen()),
-              );
-            },
-          ),
-        ],
-      ),
+      floatingActionButton: (Provider.of<AppUserNotifier>(context,
+                  listen: false)
+              .isLoggedIn)
+          ? SpeedDial(
+              animatedIcon: AnimatedIcons.menu_close,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              overlayOpacity: 0.5,
+              spacing: 10,
+              children: [
+                SpeedDialChild(
+                  child: Icon(Icons.shopping_basket,
+                      color: Theme.of(context).colorScheme.onPrimary),
+                  label: AppLocalizations.of(context)?.ordersText,
+                  labelBackgroundColor: Theme.of(context).colorScheme.primary,
+                  labelStyle: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => OrdersScreen()),
+                    );
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.shopping_cart,
+                      color: Theme.of(context).colorScheme.onPrimary),
+                  label: AppLocalizations.of(context)?.cartText,
+                  labelBackgroundColor: Theme.of(context).colorScheme.primary,
+                  labelStyle: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CartScreen()),
+                    );
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.add_box_outlined,
+                      color: Theme.of(context).colorScheme.onPrimary),
+                  label: AppLocalizations.of(context)?.addProductTxt,
+                  labelBackgroundColor: Theme.of(context).colorScheme.primary,
+                  labelStyle: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ProductFormScreen()),
+                    );
+                  },
+                ),
+              ],
+            )
+          : null,
       appBar: AppBar(
         elevation: 0,
-        title: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            hintText: AppLocalizations.of(context)?.searchTxt,
-            border: InputBorder.none,
-            icon: Icon(Icons.search_outlined,
-                color: Theme.of(context).colorScheme.onSurface),
+        title: Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).dividerColor,
+              width: 1,
+            ),
+          ),
+          child: TextField(
+            controller: _searchController,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)?.searchTxt,
+              prefixIcon: Icon(Icons.search_outlined,
+                  color: Theme.of(context).colorScheme.onSurface),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+            ),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
-        actions: <Widget>[
-          IconButton(
-            icon:
-                Icon(Icons.add, color: Theme.of(context).colorScheme.onSurface),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ProductFormScreen()),
-              );
-            },
-          ),
-          const SizedBox(width: GluttexConstants.kDefaultPaddin / 2),
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: Icon(Icons.add_circle,
+        //         color: Theme.of(context).colorScheme.onSurface),
+        //     onPressed: () {
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(
+        //             builder: (context) => const ProductFormScreen()),
+        //       );
+        //     },
+        //   ),
+        //   const SizedBox(width: GluttexConstants.kDefaultPaddin / 2),
+        // ],
       ),
       body: Consumer<ProductNotifier>(
         builder: (context, productNotifier, child) {
@@ -154,7 +202,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: GluttexConstants.kDefaultPaddin),
+                      horizontal: GluttexConstants.kDefaultPaddin / 4),
                   child: RefreshIndicator(
                     onRefresh: () async {
                       await productNotifier.fetchProducts(_selectedCategoryId,

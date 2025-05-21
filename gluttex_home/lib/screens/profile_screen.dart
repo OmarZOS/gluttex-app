@@ -48,38 +48,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                AppLocalizations.of(context)!.profileText,
-                style: TextStyle(
-                  color: theme.colorScheme.onBackground,
-                  shadows: isDarkMode
-                      ? [const Shadow(color: Colors.black, blurRadius: 4)]
-                      : null,
-                ),
-              ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDarkMode
-                        ? [
-                            const Color.fromARGB(255, 100, 110, 105),
-                            const Color(0xFF186A3B)
-                          ] // Darker green shades
-                        : [
-                            const Color(0xFF2ECC71),
-                            const Color.fromARGB(255, 143, 197, 166)
-                          ], // Your main color + slightly darker
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // SliverAppBar(
+          //   expandedHeight: 200,
+          //   pinned: true,
+          //   flexibleSpace: FlexibleSpaceBar(
+          //     // title: Text(
+          //     //   '',
+          //     //   style: TextStyle(
+          //     //     color: theme.colorScheme.onBackground,
+          //     //     shadows: isDarkMode
+          //     //         ? [const Shadow(color: Colors.black, blurRadius: 4)]
+          //     //         : null,
+          //     //   ),
+          //     // ),
+          //     background: Container(
+          //       decoration: BoxDecoration(
+          //         gradient: LinearGradient(
+          //           colors: isDarkMode
+          //               ? [
+          //                   const Color.fromARGB(255, 100, 110, 105),
+          //                   const Color(0xFF186A3B)
+          //                 ] // Darker green shades
+          //               : [
+          //                   const Color(0xFF2ECC71),
+          //                   const Color.fromARGB(255, 143, 197, 166)
+          //                 ], // Your main color + slightly darker
+          //           begin: Alignment.topLeft,
+          //           end: Alignment.bottomRight,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           SliverToBoxAdapter(
             child: Consumer<AppUserNotifier>(
               builder: (context, appUserNotifier, _) {
@@ -94,6 +94,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  // void showDiseaseInfoSheet(BuildContext context) {
+  //   final theme = Theme.of(context);
+  //   showModalBottomSheet(
+  //     context: context,
+  //     backgroundColor: theme.colorScheme.background,
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+  //     ),
+  //     builder: (context) {
+  //       return Container(
+  //         padding: const EdgeInsets.all(16),
+  //         child: SingleChildScrollView(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(
+  //                 'Maladie cœliaque',
+  //                 style: theme.textTheme.headlineSmall,
+  //               ),
+  //               const SizedBox(height: 12),
+  //               Text(
+  //                 AppLocalizations.of(context)!
+  //                     .illnessInfoTab, // localized description
+  //                 style: theme.textTheme.bodyMedium,
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildFloatingActionButtons(BuildContext context, ThemeData theme) {
     return Row(
@@ -180,10 +213,152 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
               theme: theme,
             ),
+            _buildProfileSection(
+              title: localizations.illnessInfoTab,
+              children: [
+                GestureDetector(
+                  onTap: () => showIllnessInfoPopup(context), // Call your modal
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          color: Theme.of(context).colorScheme.primary),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          localizations
+                              .illnessOverviewTitle, // Or your localized string
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium!.color,
+                          ),
+                        ),
+                      ),
+                      Icon(Icons.arrow_forward_ios_rounded,
+                          size: 16, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              ],
+              theme: theme,
+            ),
           ] else ...[
             _buildEditableProfileSection(localizations, theme)
           ],
         ],
+      ),
+    );
+  }
+
+  void showIllnessInfoPopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.background,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (_, scrollController) => SingleChildScrollView(
+            controller: scrollController,
+            child: _buildIllnessInfoTab(context),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIllnessInfoTab(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+              AppLocalizations.of(context)!.illnessOverviewTitle),
+          _buildSectionText(
+              AppLocalizations.of(context)!.illnessOverviewContent),
+          const SizedBox(height: 24),
+          _buildSectionHeader(AppLocalizations.of(context)!.symptomsTitle),
+          _buildSymptomItem(AppLocalizations.of(context)!.symptom1),
+          _buildSymptomItem(AppLocalizations.of(context)!.symptom2),
+          _buildSymptomItem(AppLocalizations.of(context)!.symptom3),
+          const SizedBox(height: 24),
+          _buildSectionHeader(AppLocalizations.of(context)!.treatmentTitle),
+          _buildSectionText(AppLocalizations.of(context)!.treatmentContent),
+          const SizedBox(height: 24),
+          _buildSectionHeader(AppLocalizations.of(context)!.resourcesTitle),
+          _buildResourceLink(AppLocalizations.of(context)!.resource1),
+          _buildResourceLink(AppLocalizations.of(context)!.resource2),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSymptomItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.circle, size: 8, color: Colors.red),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResourceLink(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: InkWell(
+        onTap: () {
+          // Handle link opening
+        },
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.blue,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.teal,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 16,
+        height: 1.5,
       ),
     );
   }

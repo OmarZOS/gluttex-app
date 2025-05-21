@@ -22,7 +22,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addToCart => 'أضف';
 
   @override
-  String get aboutProvider => 'حول';
+  String get aboutProvider => 'حولَنا';
 
   @override
   String get productQuantity => 'الكمية';
@@ -146,6 +146,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get locationText => 'الموقع';
+
+  @override
+  String get myLocationText => 'موقعي';
+
+  @override
+  String get removePhoto => 'إزالة الصورة';
 
   @override
   String get streetText => 'الشارع';
@@ -437,7 +443,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get productCategoryTextList => 'المخبوزات,مربى,الحبوب,المعكرونة,الوجبات الخفيفة,المشروبات,الحلويات,الأطعمة المجمدة,مكونات,معلبات';
+  String get productCategoryTextList => 'مخبوزات,مربى,الحبوب,المعكرونة,الوجبات الخفيفة,المشروبات,الحلويات,الأطعمة المجمدة,مكونات,معلبات';
 
   @override
   String get allText => 'الكل';
@@ -1223,7 +1229,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resourcesTitle => 'موارد مفيدة';
 
   @override
-  String get userCredentialsText => 'بيانات تسجيل الدخول الخاصة بك تتضمن بريدك الإلكتروني وكلمة المرور. تأكد من الحفاظ عليها آمنة ولا تشاركها مع أي شخص.';
+  String get userCredentialsText => 'بيانات تسجيل الدخول الخاصة بك تتضمن اسم المستخدم وكلمة المرور. تأكد من الحفاظ عليها آمنة ولا تشاركها مع أي شخص.';
 
   @override
   String get processingRequest => 'جاري معالجة طلبك...';
@@ -1413,4 +1419,88 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get continueAsGuestText => 'المتابعة كضيف';
+
+  @override
+  String get ingredientText => 'المكونات';
+
+  @override
+  String get termsTitle => 'الشروط والأحكام';
+
+  @override
+  String get termsContent => 'باستخدامك لهذا التطبيق فإنك توافق على:';
+
+  @override
+  String get termsPoint1 => 'استخدام التطبيق للأغراض الشخصية فقط';
+
+  @override
+  String get termsPoint2 => 'عدم إعادة توزيع الوصفات الخالية من الجلوتين لأغراض تجارية';
+
+  @override
+  String get termsPoint3 => 'الاعتراف بالاختلافات المحتملة في الوصفات';
+
+  @override
+  String get guideTitle => 'دليل المستخدم';
+
+  @override
+  String get guideStep1 => 'أنشئ ملفك الشخصي لحفظ التفضيلات';
+
+  @override
+  String get guideStep2 => 'ابحث عن الوصفات حسب المكونات أو الاحتياجات الغذائية';
+
+  @override
+  String get guideStep3 => 'احفظ المفضلة لديك للوصول السريع';
+
+  @override
+  String get disclaimerTitle => 'تنويه مهم';
+
+  @override
+  String get disclaimerContent => 'بينما نتحقق من الوصفات، دائمًا تحقق من الملصقات حيث قد يغير المصنعون المكونات.';
+
+  @override
+  String get versionText => 'إصدار التطبيق';
+
+  @override
+  String get providedBy => 'مقدم من';
+
+  @override
+  String get unknownProvider => 'مزود غير معروف';
+
+  @override
+  String get callProvider => 'اتصال بالمزود';
+
+  @override
+  String get emailProvider => 'بريد إلكتروني للمزود';
+
+  @override
+  String get viewOnMap => 'عرض على الخريطة';
+
+  @override
+  String get providerContactOptions => 'خيارات التواصل مع المزود';
+
+  @override
+  String get supplierText => 'مزود';
+
+  @override
+  String get legalDocumentsTitle => 'المستندات القانونية';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get termsOfUse => 'شروط الاستخدام';
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String get termsAgreementText => 'أوافق على شروط الاستخدام الخاصة باستخدام تطبيق جلوتكس';
+
+  @override
+  String get privacyAgreementText => 'أوافق على طريقة جمع ومعالجة جلوتكس لبياناتي';
+
+  @override
+  String get readFullDocument => 'قراءة المستند كاملاً';
+
+  @override
+  String get acceptAllTermsError => 'يجب الموافقة على كلا المستندين للمتابعة';
 }

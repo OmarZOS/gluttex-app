@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/Services/AuthService.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
@@ -13,6 +14,11 @@ class AppUserNotifier extends ChangeNotifier {
   late String? token;
 
   AppUser? get appUser => _appUser;
+
+  bool get isLoggedIn => (_appUser?.id_app_user ?? 0) > 0;
+
+  bool get isCookingChef =>
+      ((appUser?.app_user_type_id ?? 0) == GluttexConstants.cookingChefDBId);
 
   Future<void> fetchAppUser(String userId) async {
     var appUser = await _appUserService.getAppUser(userId);

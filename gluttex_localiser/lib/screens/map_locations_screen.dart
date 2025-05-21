@@ -52,7 +52,7 @@ class _MapScreenState extends State<MapScreen> {
         markerId: const MarkerId("user_location"),
         position: LatLng(
             widget.userLocation!.latitude, widget.userLocation!.longitude),
-        infoWindow: InfoWindow(title: loc?.locationText ?? "Your Location"),
+        infoWindow: InfoWindow(title: loc?.myLocationText ?? "Your Location"),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         zIndex: 2,
       ));

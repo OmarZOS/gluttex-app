@@ -293,6 +293,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             ),
             child: Center(child: Text(loc.noImageSelectedTxt)),
           ),
+        const SizedBox(height: 8),
         OutlinedButton.icon(
           icon: const Icon(Icons.image),
           label: Text(loc.pickImageMsg),

@@ -37,8 +37,8 @@ class RecipeCard extends StatelessWidget {
         .split(",")[(recipe.recipe_category_id ?? 1) - 1];
 
     return Card(
-      color: GluttexConstants().getCardColor(
-          categoryId - 1, Theme.of(context).brightness == Brightness.dark),
+      // color: GluttexConstants().getCardColor(
+      //     categoryId - 1, Theme.of(context).brightness == Brightness.dark),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -73,12 +73,31 @@ class RecipeCard extends StatelessWidget {
                       color: colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(
-                      categoryName,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      mainAxisSize:
+                          MainAxisSize.min, // Important for proper sizing
+                      children: [
+                        Container(
+                          width: 16,
+                          height: 16,
+                          // color: colorScheme.primary,
+                          child: SvgPicture.asset(
+                            'assets/icons/${recipe.recipe_category_id}.svg',
+                            package: "gluttex_chef",
+                            color: Theme.of(context).colorScheme.primary,
+                          ), // Replace with desired icon
+                        ),
+
+                        const SizedBox(
+                            width: 4), // Add spacing between icon and text
+                        Text(
+                          categoryName,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -120,31 +139,44 @@ class RecipeCard extends StatelessWidget {
   }
 
   Widget _buildRecipeImage(BuildContext context, int categoryId) {
-    return Hero(
-      tag: 'recipe-image-${recipe.id_recipe}',
+    return SizedBox.expand(
+      // Forces full parent space
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: recipe.recipe_image_url != null
-            ? Image.network(
-                GluttexConstants.fsBaseUrl + recipe.recipe_image_url!,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildFallbackImage(context, categoryId);
-                },
-                key: ValueKey(recipe.id_recipe_image),
+            ? Container(
+                constraints:
+                    const BoxConstraints.expand(), // Expands within parent
+                child: Hero(
+                    tag: 'recipe-image-${recipe.id_recipe}',
+                    child: Image.network(
+                      GluttexConstants.fsBaseUrl + recipe.recipe_image_url!,
+                      fit: BoxFit.cover, // Covers all available space
+                      alignment: Alignment.center, // Centers the image
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return SizedBox.expand(
+                          // Fallback also fills space
+                          child: _buildFallbackImage(context, categoryId),
+                        );
+                      },
+                      key: ValueKey(recipe.id_recipe_image),
+                    )),
               )
-            : _buildPlaceholder(context),
+            : SizedBox.expand(
+                // Placeholder fills space
+                child: _buildPlaceholder(context),
+              ),
       ),
     );
   }

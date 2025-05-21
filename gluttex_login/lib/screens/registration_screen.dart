@@ -2,9 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
+import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegistrationForm extends StatefulWidget {
   const RegistrationForm({super.key});
@@ -22,7 +24,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
   String? personFirstName = "";
   String? personLastName = "";
   String? personGender = "";
-  String? personNationality = "Algeria";
+  String? personNationality = "";
   int? bloodTypeId = 0;
   double? locationLatitude = 0;
   double? locationLongitude = 0;
@@ -30,204 +32,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
   String? addressStreet = "";
   String? addressCity = "";
   String? addressPostalCode = "";
-  String? addressCountry = "Algeria";
+  String? addressCountry = "";
+
+  bool agreedToTerms = false;
+  bool agreedToPrivacy = false;
 
   final TextEditingController _birthDateController = TextEditingController();
   DateTime? selectedDate;
-
-  final List<Map<String, String>> countries = [
-    {"name": "Afghanistan", "native": "افغانستان"},
-    {"name": "Albania", "native": "Shqipëri"},
-    {"name": "Algeria", "native": "الجزائر"},
-    {"name": "Andorra", "native": "Andorra"},
-    {"name": "Angola", "native": "Angola"},
-    {"name": "Argentina", "native": "Argentina"},
-    {"name": "Armenia", "native": "Հայաստան"},
-    {"name": "Australia", "native": "Australia"},
-    {"name": "Austria", "native": "Österreich"},
-    {"name": "Azerbaijan", "native": "Azərbaycan"},
-    {"name": "Bahamas", "native": "Bahamas"},
-    {"name": "Bahrain", "native": "البحرين"},
-    {"name": "Bangladesh", "native": "বাংলাদেশ"},
-    {"name": "Belarus", "native": "Беларусь"},
-    {"name": "Belgium", "native": "België"},
-    {"name": "Benin", "native": "Bénin"},
-    {"name": "Bhutan", "native": "འབྲུག"},
-    {"name": "Bolivia", "native": "Bolivia"},
-    {"name": "Bosnia and Herzegovina", "native": "Bosna i Hercegovina"},
-    {"name": "Botswana", "native": "Botswana"},
-    {"name": "Brazil", "native": "Brasil"},
-    {"name": "Brunei", "native": "بروني"},
-    {"name": "Bulgaria", "native": "България"},
-    {"name": "Burkina Faso", "native": "Burkina Faso"},
-    {"name": "Burundi", "native": "Uburundi"},
-    {"name": "Cambodia", "native": "កម្ពុជា"},
-    {"name": "Cameroon", "native": "Cameroun"},
-    {"name": "Canada", "native": "Canada"},
-    {"name": "Cape Verde", "native": "Cabo Verde"},
-    {"name": "Central African Republic", "native": "République Centrafricaine"},
-    {"name": "Chad", "native": "تشاد"},
-    {"name": "Chile", "native": "Chile"},
-    {"name": "China", "native": "中国"},
-    {"name": "Colombia", "native": "Colombia"},
-    {"name": "Comoros", "native": "Komori"},
-    {"name": "Congo (Congo-Brazzaville)", "native": "Congo"},
-    {"name": "Costa Rica", "native": "Costa Rica"},
-    {"name": "Croatia", "native": "Hrvatska"},
-    {"name": "Cuba", "native": "Cuba"},
-    {"name": "Cyprus", "native": "Κύπρος"},
-    {"name": "Czech Republic", "native": "Česká republika"},
-    {"name": "Denmark", "native": "Danmark"},
-    {"name": "Djibouti", "native": "جيبوتي"},
-    {"name": "Dominica", "native": "Dominica"},
-    {"name": "Dominican Republic", "native": "República Dominicana"},
-    {"name": "Ecuador", "native": "Ecuador"},
-    {"name": "Egypt", "native": "مصر"},
-    {"name": "El Salvador", "native": "El Salvador"},
-    {"name": "Equatorial Guinea", "native": "Guinea Ecuatorial"},
-    {"name": "Eritrea", "native": "إريتريا"},
-    {"name": "Estonia", "native": "Eesti"},
-    {"name": "Eswatini", "native": "Eswatini"},
-    {"name": "Ethiopia", "native": "ኢትዮጵያ"},
-    {"name": "Fiji", "native": "Fiji"},
-    {"name": "Finland", "native": "Suomi"},
-    {"name": "France", "native": "France"},
-    {"name": "Gabon", "native": "Gabon"},
-    {"name": "Gambia", "native": "The Gambia"},
-    {"name": "Georgia", "native": "საქართველო"},
-    {"name": "Germany", "native": "Deutschland"},
-    {"name": "Ghana", "native": "Ghana"},
-    {"name": "Greece", "native": "Ελλάδα"},
-    {"name": "Grenada", "native": "Grenada"},
-    {"name": "Guatemala", "native": "Guatemala"},
-    {"name": "Guinea", "native": "Guinée"},
-    {"name": "Guinea-Bissau", "native": "Guiné-Bissau"},
-    {"name": "Guyana", "native": "Guyana"},
-    {"name": "Haiti", "native": "Haïti"},
-    {"name": "Honduras", "native": "Honduras"},
-    {"name": "Hungary", "native": "Magyarország"},
-    {"name": "Iceland", "native": "Ísland"},
-    {"name": "India", "native": "भारत"},
-    {"name": "Indonesia", "native": "Indonesia"},
-    {"name": "Iran", "native": "ایران"},
-    {"name": "Iraq", "native": "العراق"},
-    {"name": "Ireland", "native": "Éire"},
-    // {"name": "Israel", "native": "יִשְׂרָאֵל"},
-    {"name": "Italy", "native": "Italia"},
-    {"name": "Jamaica", "native": "Jamaica"},
-    {"name": "Japan", "native": "日本"},
-    {"name": "Jordan", "native": "الأردن"},
-    {"name": "Kazakhstan", "native": "Қазақстан"},
-    {"name": "Kenya", "native": "Kenya"},
-    {"name": "Kiribati", "native": "Kiribati"},
-    {"name": "Kuwait", "native": "الكويت"},
-    {"name": "Kyrgyzstan", "native": "Кыргызстан"},
-    {"name": "Laos", "native": "ສ.ປ.ປ ລາວ"},
-    {"name": "Latvia", "native": "Latvija"},
-    {"name": "Lebanon", "native": "لبنان"},
-    {"name": "Lesotho", "native": "Lesotho"},
-    {"name": "Liberia", "native": "Liberia"},
-    {"name": "Libya", "native": "ليبيا"},
-    {"name": "Liechtenstein", "native": "Liechtenstein"},
-    {"name": "Lithuania", "native": "Lietuva"},
-    {"name": "Luxembourg", "native": "Luxembourg"},
-    {"name": "Madagascar", "native": "Madagasikara"},
-    {"name": "Malawi", "native": "Malawi"},
-    {"name": "Malaysia", "native": "Malaysia"},
-    {"name": "Maldives", "native": "ދިވެހި"},
-    {"name": "Mali", "native": "Mali"},
-    {"name": "Malta", "native": "Malta"},
-    {"name": "Marshall Islands", "native": "Aolepān Aorōkin M̧ajeļ"},
-    {"name": "Mauritania", "native": "موريتانيا"},
-    {"name": "Mauritius", "native": "Maurice"},
-    {"name": "Mexico", "native": "México"},
-    {"name": "Micronesia", "native": "Micronesia"},
-    {"name": "Moldova", "native": "Moldova"},
-    {"name": "Monaco", "native": "Monaco"},
-    {"name": "Mongolia", "native": "Монгол Улс"},
-    {"name": "Montenegro", "native": "Crna Gora"},
-    {"name": "Morocco", "native": "المغرب"},
-    {"name": "Mozambique", "native": "Moçambique"},
-    {"name": "Myanmar", "native": "မြန်မာ"},
-    {"name": "Namibia", "native": "Namibia"},
-    {"name": "Nauru", "native": "Nauru"},
-    {"name": "Nepal", "native": "नेपाल"},
-    {"name": "Netherlands", "native": "Nederland"},
-    {"name": "New Zealand", "native": "Aotearoa"},
-    {"name": "Nicaragua", "native": "Nicaragua"},
-    {"name": "Niger", "native": "Niger"},
-    {"name": "Nigeria", "native": "Nigeria"},
-    {"name": "North Korea", "native": "조선"},
-    {"name": "North Macedonia", "native": "Северна Македонија"},
-    {"name": "Norway", "native": "Norge"},
-    {"name": "Oman", "native": "عمان"},
-    {"name": "Pakistan", "native": "پاکستان"},
-    {"name": "Palau", "native": "Belau"},
-    {"name": "Palestine", "native": "فلسطين"},
-    {"name": "Panama", "native": "Panamá"},
-    {"name": "Papua New Guinea", "native": "Papua Niugini"},
-    {"name": "Paraguay", "native": "Paraguay"},
-    {"name": "Peru", "native": "Perú"},
-    {"name": "Philippines", "native": "Pilipinas"},
-    {"name": "Poland", "native": "Polska"},
-    {"name": "Portugal", "native": "Portugal"},
-    {"name": "Qatar", "native": "قطر"},
-    {"name": "Romania", "native": "România"},
-    {"name": "Rwanda", "native": "Rwanda"},
-    {"name": "Saint Kitts and Nevis", "native": "Saint Kitts and Nevis"},
-    {"name": "Saint Lucia", "native": "Saint Lucia"},
-    {
-      "name": "Saint Vincent and the Grenadines",
-      "native": "Saint Vincent and the Grenadines"
-    },
-    {"name": "Samoa", "native": "Samoa"},
-    {"name": "San Marino", "native": "San Marino"},
-    {"name": "Sao Tome and Principe", "native": "São Tomé e Príncipe"},
-    {"name": "Saudi Arabia", "native": "السعودية"},
-    {"name": "Senegal", "native": "Sénégal"},
-    {"name": "Serbia", "native": "Србија"},
-    {"name": "Seychelles", "native": "Sesel"},
-    {"name": "Sierra Leone", "native": "Sierra Leone"},
-    {"name": "Singapore", "native": "Singapore"},
-    {"name": "Slovakia", "native": "Slovensko"},
-    {"name": "Slovenia", "native": "Slovenija"},
-    {"name": "Solomon Islands", "native": "Solomon Islands"},
-    {"name": "Somalia", "native": "Soomaaliya"},
-    {"name": "South Africa", "native": "South Africa"},
-    {"name": "South Korea", "native": "대한민국"},
-    {"name": "South Sudan", "native": "جنوب السودان"},
-    {"name": "Sri Lanka", "native": "ශ්‍රී ලංකාව"},
-    {"name": "Sudan", "native": "السودان"},
-    {"name": "Suriname", "native": "Suriname"},
-    {"name": "Sweden", "native": "Sverige"},
-    {"name": "Switzerland", "native": "Schweiz"},
-    {"name": "Syria", "native": "سوريا"},
-    {"name": "Tajikistan", "native": "Тоҷикистон"},
-    {"name": "Tanzania", "native": "Tanzania"},
-    {"name": "Thailand", "native": "ประเทศไทย"},
-    {"name": "Timor-Leste", "native": "Timor-Leste"},
-    {"name": "Togo", "native": "Togo"},
-    {"name": "Tonga", "native": "Tonga"},
-    {"name": "Trinidad and Tobago", "native": "Trinidad and Tobago"},
-    {"name": "Tunisia", "native": "تونس"},
-    {"name": "Turkey", "native": "Türkiye"},
-    {"name": "Turkmenistan", "native": "Türkmenistan"},
-    {"name": "Tuvalu", "native": "Tuvalu"},
-    {"name": "Uganda", "native": "Uganda"},
-    {"name": "Ukraine", "native": "Україна"},
-    {"name": "United Arab Emirates", "native": "الإمارات العربية المتحدة"},
-    {"name": "United Kingdom", "native": "United Kingdom"},
-    {"name": "United States", "native": "United States"},
-    {"name": "Uruguay", "native": "Uruguay"},
-    {"name": "Uzbekistan", "native": "Oʻzbekiston"},
-    {"name": "Vanuatu", "native": "Vanuatu"},
-    {"name": "Vatican City", "native": "Vaticano"},
-    {"name": "Venezuela", "native": "Venezuela"},
-    {"name": "Vietnam", "native": "Việt Nam"},
-    {"name": "Yemen", "native": "اليمن"},
-    {"name": "Zambia", "native": "Zambia"},
-    {"name": "Zimbabwe", "native": "Zimbabwe"}
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -235,11 +46,11 @@ class _RegistrationFormState extends State<RegistrationForm> {
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.registerationFormText),
-        centerTitle: true,
-        elevation: 0,
-      ),
+      // appBar: AppBar(
+      //   title: Text(AppLocalizations.of(context)!.registerationFormText),
+      //   centerTitle: true,
+      //   elevation: 0,
+      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         child: Form(
@@ -248,6 +59,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // User Credentials Section
+              const SizedBox(height: GluttexConstants.kDefaultPaddin),
               _buildSectionHeader(
                   context, AppLocalizations.of(context)!.userCredentialsText),
               _buildTextField(
@@ -280,6 +92,10 @@ class _RegistrationFormState extends State<RegistrationForm> {
                   {
                     'value': 3,
                     'label': AppLocalizations.of(context)!.cookingChefText
+                  },
+                  {
+                    'value': 4,
+                    'label': AppLocalizations.of(context)!.supplierText
                   }
                 ],
                 onChanged: (value) => appUserTypeId = value,
@@ -292,129 +108,10 @@ class _RegistrationFormState extends State<RegistrationForm> {
               // Personal Information Section
               _buildSectionHeader(
                   context, AppLocalizations.of(context)!.personalInfoText),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      context,
-                      label: AppLocalizations.of(context)!.firstNameText,
-                      onSaved: (value) => personFirstName = value,
-                      validator: (value) => value?.isEmpty ?? true
-                          ? AppLocalizations.of(context)!
-                              .pleaseInputFirstNameMsg
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      context,
-                      label: AppLocalizations.of(context)!.lastNameText,
-                      onSaved: (value) => personLastName = value,
-                      validator: (value) => value?.isEmpty ?? true
-                          ? AppLocalizations.of(context)!.pleaseInputLastNameMsg
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                context,
-                label: AppLocalizations.of(context)!.birthdayText,
-                controller: _birthDateController,
-                readOnly: true,
-                onTap: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate ?? DateTime.now(),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      selectedDate = pickedDate;
-                      _birthDateController.text =
-                          "${pickedDate.toLocal()}".split(' ')[0];
-                    });
-                  }
-                },
-                suffixIcon: const Icon(Icons.calendar_today),
-                validator: (value) => value?.isEmpty ?? true
-                    ? AppLocalizations.of(context)!.pleaseInputBirthdateMsg
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              _buildDropdown<String>(
-                context,
-                label: AppLocalizations.of(context)!.genderText,
-                items: AppLocalizations.of(context)!
-                    .genderTextList
-                    .split(",")
-                    .map((value) => {'value': value, 'label': value})
-                    .toList(),
-                onChanged: (value) => personGender = value,
-                validator: (value) => value == null
-                    ? AppLocalizations.of(context)!.pleaseInputgenderMsg
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              _buildDropdown<String>(
-                context,
-                label: AppLocalizations.of(context)!.nationalityText,
-                items: countries
-                    .map((country) => {
-                          'value': country['name']!,
-                          'label': country['native']!
-                        })
-                    .toList(),
-                onChanged: (value) => personNationality = value,
-                value: personNationality,
-                validator: (value) => value == null
-                    ? AppLocalizations.of(context)!.pleaseInputnationalityMsg
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              _buildDropdown<int>(
-                context,
-                label: AppLocalizations.of(context)!.bloodTypeText,
-                items: [
-                  {'value': 1, 'label': 'O+'},
-                  {'value': 2, 'label': 'A+'},
-                  {'value': 3, 'label': 'B+'},
-                  {'value': 4, 'label': 'AB+'},
-                  {'value': 5, 'label': 'O-'},
-                  {'value': 6, 'label': 'A-'},
-                  {'value': 7, 'label': 'B-'},
-                  {'value': 8, 'label': 'AB-'},
-                ],
-                onChanged: (value) => bloodTypeId = value,
-                validator: (value) => value == null
-                    ? AppLocalizations.of(context)!.pleaseInputBloodTypeMsg
-                    : null,
-              ),
-              const SizedBox(height: 24),
 
-              // Location Information Section
-              _buildSectionHeader(
-                  context, AppLocalizations.of(context)!.locationInfoText),
-              _buildDropdown<String>(
-                context,
-                label: AppLocalizations.of(context)!.countryText,
-                items: countries
-                    .map((country) => {
-                          'value': country['name']!,
-                          'label': country['native']!
-                        })
-                    .toList(),
-                onChanged: (value) => setState(() => addressCountry = value),
-                value: addressCountry,
-                validator: (value) => value == null
-                    ? AppLocalizations.of(context)!.pleaseInputCountryMsg
-                    : null,
-              ),
-              const SizedBox(height: 32),
+              _buildLegalAgreement(context),
 
+              // const SizedBox(height: 32),
               // Submit Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -448,6 +145,151 @@ class _RegistrationFormState extends State<RegistrationForm> {
             ),
       ),
     );
+  }
+
+  Widget _buildLegalAgreement(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Terms of Use Agreement
+            _buildAgreementTile(
+              context,
+              title: AppLocalizations.of(context)!.termsOfUse,
+              url: 'https://gluttex.com/terms/terms_of_use_',
+              content: AppLocalizations.of(context)!.termsAgreementText,
+              value: agreedToTerms,
+              onChanged: (value) => setState(() => agreedToTerms = value!),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Privacy Policy Agreement
+            _buildAgreementTile(
+              context,
+              title: AppLocalizations.of(context)!.privacyPolicy,
+              content: AppLocalizations.of(context)!.privacyAgreementText,
+              url: 'https://gluttex.com/policy/privacy_policy_',
+              value: agreedToPrivacy,
+              onChanged: (value) => setState(() => agreedToPrivacy = value!),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Validation Error (if both not checked)
+            if (!agreedToTerms || !agreedToPrivacy)
+              Column(
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.acceptAllTermsError,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              )
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildAgreementTile(
+    BuildContext context, {
+    required String title,
+    required String url,
+    required String content,
+    required bool value,
+    required ValueChanged<bool?> onChanged,
+  }) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.3),
+        ),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Checkbox
+          Transform.translate(
+            offset: const Offset(0, -6), // Align with first line of text
+            child: Checkbox(
+              value: value,
+              onChanged: onChanged,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              side: BorderSide(
+                color: theme.colorScheme.outline,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // Clickable text
+          Expanded(
+            child: GestureDetector(
+              onTap: () => openDocFromUrl(context, url),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  // Content preview
+                  Text(
+                    content,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+
+                  // "Read full document" link
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      AppLocalizations.of(context)!.readFullDocument,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> openDocFromUrl(BuildContext context, String url) async {
+    String languageCode = Provider.of<LocaleProvider>(context, listen: false)
+            .locale
+            ?.languageCode ??
+        "ar";
+
+    final Uri final_url = Uri.parse('$url$languageCode.html');
+
+    if (!await launchUrl(final_url, mode: LaunchMode.externalApplication)) {
+      // throw Exception('Could not launch $url');
+    }
   }
 
   Widget _buildTextField(
@@ -509,7 +351,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
   }
 
   void _submitForm() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && agreedToTerms && agreedToPrivacy) {
       _formKey.currentState!.save();
 
       var payload = {

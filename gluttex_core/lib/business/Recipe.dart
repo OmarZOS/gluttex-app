@@ -54,10 +54,9 @@ class Recipe {
     Map<int, String> ingredientsMap = {};
     if (json['recipe_contains_ingredient'] != null)
       for (var ingredient in json['recipe_contains_ingredient']) {
-        if (ingredient['contained_ingredient_id'] != null &&
-            ingredient['contained_quantity'] != null) {
+        if (ingredient['contained_ingredient_id'] != null) {
           ingredientsMap[ingredient['contained_ingredient_id']] =
-              ingredient['contained_quantity'];
+              ingredient['contained_quantity'] ?? "";
         }
       }
 

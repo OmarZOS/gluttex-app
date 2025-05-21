@@ -36,10 +36,16 @@ class _GameScreenState extends State<GameScreen> {
     'assets/images/strawberry.svg',
     'assets/images/apple_pie.svg',
     'assets/images/watermelon.svg',
+    'assets/images/banana.svg',
+    'assets/images/fish.svg',
   ];
   List<String> unhealthyFoodAssets = [
     'assets/images/bread.svg',
     'assets/images/pizza.svg',
+    'assets/images/croissant.svg',
+    'assets/images/hamburger.svg',
+    'assets/images/taco.svg',
+    'assets/images/donut.svg',
   ];
 
   int healthyFoodListLength = 0;

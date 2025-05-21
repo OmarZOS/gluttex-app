@@ -89,12 +89,12 @@ class GluttexApp extends StatelessWidget {
             navigatorKey: globalNavigatorKey,
             onGenerateRoute: AppRouter.generateRoute,
             theme: ThemeData(
-              brightness: Brightness.light,
-              primarySwatch: Colors.blue,
+              colorScheme: ColorScheme.fromSeed(
+                  brightness: Brightness.light, seedColor: Colors.green),
             ),
             darkTheme: ThemeData(
-              brightness: Brightness.dark,
-              primarySwatch: Colors.blueGrey,
+              colorScheme: ColorScheme.fromSeed(
+                  brightness: Brightness.dark, seedColor: Colors.lightGreen),
             ),
             themeMode: localeProvider.themeMode,
           );

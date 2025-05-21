@@ -148,6 +148,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationText => 'Location';
 
   @override
+  String get myLocationText => 'My Location';
+
+  @override
+  String get removePhoto => 'Remove Photo';
+
+  @override
   String get streetText => 'Street';
 
   @override
@@ -1223,7 +1229,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resourcesTitle => 'Useful Resources';
 
   @override
-  String get userCredentialsText => 'Your login credentials include your email and password. Make sure to keep them secure and do not share them with anyone.';
+  String get userCredentialsText => 'Your login credentials include your username and password. Make sure to keep them secure and do not share them with anyone.';
 
   @override
   String get processingRequest => 'Processing your request...';
@@ -1413,4 +1419,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueAsGuestText => 'Continue as Guest';
+
+  @override
+  String get ingredientText => 'Ingredients';
+
+  @override
+  String get termsTitle => 'Terms and Conditions';
+
+  @override
+  String get termsContent => 'By using this app you agree to:';
+
+  @override
+  String get termsPoint1 => 'Use the app only for personal purposes';
+
+  @override
+  String get termsPoint2 => 'Not redistribute gluten-free recipes commercially';
+
+  @override
+  String get termsPoint3 => 'Acknowledge potential recipe variations';
+
+  @override
+  String get guideTitle => 'User Guide';
+
+  @override
+  String get guideStep1 => 'Create your profile to save preferences';
+
+  @override
+  String get guideStep2 => 'Search recipes by ingredients or dietary needs';
+
+  @override
+  String get guideStep3 => 'Bookmark favorites for quick access';
+
+  @override
+  String get disclaimerTitle => 'Important Disclaimer';
+
+  @override
+  String get disclaimerContent => 'While we verify recipes, always check labels as manufacturers may change ingredients.';
+
+  @override
+  String get versionText => 'App Version';
+
+  @override
+  String get providedBy => 'Provided by';
+
+  @override
+  String get unknownProvider => 'Unknown provider';
+
+  @override
+  String get callProvider => 'Call provider';
+
+  @override
+  String get emailProvider => 'Email provider';
+
+  @override
+  String get viewOnMap => 'View on map';
+
+  @override
+  String get providerContactOptions => 'Contact Options';
+
+  @override
+  String get supplierText => 'Supplier';
+
+  @override
+  String get legalDocumentsTitle => 'Legal Documents';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get termsOfUse => 'Terms of Use';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get termsAgreementText => 'I agree to the Terms of Use governing my use of Gluttex';
+
+  @override
+  String get privacyAgreementText => 'I agree to how Gluttex collects and processes my data';
+
+  @override
+  String get readFullDocument => 'Read full document';
+
+  @override
+  String get acceptAllTermsError => 'You must accept both documents to continue';
 }

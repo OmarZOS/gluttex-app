@@ -285,7 +285,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
           style: OutlinedButton.styleFrom(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12.0),
           ),
           onPressed: _pickImage,
         ),
@@ -353,7 +353,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
           style: OutlinedButton.styleFrom(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
           ),
           onPressed: () => showDialog(
             context: context,

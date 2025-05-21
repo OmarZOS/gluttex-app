@@ -148,6 +148,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get locationText => 'Emplacement';
 
   @override
+  String get myLocationText => 'Ma position';
+
+  @override
+  String get removePhoto => 'Supprimer la photo';
+
+  @override
   String get streetText => 'Rue';
 
   @override
@@ -1223,7 +1229,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get resourcesTitle => 'Ressources utiles';
 
   @override
-  String get userCredentialsText => 'Vos informations de connexion comprennent votre e-mail et votre mot de passe. Assurez-vous de les garder en sécurité et de ne les partager avec personne.';
+  String get userCredentialsText => 'Vos informations de connexion comprennent votre pseudo et votre mot de passe. Assurez-vous de les garder en sécurité et de ne les partager avec personne.';
 
   @override
   String get processingRequest => 'Traitement de votre demande...';
@@ -1413,4 +1419,88 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get continueAsGuestText => 'Continuer en tant qu\'invité';
+
+  @override
+  String get ingredientText => 'Ingrédients';
+
+  @override
+  String get termsTitle => 'Terms and Conditions';
+
+  @override
+  String get termsContent => 'By using this app you agree to:';
+
+  @override
+  String get termsPoint1 => 'Use the app only for personal purposes';
+
+  @override
+  String get termsPoint2 => 'Not redistribute gluten-free recipes commercially';
+
+  @override
+  String get termsPoint3 => 'Acknowledge potential recipe variations';
+
+  @override
+  String get guideTitle => 'User Guide';
+
+  @override
+  String get guideStep1 => 'Create your profile to save preferences';
+
+  @override
+  String get guideStep2 => 'Search recipes by ingredients or dietary needs';
+
+  @override
+  String get guideStep3 => 'Bookmark favorites for quick access';
+
+  @override
+  String get disclaimerTitle => 'Important Disclaimer';
+
+  @override
+  String get disclaimerContent => 'While we verify recipes, always check labels as manufacturers may change ingredients.';
+
+  @override
+  String get versionText => 'App Version';
+
+  @override
+  String get providedBy => 'Fourni par';
+
+  @override
+  String get unknownProvider => 'Fournisseur inconnu';
+
+  @override
+  String get callProvider => 'Appeler le fournisseur';
+
+  @override
+  String get emailProvider => 'Envoyer un email';
+
+  @override
+  String get viewOnMap => 'Voir sur la carte';
+
+  @override
+  String get providerContactOptions => 'Options de contact';
+
+  @override
+  String get supplierText => 'Fournisseur';
+
+  @override
+  String get legalDocumentsTitle => 'Documents Légaux';
+
+  @override
+  String get privacyPolicy => 'Politique de Confidentialité';
+
+  @override
+  String get termsOfUse => 'Conditions d\'Utilisation';
+
+  @override
+  String get close => 'Fermer';
+
+  @override
+  String get termsAgreementText => 'J\'accepte les conditions d\'utilisation de Gluttex';
+
+  @override
+  String get privacyAgreementText => 'J\'accepte la collecte et le traitement de mes données';
+
+  @override
+  String get readFullDocument => 'Lire le document complet';
+
+  @override
+  String get acceptAllTermsError => 'Vous devez accepter les deux documents pour continuer';
 }

@@ -3,8 +3,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_chef/components/RecipeCard.dart';
+import 'package:gluttex_chef/components/RecipeOwner.dart';
 import 'package:gluttex_chef/screens/recipe_form_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
@@ -92,8 +94,24 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      floatingActionButton:
+          Provider.of<AppUserNotifier>(context, listen: false).isCookingChef
+              ? FloatingActionButton(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.post_add),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const RecipeFormScreen()),
+                  ),
+                )
+              : null,
       appBar: _buildAppBar(context, colorScheme),
-      floatingActionButton: _buildAddRecipeButton(context),
+      // floatingActionButton: _buildAddRecipeButton(context),
       body: Consumer<RecipeNotifier>(
         builder: (context, recipeNotifier, child) {
           final recipes =
@@ -120,51 +138,55 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
   AppBar _buildAppBar(BuildContext context, ColorScheme colorScheme) {
     return AppBar(
       elevation: 0,
-      title: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        child: _isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.searchTxt,
-                  border: InputBorder.none,
-                  icon: Icon(Icons.search, color: colorScheme.onSurface),
-                ),
-                style: TextStyle(color: colorScheme.onSurface),
-              )
-            : Text(AppLocalizations.of(context)!.recipesText),
+      title: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).dividerColor,
+            width: 1,
+          ),
+        ),
+        child: TextField(
+          controller: _searchController,
+          textInputAction: TextInputAction.search,
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)?.searchTxt,
+            prefixIcon: Icon(Icons.search_outlined,
+                color: Theme.of(context).colorScheme.onSurface),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          ),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
       ),
       actions: [
         IconButton(
-          icon: Icon(_isSearching ? Icons.close : Icons.search),
-          onPressed: () {
-            setState(() {
-              if (_isSearching) {
-                _searchController.clear();
-              }
-              _isSearching = !_isSearching;
-            });
-          },
+          icon: Icon(Icons.add_circle),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const RecipeFormScreen()),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildAddRecipeButton(BuildContext context) {
-    return FloatingActionButton(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: const Icon(Icons.add),
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const RecipeFormScreen()),
-      ),
-    );
-  }
+  // Widget _buildAddRecipeButton(BuildContext context) {
+  //   return FloatingActionButton(
+  //     backgroundColor: Theme.of(context).colorScheme.primary,
+  //     foregroundColor: Theme.of(context).colorScheme.onPrimary,
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(16),
+  //     ),
+  //     child: const Icon(Icons.add),
+  //     onPressed: () => Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => const RecipeFormScreen()),
+  //     ),
+  //   );
+  // }
 
   Widget _buildCategoryChips(ColorScheme colorScheme) {
     return SingleChildScrollView(
