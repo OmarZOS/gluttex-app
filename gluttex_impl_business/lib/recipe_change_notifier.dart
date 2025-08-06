@@ -41,6 +41,29 @@ class RecipeNotifier extends ChangeNotifier {
     initialize();
   }
 
+  Future<int?> addOrUpdateRecipe(Recipe recipe) async {
+    try {
+      log('Adding/updating recipe: ${recipe.recipe_name}');
+      if (recipe.recipeImage != null) {
+        String? imageUrl = await recipe.recipeImage?.uploadImage();
+        recipe.recipe_image_url = imageUrl;
+        recipe.id_recipe_image = 0; // Reset image ID to ensure new upload
+      }
+
+      int? status = (recipe.id_recipe == 0
+          ? await _recipeService.addRecipe(recipe)
+          : await _recipeService.updateRecipe(recipe));
+      if (status != null) {
+        updateLocalRecipe(recipe);
+        await fetchRecipes(currentCategory, reset: true);
+      }
+      return status;
+    } catch (e) {
+      log("Failed to add/update recipe: $e");
+      return null;
+    }
+  }
+
   /// Fetches all ingredients and stores them in a map for fast lookups
   Future<void> fetchIngredients() async {
     try {
@@ -133,6 +156,10 @@ class RecipeNotifier extends ChangeNotifier {
 
   /// Adds a new recipe and updates the local state without refetching all recipes
   Future<void> addRecipe(Recipe recipe) async {
+    if (recipe.recipeImage != null) {
+      String? imageUrl = await recipe.recipeImage?.uploadImage();
+      recipe.recipe_image_url = imageUrl;
+    }
     int? status = await _recipeService.addRecipe(recipe);
     if (status != null) {
       _recipes[recipe.id_recipe!] = recipe;
@@ -142,9 +169,9 @@ class RecipeNotifier extends ChangeNotifier {
   }
 
   /// Updates a recipe and updates the local state efficiently
-  Future<void> updateRecipe(Recipe recipe) async {
-    int? status = await _recipeService.updateRecipe(recipe);
-    if (status != null && _recipes.containsKey(recipe.id_recipe)) {
+  void updateLocalRecipe(Recipe recipe) async {
+    // int? status = await _recipeService.updateRecipe(recipe);
+    if (_recipes.containsKey(recipe.id_recipe)) {
       _recipes[recipe.id_recipe!] = recipe;
       notifyListeners();
     }

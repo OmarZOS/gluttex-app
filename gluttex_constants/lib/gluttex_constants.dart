@@ -173,7 +173,10 @@ class GluttexConstants {
   static const String deleteAppUserEndpoint = '/app_user/delete';
   static const String getAllAppUsersEndpoint = '/app_user';
   static const String appUserEndpoint = '/app_user';
+  static const String updateAppUserImageEndpoint = '/app_user/update_image_url';
   static const String getAppUserCategoriesEndpoint = '/app_user/categorie/all';
+
+  static const String postImageEndpoint = '/fs/upload';
 
   static const String addProductEndpoint = '/product/add';
   static const String deleteProductEndpoint = '/product/delete';
@@ -205,6 +208,8 @@ class GluttexConstants {
   static const String loginEndpoint = '/authentication/token';
   static const String signUpEndpoint = '/app_user/add';
   static const String productsEndpoint = '/product';
+
+  static const int adminCategoryId = 3;
 
   static const int itemsPerPage = 6;
 

@@ -33,7 +33,7 @@ null_safety: false
 dependencies:
   flutter:
     sdk: flutter
-  google_maps_flutter: ^2.2.3
+  google_maps_flutter: ^2.12.3
   locator: 
     path: ../locator
   gluttex_core:
@@ -58,8 +58,6 @@ dependencies:
   provider: ^6.1.2
   geolocator: ^13.0.3
   flutter_svg: ^2.0.17
-  # geolocator: ^10.0.0
-  # image: ^3.3.0
 
 dev_dependencies:
   flutter_test:

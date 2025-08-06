@@ -106,8 +106,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               const SizedBox(height: 24),
 
               // Personal Information Section
-              _buildSectionHeader(
-                  context, AppLocalizations.of(context)!.personalInfoText),
+              _buildSectionHeader(context,
+                  AppLocalizations.of(context)!.registrationConditionsText),
 
               _buildLegalAgreement(context),
 

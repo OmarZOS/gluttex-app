@@ -1,11 +1,13 @@
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gluttex_chef/components/ImagePickerSection.dart';
 import 'package:gluttex_chef/components/category_picker.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/components/ingredient_popup.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
+import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/ResponseHandler.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_chef/tools/duration.dart';
@@ -22,7 +24,8 @@ class RecipeEditFormScreen extends StatefulWidget {
   final String? initialRecipeName;
   final String? initialRecipeBrand;
   final String? initialRecipeBarcode;
-  final Uint8List? initialRecipeImage;
+  // final Uint8List? initialRecipeImage;
+  final String? initialRecipeImageUrl;
   final int? initialRecipeTypeId;
   final double? initialRecipePrice;
   final int? initialRecipeQuantity;
@@ -41,7 +44,8 @@ class RecipeEditFormScreen extends StatefulWidget {
       this.initialRecipeName,
       this.initialRecipeBrand,
       this.initialRecipeBarcode,
-      this.initialRecipeImage,
+      // this.initialRecipeImage,
+      this.initialRecipeImageUrl,
       this.initialRecipeTypeId,
       this.initialRecipePrice,
       this.initialRecipeQuantity,
@@ -62,7 +66,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   String? _recipeName;
-  Uint8List? _recipeImage;
+  GluttexImage? _recipeImage;
   int? _recipe_category_id;
   int? _recipe_owner_id;
   int? _id_recipe;
@@ -73,6 +77,8 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
   late Duration preparationTime;
   DateTime? recipe_created_at;
   DateTime? recipe_last_updated;
+  String imageUrl = "";
+  String _initialRecipeImageUrl = "";
   late Map<int, String> _selectedIngredients;
 
   @override
@@ -80,32 +86,17 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
     super.initState();
     // Initialize state variables with initial values from the widget
     _recipeName = widget.initialRecipeName;
-    _recipeImage = widget.initialRecipeImage;
+    // _recipeImage = widget.initialRecipeImage;
     _recipeDescription = widget.initialRecipeDescription;
-
+    _initialRecipeImageUrl = widget.initialRecipeImageUrl ?? "";
     _recipeInstruction = widget.initialRecipeInstruction;
     _recipe_category_id = widget.initialRecipe_category_id;
     _id_recipe = widget.initialIdRecipe;
-    _id_recipe_image = widget.initialIdRecipeImage;
+    _id_recipe_image = 0;
     _recipePreparationTime = widget.initialRecipePreparationTime;
-    _selectedIngredients = widget.initialIngredients ?? {};
+    _recipe_owner_id = widget.initialRecipe_provider_id ?? 1;
     preparationTime = _recipePreparationTime!;
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      Uint8List imageData = await pickedFile.readAsBytes();
-      Uint8List resizedImage = resizeImage(
-          imageData,
-          MediaQuery.of(context).size.width.floor(),
-          MediaQuery.of(context).size.width.floor());
-      setState(() {
-        _recipeImage = resizedImage;
-      });
-    }
+    _selectedIngredients = widget.initialIngredients ?? {};
   }
 
   void _selectDuration(BuildContext context) {
@@ -136,6 +127,8 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ingredientNames =
+        AppLocalizations.of(context)!.ingredientTextList.split(',');
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.updateRecipeMsg),
@@ -194,7 +187,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
               ),
               const SizedBox(height: 16.0),
               CategoryPicker(
-                category_id: _recipe_category_id ?? 0,
+                category_id: _recipe_category_id ?? 1,
                 categories: Provider.of<RecipeNotifier>(context).categories,
                 onCategoryChanged: (selectedCategoryId) {
                   _onCategoryChanged(selectedCategoryId);
@@ -233,14 +226,11 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                                     _selectedIngredients.remove(key);
                                   });
                                 },
-                                name: Provider.of<RecipeNotifier>(context,
-                                        listen: false)
-                                    .recipeIngredients[key]
-                                    .ingredient_name,
+                                name: ingredientNames[key - 1],
                                 quantity: quantity,
                                 icon: Provider.of<RecipeNotifier>(context,
                                         listen: false)
-                                    .recipeIngredients[key]
+                                    .recipeIngredients[key - 1]
                                     .ingredient_icon,
                               );
                             },
@@ -271,15 +261,17 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                 ],
               ),
               const SizedBox(height: 16.0),
-              _recipeImage != null
-                  ? Image.memory(_recipeImage!,
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.width)
-                  : Text(AppLocalizations.of(context)!.noImageSelectedTxt),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: Text(AppLocalizations.of(context)!.pickImageMsg),
+              ImagePickerSection(
+                initialImageUrl: _initialRecipeImageUrl,
+                entityType: 'recipe',
+                ownerId: '$_recipe_owner_id',
+                entityId: '$_id_recipe',
+                onImageUploaded: (newImage) {
+                  setState(() {
+                    _recipeImage = newImage;
+                    _id_recipe_image = 0; // Reset image ID to 0 for new uploads
+                  });
+                },
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -292,26 +284,32 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                       recipe_category_id: _recipe_category_id,
                       id_recipe_image: _id_recipe_image,
                       recipe_name: _recipeName,
-                      recipe_image_data: _recipeImage,
-                      recipe_image_url: null,
+                      // recipeImage: _recipeImage,
+                      recipe_image_url: imageUrl,
                       recipe_description: _recipeDescription,
                       recipe_created_at: null,
                       recipe_last_updated: null,
                       recipe_instruction: _recipeInstruction,
                       recipe_preparation_time: preparationTime,
                       recipe_category_desc: "",
-                      recipe_ingredients: {},
+                      recipe_ingredients: _selectedIngredients,
                     );
                     try {
-                      await GluttexLocator.get<RecipeService>()
-                          .updateRecipe(recipe);
+                      if (_recipeImage != null)
+                        // ignore: curly_braces_in_flow_control_structures
+                        recipe.recipeImage = _recipeImage!;
+                      final statusCode = await Provider.of<RecipeNotifier>(
+                              context,
+                              listen: false)
+                          .addOrUpdateRecipe(recipe);
 
                       ResponseHandler.handleResponse(
                         context: context,
                         statusCode: 200,
-                        responseCode: "SUCCESS",
+                        responseCode: "PUT_SUCCESS",
                         finalMessage: AppLocalizations.of(context)!.putSuccess,
                       );
+                      Navigator.pop(context);
                       await Provider.of<RecipeNotifier>(context, listen: false)
                           .fetchRecipes(0);
                     } on GluttexException catch (e) {

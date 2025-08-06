@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:gluttex_constants/gluttex_constants.dart';
+
 class AppUser {
   final int? id_app_user;
   final int? app_user_person_id;
@@ -9,7 +11,8 @@ class AppUser {
   final String? app_user_password;
   final String? app_user_preferences;
   final String? app_user_type_desc;
-  final Uint8List? app_user_image;
+  // final Uint8List? app_user_image;
+  final String? app_user_image_url;
   final int idPerson;
   final int personDetailsId;
   final String personFirstName;
@@ -29,6 +32,10 @@ class AppUser {
   final String addressPostalCode;
   final String addressCountry;
 
+  get isAdmin =>
+      app_user_type_id ==
+      GluttexConstants.adminCategoryId; // Assuming 1 is the admin type ID
+
   AppUser({
     required this.id_app_user,
     required this.app_user_person_id,
@@ -37,7 +44,8 @@ class AppUser {
     required this.app_user_password,
     required this.app_user_preferences,
     required this.app_user_type_desc,
-    required this.app_user_image,
+    // required this.app_user_image,
+    required this.app_user_image_url,
     required this.idPerson,
     required this.personDetailsId,
     required this.personFirstName,
@@ -59,6 +67,7 @@ class AppUser {
   });
   AppUser copyWith({
     Uint8List? app_user_image,
+    String? app_user_image_url,
     String? personFirstName,
     int? id_app_user,
     int? app_user_person_id,
@@ -87,7 +96,8 @@ class AppUser {
     // ... all other fields
   }) {
     return AppUser(
-      app_user_image: app_user_image ?? this.app_user_image,
+      // app_user_image: app_user_image ?? this.app_user_image,
+      app_user_image_url: app_user_image_url ?? this.app_user_image_url,
       personFirstName: personFirstName ?? this.personFirstName,
       id_app_user: id_app_user ?? this.id_app_user,
       app_user_person_id: app_user_person_id ?? this.app_user_person_id,
@@ -117,13 +127,13 @@ class AppUser {
   }
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
-    Uint8List? imageData;
-    if (json['app_user_image'] != null && json['app_user_image']!.isNotEmpty) {
-      final imageBase64 = json['app_user_image'];
-      if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
-        imageData = base64Decode(imageBase64);
-      }
-    }
+    // Uint8List? imageData;
+    // if (json['app_user_image'] != null && json['app_user_image']!.isNotEmpty) {
+    //   final imageBase64 = json['app_user_image'];
+    //   if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
+    //     imageData = base64Decode(imageBase64);
+    //   }
+    // }
 
     var idBloodType;
     var bloodTypeDesc;
@@ -185,7 +195,8 @@ class AppUser {
       app_user_password: json['app_user_password'] ?? "",
       app_user_preferences: json['app_user_preferences'] ?? "",
       app_user_type_desc: json['app_user_type']?['app_user_type_desc'] ?? "",
-      app_user_image: imageData,
+      // app_user_image: imageData,
+      app_user_image_url: json['app_user_image_url'] ?? "",
       idPerson: json['idPerson'] ?? 0,
       personDetailsId: idPersonDetails ?? 0,
       personFirstName: personFirstName ?? "",
@@ -216,7 +227,8 @@ class AppUser {
       app_user_password: "",
       app_user_preferences: "",
       app_user_type_desc: "",
-      app_user_image: null,
+      // app_user_image: null,
+      app_user_image_url: "",
       idPerson: 0,
       personDetailsId: 0,
       personFirstName: "",
@@ -247,7 +259,8 @@ class AppUser {
       'app_user_password': app_user_password,
       'app_user_preferences': app_user_preferences,
       'app_user_type_desc': app_user_type_desc,
-      'app_user_image': app_user_image
+      'app_user_image_url': app_user_image_url,
+      // 'app_user_image': app_user_image,
     };
   }
 }

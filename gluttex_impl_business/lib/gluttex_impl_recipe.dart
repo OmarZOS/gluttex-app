@@ -12,15 +12,6 @@ class RecipeServiceImpl implements RecipeService {
   List<RecipeCategory> categories = [];
 
   @override
-  Future<Uint8List?> getRecipeImage(String id) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
-    List<dynamic> data = await storageService.get(
-        GluttexConstants.apiBaseUrl + GluttexConstants.getRecipeImageEndpoint,
-        id) as List<dynamic>;
-    return Recipe.imageFromJson(data);
-  }
-
-  @override
   Future<int?> addRecipe(Recipe Recipe) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
 
@@ -42,8 +33,9 @@ class RecipeServiceImpl implements RecipeService {
   Future<int?> updateRecipe(Recipe updatedRecipe) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
     return await storageService.update(
-        GluttexConstants.apiBaseUrl + GluttexConstants.recipeEndpoint,
-        '${updatedRecipe.id_recipe}',
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.recipeEndpoint}/${updatedRecipe.id_recipe}',
+        '',
+        {"recipe_id": "${updatedRecipe.id_recipe}"},
         updatedRecipe.toJson());
   }
 
@@ -75,8 +67,18 @@ class RecipeServiceImpl implements RecipeService {
       // Check if the response data is not null and is a list
       // Convert the list of dynamic maps to a list of Recipe objects
       List dateien = responseData;
-      List<Recipe?> recipes = dateien
-          .map((data) => Recipe.fromJson(data as Map<String, dynamic>))
+      List<Recipe> recipes = dateien
+          .map((data) {
+            try {
+              return Recipe.fromJson(data as Map<String, dynamic>);
+            } catch (e) {
+              // Log error or ignore silently
+              // debugPrint('Invalid recipe data ignored: $e');
+              return null;
+            }
+          })
+          .where((recipe) => recipe != null)
+          .cast<Recipe>()
           .toList();
       return recipes as List<Recipe>?;
     } catch (e, stacktrace) {

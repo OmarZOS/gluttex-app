@@ -24,7 +24,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
 
   @override
   void initState() {
-    _selectedCategoryIndex = widget.category_id;
+    _selectedCategoryIndex = widget.category_id - 1;
     widget.onCategoryChanged(
       widget.category_id,
     );
@@ -71,7 +71,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
               }
 
               widget.onCategoryChanged(
-                index,
+                index + 1,
               );
             },
             children: widget.categories.map((String category) {

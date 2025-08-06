@@ -154,6 +154,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get removePhoto => 'إزالة الصورة';
 
   @override
+  String get mapNotAvailableText => 'الخريطة غير متاحة حاليا على هذا الجهاز';
+
+  @override
+  String get pdfNotSupportedOnWeb => 'ملف PDF غير مدعوم حاليًا على الويب';
+
+  @override
+  String get registrationConditionsText => 'شروط التسجيل';
+
+  @override
   String get streetText => 'الشارع';
 
   @override

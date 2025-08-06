@@ -8,10 +8,6 @@ abstract class RecipeService {
     return null;
   }
 
-  Future<Uint8List?> getRecipeImage(String id) async {
-    return null;
-  }
-
   Future<List<RecipeCategory>?>? getCategories() async {
     return null;
   }

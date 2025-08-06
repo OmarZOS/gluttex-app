@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // <-- Add this
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
@@ -8,8 +9,11 @@ class PdfViewerScreen extends StatefulWidget {
   final String assetPath;
   final String screenTitle;
 
-  const PdfViewerScreen(
-      {super.key, required this.assetPath, required this.screenTitle});
+  const PdfViewerScreen({
+    super.key,
+    required this.assetPath,
+    required this.screenTitle,
+  });
 
   @override
   State<PdfViewerScreen> createState() => _PdfViewerScreenState();
@@ -22,7 +26,11 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPdf();
+    if (!kIsWeb) {
+      _loadPdf();
+    } else {
+      _isLoading = false;
+    }
   }
 
   Future<Uint8List> _loadPdfBytes(String assetPath) async {
@@ -51,22 +59,35 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context); // optional localization
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.screenTitle)),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : _pdfBytes != null
-              ? PDFView(
-                  pdfData: _pdfBytes!, // ← Pass bytes here
-                  enableSwipe: true,
-                  pageSnap: true,
-                  onError: (error) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('PDF Error: $error')),
-                    );
-                  },
+          : kIsWeb
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      l10n?.pdfNotSupportedOnWeb ??
+                          'PDF viewing is not supported on this device. Please download the file.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 )
-              : Center(child: Text('Failed to load PDF')),
+              : _pdfBytes != null
+                  ? PDFView(
+                      pdfData: _pdfBytes!,
+                      enableSwipe: true,
+                      pageSnap: true,
+                      onError: (error) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('PDF Error: $error')),
+                        );
+                      },
+                    )
+                  : Center(child: Text('Failed to load PDF')),
     );
   }
 }

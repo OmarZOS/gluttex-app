@@ -154,6 +154,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get removePhoto => 'Supprimer la photo';
 
   @override
+  String get mapNotAvailableText => 'Carte actuellement non disponible sur votre appareil';
+
+  @override
+  String get pdfNotSupportedOnWeb => 'Le PDF n\'est pas pris en charge sur le Web. Veuillez utiliser un appareil mobile.';
+
+  @override
+  String get registrationConditionsText => 'Conditions d\'inscription';
+
+  @override
   String get streetText => 'Rue';
 
   @override

@@ -72,6 +72,7 @@ class SupplierServiceImpl implements SupplierService {
     return storageService.update(
         GluttexConstants.apiBaseUrl + GluttexConstants.addSupplierEndpoint,
         updatedSupplier.idProductProvider as String,
+        {},
         updatedSupplier.toJson());
   }
 

@@ -394,6 +394,24 @@ abstract class AppLocalizations {
   /// **'Remove Photo'**
   String get removePhoto;
 
+  /// No description provided for @mapNotAvailableText.
+  ///
+  /// In en, this message translates to:
+  /// **'Map actually not available on this device'**
+  String get mapNotAvailableText;
+
+  /// No description provided for @pdfNotSupportedOnWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF files are not supported on web. Please use a mobile device.'**
+  String get pdfNotSupportedOnWeb;
+
+  /// No description provided for @registrationConditionsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions of registration'**
+  String get registrationConditionsText;
+
   /// No description provided for @streetText.
   ///
   /// In en, this message translates to:
@@ -3040,12 +3058,6 @@ abstract class AppLocalizations {
   /// **'I agree to how Gluttex collects and processes my data'**
   String get privacyAgreementText;
 
-  /// No description provided for @readFullDocument.
-  ///
-  /// In en, this message translates to:
-  /// **'Read full document'**
-  String get readFullDocument;
-
   String getLocalizedQuestion(int index) {
     switch (index) {
       case 1:
@@ -3459,6 +3471,12 @@ abstract class AppLocalizations {
         return notFoundError;
     }
   }
+
+  /// No description provided for @readFullDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Read full document'**
+  String get readFullDocument;
 
   /// No description provided for @acceptAllTermsError.
   ///

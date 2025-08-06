@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
@@ -383,13 +384,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: CircleAvatar(
                     radius: 50,
                     backgroundColor: theme.colorScheme.surfaceVariant,
-                    child: user.app_user_image != null
+                    child: user.app_user_image_url != null
                         ? ClipOval(
-                            child: Image.memory(
-                              user.app_user_image!,
+                            child: Image.network(
+                              GluttexConstants.fsBaseUrl +
+                                  user.app_user_image_url!,
                               width: 100,
                               height: 100,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  height: 100,
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: Icon(Icons.person,
+                                        size: 60, color: Colors.white),
+                                  ),
+                                );
+                              },
                             ),
                           )
                         : Icon(

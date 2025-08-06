@@ -47,6 +47,7 @@ Future<void> main() async {
 
   setupLocator();
   WidgetsFlutterBinding.ensureInitialized();
+
   runApp(GluttexApp(localeProvider));
 }
 
@@ -90,11 +91,13 @@ class GluttexApp extends StatelessWidget {
             onGenerateRoute: AppRouter.generateRoute,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                  brightness: Brightness.light, seedColor: Colors.green),
+                  brightness: Brightness.light,
+                  seedColor: const Color(0xFF2ECC71)),
             ),
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                  brightness: Brightness.dark, seedColor: Colors.lightGreen),
+                  brightness: Brightness.dark,
+                  seedColor: const Color(0xFF2ECC71)),
             ),
             themeMode: localeProvider.themeMode,
           );

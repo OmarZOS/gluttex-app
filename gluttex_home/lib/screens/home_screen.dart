@@ -96,40 +96,37 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: Theme.of(context).colorScheme.surface,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: const Icon(CupertinoIcons.cube_box_fill),
-            label: AppLocalizations.of(context)!.productsText,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? const Color.fromARGB(255, 67, 125, 133) // Light teal
-                : const Color(0xFF4DB6AC), // Dark muted teal
-          ),
+              icon: const Icon(CupertinoIcons.cube_box_fill),
+              label: AppLocalizations.of(context)!.productsText,
+              backgroundColor: Theme.of(context).brightness == Brightness.light
+                  ? const Color(0xFF2ECC71) // Darker green shades
+                  : const Color(0xFF186A3B)),
           BottomNavigationBarItem(
             icon: const Icon(Icons.store_sharp),
             label: AppLocalizations.of(context)!.providersText,
             backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? const Color.fromARGB(255, 70, 99, 138) // Light blue
-                : const Color(0xFF5C6BC0), // Dark periwinkle
+                ? const Color(0xFF2ECC71) // Darker green shades
+                : const Color(0xFF186A3B),
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.restaurant_menu_outlined),
-            label: AppLocalizations.of(context)!.recipesText,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? const Color.fromARGB(255, 107, 63, 124) // Light purple
-                : const Color(0xFFAB47BC), // Dark lavender
-          ),
+              icon: const Icon(Icons.restaurant_menu_outlined),
+              label: AppLocalizations.of(context)!.recipesText,
+              backgroundColor: Theme.of(context).brightness == Brightness.light
+                  ? const Color(0xFF2ECC71) // Darker green shades
+                  : const Color(0xFF186A3B)),
           BottomNavigationBarItem(
             icon: const Icon(CupertinoIcons.gamecontroller_alt_fill),
             label: AppLocalizations.of(context)!.gamesText,
             backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? const Color.fromARGB(255, 67, 72, 133) // Light navy
-                : const Color(0xFF3949AB), // Dark softer navy
+                ? const Color(0xFF2ECC71)
+                : const Color(0xFF186A3B),
           ),
           BottomNavigationBarItem(
-            icon: const Icon(CupertinoIcons.profile_circled),
-            label: AppLocalizations.of(context)!.profileText,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? const Color.fromARGB(255, 136, 68, 102) // Light mauve
-                : const Color(0xFFEC407A), // Dark soft pink
-          ),
+              icon: const Icon(CupertinoIcons.profile_circled),
+              label: AppLocalizations.of(context)!.profileText,
+              backgroundColor: Theme.of(context).brightness == Brightness.light
+                  ? const Color(0xFF2ECC71)
+                  : const Color(0xFF186A3B)),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

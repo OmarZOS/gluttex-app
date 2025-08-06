@@ -154,6 +154,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removePhoto => 'Remove Photo';
 
   @override
+  String get mapNotAvailableText => 'Map actually not available on this device';
+
+  @override
+  String get pdfNotSupportedOnWeb => 'PDF files are not supported on web. Please use a mobile device.';
+
+  @override
+  String get registrationConditionsText => 'Conditions of registration';
+
+  @override
   String get streetText => 'Street';
 
   @override

@@ -73,11 +73,12 @@ class StorageServiceImpl implements StorageService {
     try {
       // Log the request data
       // log('Request data: ${json.encode(data)}');
-
+      log('Sending data to $destination');
+      log(data.toString());
       // Make the PUT request
       final response = await _dio.put(
         destination,
-        data: json.encode(data),
+        data: data,
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
@@ -102,23 +103,59 @@ class StorageServiceImpl implements StorageService {
   }
 
   @override
-  Future<int?> update(
-      String destination, String id, Map<String, dynamic> data) async {
+  Future<String?> insertBinary(String destination, FormData data) async {
     try {
-      final response = await _dio.post('$destination/$id',
-          data: json.encode(data),
-          options: Options(headers: {
-            'Content-Type': 'application/json',
-            'accept': 'application/json'
-          }));
+      // Log the request data
+      // log('Request data: ${data.files}');
+      log('Sending data to $destination');
+      // log(json.encode(data));
+      // Make the POST request
+      final response = await _dio.post(
+        destination,
+        data: data,
+        options: Options(headers: {
+          'accept': 'application/json',
+          'Content-Type': 'multipart/form-data',
+        }),
+      );
 
-      return response.statusCode;
+      // Log the response status code and data
+      // //log('Response status code: ${response.statusCode}');
+      log('Response data uploading image: ${response.data}');
+
+      // Check the response status code
+      return response.data['path'].toString().replaceFirst("files/", "");
+
+      // Return success message
     } on DioException catch (e, stacktrace) {
+      // Log the error and stack trace for better debugging
       log('Error: $e');
       log('Stack trace: $stacktrace');
 
       throw GluttexException(e.response?.data["error_code"],
           statusCode: e.response?.statusCode, error: e);
+    } catch (e) {
+      return "";
+    }
+  }
+
+  @override
+  Future<int?> update(String destination, String id,
+      Map<String, dynamic> parameters, Map<String, dynamic> data) async {
+    try {
+      log(data.toString());
+      final response = await _dio.post(destination,
+          data: data,
+          queryParameters: parameters,
+          options: Options(headers: {'Content-Type': 'application/json'}));
+      log('Update Response data: ${response.data}');
+      return response.statusCode;
+    } on DioException catch (e, stacktrace) {
+      log('Error: $e');
+      log('Stack trace: $stacktrace');
+
+      // throw GluttexException(e.response?.data?["error_code"],
+      //     statusCode: e.response?.statusCode, error: e);
     }
   }
 

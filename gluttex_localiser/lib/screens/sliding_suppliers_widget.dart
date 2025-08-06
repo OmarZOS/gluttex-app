@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -190,21 +191,57 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
 
           return Stack(
             children: [
-              // Map Screen
-              MapScreen(
-                onMapCreated: (controller) => _mapController = controller,
-                userLocation: supplierNotifier.currentLocation,
-                suppliers: suppliers,
-                onSupplierTap: (supplier) {
-                  _focusOnLocation(
-                    supplier.locationLatitude,
-                    supplier.locationLongitude,
-                  );
-                  showSupplierDetails(context, supplier);
-                },
-              ),
+              // Fallback for Web or if Map Fails
+              if (kIsWeb) // Check if web or map not initialized
+                Container(
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.map_outlined,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        loc.mapNotAvailableText,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                      ),
+                      const SizedBox(height: 8),
+                      // TextButton(
+                      //   onPressed: () {
+                      //     // Optionally open Google Maps in a browser
+                      //     final url = 'https://www.google.com/maps';
+                      //     // launchUrl(Uri.parse(url));
+                      //   },
+                      //   child: Text("Open in Google Maps"),
+                      // ),
+                    ],
+                  ),
+                )
+              else
+                // Map Screen (only for mobile)
+                MapScreen(
+                  onMapCreated: (controller) => _mapController = controller,
+                  userLocation: supplierNotifier.currentLocation,
+                  suppliers: suppliers,
+                  onSupplierTap: (supplier) {
+                    _focusOnLocation(
+                      supplier.locationLatitude,
+                      supplier.locationLongitude,
+                    );
+                    showSupplierDetails(context, supplier);
+                  },
+                ),
 
-              // Sliding Panel
+              // Sliding Panel (always visible)
               SlidingUpPanel(
                 controller: _panelController,
                 minHeight: 80,
@@ -213,7 +250,7 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                     const BorderRadius.vertical(top: Radius.circular(20)),
                 backdropEnabled: true,
                 backdropOpacity: 0.2,
-                backdropColor: theme.colorScheme.onSurface,
+                backdropColor: Theme.of(context).colorScheme.onSurface,
                 panelBuilder: (scrollController) => _buildPanelContent(
                   context,
                   suppliers,

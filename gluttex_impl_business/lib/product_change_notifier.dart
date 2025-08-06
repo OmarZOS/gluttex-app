@@ -9,7 +9,6 @@ import 'package:locator/locator.dart';
 class ProductNotifier extends ChangeNotifier {
   final ProductService _productService = GluttexLocator.get<ProductService>();
   final Map<int, Product> _products = {}; // Optimized for fast lookups
-  List<String> _categories = [];
   Timer? _pollingTimer;
   bool isLoading = false;
   int currentPage = 0;
@@ -29,9 +28,15 @@ class ProductNotifier extends ChangeNotifier {
 
   Future<int?> addOrUpdateProduct(Product product) async {
     try {
-      int? status = product.id_product == null
+      log('Adding/updating product: ${product.product_name}');
+      if (product.productImage != null) {
+        String? imageUrl = await product.productImage?.uploadImage();
+        product.product_image_url = imageUrl;
+      }
+
+      int? status = (product.id_product == 0
           ? await _productService.addProduct(product)
-          : await _productService.updateProduct(product);
+          : await _productService.updateProduct(product));
       if (status != null) {
         await fetchProducts(currentCategory, reset: true);
       }

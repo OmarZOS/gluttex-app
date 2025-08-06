@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/AuthService.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:locator/locator.dart';
@@ -41,8 +42,8 @@ class AppUserNotifier extends ChangeNotifier {
     return status;
   }
 
-  Future<int?> updateAppUser(AppUser appUser) async {
-    int? status = await _appUserService.updateAppUser(appUser);
+  Future<int?> updateAppUserImage(AppUser appUser) async {
+    int? status = await _appUserService.updateAppUserImage(appUser);
     await fetchAppUser('${appUser.id_app_user}');
     return status;
   }

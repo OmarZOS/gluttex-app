@@ -1,4 +1,6 @@
 // UserService.dart
+import 'package:gluttex_core/app/GluttexImage.dart';
+
 import '../AppUser.dart';
 
 // AppUserService.dart
@@ -15,7 +17,7 @@ abstract class AppUserService {
     return null;
   }
 
-  Future<int?> updateAppUser(AppUser updatedAppUser) async {
+  Future<int?> updateAppUserImage(AppUser updatedAppUser) async {
     return null;
   }
 

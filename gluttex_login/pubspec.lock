@@ -108,7 +108,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_pdfview:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_pdfview
       sha256: "51413e36ab3f1a2fe0edf97ebfa770e20182ea4a066bc9f292920330d9245c9d"

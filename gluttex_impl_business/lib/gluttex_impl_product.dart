@@ -33,18 +33,10 @@ class ProductServiceImpl implements ProductService {
   Future<int?> updateProduct(Product updatedProduct) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
     return await storageService.update(
-        GluttexConstants.apiBaseUrl + GluttexConstants.productEndpoint,
-        '${updatedProduct.id_product}',
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.productEndpoint}/${updatedProduct.id_product}',
+        "",
+        {},
         updatedProduct.toJson());
-  }
-
-  @override
-  Future<Uint8List?> getProductImage(String id) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
-    List<dynamic> data = await storageService.get(
-        GluttexConstants.apiBaseUrl + GluttexConstants.getProductImageEndpoint,
-        id) as List<dynamic>;
-    return Product.imageFromJson(data);
   }
 
   @override

@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:gluttex_core/app/GluttexImage.dart';
+
 class Recipe {
   final int? id_recipe;
   final int? recipe_owner_id;
   final int? recipe_category_id;
 
-  final int? id_recipe_image;
-  Uint8List? recipe_image_data;
-  final String? recipe_image_url;
+  int? id_recipe_image;
+  String? recipe_image_url;
   final DateTime? recipe_created_at;
   final DateTime? recipe_last_updated;
   final String? recipe_name;
@@ -18,12 +19,13 @@ class Recipe {
   final String? recipe_category_desc;
   final Map<int, String>? recipe_ingredients;
 
+  GluttexImage? recipeImage;
+
   Recipe(
       {required this.id_recipe,
       required this.recipe_category_id,
       required this.id_recipe_image,
       required this.recipe_name,
-      required this.recipe_image_data,
       required this.recipe_image_url,
       required this.recipe_description,
       required this.recipe_created_at,
@@ -40,9 +42,9 @@ class Recipe {
     if (json['recipe_image'] != null &&
         json['recipe_image'] is List &&
         json['recipe_image']!.isNotEmpty) {
-      final imageId = json['recipe_image'][0]["id_recipe_image"];
+      final imageId = json['recipe_image'].last["id_recipe_image"];
       cardImageId = imageId;
-      imageUrl = json['recipe_image'][0]["recipe_image_url"];
+      imageUrl = json['recipe_image'].last["recipe_image_url"];
     }
 
     List<String> preparationTime =
@@ -53,6 +55,7 @@ class Recipe {
 
     Map<int, String> ingredientsMap = {};
     if (json['recipe_contains_ingredient'] != null)
+      // ignore: curly_braces_in_flow_control_structures
       for (var ingredient in json['recipe_contains_ingredient']) {
         if (ingredient['contained_ingredient_id'] != null) {
           ingredientsMap[ingredient['contained_ingredient_id']] =
@@ -65,7 +68,6 @@ class Recipe {
         recipe_owner_id: json['recipe_owner_id'] ?? 0,
         recipe_category_id: json['recipe_category_id'] ?? 0,
         id_recipe_image: cardImageId,
-        recipe_image_data: null,
         recipe_image_url: imageUrl ?? "",
         recipe_name: json['recipe_name'] ?? "",
         recipe_description: json['recipe_description'],
@@ -76,16 +78,6 @@ class Recipe {
         recipe_category_desc:
             json['recipe_category']['recipe_category_desc'] ?? "",
         recipe_ingredients: ingredientsMap);
-  }
-  static Uint8List? imageFromJson(List<dynamic> json) {
-    Uint8List? imageData;
-    if (json.isNotEmpty) {
-      final imageBase64 = json[0]["recipe_image_data"];
-      if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
-        imageData = base64Decode(imageBase64);
-      }
-    }
-    return imageData;
   }
 
   static Map<String, dynamic> ingredientsFromJson(List<dynamic> json) {
@@ -109,8 +101,7 @@ class Recipe {
       },
       "image": {
         "id_recipe_image": id_recipe_image ?? 0,
-        "recipe_image_data":
-            recipe_image_data != null ? base64Encode(recipe_image_data!) : null,
+        "recipe_image_data": recipe_image_url ?? "",
         "recipe_ref_id": id_recipe ?? 0
       }
     };

@@ -1,15 +1,16 @@
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
-import 'package:gluttex_home/screens/components/category_picker.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 class AppUserEditFormScreen extends StatefulWidget {
   final AppUser? appUser;
@@ -23,13 +24,15 @@ class AppUserEditFormScreen extends StatefulWidget {
 class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late AppUser _editedUser;
+
+  File? _editedImage;
   bool _isLoading = false;
   bool _imageChanged = false;
 
   @override
   void initState() {
     super.initState();
-    _editedUser = widget.appUser!.copyWith(); // Create a deep copy
+    _editedUser = widget.appUser!.copyWith(); // Deep copy
   }
 
   Future<void> _pickImage() async {
@@ -44,9 +47,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
       if (pickedFile != null) {
         setState(() {
           _imageChanged = true;
-          _editedUser = _editedUser.copyWith(
-              // app_user_image: Uint8List.fromList(await pickedFile.readAsBytes()),
-              );
+          _editedImage = File(pickedFile.path);
         });
       }
     } on PlatformException catch (e) {
@@ -60,35 +61,49 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
     _formKey.currentState!.save();
     setState(() => _isLoading = true);
 
-    try {
-      await GluttexLocator.get<AppUserService>().updateAppUser(_editedUser);
-      await Provider.of<AppUserNotifier>(context, listen: false)
-          .fetchAppUser('${_editedUser.id_app_user}');
+    // Copy editedUser now (because we modify it asynchronously later)
+    var localUser = _editedUser;
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.putSuccess),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context, _editedUser);
+    // Run tasks in background
+    unawaited(Future(() async {
+      try {
+        if (_imageChanged && _editedImage != null) {
+          final imageUrl = await GluttexImage(
+            filepath: _editedImage!.path,
+            filename: _editedImage!.path.split("/").last,
+            entityType: 'user',
+            ownerId: '${_editedUser.id_app_user}',
+            entityId: '${_editedUser.id_app_user}',
+          ).uploadImage();
+
+          localUser = localUser.copyWith(app_user_image_url: imageUrl);
+        }
+
+        await Provider.of<AppUserNotifier>(context, listen: false)
+            .updateAppUserImage(localUser);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.putSuccess),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, localUser);
+        }
+      } catch (_) {
+        if (mounted) {
+          _showErrorSnackbar(AppLocalizations.of(context)!.putFailure);
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
       }
-    } catch (e) {
-      if (mounted) {
-        _showErrorSnackbar(AppLocalizations.of(context)!.putFailure);
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+    }));
   }
 
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -100,13 +115,6 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.personalInformation),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: null,
-            // onPressed: _isLoading ? null : _submitForm,
-          ),
-        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -117,11 +125,15 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Profile Picture Section
-                    _buildProfilePictureSection(theme),
+                    _buildProfilePictureSection(theme, loc),
                     const SizedBox(height: 24),
-
-                    // Personal Info Section
+                    _buildSectionHeader(loc.accountInformation, theme),
+                    _buildTextFormField(
+                      label: loc.username,
+                      initialValue: _editedUser.app_user_name,
+                      onSaved: (v) =>
+                          _editedUser = _editedUser.copyWith(app_user_name: v),
+                    ),
                     _buildSectionHeader(loc.personalInformation, theme),
                     _buildTextFormField(
                       label: loc.firstName,
@@ -135,20 +147,37 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                       onSaved: (v) =>
                           _editedUser = _editedUser.copyWith(personLastName: v),
                     ),
-
-                    // Account Info Section
-                    _buildSectionHeader(loc.accountInformation, theme),
                     _buildTextFormField(
-                      label: loc.username,
-                      initialValue: _editedUser.app_user_name,
-                      onSaved: (v) =>
-                          _editedUser = _editedUser.copyWith(app_user_name: v),
+                      label: loc.birthdayText,
+                      initialValue: _editedUser.personBirthDate,
+                      onSaved: (v) => _editedUser =
+                          _editedUser.copyWith(personBirthDate: v),
                     ),
-
-                    // Category Picker
-                    // _buildCategoryPicker(),
-
-                    // Submit Button
+                    _buildTextFormField(
+                      label: loc.genderText,
+                      initialValue: _editedUser.personGender,
+                      onSaved: (v) =>
+                          _editedUser = _editedUser.copyWith(personGender: v),
+                    ),
+                    _buildSectionHeader(loc.locationInfoText, theme),
+                    _buildTextFormField(
+                      label: loc.locationNameText,
+                      initialValue: _editedUser.locationName,
+                      onSaved: (v) =>
+                          _editedUser = _editedUser.copyWith(locationName: v),
+                    ),
+                    _buildTextFormField(
+                      label: loc.locationText,
+                      initialValue: _editedUser.addressCity,
+                      onSaved: (v) =>
+                          _editedUser = _editedUser.copyWith(addressCity: v),
+                    ),
+                    _buildTextFormField(
+                      label: loc.countryText,
+                      initialValue: _editedUser.addressCountry,
+                      onSaved: (v) =>
+                          _editedUser = _editedUser.copyWith(addressCountry: v),
+                    ),
                     const SizedBox(height: 32),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -167,7 +196,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
     );
   }
 
-  Widget _buildProfilePictureSection(ThemeData theme) {
+  Widget _buildProfilePictureSection(ThemeData theme, AppLocalizations loc) {
     return Column(
       children: [
         Stack(
@@ -175,13 +204,41 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
           children: [
             CircleAvatar(
               radius: 60,
-              backgroundImage: _editedUser.app_user_image != null
-                  ? MemoryImage(_editedUser.app_user_image!)
-                  : const AssetImage('assets/default_avatar.png')
-                      as ImageProvider,
+              backgroundImage:
+                  _editedImage != null ? FileImage(_editedImage!) : null,
+              child: _editedImage == null
+                  ? CircleAvatar(
+                      radius: 50,
+                      backgroundColor: theme.colorScheme.surfaceVariant,
+                      child: _editedUser.app_user_image_url != null
+                          ? ClipOval(
+                              child: Image.network(
+                                GluttexConstants.fsBaseUrl +
+                                    _editedUser.app_user_image_url!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    height: 100,
+                                    color: Colors.grey[200],
+                                    child: const Center(
+                                      child: Icon(Icons.person,
+                                          size: 60, color: Colors.white),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          : Icon(
+                              Icons.person,
+                              size: 50,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+                  : null,
             ),
             FloatingActionButton.small(
-              // heroTag: null,
               onPressed: _pickImage,
               child: const Icon(Icons.camera_alt),
             ),
@@ -193,16 +250,16 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
               const SizedBox(height: GluttexConstants.kDefaultPaddin),
               TextButton(
                 onPressed: () => setState(() {
-                  _editedUser = _editedUser.copyWith(app_user_image: null);
                   _imageChanged = false;
+                  _editedImage = null;
                 }),
                 child: Text(
-                  AppLocalizations.of(context)!.removePhoto,
+                  loc.removePhoto,
                   style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
                 ),
               ),
             ],
-          )
+          ),
       ],
     );
   }
@@ -225,6 +282,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
     required String? initialValue,
     required void Function(String?) onSaved,
     int maxLength = 300,
+    bool enabled = false, // <-- default value: disabled
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -235,47 +293,16 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
           border: const OutlineInputBorder(),
           counterText: '',
         ),
+        enabled: enabled, // <-- control editing here
         maxLength: maxLength,
         validator: (value) {
-          if (value?.isEmpty ?? true)
+          if ((value?.isEmpty ?? true) && enabled) {
             return AppLocalizations.of(context)!.fieldRequired;
+          }
           return null;
         },
         onSaved: onSaved,
       ),
     );
   }
-
-  // Widget _buildCategoryPicker() {
-  //   return FutureBuilder<List<AppUserCategory>?>(
-  //     future: Provider.of<AppUserNotifier>(context, listen: false)
-  //         .categories,
-  //     builder: (context, snapshot) {
-  //       if (snapshot.connectionState == ConnectionState.waiting) {
-  //         return const LinearProgressIndicator();
-  //       }
-
-  //       if (snapshot.hasError) {
-  //         return Text("AppLocalizations.of(context)!.loadError");
-  //       }
-
-  //       if (!snapshot.hasData || snapshot.data!.isEmpty) {
-  //         return Text("AppLocalizations.of(context)!.noCategories");
-  //       }
-
-  //       return Padding(
-  //         padding: const EdgeInsets.only(bottom: 16),
-  //         child: CategoryPicker(
-  //           category_id: _editedUser.app_user_type_id ?? 1,
-  //           categories: snapshot.data!,
-  //           onCategoryChanged: (id) {
-  //             setState(() {
-  //               _editedUser = _editedUser.copyWith(app_user_type_id: id);
-  //             });
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 }

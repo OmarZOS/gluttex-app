@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
@@ -29,11 +30,13 @@ class AppUserServiceImpl implements AppUserService {
   }
 
   @override
-  Future<int?> updateAppUser(AppUser updatedAppUser) async {
+  Future<int?> updateAppUserImage(AppUser updatedAppUser) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
     return await storageService.update(
-        GluttexConstants.apiBaseUrl + GluttexConstants.appUserEndpoint,
+        GluttexConstants.apiBaseUrl +
+            GluttexConstants.updateAppUserImageEndpoint,
         '${updatedAppUser.id_app_user}',
+        {'image_url': updatedAppUser.app_user_image_url},
         updatedAppUser.toJson());
   }
 

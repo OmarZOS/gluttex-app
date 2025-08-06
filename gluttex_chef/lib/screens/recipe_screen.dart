@@ -138,19 +138,39 @@ class _DetailsScreenState extends State<DetailsScreen> {
   Widget _buildImagePlaceholder(Size size) {
     return Container(
       height: size.height * _imageHeightRatio,
-      color: Colors.grey[200],
-      child: const Center(
-        child: Icon(Icons.fastfood, size: 60, color: Colors.white),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: (Theme.of(context).brightness == Brightness.dark)
+              ? [
+                  const Color.fromARGB(255, 100, 110, 105),
+                  const Color(0xFF186A3B),
+                ]
+              : [
+                  const Color(0xFF2ECC71),
+                  const Color.fromARGB(255, 143, 197, 166),
+                ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: SvgPicture.asset(
+          'assets/icons/${_recipe.recipe_category_id}.svg',
+          package: "gluttex_chef",
+          color: Theme.of(context).colorScheme.primary,
+          width: MediaQuery.of(context).size.width * 0.2,
+          height: MediaQuery.of(context).size.width * 0.2,
+        ),
       ),
     );
   }
 
   List<Widget> _buildAppBarActions(BuildContext context) {
     return [
-      IconButton(
-        icon: const Icon(Icons.edit),
-        onPressed: () => _navigateToEditScreen(context),
-      ),
+      // IconButton(
+      //   icon: const Icon(Icons.edit),
+      //   onPressed: () => _navigateToEditScreen(context),
+      // ),
       IconButton(
         icon: const Icon(Icons.delete, color: Colors.red),
         onPressed: () => _showDeleteConfirmation(context),
@@ -205,7 +225,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             SvgPicture.asset(
           'assets/icons/${_recipe.recipe_category_id}.svg',
           package: "gluttex_chef",
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.secondary,
         ), // Replace with your desired icon
         // size: 18,
         // color: theme.colorScheme.primary,
@@ -239,7 +259,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             itemBuilder: (context, index) {
               final key = _recipe.recipe_ingredients!.keys.elementAt(index);
               final quantity = _recipe.recipe_ingredients![key]!;
-              final currentIngredient = notifier.recipeIngredients[key];
+              final currentIngredient = notifier.recipeIngredients[key - 1];
 
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
@@ -247,7 +267,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   onClicked: () {},
                   name: AppLocalizations.of(context)!
                       .ingredientTextList
-                      .split(',')[key],
+                      .split(',')[key - 1],
                   quantity: quantity,
                   icon: currentIngredient.ingredient_icon,
                 ),
@@ -285,15 +305,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
       MaterialPageRoute(
         builder: (context) => RecipeEditFormScreen(
           initialRecipeName: _recipe.recipe_name,
-          initialRecipeImage: _recipe.recipe_image_data,
+          // initialRecipeImage: _recipe.recipe_image_data,
           initialRecipeTypeId: _recipe.recipe_category_id,
           initialRecipe_provider_id: _recipe.recipe_owner_id,
           initialRecipe_category_id: _recipe.recipe_category_id,
           initialIdRecipe: _recipe.id_recipe,
+          initialRecipeImageUrl: _recipe.recipe_image_url,
           initialIdRecipeImage: _recipe.id_recipe_image,
           initialRecipeDescription: _recipe.recipe_category_desc,
           initialRecipeInstruction: _recipe.recipe_instruction,
           initialRecipePreparationTime: _recipe.recipe_preparation_time,
+          initialIngredients: _recipe.recipe_ingredients,
         ),
       ),
     );
@@ -316,6 +338,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             responseCode: "SUCCESS",
             finalMessage: AppLocalizations.of(context)!.deleteSuccess,
           );
+          Navigator.pop(context);
         } on GluttexException catch (e) {
           ResponseHandler.handleResponse(
             context: context,

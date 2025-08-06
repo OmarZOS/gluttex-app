@@ -187,9 +187,9 @@ class RecipeCard extends StatelessWidget {
       child: Center(
         child: SvgPicture.asset(
           'assets/icons/$categoryId.svg',
-          package: "medicom_catalog",
-          width: 40,
-          height: 40,
+          package: "gluttex_chef",
+          width: MediaQuery.of(context).size.width * 0.2,
+          height: MediaQuery.of(context).size.width * 0.2,
           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
         ),
       ),

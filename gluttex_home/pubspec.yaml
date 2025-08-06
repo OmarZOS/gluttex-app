@@ -55,6 +55,7 @@ dependencies:
   gluttex_login:
     path: ../gluttex_login
   flutter_pdfview: ^1.4.0+1
+  
 
 
   # The following adds the Cupertino Icons font to your application.

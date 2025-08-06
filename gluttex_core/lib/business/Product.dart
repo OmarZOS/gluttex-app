@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:gluttex_core/app/GluttexImage.dart';
+
 class Product {
   final int? id_product;
   final int? product_provider_id;
@@ -15,12 +17,12 @@ class Product {
   final double? product_price;
   final int? product_quantity;
   final String? product_category_desc;
-  Uint8List? product_image_data;
   String? product_image_url;
-
   final String? product_description;
   final DateTime? product_created_at;
   final DateTime? product_last_updated;
+
+  GluttexImage? productImage;
 
   Product(
       {required this.id_product,
@@ -33,7 +35,7 @@ class Product {
       required this.product_brand,
       required this.product_barcode,
       required this.product_category_desc,
-      required this.product_image_data,
+      // required this.product_image_data,
       required this.product_image_url,
       required this.product_price,
       required this.product_quantity,
@@ -44,16 +46,15 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     String? imageUrl;
-    int cardImageId = 0;
+    int imageId = 0;
     String productCategory = "Missing";
     // log("Got product");
 
-    if (json['product_image'] != null &&
-        json['product_image'] is List &&
-        json['product_image']!.isNotEmpty) {
-      final imageId = json['product_image'][0]["id_product_image"] ?? 0;
-      cardImageId = imageId;
-      imageUrl = json['product_image'][0]["product_image_url"];
+    if (json['product_image'] != null && json['product_image'] is List) {
+      if (json['product_image']?.isNotEmpty) {
+        imageId = json['product_image'].last["id_product_image"] ?? 0;
+        imageUrl = json['product_image'].last["product_image_url"];
+      }
     }
 
     if (json['product_category'] != null) {
@@ -65,13 +66,13 @@ class Product {
       product_provider_id: json['product_provider_id'] ?? 0,
       product_category_id: json['product_category_id'] ?? 0,
       id_product_category: json['id_product_category'] ?? 0,
-      id_product_image: cardImageId,
+      id_product_image: imageId,
       product_ref_id: json['product_ref_id'] ?? 0,
       product_name: json['product_name'] ?? "",
       product_brand: json['product_brand'] ?? "",
       product_barcode: json['product_barcode'] ?? "",
       product_category_desc: productCategory,
-      product_image_data: null,
+      // product_image_data: null,
       product_image_url: imageUrl ?? "",
       product_price: json['product_price'] ?? 0.0,
       product_quantity: json['product_quantity'] ?? 0,
@@ -82,17 +83,6 @@ class Product {
       // product_created_at: DateTime.tryParse(json['created'] ?? 0),
       // product_last_updated: DateTime.tryParse(json['last_updated'] ?? 0),
     );
-  }
-
-  static Uint8List? imageFromJson(List<dynamic> json) {
-    Uint8List? imageData;
-    if (json.isNotEmpty) {
-      final imageBase64 = json[0]["product_image_data"];
-      if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
-        imageData = base64Decode(imageBase64);
-      }
-    }
-    return imageData;
   }
 
   Product copyWith({
@@ -110,7 +100,6 @@ class Product {
         product_brand: product_brand ?? product_brand,
         product_barcode: product_barcode ?? product_barcode,
         product_category_desc: product_category_desc ?? product_category_desc,
-        product_image_data: product_image_data ?? product_image_data,
         product_image_url: product_image_url ?? product_image_url,
         product_price: product_price ?? product_price,
         product_quantity: product_quantity ?? this.product_quantity,
@@ -140,7 +129,7 @@ class Product {
       "image": {
         "id_product_image": id_product_image,
         "product_image_data":
-            product_image_data != null ? base64Encode(product_image_data!) : "",
+            product_image_url ?? "", // For reasons of simplicity
         "product_ref_id": product_ref_id
       }
     };

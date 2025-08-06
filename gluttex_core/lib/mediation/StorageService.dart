@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 
 abstract class StorageService {
   Future<dynamic> getAll(String destination) async {
@@ -5,6 +6,10 @@ abstract class StorageService {
   }
 
   Future<int?> insert(String destination, Map<String, dynamic> data) async {
+    return null;
+  }
+
+  Future<String?> insertBinary(String destination, FormData data) async {
     return null;
   }
 
@@ -16,8 +21,8 @@ abstract class StorageService {
     return null;
   }
 
-  Future<int?> update(
-      String destination, String id, Map<String, dynamic> data) async {
+  Future<int?> update(String destination, String id,
+      Map<String, dynamic> parameters, Map<String, dynamic> data) async {
     return null;
   }
 

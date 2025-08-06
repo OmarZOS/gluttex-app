@@ -161,15 +161,15 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.add_circle),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const RecipeFormScreen()),
-          ),
-        ),
-      ],
+      // actions: [
+      //   IconButton(
+      //     icon: Icon(Icons.add_circle),
+      //     onPressed: () => Navigator.push(
+      //       context,
+      //       MaterialPageRoute(builder: (context) => const RecipeFormScreen()),
+      //     ),
+      //   ),
+      // ],
     );
   }
 
@@ -191,8 +191,8 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
   Widget _buildCategoryChips(ColorScheme colorScheme) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(
-          vertical: GluttexConstants.kDefaultPaddin / 2),
+      // padding: const EdgeInsets.symmetric(
+      //     vertical: GluttexConstants.kDefaultPaddin / 2),
       child: Row(
         children: _categories.map((category) {
           final index = _categories.indexOf(category);

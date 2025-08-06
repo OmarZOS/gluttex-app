@@ -41,8 +41,8 @@ class SettingsScreen extends StatelessWidget {
                 _SettingsSection(
                   title: AppLocalizations.of(context)!.accountText,
                   children: [
-                    if ((Provider.of<AppUserNotifier>(context, listen: false)
-                        .isLoggedIn))
+                    if (Provider.of<AppUserNotifier>(context, listen: false)
+                        .isLoggedIn)
                       Column(
                         children: [
                           _ProfileUpdateTile(),

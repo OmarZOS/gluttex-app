@@ -1,24 +1,23 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:gluttex_chef/components/ImagePickerSection.dart';
 import 'package:gluttex_chef/components/category_picker.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/components/ingredient_popup.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
+import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/ResponseHandler.dart';
-import 'package:gluttex_core/app/Services/SnackbarService.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class RecipeFormScreen extends StatefulWidget {
   const RecipeFormScreen({super.key});
 
   @override
-  _RecipeFormScreenState createState() => _RecipeFormScreenState();
+  State<RecipeFormScreen> createState() => _RecipeFormScreenState();
 }
 
 class _RecipeFormScreenState extends State<RecipeFormScreen> {
@@ -27,12 +26,13 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   final _descriptionController = TextEditingController();
   final _instructionsController = TextEditingController();
 
+  String imageUrl = "";
   late RecipeNotifier _recipeNotifier;
-  Uint8List? _recipeImage;
   int? _recipeCategoryId;
   Duration _preparationTime = Duration.zero;
   final Map<int, String> _selectedIngredients = {};
   bool _isSubmitting = false;
+  GluttexImage? _recipeImage;
 
   @override
   void initState() {
@@ -46,28 +46,6 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
     _descriptionController.dispose();
     _instructionsController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickImage() async {
-    try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 85,
-      );
-
-      if (pickedFile != null) {
-        final imageData = await pickedFile.readAsBytes();
-        setState(() => _recipeImage = imageData);
-      }
-    } catch (e) {
-      SnackbarService.showSnackbar(
-          context: context,
-          message: AppLocalizations.of(context)!.noImageSelectedTxt,
-          backgroundColor: Colors.red);
-    }
   }
 
   void _selectDuration(BuildContext context) {
@@ -86,9 +64,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               mode: CupertinoTimerPickerMode.hm,
               initialTimerDuration: _preparationTime,
               onTimerDurationChanged: (Duration newDuration) {
-                setState(() {
-                  _preparationTime = newDuration;
-                });
+                setState(() => _preparationTime = newDuration);
               },
             ),
             const SizedBox(height: 16),
@@ -103,24 +79,20 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_isSubmitting) return;
-
-    _formKey.currentState!.save();
+    if (!_formKey.currentState!.validate() || _isSubmitting) return;
     setState(() => _isSubmitting = true);
 
     try {
       final recipe = Recipe(
-        id_recipe: null,
+        id_recipe: 0,
         recipe_owner_id: Provider.of<AppUserNotifier>(context, listen: false)
                 .appUser
                 ?.id_app_user ??
             1,
-        recipe_category_id: _recipeCategoryId ?? 0,
+        recipe_category_id: _recipeCategoryId ?? 1,
         id_recipe_image: null,
         recipe_name: _nameController.text,
-        recipe_image_data: _recipeImage,
-        recipe_image_url: null,
+        recipe_image_url: imageUrl,
         recipe_description: _descriptionController.text,
         recipe_created_at: null,
         recipe_last_updated: null,
@@ -130,7 +102,10 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
         recipe_ingredients: _selectedIngredients,
       );
 
-      await _recipeNotifier.addRecipe(recipe);
+      if (_recipeImage != null) recipe.recipeImage = _recipeImage!;
+
+      await Provider.of<RecipeNotifier>(context, listen: false)
+          .addOrUpdateRecipe(recipe);
 
       ResponseHandler.handleResponse(
         context: context,
@@ -139,7 +114,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
         finalMessage: AppLocalizations.of(context)!.putSuccess,
       );
 
-      // _handleResponse(statusCode, recipe);
+      Navigator.pop(context);
     } on GluttexException catch (e) {
       ResponseHandler.handleResponse(
         context: context,
@@ -155,12 +130,10 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.insertRecipeText),
-        elevation: 0,
         centerTitle: true,
       ),
       body: Form(
@@ -170,12 +143,20 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildImageSection(loc),
+              ImagePickerSection(
+                initialImageUrl: "",
+                entityType: 'recipe',
+                ownerId:
+                    '${Provider.of<AppUserNotifier>(context, listen: false).appUser?.id_app_user ?? 0}',
+                entityId: '0',
+                onImageUploaded: (image) =>
+                    setState(() => _recipeImage = image),
+              ),
               const SizedBox(height: 24),
               _buildTextField(
                 controller: _nameController,
                 label: loc.recipeNameText,
-                validator: (value) => value?.isEmpty ?? true
+                validator: (value) => (value?.isEmpty ?? true)
                     ? loc.pleaseInputRecipeNameMsg
                     : null,
               ),
@@ -200,7 +181,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               ),
               const SizedBox(height: 16),
               CategoryPicker(
-                category_id: 0,
+                category_id: _recipeCategoryId ?? 1,
                 categories: _recipeNotifier.categories,
                 onCategoryChanged: (id) => _recipeCategoryId = id,
               ),
@@ -214,8 +195,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 child: _isSubmitting
                     ? const CircularProgressIndicator()
@@ -238,9 +218,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
       ),
@@ -249,62 +227,18 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
     );
   }
 
-  Widget _buildImageSection(AppLocalizations loc) {
-    return Column(
-      children: [
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: _recipeImage != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.memory(
-                    _recipeImage!,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.image, size: 50, color: Colors.grey.shade400),
-                      Text(loc.noImageSelectedTxt),
-                    ],
-                  ),
-                ),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.camera_alt),
-          label: Text(loc.pickImageMsg),
-          style: OutlinedButton.styleFrom(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12.0),
-          ),
-          onPressed: _pickImage,
-        ),
-      ],
-    );
-  }
-
   Widget _buildDurationPicker(AppLocalizations loc) {
     return Card(
-      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey.shade300),
       ),
       child: ListTile(
         title: Text(
-          AppLocalizations.of(context)!.preparationTimeText(
-              _preparationTime.inHours.toString(),
-              _preparationTime.inMinutes.remainder(60).toString()),
+          loc.preparationTimeText(
+            _preparationTime.inHours.toString(),
+            _preparationTime.inMinutes.remainder(60).toString(),
+          ),
         ),
         trailing: const Icon(Icons.timer),
         onTap: () => _selectDuration(context),
@@ -316,10 +250,8 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          loc.ingredientSelect,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text(loc.ingredientSelect,
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         if (_selectedIngredients.isNotEmpty)
           SizedBox(
@@ -330,15 +262,15 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               itemBuilder: (context, index) {
                 final key = _selectedIngredients.keys.elementAt(index);
                 final quantity = _selectedIngredients[key]!;
-                final ingredient = _recipeNotifier.recipeIngredients[key - 1];
+                final ingredient = _recipeNotifier.recipeIngredients
+                    .firstWhere((i) => i.id_ingredient == key);
 
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: IngredientCard(
                     onClicked: () =>
                         setState(() => _selectedIngredients.remove(key)),
-                    name: loc.ingredientTextList
-                        .split(",")[ingredient.id_ingredient - 1],
+                    name: ingredient.ingredient_name,
                     quantity: quantity,
                     icon: ingredient.ingredient_icon,
                   ),
@@ -358,9 +290,8 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
           onPressed: () => showDialog(
             context: context,
             builder: (context) => IngredientPopup(
-              onIngredientSelected: (ingredient, quantity) {
-                setState(() => _selectedIngredients[ingredient] = quantity);
-              },
+              onIngredientSelected: (ingredient, quantity) =>
+                  setState(() => _selectedIngredients[ingredient] = quantity),
             ),
           ),
         ),

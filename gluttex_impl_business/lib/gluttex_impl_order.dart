@@ -35,6 +35,7 @@ class OrderServiceImpl implements OrderService {
     return await storageService.update(
         GluttexConstants.apiBaseUrl + GluttexConstants.productEndpoint,
         '${updatedOrder.id_order}',
+        {},
         updatedOrder.toJson());
   }
 

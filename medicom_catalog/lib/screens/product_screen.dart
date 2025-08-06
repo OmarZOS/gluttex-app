@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
@@ -60,8 +62,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final bool isRTL = Provider.of<LocaleProvider>(context, listen: false)
-            .locale!
-            .languageCode ==
+            .locale
+            ?.languageCode ==
         "ar";
     return Scaffold(
       floatingActionButton:
@@ -111,109 +113,122 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               alignment: isRTL
                                   ? Alignment.topLeft
                                   : Alignment.topRight,
-                              child: FractionallySizedBox(
-                                widthFactor: 0.65,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: MediaQuery.of(context).size.width /
+                                      2, // half screen
+                                ),
                                 child: Opacity(
                                   opacity: 1,
                                   child: ClipRRect(
-                                      borderRadius: BorderRadius.only(
-                                        topRight: isRTL
-                                            ? const Radius.circular(40)
-                                            : Radius.zero,
-                                        bottomRight: isRTL
-                                            ? const Radius.circular(40)
-                                            : Radius.zero,
-                                        topLeft: isRTL
-                                            ? Radius.zero
-                                            : const Radius.circular(40),
-                                        bottomLeft: isRTL
-                                            ? Radius.zero
-                                            : const Radius.circular(40),
+                                    borderRadius: BorderRadius.only(
+                                      topRight: isRTL
+                                          ? const Radius.circular(40)
+                                          : Radius.zero,
+                                      bottomRight: isRTL
+                                          ? const Radius.circular(40)
+                                          : Radius.zero,
+                                      topLeft: isRTL
+                                          ? Radius.zero
+                                          : const Radius.circular(40),
+                                      bottomLeft: isRTL
+                                          ? Radius.zero
+                                          : const Radius.circular(40),
+                                    ),
+                                    child: Hero(
+                                      tag:
+                                          "product-image-${_product.id_product}",
+                                      child: Image.network(
+                                        GluttexConstants.fsBaseUrl +
+                                            _product.product_image_url!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(Icons.broken_image,
+                                                    size: 64),
+                                        loadingBuilder:
+                                            (context, child, loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return const Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        },
                                       ),
-                                      child: Hero(
-                                        tag:
-                                            "product-image-${_product.id_product}",
-                                        child: Image.network(
-                                          GluttexConstants.fsBaseUrl +
-                                              _product.product_image_url!,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  const Icon(Icons.broken_image,
-                                                      size: 64),
-                                          loadingBuilder: (context, child,
-                                              loadingProgress) {
-                                            if (loadingProgress == null)
-                                              return child;
-                                            return const Center(
-                                                child:
-                                                    CircularProgressIndicator());
-                                          },
-                                        ),
-                                      )),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
 
-                          // Foreground Content
+                          // Foreground Content with half-width text
                           Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: GluttexConstants.kDefaultPaddin,
                               vertical: GluttexConstants.kDefaultPaddin,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                // const SizedBox(
-                                //     height:
-                                //         GluttexConstants.kDefaultPaddin * 1.2),
-                                Text(_product.product_brand ?? ""),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _product.product_name ?? "",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge!
-                                      .copyWith(
-                                        fontWeight: FontWeight.bold,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width /
+                                    2, // half screen width
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(_product.product_brand ?? ""),
+                                  const SizedBox(height: 4),
+                                  ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width /
+                                                3, // half screen width
                                       ),
-                                ),
-                                const SizedBox(
-                                    height: GluttexConstants.kDefaultPaddin),
-                                RichText(
-                                  text: TextSpan(
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                    children: [
-                                      TextSpan(
-                                        text:
-                                            "${AppLocalizations.of(context)!.priceText}\n",
+                                      child: Text(
+                                        _product.product_name ?? "",
                                         style: Theme.of(context)
                                             .textTheme
-                                            .bodyLarge!
+                                            .titleLarge!
                                             .copyWith(
-                                                fontWeight: FontWeight.w600,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface),
-                                      ),
-                                      TextSpan(
-                                        text: AppLocalizations.of(context)!
-                                            .price(_product.product_price
-                                                .toString()),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineSmall!
-                                            .copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary),
-                                      ),
-                                    ],
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      )),
+                                  const SizedBox(
+                                      height: GluttexConstants.kDefaultPaddin),
+                                  RichText(
+                                    text: TextSpan(
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              "${AppLocalizations.of(context)!.priceText}\n",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface),
+                                        ),
+                                        TextSpan(
+                                          text: AppLocalizations.of(context)!
+                                              .price(_product.product_price
+                                                  .toString()),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineSmall!
+                                              .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -288,7 +303,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   AppBar _buildAppBar(BuildContext context) {
-    final isOwner = is_product_owner(context, _product.product_owner_id ?? 0);
+    final isOwner = isProductOwner(context, _product.product_owner_id ?? 0);
 
     return AppBar(
       elevation: 0,
@@ -490,6 +505,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Future<void> _navigateToEditScreen(BuildContext context) async {
+    log('Owner Id: ${_product.product_owner_id}');
+    log('Image Id: ${_product.id_product_image}');
+
     final updatedProduct = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -497,8 +515,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
           initialProductName: _product.product_name,
           initialProductBrand: _product.product_brand,
           initialProductBarcode: _product.product_barcode,
-          initialProductImage: _product.product_image_data,
+          // initialProductImage: _product.product_image_data,
           initialProductOwner: _product.product_owner_id,
+          initialProductImageUrl: _product.product_image_url,
           initialProductTypeId: _product.product_category_id,
           initialProductPrice: _product.product_price,
           initialProductQuantity: _product.product_quantity,

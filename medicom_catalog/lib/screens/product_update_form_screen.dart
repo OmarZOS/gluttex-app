@@ -2,22 +2,23 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
+import 'package:medicom_catalog/screens/components/ImagePickerSection.dart';
 import 'package:medicom_catalog/screens/components/category_picker.dart';
 import 'package:provider/provider.dart';
-
-import 'components/image_picker.dart';
 
 class ProductEditFormScreen extends StatefulWidget {
   final String? initialProductName;
   final String? initialProductBrand;
   final String? initialProductBarcode;
   final Uint8List? initialProductImage;
+  final String? initialProductImageUrl;
   final int? initialProductTypeId;
   final double? initialProductPrice;
   final int? initialProductQuantity;
@@ -35,6 +36,7 @@ class ProductEditFormScreen extends StatefulWidget {
       this.initialProductBrand,
       this.initialProductBarcode,
       this.initialProductImage,
+      this.initialProductImageUrl,
       this.initialProductTypeId,
       this.initialProductPrice,
       this.initialProductQuantity,
@@ -56,7 +58,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
   String? _productName;
   String? _productBrand;
   String? _productBarcode;
-  Uint8List? _productImage;
+  GluttexImage? _productImage = null;
   int? _productTypeId;
   double? _productPrice;
   int? _productQuantity;
@@ -65,7 +67,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
   int? _product_category_id;
   int? _id_product;
   int? _id_product_image;
-
+  String? imageUrl;
   String? _productDescription;
   DateTime? product_created_at;
   DateTime? product_last_updated;
@@ -77,32 +79,17 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
     _productName = widget.initialProductName;
     _productBrand = widget.initialProductBrand;
     _productBarcode = widget.initialProductBarcode;
-    _productImage = widget.initialProductImage;
+    // _productImage = widget.initialProductImage;
+    imageUrl = widget.initialProductImageUrl ?? "";
     _productTypeId = widget.initialProductTypeId ?? 1;
     _productPrice = widget.initialProductPrice;
     _productQuantity = widget.initialProductQuantity;
-    _product_owner_id == widget.initialProductOwner;
+    _product_owner_id = widget.initialProductOwner;
     _productDescription = widget.initialProductDescription;
     _product_provider_id = widget.initialProduct_provider_id;
     _product_category_id = widget.initialProduct_category_id;
     _id_product = widget.initialIdProduct;
     _id_product_image = widget.initialIdProductImage;
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      Uint8List imageData = await pickedFile.readAsBytes();
-      Uint8List resizedImage = resizeImage(
-          imageData,
-          MediaQuery.of(context).size.width.floor(),
-          MediaQuery.of(context).size.width.floor());
-      setState(() {
-        _productImage = resizedImage;
-      });
-    }
   }
 
   void _onCategoryChanged(int identifier) {
@@ -237,17 +224,20 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                 },
               ),
               const SizedBox(height: 16.0),
-              _productImage != null
-                  ? Image.memory(_productImage!,
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.width)
-                  : Text(AppLocalizations.of(context)!.noImageSelectedTxt),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: Text(AppLocalizations.of(context)!.pickImageMsg),
+              ImagePickerSection(
+                initialImageUrl: imageUrl,
+                entityType: 'product',
+                ownerId: '$_product_owner_id',
+                entityId: '$_id_product',
+                onImageUploaded: (newImage) {
+                  setState(() {
+                    _productImage = newImage;
+                    _id_product_image =
+                        0; // Reset image ID to 0 for new uploads
+                  });
+                },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
@@ -264,8 +254,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                       product_name: _productName,
                       product_brand: _productBrand,
                       product_barcode: _productBarcode,
-                      product_image_data: _productImage,
-                      product_image_url: null,
+                      product_image_url: imageUrl,
                       product_category_desc: '',
                       product_price: _productPrice ?? 0,
                       product_quantity: _productQuantity ?? 0,
@@ -274,45 +263,16 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
                       product_last_updated: null,
                     );
 
-                    // Handle product submission
-                    int? statusCode = await GluttexLocator.get<ProductService>()
-                        .updateProduct(product);
+                    if (_productImage != null)
+                      // ignore: curly_braces_in_flow_control_structures
+                      product.productImage = _productImage!;
 
-                    Response response = Response();
+                    final statusCode = await Provider.of<ProductNotifier>(
+                            context,
+                            listen: false)
+                        .addOrUpdateProduct(product);
 
-                    switch (statusCode) {
-                      case 200:
-                        response.color = Colors.green;
-                        response.text =
-                            AppLocalizations.of(context)!.putSuccess;
-                        await Provider.of<ProductNotifier>(context,
-                                listen: false)
-                            .fetchProducts(0);
-                        Navigator.pop(context, product);
-                        break;
-                      case 406:
-                        response.color = Colors.amberAccent;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                        break;
-                      case 422:
-                        response.color = Colors.amberAccent;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.putFailure}';
-                        break;
-
-                      default:
-                        response.color = Colors.red;
-                        response.text =
-                            'Error $statusCode: ${AppLocalizations.of(context)!.serverError}';
-                    }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(response.text),
-                        backgroundColor: response.color,
-                      ),
-                    );
+                    _handleResponse(statusCode);
 
                     // You can use a provider or any state management to save the product
                   }
@@ -322,6 +282,40 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _handleResponse(int? statusCode) {
+    final loc = AppLocalizations.of(context)!;
+    String message;
+    Color color;
+
+    switch (statusCode) {
+      case 200:
+        message = loc.putSuccess;
+        color = Colors.green;
+        Provider.of<ProductNotifier>(context, listen: false).fetchProducts(0);
+        Navigator.pop(context);
+        break;
+      case 406:
+      case 422:
+        message = '${loc.putFailure} (Error $statusCode)';
+        color = Colors.amber;
+        break;
+      default:
+        message = '${loc.serverError} (Error $statusCode)';
+        color = Colors.red;
+    }
+
+    _showSnackBar(message, color);
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
       ),
     );
   }

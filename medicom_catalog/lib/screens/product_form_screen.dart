@@ -2,10 +2,12 @@ import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:medicom_catalog/screens/components/ImagePickerSection.dart';
 import 'package:medicom_catalog/screens/components/category_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -25,7 +27,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _productQuantityController = TextEditingController();
   final _productDescriptionController = TextEditingController();
 
-  Uint8List? _productImage;
+  GluttexImage? _productImage;
   int? _productTypeId;
   bool _isSubmitting = false;
 
@@ -40,33 +42,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 85,
-      );
-
-      if (pickedFile != null) {
-        final imageData = await pickedFile.readAsBytes();
-        setState(() {
-          _productImage = imageData;
-        });
-      }
-    } catch (e) {
-      log("Image picker error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.noImageSelectedTxt),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     if (_isSubmitting) return;
@@ -78,14 +53,13 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       final product = Product(
         id_product: 0,
         product_provider_id: 1,
-        product_category_id: _productTypeId ?? 0,
-        id_product_category: _productTypeId ?? 0,
+        product_category_id: _productTypeId ?? 1,
+        id_product_category: _productTypeId ?? 1,
         id_product_image: 0,
         product_ref_id: 0,
         product_name: _productNameController.text,
         product_brand: _productBrandController.text,
         product_barcode: _productBarcodeController.text,
-        product_image_data: _productImage,
         product_image_url: null,
         product_category_desc: '',
         product_price: double.tryParse(_productPriceController.text) ?? 0.0,
@@ -98,6 +72,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 .id_app_user ??
             1,
       );
+
+      if (_productImage != null)
+        // ignore: curly_braces_in_flow_control_structures
+        product.productImage = _productImage!;
 
       final statusCode =
           await Provider.of<ProductNotifier>(context, listen: false)
@@ -228,13 +206,24 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 24),
               CategoryPicker(
-                category_id: 0,
+                category_id: 1,
                 categories: Provider.of<ProductNotifier>(context).categories,
                 onCategoryChanged: (id) => _productTypeId = id,
               ),
               const SizedBox(height: 24),
-              _buildImageSection(loc),
-              const SizedBox(height: 24),
+              ImagePickerSection(
+                initialImageUrl: null,
+                entityType: 'product',
+                onImageUploaded: (image) {
+                  setState(() {
+                    _productImage = image;
+                  });
+                },
+                ownerId:
+                    '${Provider.of<AppUserNotifier>(context, listen: false).appUser!.id_app_user}',
+                entityId: '0', // New product, so no ID yet
+              ),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
@@ -267,39 +256,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       validator: validator,
       keyboardType: keyboardType,
       maxLines: maxLines,
-    );
-  }
-
-  Widget _buildImageSection(AppLocalizations loc) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (_productImage != null)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.memory(
-              _productImage!,
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          )
-        else
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(child: Text(loc.noImageSelectedTxt)),
-          ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.image),
-          label: Text(loc.pickImageMsg),
-          onPressed: _pickImage,
-        ),
-      ],
     );
   }
 }
