@@ -321,7 +321,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   IconButton _buildDeleteButton(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+      icon: const Icon(Icons.delete, color: Colors.red),
       onPressed: () => _showDeleteConfirmation(context),
     );
   }

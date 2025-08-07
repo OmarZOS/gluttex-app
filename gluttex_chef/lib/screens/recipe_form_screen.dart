@@ -247,6 +247,8 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   }
 
   Widget _buildIngredientsSection(AppLocalizations loc) {
+    final ingredientNames =
+        AppLocalizations.of(context)!.ingredientTextList.split(',');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -270,9 +272,9 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                   child: IngredientCard(
                     onClicked: () =>
                         setState(() => _selectedIngredients.remove(key)),
-                    name: ingredient.ingredient_name,
+                    name: ingredientNames[key - 1],
                     quantity: quantity,
-                    icon: ingredient.ingredient_icon,
+                    id: ingredient.id_ingredient,
                   ),
                 );
               },

@@ -153,10 +153,12 @@ class _IngredientPopupState extends State<IngredientPopup> {
         final name = _getIngredientName(ingredient.id_ingredient);
 
         return ListTile(
-          leading: SvgPicture.string(
-            ingredient.ingredient_icon,
+          leading: SvgPicture.asset(
+            'assets/ingredient_svg/${ingredient.id_ingredient}.svg',
+            package: "gluttex_chef",
             width: 28,
             height: 28,
+            fit: BoxFit.contain, // <-- Add this line
             placeholderBuilder: (context) => const SizedBox(
               width: 28,
               height: 28,
@@ -166,6 +168,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
               ),
             ),
           ),
+
           title: Text(name),
           // subtitle: Textrr(ingredient.),
           trailing: const Icon(Icons.add),

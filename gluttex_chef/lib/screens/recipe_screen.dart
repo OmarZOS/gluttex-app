@@ -269,7 +269,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       .ingredientTextList
                       .split(',')[key - 1],
                   quantity: quantity,
-                  icon: currentIngredient.ingredient_icon,
+                  id: currentIngredient.id_ingredient,
                 ),
               );
             },

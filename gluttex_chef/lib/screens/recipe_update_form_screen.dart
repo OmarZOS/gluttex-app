@@ -228,10 +228,7 @@ class _RecipeEditFormScreenState extends State<RecipeEditFormScreen> {
                                 },
                                 name: ingredientNames[key - 1],
                                 quantity: quantity,
-                                icon: Provider.of<RecipeNotifier>(context,
-                                        listen: false)
-                                    .recipeIngredients[key - 1]
-                                    .ingredient_icon,
+                                id: key,
                               );
                             },
                           ),

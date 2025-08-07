@@ -4,14 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 class IngredientCard extends StatelessWidget {
   final String name;
   final String quantity;
-  final String icon;
+  final int id;
   final VoidCallback onClicked;
 
   const IngredientCard({
     super.key,
     required this.name,
     required this.quantity,
-    required this.icon,
+    required this.id,
     required this.onClicked,
   });
 
@@ -45,14 +45,15 @@ class IngredientCard extends StatelessWidget {
                       : theme.colorScheme.primaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: SvgPicture.string(
-                  icon,
+                child: SvgPicture.asset(
+                  'assets/ingredient_svg/$id.svg',
+                  package: "gluttex_chef",
                   width: 28,
                   height: 28,
                   placeholderBuilder: (context) => const SizedBox(
                     width: 28,
                     height: 28,
-                    child: const CircularProgressIndicator(
+                    child: CircularProgressIndicator(
                       strokeWidth: 2,
                     ),
                   ),
