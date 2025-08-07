@@ -117,14 +117,15 @@ class RecipeServiceImpl implements RecipeService {
   }
 
   @override
-  Future<List<RecipeIngredient>?> getAllIngredients() async {
+  Future<List<RecipeIngredient>?> getAllIngredients(
+      int offset, int limit) async {
     try {
       // Get the storage service instance
       StorageService storageService = GluttexLocator.get<StorageService>();
 
       // Make a call to get all categories
       List<dynamic> responseData = await storageService.getAll(
-          GluttexConstants.apiBaseUrl + GluttexConstants.getIngredientEndpoint);
+          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getIngredientEndpoint}/$offset/$limit");
 
       // Check if the response data is not null and is a list
       // Convert the list of RecipeCategory maps to a list of Supplier objects

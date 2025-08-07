@@ -21,11 +21,14 @@ class _IngredientPopupState extends State<IngredientPopup> {
   bool _isLoading = true;
   String? _error;
   late RecipeNotifier _notifier;
+  bool _isFetchingMore = false;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _notifier = Provider.of<RecipeNotifier>(context, listen: false);
+    _scrollController = ScrollController()..addListener(_onScroll);
     _loadIngredients();
   }
 
@@ -33,6 +36,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
   void dispose() {
     _searchController.dispose();
     _quantityController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -145,10 +149,40 @@ class _IngredientPopupState extends State<IngredientPopup> {
     );
   }
 
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !_isFetchingMore &&
+        _notifier.hasMoreIngredients) {
+      _fetchMoreIngredients();
+    }
+  }
+
+  Future<void> _fetchMoreIngredients() async {
+    _isFetchingMore = true;
+    try {
+      await _notifier.fetchIngredients(); // Should fetch the next page
+      _filterIngredients(_searchController.text); // Re-filter after fetching
+    } catch (e) {
+      debugPrint("Failed to fetch more ingredients: $e");
+    } finally {
+      _isFetchingMore = false;
+    }
+  }
+
   Widget _buildIngredientList() {
     return ListView.builder(
-      itemCount: _filteredIngredients.length,
+      controller: _scrollController,
+      itemCount:
+          _filteredIngredients.length + (_notifier.hasMoreIngredients ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index >= _filteredIngredients.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
         final ingredient = _filteredIngredients[index];
         final name = _getIngredientName(ingredient.id_ingredient);
 
@@ -158,19 +192,14 @@ class _IngredientPopupState extends State<IngredientPopup> {
             package: "gluttex_chef",
             width: 28,
             height: 28,
-            fit: BoxFit.contain, // <-- Add this line
+            fit: BoxFit.contain,
             placeholderBuilder: (context) => const SizedBox(
               width: 28,
               height: 28,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                // color: theme.colorScheme.primary,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
-
           title: Text(name),
-          // subtitle: Textrr(ingredient.),
           trailing: const Icon(Icons.add),
           onTap: () => _showQuantityDialog(ingredient),
         );

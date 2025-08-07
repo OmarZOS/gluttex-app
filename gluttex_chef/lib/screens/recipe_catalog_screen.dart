@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_chef/components/RecipeCard.dart';
-import 'package:gluttex_chef/components/RecipeOwner.dart';
 import 'package:gluttex_chef/screens/recipe_form_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';

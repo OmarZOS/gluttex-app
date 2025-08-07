@@ -32,9 +32,13 @@ class RecipeNotifier extends ChangeNotifier {
   List<RecipeIngredient> get recipeIngredients =>
       _recipeIngredients.values.toList();
 
+  int currentIngredientPage = 0;
+  final int ingredientsPerPage = 50;
+  bool hasMoreIngredients = true;
+
   Future<void> initialize() async {
-    await fetchIngredients();
-    // await fetchRecipes(0);
+    await fetchIngredients(reset: true);
+    await fetchRecipes(0, reset: true);
   }
 
   RecipeNotifier() {
@@ -65,25 +69,39 @@ class RecipeNotifier extends ChangeNotifier {
   }
 
   /// Fetches all ingredients and stores them in a map for fast lookups
-  Future<void> fetchIngredients() async {
+  Future<void> fetchIngredients({bool reset = false}) async {
+    if (reset) {
+      _recipeIngredients.clear();
+      currentIngredientPage = 0;
+      hasMoreIngredients = true;
+    }
+
+    if (!hasMoreIngredients || isLoading) return;
+
+    isLoading = true;
+    notifyListeners();
+
     try {
-      if (_recipeIngredients.isEmpty) {
-        final fetchedIngredients = await _recipeService.getAllIngredients();
-        if (fetchedIngredients != null) {
-          // _recipeIngredients.clear();
-          log("Adding to ingredients: ${fetchedIngredients.length} elements");
-          for (var ingredient in fetchedIngredients) {
-            _recipeIngredients[ingredient.id_ingredient] = ingredient;
-          }
-          log("Just added: ${_recipeIngredients.values.length} elements");
+      final fetchedIngredients = await _recipeService.getAllIngredients(
+        currentIngredientPage * ingredientsPerPage,
+        ingredientsPerPage,
+      );
+
+      if (fetchedIngredients != null && fetchedIngredients.isNotEmpty) {
+        for (var ingredient in fetchedIngredients) {
+          _recipeIngredients[ingredient.id_ingredient] = ingredient;
         }
+        currentIngredientPage++;
+      } else {
+        hasMoreIngredients = false;
       }
-      log("Gonna fetch ingredients");
-      log("${_recipeIngredients.toString()}");
-      log("Fetched ingredients");
+
       notifyListeners();
     } catch (e) {
       log("Failed to fetch ingredients: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 

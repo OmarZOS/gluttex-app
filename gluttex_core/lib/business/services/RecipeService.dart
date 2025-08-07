@@ -4,7 +4,8 @@ import '../Recipe.dart';
 
 // RecipeService.dart
 abstract class RecipeService {
-  Future<List<RecipeIngredient>?> getAllIngredients() async {
+  Future<List<RecipeIngredient>?> getAllIngredients(
+      int offset, int limit) async {
     return null;
   }
 
