@@ -203,20 +203,20 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
           alignment: Alignment.bottomRight,
           children: [
             CircleAvatar(
-              radius: 60,
+              radius: MediaQuery.of(context).size.width * 0.25,
               backgroundImage:
                   _editedImage != null ? FileImage(_editedImage!) : null,
               child: _editedImage == null
                   ? CircleAvatar(
-                      radius: 50,
+                      radius: MediaQuery.of(context).size.width * 0.5,
                       backgroundColor: theme.colorScheme.surfaceVariant,
                       child: _editedUser.app_user_image_url != null
                           ? ClipOval(
                               child: Image.network(
                                 GluttexConstants.fsBaseUrl +
                                     _editedUser.app_user_image_url!,
-                                width: 100,
-                                height: 100,
+                                width: MediaQuery.of(context).size.width * 0.5,
+                                height: MediaQuery.of(context).size.width * 0.5,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(

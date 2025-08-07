@@ -84,6 +84,8 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
       ].contains(// Cooking Chef and Supplier id in the database
               Provider.of<AppUserNotifier>(context).appUser?.app_user_type_id)
           ? FloatingActionButton(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
               onPressed: () {
                 Navigator.push(
                   context,

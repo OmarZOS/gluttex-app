@@ -304,6 +304,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
         // Product Grid
         Expanded(
           child: GridView.builder(
+            physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics()),
             controller: _scrollController,
             itemCount: products.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -316,7 +318,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           ),
         ),
         // Loading Indicator
-        if (productNotifier.isLoading)
+        if (productNotifier.isLoading && products.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Center(

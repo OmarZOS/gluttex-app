@@ -10,37 +10,39 @@ class GameSelectionScreen extends StatelessWidget {
       // appBar:
       //     AppBar(title: Text(AppLocalizations.of(context)!.selectGameMessage)),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            const SizedBox(height: 8), // Top spacing
-            _buildGameCard(
-              context,
-              title: AppLocalizations.of(context)!.snakeTitle,
-              imagePath: "assets/images/snake.jpg",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SnakeGame()),
-                );
-              },
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
             ),
-            const SizedBox(height: 16), // Spacing between cards
-            _buildGameCard(
-              context,
-              title: AppLocalizations.of(context)!.quizTitle,
-              imagePath: "assets/images/quiz.jpg",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => GlutenFreeQuiz()),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+            children: [
+              const SizedBox(height: 8), // Top spacing
+              _buildGameCard(
+                context,
+                title: AppLocalizations.of(context)!.snakeTitle,
+                imagePath: "assets/images/snake.jpg",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SnakeGame()),
+                  );
+                },
+              ),
+              const SizedBox(height: 16), // Spacing between cards
+              _buildGameCard(
+                context,
+                title: AppLocalizations.of(context)!.quizTitle,
+                imagePath: "assets/images/quiz.jpg",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => GlutenFreeQuiz()),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          )),
     );
   }
 

@@ -14,31 +14,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _isEditing = false;
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
-  // late TextEditingController _emailController;
-
-  @override
-  void initState() {
-    super.initState();
-    final user = Provider.of<AppUserNotifier>(context, listen: false).appUser;
-    _firstNameController =
-        TextEditingController(text: user?.personFirstName ?? '');
-    _lastNameController =
-        TextEditingController(text: user?.personLastName ?? '');
-    // _emailController = TextEditingController(text: user. ?? '');
-  }
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    // _emailController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -49,38 +24,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // SliverAppBar(
-          //   expandedHeight: 200,
-          //   pinned: true,
-          //   flexibleSpace: FlexibleSpaceBar(
-          //     // title: Text(
-          //     //   '',
-          //     //   style: TextStyle(
-          //     //     color: theme.colorScheme.onBackground,
-          //     //     shadows: isDarkMode
-          //     //         ? [const Shadow(color: Colors.black, blurRadius: 4)]
-          //     //         : null,
-          //     //   ),
-          //     // ),
-          //     background: Container(
-          //       decoration: BoxDecoration(
-          //         gradient: LinearGradient(
-          //           colors: isDarkMode
-          //               ? [
-          //                   const Color.fromARGB(255, 100, 110, 105),
-          //                   const Color(0xFF186A3B)
-          //                 ] // Darker green shades
-          //               : [
-          //                   const Color(0xFF2ECC71),
-          //                   const Color.fromARGB(255, 143, 197, 166)
-          //                 ], // Your main color + slightly darker
-          //           begin: Alignment.topLeft,
-          //           end: Alignment.bottomRight,
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
           SliverToBoxAdapter(
             child: Consumer<AppUserNotifier>(
               builder: (context, appUserNotifier, _) {
@@ -96,80 +39,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // void showDiseaseInfoSheet(BuildContext context) {
-  //   final theme = Theme.of(context);
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: theme.colorScheme.background,
-  //     shape: RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-  //     ),
-  //     builder: (context) {
-  //       return Container(
-  //         padding: const EdgeInsets.all(16),
-  //         child: SingleChildScrollView(
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text(
-  //                 'Maladie cœliaque',
-  //                 style: theme.textTheme.headlineSmall,
-  //               ),
-  //               const SizedBox(height: 12),
-  //               Text(
-  //                 AppLocalizations.of(context)!
-  //                     .illnessInfoTab, // localized description
-  //                 style: theme.textTheme.bodyMedium,
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _buildFloatingActionButtons(BuildContext context, ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (_isEditing)
-          FloatingActionButton(
-            heroTag: 'save',
-            backgroundColor: theme.colorScheme.secondary,
-            foregroundColor: theme.colorScheme.onSecondary,
-            onPressed: _saveChanges,
-            child: const Icon(Icons.save),
-          ),
         const SizedBox(width: 16),
         FloatingActionButton(
-          heroTag: 'settings',
+          // heroTag: 'settings',
           backgroundColor: theme.colorScheme.primary,
           foregroundColor: theme.colorScheme.onPrimary,
-          onPressed: () => _navigateToSettings(context),
-          child: Icon(_isEditing ? Icons.close : Icons.settings),
+          onPressed: () => showIllnessInfoPopup(context),
+          // _navigateToSettings(context)
+          child: const Icon(Icons.info),
         ),
       ],
     );
-  }
-
-  void _navigateToSettings(BuildContext context) {
-    if (_isEditing) {
-      setState(() => _isEditing = false);
-    } else {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const SettingsScreen(),
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-        ),
-      );
-    }
   }
 
   Widget _buildProfileContent(
@@ -182,71 +66,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildUserAvatarSection(user, theme),
-          const SizedBox(height: 24),
-          if (!_isEditing) ...[
-            _buildProfileSection(
-              title: localizations.userInfoText,
-              children: [
-                _buildInfoTile(localizations.usernameText, user.app_user_name),
-                // _buildInfoTile(localizations.emailText, user.app_user_email),
-                _buildInfoTile(
-                    localizations.userTypeText, user.app_user_type_desc),
-              ],
-              theme: theme,
-            ),
-            _buildProfileSection(
-              title: localizations.personalInfoText,
-              children: [
-                _buildInfoTile(
-                    localizations.firstNameText, user.personFirstName),
-                _buildInfoTile(localizations.lastNameText, user.personLastName),
-                _buildInfoTile(
-                    localizations.birthdayText, user.personBirthDate),
-                _buildInfoTile(localizations.genderText, user.personGender),
-              ],
-              theme: theme,
-            ),
-            _buildProfileSection(
-              title: localizations.locationInfoText,
-              children: [
-                _buildInfoTile(localizations.cityText, user.addressCity),
-                _buildInfoTile(localizations.countryText, user.addressCountry),
-              ],
-              theme: theme,
-            ),
-            _buildProfileSection(
-              title: localizations.illnessInfoTab,
-              children: [
-                GestureDetector(
-                  onTap: () => showIllnessInfoPopup(context), // Call your modal
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline,
-                          color: Theme.of(context).colorScheme.primary),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          localizations
-                              .illnessOverviewTitle, // Or your localized string
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color:
-                                Theme.of(context).textTheme.bodyMedium!.color,
-                          ),
-                        ),
-                      ),
-                      Icon(Icons.arrow_forward_ios_rounded,
-                          size: 16, color: Colors.grey),
-                    ],
-                  ),
-                ),
-              ],
-              theme: theme,
-            ),
-          ] else ...[
-            _buildEditableProfileSection(localizations, theme)
-          ],
+          // const SizedBox(height: 8),
+
+          _buildProfileSection(
+            title: localizations.userInfoText,
+            children: [
+              _buildInfoTile(localizations.usernameText, user.app_user_name),
+              // _buildInfoTile(localizations.emailText, user.app_user_email),
+              _buildInfoTile(
+                  localizations.userTypeText, user.app_user_type_desc),
+            ],
+            theme: theme,
+          ),
+          _buildProfileSection(
+            title: localizations.personalInfoText,
+            children: [
+              _buildInfoTile(localizations.firstNameText, user.personFirstName),
+              _buildInfoTile(localizations.lastNameText, user.personLastName),
+              _buildInfoTile(localizations.birthdayText, user.personBirthDate),
+              _buildInfoTile(localizations.genderText, user.personGender),
+            ],
+            theme: theme,
+          ),
+          _buildProfileSection(
+            title: localizations.locationInfoText,
+            children: [
+              _buildInfoTile(localizations.cityText, user.addressCity),
+              _buildInfoTile(localizations.countryText, user.addressCountry),
+            ],
+            theme: theme,
+          ),
         ],
       ),
     );
@@ -366,7 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildUserAvatarSection(AppUser user, ThemeData theme) {
     return GestureDetector(
-      onTap: _isEditing ? _changeProfilePicture : null,
+      // onTap: _isEditing ? _changeProfilePicture : null,
       child: Center(
         child: Column(
           children: [
@@ -382,23 +231,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   child: CircleAvatar(
-                    radius: 50,
+                    radius: MediaQuery.of(context).size.width * 0.25,
                     backgroundColor: theme.colorScheme.surfaceVariant,
                     child: user.app_user_image_url != null
                         ? ClipOval(
                             child: Image.network(
                               GluttexConstants.fsBaseUrl +
                                   user.app_user_image_url!,
-                              width: 100,
-                              height: 100,
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              height: MediaQuery.of(context).size.width * 0.5,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  height: 100,
-                                  color: Colors.grey[200],
-                                  child: const Center(
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.5,
+                                  // color: Colors.grey[200],
+                                  child: Center(
                                     child: Icon(Icons.person,
-                                        size: 60, color: Colors.white),
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.4),
                                   ),
                                 );
                               },
@@ -411,19 +263,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                   ),
                 ),
-                if (_isEditing)
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.edit,
-                      size: 20,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                  ),
               ],
             ),
             const SizedBox(height: 8),
@@ -433,16 +272,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (_isEditing)
-              TextButton(
-                onPressed: _changeProfilePicture,
-                child: Text(
-                  AppLocalizations.of(context)!.changePhotoText,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -516,118 +345,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildEditableProfileSection(AppLocalizations loc, ThemeData theme) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          _buildProfileSection(
-            title: loc.personalInfoText,
-            children: [
-              _buildEditableField(
-                label: loc.firstNameText,
-                controller: _firstNameController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return loc.fieldRequired;
-                  }
-                  return null;
-                },
-                theme: theme,
-              ),
-              _buildEditableField(
-                label: loc.lastNameText,
-                controller: _lastNameController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return loc.fieldRequired;
-                  }
-                  return null;
-                },
-                theme: theme,
-              ),
-            ],
-            theme: theme,
-          ),
-          // _buildProfileSection(
-          //   title: loc.contactInfoText,
-          //   children: [
-          //     _buildEditableField(
-          //       label: loc.emailText,
-          //       controller: _emailController,
-          //       validator: (value) {
-          //         if (value == null || value.isEmpty) {
-          //           return loc.fieldRequired;
-          //         }
-          //         if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-          //             .hasMatch(value)) {
-          //           return loc.invalidEmail;
-          //         }
-          //         return null;
-          //       },
-          //       theme: theme,
-          //     ),
-          //   ],
-          //   theme: theme,
-          // ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEditableField({
-    required String label,
-    required TextEditingController controller,
-    required String? Function(String?) validator,
-    required ThemeData theme,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          filled: true,
-        ),
-        validator: validator,
-      ),
-    );
-  }
-
-  Future<void> _changeProfilePicture() async {
-    // Implement image picker logic
-  }
-
-  Future<void> _saveChanges() async {
-    if (_formKey.currentState!.validate()) {
-      // Save changes to backend
-      // final notifier = Provider.of<AppUserNotifier>(context, listen: false);
-      try {
-        // await notifier.updateUserProfile(
-        //   firstName: _firstNameController.text,
-        //   lastName: _lastNameController.text,
-        //   email: _emailController.text,
-        // );
-        setState(() => _isEditing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.profileUpdateSuccess),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 }

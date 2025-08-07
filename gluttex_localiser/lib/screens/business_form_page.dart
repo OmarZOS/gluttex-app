@@ -176,13 +176,13 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.addSupplierTxt),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _submitForm,
-            tooltip: localizations.save,
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.save),
+        //     onPressed: _submitForm,
+        //     tooltip: localizations.save,
+        //   ),
+        // ],
       ),
       body: Form(
         key: _formKey,

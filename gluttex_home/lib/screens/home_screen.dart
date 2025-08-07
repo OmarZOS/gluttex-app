@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
@@ -18,8 +19,40 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
+  int _animationCount = 0;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    // Start the animation sequence
+    // _startIconAnimation();
+  }
+
+  void _startIconAnimation() {
+    if (_selectedIndex != 4) return; // Only animate in profile
+    _controller.forward().then((_) {
+      _controller.reverse().then((_) {
+        _animationCount++;
+        if (_animationCount < 2 && _selectedIndex == 4) {
+          _startIconAnimation(); // repeat only while on profile
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   static final List<Widget> _pages = <Widget>[
     const CatalogScreen(),
@@ -33,6 +66,10 @@ class _HomePageState extends State<HomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      if (_selectedIndex == 4) {
+        _animationCount = 0;
+        _startIconAnimation();
+      }
     });
   }
 
@@ -70,6 +107,18 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_getTitle(_selectedIndex)),
+        actions: [
+          if (_selectedIndex == 4)
+            RotationTransition(
+              turns: Tween(begin: -0.05, end: 0.05)
+                  .chain(CurveTween(curve: Curves.easeInOut))
+                  .animate(_controller),
+              child: IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => _navigateToSettings(context),
+              ),
+            ),
+        ],
         backgroundColor: isDarkMode
             ? // Darker green shades
             const Color(0xFF186A3B)
@@ -130,6 +179,21 @@ class _HomePageState extends State<HomePage> {
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+      ),
+    );
+  }
+
+  void _navigateToSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const SettingsScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
       ),
     );
   }

@@ -284,19 +284,25 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
       onRefresh: _refreshRecipes,
       color: Theme.of(context).colorScheme.primary,
       child: CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
         controller: _scrollController,
         slivers: [
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) => Padding(
                 padding: const EdgeInsets.only(
-                    bottom: GluttexConstants.kDefaultPaddin),
+                  bottom: GluttexConstants.kDefaultPaddin,
+                ),
                 child: RecipeCard(recipe: recipes[index]),
               ),
               childCount: recipes.length,
             ),
           ),
-          if (recipeNotifier.isLoading)
+
+          // show bottom loader only when we already have data
+          if (recipeNotifier.isLoading && recipes.isNotEmpty)
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
