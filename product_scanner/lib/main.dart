@@ -58,6 +58,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
         child: Text('Scan result: $_barcode'),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'floating-button',
         onPressed: scanBarcode,
         tooltip: 'Scan Barcode',
         child: const Icon(Icons.camera_alt),

@@ -51,6 +51,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       floatingActionButton:
           Provider.of<AppUserNotifier>(context, listen: false).isCookingChef
               ? FloatingActionButton(
+                  heroTag: 'floating-button',
                   onPressed: () => _navigateToEditScreen(context),
                   child: const Icon(Icons.edit),
                 )
@@ -86,8 +87,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
               _buildCategoryTag(theme, categoryName),
               const SizedBox(height: 24),
               if (_recipe.recipe_ingredients?.isNotEmpty ?? false)
-                _buildIngredientsList(context),
-              const SizedBox(height: 24),
+                Column(
+                  children: [
+                    _buildIngredientsList(context),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               _buildInstructionsSection(theme),
               FutureBuilder<Widget>(
                 future: _buildProviderTile(context),

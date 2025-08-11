@@ -103,6 +103,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
         title: Text(AppLocalizations.of(context)!.updateProductText),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'floating-button',
         child: const Icon(
           Icons.shopify_sharp,
           // color: Colors.yellow[50],

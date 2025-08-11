@@ -149,6 +149,7 @@ class _MapScreenState extends State<MapScreen> {
           bottom: 20,
           right: 20,
           child: FloatingActionButton(
+            heroTag: 'floating-button',
             mini: true,
             backgroundColor: Theme.of(context).colorScheme.surface,
             child: Icon(

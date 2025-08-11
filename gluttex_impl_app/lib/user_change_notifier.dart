@@ -14,6 +14,9 @@ class AppUserNotifier extends ChangeNotifier {
   AppUser? _appUser;
   late String? token;
 
+  int _selectedTabIndex = 0;
+  int get selectedTabIndex => _selectedTabIndex;
+
   AppUser? get appUser => _appUser;
 
   bool get isLoggedIn => (_appUser?.id_app_user ?? 0) > 0;
@@ -24,6 +27,11 @@ class AppUserNotifier extends ChangeNotifier {
   Future<void> fetchAppUser(String userId) async {
     var appUser = await _appUserService.getAppUser(userId);
     _appUser = appUser;
+    notifyListeners();
+  }
+
+  void setSelectedTabIndex(int index) {
+    _selectedTabIndex = index;
     notifyListeners();
   }
 

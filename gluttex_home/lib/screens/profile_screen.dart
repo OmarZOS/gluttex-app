@@ -45,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         const SizedBox(width: 16),
         FloatingActionButton(
-          // heroTag: 'settings',
+          heroTag: 'floating-button',
           backgroundColor: theme.colorScheme.primary,
           foregroundColor: theme.colorScheme.onPrimary,
           onPressed: () => showIllnessInfoPopup(context),

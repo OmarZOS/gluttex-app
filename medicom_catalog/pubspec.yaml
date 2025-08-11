@@ -42,6 +42,8 @@ dependencies:
     path: ../gluttex_impl_business
   gluttex_impl_mediation:
     path: ../gluttex_impl_mediation
+  gluttex_localiser:
+    path: ../gluttex_localiser
     
 
 

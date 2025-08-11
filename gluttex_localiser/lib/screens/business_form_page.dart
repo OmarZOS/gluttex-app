@@ -9,6 +9,7 @@ import 'package:gluttex_localiser/components/map_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:locator/locator.dart';
 import 'package:gluttex_core/app/Response.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SupplierFormScreen extends StatefulWidget {
   const SupplierFormScreen({super.key});
@@ -65,12 +66,14 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     setState(() {
       _contactControllers.add(controller);
       _contactFocusNodes.add(focusNode);
+      _selectedContactTypes.add(_contactTypes.first); // initialize same length
     });
   }
 
   void _removeContactField(int index) {
     setState(() {
       _contactControllers.removeAt(index);
+      _selectedContactTypes.removeAt(index);
       _contactFocusNodes.removeAt(index).dispose();
     });
   }
@@ -231,7 +234,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               // Contact Information Section
               _buildSectionHeader(localizations.contactInformation),
               ..._buildContactFields(context),
-              _buildAddContactButton(context),
+              // _buildAddContactButton(context),
               const SizedBox(height: 32),
 
               // Submit Button
@@ -310,23 +313,92 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   }
 
   Widget _buildLocationPicker(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Icon(
-          Icons.location_on,
-          color: _position != null ? Colors.green : null,
+    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
+    final hasLocation = _position != null;
+
+    return GestureDetector(
+      onTap: () async {
+        final position = await showLocationInputDialog(context);
+        if (position != null && mounted) {
+          setState(() {
+            _position = position;
+            _location_latitude = position.latitude;
+            _location_longitude = position.longitude;
+          });
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceVariant.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: hasLocation
+                ? theme.colorScheme.primary.withOpacity(0.2)
+                : theme.colorScheme.outline.withOpacity(0.1),
+            width: 1,
+          ),
         ),
-        title: Text(
-          _position != null
-              ? '${_position!.latitude.toStringAsFixed(4)}, ${_position!.longitude.toStringAsFixed(4)}'
-              : AppLocalizations.of(context)!.insertCoordinatesMsg,
-        ),
-        trailing: _position != null
-            ? IconButton(
-                icon: const Icon(Icons.edit),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: hasLocation
+                    ? theme.colorScheme.primary.withOpacity(0.1)
+                    : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.location_on,
+                color: hasLocation
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withOpacity(0.5),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.insertCoordinatesMsg,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    hasLocation
+                        ? '${_position!.latitude.toStringAsFixed(4)}, ${_position!.longitude.toStringAsFixed(4)}'
+                        : loc.insertCoordinatesMsg,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: hasLocation
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                  if (hasLocation && _location_name != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        _location_name!,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (hasLocation)
+              IconButton(
+                icon: Icon(Icons.edit, size: 20),
+                color: theme.colorScheme.primary,
                 onPressed: () async {
                   final newPosition = await showLocationInputDialog(context);
-                  if (newPosition != null) {
+                  if (newPosition != null && mounted) {
                     setState(() {
                       _position = newPosition;
                       _location_latitude = newPosition.latitude;
@@ -334,86 +406,262 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                     });
                   }
                 },
-              )
-            : null,
-        onTap: () async {
-          final position = await showLocationInputDialog(context);
-          if (position != null) {
-            setState(() {
-              _position = position;
-              _location_latitude = position.latitude;
-              _location_longitude = position.longitude;
-            });
-          }
-        },
+              ),
+          ],
+        ),
       ),
     );
   }
 
+  final List<String> _contactTypes = [
+    'Instagram',
+    'Facebook',
+    'Email',
+    'Phone',
+    'TikTok',
+  ];
+
+  final Map<String, IconData> _contactIcons = {
+    'Instagram':
+        FontAwesomeIcons.instagram, // replace with brand icons if needed
+    'Facebook': FontAwesomeIcons.facebook,
+    'Email': FontAwesomeIcons.envelope,
+    'Phone': FontAwesomeIcons.phone,
+    'TikTok': FontAwesomeIcons.tiktok,
+  };
+
+// Stores selected type for each contact row
+  List<String> _selectedContactTypes = [];
+
   List<Widget> _buildContactFields(BuildContext context) {
+    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
+
     return _contactControllers.asMap().entries.map((entry) {
       final index = entry.key;
       final controller = entry.value;
       final focusNode = _contactFocusNodes[index];
+      final selectedType = _selectedContactTypes[index];
+      final isLastField = index == _contactControllers.length - 1;
 
       return Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: controller,
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.contactInfoMsg,
-                  prefixIcon: const Icon(Icons.contact_phone),
-                  suffixIcon: _contactControllers.length > 1
-                      ? IconButton(
-                          icon: const Icon(Icons.remove_circle,
-                              color: Colors.red),
-                          onPressed: () => _removeContactField(index),
-                        )
-                      : null,
+        padding: EdgeInsets.only(bottom: isLastField ? 24 : 16),
+        child: AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          child: Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceVariant.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withOpacity(0.1),
+                    width: 1,
+                  ),
                 ),
-                validator: (value) => value?.isEmpty ?? true
-                    ? AppLocalizations.of(context)!.pleaseInputContactInfoMsg
-                    : null,
-                textInputAction: index == _contactControllers.length - 1
-                    ? TextInputAction.done
-                    : TextInputAction.next,
-                onEditingComplete: () {
-                  if (index == _contactControllers.length - 1) {
-                    focusNode.unfocus();
-                  } else {
-                    FocusScope.of(context)
-                        .requestFocus(_contactFocusNodes[index + 1]);
-                  }
-                },
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Contact type dropdown (icon-only)
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Tooltip(
+                        message: selectedType,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: theme.colorScheme.surfaceVariant
+                                .withOpacity(0.3),
+                          ),
+                          child: Center(
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                isExpanded: true,
+                                value: selectedType,
+                                onChanged: (newValue) => setState(() {
+                                  _selectedContactTypes[index] = newValue!;
+                                  if (controller.text.isEmpty) {
+                                    FocusScope.of(context)
+                                        .requestFocus(focusNode);
+                                  }
+                                }),
+                                items: _contactTypes.map((type) {
+                                  return DropdownMenuItem<String>(
+                                    value: type,
+                                    child: Tooltip(
+                                      message: type,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        child:
+                                            Icon(_contactIcons[type], size: 24),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                selectedItemBuilder: (context) {
+                                  return _contactTypes.map((type) {
+                                    return Center(
+                                      child:
+                                          Icon(_contactIcons[type], size: 24),
+                                    );
+                                  }).toList();
+                                },
+                                icon:
+                                    const Icon(Icons.arrow_drop_down, size: 20),
+                                borderRadius: BorderRadius.circular(12),
+                                dropdownColor: theme.colorScheme.surface,
+                                elevation: 4,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Contact input field
+                    Expanded(
+                      child: TextFormField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.surface,
+                          hintText: _getContactHint(selectedType),
+                          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.only(left: 12, right: 8),
+                            child: Icon(
+                              _contactIcons[selectedType],
+                              size: 20,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          suffixIcon: _contactControllers.length > 1
+                              ? IconButton(
+                                  icon: Icon(Icons.remove_circle,
+                                      color: theme.colorScheme.error),
+                                  onPressed: () => _removeContactField(index),
+                                  // tooltip: loc.removeContact,
+                                )
+                              : null,
+                        ),
+                        style: theme.textTheme.bodyMedium,
+                        validator: (value) =>
+                            value == "" ? loc.pleaseInputContactInfoMsg : null,
+                        textInputAction: isLastField
+                            ? TextInputAction.done
+                            : TextInputAction.next,
+                        keyboardType: _getKeyboardType(selectedType),
+                        onEditingComplete: () {
+                          if (isLastField) {
+                            focusNode.unfocus();
+                          } else {
+                            FocusScope.of(context)
+                                .requestFocus(_contactFocusNodes[index + 1]);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              // Add new field button (only on last field)
+              if (isLastField)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: FilledButton.tonal(
+                      onPressed: _addContactField,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: theme.colorScheme.surfaceVariant,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add,
+                              size: 18, color: theme.colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Text(loc.addContactInfoMsg,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       );
     }).toList();
   }
 
-  Widget _buildAddContactButton(BuildContext context) {
-    return TextButton.icon(
-      icon: const Icon(Icons.add_circle_outline),
-      label: Text(AppLocalizations.of(context)!.addContactInfoMsg),
-      onPressed: () {
-        _addContactField();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-          FocusScope.of(context).requestFocus(_contactFocusNodes.last);
-        });
-      },
-    );
+// Helper method to determine keyboard type based on contact type
+  TextInputType _getKeyboardType(String contactType) {
+    if (contactType.toLowerCase().contains('phone')) {
+      return TextInputType.phone;
+    } else if (contactType.toLowerCase().contains('email')) {
+      return TextInputType.emailAddress;
+    } else if (contactType.toLowerCase().contains('url')) {
+      return TextInputType.url;
+    }
+    return TextInputType.text;
   }
+
+// Helper method to provide contextual hints
+  String _getContactHint(String contactType) {
+    switch (contactType.toLowerCase()) {
+      case 'phone':
+        return 'Enter phone number';
+      case 'email':
+        return 'Enter email address';
+      case 'website':
+        return 'Enter website URL';
+      case 'social':
+        return 'Enter social media handle';
+      default:
+        return 'Enter contact information';
+    }
+  }
+
+  // Widget _buildAddContactButton(BuildContext context) {
+  //   return TextButton.icon(
+  //     icon: const Icon(Icons.add_circle_outline),
+  //     label: Text(AppLocalizations.of(context)!.addContactInfoMsg),
+  //     onPressed: () {
+  //       _addContactField();
+  //       WidgetsBinding.instance.addPostFrameCallback((_) {
+  //         _scrollController.animateTo(
+  //           _scrollController.position.maxScrollExtent,
+  //           duration: const Duration(milliseconds: 300),
+  //           curve: Curves.easeOut,
+  //         );
+  //         FocusScope.of(context).requestFocus(_contactFocusNodes.last);
+  //       });
+  //     },
+  //   );
+  // }
 
   Widget _buildSectionHeader(String title) {
     return Padding(

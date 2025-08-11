@@ -1,19 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Services/SnackbarService.dart';
+import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
+import 'package:gluttex_localiser/components/Linkifier.dart';
 import 'package:gluttex_localiser/screens/business_form_page.dart';
+import 'package:gluttex_localiser/screens/supplier_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gluttex_impl_business/supplier_change_notifier.dart';
 import 'package:gluttex_localiser/screens/map_locations_screen.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SlidingSuppliersWidget extends StatefulWidget {
   const SlidingSuppliersWidget({Key? key}) : super(key: key);
@@ -86,6 +92,7 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
           ? FloatingActionButton(
               backgroundColor: theme.colorScheme.primary,
               foregroundColor: theme.colorScheme.onPrimary,
+              heroTag: 'floating-button',
               onPressed: () {
                 Navigator.push(
                   context,
@@ -406,7 +413,7 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                             ),
                             trailing: IconButton(
                               icon: Icon(
-                                Icons.location_on_outlined,
+                                FontAwesomeIcons.locationDot,
                                 color: theme.colorScheme.primary,
                               ),
                               onPressed: () => _focusOnLocation(
@@ -415,10 +422,10 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                               ),
                             ),
                             onTap: () {
-                              _focusOnLocation(
-                                supplier.locationLatitude,
-                                supplier.locationLongitude,
-                              );
+                              // _focusOnLocation(
+                              //   supplier.locationLatitude,
+                              //   supplier.locationLongitude,
+                              // );
                               showSupplierDetails(context, supplier);
                             },
                           ),
@@ -429,104 +436,78 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
       ],
     );
   }
-}
 
-void showSupplierDetails(BuildContext context, Supplier supplier) {
-  final theme = Theme.of(context);
-  final loc = AppLocalizations.of(context)!;
+  // Helper widget for product cards
+  Widget _buildProductCard(BuildContext context, Product product) {
+    final theme = Theme.of(context);
 
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (context) => Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            supplier.providerName,
-            style: theme.textTheme.titleLarge,
-          ),
-          const SizedBox(height: 16),
-          _buildDetailRow(
-            context,
-            icon: Icons.location_on_outlined,
-            label: loc.locationText,
-            value: supplier.locationName ?? "",
-          ),
-          const SizedBox(height: 12),
-          _buildDetailRow(
-            context,
-            icon: Icons.contact_page_outlined,
-            label: loc.contactInfoMsg,
-            value: supplier.providerContactInfo.replaceAll(",", "\n"),
-            onLongPress: () {
-              Clipboard.setData(
-                  ClipboardData(text: supplier.providerContactInfo));
-
-              SnackbarService.showSnackbar(
-                  context: context, message: loc.copiedToClipboardText);
-            },
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-            ),
-            child: Text(loc.cancelTxt),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Widget _buildDetailRow(
-  BuildContext context, {
-  required IconData icon,
-  required String label,
-  required String value,
-  VoidCallback? onLongPress,
-}) {
-  return GestureDetector(
-    onLongPress: onLongPress,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.6),
+    return Container(
+      width: 120,
+      margin: const EdgeInsets.only(right: 12),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.pop(context); // Close bottom sheet
+            // Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => ProductDetailsScreen(product: product),
+            //     ));
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product image
+                Container(
+                  height: 80,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: theme.colorScheme.surfaceVariant,
+                    image: product.product_image_url != null
+                        ? DecorationImage(
+                            image: NetworkImage(product.product_image_url!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: product.product_image_url == null
+                      ? Center(
+                          child: Icon(
+                            Icons.shopping_bag,
+                            size: 32,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(height: 8),
+                // Product name
+                Text(
+                  product.product_name ?? '',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall,
+                ),
+                // Product price if available
+                if (product.product_price != null)
+                  Text(
+                    product.product_price!.toStringAsFixed(2),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
+                  ),
+              ],
+            ),
           ),
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }

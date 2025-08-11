@@ -7,7 +7,6 @@ import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
-import 'package:gluttex_medical/screens/informations_screen.dart';
 import 'package:gluttex_play/screens/game_catalog.dart';
 import 'package:medicom_catalog/screens/catalog_screen.dart';
 import 'package:provider/provider.dart';
@@ -104,6 +103,7 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final appUser = Provider.of<AppUserNotifier>(context).appUser;
     return Scaffold(
       appBar: AppBar(
         title: Text(_getTitle(_selectedIndex)),
@@ -171,8 +171,47 @@ class _HomePageState extends State<HomePage>
                 : const Color(0xFF186A3B),
           ),
           BottomNavigationBarItem(
-              icon: const Icon(CupertinoIcons.profile_circled),
-              label: AppLocalizations.of(context)!.profileText,
+              icon: appUser?.id_app_user != 0 &&
+                      appUser?.app_user_image_url != null
+                  ? ClipOval(
+                      child: Image.network(
+                        GluttexConstants.fsBaseUrl +
+                            appUser!.app_user_image_url!,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        (loadingProgress.expectedTotalBytes ??
+                                            1)
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const SizedBox(
+                            height: 24,
+                            // color: Colors.grey[200],
+                            child: Center(
+                              child: Icon(Icons.person, size: 24),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  : const Icon(size: 24.0, CupertinoIcons.profile_circled),
+              label: (appUser!.id_app_user == 0)
+                  ? AppLocalizations.of(context)!.profileText
+                  : '${appUser.personFirstName} ${appUser.personLastName}',
               backgroundColor: Theme.of(context).brightness == Brightness.light
                   ? const Color(0xFF2ECC71)
                   : const Color(0xFF186A3B)),
