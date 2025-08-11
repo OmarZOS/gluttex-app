@@ -509,5 +509,10 @@
   "termsAgreementText": "I agree to the Terms of Use governing my use of Gluttex",
   "privacyAgreementText": "I agree to how Gluttex collects and processes my data",
   "readFullDocument": "Read full document",
-  "acceptAllTermsError": "You must accept both documents to continue"
+  "acceptAllTermsError": "You must accept both documents to continue",
+  "outOfStock": "Out of Stock",
+  "availableText": "{amount} Available",
+  "ingredientUnits":"Gram,Kilogram,Milligram,Pound,Ounce,Milliliter,Liter,Cup,Tablespoon,Teaspoon,Pinch",
+  "unitText": "Unit",
+  "amountText": "Amount"
 }

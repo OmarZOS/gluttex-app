@@ -14,7 +14,7 @@ ListTile buildLocationTile(BuildContext context, Supplier supplier) {
   final hasLocation =
       supplier.locationLatitude != null && supplier.locationLongitude != null;
 
-  Future<void> _openInMaps() async {
+  Future<void> openInMaps() async {
     final url =
         'https://www.google.com/maps/search/?api=1&query=${supplier.locationLatitude},${supplier.locationLongitude}';
     if (await canLaunch(url)) {
@@ -26,9 +26,9 @@ ListTile buildLocationTile(BuildContext context, Supplier supplier) {
     }
   }
 
-  void _copyToClipboard() {
+  void copyToClipboard() {
     final coords =
-        '${supplier.locationLatitude?.toStringAsFixed(6)}, ${supplier.locationLongitude?.toStringAsFixed(6)}';
+        '${supplier.locationLatitude.toStringAsFixed(6)}, ${supplier.locationLongitude?.toStringAsFixed(6)}';
     Clipboard.setData(ClipboardData(text: coords));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Coordinates copied: $coords')),
@@ -36,8 +36,8 @@ ListTile buildLocationTile(BuildContext context, Supplier supplier) {
   }
 
   return ListTile(
-    onTap: hasLocation ? _openInMaps : null,
-    onLongPress: hasLocation ? _copyToClipboard : null,
+    onTap: hasLocation ? openInMaps : null,
+    onLongPress: hasLocation ? copyToClipboard : null,
     leading: Container(
       width: 40,
       height: 40,
@@ -60,8 +60,8 @@ ListTile buildLocationTile(BuildContext context, Supplier supplier) {
     ),
     subtitle: hasLocation
         ? Text(
-            '${supplier.locationLatitude?.toStringAsFixed(4)}, '
-            '${supplier.locationLongitude?.toStringAsFixed(4)}',
+            '${supplier.locationLatitude.toStringAsFixed(4)}, '
+            '${supplier.locationLongitude.toStringAsFixed(4)}',
             style: theme.textTheme.bodySmall,
           )
         : null,

@@ -585,5 +585,10 @@
   "termsAgreementText": "أوافق على شروط الاستخدام الخاصة باستخدام تطبيق جلوتكس",
   "privacyAgreementText": "أوافق على طريقة جمع ومعالجة جلوتكس لبياناتي",
   "readFullDocument": "قراءة المستند كاملاً",
-  "acceptAllTermsError": "يجب الموافقة على كلا المستندين للمتابعة"
+  "acceptAllTermsError": "يجب الموافقة على كلا المستندين للمتابعة",
+  "outOfStock": "غير متوفر",
+  "availableText": "{amount} متوفر",
+  "ingredientUnits":"غرام,كيلوغرام,ميليغرام,رطل,أوقية,ملليلتر,لتر,كوب,ملعقة كبيرة,ملعقة صغيرة,رشة",
+  "unitText": "الوحدة",
+  "amountText": "الكمية"
 }

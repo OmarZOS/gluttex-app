@@ -102,14 +102,6 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                           ),
                         ),
                       ),
-                      // IconButton(
-                      //   icon: Icon(Icons.open_in_new, size: 24),
-                      //   onPressed: () {
-                      //     Navigator.pop(context);
-                      //     // _navigateToSupplierDetailsScreen(context, supplier);
-                      //   },
-                      //   tooltip: "loc.viewFullDetails",
-                      // ),
                     ],
                   ),
                 ),
@@ -234,22 +226,6 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                           child: Text(loc.close),
                         ),
                       ),
-                      // const SizedBox(width: 16),
-                      // Expanded(
-                      //   child: FilledButton(
-                      //     onPressed: () {
-                      //       Navigator.pop(context);
-                      //       // _navigateToOrderScreen(context, supplier);
-                      //     },
-                      //     style: FilledButton.styleFrom(
-                      //       padding: const EdgeInsets.symmetric(vertical: 16),
-                      //       shape: RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(12),
-                      //       ),
-                      //     ),
-                      //     child: Text(loc.orderNowTxt),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -274,16 +250,3 @@ Widget _buildSectionHeader(BuildContext context, String title) {
     ),
   );
 }
-
-// Future<void> _openMaps(
-//     BuildContext context, double lat, double lng, String? name) async {
-//   final uri = Uri.parse(
-//       'https://www.google.com/maps/search/?api=1&query=$lat,$lng${name != null ? '&query_place_id=$name' : ''}');
-//   if (await canLaunchUrl(uri)) {
-//     await launchUrl(uri, mode: LaunchMode.externalApplication);
-//   } else if (mounted) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(content: Text('Could not open maps')),
-//     );
-//   }
-// }

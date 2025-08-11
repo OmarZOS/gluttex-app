@@ -1512,4 +1512,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get acceptAllTermsError => 'Vous devez accepter les deux documents pour continuer';
+
+  @override
+  String get outOfStock => 'Rupture de stock';
+
+  @override
+  String availableText(Object amount) {
+    return '$amount disponible';
+  }
+
+  @override
+  String get ingredientUnits => 'Gramme,Kilogramme,Milligramme,Livre,Once,Millilitre,Litre,Tasse,Cuillère à soupe,Cuillère à café,Pincée';
+
+  @override
+  String get unitText => 'Unité';
+
+  @override
+  String get amountText => 'Quantité';
 }

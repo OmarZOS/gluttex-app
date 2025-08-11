@@ -164,6 +164,20 @@ class GluttexConstants {
     },
   ];
 
+  static List<String> recipeUnits = [
+    'g',
+    'kg',
+    'mg',
+    'lb',
+    'oz',
+    'ml',
+    'l',
+    'cup',
+    'tbsp',
+    'tsp',
+    'pinch',
+  ];
+
   // API endpoints
   static const String apiBaseUrl = 'https://gluttex.com/api';
   static const String fsBaseUrl = 'https://gluttex.com';

@@ -142,7 +142,7 @@ class SupplierProductCard extends StatelessWidget {
                                 child: Text(
                                   isOutOfStock
                                       ? "loc.outOfStock"
-                                      : '$stockQuantity available',
+                                      : "loc.available(stockQuantity)",
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: priceColor,
@@ -153,15 +153,6 @@ class SupplierProductCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          // Text(
-                          //   '{loc.minOrder}: $minOrderQty',
-                          //   style: theme.textTheme.bodySmall?.copyWith(
-                          //     fontWeight: FontWeight.w500,
-                          //     color: isOutOfStock
-                          //         ? theme.colorScheme.onSurface.withOpacity(0.5)
-                          //         : theme.colorScheme.onSurface,
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),

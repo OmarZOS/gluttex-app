@@ -1512,4 +1512,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get acceptAllTermsError => 'يجب الموافقة على كلا المستندين للمتابعة';
+
+  @override
+  String get outOfStock => 'غير متوفر';
+
+  @override
+  String availableText(Object amount) {
+    return '$amount متوفر';
+  }
+
+  @override
+  String get ingredientUnits => 'غرام,كيلوغرام,ميليغرام,رطل,أوقية,ملليلتر,لتر,كوب,ملعقة كبيرة,ملعقة صغيرة,رشة';
+
+  @override
+  String get unitText => 'الوحدة';
+
+  @override
+  String get amountText => 'الكمية';
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 
 class IngredientCard extends StatelessWidget {
   final String name;
@@ -19,6 +21,16 @@ class IngredientCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
+    final parts = quantity.split(':'); // ["Kg", "1.0"]
+    final loc = AppLocalizations.of(context)!;
+
+    final unitCode = parts[0];
+    final amount = parts.length > 1 ? parts[1] : '';
+    final unitIndex = GluttexConstants.recipeUnits
+        .indexOf(unitCode); // 'units' is your list of short codes
+    final unitName = unitIndex != -1
+        ? loc.ingredientUnits.split(',')[unitIndex]
+        : unitCode; // fallback to code if not found
 
     return Card(
       elevation: 2,
@@ -77,7 +89,7 @@ class IngredientCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   quantity != ""
                       ? Text(
-                          quantity,
+                          "$amount $unitName",
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface.withOpacity(0.7),
                           ),

@@ -2662,402 +2662,6 @@ abstract class AppLocalizations {
   /// **'Incorrect username or password'**
   String get incorrect_credentials;
 
-  /// No description provided for @sqlalchemy_error.
-  ///
-  /// In en, this message translates to:
-  /// **'SQLAlchemy database error. Check query or connection.'**
-  String get sqlalchemy_error;
-
-  /// No description provided for @changePassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Change Password'**
-  String get changePassword;
-
-  /// No description provided for @passwordChangeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Create a new password'**
-  String get passwordChangeTitle;
-
-  /// No description provided for @passwordChangeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Your new password must be different from previous passwords'**
-  String get passwordChangeSubtitle;
-
-  /// No description provided for @currentPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Current Password'**
-  String get currentPassword;
-
-  /// No description provided for @currentPasswordHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your current password'**
-  String get currentPasswordHint;
-
-  /// No description provided for @newPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'New Password'**
-  String get newPassword;
-
-  /// No description provided for @newPasswordHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your new password'**
-  String get newPasswordHint;
-
-  /// No description provided for @confirmPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Password'**
-  String get confirmPassword;
-
-  /// No description provided for @confirmPasswordHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-enter your new password'**
-  String get confirmPasswordHint;
-
-  /// No description provided for @changePasswordButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Change Password'**
-  String get changePasswordButton;
-
-  /// No description provided for @passwordRequirements.
-  ///
-  /// In en, this message translates to:
-  /// **'Password must contain:'**
-  String get passwordRequirements;
-
-  /// No description provided for @passwordLengthRequirement.
-  ///
-  /// In en, this message translates to:
-  /// **'At least 8 characters'**
-  String get passwordLengthRequirement;
-
-  /// No description provided for @passwordUppercaseRequirement.
-  ///
-  /// In en, this message translates to:
-  /// **'At least 1 uppercase letter'**
-  String get passwordUppercaseRequirement;
-
-  /// No description provided for @passwordNumberRequirement.
-  ///
-  /// In en, this message translates to:
-  /// **'At least 1 number'**
-  String get passwordNumberRequirement;
-
-  /// No description provided for @passwordChangeSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Password changed successfully!'**
-  String get passwordChangeSuccess;
-
-  /// No description provided for @weakPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Weak password'**
-  String get weakPassword;
-
-  /// No description provided for @mediumPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Medium strength'**
-  String get mediumPassword;
-
-  /// No description provided for @strongPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Strong password'**
-  String get strongPassword;
-
-  /// No description provided for @categoryText.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get categoryText;
-
-  /// No description provided for @currentPasswordRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Current password is required'**
-  String get currentPasswordRequired;
-
-  /// No description provided for @passwordTooShort.
-  ///
-  /// In en, this message translates to:
-  /// **'Password must be at least 8 characters'**
-  String get passwordTooShort;
-
-  /// No description provided for @newPasswordRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'New password is required'**
-  String get newPasswordRequired;
-
-  /// No description provided for @passwordUppercaseError.
-  ///
-  /// In en, this message translates to:
-  /// **'Must contain at least one uppercase letter'**
-  String get passwordUppercaseError;
-
-  /// No description provided for @passwordNumberError.
-  ///
-  /// In en, this message translates to:
-  /// **'Must contain at least one number'**
-  String get passwordNumberError;
-
-  /// No description provided for @passwordSameAsCurrent.
-  ///
-  /// In en, this message translates to:
-  /// **'New password must be different from current password'**
-  String get passwordSameAsCurrent;
-
-  /// No description provided for @confirmPasswordRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Please confirm your new password'**
-  String get confirmPasswordRequired;
-
-  /// No description provided for @passwordsDontMatch.
-  ///
-  /// In en, this message translates to:
-  /// **'Passwords do not match'**
-  String get passwordsDontMatch;
-
-  /// No description provided for @changePhotoText.
-  ///
-  /// In en, this message translates to:
-  /// **'Change Profile Photo'**
-  String get changePhotoText;
-
-  /// No description provided for @fieldRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Field is required'**
-  String get fieldRequired;
-
-  /// No description provided for @profileUpdateSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile updated successfully'**
-  String get profileUpdateSuccess;
-
-  /// No description provided for @editProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Profile'**
-  String get editProfile;
-
-  /// No description provided for @personalInformation.
-  ///
-  /// In en, this message translates to:
-  /// **'Personal Information'**
-  String get personalInformation;
-
-  /// No description provided for @firstName.
-  ///
-  /// In en, this message translates to:
-  /// **'First Name'**
-  String get firstName;
-
-  /// No description provided for @lastName.
-  ///
-  /// In en, this message translates to:
-  /// **'Last Name'**
-  String get lastName;
-
-  /// No description provided for @accountInformation.
-  ///
-  /// In en, this message translates to:
-  /// **'Account Information'**
-  String get accountInformation;
-
-  /// No description provided for @username.
-  ///
-  /// In en, this message translates to:
-  /// **'Username'**
-  String get username;
-
-  /// No description provided for @saveChanges.
-  ///
-  /// In en, this message translates to:
-  /// **'Save Changes'**
-  String get saveChanges;
-
-  /// No description provided for @logoutText.
-  ///
-  /// In en, this message translates to:
-  /// **'Logout'**
-  String get logoutText;
-
-  /// No description provided for @continueAsGuestText.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue as Guest'**
-  String get continueAsGuestText;
-
-  /// No description provided for @ingredientText.
-  ///
-  /// In en, this message translates to:
-  /// **'Ingredients'**
-  String get ingredientText;
-
-  /// No description provided for @termsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Terms and Conditions'**
-  String get termsTitle;
-
-  /// No description provided for @termsContent.
-  ///
-  /// In en, this message translates to:
-  /// **'By using this app you agree to:'**
-  String get termsContent;
-
-  /// No description provided for @termsPoint1.
-  ///
-  /// In en, this message translates to:
-  /// **'Use the app only for personal purposes'**
-  String get termsPoint1;
-
-  /// No description provided for @termsPoint2.
-  ///
-  /// In en, this message translates to:
-  /// **'Not redistribute gluten-free recipes commercially'**
-  String get termsPoint2;
-
-  /// No description provided for @termsPoint3.
-  ///
-  /// In en, this message translates to:
-  /// **'Acknowledge potential recipe variations'**
-  String get termsPoint3;
-
-  /// No description provided for @guideTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'User Guide'**
-  String get guideTitle;
-
-  /// No description provided for @guideStep1.
-  ///
-  /// In en, this message translates to:
-  /// **'Create your profile to save preferences'**
-  String get guideStep1;
-
-  /// No description provided for @guideStep2.
-  ///
-  /// In en, this message translates to:
-  /// **'Search recipes by ingredients or dietary needs'**
-  String get guideStep2;
-
-  /// No description provided for @guideStep3.
-  ///
-  /// In en, this message translates to:
-  /// **'Bookmark favorites for quick access'**
-  String get guideStep3;
-
-  /// No description provided for @disclaimerTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Important Disclaimer'**
-  String get disclaimerTitle;
-
-  /// No description provided for @disclaimerContent.
-  ///
-  /// In en, this message translates to:
-  /// **'While we verify recipes, always check labels as manufacturers may change ingredients.'**
-  String get disclaimerContent;
-
-  /// No description provided for @versionText.
-  ///
-  /// In en, this message translates to:
-  /// **'App Version'**
-  String get versionText;
-
-  /// No description provided for @providedBy.
-  ///
-  /// In en, this message translates to:
-  /// **'Provided by'**
-  String get providedBy;
-
-  /// No description provided for @unknownProvider.
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown provider'**
-  String get unknownProvider;
-
-  /// No description provided for @callProvider.
-  ///
-  /// In en, this message translates to:
-  /// **'Call provider'**
-  String get callProvider;
-
-  /// No description provided for @emailProvider.
-  ///
-  /// In en, this message translates to:
-  /// **'Email provider'**
-  String get emailProvider;
-
-  /// No description provided for @viewOnMap.
-  ///
-  /// In en, this message translates to:
-  /// **'View on map'**
-  String get viewOnMap;
-
-  /// No description provided for @providerContactOptions.
-  ///
-  /// In en, this message translates to:
-  /// **'Contact Options'**
-  String get providerContactOptions;
-
-  /// No description provided for @supplierText.
-  ///
-  /// In en, this message translates to:
-  /// **'Supplier'**
-  String get supplierText;
-
-  /// No description provided for @legalDocumentsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Legal Documents'**
-  String get legalDocumentsTitle;
-
-  /// No description provided for @privacyPolicy.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy Policy'**
-  String get privacyPolicy;
-
-  /// No description provided for @termsOfUse.
-  ///
-  /// In en, this message translates to:
-  /// **'Terms of Use'**
-  String get termsOfUse;
-
-  /// No description provided for @close.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get close;
-
-  /// No description provided for @termsAgreementText.
-  ///
-  /// In en, this message translates to:
-  /// **'I agree to the Terms of Use governing my use of Gluttex'**
-  String get termsAgreementText;
-
-  /// No description provided for @privacyAgreementText.
-  ///
-  /// In en, this message translates to:
-  /// **'I agree to how Gluttex collects and processes my data'**
-  String get privacyAgreementText;
-
   String getLocalizedQuestion(int index) {
     switch (index) {
       case 1:
@@ -3472,6 +3076,402 @@ abstract class AppLocalizations {
     }
   }
 
+  /// No description provided for @sqlalchemy_error.
+  ///
+  /// In en, this message translates to:
+  /// **'SQLAlchemy database error. Check query or connection.'**
+  String get sqlalchemy_error;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePassword;
+
+  /// No description provided for @passwordChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new password'**
+  String get passwordChangeTitle;
+
+  /// No description provided for @passwordChangeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new password must be different from previous passwords'**
+  String get passwordChangeSubtitle;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @currentPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current password'**
+  String get currentPasswordHint;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @newPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your new password'**
+  String get newPasswordHint;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your new password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @changePasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePasswordButton;
+
+  /// No description provided for @passwordRequirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain:'**
+  String get passwordRequirements;
+
+  /// No description provided for @passwordLengthRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get passwordLengthRequirement;
+
+  /// No description provided for @passwordUppercaseRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 1 uppercase letter'**
+  String get passwordUppercaseRequirement;
+
+  /// No description provided for @passwordNumberRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 1 number'**
+  String get passwordNumberRequirement;
+
+  /// No description provided for @passwordChangeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully!'**
+  String get passwordChangeSuccess;
+
+  /// No description provided for @weakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak password'**
+  String get weakPassword;
+
+  /// No description provided for @mediumPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium strength'**
+  String get mediumPassword;
+
+  /// No description provided for @strongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong password'**
+  String get strongPassword;
+
+  /// No description provided for @categoryText.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get categoryText;
+
+  /// No description provided for @currentPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is required'**
+  String get currentPasswordRequired;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @newPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'New password is required'**
+  String get newPasswordRequired;
+
+  /// No description provided for @passwordUppercaseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Must contain at least one uppercase letter'**
+  String get passwordUppercaseError;
+
+  /// No description provided for @passwordNumberError.
+  ///
+  /// In en, this message translates to:
+  /// **'Must contain at least one number'**
+  String get passwordNumberError;
+
+  /// No description provided for @passwordSameAsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'New password must be different from current password'**
+  String get passwordSameAsCurrent;
+
+  /// No description provided for @confirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your new password'**
+  String get confirmPasswordRequired;
+
+  /// No description provided for @passwordsDontMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDontMatch;
+
+  /// No description provided for @changePhotoText.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Profile Photo'**
+  String get changePhotoText;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @profileUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdateSuccess;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @personalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInformation;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastName;
+
+  /// No description provided for @accountInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Information'**
+  String get accountInformation;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @logoutText.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logoutText;
+
+  /// No description provided for @continueAsGuestText.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as Guest'**
+  String get continueAsGuestText;
+
+  /// No description provided for @ingredientText.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get ingredientText;
+
+  /// No description provided for @termsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms and Conditions'**
+  String get termsTitle;
+
+  /// No description provided for @termsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'By using this app you agree to:'**
+  String get termsContent;
+
+  /// No description provided for @termsPoint1.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the app only for personal purposes'**
+  String get termsPoint1;
+
+  /// No description provided for @termsPoint2.
+  ///
+  /// In en, this message translates to:
+  /// **'Not redistribute gluten-free recipes commercially'**
+  String get termsPoint2;
+
+  /// No description provided for @termsPoint3.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge potential recipe variations'**
+  String get termsPoint3;
+
+  /// No description provided for @guideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User Guide'**
+  String get guideTitle;
+
+  /// No description provided for @guideStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your profile to save preferences'**
+  String get guideStep1;
+
+  /// No description provided for @guideStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes by ingredients or dietary needs'**
+  String get guideStep2;
+
+  /// No description provided for @guideStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark favorites for quick access'**
+  String get guideStep3;
+
+  /// No description provided for @disclaimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Important Disclaimer'**
+  String get disclaimerTitle;
+
+  /// No description provided for @disclaimerContent.
+  ///
+  /// In en, this message translates to:
+  /// **'While we verify recipes, always check labels as manufacturers may change ingredients.'**
+  String get disclaimerContent;
+
+  /// No description provided for @versionText.
+  ///
+  /// In en, this message translates to:
+  /// **'App Version'**
+  String get versionText;
+
+  /// No description provided for @providedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Provided by'**
+  String get providedBy;
+
+  /// No description provided for @unknownProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown provider'**
+  String get unknownProvider;
+
+  /// No description provided for @callProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Call provider'**
+  String get callProvider;
+
+  /// No description provided for @emailProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Email provider'**
+  String get emailProvider;
+
+  /// No description provided for @viewOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'View on map'**
+  String get viewOnMap;
+
+  /// No description provided for @providerContactOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Options'**
+  String get providerContactOptions;
+
+  /// No description provided for @supplierText.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier'**
+  String get supplierText;
+
+  /// No description provided for @legalDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal Documents'**
+  String get legalDocumentsTitle;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get termsOfUse;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @termsAgreementText.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the Terms of Use governing my use of Gluttex'**
+  String get termsAgreementText;
+
+  /// No description provided for @privacyAgreementText.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to how Gluttex collects and processes my data'**
+  String get privacyAgreementText;
+
   /// No description provided for @readFullDocument.
   ///
   /// In en, this message translates to:
@@ -3483,6 +3483,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You must accept both documents to continue'**
   String get acceptAllTermsError;
+
+  /// No description provided for @outOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of Stock'**
+  String get outOfStock;
+
+  /// No description provided for @availableText.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} Available'**
+  String availableText(Object amount);
+
+  /// No description provided for @ingredientUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Gram,Kilogram,Milligram,Pound,Ounce,Milliliter,Liter,Cup,Tablespoon,Teaspoon,Pinch'**
+  String get ingredientUnits;
+
+  /// No description provided for @unitText.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get unitText;
+
+  /// No description provided for @amountText.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amountText;
 }
 
 class _AppLocalizationsDelegate

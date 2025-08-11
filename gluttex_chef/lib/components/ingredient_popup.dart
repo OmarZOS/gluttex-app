@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_impl_business/recipe_change_notifier.dart';
 import 'package:provider/provider.dart';
@@ -81,17 +82,49 @@ class _IngredientPopupState extends State<IngredientPopup> {
   }
 
   Future<void> _showQuantityDialog(RecipeIngredient ingredient) async {
-    final quantity = await showDialog<String>(
+    // Map of unit short codes to full names
+    var units = GluttexConstants.recipeUnits;
+    final loc = AppLocalizations.of(context)!;
+    String selectedUnit = 'g'; // Default selected unit
+    final amountController = TextEditingController();
+
+    final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.ingredientQuantity),
-        content: TextField(
-          controller: _quantityController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: AppLocalizations.of(context)!.ingredientQuantity,
-            border: const OutlineInputBorder(),
-          ),
+        title: Text(loc.ingredientQuantity),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: amountController,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                hintText: loc.amountText,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: selectedUnit,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: loc.unitText,
+              ),
+              items: units.map((unit) {
+                return DropdownMenuItem<String>(
+                  value: unit,
+                  child:
+                      Text(loc.ingredientUnits.split(',')[units.indexOf(unit)]),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  selectedUnit = value;
+                }
+              },
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -100,8 +133,10 @@ class _IngredientPopupState extends State<IngredientPopup> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (_quantityController.text.trim().isNotEmpty) {
-                Navigator.pop(context, _quantityController.text);
+              final amount = amountController.text.trim();
+              if (amount.isNotEmpty) {
+                // Store in shortCode:value format
+                Navigator.pop(context, '$selectedUnit:$amount');
               }
             },
             child: Text(AppLocalizations.of(context)!.addText),
@@ -110,8 +145,8 @@ class _IngredientPopupState extends State<IngredientPopup> {
       ),
     );
 
-    if (quantity != null && quantity.isNotEmpty) {
-      widget.onIngredientSelected(ingredient.id_ingredient, quantity);
+    if (result != null && result.isNotEmpty) {
+      widget.onIngredientSelected(ingredient.id_ingredient, result);
       if (mounted) Navigator.pop(context);
     }
   }
