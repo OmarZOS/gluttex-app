@@ -1529,4 +1529,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get amountText => 'الكمية';
+
+  @override
+  String otherProductsFromSupplier(Object supplier_name) {
+    return 'منتجات أخرى من: $supplier_name';
+  }
+
+  @override
+  String similarProductsFromCategory(Object category_name) {
+    return 'منتجات مشابهة من فئة $category_name';
+  }
+
+  @override
+  String get noOtherProductsAvailable => 'لا توجد منتجات أخرى متاحة من هذا المزود';
 }

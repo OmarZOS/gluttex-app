@@ -1529,4 +1529,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get amountText => 'Amount';
+
+  @override
+  String otherProductsFromSupplier(Object supplier_name) {
+    return 'Also from: $supplier_name';
+  }
+
+  @override
+  String similarProductsFromCategory(Object category_name) {
+    return 'Similar Products in: $category_name';
+  }
+
+  @override
+  String get noOtherProductsAvailable => 'No other products available from this supplier.';
 }

@@ -4,6 +4,7 @@ class Supplier {
   final int idProviderDetails;
   final int idProductProvider;
   final int productProviderDetailsId;
+  final int productProviderOwnerId;
   final String providerName;
   final String providerContactInfo;
   final int productProviderTypeId;
@@ -20,6 +21,7 @@ class Supplier {
     required this.locationLatitude,
     required this.locationLongitude,
     required this.locationName,
+    required this.productProviderOwnerId,
     required this.productProviderTypeId,
   });
 
@@ -27,6 +29,7 @@ class Supplier {
         idProviderDetails: 0,
         idProductProvider: 0,
         productProviderDetailsId: 0,
+        productProviderOwnerId: 0,
         providerName: "",
         providerContactInfo: "",
         locationLatitude: 0.0,
@@ -60,6 +63,7 @@ class Supplier {
       providerName: json['product_provider_details']?['provider_name'] ?? "",
       providerContactInfo:
           json['product_provider_details']?['provider_contact_info'] ?? "",
+      productProviderOwnerId: json['product_provider_owner'] ?? 0,
       locationLatitude: latitude,
       locationLongitude: longitude,
       productProviderTypeId:

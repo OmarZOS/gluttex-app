@@ -44,7 +44,7 @@ dependencies:
     path: ../gluttex_impl_mediation
   gluttex_localiser:
     path: ../gluttex_localiser
-    
+  
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -60,6 +60,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_speed_dial: ^4.6.6
+  shimmer: ^3.0.0
   # eventsource: ^0.4.0
   # http: ^0.13.3
 # dependency_overrides:

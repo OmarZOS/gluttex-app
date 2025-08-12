@@ -38,139 +38,167 @@ class SupplierProductCard extends StatelessWidget {
         ? categories[
             (product.product_category_id! - 1).clamp(0, categories.length - 1)]
         : '';
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: isOutOfStock ? null : onTap,
       child: Container(
         width: 280, // Optimal for horizontal scrolling
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDarkMode
+                ? Colors.white.withOpacity(0.5)
+                : Colors.black.withOpacity(0.5), // Border color
+            width: 1, // Border width
+          ),
+        ),
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Material(
-          borderRadius: BorderRadius.circular(16),
-          color: isOutOfStock
-              ? theme.colorScheme.surface.withOpacity(0.6)
-              : theme.colorScheme.surface,
-          elevation: 4,
-          clipBehavior: Clip.antiAlias,
-          shadowColor: theme.colorScheme.shadow,
-          child: Stack(
-            children: [
-              // Main content
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Image section
-                    Column(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Material(
+            borderRadius: BorderRadius.circular(16),
+            color: const Color.fromRGBO(0, 0, 0, 0),
+            elevation: 4,
+            clipBehavior: Clip.antiAlias,
+            shadowColor: Colors.transparent,
+            child: InkWell(
+              onTap: isOutOfStock ? null : onTap,
+              splashColor: isOutOfStock
+                  ? Colors.transparent
+                  : theme.colorScheme.primary.withOpacity(0.1),
+              highlightColor: isOutOfStock
+                  ? Colors.transparent
+                  : theme.colorScheme.primary.withOpacity(0.1),
+              child: Stack(
+                children: [
+                  // Main content
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildProductImage(context, theme),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: priceColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                loc.price(
-                                  product.product_price?.toStringAsFixed(2) ??
-                                      '--',
-                                ),
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: priceColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                        // Price badge
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-
-                    // Info section
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Product name and supplier
-                          Text(
-                            product.product_name ?? loc.missingText,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: isOutOfStock
-                                  ? theme.colorScheme.onSurface.withOpacity(0.5)
-                                  : theme.colorScheme.onSurface,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            supplierName,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: isOutOfStock
-                                  ? theme.colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5)
-                                  : theme.colorScheme.onSurfaceVariant,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Category chip
-                          if (categoryName.isNotEmpty)
-                            _buildCategoryChip(context, theme, categoryName),
-                          const SizedBox(height: 8),
-
-                          // Stock and price info
-                          Row(
-                            children: [
-                              // Stock indicator
-                              Icon(
-                                isOutOfStock ? Icons.block : Icons.inventory_2,
-                                size: 16,
-                                color: priceColor,
-                              ),
-                              const SizedBox(width: 4),
-                              Center(
-                                child: Text(
-                                  isOutOfStock
-                                      ? "loc.outOfStock"
-                                      : "loc.available(stockQuantity)",
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: priceColor,
+                        // Image section
+                        Column(
+                          children: [
+                            _buildProductImage(context, theme),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: priceColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    loc.price(
+                                      product.product_price
+                                              ?.toStringAsFixed(2) ??
+                                          '--',
+                                    ),
+                                    style:
+                                        theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: priceColor,
+                                    ),
                                   ),
                                 ),
                               ),
-                              const Spacer(),
+                            )
+                            // Price badge
+                          ],
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Info section
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Product name and supplier
+                              Text(
+                                product.product_name ?? loc.missingText,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: isOutOfStock
+                                      ? theme.colorScheme.onSurface
+                                          .withOpacity(0.5)
+                                      : theme.colorScheme.onSurface,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                supplierName,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: isOutOfStock
+                                      ? theme.colorScheme.onSurfaceVariant
+                                          .withOpacity(0.5)
+                                      : theme.colorScheme.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Category chip
+                              if (categoryName.isNotEmpty)
+                                _buildCategoryChip(
+                                    context, theme, categoryName),
+                              const SizedBox(height: 8),
+
+                              // Stock and price info
+                              Row(
+                                children: [
+                                  // Stock indicator
+                                  Icon(
+                                    isOutOfStock
+                                        ? Icons.block
+                                        : Icons.inventory_2,
+                                    size: 16,
+                                    color: priceColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Center(
+                                    child: Text(
+                                      isOutOfStock
+                                          ? loc.outOfStock
+                                          : loc.availableText(stockQuantity),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: priceColor,
+                                      ),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Out of stock overlay
-              if (isOutOfStock)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: Colors.black.withOpacity(0.03),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-            ],
+
+                  // Out of stock overlay
+                  if (isOutOfStock)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.black.withOpacity(0.03),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -178,6 +178,9 @@ class GluttexConstants {
     'pinch',
   ];
 
+  static Color get backgroundColor => const Color(0xFF2ECC71);
+  static Color get backgroundDarkColor => const Color(0xFF186A3B);
+
   // API endpoints
   static const String apiBaseUrl = 'https://gluttex.com/api';
   static const String fsBaseUrl = 'https://gluttex.com';
@@ -194,7 +197,7 @@ class GluttexConstants {
 
   static const String addProductEndpoint = '/product/add';
   static const String deleteProductEndpoint = '/product/delete';
-  static const String getAllProductsEndpoint = '/product/all';
+  static const String getAllProductsEndpoint = '/product';
   static const String productEndpoint = '/product';
   static const String getProductCategoriesEndpoint = '/product/category/all';
   static const String getAllProductsByCategoryEndpoint = '/product/category';
@@ -259,8 +262,19 @@ class GluttexConstants {
   }
 }
 
+class GluttexPageIndex {
+  static const int catalog = 0;
+  static const int suppliers = 1;
+  static const int recipes = 2;
+  static const int games = 3;
+  static const int profile = 4;
+}
+
 class AppRoutes {
   static const String login = '/login';
   static const String registration = '/registration';
   static const String home = '/home';
+  static const String productCreate = '/product/create';
+  static const String recipeCreate = '/recipe/create';
+  static const String providerCreate = '/provider/create';
 }

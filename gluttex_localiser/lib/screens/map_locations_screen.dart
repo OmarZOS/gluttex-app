@@ -26,11 +26,12 @@ class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _mapController;
   final Set<Marker> _markers = {};
   bool _isMapReady = false;
+  bool _isUpdatingMarkers = false;
 
   @override
   void initState() {
     super.initState();
-    _updateMarkers();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateMarkers());
   }
 
   @override
@@ -43,6 +44,30 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _updateMarkers() async {
+    if (_isUpdatingMarkers) return;
+    _isUpdatingMarkers = true;
+
+    try {
+      final markers = await _createMarkers();
+      if (!mounted) return;
+
+      setState(() {
+        _markers
+          ..clear()
+          ..addAll(markers);
+      });
+
+      if (_isMapReady && markers.isNotEmpty) {
+        await _adjustCameraToMarkers(markers);
+      }
+    } catch (e) {
+      debugPrint('Error updating markers: $e');
+    } finally {
+      _isUpdatingMarkers = false;
+    }
+  }
+
+  Future<Set<Marker>> _createMarkers() async {
     final markers = <Marker>{};
     final loc = AppLocalizations.of(context);
 
@@ -51,7 +76,9 @@ class _MapScreenState extends State<MapScreen> {
       markers.add(Marker(
         markerId: const MarkerId("user_location"),
         position: LatLng(
-            widget.userLocation!.latitude, widget.userLocation!.longitude),
+          widget.userLocation!.latitude,
+          widget.userLocation!.longitude,
+        ),
         infoWindow: InfoWindow(title: loc?.myLocationText ?? "Your Location"),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         zIndex: 2,
@@ -60,9 +87,17 @@ class _MapScreenState extends State<MapScreen> {
 
     // Add supplier markers
     for (final supplier in widget.suppliers) {
+      if (supplier.locationLatitude == null ||
+          supplier.locationLongitude == null) {
+        continue;
+      }
+
       markers.add(Marker(
-        markerId: MarkerId(supplier.idProductProvider.toString()),
-        position: LatLng(supplier.locationLatitude, supplier.locationLongitude),
+        markerId: MarkerId('supplier_${supplier.idProductProvider}'),
+        position: LatLng(
+          supplier.locationLatitude!,
+          supplier.locationLongitude!,
+        ),
         infoWindow: InfoWindow(
           title: supplier.providerName,
           snippet: loc?.tapForDetailsText ?? "Tap for details",
@@ -72,47 +107,49 @@ class _MapScreenState extends State<MapScreen> {
       ));
     }
 
-    if (mounted) {
-      setState(() => _markers.clear());
-      setState(() => _markers.addAll(markers));
+    return markers;
+  }
 
-      if (_isMapReady && widget.userLocation != null) {
-        // Adjust camera to show all markers with padding
+  Future<void> _adjustCameraToMarkers(Set<Marker> markers) async {
+    try {
+      final bounds = _calculateBounds(markers);
+      await _mapController.animateCamera(
+        CameraUpdate.newLatLngBounds(bounds, 100),
+      );
+    } catch (e) {
+      // Fallback to first marker if bounds calculation fails
+      if (markers.isNotEmpty) {
         await _mapController.animateCamera(
-          CameraUpdate.newLatLngBounds(
-            _boundsFromMarkers(markers),
-            100, // Padding
-          ),
+          CameraUpdate.newLatLngZoom(markers.first.position, 12),
         );
       }
     }
   }
 
-  LatLngBounds _boundsFromMarkers(Set<Marker> markers) {
-    var bounds = LatLngBounds(
-      southwest: const LatLng(0, 0),
-      northeast: const LatLng(0, 0),
+  LatLngBounds _calculateBounds(Set<Marker> markers) {
+    if (markers.isEmpty || !mounted) {
+      return LatLngBounds(
+        southwest: const LatLng(0, 0),
+        northeast: const LatLng(0, 0),
+      );
+    }
+
+    double? minLat, maxLat, minLng, maxLng;
+
+    for (final marker in markers) {
+      final lat = marker.position.latitude;
+      final lng = marker.position.longitude;
+
+      minLat = minLat == null ? lat : (lat < minLat ? lat : minLat);
+      maxLat = maxLat == null ? lat : (lat > maxLat ? lat : maxLat);
+      minLng = minLng == null ? lng : (lng < minLng ? lng : minLng);
+      maxLng = maxLng == null ? lng : (lng > maxLng ? lng : maxLng);
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(minLat!, minLng!),
+      northeast: LatLng(maxLat!, maxLng!),
     );
-
-    if (markers.isEmpty) return bounds;
-
-    bounds = LatLngBounds(
-      southwest: LatLng(
-        markers.first.position.latitude,
-        markers.first.position.longitude,
-      ),
-      northeast: LatLng(
-        markers.first.position.latitude,
-        markers.first.position.longitude,
-      ),
-    );
-
-    bounds = getBounds(markers);
-    _mapController.animateCamera(
-      CameraUpdate.newLatLngBounds(bounds, 50), // 50 is padding
-    );
-
-    return bounds;
   }
 
   @override
@@ -128,6 +165,7 @@ class _MapScreenState extends State<MapScreen> {
             _mapController = controller;
             widget.onMapCreated(controller);
             setState(() => _isMapReady = true);
+            _updateMarkers();
           },
           initialCameraPosition: CameraPosition(
             target: initialPosition,
@@ -139,17 +177,12 @@ class _MapScreenState extends State<MapScreen> {
           compassEnabled: true,
           mapToolbarEnabled: false,
           zoomControlsEnabled: false,
-          onTap: (position) {
-            // Handle map taps if needed
-          },
         ),
-
-        // Custom Location Button
         Positioned(
           bottom: 20,
           right: 20,
           child: FloatingActionButton(
-            heroTag: 'floating-button',
+            heroTag: 'map_location_button',
             mini: true,
             backgroundColor: Theme.of(context).colorScheme.surface,
             child: Icon(
@@ -157,7 +190,7 @@ class _MapScreenState extends State<MapScreen> {
               color: Theme.of(context).colorScheme.primary,
             ),
             onPressed: () {
-              if (widget.userLocation != null) {
+              if (widget.userLocation != null && _isMapReady) {
                 _mapController.animateCamera(
                   CameraUpdate.newLatLngZoom(
                     LatLng(
@@ -175,31 +208,9 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  LatLngBounds getBounds(Set<Marker> markers) {
-    if (markers.isEmpty) {
-      return LatLngBounds(
-        southwest: LatLng(0, 0),
-        northeast: LatLng(0, 0),
-      );
-    }
-
-    double minLat = markers.first.position.latitude;
-    double maxLat = markers.first.position.latitude;
-    double minLng = markers.first.position.longitude;
-    double maxLng = markers.first.position.longitude;
-
-    for (final marker in markers) {
-      if (marker.position.latitude < minLat) minLat = marker.position.latitude;
-      if (marker.position.latitude > maxLat) maxLat = marker.position.latitude;
-      if (marker.position.longitude < minLng)
-        minLng = marker.position.longitude;
-      if (marker.position.longitude > maxLng)
-        maxLng = marker.position.longitude;
-    }
-
-    return LatLngBounds(
-      southwest: LatLng(minLat, minLng),
-      northeast: LatLng(maxLat, maxLng),
-    );
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
@@ -6,6 +8,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
+import 'package:gluttex_impl_business/product_change_notifier.dart';
 import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
 import 'package:gluttex_play/screens/game_catalog.dart';
 import 'package:medicom_catalog/screens/catalog_screen.dart';
@@ -23,9 +26,12 @@ class _HomePageState extends State<HomePage>
   int _selectedIndex = 0;
   int _animationCount = 0;
   late AnimationController _controller;
+  late ProductNotifier provider;
 
   @override
   void initState() {
+    provider = Provider.of<ProductNotifier>(context, listen: false);
+
     super.initState();
     _controller = AnimationController(
       vsync: this,
@@ -36,11 +42,12 @@ class _HomePageState extends State<HomePage>
   }
 
   void _startIconAnimation() {
-    if (_selectedIndex != 4) return; // Only animate in profile
+    if (_selectedIndex != GluttexPageIndex.profile)
+      return; // Only animate in profile
     _controller.forward().then((_) {
       _controller.reverse().then((_) {
         _animationCount++;
-        if (_animationCount < 2 && _selectedIndex == 4) {
+        if (_animationCount < 2 && _selectedIndex == GluttexPageIndex.profile) {
           _startIconAnimation(); // repeat only while on profile
         }
       });
@@ -65,7 +72,12 @@ class _HomePageState extends State<HomePage>
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      if (_selectedIndex == 4) {
+      // if (_selectedIndex == GluttexPageIndex.catalog) {
+      //   final currentCategory = provider.currentCategory;
+      //   log('Current Category: $currentCategory');
+      //   provider.fetchProducts(categoryId: currentCategory, reset: true);
+      // }
+      if (_selectedIndex == GluttexPageIndex.profile) {
         _animationCount = 0;
         _startIconAnimation();
       }
@@ -74,15 +86,15 @@ class _HomePageState extends State<HomePage>
 
   String _getTitle(selectedIndex) {
     switch (selectedIndex) {
-      case 0:
+      case GluttexPageIndex.catalog:
         return AppLocalizations.of(context)!.productsText;
-      case 1:
+      case GluttexPageIndex.suppliers:
         return AppLocalizations.of(context)!.providersText;
-      case 2:
+      case GluttexPageIndex.recipes:
         return AppLocalizations.of(context)!.recipesText;
-      case 3:
+      case GluttexPageIndex.games:
         return AppLocalizations.of(context)!.gamesText;
-      case 4:
+      case GluttexPageIndex.profile:
         return AppLocalizations.of(context)!.profileText;
       default:
         return '';
@@ -108,7 +120,7 @@ class _HomePageState extends State<HomePage>
       appBar: AppBar(
         title: Text(_getTitle(_selectedIndex)),
         actions: [
-          if (_selectedIndex == 4)
+          if (_selectedIndex == GluttexPageIndex.profile)
             RotationTransition(
               turns: Tween(begin: -0.05, end: 0.05)
                   .chain(CurveTween(curve: Curves.easeInOut))
@@ -120,9 +132,8 @@ class _HomePageState extends State<HomePage>
             ),
         ],
         backgroundColor: isDarkMode
-            ? // Darker green shades
-            const Color(0xFF186A3B)
-            : const Color(0xFF2ECC71),
+            ? GluttexConstants.backgroundDarkColor
+            : GluttexConstants.backgroundColor,
 
         // actions: [
         //   IconButton(
@@ -148,27 +159,27 @@ class _HomePageState extends State<HomePage>
               icon: const Icon(CupertinoIcons.cube_box_fill),
               label: AppLocalizations.of(context)!.productsText,
               backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFF2ECC71) // Darker green shades
-                  : const Color(0xFF186A3B)),
+                  ? GluttexConstants.backgroundColor
+                  : GluttexConstants.backgroundDarkColor),
           BottomNavigationBarItem(
             icon: const Icon(Icons.store_sharp),
             label: AppLocalizations.of(context)!.providersText,
             backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? const Color(0xFF2ECC71) // Darker green shades
-                : const Color(0xFF186A3B),
+                ? GluttexConstants.backgroundColor
+                : GluttexConstants.backgroundDarkColor,
           ),
           BottomNavigationBarItem(
               icon: const Icon(Icons.restaurant_menu_outlined),
               label: AppLocalizations.of(context)!.recipesText,
               backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFF2ECC71) // Darker green shades
-                  : const Color(0xFF186A3B)),
+                  ? GluttexConstants.backgroundColor
+                  : GluttexConstants.backgroundDarkColor),
           BottomNavigationBarItem(
             icon: const Icon(CupertinoIcons.gamecontroller_alt_fill),
             label: AppLocalizations.of(context)!.gamesText,
             backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? const Color(0xFF2ECC71)
-                : const Color(0xFF186A3B),
+                ? GluttexConstants.backgroundColor
+                : GluttexConstants.backgroundDarkColor,
           ),
           BottomNavigationBarItem(
               icon: appUser?.id_app_user != 0 &&
@@ -213,8 +224,8 @@ class _HomePageState extends State<HomePage>
                   ? AppLocalizations.of(context)!.profileText
                   : '${appUser.personFirstName} ${appUser.personLastName}',
               backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFF2ECC71)
-                  : const Color(0xFF186A3B)),
+                  ? GluttexConstants.backgroundColor
+                  : GluttexConstants.backgroundDarkColor),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

@@ -590,5 +590,8 @@
   "availableText": "{amount} متوفر",
   "ingredientUnits":"غرام,كيلوغرام,ميليغرام,رطل,أوقية,ملليلتر,لتر,كوب,ملعقة كبيرة,ملعقة صغيرة,رشة",
   "unitText": "الوحدة",
-  "amountText": "الكمية"
+  "amountText": "الكمية",
+  "otherProductsFromSupplier": "منتجات أخرى من: {supplier_name}",
+  "similarProductsFromCategory": "منتجات مشابهة من فئة {category_name}",
+  "noOtherProductsAvailable": "لا توجد منتجات أخرى متاحة من هذا المزود"
 }

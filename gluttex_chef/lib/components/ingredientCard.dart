@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
@@ -19,6 +21,7 @@ class IngredientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log('Parts : ${quantity.toString()}');
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
     final parts = quantity.split(':'); // ["Kg", "1.0"]

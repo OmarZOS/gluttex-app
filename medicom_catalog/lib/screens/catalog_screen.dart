@@ -22,11 +22,12 @@ class CatalogScreen extends StatefulWidget {
 class _CatalogScreenState extends State<CatalogScreen> {
   final TextEditingController _searchController = TextEditingController();
   late List<String> _categories = [];
-  late int _selectedCategoryId = 0;
+  int _selectedCategoryId = 0;
   final ScrollController _scrollController = ScrollController();
-
+  late ProductNotifier provider;
   @override
   void initState() {
+    provider = Provider.of<ProductNotifier>(context, listen: false);
     super.initState();
     _searchController.addListener(_filterProducts);
     _scrollController.addListener(_scrollListener);
@@ -47,16 +48,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
         categs;
   }
 
-  void _filterProducts() {
-    setState(() {});
-  }
+  void _filterProducts() {}
 
   void _selectCategory(int index) {
-    setState(() {
-      _selectedCategoryId = index;
-    });
+    _selectedCategoryId = index;
     Provider.of<ProductNotifier>(context, listen: false)
-        .fetchProducts(_selectedCategoryId);
+        .fetchProducts(categoryId: _selectedCategoryId);
   }
 
   void _scrollListener() {
@@ -64,7 +61,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
             _scrollController.position.maxScrollExtent - 100 &&
         !Provider.of<ProductNotifier>(context, listen: false).isLoading) {
       Provider.of<ProductNotifier>(context, listen: false)
-          .fetchProducts(_selectedCategoryId);
+          .fetchProducts(categoryId: provider.currentCategory);
     }
   }
 
@@ -187,8 +184,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
       ),
       body: Consumer<ProductNotifier>(
         builder: (context, productNotifier, child) {
-          final products =
-              productNotifier.filterProductsByCategory(_selectedCategoryId);
+          final products = productNotifier
+              .filterProductsByCategory(provider.currentCategory);
           var filteredProducts = products.where((product) {
             var query = _searchController.text.toLowerCase();
             return (product.product_name?.toLowerCase().contains(query) ??
@@ -205,8 +202,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       horizontal: GluttexConstants.kDefaultPaddin / 4),
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      await productNotifier.fetchProducts(_selectedCategoryId,
-                          reset: true);
+                      await productNotifier.fetchProducts(
+                          categoryId: provider.currentCategory, reset: true);
                     },
                     child: _buildProductGrid(filteredProducts, productNotifier),
                   ),
@@ -225,7 +222,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
       child: Row(
         children: _categories.map((category) {
           int index = _categories.indexOf(category);
-          bool isSelected = _selectedCategoryId == index;
+          bool isSelected = provider.currentCategory == index;
           String? iconPath = 'assets/icons/$index.svg';
 
           return GestureDetector(

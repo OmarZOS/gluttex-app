@@ -6,6 +6,8 @@ import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_impl_business/product_change_notifier.dart';
+import 'package:gluttex_impl_business/supplier_change_notifier.dart';
+import 'package:gluttex_localiser/components/supplier_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medicom_catalog/screens/components/ImagePickerSection.dart';
 import 'package:medicom_catalog/screens/components/category_picker.dart';
@@ -27,6 +29,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _productQuantityController = TextEditingController();
   final _productDescriptionController = TextEditingController();
 
+  late SupplierChangeNotifier supplierNotifier;
+
   GluttexImage? _productImage;
   int? _productTypeId;
   bool _isSubmitting = false;
@@ -40,6 +44,13 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _productQuantityController.dispose();
     _productDescriptionController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    supplierNotifier =
+        Provider.of<SupplierChangeNotifier>(context, listen: false);
   }
 
   Future<void> _submitForm() async {
@@ -104,7 +115,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       case 200:
         message = loc.putSuccess;
         color = Colors.green;
-        Provider.of<ProductNotifier>(context, listen: false).fetchProducts(0);
+        Provider.of<ProductNotifier>(context, listen: false).fetchProducts();
         Navigator.pop(context);
         break;
       case 406:
@@ -222,6 +233,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ownerId:
                     '${Provider.of<AppUserNotifier>(context, listen: false).appUser!.id_app_user}',
                 entityId: '0', // New product, so no ID yet
+              ),
+              const SizedBox(height: 16),
+              SupplierPicker(
+                onSupplierChanged: (selectedSupplier) {
+                  // Handle supplier selection
+                  print('Selected supplier: ${selectedSupplier.providerName}');
+                },
+                suppliers: supplierNotifier.suppliers,
+                initialSelection: supplierNotifier.suppliers[0],
               ),
               const SizedBox(height: 16),
               ElevatedButton(

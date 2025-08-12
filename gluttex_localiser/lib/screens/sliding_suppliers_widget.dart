@@ -92,7 +92,7 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
           ? FloatingActionButton(
               backgroundColor: theme.colorScheme.primary,
               foregroundColor: theme.colorScheme.onPrimary,
-              heroTag: 'floating-button',
+              heroTag: 'floating-button-12',
               onPressed: () {
                 Navigator.push(
                   context,
@@ -129,69 +129,6 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
-
-        // TextField(
-        //   controller: _searchController,
-        //   decoration: InputDecoration(
-        //     hintText: loc.searchTxt,
-        //     hintStyle: TextStyle(
-        //       color: Theme.of(context).hintColor.withOpacity(0.6),
-        //     ),
-        //     border: _buildOutlineInputBorder(), // Custom border (see below)
-        //     enabledBorder: _buildOutlineInputBorder(),
-        //     focusedBorder: _buildOutlineInputBorder(
-        //       borderColor: Theme.of(context).primaryColor, // Green for focus
-        //     ),
-        //     filled: true,
-        //     fillColor:
-        //         Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
-        //     contentPadding:
-        //         const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-        //     prefixIcon: Icon(
-        //       Icons.search,
-        //       color: Theme.of(context).hintColor.withOpacity(0.7),
-        //     ),
-        //     suffixIcon: _searchController.text.isEmpty
-        //         ? null // Hide clear button when empty
-        //         : IconButton(
-        //             icon: Icon(
-        //               Icons.close,
-        //               color: Theme.of(context).hintColor.withOpacity(0.7),
-        //             ),
-        //             splashRadius: 20, // Smaller splash area
-        //             onPressed: () {
-        //               _searchController.clear();
-        //               _handleSearch('');
-        //               FocusScope.of(context)
-        //                   .unfocus(); // Optional: Close keyboard
-        //             },
-        //           ),
-        //   ),
-        //   style: TextStyle(
-        //     color: Theme.of(context).colorScheme.onSurface,
-        //   ),
-        //   cursorColor: Theme.of(context).primaryColor, // Green cursor
-        //   textInputAction:
-        //       TextInputAction.search, // Android/iOS "search" keyboard button
-        //   onSubmitted: _handleSearch,
-        //   onChanged: (value) {
-        //     setState(() {}); // Rebuild to show/hide clear button
-        //   },
-        // ),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.add_business),
-        //     onPressed: () {
-        //       Navigator.push(
-        //         context,
-        //         MaterialPageRoute(
-        //           builder: (context) => const SupplierFormScreen(),
-        //         ),
-        //       );
-        //     },
-        //     tooltip: 'Add Supplier', // Optional accessibility hint
-        //   )
-        // ],
       ),
       body: Consumer<SupplierChangeNotifier>(
         builder: (context, supplierNotifier, child) {
@@ -224,14 +161,6 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                                 ),
                       ),
                       const SizedBox(height: 8),
-                      // TextButton(
-                      //   onPressed: () {
-                      //     // Optionally open Google Maps in a browser
-                      //     final url = 'https://www.google.com/maps';
-                      //     // launchUrl(Uri.parse(url));
-                      //   },
-                      //   child: Text("Open in Google Maps"),
-                      // ),
                     ],
                   ),
                 )
@@ -246,7 +175,9 @@ class _SlidingSuppliersWidgetState extends State<SlidingSuppliersWidget> {
                       supplier.locationLatitude,
                       supplier.locationLongitude,
                     );
-                    showSupplierDetails(context, supplier);
+                    Future.delayed(const Duration(milliseconds: 400), () {
+                      showSupplierDetails(context, supplier);
+                    });
                   },
                 ),
 

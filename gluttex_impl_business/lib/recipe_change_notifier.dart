@@ -37,7 +37,7 @@ class RecipeNotifier extends ChangeNotifier {
   bool hasMoreIngredients = true;
 
   Future<void> initialize() async {
-    await fetchIngredients(reset: true);
+    // await fetchIngredients(reset: true);
     await fetchRecipes(0, reset: true);
   }
 

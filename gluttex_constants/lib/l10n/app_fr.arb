@@ -609,5 +609,8 @@
   "availableText": "{amount} disponible",
   "ingredientUnits":"Gramme,Kilogramme,Milligramme,Livre,Once,Millilitre,Litre,Tasse,Cuillère à soupe,Cuillère à café,Pincée",
   "unitText": "Unité",
-  "amountText": "Quantité"
+  "amountText": "Quantité",
+  "otherProductsFromSupplier": "Aussi fournis par: {supplier_name}",
+  "similarProductsFromCategory": "Produits similaires de: {category_name}",
+  "noOtherProductsAvailable": "Aucun autre produit disponible"
 }

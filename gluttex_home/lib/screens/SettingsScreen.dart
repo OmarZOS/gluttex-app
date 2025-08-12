@@ -290,8 +290,10 @@ class _LogOutTile extends StatelessWidget {
                 ? AppLocalizations.of(context)!.logoutText
                 : AppLocalizations.of(context)!.loginText),
         // trailing: const Icon(Icons.chevron_right),
-        onTap: () =>
-            {Provider.of<AppUserNotifier>(context, listen: false).logout()});
+        onTap: () => {
+              // Navigator.popUntil(context, (route) => route.),
+              Provider.of<AppUserNotifier>(context, listen: false).logout(),
+            });
   }
 }
 

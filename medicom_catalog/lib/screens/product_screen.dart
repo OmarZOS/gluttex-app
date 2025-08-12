@@ -24,64 +24,76 @@ import 'package:medicom_catalog/screens/product_update_form_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:gluttex_impl_business/supplier_change_notifier.dart';
+import 'package:shimmer/shimmer.dart';
 
-class DetailsScreen extends StatefulWidget {
+class DetailsScreen extends StatelessWidget {
   final Product product;
 
   const DetailsScreen({super.key, required this.product});
 
   @override
-  State<DetailsScreen> createState() => _DetailsScreenState();
+  Widget build(BuildContext context) {
+    return _DetailsScreenContent(product: product);
+  }
 }
 
-class _DetailsScreenState extends State<DetailsScreen> {
+class _DetailsScreenContent extends StatefulWidget {
+  final Product product;
+
+  const _DetailsScreenContent({required this.product});
+
+  @override
+  State<_DetailsScreenContent> createState() => _DetailsScreenContentState();
+}
+
+class _DetailsScreenContentState extends State<_DetailsScreenContent> {
+  late final PanelController _panelController;
+  int _quantity = 1;
+  Supplier? _provider;
   late Product _product;
-  final PanelController _panelController = PanelController();
-  late ProductNotifier _productNotifier;
-  int quantity = 1;
-  final double _panelMinHeight = 80;
-  final double _panelMaxHeight = 320;
-  Supplier? provider;
   bool _isLoadingProvider = true;
 
   @override
   void initState() {
-    super.initState();
     _product = widget.product;
-    _subscribeToProductUpdates();
+    _panelController = PanelController();
+    super.initState();
     _fetchProvider();
+    _initializeProducts();
   }
 
-  @override
-  void dispose() {
-    _productNotifier.stopPollingProductUpdates();
-    super.dispose();
-  }
-
-  void _subscribeToProductUpdates() {
-    _productNotifier = Provider.of<ProductNotifier>(context, listen: false);
-    _productNotifier.startPollingProductUpdates(_product);
+  void _initializeProducts() {
+    final productNotifier =
+        Provider.of<ProductNotifier>(context, listen: false);
+    productNotifier.fetchProducts(
+        categoryId: widget.product.product_category_id ?? 0);
+    productNotifier.startPollingProductUpdates(widget.product);
   }
 
   Future<void> _fetchProvider() async {
     try {
-      final fetchedProvider =
+      setState(() => _isLoadingProvider = true);
+
+      _provider =
           await Provider.of<SupplierChangeNotifier>(context, listen: false)
-              .getSupplierById(_product.product_provider_id ?? 0);
-      if (mounted) {
-        setState(() {
-          provider = fetchedProvider;
-          _isLoadingProvider = false;
-        });
-      }
+              .getSupplierById(widget.product.product_provider_id ?? 0);
     } catch (e) {
+      debugPrint('Error fetching provider: $e');
+    } finally {
       if (mounted) {
-        setState(() {
-          _isLoadingProvider = false;
-        });
+        setState(() => _isLoadingProvider = false);
       }
-      log('Error fetching provider: $e');
     }
+  }
+
+  void _decrementQuantity() {
+    if (_quantity > 1) {
+      setState(() => _quantity--);
+    }
+  }
+
+  void _incrementQuantity() {
+    setState(() => _quantity++);
   }
 
   @override
@@ -91,25 +103,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
             .locale
             ?.languageCode ==
         "ar";
-    final notifier = Provider.of<ProductNotifier>(context);
     final isLoggedIn =
         Provider.of<AppUserNotifier>(context, listen: false).isLoggedIn;
-    final product = _product;
-    final providerName = provider?.providerName ?? "";
-
+    final isDarkMode = theme.brightness == Brightness.dark;
     return Scaffold(
       floatingActionButton:
           isLoggedIn ? _buildFloatingCartButton(context) : null,
-      appBar: _buildAppBar(context),
+      appBar: _buildAppBar(context, widget.product),
       body: SlidingUpPanel(
         controller: _panelController,
-        minHeight: isLoggedIn ? _panelMinHeight : 0,
-        maxHeight: isLoggedIn ? _panelMaxHeight : 0,
+        minHeight: isLoggedIn ? 80 : 0,
+        maxHeight: isLoggedIn ? 320 : 0,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         color: theme.colorScheme.surface,
         backdropEnabled: true,
         backdropOpacity: 0.5,
-        backdropColor: Colors.black,
+        backdropColor: isDarkMode
+            ? Colors.white.withOpacity(0.5)
+            : Colors.black.withOpacity(0.5), // Border color
         panel: _buildSlidingPanel(context),
         body: CustomScrollView(
           slivers: [
@@ -127,80 +138,133 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 ),
                 child: Column(
                   children: [
-                    _buildProductHeader(context, isRTL),
+                    _buildProductHeader(context, isRTL, widget.product),
                     const SizedBox(height: GluttexConstants.kDefaultPaddin),
                     Consumer<ProductNotifier>(
                       builder: (context, productNotifier, _) {
                         final currentProduct =
                             productNotifier.products.firstWhere(
-                          (element) => element.id_product == product.id_product,
-                          orElse: () => product,
+                          (element) =>
+                              element.id_product == widget.product.id_product,
+                          orElse: () => widget.product,
                         );
                         return QuantityAndRef(product: currentProduct);
                       },
                     ),
                     const SizedBox(height: GluttexConstants.kDefaultPaddin / 2),
-                    Description(product: product),
+                    Description(product: widget.product),
                     if (isLoggedIn) ...[
                       const SizedBox(
                           height: GluttexConstants.kDefaultPaddin / 2),
                       AddToCart(
-                        product: product,
+                        product: widget.product,
                         onAddToCartPressed: _panelController.open,
                       ),
                     ],
                     const SizedBox(height: GluttexConstants.kDefaultPaddin / 2),
-                    if (!notifier.isLoading && notifier.products.isNotEmpty)
-                      SizedBox(
-                        height: 200,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: notifier.products.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                            final product = notifier.products[index];
-                            return SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(16),
-                                    onTap: () => _navigateToProductDetail(
-                                        context, product),
-                                    child: SupplierProductCard(
-                                      product: product,
-                                      supplierName: providerName,
-                                      stockQuantity:
-                                          product.product_quantity ?? 0,
-                                      minOrderQty: '1',
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        AppLocalizations.of(context)!
+                            .similarProductsFromCategory(
+                                AppLocalizations.of(context)!
+                                        .productCategoryTextList
+                                        .split(",")[
+                                    (widget.product.product_category_id ?? 1) -
+                                        1]),
+                        textAlign: isRTL ? TextAlign.right : TextAlign.left,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    Consumer<ProductNotifier>(
+                      builder: (context, notifier, _) {
+                        if (notifier.isLoading) {
+                          return SizedBox(
+                            height: 180,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: 3,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 12),
+                              itemBuilder: (context, index) {
+                                return Shimmer.fromColors(
+                                    baseColor: Colors.grey[300]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: Container(
+                                      width: 360,
+                                      decoration: BoxDecoration(
+                                        color: isDarkMode
+                                            ? Colors.white.withOpacity(0.5)
+                                            : Colors.black.withOpacity(
+                                                0.5), // Border color,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ));
+                              },
+                            ),
+                          );
+                        }
+
+                        if (notifier.products.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+
+                        return SizedBox(
+                          height: 180,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: notifier.products.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 12),
+                            itemBuilder: (context, index) {
+                              final product = notifier.products[index];
+                              if (product.id_product ==
+                                  widget.product.id_product) {
+                                return const SizedBox.shrink();
+                              }
+                              return SizedBox(
+                                width: 360,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Material(
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(16),
                                       onTap: () => Future.delayed(
-                                          const Duration(milliseconds: 150),
-                                          () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                DetailsScreen(product: product),
-                                          ),
-                                        );
-                                      }),
+                                        const Duration(milliseconds: 150),
+                                        () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DetailsScreen(
+                                                      product: product),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      child: SupplierProductCard(
+                                        product: product,
+                                        supplierName:
+                                            _provider?.providerName ?? "",
+                                        stockQuantity:
+                                            product.product_quantity ?? 0,
+                                        minOrderQty: '1',
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    _buildProviderTile(context),
-                    if (isLoggedIn)
-                      const SizedBox(
-                        height: 160,
-                      ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    _buildProviderTile(),
+                    if (isLoggedIn) const SizedBox(height: 160),
                   ],
                 ),
               ),
@@ -211,10 +275,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  Widget _buildProductHeader(BuildContext context, bool isRTL) {
+  Widget _buildProductHeader(
+      BuildContext context, bool isRTL, Product product) {
     final theme = Theme.of(context);
-    final product = _product;
-
+    // log("Screen id_product: ${product.id_product}");
     return Stack(
       children: [
         if (product.product_image_url != null &&
@@ -236,7 +300,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     bottomLeft: isRTL ? Radius.zero : const Radius.circular(40),
                   ),
                   child: Hero(
-                    tag: "product-image-${product.id_product}",
+                    tag: "product-image-${product.id_product}-card",
                     child: Image.network(
                       GluttexConstants.fsBaseUrl + product.product_image_url!,
                       fit: BoxFit.cover,
@@ -254,7 +318,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
           ),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: GluttexConstants.kDefaultPaddin,
             vertical: GluttexConstants.kDefaultPaddin,
           ),
           child: ConstrainedBox(
@@ -310,20 +373,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  void _navigateToProductDetail(BuildContext context, Product product) {
-    Future.delayed(const Duration(milliseconds: 150), () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DetailsScreen(product: product),
-        ),
-      );
-    });
-  }
-
   Widget _buildFloatingCartButton(BuildContext context) {
     return FloatingActionButton(
-      heroTag: 'floating-button',
+      heroTag: 'floating-button-0',
       backgroundColor: Theme.of(context).colorScheme.primary,
       onPressed: () => Navigator.push(
         context,
@@ -341,8 +393,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    final isOwner = isProductOwner(context, _product.product_owner_id ?? 0);
+  AppBar _buildAppBar(BuildContext context, Product product) {
+    final isOwner = isProductOwner(context, product.product_owner_id ?? 0);
 
     return AppBar(
       elevation: 0,
@@ -351,30 +403,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
-        if (isOwner) _buildDeleteButton(context),
-        if (isOwner) _buildEditButton(context),
+        if (isOwner)
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _showDeleteConfirmation(context, product),
+          ),
+        if (isOwner)
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () => _navigateToEditScreen(context, product),
+          ),
         const SizedBox(width: GluttexConstants.kDefaultPaddin / 2),
       ],
     );
   }
 
-  IconButton _buildDeleteButton(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.delete, color: Colors.red),
-      onPressed: () => _showDeleteConfirmation(context),
-    );
-  }
-
-  IconButton _buildEditButton(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.edit),
-      onPressed: () => _navigateToEditScreen(context),
-    );
-  }
-
   Widget _buildSlidingPanel(BuildContext context) {
     final theme = Theme.of(context);
-    final price = (_product.product_price ?? 0) * quantity;
+    final price =
+        (_product?.product_price ?? 0) * (_product?.product_quantity ?? 0);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -385,7 +432,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              _buildProductThumbnail(theme),
+              _buildProductThumbnail(theme, _product),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -415,7 +462,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          _buildQuantityControls(theme),
+          _buildQuantityControls(context, theme),
           const SizedBox(height: 24),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -425,7 +472,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: _addToCart,
+            onPressed: () => _addToCart(context),
             child: Text(
               AppLocalizations.of(context)!.cartAddConfirmationMessage,
               style: theme.textTheme.labelLarge?.copyWith(
@@ -452,7 +499,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  Widget _buildProductThumbnail(ThemeData theme) {
+  Widget _buildProductThumbnail(ThemeData theme, Product? product) {
     return Container(
       width: 60,
       height: 60,
@@ -464,13 +511,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
           width: 24,
           height: 24,
           child: SvgPicture.asset(
-            'assets/icons/${_product.product_category_id ?? 1}.svg',
+            'assets/icons/${product?.product_category_id ?? 1}.svg',
             package: "medicom_catalog",
           )),
     );
   }
 
-  Widget _buildQuantityControls(ThemeData theme) {
+  Widget _buildQuantityControls(BuildContext context, ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -481,9 +528,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
         Row(
           children: [
             IconButton(
-              onPressed: () => setState(() {
-                if (quantity > 1) quantity--;
-              }),
+              onPressed: _decrementQuantity,
               icon: Icon(Icons.remove_circle,
                   size: 32, color: theme.colorScheme.error),
             ),
@@ -491,12 +536,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
               width: 40,
               alignment: Alignment.center,
               child: Text(
-                '$quantity',
+                '${_quantity}',
                 style: theme.textTheme.titleMedium,
               ),
             ),
             IconButton(
-              onPressed: () => setState(() => quantity++),
+              onPressed: _incrementQuantity,
               icon: Icon(Icons.add_circle,
                   size: 32, color: theme.colorScheme.primary),
             ),
@@ -506,14 +551,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation(BuildContext context, Product product) {
     showConfirmationDialog(
       context,
       AppLocalizations.of(context)!.productdeletionConfirmationMessage,
       () async {
         final statusCode =
             await Provider.of<ProductNotifier>(context, listen: false)
-                .deleteProduct('${_product.id_product}');
+                .deleteProduct('${product.id_product}');
 
         final response = Response();
 
@@ -539,39 +584,41 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  Future<void> _navigateToEditScreen(BuildContext context) async {
-    log('Owner Id: ${_product.product_owner_id}');
-    log('Image Id: ${_product.id_product_image}');
+  Future<void> _navigateToEditScreen(
+      BuildContext context, Product product) async {
+    log('Owner Id: ${product.product_owner_id}');
+    log('Image Id: ${product.id_product_image}');
 
     final updatedProduct = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ProductEditFormScreen(
-          initialProductName: _product.product_name,
-          initialProductBrand: _product.product_brand,
-          initialProductBarcode: _product.product_barcode,
-          initialProductOwner: _product.product_owner_id,
-          initialProductImageUrl: _product.product_image_url,
-          initialProductTypeId: _product.product_category_id,
-          initialProductPrice: _product.product_price,
-          initialProductQuantity: _product.product_quantity,
-          initialProduct_provider_id: _product.product_provider_id,
-          initialProduct_category_id: _product.product_category_id,
-          initialIdProduct: _product.id_product,
-          initialIdProductImage: _product.id_product_image,
-          initialProductDescription: _product.product_description,
+          initialProductName: product.product_name,
+          initialProductBrand: product.product_brand,
+          initialProductBarcode: product.product_barcode,
+          initialProductOwner: product.product_owner_id,
+          initialProductImageUrl: product.product_image_url,
+          initialProductTypeId: product.product_category_id,
+          initialProductPrice: product.product_price,
+          initialProductQuantity: product.product_quantity,
+          initialProduct_provider_id: product.product_provider_id,
+          initialProduct_category_id: product.product_category_id,
+          initialIdProduct: product.id_product,
+          initialIdProductImage: product.id_product_image,
+          initialProductDescription: product.product_description,
         ),
       ),
     );
 
     if (updatedProduct != null) {
-      setState(() => _product = updatedProduct);
+      Provider.of<ProductNotifier>(context, listen: false)
+          .addOrUpdateProduct(updatedProduct);
     }
   }
 
-  void _addToCart() {
+  void _addToCart(BuildContext context) {
     Provider.of<CartChangeNotifier>(context, listen: false)
-        .addItem(widget.product, quantity);
+        .addItem(_product, _product?.product_quantity ?? 0);
     _panelController.close();
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -585,7 +632,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  Widget _buildProviderTile(BuildContext context) {
+  Widget _buildProviderTile() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -605,8 +652,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // Handle navigation or action here
-          showSupplierDetails(context, provider ?? Supplier.empty());
+          showSupplierDetails(context, _provider ?? Supplier.empty());
         },
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -630,17 +676,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       color: colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: provider != null
+                    child: _provider != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: SvgPicture.asset(
-                              'assets/icons/${provider?.productProviderTypeId ?? 0}.svg',
+                              'assets/icons/${_provider?.productProviderTypeId ?? 0}.svg',
                               package: "gluttex_localiser",
                               color: Theme.of(context).colorScheme.primary,
                               fit: BoxFit.cover,
                             ),
                           )
-                        : _buildDefaultProviderIcon(),
+                        : _buildDefaultProviderIcon(context),
                   ),
                   const SizedBox(width: 12),
 
@@ -650,7 +696,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          provider?.providerName ??
+                          _provider?.providerName ??
                               AppLocalizations.of(context)!.unknownProvider,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
@@ -658,7 +704,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (provider?.locationName != null) ...[
+                        if (_provider?.locationName != null) ...[
                           const SizedBox(height: 4),
                           Row(
                             children: [
@@ -669,7 +715,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                provider?.locationName ?? "",
+                                _provider?.locationName ?? "",
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: colorScheme.onSurface.withOpacity(0.6),
                                 ),
@@ -689,7 +735,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  Widget _buildDefaultProviderIcon() {
+  Widget _buildDefaultProviderIcon(
+    BuildContext context,
+  ) {
     return Center(
       child: Icon(
         Icons.store_outlined,

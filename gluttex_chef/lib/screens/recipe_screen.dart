@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_chef/components/RecipeCard.dart';
@@ -51,7 +53,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       floatingActionButton:
           Provider.of<AppUserNotifier>(context, listen: false).isCookingChef
               ? FloatingActionButton(
-                  heroTag: 'floating-button',
+                  heroTag: 'floating-button-2',
                   onPressed: () => _navigateToEditScreen(context),
                   child: const Icon(Icons.edit),
                 )
@@ -148,10 +150,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
           colors: (Theme.of(context).brightness == Brightness.dark)
               ? [
                   const Color.fromARGB(255, 100, 110, 105),
-                  const Color(0xFF186A3B),
+                  GluttexConstants.backgroundDarkColor,
                 ]
               : [
-                  const Color(0xFF2ECC71),
+                  GluttexConstants.backgroundColor,
                   const Color.fromARGB(255, 143, 197, 166),
                 ],
           begin: Alignment.topLeft,
@@ -246,6 +248,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Widget _buildIngredientsList(BuildContext context) {
+    log("Recipe ingredients: ${_recipe.recipe_ingredients}");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -264,8 +267,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
             itemBuilder: (context, index) {
               final key = _recipe.recipe_ingredients!.keys.elementAt(index);
               final quantity = _recipe.recipe_ingredients![key]!;
-              final currentIngredient = notifier.recipeIngredients[key - 1];
-
+              // final currentIngredient = notifier.recipeIngredients[key - 1];
+              // log("Ingredient: $currentIngredient, Quantity: $quantity");
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: IngredientCard(
@@ -274,7 +277,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       .ingredientTextList
                       .split(',')[key - 1],
                   quantity: quantity,
-                  id: currentIngredient.id_ingredient,
+                  id: key,
                 ),
               );
             },

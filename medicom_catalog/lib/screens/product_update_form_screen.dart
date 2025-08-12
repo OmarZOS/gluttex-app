@@ -103,7 +103,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
         title: Text(AppLocalizations.of(context)!.updateProductText),
       ),
       floatingActionButton: FloatingActionButton(
-        heroTag: 'floating-button',
+        heroTag: 'floating-button-01',
         child: const Icon(
           Icons.shopify_sharp,
           // color: Colors.yellow[50],
@@ -296,7 +296,7 @@ class _ProductEditFormScreenState extends State<ProductEditFormScreen> {
       case 200:
         message = loc.putSuccess;
         color = Colors.green;
-        Provider.of<ProductNotifier>(context, listen: false).fetchProducts(0);
+        Provider.of<ProductNotifier>(context, listen: false).fetchProducts();
         Navigator.pop(context);
         break;
       case 406:

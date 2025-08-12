@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
+import 'package:gluttex_impl_app/user_change_notifier.dart';
 import 'package:gluttex_localiser/components/category_picker.dart';
 import 'package:gluttex_localiser/components/image_picker.dart';
 import 'package:gluttex_localiser/components/map_picker.dart';
@@ -10,6 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:locator/locator.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 class SupplierFormScreen extends StatefulWidget {
   const SupplierFormScreen({super.key});
@@ -104,6 +106,11 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         locationLatitude: _location_latitude ?? 0.0,
         locationLongitude: _location_longitude ?? 0.0,
         locationName: _location_name ?? "",
+        productProviderOwnerId:
+            Provider.of<AppUserNotifier>(context, listen: false)
+                    .appUser!
+                    .id_app_user ??
+                0,
       );
 
       // Show loading indicator

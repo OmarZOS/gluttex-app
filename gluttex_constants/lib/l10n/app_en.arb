@@ -514,5 +514,8 @@
   "availableText": "{amount} Available",
   "ingredientUnits":"Gram,Kilogram,Milligram,Pound,Ounce,Milliliter,Liter,Cup,Tablespoon,Teaspoon,Pinch",
   "unitText": "Unit",
-  "amountText": "Amount"
+  "amountText": "Amount",
+  "otherProductsFromSupplier": "Also from: {supplier_name}",
+  "similarProductsFromCategory": "Similar Products in: {category_name}",
+  "noOtherProductsAvailable": "No other products available from this supplier."
 }

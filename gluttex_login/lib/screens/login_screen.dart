@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
@@ -398,10 +399,17 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       children: [
         // Logo
-        Image.asset(
-          'assets/images/logo.png',
-          height: 120,
-          color: isDarkMode ? Colors.lightGreen : Colors.green,
+        SvgPicture.asset(
+          'assets/images/logo.svg',
+          // package: "gluttex_localiser",
+          color: isDarkMode
+              ? GluttexConstants.backgroundDarkColor
+              : GluttexConstants.backgroundColor,
+          // fit: BoxFit.cover,
+
+          width: 140,
+          height: 140,
+          package: "gluttex_login",
         ),
         const SizedBox(height: 16),
 

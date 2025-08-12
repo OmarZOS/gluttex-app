@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
@@ -13,7 +15,7 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int categoryId = product.product_category_id ?? 0;
-
+    // log("Card id_product: ${product.id_product}");
     return Card(
       // color: GluttexConstants().getCardColor(
       //     categoryId - 1, Theme.of(context).brightness == Brightness.dark),
@@ -49,7 +51,7 @@ class ProductCard extends StatelessWidget {
                   duration: const Duration(milliseconds: 500),
                   child: product.product_image_url != null
                       ? Hero(
-                          tag: 'product-image-${product.id_product}',
+                          tag: 'product-image-${product.id_product}-card',
                           child: Image.network(
                             GluttexConstants.fsBaseUrl +
                                 product.product_image_url!,

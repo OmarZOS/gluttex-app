@@ -13,6 +13,9 @@ class ProductNotifier extends ChangeNotifier {
   bool isLoading = false;
   int currentPage = 0;
   int currentCategory = 0;
+  int currentUserId = 0;
+  int currentProviderId = 0;
+
   final int itemsPerPage = GluttexConstants.itemsPerPage;
   List<String> get categories => _productCategories;
   List<String> _productCategories = [];
@@ -23,7 +26,7 @@ class ProductNotifier extends ChangeNotifier {
   List<Product> get products => _products.values.toList();
 
   ProductNotifier() {
-    fetchProducts(0);
+    fetchProducts();
   }
 
   Future<int?> addOrUpdateProduct(Product product) async {
@@ -38,7 +41,8 @@ class ProductNotifier extends ChangeNotifier {
           ? await _productService.addProduct(product)
           : await _productService.updateProduct(product));
       if (status != null) {
-        await fetchProducts(currentCategory, reset: true);
+        await fetchProducts(
+            categoryId: currentCategory, userId: currentUserId, reset: true);
       }
       return status;
     } catch (e) {
@@ -89,15 +93,23 @@ class ProductNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchProducts(int categoryId, {bool reset = false}) async {
+  Future<void> fetchProducts(
+      {int categoryId = 0,
+      int userId = 0,
+      int providerId = 0,
+      bool reset = false}) async {
     if (isLoading) return;
 
-    if (reset || currentCategory != categoryId) {
+    if (reset ||
+        currentCategory != categoryId ||
+        currentUserId != userId ||
+        currentProviderId != providerId) {
       currentCategory = categoryId;
+      currentUserId = userId;
+      currentProviderId = providerId;
       currentPage = 0;
-      if (reset) {
-        _products.clear(); // Only clear products if reset is true
-      }
+
+      _products.clear();
     }
 
     isLoading = true;
@@ -105,9 +117,11 @@ class ProductNotifier extends ChangeNotifier {
 
     try {
       final fetchedProducts = await _productService.getAllProducts(
-        categoryId,
-        currentPage * itemsPerPage,
-        itemsPerPage,
+        userId: currentUserId,
+        category: categoryId,
+        providerId: providerId,
+        page: currentPage * itemsPerPage,
+        limit: itemsPerPage,
       );
 
       if (fetchedProducts != null && fetchedProducts.isNotEmpty) {
