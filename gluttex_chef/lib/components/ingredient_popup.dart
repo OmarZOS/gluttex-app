@@ -75,7 +75,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
   String _getIngredientName(int id) {
     try {
       final names = AppLocalizations.of(context)!.ingredientTextList.split(',');
-      return names[id % names.length - 1]; // Safe fallback
+      return names[id - 1]; // Safe fallback
     } catch (e) {
       return 'Ingredient $id';
     }
@@ -221,23 +221,30 @@ class _IngredientPopupState extends State<IngredientPopup> {
         final ingredient = _filteredIngredients[index];
         final name = _getIngredientName(ingredient.id_ingredient);
 
-        return ListTile(
-          leading: SvgPicture.asset(
-            'assets/ingredient_svg/${ingredient.id_ingredient}.svg',
-            package: "gluttex_chef",
-            width: 28,
-            height: 28,
-            fit: BoxFit.contain,
-            placeholderBuilder: (context) => const SizedBox(
+        return Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 4, // Shadow depth
+          child: ListTile(
+            leading: SvgPicture.asset(
+              'assets/ingredient_svg/${ingredient.id_ingredient}.svg',
+              package: "gluttex_chef",
               width: 28,
               height: 28,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              fit: BoxFit.contain,
+              placeholderBuilder: (context) => const SizedBox(
+                width: 28,
+                height: 28,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
             ),
+            title: Text(name),
+            trailing: const Icon(Icons.add),
+            onTap: () => _showQuantityDialog(ingredient),
           ),
-          title: Text(name),
-          trailing: const Icon(Icons.add),
-          onTap: () => _showQuantityDialog(ingredient),
         );
+        ;
       },
     );
   }
