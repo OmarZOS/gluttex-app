@@ -87,11 +87,11 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
       GluttexImage gluttexImage = GluttexLocator.get<GluttexImage>();
 
       gluttexImage.setupImage(
-        path,
-        path.split("/").last,
-        widget.entityType,
-        widget.ownerId,
-        widget.entityId,
+        filepath: path,
+        filename: path.split("/").last,
+        entityType: widget.entityType,
+        ownerId: widget.ownerId,
+        entityId: widget.entityId,
       );
 
       widget.onImageUploaded?.call(gluttexImage);

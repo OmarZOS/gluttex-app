@@ -91,11 +91,11 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
         if (_imageChanged && _editedImage != null) {
           GluttexImage image = GluttexLocator.get<GluttexImage>();
           image.setupImage(
-            _editedImage!.path,
-            _editedImage!.path.split("/").last,
-            'user',
-            '${_editedUser.id_app_user}',
-            '${_editedUser.id_app_user}',
+            filepath: _editedImage!.path,
+            filename: _editedImage!.path.split("/").last,
+            entityType: 'user',
+            ownerId: '${_editedUser.id_app_user}',
+            entityId: '${_editedUser.id_app_user}',
           );
           final imageUrl = await image.uploadImage();
 

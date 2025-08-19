@@ -114,7 +114,7 @@ class _ProductDetailsScreenContentState
 
   void _updateQuantity(int newValue) {
     if (!mounted) return;
-    setState(() => _quantity = newValue.clamp(1, 100)); // Add reasonable limits
+    setState(() => _quantity = newValue); // Add reasonable limits
   }
 
   @override
@@ -539,7 +539,7 @@ class _ProductDetailsScreenContentState
         Row(
           children: [
             IconButton(
-              onPressed: () => _updateQuantity(-1),
+              onPressed: () => _updateQuantity(_quantity - 1),
               icon: Icon(Icons.remove_circle,
                   size: 32, color: theme.colorScheme.error),
             ),

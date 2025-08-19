@@ -14,7 +14,13 @@ class GluttexImage {
 
   // GluttexImage();
 
-  setupImage(filepath, filename, entityType, ownerId, entityId) {
+  setupImage({
+    required String filepath,
+    required String filename,
+    required String entityType,
+    required String ownerId,
+    required String entityId,
+  }) {
     this.filepath = filepath;
     this.filename = filename;
     this.entityType = entityType;
