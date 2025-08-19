@@ -7,11 +7,11 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
-import 'package:gluttex_impl_business/product_change_notifier.dart';
-import 'package:gluttex_localiser/screens/sliding_suppliers_widget.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:gluttex_event/product_change_notifier.dart';
+import 'package:gluttex_localiser/screens/suppliers_map_screen.dart';
 import 'package:gluttex_play/screens/game_catalog.dart';
-import 'package:medicom_catalog/screens/catalog_screen.dart';
+import 'package:medicom_catalog/screens/product_catalog_screen.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -61,8 +61,8 @@ class _HomePageState extends State<HomePage>
   }
 
   static final List<Widget> _pages = <Widget>[
-    const CatalogScreen(),
-    const SlidingSuppliersWidget(),
+    const ProductCatalogScreen(),
+    const SuppliersMapScreen(),
     const RecipeCatalogScreen(),
     // CeliacScreen(),
     GameSelectionScreen(),
@@ -72,11 +72,11 @@ class _HomePageState extends State<HomePage>
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      // if (_selectedIndex == GluttexPageIndex.catalog) {
-      //   final currentCategory = provider.currentCategory;
-      //   log('Current Category: $currentCategory');
-      //   provider.fetchProducts(categoryId: currentCategory, reset: true);
-      // }
+      if (_selectedIndex == GluttexPageIndex.catalog) {
+        final currentCategory = provider.currentCategory;
+        log('Current Category: $currentCategory');
+        provider.fetchProducts(categoryId: currentCategory, reset: true);
+      }
       if (_selectedIndex == GluttexPageIndex.profile) {
         _animationCount = 0;
         _startIconAnimation();
@@ -116,6 +116,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final appUser = Provider.of<AppUserNotifier>(context).appUser;
+    final diplayName = '${appUser?.personFirstName} ${appUser?.personLastName}';
     return Scaffold(
       appBar: AppBar(
         title: Text(_getTitle(_selectedIndex)),
@@ -220,9 +221,9 @@ class _HomePageState extends State<HomePage>
                       ),
                     )
                   : const Icon(size: 24.0, CupertinoIcons.profile_circled),
-              label: (appUser!.id_app_user == 0)
+              label: (appUser!.id_app_user == 0 || diplayName == " ")
                   ? AppLocalizations.of(context)!.profileText
-                  : '${appUser.personFirstName} ${appUser.personLastName}',
+                  : (diplayName),
               backgroundColor: Theme.of(context).brightness == Brightness.light
                   ? GluttexConstants.backgroundColor
                   : GluttexConstants.backgroundDarkColor),

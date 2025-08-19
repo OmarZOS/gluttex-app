@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
-import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:gluttex_event/preferenceChangeNotifier.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
@@ -381,13 +381,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
           "id_location": 0,
           "id_address": 0,
           "location_address_id": 0,
-          "location_latitude": locationLatitude ?? 0.0,
-          "location_longitude": locationLongitude ?? 0.0,
-          "location_name": locationName ?? "",
-          "address_street": addressStreet ?? "",
-          "address_city": addressCity ?? "",
-          "address_postal_code": addressPostalCode ?? "00000",
-          "address_country": addressCountry ?? "Unknown"
+          // "location_latitude": locationLatitude ?? 0.0,
+          // "location_longitude": locationLongitude ?? 0.0,
+          // "location_name": locationName ?? "",
+          // "address_street": addressStreet ?? "",
+          // "address_city": addressCity ?? "",
+          // "address_postal_code": addressPostalCode ?? "00000",
+          // "address_country": addressCountry ?? "Unknown"
         }
       };
 

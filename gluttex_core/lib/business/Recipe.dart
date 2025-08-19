@@ -62,6 +62,10 @@ class Recipe {
               ingredient['contained_quantity'] ?? "";
         }
       }
+    String category = "";
+    if (json['recipe_category'] != null) {
+      category = json['recipe_category']['recipe_category_desc'];
+    }
 
     return Recipe(
         id_recipe: json['id_recipe'] ?? 0,
@@ -75,8 +79,7 @@ class Recipe {
         recipe_preparation_time: preparationDuration,
         recipe_created_at: null,
         recipe_last_updated: null,
-        recipe_category_desc:
-            json['recipe_category']['recipe_category_desc'] ?? "",
+        recipe_category_desc: category,
         recipe_ingredients: ingredientsMap);
   }
 
@@ -88,7 +91,7 @@ class Recipe {
     return {
       "recipe": {
         "id_recipe": id_recipe ?? 0,
-        "recipe_owner_id": recipe_owner_id ?? 0,
+        "recipe_owner_id": recipe_owner_id ?? 1,
         "recipe_category_id": recipe_category_id ?? 0,
         "recipe_preparation_time":
             "${recipe_preparation_time!.inHours}h${recipe_preparation_time!.inMinutes}",
@@ -105,6 +108,23 @@ class Recipe {
         "recipe_ref_id": id_recipe ?? 0
       }
     };
+  }
+
+  static empty() {
+    return Recipe(
+        id_recipe: 0,
+        recipe_owner_id: 0,
+        recipe_category_id: 1,
+        id_recipe_image: 0,
+        recipe_image_url: "",
+        recipe_name: "",
+        recipe_description: "",
+        recipe_instruction: "",
+        recipe_preparation_time: const Duration(),
+        recipe_created_at: null,
+        recipe_last_updated: null,
+        recipe_category_desc: "",
+        recipe_ingredients: {});
   }
 }
 

@@ -20,11 +20,11 @@ abstract class SupplierService {
     throw UnimplementedError();
   }
 
-  Future<int?> addSupplier(Supplier supplier) async {
+  Future<Supplier?> addSupplier(Supplier supplier) async {
     throw UnimplementedError();
   }
 
-  Future<int?> updateSupplier(Supplier updatedSupplier) async {
+  Future<Supplier?> updateSupplier(Supplier updatedSupplier) async {
     throw UnimplementedError();
   }
 

@@ -7,7 +7,7 @@ import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_impl_app/gluttex_impl_app.dart';
 import 'package:gluttex_impl_business/gluttex_impl_recipe.dart';
 import 'package:gluttex_impl_business/gluttex_impl_supplier.dart';
-import 'package:gluttex_impl_business/recipe_change_notifier.dart';
+import 'package:gluttex_event/recipe_change_notifier.dart';
 import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';

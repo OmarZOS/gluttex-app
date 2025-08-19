@@ -1542,4 +1542,34 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noOtherProductsAvailable => 'Aucun autre produit disponible';
+
+  @override
+  String get gallery => 'Galerie';
+
+  @override
+  String get camera => 'Appareil photo';
+
+  @override
+  String get imagePickFailed => 'Échec de la sélection de l\'image';
+
+  @override
+  String get changeImage => 'Changer l\'image';
+
+  @override
+  String get selectImage => 'Sélectionner une image';
+
+  @override
+  String get uploadImage => 'Téléverser l\'image';
+
+  @override
+  String get removeImage => 'Supprimer l\'image';
+
+  @override
+  String get noImageSelected => 'Aucune image sélectionnée';
+
+  @override
+  String get searchSuppliersText => 'Rechercher des fournisseurs...';
+
+  @override
+  String get confirm => 'Confirmer';
 }

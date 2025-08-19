@@ -22,11 +22,11 @@ abstract class RecipeService {
     return null;
   }
 
-  Future<int?> addRecipe(Recipe recipe) async {
+  Future<Recipe?> addRecipe(Recipe recipe) async {
     return null;
   }
 
-  Future<int?> updateRecipe(Recipe updatedRecipe) async {
+  Future<Recipe?> updateRecipe(Recipe updatedRecipe) async {
     return null;
   }
 

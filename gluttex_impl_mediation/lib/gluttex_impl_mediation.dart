@@ -69,12 +69,12 @@ class StorageServiceImpl implements StorageService {
   }
 
   @override
-  Future<int?> insert(String destination, Map<String, dynamic> data) async {
+  Future<dynamic> insert(String destination, Map<String, dynamic> data) async {
     try {
       // Log the request data
       // log('Request data: ${json.encode(data)}');
-      log('Sending data to $destination');
-      log(data.toString());
+      // log('Sending data to $destination');
+      // log(data.toString());
       // Make the PUT request
       final response = await _dio.put(
         destination,
@@ -84,10 +84,10 @@ class StorageServiceImpl implements StorageService {
 
       // Log the response status code and data
       // //log('Response status code: ${response.statusCode}');
-      // //log('Response data: ${response.data}');
+      log('Response data: ${response.data}');
 
       // Check the response status code
-      return response.statusCode;
+      return response.data;
 
       // Return success message
     } on DioException catch (e, stacktrace) {
@@ -140,7 +140,7 @@ class StorageServiceImpl implements StorageService {
   }
 
   @override
-  Future<int?> update(String destination, String id,
+  Future<dynamic> update(String destination, String id,
       Map<String, dynamic> parameters, Map<String, dynamic> data) async {
     try {
       log(data.toString());
@@ -149,7 +149,7 @@ class StorageServiceImpl implements StorageService {
           queryParameters: parameters,
           options: Options(headers: {'Content-Type': 'application/json'}));
       log('Update Response data: ${response.data}');
-      return response.statusCode;
+      return response.data;
     } on DioException catch (e, stacktrace) {
       log('Error: $e');
       log('Stack trace: $stacktrace');
@@ -217,10 +217,10 @@ class StorageServiceImpl implements StorageService {
     } on DioException catch (e) {
       // Return server error message
       log('${e.response}');
-      String error_code = getErrorCode(e);
+      // String error_code = getErrorCode(e);
 
-      throw GluttexException(error_code,
-          statusCode: e.response?.statusCode ?? 501, error: "");
+      // throw GluttexException(error_code,
+      //     statusCode: e.response?.statusCode ?? 501, error: "");
     }
   }
 
@@ -245,31 +245,31 @@ class StorageServiceImpl implements StorageService {
     }
   }
 
-  String getErrorCode(DioException e) {
-    try {
-      // Check if response exists and has data
-      if (e.response?.data != null) {
-        final responseData = e.response!.data;
+  // String getErrorCode(DioException e) {
+  //   try {
+  //     // Check if response exists and has data
+  //     if (e.response?.data != null) {
+  //       final responseData = e.response!.data;
 
-        // Handle case where data is a Map
-        if (responseData is Map<String, dynamic>) {
-          return responseData['error_code']?.toString() ??
-              'INCORRECT_CREDENTIALS';
-        }
-        // Handle case where data is a String (might be JSON encoded)
-        else if (responseData is String) {
-          try {
-            final decoded = jsonDecode(responseData) as Map<String, dynamic>;
-            return decoded['error_code']?.toString() ?? 'UNKNOWN_ERROR';
-          } catch (_) {
-            return 'HTTP_EXCEPTION';
-          }
-        }
-      }
-    } catch (e) {
-      developer.log('Error extracting error_code', error: e);
-    }
+  //       // Handle case where data is a Map
+  //       if (responseData is Map<String, dynamic>) {
+  //         return responseData['error_code']?.toString() ??
+  //             'INCORRECT_CREDENTIALS';
+  //       }
+  //       // Handle case where data is a String (might be JSON encoded)
+  //       else if (responseData is String) {
+  //         try {
+  //           final decoded = jsonDecode(responseData) as Map<String, dynamic>;
+  //           return decoded['error_code']?.toString() ?? 'UNKNOWN_ERROR';
+  //         } catch (_) {
+  //           return 'HTTP_EXCEPTION';
+  //         }
+  //       }
+  //     }
+  //   } catch (e) {
+  //     developer.log('Error extracting error_code', error: e);
+  //   }
 
-    return 'HTTP_EXCEPTION';
-  }
+  //   return 'HTTP_EXCEPTION';
+  // }
 }

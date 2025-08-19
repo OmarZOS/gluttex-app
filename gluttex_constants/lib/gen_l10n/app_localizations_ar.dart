@@ -1542,4 +1542,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noOtherProductsAvailable => 'لا توجد منتجات أخرى متاحة من هذا المزود';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String get imagePickFailed => 'فشل في اختيار الصورة';
+
+  @override
+  String get changeImage => 'تغيير الصورة';
+
+  @override
+  String get selectImage => 'اختر صورة';
+
+  @override
+  String get uploadImage => 'رفع الصورة';
+
+  @override
+  String get removeImage => 'إزالة الصورة';
+
+  @override
+  String get noImageSelected => 'لم يتم اختيار أي صورة';
+
+  @override
+  String get searchSuppliersText => 'ابحث عن الموردين...';
+
+  @override
+  String get confirm => 'تأكيد';
 }

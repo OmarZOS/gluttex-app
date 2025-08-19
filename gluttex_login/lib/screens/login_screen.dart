@@ -4,9 +4,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
-import 'package:gluttex_core/app/ResponseHandler.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_login/screens/registration_screen.dart';
+import 'package:gluttex_ui/Services/ResponseHandler.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {

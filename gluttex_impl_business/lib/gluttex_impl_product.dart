@@ -1,8 +1,6 @@
 library gluttex_impl_business;
 
 import 'dart:developer' as developer;
-import 'dart:typed_data';
-
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
@@ -12,12 +10,15 @@ import 'package:locator/locator.dart';
 class ProductServiceImpl implements ProductService {
   List<ProductCategory> categories = [];
   @override
-  Future<int?> addProduct(Product Product) async {
+  Future<Product?> addProduct(Product product) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
-
-    return await storageService.insert(
+    final result = await storageService.insert(
         GluttexConstants.apiBaseUrl + GluttexConstants.addProductEndpoint,
-        Product.toJson());
+        product.toJson());
+    // log("At the impl prod");
+    // log("${result.toString()}");
+
+    return Product.fromJson(result);
   }
 
   @override
@@ -30,13 +31,15 @@ class ProductServiceImpl implements ProductService {
   }
 
   @override
-  Future<int?> updateProduct(Product updatedProduct) async {
+  Future<Product?> updateProduct(Product updatedProduct) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
-    return await storageService.update(
+
+    final result = await storageService.update(
         '${GluttexConstants.apiBaseUrl}${GluttexConstants.productEndpoint}/${updatedProduct.id_product}',
         "",
         {},
         updatedProduct.toJson());
+    return Product.fromJson(result);
   }
 
   @override

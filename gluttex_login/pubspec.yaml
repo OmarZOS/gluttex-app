@@ -34,21 +34,22 @@ dependencies:
   # google_sign_in: ^6.2.1
   # flutter_facebook_auth: ^7.0.1
   font_awesome_flutter: ^10.1.0 # For social media icons
-  gluttex_impl_app:
-    path: ../gluttex_impl_app
   locator: 
     path: ../locator
-  gluttex_impl_mediation:
-    path: ../gluttex_impl_mediation
   gluttex_core:
     path: ../gluttex_core
+  gluttex_ui:
+    path: ../gluttex_ui
+  gluttex_event:
+    path: ../gluttex_event
+
   url_launcher: ^6.2.5
   flutter_svg: ^2.0.17
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.6
+  # cupertino_icons: ^1.0.6
 
 dev_dependencies:
   flutter_test:

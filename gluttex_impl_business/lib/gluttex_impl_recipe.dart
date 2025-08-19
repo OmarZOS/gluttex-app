@@ -12,12 +12,12 @@ class RecipeServiceImpl implements RecipeService {
   List<RecipeCategory> categories = [];
 
   @override
-  Future<int?> addRecipe(Recipe Recipe) async {
+  Future<Recipe?> addRecipe(Recipe recipe) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
-
-    return await storageService.insert(
+    final result = await storageService.insert(
         GluttexConstants.apiBaseUrl + GluttexConstants.addRecipeEndpoint,
-        Recipe.toJson());
+        recipe.toJson());
+    return Recipe.fromJson(result);
   }
 
   @override
@@ -30,13 +30,14 @@ class RecipeServiceImpl implements RecipeService {
   }
 
   @override
-  Future<int?> updateRecipe(Recipe updatedRecipe) async {
+  Future<Recipe?> updateRecipe(Recipe updatedRecipe) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
-    return await storageService.update(
+    final result = await storageService.update(
         '${GluttexConstants.apiBaseUrl}${GluttexConstants.recipeEndpoint}/${updatedRecipe.id_recipe}',
         '',
         {"recipe_id": "${updatedRecipe.id_recipe}"},
         updatedRecipe.toJson());
+    return Recipe.fromJson(result);
   }
 
   @override

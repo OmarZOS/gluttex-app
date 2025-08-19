@@ -28,12 +28,8 @@ class ProductCard extends StatelessWidget {
         onTap: () {
           // Add a slight delay to allow the scale animation to complete
           Future.delayed(const Duration(milliseconds: 150), () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DetailsScreen(product: product),
-              ),
-            );
+            Navigator.pushNamed(context, AppRoutes.productDetails,
+                arguments: {"product": product});
           });
         },
         borderRadius: BorderRadius.circular(12),

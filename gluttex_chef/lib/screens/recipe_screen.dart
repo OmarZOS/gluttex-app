@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -5,43 +6,91 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_chef/components/RecipeCard.dart';
 import 'package:gluttex_chef/components/RecipeOwner.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
-import 'package:gluttex_chef/screens/recipe_update_form_screen.dart';
+import 'package:gluttex_chef/screens/recipe_form_screen.dart';
 import 'package:gluttex_chef/tools/confirmation_dialogue.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/Response.dart';
-import 'package:gluttex_core/app/ResponseHandler.dart';
 import 'package:gluttex_core/business/Recipe.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
-import 'package:gluttex_impl_business/recipe_change_notifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:gluttex_event/recipe_change_notifier.dart';
+import 'package:gluttex_ui/Services/ResponseHandler.dart';
 import 'package:provider/provider.dart';
 
-class DetailsScreen extends StatefulWidget {
+class RecipeDetailsScreen extends StatefulWidget {
   final Recipe recipe;
 
-  const DetailsScreen({super.key, required this.recipe});
+  const RecipeDetailsScreen({super.key, required this.recipe});
 
   @override
-  State<DetailsScreen> createState() => _DetailsScreenState();
+  State<RecipeDetailsScreen> createState() => _RecipeDetailsScreenState();
 }
 
-class _DetailsScreenState extends State<DetailsScreen> {
+class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   late Recipe _recipe;
   final double _imageHeightRatio = 0.35;
 
   late RecipeNotifier notifier;
+
+  AppUser? _provider;
+  bool _isLoadingProvider = true;
 
   @override
   void initState() {
     super.initState();
     _recipe = widget.recipe;
     notifier = Provider.of<RecipeNotifier>(context, listen: false);
+    _loadProviderData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    notifier = Provider.of<RecipeNotifier>(context, listen: false);
+
+    if (_recipe != widget.recipe) {
+      _recipe = widget.recipe;
+    }
+    if (_isLoadingProvider) {
+      _loadProviderData();
+    }
+  }
+
+  late Future<AppUser?> _providerFuture;
+
+  Future<void> _loadProviderData() async {
+    if (_recipe.recipe_owner_id == null) {
+      if (mounted) setState(() => _isLoadingProvider = false);
+      return;
+    }
+
+    if (mounted) setState(() => _isLoadingProvider = true);
+
+    try {
+      _providerFuture = notifier.getUserById(_recipe.recipe_owner_id!);
+      final provider = await _providerFuture;
+
+      if (!mounted) return;
+
+      setState(() {
+        _provider = provider;
+        _isLoadingProvider = false;
+      });
+    } on TimeoutException {
+      debugPrint('Timeout loading provider');
+      if (mounted) setState(() => _isLoadingProvider = false);
+    } catch (e) {
+      debugPrint('Error loading provider: $e');
+      if (mounted) setState(() => _isLoadingProvider = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    notifier = Provider.of<RecipeNotifier>(context,
+        listen: false); // Problem: Using context in initState
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isOwner = is_recipe_owner(context, _recipe.recipe_owner_id ?? 0);
@@ -96,18 +145,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   ],
                 ),
               _buildInstructionsSection(theme),
-              FutureBuilder<Widget>(
-                future: _buildProviderTile(context),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return const Text('Error loading provider tile');
-                  } else {
-                    return snapshot.data!;
-                  }
-                },
-              ),
+              _isLoadingProvider
+                  ? const CircularProgressIndicator()
+                  : _buildProviderTileContent(_provider),
             ],
           ),
         ),
@@ -308,29 +348,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Future<void> _navigateToEditScreen(BuildContext context) async {
-    final updatedRecipe = await Navigator.push(
+    // final updatedRecipe =
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (context) => RecipeEditFormScreen(
-          initialRecipeName: _recipe.recipe_name,
-          // initialRecipeImage: _recipe.recipe_image_data,
-          initialRecipeTypeId: _recipe.recipe_category_id,
-          initialRecipe_provider_id: _recipe.recipe_owner_id,
-          initialRecipe_category_id: _recipe.recipe_category_id,
-          initialIdRecipe: _recipe.id_recipe,
-          initialRecipeImageUrl: _recipe.recipe_image_url,
-          initialIdRecipeImage: _recipe.id_recipe_image,
-          initialRecipeDescription: _recipe.recipe_category_desc,
-          initialRecipeInstruction: _recipe.recipe_instruction,
-          initialRecipePreparationTime: _recipe.recipe_preparation_time,
-          initialIngredients: _recipe.recipe_ingredients,
-        ),
-      ),
+      AppRoutes.recipeCreate,
+      arguments: {"recipe": _recipe},
     );
 
-    if (updatedRecipe != null) {
-      setState(() => _recipe = updatedRecipe);
-    }
+    // if (updatedRecipe != null) {
+    //   setState(() => _recipe = updatedRecipe);
+    // }
   }
 
   void _showDeleteConfirmation(BuildContext context) {
@@ -356,6 +383,107 @@ class _DetailsScreenState extends State<DetailsScreen> {
           );
         }
       },
+    );
+  }
+
+  Widget _buildProviderTileContent(AppUser? provider) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Card(
+      margin: const EdgeInsets.symmetric(
+        horizontal: GluttexConstants.kDefaultPaddin / 8,
+        vertical: 8,
+      ),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.providedBy,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                // Provider Avatar/Logo
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: provider != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            package: "gluttex_home",
+                            height: 48,
+                            color: Colors.lightGreen,
+                          ),
+                        )
+                      : _buildDefaultProviderIcon(),
+                ),
+                const SizedBox(width: 12),
+
+                // Provider Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${provider?.personFirstName} ${provider?.personLastName}" ??
+                            AppLocalizations.of(context)!.unknownProvider,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (provider?.locationName != "") ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 16,
+                              color: colorScheme.onSurface.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              provider!.locationName!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Contact Button
+                // IconButton(
+                //   icon: Icon(
+                //     Icons.contact_support_outlined,
+                //     color: colorScheme.primary,
+                //   ),
+                //   onPressed: () => _showContactOptions(context, provider),
+                // ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 

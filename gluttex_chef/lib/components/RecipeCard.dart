@@ -4,7 +4,7 @@ import 'package:gluttex_chef/screens/recipe_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
-import 'package:gluttex_impl_business/recipe_change_notifier.dart';
+import 'package:gluttex_event/recipe_change_notifier.dart';
 import 'package:provider/provider.dart';
 
 class RecipeCard extends StatelessWidget {
@@ -214,7 +214,7 @@ class RecipeCard extends StatelessWidget {
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            DetailsScreen(recipe: recipe),
+            RecipeDetailsScreen(recipe: recipe),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = 0.0;
           const end = 1.0;

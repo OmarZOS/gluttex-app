@@ -593,5 +593,15 @@
   "amountText": "الكمية",
   "otherProductsFromSupplier": "منتجات أخرى من: {supplier_name}",
   "similarProductsFromCategory": "منتجات مشابهة من فئة {category_name}",
-  "noOtherProductsAvailable": "لا توجد منتجات أخرى متاحة من هذا المزود"
+  "noOtherProductsAvailable": "لا توجد منتجات أخرى متاحة من هذا المزود",
+    "gallery": "المعرض",
+  "camera": "الكاميرا",
+  "imagePickFailed": "فشل في اختيار الصورة",
+  "changeImage": "تغيير الصورة",
+  "selectImage": "اختر صورة",
+  "uploadImage": "رفع الصورة",
+  "removeImage": "إزالة الصورة",
+  "noImageSelected": "لم يتم اختيار أي صورة",
+  "searchSuppliersText": "ابحث عن الموردين...",
+  "confirm": "تأكيد"
 }

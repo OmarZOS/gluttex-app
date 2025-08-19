@@ -49,12 +49,12 @@ class SupplierServiceImpl implements SupplierService {
   }
 
   @override
-  Future<int?> addSupplier(Supplier Supplier) async {
+  Future<Supplier?> addSupplier(Supplier supplier) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
-
-    return await storageService.insert(
+    final result = await storageService.insert(
         GluttexConstants.apiBaseUrl + GluttexConstants.addSupplierEndpoint,
-        Supplier.toJson());
+        supplier.toJson());
+    return Supplier.fromJson(result);
   }
 
   @override
@@ -67,13 +67,14 @@ class SupplierServiceImpl implements SupplierService {
   }
 
   @override
-  Future<int?> updateSupplier(Supplier updatedSupplier) {
+  Future<Supplier?> updateSupplier(Supplier updatedSupplier) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
-    return storageService.update(
+    final result = await storageService.update(
         GluttexConstants.apiBaseUrl + GluttexConstants.addSupplierEndpoint,
         updatedSupplier.idProductProvider as String,
         {},
         updatedSupplier.toJson());
+    return Supplier.fromJson(result);
   }
 
   @override

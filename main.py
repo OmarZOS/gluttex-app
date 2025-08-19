@@ -11,9 +11,9 @@ with open("deps.json", "r") as f:
 # # Initialize graph
 # G = nx.DiGraph()
 
-internal_packages = ["gluttex_chef"     ,"gluttex_core","gluttex_impl_app","gluttex_impl_mediation","gluttex_login","gluttex_play","gluttex_constants","gluttex_home","gluttex_impl_business","gluttex_localiser"  ,"gluttex_medical","locator","medicom_catalog"]
+internal_packages = ["gluttex_chef",     "gluttex_launcher" ,"gluttex_io","gluttex_ui"     ,"gluttex_event"     ,"gluttex_core","gluttex_impl_app","gluttex_impl_mediation","gluttex_login","gluttex_play","gluttex_constants","gluttex_home","gluttex_impl_business","gluttex_localiser"  ,"gluttex_medical","locator","medicom_catalog"]
 
-ui_packages = ["gluttex_chef","gluttex_login","gluttex_play","medicom_catalog","gluttex_home","gluttex_medical","gluttex_localiser"]
+ui_packages = ["gluttex_chef",     "gluttex_launcher","gluttex_ui","gluttex_login","gluttex_play","medicom_catalog","gluttex_home","gluttex_medical","gluttex_localiser"]
 
 # Define what counts as "internal"
 def is_internal(pkg):
@@ -47,15 +47,16 @@ in_degrees = dict(G.in_degree())
 for node in G.nodes():
     size = 15 + in_degrees.get(node, 0) * 8  # base size + scaled by in-degree
     # color = "#ff6666" if node == data["root"] else "#66b3ff"
+    
     if(node in ui_packages):
         color = "#33ff00"
     else:
         if node in internal_packages:
-            color = "#002fff"
+            color = "#66b3ff"
         else:
             color = "#ff6666"
-    
-    # color = "#8400ff" if node == data["root"] else "#66b3ff"
+    if node == data["root"]:
+        color = "#ffae00"
 
     net.add_node(node, size=size, color=color, image="package.svg", title=f"{node} dependencies: {len(list(G.successors(node)))}")
 

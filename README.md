@@ -1,6 +1,6 @@
 # gluttex_app
 
-> cd gluttex_home
+> cd gluttex_launcher
 > 
 >   dart pub deps --json > ../deps.json
 > 

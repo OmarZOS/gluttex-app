@@ -612,5 +612,15 @@
   "amountText": "Quantité",
   "otherProductsFromSupplier": "Aussi fournis par: {supplier_name}",
   "similarProductsFromCategory": "Produits similaires de: {category_name}",
-  "noOtherProductsAvailable": "Aucun autre produit disponible"
+  "noOtherProductsAvailable": "Aucun autre produit disponible",
+    "gallery": "Galerie",
+  "camera": "Appareil photo",
+  "imagePickFailed": "Échec de la sélection de l'image",
+  "changeImage": "Changer l'image",
+  "selectImage": "Sélectionner une image",
+  "uploadImage": "Téléverser l'image",
+  "removeImage": "Supprimer l'image",
+  "noImageSelected": "Aucune image sélectionnée",
+  "searchSuppliersText": "Rechercher des fournisseurs...",
+  "confirm": "Confirmer"
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_home/screens/PasswordChangeScreen.dart';
 import 'package:gluttex_home/screens/PdfViewerScreen.dart';
 import 'package:gluttex_home/screens/app_user_update_form_screen.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
-import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:gluttex_event/preferenceChangeNotifier.dart';
 import 'package:gluttex_medical/screens/informations_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -228,24 +229,21 @@ class _ProfileUpdateTile extends StatelessWidget {
     AppUserNotifier notifier =
         Provider.of<AppUserNotifier>(context, listen: false);
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-          shape: BoxShape.circle,
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.person),
         ),
-        child: const Icon(Icons.person),
-      ),
-      title: Text(AppLocalizations.of(context)!.profileUpdateText),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              AppUserEditFormScreen(appUser: notifier.appUser),
-        ),
-      ),
-    );
+        title: Text(AppLocalizations.of(context)!.profileUpdateText),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => Navigator.pushNamed(
+              context,
+              AppRoutes.userEdit,
+              arguments: {"user": notifier.appUser},
+            ));
   }
 }
 

@@ -25,11 +25,11 @@ abstract class ProductService {
     return null;
   }
 
-  Future<int?> addProduct(Product product) async {
+  Future<Product?> addProduct(Product product) async {
     return null;
   }
 
-  Future<int?> updateProduct(Product updatedProduct) async {
+  Future<Product?> updateProduct(Product updatedProduct) async {
     return null;
   }
 

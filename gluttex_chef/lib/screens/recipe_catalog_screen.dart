@@ -3,10 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_chef/components/RecipeCard.dart';
-import 'package:gluttex_chef/screens/recipe_form_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
-import 'package:gluttex_impl_business/recipe_change_notifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:gluttex_event/recipe_change_notifier.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:provider/provider.dart';
@@ -102,10 +101,10 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(Icons.post_add),
-                  onPressed: () => Navigator.push(
+                  onPressed: () => Navigator.pushNamed(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const RecipeFormScreen()),
+                    AppRoutes.recipeCreate,
+                    arguments: {"recipe": Recipe.empty()},
                   ),
                 )
               : null,

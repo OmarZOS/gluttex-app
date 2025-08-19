@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_impl_business/supplier_change_notifier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:provider/provider.dart';
 
 class SupplierInfoPopup {

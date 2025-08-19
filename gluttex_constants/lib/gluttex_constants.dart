@@ -274,7 +274,12 @@ class AppRoutes {
   static const String login = '/login';
   static const String registration = '/registration';
   static const String home = '/home';
+  static const String productDetails = '/product/details';
+  static const String supplierDetails = '/supplier/details';
+  static const String recipeDetails = '/recipe/details';
   static const String productCreate = '/product/create';
   static const String recipeCreate = '/recipe/create';
   static const String providerCreate = '/provider/create';
+  static const String userEdit = '/user/edit';
+  static const String imageUpload = '/image/upload';
 }

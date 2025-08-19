@@ -1542,4 +1542,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noOtherProductsAvailable => 'No other products available from this supplier.';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get imagePickFailed => 'Failed to pick image';
+
+  @override
+  String get changeImage => 'Change Image';
+
+  @override
+  String get selectImage => 'Select Image';
+
+  @override
+  String get uploadImage => 'Upload Image';
+
+  @override
+  String get removeImage => 'Remove Image';
+
+  @override
+  String get noImageSelected => 'No image selected';
+
+  @override
+  String get searchSuppliersText => 'Search suppliers...';
+
+  @override
+  String get confirm => 'Confirm';
 }

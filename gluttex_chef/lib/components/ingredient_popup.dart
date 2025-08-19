@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
-import 'package:gluttex_impl_business/recipe_change_notifier.dart';
+import 'package:gluttex_event/recipe_change_notifier.dart';
 import 'package:provider/provider.dart';
 
 class IngredientPopup extends StatefulWidget {

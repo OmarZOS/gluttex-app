@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:gluttex_constants/gluttex_constants.dart';
-
 class AppUser {
   final int? id_app_user;
   final int? app_user_person_id;
@@ -32,9 +30,7 @@ class AppUser {
   final String addressPostalCode;
   final String addressCountry;
 
-  get isAdmin =>
-      app_user_type_id ==
-      GluttexConstants.adminCategoryId; // Assuming 1 is the admin type ID
+  get isAdmin => app_user_type_id == 3; // Assuming 3 is the admin type ID
 
   AppUser({
     required this.id_app_user,
@@ -253,12 +249,12 @@ class AppUser {
   Map<String, dynamic> toJson() {
     return {
       'id_app_user': id_app_user,
-      'app_user_person_id': app_user_person_id,
+      // 'app_user_person_id': app_user_person_id,
       'app_user_type_id': app_user_type_id,
       'app_user_name': app_user_name,
       'app_user_password': app_user_password,
-      'app_user_preferences': app_user_preferences,
-      'app_user_type_desc': app_user_type_desc,
+      // 'app_user_preferences': app_user_preferences,
+      // 'app_user_type_desc': app_user_type_desc,
       'app_user_image_url': app_user_image_url,
       // 'app_user_image': app_user_image,
     };

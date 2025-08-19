@@ -3,7 +3,7 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_home/screens/SettingsScreen.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {

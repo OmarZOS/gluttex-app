@@ -6,18 +6,21 @@ import 'package:locator/locator.dart';
 import 'package:path/path.dart';
 
 class GluttexImage {
-  final String filepath;
-  final String filename;
-  final String entityType;
-  final String ownerId;
-  final String entityId;
+  late String filepath;
+  late String filename;
+  late String entityType;
+  late String ownerId;
+  late String entityId;
 
-  GluttexImage(
-      {required this.filepath,
-      required this.filename,
-      required this.entityType,
-      required this.ownerId,
-      required this.entityId});
+  // GluttexImage();
+
+  setupImage(filepath, filename, entityType, ownerId, entityId) {
+    this.filepath = filepath;
+    this.filename = filename;
+    this.entityType = entityType;
+    this.ownerId = ownerId;
+    this.entityId = entityId;
+  }
 
   Future<FormData> formData() async {
     return FormData.fromMap({

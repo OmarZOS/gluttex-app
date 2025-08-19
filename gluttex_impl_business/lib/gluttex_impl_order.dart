@@ -11,7 +11,7 @@ import 'package:locator/locator.dart';
 
 class OrderServiceImpl implements OrderService {
   @override
-  Future<int?> addOrder(Order Order) async {
+  Future<Order?> addOrder(Order Order) async {
     throw UnimplementedError(
         "Already using another implementation in the change notifier.");
     StorageService storageService = GluttexLocator.get<StorageService>();
@@ -30,13 +30,14 @@ class OrderServiceImpl implements OrderService {
   }
 
   @override
-  Future<int?> updateOrder(Order updatedOrder) async {
+  Future<Order?> updateOrder(Order updatedOrder) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
-    return await storageService.update(
+    final result = await storageService.update(
         GluttexConstants.apiBaseUrl + GluttexConstants.productEndpoint,
         '${updatedOrder.id_order}',
         {},
         updatedOrder.toJson());
+    return Order.fromJson(result);
   }
 
   @override

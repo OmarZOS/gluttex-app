@@ -12,11 +12,11 @@ abstract class OrderService {
     return null;
   }
 
-  Future<int?> addOrder(Order Order) async {
+  Future<Order?> addOrder(Order Order) async {
     return null;
   }
 
-  Future<int?> updateOrder(Order updatedOrder) async {
+  Future<Order?> updateOrder(Order updatedOrder) async {
     return null;
   }
 

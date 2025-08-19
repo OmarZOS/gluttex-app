@@ -7,109 +7,127 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
-import 'package:gluttex_impl_business/product_change_notifier.dart';
-import 'package:gluttex_impl_business/cart_change_notifier.dart';
-import 'package:gluttex_impl_mediation/preferenceChangeNotifier.dart';
-import 'package:gluttex_localiser/components/SupplierProductCard.dart';
-import 'package:gluttex_localiser/screens/supplier_screen.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:gluttex_event/product_change_notifier.dart';
+import 'package:gluttex_event/preferenceChangeNotifier.dart';
+import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_ui/SupplierProductCard.dart';
+import 'package:gluttex_ui/components/supplier_screen.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
 import 'package:medicom_catalog/screens/components/ProductOwner.dart';
 import 'package:medicom_catalog/screens/components/add_to_cart.dart';
 import 'package:medicom_catalog/screens/components/quantity_and_ref.dart';
 import 'package:medicom_catalog/screens/components/description.dart';
 import 'package:medicom_catalog/screens/components/dialogue/confirmation_dialogue.dart';
-import 'package:medicom_catalog/screens/components/supplier_popup.dart';
-import 'package:medicom_catalog/screens/product_update_form_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:gluttex_impl_business/supplier_change_notifier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 
-class DetailsScreen extends StatelessWidget {
-  final Product product;
+class ProductDetailsScreen extends StatelessWidget {
+  // final Product product;
 
-  const DetailsScreen({super.key, required this.product});
+  const ProductDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return _DetailsScreenContent(product: product);
+    return _ProductDetailsScreenContent();
   }
 }
 
-class _DetailsScreenContent extends StatefulWidget {
-  final Product product;
+class _ProductDetailsScreenContent extends StatefulWidget {
+  // final Product product;
 
-  const _DetailsScreenContent({required this.product});
+  const _ProductDetailsScreenContent();
 
   @override
-  State<_DetailsScreenContent> createState() => _DetailsScreenContentState();
+  State<_ProductDetailsScreenContent> createState() =>
+      _ProductDetailsScreenContentState();
 }
 
-class _DetailsScreenContentState extends State<_DetailsScreenContent> {
+class _ProductDetailsScreenContentState
+    extends State<_ProductDetailsScreenContent> {
   late final PanelController _panelController;
   int _quantity = 1;
   Supplier? _provider;
   late Product _product;
   bool _isLoadingProvider = true;
 
+  bool _initialized = false; // to prevent re-initialization
+
   @override
   void initState() {
-    _product = widget.product;
+    // _product = _product;
     _panelController = PanelController();
     super.initState();
-    _fetchProvider();
-    _initializeProducts();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+      _product = args?["product"];
+      _fetchProvider(); // Async operation without mounted check
+      _initializeProducts();
+      _initialized = true;
+    }
   }
 
   void _initializeProducts() {
-    final productNotifier =
-        Provider.of<ProductNotifier>(context, listen: false);
-    productNotifier.fetchProducts(
-        categoryId: widget.product.product_category_id ?? 0);
-    productNotifier.startPollingProductUpdates(widget.product);
+    final productNotifier = context.read<ProductNotifier>();
+    // productNotifier.fetchProducts(
+    //     categoryId: _product.product_category_id ?? 0);
+    productNotifier.startPollingProductUpdates(_product);
+  }
+
+  @override
+  void dispose() {
+    // _panelController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchProvider() async {
-    try {
-      setState(() => _isLoadingProvider = true);
+    if (!mounted) return;
 
-      _provider =
+    setState(() => _isLoadingProvider = true);
+
+    try {
+      final provider =
           await Provider.of<SupplierChangeNotifier>(context, listen: false)
-              .getSupplierById(widget.product.product_provider_id ?? 0);
+              .getSupplierById(_product.product_provider_id ?? 0);
+
+      if (mounted) {
+        setState(() {
+          _provider = provider;
+          _isLoadingProvider = false;
+        });
+      }
     } catch (e) {
-      debugPrint('Error fetching provider: $e');
-    } finally {
       if (mounted) {
         setState(() => _isLoadingProvider = false);
       }
+      debugPrint('Error fetching provider: $e');
     }
   }
 
-  void _decrementQuantity() {
-    if (_quantity > 1) {
-      setState(() => _quantity--);
-    }
-  }
-
-  void _incrementQuantity() {
-    setState(() => _quantity++);
+  void _updateQuantity(int newValue) {
+    if (!mounted) return;
+    setState(() => _quantity = newValue.clamp(1, 100)); // Add reasonable limits
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isRTL = Provider.of<LocaleProvider>(context, listen: false)
-            .locale
-            ?.languageCode ==
-        "ar";
-    final isLoggedIn =
-        Provider.of<AppUserNotifier>(context, listen: false).isLoggedIn;
+    final isRTL = context.read<LocaleProvider>().locale?.languageCode == "ar";
+    final isLoggedIn = context.read<AppUserNotifier>().isLoggedIn;
     final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
       floatingActionButton:
           isLoggedIn ? _buildFloatingCartButton(context) : null,
-      appBar: _buildAppBar(context, widget.product),
+      appBar: _buildAppBar(context, _product),
       body: SlidingUpPanel(
         controller: _panelController,
         minHeight: isLoggedIn ? 80 : 0,
@@ -138,26 +156,26 @@ class _DetailsScreenContentState extends State<_DetailsScreenContent> {
                 ),
                 child: Column(
                   children: [
-                    _buildProductHeader(context, isRTL, widget.product),
+                    _buildProductHeader(context, isRTL, _product),
                     const SizedBox(height: GluttexConstants.kDefaultPaddin),
                     Consumer<ProductNotifier>(
                       builder: (context, productNotifier, _) {
                         final currentProduct =
                             productNotifier.products.firstWhere(
                           (element) =>
-                              element.id_product == widget.product.id_product,
-                          orElse: () => widget.product,
+                              element.id_product == _product.id_product,
+                          orElse: () => _product,
                         );
                         return QuantityAndRef(product: currentProduct);
                       },
                     ),
                     const SizedBox(height: GluttexConstants.kDefaultPaddin / 2),
-                    Description(product: widget.product),
+                    Description(product: _product),
                     if (isLoggedIn) ...[
                       const SizedBox(
                           height: GluttexConstants.kDefaultPaddin / 2),
                       AddToCart(
-                        product: widget.product,
+                        product: _product,
                         onAddToCartPressed: _panelController.open,
                       ),
                     ],
@@ -170,8 +188,7 @@ class _DetailsScreenContentState extends State<_DetailsScreenContent> {
                                 AppLocalizations.of(context)!
                                         .productCategoryTextList
                                         .split(",")[
-                                    (widget.product.product_category_id ?? 1) -
-                                        1]),
+                                    (_product.product_category_id ?? 1) - 1]),
                         textAlign: isRTL ? TextAlign.right : TextAlign.left,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -222,8 +239,7 @@ class _DetailsScreenContentState extends State<_DetailsScreenContent> {
                                 const SizedBox(width: 12),
                             itemBuilder: (context, index) {
                               final product = notifier.products[index];
-                              if (product.id_product ==
-                                  widget.product.id_product) {
+                              if (product.id_product == _product.id_product) {
                                 return const SizedBox.shrink();
                               }
                               return SizedBox(
@@ -236,14 +252,9 @@ class _DetailsScreenContentState extends State<_DetailsScreenContent> {
                                       onTap: () => Future.delayed(
                                         const Duration(milliseconds: 150),
                                         () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  DetailsScreen(
-                                                      product: product),
-                                            ),
-                                          );
+                                          Navigator.pushNamed(
+                                              context, AppRoutes.productDetails,
+                                              arguments: {"product": product});
                                         },
                                       ),
                                       child: SupplierProductCard(
@@ -528,7 +539,7 @@ class _DetailsScreenContentState extends State<_DetailsScreenContent> {
         Row(
           children: [
             IconButton(
-              onPressed: _decrementQuantity,
+              onPressed: () => _updateQuantity(-1),
               icon: Icon(Icons.remove_circle,
                   size: 32, color: theme.colorScheme.error),
             ),
@@ -541,7 +552,7 @@ class _DetailsScreenContentState extends State<_DetailsScreenContent> {
               ),
             ),
             IconButton(
-              onPressed: _incrementQuantity,
+              onPressed: () => _updateQuantity(_quantity + 1),
               icon: Icon(Icons.add_circle,
                   size: 32, color: theme.colorScheme.primary),
             ),
@@ -586,34 +597,17 @@ class _DetailsScreenContentState extends State<_DetailsScreenContent> {
 
   Future<void> _navigateToEditScreen(
       BuildContext context, Product product) async {
-    log('Owner Id: ${product.product_owner_id}');
-    log('Image Id: ${product.id_product_image}');
+    // log('Owner Id: ${product.product_owner_id}');
+    // log('Image Id: ${product.id_product_image}');
 
-    final updatedProduct = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProductEditFormScreen(
-          initialProductName: product.product_name,
-          initialProductBrand: product.product_brand,
-          initialProductBarcode: product.product_barcode,
-          initialProductOwner: product.product_owner_id,
-          initialProductImageUrl: product.product_image_url,
-          initialProductTypeId: product.product_category_id,
-          initialProductPrice: product.product_price,
-          initialProductQuantity: product.product_quantity,
-          initialProduct_provider_id: product.product_provider_id,
-          initialProduct_category_id: product.product_category_id,
-          initialIdProduct: product.id_product,
-          initialIdProductImage: product.id_product_image,
-          initialProductDescription: product.product_description,
-        ),
-      ),
-    );
+    final updatedProduct = await Navigator.pushNamed(
+        context, AppRoutes.productCreate,
+        arguments: {"product": product});
 
-    if (updatedProduct != null) {
-      Provider.of<ProductNotifier>(context, listen: false)
-          .addOrUpdateProduct(updatedProduct);
-    }
+    // if (updatedProduct != null) {
+    //   Provider.of<ProductNotifier>(context, listen: false)
+    //       .addOrUpdateProduct(updatedProduct);
+    // }
   }
 
   void _addToCart(BuildContext context) {

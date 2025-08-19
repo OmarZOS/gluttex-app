@@ -3,19 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_constants/gluttex_response_codes.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
-import 'package:gluttex_impl_app/user_change_notifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:gluttex_ui/Services/ResponseHandler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 
 class AppUserEditFormScreen extends StatefulWidget {
-  final AppUser? appUser;
+  // final AppUser? appUser;
 
-  const AppUserEditFormScreen({super.key, required this.appUser});
+  const AppUserEditFormScreen({super.key});
 
   @override
   State<AppUserEditFormScreen> createState() => _AppUserEditFormScreenState();
@@ -25,6 +27,8 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late AppUser _editedUser;
 
+  bool _initialized = false; // to prevent re-initialization
+
   File? _editedImage;
   bool _isLoading = false;
   bool _imageChanged = false;
@@ -32,7 +36,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
   @override
   void initState() {
     super.initState();
-    _editedUser = widget.appUser!.copyWith(); // Deep copy
+    // _editedUser = widget.appUser!.copyWith(); // Deep copy
   }
 
   Future<void> _pickImage() async {
@@ -51,7 +55,24 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
         });
       }
     } on PlatformException catch (e) {
-      _showErrorSnackbar('Failed to pick image: ${e.message}');
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 500,
+        responseCode: GluttexResponseCodes.put_success,
+        finalMessage: AppLocalizations.of(context)!.putSuccess,
+      );
+      // _showErrorSnackbar('Failed to pick image: ${e.message}');
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+      final AppUser? user = args?["user"];
+      _editedUser = user ?? AppUser.empty();
     }
   }
 
@@ -68,13 +89,15 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
     unawaited(Future(() async {
       try {
         if (_imageChanged && _editedImage != null) {
-          final imageUrl = await GluttexImage(
-            filepath: _editedImage!.path,
-            filename: _editedImage!.path.split("/").last,
-            entityType: 'user',
-            ownerId: '${_editedUser.id_app_user}',
-            entityId: '${_editedUser.id_app_user}',
-          ).uploadImage();
+          GluttexImage image = GluttexLocator.get<GluttexImage>();
+          image.setupImage(
+            _editedImage!.path,
+            _editedImage!.path.split("/").last,
+            'user',
+            '${_editedUser.id_app_user}',
+            '${_editedUser.id_app_user}',
+          );
+          final imageUrl = await image.uploadImage();
 
           localUser = localUser.copyWith(app_user_image_url: imageUrl);
         }

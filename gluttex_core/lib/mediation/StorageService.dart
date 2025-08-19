@@ -5,7 +5,7 @@ abstract class StorageService {
     return null;
   }
 
-  Future<int?> insert(String destination, Map<String, dynamic> data) async {
+  Future<dynamic> insert(String destination, Map<String, dynamic> data) async {
     return null;
   }
 
@@ -21,7 +21,7 @@ abstract class StorageService {
     return null;
   }
 
-  Future<int?> update(String destination, String id,
+  Future<dynamic> update(String destination, String id,
       Map<String, dynamic> parameters, Map<String, dynamic> data) async {
     return null;
   }

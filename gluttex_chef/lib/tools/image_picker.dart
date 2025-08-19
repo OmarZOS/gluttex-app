@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_core/app/Services/SnackbarService.dart';
+import 'package:gluttex_ui/Services/SnackbarService.dart';
 import 'package:image/image.dart' as img;
 import 'package:custom_image_crop/custom_image_crop.dart';
 import 'package:flutter/material.dart';

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:gluttex_core/app/GluttexImage.dart';
@@ -44,12 +45,13 @@ class Product {
       required this.product_last_updated,
       required this.product_owner_id});
 
-  factory Product.fromJson(Map<String, dynamic> json) {
+  factory Product.fromJson(dynamic json) {
     String? imageUrl;
     int imageId = 0;
     String productCategory = "Missing";
     // log("Got product");
 
+    log("$json");
     if (json['product_image'] != null && json['product_image'] is List) {
       if (json['product_image']?.isNotEmpty) {
         imageId = json['product_image'].last["id_product_image"] ?? 0;
@@ -65,7 +67,7 @@ class Product {
       id_product: json['id_product'] ?? 0,
       product_provider_id: json['product_provider_id'] ?? 0,
       product_category_id: json['product_category_id'] ?? 0,
-      id_product_category: json['id_product_category'] ?? 0,
+      id_product_category: json['product_category_id'] ?? 0,
       id_product_image: imageId,
       product_ref_id: json['product_ref_id'] ?? 0,
       product_name: json['product_name'] ?? "",
@@ -112,25 +114,25 @@ class Product {
   Map<String, dynamic> toJson() {
     return {
       "product": {
-        'id_product': id_product,
-        'product_provider_id': product_provider_id,
-        'product_category_id': product_category_id,
-        'id_product_category': id_product_category,
-        'id_product_image': id_product_image,
-        'product_name': product_name,
-        'product_brand': product_brand,
-        'product_barcode': product_barcode,
-        'product_category_desc': product_category_desc,
-        'product_price': product_price,
-        'product_quantity': product_quantity,
-        'product_description': product_description,
-        "product_owner": product_owner_id
+        'id_product': id_product ?? 0,
+        'product_provider_id': product_provider_id ?? "",
+        'product_category_id': product_category_id ?? "",
+        'id_product_category': id_product_category ?? 0,
+        'id_product_image': id_product_image ?? "",
+        'product_name': product_name ?? "",
+        'product_brand': product_brand ?? "",
+        'product_barcode': product_barcode ?? "",
+        'product_category_desc': product_category_desc ?? "",
+        'product_price': product_price ?? 0,
+        'product_quantity': product_quantity ?? 0,
+        'product_description': product_description ?? "",
+        "product_owner": product_owner_id ?? 0
       },
       "image": {
-        "id_product_image": id_product_image,
+        "id_product_image": id_product_image ?? 0,
         "product_image_data":
             product_image_url ?? "", // For reasons of simplicity
-        "product_ref_id": product_ref_id
+        "product_ref_id": product_ref_id ?? 0
       }
     };
   }
