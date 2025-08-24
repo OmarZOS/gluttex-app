@@ -435,7 +435,6 @@
       "kind": "direct",
       "source": "path",
       "dependencies": [
-        "flutter",
         "dio",
         "gluttex_core",
         "gluttex_constants",
@@ -445,7 +444,6 @@
         "flutter_pdfview"
       ],
       "directDependencies": [
-        "flutter",
         "dio",
         "gluttex_core",
         "gluttex_constants",
@@ -845,12 +843,10 @@
       "kind": "direct",
       "source": "path",
       "dependencies": [
-        "flutter",
         "flutter_localizations",
         "intl"
       ],
       "directDependencies": [
-        "flutter",
         "flutter_localizations",
         "intl"
       ]
@@ -904,12 +900,8 @@
       "version": "0.0.1",
       "kind": "direct",
       "source": "path",
-      "dependencies": [
-        "flutter"
-      ],
-      "directDependencies": [
-        "flutter"
-      ]
+      "dependencies": [],
+      "directDependencies": []
     },
     {
       "name": "dio",
@@ -997,14 +989,12 @@
       "kind": "direct",
       "source": "path",
       "dependencies": [
-        "flutter",
         "gluttex_core",
         "gluttex_constants",
         "locator",
         "google_sign_in"
       ],
       "directDependencies": [
-        "flutter",
         "gluttex_core",
         "gluttex_constants",
         "locator",
@@ -1133,11 +1123,9 @@
       "kind": "direct",
       "source": "path",
       "dependencies": [
-        "flutter",
         "get_it"
       ],
       "directDependencies": [
-        "flutter",
         "get_it"
       ]
     },
@@ -1163,7 +1151,6 @@
       "kind": "direct",
       "source": "path",
       "dependencies": [
-        "flutter",
         "gluttex_core",
         "gluttex_constants",
         "locator",
@@ -1171,7 +1158,6 @@
         "permission_handler"
       ],
       "directDependencies": [
-        "flutter",
         "gluttex_core",
         "gluttex_constants",
         "locator",
@@ -1445,6 +1431,7 @@
         "medicom_catalog",
         "gluttex_play",
         "gluttex_ui",
+        "gluttex_login",
         "gluttex_event",
         "flutter_pdfview"
       ],
@@ -1459,6 +1446,7 @@
         "medicom_catalog",
         "gluttex_play",
         "gluttex_ui",
+        "gluttex_login",
         "gluttex_event",
         "flutter_pdfview"
       ]
@@ -1469,7 +1457,6 @@
       "kind": "direct",
       "source": "path",
       "dependencies": [
-        "flutter",
         "locator",
         "gluttex_core",
         "gluttex_constants",
@@ -1477,12 +1464,283 @@
         "geolocator"
       ],
       "directDependencies": [
-        "flutter",
         "locator",
         "gluttex_core",
         "gluttex_constants",
         "shared_preferences",
         "geolocator"
+      ]
+    },
+    {
+      "name": "gluttex_login",
+      "version": "1.0.0+1",
+      "kind": "direct",
+      "source": "path",
+      "dependencies": [
+        "flutter",
+        "provider",
+        "font_awesome_flutter",
+        "locator",
+        "gluttex_core",
+        "gluttex_ui",
+        "gluttex_event",
+        "url_launcher",
+        "flutter_svg"
+      ],
+      "directDependencies": [
+        "flutter",
+        "provider",
+        "font_awesome_flutter",
+        "locator",
+        "gluttex_core",
+        "gluttex_ui",
+        "gluttex_event",
+        "url_launcher",
+        "flutter_svg"
+      ]
+    },
+    {
+      "name": "flutter_svg",
+      "version": "2.2.0",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "http",
+        "vector_graphics",
+        "vector_graphics_codec",
+        "vector_graphics_compiler"
+      ],
+      "directDependencies": [
+        "flutter",
+        "http",
+        "vector_graphics",
+        "vector_graphics_codec",
+        "vector_graphics_compiler"
+      ]
+    },
+    {
+      "name": "vector_graphics_compiler",
+      "version": "1.1.18",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "args",
+        "meta",
+        "path",
+        "path_parsing",
+        "vector_graphics_codec",
+        "xml"
+      ],
+      "directDependencies": [
+        "args",
+        "meta",
+        "path",
+        "path_parsing",
+        "vector_graphics_codec",
+        "xml"
+      ]
+    },
+    {
+      "name": "xml",
+      "version": "6.5.0",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ],
+      "directDependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "petitparser",
+      "version": "6.0.2",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "meta"
+      ],
+      "directDependencies": [
+        "meta"
+      ]
+    },
+    {
+      "name": "vector_graphics_codec",
+      "version": "1.1.13",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [],
+      "directDependencies": []
+    },
+    {
+      "name": "path_parsing",
+      "version": "1.1.0",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "meta",
+        "vector_math"
+      ],
+      "directDependencies": [
+        "meta",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "args",
+      "version": "2.7.0",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [],
+      "directDependencies": []
+    },
+    {
+      "name": "vector_graphics",
+      "version": "1.1.19",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "http",
+        "vector_graphics_codec"
+      ],
+      "directDependencies": [
+        "flutter",
+        "http",
+        "vector_graphics_codec"
+      ]
+    },
+    {
+      "name": "url_launcher",
+      "version": "6.3.2",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "url_launcher_android",
+        "url_launcher_ios",
+        "url_launcher_linux",
+        "url_launcher_macos",
+        "url_launcher_platform_interface",
+        "url_launcher_web",
+        "url_launcher_windows"
+      ],
+      "directDependencies": [
+        "flutter",
+        "url_launcher_android",
+        "url_launcher_ios",
+        "url_launcher_linux",
+        "url_launcher_macos",
+        "url_launcher_platform_interface",
+        "url_launcher_web",
+        "url_launcher_windows"
+      ]
+    },
+    {
+      "name": "url_launcher_windows",
+      "version": "3.1.4",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ],
+      "directDependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_platform_interface",
+      "version": "2.3.2",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ],
+      "directDependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_web",
+      "version": "2.4.1",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "url_launcher_platform_interface",
+        "web"
+      ],
+      "directDependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "url_launcher_platform_interface",
+        "web"
+      ]
+    },
+    {
+      "name": "url_launcher_macos",
+      "version": "3.2.2",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ],
+      "directDependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_linux",
+      "version": "3.2.1",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ],
+      "directDependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_ios",
+      "version": "6.3.3",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ],
+      "directDependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_android",
+      "version": "6.3.17",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ],
+      "directDependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
       ]
     },
     {
@@ -1960,134 +2218,6 @@
       ]
     },
     {
-      "name": "url_launcher",
-      "version": "6.3.2",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "url_launcher_android",
-        "url_launcher_ios",
-        "url_launcher_linux",
-        "url_launcher_macos",
-        "url_launcher_platform_interface",
-        "url_launcher_web",
-        "url_launcher_windows"
-      ],
-      "directDependencies": [
-        "flutter",
-        "url_launcher_android",
-        "url_launcher_ios",
-        "url_launcher_linux",
-        "url_launcher_macos",
-        "url_launcher_platform_interface",
-        "url_launcher_web",
-        "url_launcher_windows"
-      ]
-    },
-    {
-      "name": "url_launcher_windows",
-      "version": "3.1.4",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ],
-      "directDependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ]
-    },
-    {
-      "name": "url_launcher_platform_interface",
-      "version": "2.3.2",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "plugin_platform_interface"
-      ],
-      "directDependencies": [
-        "flutter",
-        "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "url_launcher_web",
-      "version": "2.4.1",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "flutter_web_plugins",
-        "url_launcher_platform_interface",
-        "web"
-      ],
-      "directDependencies": [
-        "flutter",
-        "flutter_web_plugins",
-        "url_launcher_platform_interface",
-        "web"
-      ]
-    },
-    {
-      "name": "url_launcher_macos",
-      "version": "3.2.2",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ],
-      "directDependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ]
-    },
-    {
-      "name": "url_launcher_linux",
-      "version": "3.2.1",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ],
-      "directDependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ]
-    },
-    {
-      "name": "url_launcher_ios",
-      "version": "6.3.3",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ],
-      "directDependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ]
-    },
-    {
-      "name": "url_launcher_android",
-      "version": "6.3.17",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ],
-      "directDependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ]
-    },
-    {
       "name": "flutter_linkify",
       "version": "6.0.0",
       "kind": "transitive",
@@ -2108,122 +2238,6 @@
       "source": "hosted",
       "dependencies": [],
       "directDependencies": []
-    },
-    {
-      "name": "flutter_svg",
-      "version": "2.2.0",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "http",
-        "vector_graphics",
-        "vector_graphics_codec",
-        "vector_graphics_compiler"
-      ],
-      "directDependencies": [
-        "flutter",
-        "http",
-        "vector_graphics",
-        "vector_graphics_codec",
-        "vector_graphics_compiler"
-      ]
-    },
-    {
-      "name": "vector_graphics_compiler",
-      "version": "1.1.18",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "args",
-        "meta",
-        "path",
-        "path_parsing",
-        "vector_graphics_codec",
-        "xml"
-      ],
-      "directDependencies": [
-        "args",
-        "meta",
-        "path",
-        "path_parsing",
-        "vector_graphics_codec",
-        "xml"
-      ]
-    },
-    {
-      "name": "xml",
-      "version": "6.5.0",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ],
-      "directDependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "6.0.2",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "meta"
-      ],
-      "directDependencies": [
-        "meta"
-      ]
-    },
-    {
-      "name": "vector_graphics_codec",
-      "version": "1.1.13",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [],
-      "directDependencies": []
-    },
-    {
-      "name": "path_parsing",
-      "version": "1.1.0",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "meta",
-        "vector_math"
-      ],
-      "directDependencies": [
-        "meta",
-        "vector_math"
-      ]
-    },
-    {
-      "name": "args",
-      "version": "2.7.0",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [],
-      "directDependencies": []
-    },
-    {
-      "name": "vector_graphics",
-      "version": "1.1.19",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter",
-        "http",
-        "vector_graphics_codec"
-      ],
-      "directDependencies": [
-        "flutter",
-        "http",
-        "vector_graphics_codec"
-      ]
     },
     {
       "name": "gluttex_play",
@@ -2563,46 +2577,18 @@
       "kind": "direct",
       "source": "path",
       "dependencies": [
-        "flutter",
         "locator",
         "gluttex_core",
         "gluttex_constants",
-        "path"
+        "path",
+        "dio"
       ],
       "directDependencies": [
-        "flutter",
         "locator",
         "gluttex_core",
         "gluttex_constants",
-        "path"
-      ]
-    },
-    {
-      "name": "gluttex_login",
-      "version": "1.0.0+1",
-      "kind": "direct",
-      "source": "path",
-      "dependencies": [
-        "flutter",
-        "provider",
-        "font_awesome_flutter",
-        "locator",
-        "gluttex_core",
-        "gluttex_ui",
-        "gluttex_event",
-        "url_launcher",
-        "flutter_svg"
-      ],
-      "directDependencies": [
-        "flutter",
-        "provider",
-        "font_awesome_flutter",
-        "locator",
-        "gluttex_core",
-        "gluttex_ui",
-        "gluttex_event",
-        "url_launcher",
-        "flutter_svg"
+        "path",
+        "dio"
       ]
     }
   ],

@@ -444,26 +444,29 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                         // ignore: curly_braces_in_flow_control_structures
                         recipe.recipeImage = _recipeImage!;
                       else {
-                        final insertedRecipe =
-                            await Provider.of<RecipeNotifier>(
-                          context,
-                          listen: false,
-                        ).addOrUpdateRecipe(recipe);
-                        recipe = insertedRecipe;
-                        recipe?.recipe_image_url = await Navigator.pushNamed(
-                          context,
-                          AppRoutes.imageUpload,
-                          arguments: {
-                            "entity": "recipe",
-                            "id": insertedRecipe?.id_recipe ?? 0,
-                          },
-                        ) as String?;
+                        // final insertedRecipe =
+                        //     await Provider.of<RecipeNotifier>(
+                        //   context,
+                        //   listen: false,
+                        // ).addOrUpdateRecipe(recipe);
+                        // recipe = insertedRecipe;
+
+                        if (recipe.id_recipe == null || recipe.id_recipe == 0) {
+                          recipe.recipe_image_url = await Navigator.pushNamed(
+                            context,
+                            AppRoutes.imageUpload,
+                            arguments: {
+                              "entity": "recipe",
+                              "id": recipe.id_recipe ?? 0,
+                            },
+                          ) as String?;
+                        }
                       }
 
                       final insertedRecipe = await Provider.of<RecipeNotifier>(
                         context,
                         listen: false,
-                      ).addOrUpdateRecipe(recipe!);
+                      ).addOrUpdateRecipe(recipe);
 
                       ResponseHandler.handleResponse(
                         context: context,

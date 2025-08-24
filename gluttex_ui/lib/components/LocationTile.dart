@@ -46,7 +46,7 @@ ListTile buildLocationTile(BuildContext context, Supplier supplier) {
         child: Icon(
           Icons.location_on,
           color: hasLocation
-              ? theme.colorScheme.primary
+              ? theme.colorScheme.onSurfaceVariant
               : theme.colorScheme.onSurface.withOpacity(0.5),
         ),
       ),

@@ -172,7 +172,7 @@ class SupplierSelectionSheet extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextField(
               decoration: InputDecoration(
-                hintText: "loc.searchSuppliersText",
+                hintText: loc.searchSuppliersText,
                 prefixIcon: Icon(Icons.search,
                     color: theme.colorScheme.onSurface.withOpacity(0.6)),
                 border: OutlineInputBorder(

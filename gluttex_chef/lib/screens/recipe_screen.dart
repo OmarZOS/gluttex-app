@@ -7,7 +7,7 @@ import 'package:gluttex_chef/components/RecipeCard.dart';
 import 'package:gluttex_chef/components/RecipeOwner.dart';
 import 'package:gluttex_chef/components/ingredientCard.dart';
 import 'package:gluttex_chef/screens/recipe_form_screen.dart';
-import 'package:gluttex_chef/tools/confirmation_dialogue.dart';
+import 'package:gluttex_ui/components/confirmation_dialogue.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
@@ -104,7 +104,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
               ? FloatingActionButton(
                   heroTag: 'floating-button-2',
                   onPressed: () => _navigateToEditScreen(context),
-                  child: const Icon(Icons.edit),
+                  child: Icon(color: theme.colorScheme.secondary, Icons.edit),
                 )
               : null,
       body: NestedScrollView(
@@ -219,7 +219,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
       //   onPressed: () => _navigateToEditScreen(context),
       // ),
       IconButton(
-        icon: const Icon(Icons.delete, color: Colors.red),
+        icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.tertiary),
         onPressed: () => _showDeleteConfirmation(context),
       ),
       const SizedBox(width: 8),
@@ -272,14 +272,14 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             SvgPicture.asset(
           'assets/icons/${_recipe.recipe_category_id}.svg',
           package: "gluttex_chef",
-          color: Theme.of(context).colorScheme.secondary,
+          color: theme.colorScheme.onSurface,
         ), // Replace with your desired icon
         // size: 18,
         // color: theme.colorScheme.primary,
         label: Text(categoryName),
         backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
         labelStyle: TextStyle(
-          color: theme.colorScheme.primary,
+          color: theme.colorScheme.onSurface,
           fontWeight: FontWeight.bold,
         ),
         shape: StadiumBorder(
@@ -426,109 +426,6 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                           child: Image.asset(
                             'assets/images/logo.png',
                             package: "gluttex_home",
-                            height: 48,
-                            color: Colors.lightGreen,
-                          ),
-                        )
-                      : _buildDefaultProviderIcon(),
-                ),
-                const SizedBox(width: 12),
-
-                // Provider Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${provider?.personFirstName} ${provider?.personLastName}" ??
-                            AppLocalizations.of(context)!.unknownProvider,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (provider?.locationName != "") ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              size: 16,
-                              color: colorScheme.onSurface.withOpacity(0.6),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              provider!.locationName!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurface.withOpacity(0.6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-
-                // Contact Button
-                // IconButton(
-                //   icon: Icon(
-                //     Icons.contact_support_outlined,
-                //     color: colorScheme.primary,
-                //   ),
-                //   onPressed: () => _showContactOptions(context, provider),
-                // ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<Widget> _buildProviderTile(BuildContext context) async {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final AppUser? provider =
-        await notifier.getUserById(_recipe.recipe_owner_id ?? 0);
-
-    return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: GluttexConstants.kDefaultPaddin / 8,
-        vertical: 8,
-      ),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.providedBy,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.7),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                // Provider Avatar/Logo
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: provider != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            'assets/images/logo.png',
                             height: 48,
                             color: Colors.lightGreen,
                           ),

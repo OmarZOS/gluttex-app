@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
+import 'package:gluttex_core/business/Organisation.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:locator/locator.dart';
@@ -8,13 +11,20 @@ import 'package:geolocator/geolocator.dart';
 class SupplierChangeNotifier extends ChangeNotifier {
   final SupplierService _supplierService =
       GluttexLocator.get<SupplierService>();
-  final List<Supplier> _suppliers = [];
+  List<Supplier> _suppliers = [];
   List<Supplier> _filteredSuppliers = [];
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
+  bool isLoading = false;
+  // bool get isLoading => isLoading;
   int _currentPage = 0;
   static const int _itemsPerPage = 50;
   Position? _currentLocation;
+
+  final Map<int, Organisation> _supplierOrganisations = {};
+
+  int currentOrganisationPage = 0;
+  bool hasMoreOrganisations = true;
+
+  final int organisationsPerPage = 30;
 
   List<Supplier> get suppliers => _filteredSuppliers;
   Position? get currentLocation => _currentLocation;
@@ -22,28 +32,22 @@ class SupplierChangeNotifier extends ChangeNotifier {
   SupplierChangeNotifier() {
     fetchSuppliers();
   }
+  List<Organisation> get supplierOrganisations =>
+      _supplierOrganisations.values.toList();
 
   Future<Supplier?> getSupplierById(int id) async {
-    // First check if supplier exists in local list
-    final existingSupplier = _suppliers.firstWhere(
-      (supplier) => supplier.idProductProvider == id,
-      orElse: () => Supplier.empty(), // Returns empty supplier if not found
-    );
-
-    // Return if found (and not empty)
-    if (existingSupplier.idProductProvider != null) {
-      return existingSupplier;
-    }
-
-    // If not found locally, fetch from API
-    _isLoading = true;
+    isLoading = true;
     notifyListeners();
 
     try {
       final supplier = await _supplierService.getSupplier(id.toString());
       if (supplier != null) {
         // Add to local cache
-        _suppliers.add(supplier);
+
+        _suppliers[_suppliers.indexWhere(
+                (s) => s.idProductProvider == supplier.idProductProvider)] =
+            supplier;
+
         _filteredSuppliers = List.from(_suppliers);
       }
       return supplier;
@@ -51,24 +55,62 @@ class SupplierChangeNotifier extends ChangeNotifier {
       debugPrint("Error fetching supplier by ID: $e");
       return null;
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> fetchSuppliers({bool reset = false}) async {
-    if (_isLoading) return;
+  Future<Supplier?> addOrUpdateRecipe(Supplier supplier) async {
+    try {
+      log('Adding/updating supplier: ${supplier.providerName}');
+      if (supplier.supplier_image != null) {
+        String? imageUrl = await supplier.supplier_image?.uploadImage();
+        supplier.supplier_image_url = imageUrl;
+        supplier.supplier_image_id = 0; // Reset image ID to ensure new upload
+      }
+
+      Supplier? data = (supplier.idProductProvider == 0
+          ? await _supplierService.addSupplier(supplier)
+          : await _supplierService.updateSupplier(supplier));
+      if (data != null) {
+        // updateLocalSupplier(supplier);
+        await fetchSuppliers(reset: true);
+      }
+      return data;
+    } catch (e) {
+      log("Failed to add/update recipe: $e");
+      throw GluttexException(e.toString());
+    }
+  }
+
+  /// Deletes a recipe and updates the local state efficiently
+  Future<void> deleteSupplier(int idProductProvider) async {
+    int? status =
+        await _supplierService.deleteSupplier(idProductProvider.toString());
+    if (status != null) {
+      _suppliers.removeWhere((s) => s.idProductProvider == idProductProvider);
+      _filteredSuppliers = List.from(_suppliers);
+
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSuppliers(
+      {bool reset = false, int owner_id = 0, int org_id = 0}) async {
+    if (isLoading) return;
 
     if (reset) {
       _currentPage = 0;
       _suppliers.clear();
     }
 
-    _isLoading = true;
+    isLoading = true;
     notifyListeners();
 
     try {
       final fetchedSuppliers = await _supplierService.getAllSuppliers(
+        owner_id,
+        org_id,
         _currentPage * _itemsPerPage,
         _itemsPerPage,
       );
@@ -86,7 +128,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
       debugPrint("Error fetching suppliers: $e");
     }
 
-    _isLoading = false;
+    isLoading = false;
     notifyListeners();
   }
 
@@ -99,9 +141,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
   }
 
   Future<void> getCurrentLocation() async {
-    if (_isLoading) return;
+    if (isLoading) return;
 
-    _isLoading = true;
+    isLoading = true;
     notifyListeners();
 
     try {
@@ -111,7 +153,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied ||
             permission == LocationPermission.deniedForever) {
-          _isLoading = false;
+          isLoading = false;
           notifyListeners();
           return;
         }
@@ -123,7 +165,47 @@ class SupplierChangeNotifier extends ChangeNotifier {
       debugPrint("Error getting location: $e");
     }
 
-    _isLoading = false;
+    isLoading = false;
     notifyListeners();
+  }
+
+  /// Fetches all ingredients and stores them in a map for fast lookups
+  Future<void> fetchOrganisations(
+      {bool reset = false, int owner_id = 0, int org_id = 0}) async {
+    if (reset) {
+      _supplierOrganisations?.clear();
+      currentOrganisationPage = 0;
+      hasMoreOrganisations = true;
+    }
+
+    if (!hasMoreOrganisations || isLoading) return;
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final fetchedOrganisations = await _supplierService.getAllOrganisations(
+          owner_id,
+          org_id,
+          currentOrganisationPage * organisationsPerPage,
+          organisationsPerPage);
+
+      if (fetchedOrganisations != null && fetchedOrganisations.isNotEmpty) {
+        for (var organisation in fetchedOrganisations) {
+          _supplierOrganisations[organisation.id_provider_organisation] =
+              organisation;
+        }
+        currentOrganisationPage++;
+      } else {
+        hasMoreOrganisations = false;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      // log("Failed to fetch Organisations: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 }

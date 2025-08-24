@@ -175,7 +175,7 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
                             Icon(
                               hasImage ? Icons.edit : Icons.add_a_photo,
                               size: 36,
-                              color: Colors.white,
+                              color: theme.colorScheme.secondary,
                             ),
                             const SizedBox(height: 8),
                             Text(

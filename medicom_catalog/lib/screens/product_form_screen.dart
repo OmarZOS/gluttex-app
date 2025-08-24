@@ -10,7 +10,7 @@ import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_ui/Services/ResponseHandler.dart';
-import 'package:gluttex_ui/supplier_picker.dart';
+import 'package:gluttex_ui/components/supplier_picker.dart';
 import 'package:gluttex_ui/components/ImagePickerSection.dart';
 import 'package:gluttex_ui/components/category_picker.dart';
 import 'package:provider/provider.dart';
@@ -289,22 +289,17 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         // ignore: curly_braces_in_flow_control_structures
                         product.productImage = _productImage!;
                       else {
-                        final inserted_product =
-                            await Provider.of<ProductNotifier>(context,
-                                    listen: false)
-                                .addOrUpdateProduct(product);
-                        product = inserted_product;
-                        product?.product_image_url = await Navigator.pushNamed(
+                        product.product_image_url = await Navigator.pushNamed(
                             context, AppRoutes.imageUpload, arguments: {
                           "entity": "product",
-                          "id": inserted_product?.id_product ?? 0
+                          "id": product.id_product ?? 0
                         }) as String?;
                       }
 
                       final inserted_product =
                           await Provider.of<ProductNotifier>(context,
                                   listen: false)
-                              .addOrUpdateProduct(product!);
+                              .addOrUpdateProduct(product);
 
                       ResponseHandler.handleResponse(
                         context: context,

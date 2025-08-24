@@ -6,7 +6,7 @@ import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:locator/locator.dart';
 import 'package:path/path.dart';
 
-class GluttexImageImpl extends GluttexImage {
+class GluttexImageImpl extends GluttexImage<FormData> {
   GluttexImageImpl();
 
   @override

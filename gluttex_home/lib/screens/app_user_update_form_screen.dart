@@ -9,6 +9,7 @@ import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_ui/Services/ResponseHandler.dart';
+import 'package:gluttex_ui/components/map_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
@@ -103,7 +104,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
         }
 
         await Provider.of<AppUserNotifier>(context, listen: false)
-            .updateAppUserImage(localUser);
+            .updateAppUser(localUser);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -154,6 +155,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                     _buildTextFormField(
                       label: loc.username,
                       initialValue: _editedUser.app_user_name,
+                      enabled: false,
                       onSaved: (v) =>
                           _editedUser = _editedUser.copyWith(app_user_name: v),
                     ),
@@ -183,6 +185,10 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                           _editedUser = _editedUser.copyWith(personGender: v),
                     ),
                     _buildSectionHeader(loc.locationInfoText, theme),
+                    // _buildLocationPicker(context),
+                    // const SizedBox(
+                    //   height: 16,
+                    // ),
                     _buildTextFormField(
                       label: loc.locationNameText,
                       initialValue: _editedUser.locationName,
@@ -190,7 +196,19 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                           _editedUser = _editedUser.copyWith(locationName: v),
                     ),
                     _buildTextFormField(
-                      label: loc.locationText,
+                      label: loc.streetText,
+                      initialValue: _editedUser.addressStreet,
+                      onSaved: (v) =>
+                          _editedUser = _editedUser.copyWith(addressStreet: v),
+                    ),
+                    _buildTextFormField(
+                      label: loc.postalCodeText,
+                      initialValue: _editedUser.addressPostalCode,
+                      onSaved: (v) => _editedUser =
+                          _editedUser.copyWith(addressPostalCode: v),
+                    ),
+                    _buildTextFormField(
+                      label: loc.cityText,
                       initialValue: _editedUser.addressCity,
                       onSaved: (v) =>
                           _editedUser = _editedUser.copyWith(addressCity: v),
@@ -216,6 +234,109 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildLocationPicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
+    final hasLocation = (_editedUser.locationLatitude != 0.0 &&
+        _editedUser.locationLongitude != 0.0);
+
+    return GestureDetector(
+      onTap: () async {
+        final position = await showLocationInputDialog(context);
+        if (position != null && mounted) {
+          // _position = position;
+          _editedUser = _editedUser.copyWith(
+              locationLatitude: position.latitude,
+              locationLongitude: position.longitude);
+          // setState(() {
+          // });
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceVariant.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: hasLocation
+                ? theme.colorScheme.primary.withOpacity(0.2)
+                : theme.colorScheme.outline.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: hasLocation
+                    ? theme.colorScheme.primary.withOpacity(0.1)
+                    : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.location_on,
+                color: hasLocation
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withOpacity(0.5),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.insertCoordinatesMsg,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    hasLocation
+                        ? '${_editedUser.locationLatitude.toStringAsFixed(4)}, ${_editedUser.locationLongitude.toStringAsFixed(4)}'
+                        : loc.insertCoordinatesMsg,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: hasLocation
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                  if (hasLocation && _editedUser.locationName != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        _editedUser.locationName,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (hasLocation)
+              IconButton(
+                icon: Icon(Icons.edit, size: 20),
+                color: theme.colorScheme.secondary,
+                onPressed: () async {
+                  final newPosition = await showLocationInputDialog(context);
+                  if (newPosition != null && mounted) {
+                    setState(() {
+                      _editedUser = _editedUser.copyWith(
+                          locationLatitude: newPosition.latitude,
+                          locationLongitude: newPosition.longitude);
+                    });
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -305,7 +426,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
     required String? initialValue,
     required void Function(String?) onSaved,
     int maxLength = 300,
-    bool enabled = false, // <-- default value: disabled
+    bool enabled = true, // <-- default value: disabled
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),

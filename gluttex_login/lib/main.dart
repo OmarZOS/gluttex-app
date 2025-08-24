@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/Services/AuthService.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
-import 'package:gluttex_impl_app/gluttex_impl_auth.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_login/screens/login_screen.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:gluttex_core/mediation/StorageService.dart';
-import 'package:gluttex_impl_app/gluttex_impl_app.dart';
-import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 
 void main() {
-  GluttexLocator.registerSingletonService<AppUserService>(AppUserServiceImpl());
-  GluttexLocator.registerSingletonService<StorageService>(StorageServiceImpl());
-  GluttexLocator.registerSingletonService<AuthService>(AuthServiceImpl());
+  // GluttexLocator.registerSingletonService<AppUserService>(AppUserServiceImpl());
+  // GluttexLocator.registerSingletonService<StorageService>(StorageServiceImpl());
+  // GluttexLocator.registerSingletonService<AuthService>(AuthServiceImpl());
 
   runApp(
     ChangeNotifierProvider(

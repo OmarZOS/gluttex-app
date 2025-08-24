@@ -1,5 +1,7 @@
 // SupplierService.dart
 
+import 'package:gluttex_core/business/Organisation.dart';
+
 import '../Supplier.dart';
 
 abstract class SupplierService {
@@ -16,7 +18,13 @@ abstract class SupplierService {
     throw UnimplementedError();
   }
 
-  Future<List<Supplier>> getAllSuppliers(int offset, int itemsPerPage) async {
+  Future<List<Supplier>> getAllSuppliers(
+      int owner_id, int org_id, int offset, int itemsPerPage) async {
+    throw UnimplementedError();
+  }
+
+  Future<List<Organisation>> getAllOrganisations(
+      int owner_id, int org_id, int offset, int itemsPerPage) async {
     throw UnimplementedError();
   }
 

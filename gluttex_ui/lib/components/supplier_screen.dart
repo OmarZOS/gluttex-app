@@ -4,22 +4,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
+import 'package:gluttex_ui/Services/ResponseHandler.dart';
 import 'package:gluttex_ui/SupplierProductCard.dart';
 import 'package:gluttex_ui/components/LocationTile.dart';
+import 'package:gluttex_ui/components/confirmation_dialogue.dart';
 import 'package:gluttex_ui/components/contactTile.dart';
 // import 'package:gluttex_ui/components/SupplierProductCard.dart';
 import 'package:provider/provider.dart';
+
+void _showDeleteConfirmation(BuildContext context,
+    SupplierChangeNotifier supplierNotifer, int idProductProvider) {
+  showConfirmationDialog(
+    context,
+    AppLocalizations.of(context)!.recipedeletionConfirmationMessage,
+    () async {
+      try {
+        await supplierNotifer.deleteSupplier(idProductProvider);
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: 200,
+          responseCode: "SUCCESS",
+          finalMessage: AppLocalizations.of(context)!.deleteSuccess,
+        );
+        Navigator.pop(context);
+      } on GluttexException catch (e) {
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: e.statusCode ?? 300,
+          responseCode: e.message,
+          finalMessage: AppLocalizations.of(context)!.deleteFailure,
+        );
+      }
+    },
+  );
+}
 
 void showSupplierDetails(BuildContext context, Supplier supplier) {
   final theme = Theme.of(context);
   final loc = AppLocalizations.of(context);
   final productNotifier = Provider.of<ProductNotifier>(context, listen: false);
+  final supplierNotifer =
+      Provider.of<SupplierChangeNotifier>(context, listen: false);
   final contacts = parseContactInfo(supplier.providerContactInfo);
 
   log('supplier.idProductProvider: ${supplier.idProductProvider}');
+
+  supplierNotifer.getSupplierById(supplier.idProductProvider);
+
   productNotifier.fetchProducts(
       providerId: supplier.idProductProvider, reset: true);
   final isDarkMode = theme.brightness == Brightness.dark;
@@ -78,16 +113,50 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                                   tag:
                                       'supplier-${supplier.idProductProvider}-avatar',
                                   child: CircleAvatar(
-                                    radius: 24,
+                                    radius: 50,
                                     backgroundColor:
                                         theme.colorScheme.primaryContainer,
-                                    child: SvgPicture.asset(
-                                      'assets/icons/${supplier.productProviderTypeId}.svg',
-                                      package: "gluttex_localiser",
-                                      width: 24,
-                                      height: 24,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.5),
+                                    child: Image.network(
+                                      GluttexConstants.fsBaseUrl +
+                                          (supplier.supplier_image_url ?? ""),
+                                      fit: BoxFit
+                                          .cover, // Covers all available space
+                                      alignment:
+                                          Alignment.center, // Centers the image
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress
+                                                        .expectedTotalBytes !=
+                                                    null
+                                                ? loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return SizedBox.expand(
+                                          // Fallback also fills space
+                                          child: SvgPicture.asset(
+                                            'assets/icons/${supplier.productProviderTypeId}.svg',
+                                            package: "gluttex_localiser",
+                                            width: 25,
+                                            height: 25,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                          ),
+                                        );
+                                      },
+                                      key:
+                                          ValueKey(supplier.supplier_image_url),
                                     ),
                                   ),
                                 ),
@@ -110,6 +179,27 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                                     ),
                                   ),
                                 ),
+                                IconButton(
+                                    iconSize: 27,
+                                    color: theme.colorScheme.tertiary,
+                                    onPressed: () {
+                                      _showDeleteConfirmation(
+                                          context,
+                                          supplierNotifer,
+                                          supplier.idProductProvider);
+                                    },
+                                    icon: Icon(Icons.delete)),
+                                IconButton(
+                                    iconSize: 27,
+                                    color: theme.colorScheme.secondary,
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.providerCreate,
+                                        arguments: {"supplier": supplier},
+                                      );
+                                    },
+                                    icon: Icon(Icons.edit_location_alt)),
                               ],
                             ),
                           ),
@@ -147,6 +237,18 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                         ]),
                       ),
                     ),
+
+                    if (supplierNotifer.isLoading)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
 
                     // Product list or loading/empty state
                     if (notifier.isLoading)
@@ -240,6 +342,8 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                         child: FilledButton.tonal(
                           onPressed: () => Navigator.pop(context),
                           style: FilledButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),

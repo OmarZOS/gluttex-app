@@ -13,6 +13,10 @@ abstract class AppUserService {
     return null;
   }
 
+  Future<AppUser?> updateAppUser(AppUser appUser) async {
+    return null;
+  }
+
   Future<int?> addAppUser(AppUser appUser) async {
     return null;
   }

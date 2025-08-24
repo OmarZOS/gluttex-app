@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:gluttex_core/app/GluttexImage.dart';
@@ -104,7 +105,7 @@ class Recipe {
       },
       "image": {
         "id_recipe_image": id_recipe_image ?? 0,
-        "recipe_image_data": recipe_image_url ?? "",
+        "recipe_image_url": recipe_image_url ?? "",
         "recipe_ref_id": id_recipe ?? 0
       }
     };

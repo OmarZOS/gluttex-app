@@ -10,7 +10,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 
-class StorageServiceImpl implements StorageService {
+class StorageServiceImpl implements StorageService<FormData> {
   final Dio _dio;
 
   // Constructor allows optional Dio injection
@@ -73,8 +73,8 @@ class StorageServiceImpl implements StorageService {
     try {
       // Log the request data
       // log('Request data: ${json.encode(data)}');
-      // log('Sending data to $destination');
-      // log(data.toString());
+      log('Sending data to $destination');
+      log(data.toString());
       // Make the PUT request
       final response = await _dio.put(
         destination,
@@ -143,6 +143,8 @@ class StorageServiceImpl implements StorageService {
   Future<dynamic> update(String destination, String id,
       Map<String, dynamic> parameters, Map<String, dynamic> data) async {
     try {
+      log('Sending data to $destination');
+      // log(data.toString());
       log(data.toString());
       final response = await _dio.post(destination,
           data: data,

@@ -23,10 +23,10 @@ List<Widget> buildContactTiles(BuildContext context, String contactInfo) {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.1),
+              color: theme.colorScheme.onSurfaceVariant,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: theme.colorScheme.outline.withOpacity(0.1),
+                color: theme.colorScheme.onSurfaceVariant,
                 width: 1,
               ),
             ),
@@ -59,7 +59,8 @@ Widget buildContactTile(BuildContext context, String type, String value) {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
-          child: Icon(icon, size: 20, color: theme.colorScheme.primary),
+          child:
+              Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
         ),
       ),
       const SizedBox(width: 12),
@@ -163,14 +164,14 @@ Widget buildDetailRow(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.1),
+              color: theme.colorScheme.onSurfaceVariant,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
               child: Icon(
                 matchedIcon,
                 size: 20,
-                color: theme.colorScheme.primary,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),

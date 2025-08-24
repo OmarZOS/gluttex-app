@@ -193,6 +193,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                   isLoading,
                   scrollController,
                 ),
+                color: Theme.of(context).colorScheme.surface,
                 collapsed: _buildCollapsedPanel(context),
               ),
             ],
@@ -246,6 +247,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
   ) {
     final theme = Theme.of(context);
     final loc = AppLocalizations.of(context)!;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -274,7 +276,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: theme.colorScheme.primary,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -300,6 +302,10 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                             .split(",")[supplier.productProviderTypeId - 1];
 
                         return Card(
+                          color: (isDarkMode)
+                              ? theme.colorScheme.primaryContainer
+                                  .withOpacity(0.2)
+                              : null,
                           margin: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 4,
@@ -308,31 +314,83 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: ListTile(
+                            // tileColor: theme.colorScheme.onSurfaceVariant,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
                             ),
                             leading: CircleAvatar(
-                              radius: 40,
-                              backgroundColor:
-                                  theme.colorScheme.primaryContainer,
-                              child: SvgPicture.asset(
-                                'assets/icons/${supplier.productProviderTypeId}.svg',
-                                package: "gluttex_localiser",
-                                width: 35,
-                                height: 35,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(0.5),
-                              ),
-                            ),
-                            title: Text(
-                              supplier.providerName,
-                              style: theme.textTheme.titleMedium,
+                                radius: 40,
+                                backgroundColor:
+                                    theme.colorScheme.primaryContainer,
+                                child: Image.network(
+                                  GluttexConstants.fsBaseUrl +
+                                      (supplier.supplier_image_url ?? ""),
+                                  fit: BoxFit
+                                      .cover, // Covers all available space
+                                  alignment:
+                                      Alignment.center, // Centers the image
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return SizedBox.expand(
+                                      // Fallback also fills space
+                                      child: SvgPicture.asset(
+                                        'assets/icons/${supplier.productProviderTypeId}.svg',
+                                        package: "gluttex_localiser",
+                                        width: 35,
+                                        height: 35,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                      ),
+                                    );
+                                  },
+                                  key: ValueKey(supplier.supplier_image_url),
+                                )),
+                            title: Row(
+                              // mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  supplier.providerName,
+                                  style: theme.textTheme.titleMedium,
+                                  // overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    category, // e.g. "Restaurant"
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: theme
+                                          .colorScheme.onSecondaryContainer,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             subtitle: Text(
-                              category,
+                              supplier.provider_organisation_name,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurface
                                     .withOpacity(0.6),
@@ -349,10 +407,6 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                               ),
                             ),
                             onTap: () {
-                              // _focusOnLocation(
-                              //   supplier.locationLatitude,
-                              //   supplier.locationLongitude,
-                              // );
                               showSupplierDetails(context, supplier);
                             },
                           ),

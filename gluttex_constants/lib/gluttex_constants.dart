@@ -191,6 +191,8 @@ class GluttexConstants {
   static const String getAllAppUsersEndpoint = '/app_user';
   static const String appUserEndpoint = '/app_user';
   static const String updateAppUserImageEndpoint = '/app_user/update_image_url';
+  static const String updateAppUserEndpoint = '/app_user/update';
+
   static const String getAppUserCategoriesEndpoint = '/app_user/categorie/all';
 
   static const String postImageEndpoint = '/fs/upload';
@@ -208,19 +210,21 @@ class GluttexConstants {
   static const String getAllOrdersEndpoint = '/business/user/orders/all';
 
   static const String addSupplierEndpoint = '/supplier/add';
+  static const String updateSupplierEndpoint = '/supplier';
+  static const String getOrganisations = '/org';
+
   static const String deleteSupplierEndpoint = '/supplier/delete';
-  static const String getAllSuppliersEndpoint = '/supplier/all';
+  static const String getAllSuppliersEndpoint = '/supplier';
   static const String supplierEndpoint = '/supplier';
   static const String getSupplierCategoriesEndpoint = '/supplier/category/all';
   static const String getRecipeImageEndpoint = '/image/recipe';
 
   static const String addRecipeEndpoint = '/recipe/add';
-  static const String getIngredientEndpoint = '/recipe/ingredients/all';
+  static const String getIngredientEndpoint = '/ingredient';
   static const String deleteRecipeEndpoint = '/recipe/delete';
-  static const String getAllRecipesEndpoint = '/recipe/all';
+  static const String getAllRecipesEndpoint = '/recipe';
   static const String recipeEndpoint = '/recipe';
   static const String getRecipeCategoriesEndpoint = '/recipe/category/all';
-  static const String getRecipeByCategoriesEndpoint = '/recipe/category';
 
   static const String loginEndpoint = '/authentication/token';
   static const String signUpEndpoint = '/app_user/add';

@@ -70,11 +70,15 @@ class _CategoryPickerState extends State<CategoryPicker> {
                     loc.categoryText,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     widget.categories[_selectedCategoryIndex],
-                    style: theme.textTheme.bodyLarge,
+                    style: TextStyle(
+                      fontSize: theme.textTheme.bodyLarge!.fontSize,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
               ),
@@ -189,7 +193,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
                   widget.onCategoryChanged(_selectedCategoryIndex + 1);
                   Navigator.pop(context);
                 },
-                child: Text("loc.confirm"),
+                child: Text(loc.confirm),
               ),
             ),
           ],

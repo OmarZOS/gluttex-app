@@ -8,8 +8,8 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
+  # flutter:
+  #   sdk: flutter
   get_it: ^7.6.9
 
 dev_dependencies:

@@ -21,6 +21,17 @@ class AppUserServiceImpl implements AppUserService {
   }
 
   @override
+  Future<AppUser?> updateAppUser(AppUser appUser) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+
+    return await storageService.update(
+        GluttexConstants.apiBaseUrl + GluttexConstants.updateAppUserEndpoint,
+        '${appUser.id_app_user}',
+        {},
+        appUser.toJson());
+  }
+
+  @override
   Future<int?> deleteAppUser(String AppUserId) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
 

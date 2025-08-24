@@ -1,11 +1,8 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/mediation/StorageService.dart';
-import 'package:locator/locator.dart';
-import 'package:path/path.dart';
+// import 'dart:io';
+// import 'package:gluttex_core/mediation/StorageService.dart';
+// import 'package:path/path.dart';
 
-class GluttexImage {
+class GluttexImage<T> {
   late String filepath;
   late String filename;
   late String entityType;
@@ -28,19 +25,20 @@ class GluttexImage {
     this.entityId = entityId;
   }
 
-  Future<FormData> formData() async {
-    return FormData.fromMap({
-      'file': await MultipartFile.fromFile(
-        filepath,
-        filename: filename,
-      ),
-    });
+  Future<T> formData() async {
+    throw UnimplementedError();
+    // return FormData.fromMap({
+    //   'file': await MultipartFile.fromFile(
+    //     filepath,
+    //     filename: filename,
+    //   ),
+    // });
   }
 
   Future<String?> uploadImage() async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
-    return await storageService.insertBinary(
-        '${GluttexConstants.fsBaseUrl}${GluttexConstants.postImageEndpoint}/$entityType/$ownerId/$entityId/',
-        await formData());
+    // StorageService storageService = GluttexLocator.get<StorageService>();
+    // return await storageService.insertBinary(
+    //     '${GluttexConstants.fsBaseUrl}${GluttexConstants.postImageEndpoint}/$entityType/$ownerId/$entityId/',
+    //     await formData());
   }
 }

@@ -5,11 +5,11 @@ homepage:
 
 environment:
   sdk: '>=3.3.3 <4.0.0'
-  flutter: ">=1.17.0"
+  # flutter: ">=1.17.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
+  # flutter:
+  #   sdk: flutter
   dio: ^5.4.0
   # eventsource: ^1.0.1
   gluttex_core:

@@ -25,7 +25,7 @@ class SupplierProductCard extends StatelessWidget {
     final theme = Theme.of(context);
     final loc = AppLocalizations.of(context)!;
     final isLowStock = stockQuantity < 5;
-    final isOutOfStock = stockQuantity == 0;
+    final isOutOfStock = stockQuantity < 15;
     final priceColor = isOutOfStock
         ? theme.colorScheme.error.withOpacity(0.7)
         : isLowStock
@@ -171,7 +171,7 @@ class SupplierProductCard extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                       style:
                                           theme.textTheme.bodySmall?.copyWith(
-                                        color: priceColor,
+                                        color: theme.colorScheme.onSurface,
                                       ),
                                     ),
                                   ),

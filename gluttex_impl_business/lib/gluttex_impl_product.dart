@@ -37,7 +37,7 @@ class ProductServiceImpl implements ProductService {
     final result = await storageService.update(
         '${GluttexConstants.apiBaseUrl}${GluttexConstants.productEndpoint}/${updatedProduct.id_product}',
         "",
-        {},
+        {"product_id": "${updatedProduct.id_product}"},
         updatedProduct.toJson());
     return Product.fromJson(result);
   }

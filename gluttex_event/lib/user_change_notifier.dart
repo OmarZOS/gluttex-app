@@ -30,6 +30,12 @@ class AppUserNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateAppUser(AppUser user) async {
+    var appUser = await _appUserService.updateAppUser(user);
+    _appUser = appUser;
+    notifyListeners();
+  }
+
   void setSelectedTabIndex(int index) {
     _selectedTabIndex = index;
     notifyListeners();

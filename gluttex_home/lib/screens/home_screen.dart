@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
@@ -81,6 +82,10 @@ class _HomePageState extends State<HomePage>
         _animationCount = 0;
         _startIconAnimation();
       }
+      if (_selectedIndex == GluttexPageIndex.suppliers) {
+        Provider.of<SupplierChangeNotifier>(context, listen: false)
+            .fetchOrganisations();
+      }
     });
   }
 
@@ -153,8 +158,8 @@ class _HomePageState extends State<HomePage>
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        unselectedItemColor: Theme.of(context).colorScheme.primary,
-        selectedItemColor: Theme.of(context).colorScheme.surface,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        selectedItemColor: Theme.of(context).colorScheme.onPrimary,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
               icon: const Icon(CupertinoIcons.cube_box_fill),

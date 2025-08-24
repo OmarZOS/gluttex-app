@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
+// import 'package:dio/dio.dart';
 
-abstract class StorageService {
+abstract class StorageService<T> {
   Future<dynamic> getAll(String destination) async {
     return null;
   }
@@ -9,7 +9,7 @@ abstract class StorageService {
     return null;
   }
 
-  Future<String?> insertBinary(String destination, FormData data) async {
+  Future<String?> insertBinary(String destination, T data) async {
     return null;
   }
 

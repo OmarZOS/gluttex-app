@@ -130,7 +130,7 @@ class Product {
       },
       "image": {
         "id_product_image": id_product_image ?? 0,
-        "product_image_data":
+        "product_image_url":
             product_image_url ?? "", // For reasons of simplicity
         "product_ref_id": product_ref_id ?? 0
       }

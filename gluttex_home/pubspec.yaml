@@ -48,6 +48,8 @@ dependencies:
     path: ../gluttex_play
   gluttex_ui:
     path: ../gluttex_ui
+  gluttex_login:
+    path: ../gluttex_login
   gluttex_event:
     path: ../gluttex_event
 

@@ -52,7 +52,7 @@ class _ProductDetailsScreenContentState
   Supplier? _provider;
   late Product _product;
   bool _isLoadingProvider = true;
-
+  late ProductNotifier productNotifier;
   bool _initialized = false; // to prevent re-initialization
 
   @override
@@ -76,7 +76,7 @@ class _ProductDetailsScreenContentState
   }
 
   void _initializeProducts() {
-    final productNotifier = context.read<ProductNotifier>();
+    productNotifier = context.read<ProductNotifier>();
     // productNotifier.fetchProducts(
     //     categoryId: _product.product_category_id ?? 0);
     productNotifier.startPollingProductUpdates(_product);
@@ -85,6 +85,8 @@ class _ProductDetailsScreenContentState
   @override
   void dispose() {
     // _panelController.dispose();
+    productNotifier.stopPollingProductUpdates();
+
     super.dispose();
   }
 
@@ -192,7 +194,7 @@ class _ProductDetailsScreenContentState
                         textAlign: isRTL ? TextAlign.right : TextAlign.left,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -416,12 +418,14 @@ class _ProductDetailsScreenContentState
       actions: [
         if (isOwner)
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
+            icon: Icon(Icons.delete,
+                color: Theme.of(context).colorScheme.tertiary),
             onPressed: () => _showDeleteConfirmation(context, product),
           ),
         if (isOwner)
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: Icon(Icons.edit,
+                color: Theme.of(context).colorScheme.secondary),
             onPressed: () => _navigateToEditScreen(context, product),
           ),
         const SizedBox(width: GluttexConstants.kDefaultPaddin / 2),
@@ -539,7 +543,8 @@ class _ProductDetailsScreenContentState
         Row(
           children: [
             IconButton(
-              onPressed: () => _updateQuantity(_quantity - 1),
+              onPressed: () =>
+                  {log('$_quantity'), _updateQuantity(_quantity - 1)},
               icon: Icon(Icons.remove_circle,
                   size: 32, color: theme.colorScheme.error),
             ),
@@ -574,21 +579,21 @@ class _ProductDetailsScreenContentState
         final response = Response();
 
         if (statusCode == 200) {
-          response.color = Colors.green;
+          // response.color = Colors.green;
           response.text = AppLocalizations.of(context)!.deleteSuccess;
           Navigator.pop(context);
         } else if (statusCode == 406 || statusCode == 422) {
-          response.color = Colors.amber;
+          // response.color = Colors.amber;
           response.text = AppLocalizations.of(context)!.deleteFailure;
         } else {
-          response.color = Colors.red;
+          // response.color = Colors.red;
           response.text = AppLocalizations.of(context)!.serverError;
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.text),
-            backgroundColor: response.color,
+            // backgroundColor: response.color,
           ),
         );
       },
@@ -612,7 +617,7 @@ class _ProductDetailsScreenContentState
 
   void _addToCart(BuildContext context) {
     Provider.of<CartChangeNotifier>(context, listen: false)
-        .addItem(_product, _product?.product_quantity ?? 0);
+        .addItem(_product, _quantity);
     _panelController.close();
 
     ScaffoldMessenger.of(context).showSnackBar(

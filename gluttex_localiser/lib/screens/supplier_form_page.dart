@@ -1,11 +1,21 @@
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_constants/gluttex_response_codes.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
+import 'package:gluttex_core/app/GluttexImage.dart';
+import 'package:gluttex_core/business/Organisation.dart';
 import 'package:gluttex_core/business/Supplier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_localiser/components/image_picker.dart';
+import 'package:gluttex_ui/Services/ResponseHandler.dart';
+import 'package:gluttex_ui/components/ImagePickerSection.dart';
 import 'package:gluttex_ui/components/category_picker.dart';
 import 'package:gluttex_ui/components/map_picker.dart';
+import 'package:gluttex_ui/components/organisation_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -32,17 +42,107 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   double? _location_latitude;
   double? _location_longitude;
   String? _location_name;
-  Uint8List? _supplierImage;
+  int? _id_provider_organisation;
+  String? _provider_organisation_desc;
+  String? _provider_organisation_name;
+  String? _supplierImageUrl;
+  int? _supplierImageId;
   LatLng? _position;
+  int? _id_location;
+  late SupplierChangeNotifier _notifier;
+  bool _initialized = false; // to prevent re-initialization
 
   // Dynamic contact fields
   final List<TextEditingController> _contactControllers = [];
   final List<FocusNode> _contactFocusNodes = [];
 
+  final TextEditingController _organizationController = TextEditingController();
+  late List<Organisation> organizations;
+  List<Organisation> filteredOrganizations = [];
+  Organisation? selectedOrganization;
+  bool isCustomOrganization = false;
+
+  int _location_address_id = 0;
+  String _address_street = "";
+  String _address_city = "";
+  String _address_postal_code = "";
+  String _address_country = "";
+
+  GluttexImage? supplier_image;
+
   @override
   void initState() {
     super.initState();
-    _addContactField(); // Start with one contact field
+
+    _notifier = Provider.of<SupplierChangeNotifier>(context, listen: false);
+    organizations = _notifier.supplierOrganisations;
+    filteredOrganizations = organizations;
+    _organizationController.addListener(_filterOrganizations);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+      final Supplier? supplier = args?["supplier"];
+      if (supplier != null) {
+        _idprovider_details_id = supplier.idProviderDetails;
+        _id_product_provider = supplier.idProductProvider;
+        _id_provider_organisation = supplier.id_provider_organisation;
+        _provider_organisation_desc = supplier.provider_organisation_desc;
+        _provider_organisation_name = supplier.provider_organisation_name;
+        _product_provider_details_id = supplier.idProviderDetails;
+        _provider_name = supplier.providerName;
+        _provider_contact_info = supplier.providerContactInfo;
+        _product_provider_type_id = supplier.productProviderTypeId;
+        _location_latitude = supplier.locationLatitude;
+        _location_longitude = supplier.locationLongitude;
+        _location_name = supplier.locationName;
+        _supplierImageUrl = supplier.supplier_image_url;
+        _supplierImageId = supplier.supplier_image_id;
+        _id_location = supplier.id_location;
+        _position =
+            LatLng(supplier.locationLatitude, supplier.locationLongitude);
+
+        _location_address_id = supplier.location_address_id;
+        _address_street = supplier.address_street;
+        _address_city = supplier.address_city;
+        _address_postal_code = supplier.address_postal_code;
+        _address_country = supplier.address_country;
+      }
+
+      if (_provider_contact_info != null &&
+          _provider_contact_info!.isNotEmpty) {
+        final pattern = RegExp(r'([A-Za-z]+):\s*([^,]+)(?:,\s*|$)');
+        final matches = pattern.allMatches(_provider_contact_info!);
+
+        for (final match in matches) {
+          if (match.groupCount >= 2) {
+            final type = match.group(1)?.trim() ?? '';
+            final value = match.group(2)?.trim() ?? '';
+
+            // check if _contactTypes contains this type (case-insensitive)
+
+            final checkedType = _getTypeText(type);
+
+            _contactControllers.add(TextEditingController(text: value));
+            _selectedContactTypes.add(checkedType); // keep lowercase
+            _contactFocusNodes.add(FocusNode());
+          }
+        }
+      }
+
+      // fallback in case no valid contacts parsed
+      if (_contactControllers.isEmpty) {
+        _contactControllers.add(TextEditingController());
+        _selectedContactTypes.add(_contactTypes.first);
+        _contactFocusNodes.add(FocusNode());
+      }
+
+      _initialized = true; // prevents running this block again
+    }
   }
 
   @override
@@ -53,9 +153,41 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     for (var node in _contactFocusNodes) {
       node.dispose();
     }
+    _organizationController.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _filterOrganizations() {
+    final query = _organizationController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        filteredOrganizations = organizations;
+        isCustomOrganization = false;
+      } else {
+        filteredOrganizations = organizations
+            .where((org) =>
+                org.provider_organisation_name.toLowerCase().contains(query))
+            .toList();
+
+        // Check if the current text doesn't match any organization
+        isCustomOrganization = filteredOrganizations.isEmpty ||
+            !filteredOrganizations.any((org) =>
+                org.provider_organisation_name.toLowerCase() ==
+                query.toLowerCase());
+      }
+    });
+  }
+
+  void _selectOrganization(Organisation org) {
+    setState(() {
+      selectedOrganization = org;
+      _organizationController.text = org.provider_organisation_name;
+      isCustomOrganization = false;
+    });
+    // Close the dropdown
+    FocusScope.of(context).unfocus();
   }
 
   void _addContactField() {
@@ -87,15 +219,24 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Concatenate contact info fields
+      // Concatenate contact info fields with index mapping
       _provider_contact_info = _contactControllers
-          .where((controller) => controller.text.isNotEmpty)
-          .map((controller) => controller.text)
+          .asMap()
+          .entries
+          .where((entry) => entry.value.text.isNotEmpty)
+          .map((entry) =>
+              '${_selectedContactTypes[entry.key]}:${entry.value.text}')
           .join(',');
 
-      final supplier = Supplier(
+      log("${_provider_contact_info}");
+
+      Supplier supplier = Supplier(
+        id_location: _id_location ?? 0,
         idProviderDetails: _idprovider_details_id ?? 0,
         idProductProvider: _id_product_provider ?? 0,
+        id_provider_organisation: _id_provider_organisation ?? 0,
+        provider_organisation_name: _provider_organisation_name ?? "",
+        provider_organisation_desc: _provider_organisation_desc ?? "",
         productProviderDetailsId: _product_provider_details_id ?? 0,
         productProviderTypeId: _product_provider_type_id ?? 1,
         providerName: _provider_name ?? "",
@@ -108,70 +249,141 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                     .appUser!
                     .id_app_user ??
                 0,
-      );
-
-      // Show loading indicator
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: 16),
-              Text(AppLocalizations.of(context)!.processingRequest),
-            ],
-          ),
-          duration:
-              const Duration(minutes: 1), // Long duration for async operation
-        ),
+        supplier_image_url: _supplierImageUrl,
+        supplier_image_id: _supplierImageId,
+        location_address_id: _location_address_id,
+        address_street: _address_street,
+        address_city: _address_city,
+        address_postal_code: _address_postal_code,
+        address_country: _address_country,
       );
 
       try {
-        // final result =
-        //     await GluttexLocator.get<SupplierService>().addSupplier(supplier);
+        if (supplier_image != null)
+          // ignore: curly_braces_in_flow_control_structures
+          supplier.supplier_image = supplier_image!;
 
-        // // Hide loading indicator
-        // ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        Supplier? finalSupplier = await Provider.of<SupplierChangeNotifier>(
+          context,
+          listen: false,
+        ).addOrUpdateRecipe(supplier);
+        // supplier = finalSupplier!;
+        if (supplier.idProductProvider == 0) {
+          finalSupplier?.supplier_image_url = await Navigator.pushNamed(
+            context,
+            AppRoutes.imageUpload,
+            arguments: {
+              "entity": "supplier",
+              "id": finalSupplier.idProductProvider,
+            },
+          ) as String?;
 
-        // final response = Response();
-        // switch (result) {
-        //   case 200:
-        //     response.color = Colors.green;
-        //     response.text = AppLocalizations.of(context)!.putSuccess;
-        //     break;
-        //   case 406:
-        //   case 422:
-        //     response.color = Colors.amber;
-        //     response.text = AppLocalizations.of(context)!.putFailure;
-        //     break;
-        //   default:
-        //     response.color = Colors.red;
-        //     response.text = AppLocalizations.of(context)!.serverError;
-        // }
+          supplier.idProviderDetails = finalSupplier?.idProviderDetails ?? 0;
+          supplier.idProductProvider = finalSupplier?.idProductProvider ?? 0;
+          supplier.productProviderDetailsId =
+              finalSupplier?.productProviderDetailsId ?? 0;
+          supplier.productProviderOwnerId =
+              finalSupplier?.productProviderOwnerId ?? 0;
+          supplier.productProviderTypeId =
+              finalSupplier?.productProviderTypeId ?? 0;
+          supplier.supplier_image_id = finalSupplier?.supplier_image_id;
+          supplier.location_address_id =
+              finalSupplier?.location_address_id ?? 0;
+          supplier.id_location = finalSupplier?.id_location ?? 0;
+          supplier.id_provider_organisation =
+              finalSupplier?.id_provider_organisation ?? 0;
+        }
 
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(
-        //     content: Text(response.text),
-        //     backgroundColor: response.color,
-        //     behavior: SnackBarBehavior.floating,
-        //     shape: RoundedRectangleBorder(
-        //       borderRadius: BorderRadius.circular(10),
-        //     ),
-        //   ),
-        // );
+        final insertedSupplier = await Provider.of<SupplierChangeNotifier>(
+          context,
+          listen: false,
+        ).addOrUpdateRecipe(supplier);
 
-        // if (result == 200) {
-        //   await Future.delayed(const Duration(seconds: 1));
-        //   if (mounted) Navigator.of(context).pop();
-        // }
-      } catch (e) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: 200,
+          responseCode: GluttexResponseCodes.put_success,
+          finalMessage: AppLocalizations.of(context)!.putSuccess,
+        );
+
+        Navigator.popUntil(
+            context, (route) => route.settings.name == AppRoutes.home);
+        // Show success message once
+
+        // ⚠️ Do NOT popUntil right after, otherwise the push gets cancelled
+        // If you want to go home AFTER image upload, handle it in imageUpload screen
+      } on GluttexException catch (e) {
+        // Handle recipe submission error
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: e.statusCode ?? 300,
+          responseCode: e.message,
+          finalMessage: AppLocalizations.of(context)!.putFailure,
         );
       }
+
+      // // Show loading indicator
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Row(
+      //       children: [
+      //         const CircularProgressIndicator(),
+      //         const SizedBox(width: 16),
+      //         Text(AppLocalizations.of(context)!.processingRequest),
+      //       ],
+      //     ),
+      //     duration:
+      //         const Duration(minutes: 1), // Long duration for async operation
+      //   ),
+      // );
+
+      // try {
+      // final result =
+      //     await GluttexLocator.get<SupplierService>().addSupplier(supplier);
+
+      // // Hide loading indicator
+      // ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      // final response = Response();
+      // switch (result) {
+      //   case 200:
+      //     response.color = Colors.green;
+      //     response.text = AppLocalizations.of(context)!.putSuccess;
+      //     break;
+      //   case 406:
+      //   case 422:
+      //     response.color = Colors.amber;
+      //     response.text = AppLocalizations.of(context)!.putFailure;
+      //     break;
+      //   default:
+      //     response.color = Colors.red;
+      //     response.text = AppLocalizations.of(context)!.serverError;
+      // }
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(response.text),
+      //     backgroundColor: response.color,
+      //     behavior: SnackBarBehavior.floating,
+      //     shape: RoundedRectangleBorder(
+      //       borderRadius: BorderRadius.circular(10),
+      //     ),
+      //   ),
+      // );
+
+      // if (result == 200) {
+      //   await Future.delayed(const Duration(seconds: 1));
+      //   if (mounted) Navigator.of(context).pop();
+      // }
+      // } catch (e) {
+      //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text('Error: ${e.toString()}'),
+      //       backgroundColor: Colors.red,
+      //     ),
+      //   );
+      // }
     }
   }
 
@@ -200,37 +412,191 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Supplier Image Section
-              _buildImageSection(context),
-              const SizedBox(height: 24),
+              // _buildImageSection(context),
+              // const SizedBox(height: 24),
+
+              if (_id_product_provider != null && _id_product_provider != 0)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader("localizations.ProviderImage"),
+                    ImagePickerSection(
+                      initialImageUrl: _supplierImageUrl,
+                      entityType: 'supplier',
+                      ownerId: '$_id_provider_organisation',
+                      entityId: '$_id_product_provider',
+                      onImageUploaded: (newImage) {
+                        setState(() {
+                          supplier_image = newImage;
+                          _supplierImageId =
+                              0; // Reset image ID to 0 for new uploads
+                        });
+                      },
+                    ),
+                  ],
+                ),
 
               // Basic Information Section
               _buildSectionHeader(localizations.basicInformation),
-              _buildTextField(
-                context,
-                label: localizations.supplierNameMsg,
-                icon: Icons.business,
-                onSaved: (value) => _provider_name = value,
-                validator: (value) => value?.isEmpty ?? true
-                    ? localizations.addBusinessNameMsg
-                    : null,
-              ),
+              _buildTextField(context,
+                  label: localizations.supplierNameMsg,
+                  icon: Icons.business,
+                  onSaved: (value) => _provider_name = value,
+                  validator: (value) => value?.isEmpty ?? true
+                      ? localizations.addBusinessNameMsg
+                      : null,
+                  initialValue: _provider_name),
+              const SizedBox(height: 4),
+              _buildTextField(context,
+                  label: localizations.streetText,
+                  icon: Icons.business,
+                  onSaved: (value) => _address_street = value ?? "",
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? localizations.streetText : null,
+                  initialValue: _address_street),
+              const SizedBox(height: 4),
+              _buildTextField(context,
+                  label: localizations.cityText,
+                  icon: Icons.business,
+                  onSaved: (value) => _address_city = value ?? "",
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? localizations.cityText : null,
+                  initialValue: _address_city),
+              const SizedBox(height: 4),
+              _buildTextField(context,
+                  label: localizations.postalCodeText,
+                  icon: Icons.business,
+                  onSaved: (value) => _address_postal_code = value ?? "",
+                  validator: (value) => value?.isEmpty ?? true
+                      ? localizations.postalCodeText
+                      : null,
+                  initialValue: _address_postal_code),
+
+              const SizedBox(height: 4),
+              _buildTextField(context,
+                  label: localizations.countryText,
+                  icon: Icons.business,
+                  onSaved: (value) => _address_country = value ?? "",
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? localizations.countryText : null,
+                  initialValue: _address_country),
+
               const SizedBox(height: 16),
 
+              // Replace your TextFormField with this premium component
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Label
+
+                  // Searchable input with TypeAhead
+
+                  OrganisationPicker(
+                    initialValue: _id_provider_organisation,
+                    onOrganisationSelected: (value) {
+                      _id_provider_organisation =
+                          value.id_provider_organisation;
+                      _provider_organisation_name =
+                          value.provider_organisation_name;
+                    },
+                    hintText: "localizations.selectOrganisationHintText",
+                  ),
+                  // _buildOrgPicker(conterxt),
+
+                  // const SizedBox(height: 12),
+
+                  // Selected organisation chip (pretty card style)
+                  if (selectedOrganization != null)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green[50],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle,
+                              color: Colors.green, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${selectedOrganization!.provider_organisation_name}',
+                              style: TextStyle(
+                                color: Colors.grey[800],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedOrganization = null;
+                                _organizationController.clear();
+                              });
+                            },
+                            child: Icon(Icons.close,
+                                color: Colors.grey[600], size: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Suggestion to create a new one
+                  if (selectedOrganization == null &&
+                      _organizationController.text.isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[50],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.add_circle,
+                              color: Colors.orange[700], size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  color: Colors.orange[800],
+                                  fontSize: 14,
+                                ),
+                                children: [
+                                  const TextSpan(text: 'New organisation: '),
+                                  TextSpan(
+                                    text: _organizationController.text,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const TextSpan(
+                                      text: ' will be created on submission'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
               // Category Picker
               _buildCategoryPicker(context),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Location Information Section
               _buildSectionHeader(localizations.locationInformation),
-              _buildTextField(
-                context,
-                label: localizations.locationNameText,
-                icon: Icons.place,
-                onSaved: (value) => _location_name = value,
-                validator: (value) => value?.isEmpty ?? true
-                    ? localizations.pleaseInputLocationNameMsg
-                    : null,
-              ),
+              _buildTextField(context,
+                  label: localizations.locationNameText,
+                  icon: Icons.place,
+                  onSaved: (value) => _location_name = value,
+                  validator: (value) => value?.isEmpty ?? true
+                      ? localizations.pleaseInputLocationNameMsg
+                      : null,
+                  initialValue: _location_name),
               const SizedBox(height: 16),
               _buildLocationPicker(context),
               const SizedBox(height: 24),
@@ -259,33 +625,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildImageSection(BuildContext context) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: Colors.grey[200],
-          backgroundImage:
-              _supplierImage != null ? MemoryImage(_supplierImage!) : null,
-          child: _supplierImage == null
-              ? const Icon(Icons.store, size: 50, color: Colors.grey)
-              : null,
-        ),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          icon: const Icon(Icons.camera_alt),
-          label: Text(AppLocalizations.of(context)!.pickImageMsg),
-          onPressed: () async {
-            final pickedImage = await pickImage();
-            if (pickedImage != null) {
-              setState(() => _supplierImage = pickedImage);
-            }
-          },
-        ),
-      ],
     );
   }
 
@@ -393,7 +732,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
             if (hasLocation)
               IconButton(
                 icon: Icon(Icons.edit, size: 20),
-                color: theme.colorScheme.primary,
+                color: theme.colorScheme.secondary,
                 onPressed: () async {
                   final newPosition = await showLocationInputDialog(context);
                   if (newPosition != null && mounted) {
@@ -412,21 +751,24 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   }
 
   final List<String> _contactTypes = [
-    'Instagram',
-    'Facebook',
-    'Email',
-    'Phone',
-    'TikTok',
+    'instagram',
+    'facebook',
+    'email',
+    'phone',
+    'website',
+    'tiktok',
+    'whatsapp',
+    'other',
   ];
 
-  final Map<String, IconData> _contactIcons = {
-    'Instagram':
-        FontAwesomeIcons.instagram, // replace with brand icons if needed
-    'Facebook': FontAwesomeIcons.facebook,
-    'Email': FontAwesomeIcons.envelope,
-    'Phone': FontAwesomeIcons.phone,
-    'TikTok': FontAwesomeIcons.tiktok,
-  };
+  // final Map<String, IconData> _contactIcons = {
+  //   'Instagram':
+  //       FontAwesomeIcons.instagram, // replace with brand icons if needed
+  //   'Facebook': FontAwesomeIcons.facebook,
+  //   'Email': FontAwesomeIcons.envelope,
+  //   'Phone': FontAwesomeIcons.phone,
+  //   'TikTok': FontAwesomeIcons.tiktok,
+  // };
 
 // Stores selected type for each contact row
   List<String> _selectedContactTypes = [];
@@ -494,8 +836,8 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 8),
-                                        child:
-                                            Icon(_contactIcons[type], size: 24),
+                                        child: Icon(getContactIcon(type),
+                                            size: 24),
                                       ),
                                     ),
                                   );
@@ -504,7 +846,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                                   return _contactTypes.map((type) {
                                     return Center(
                                       child:
-                                          Icon(_contactIcons[type], size: 24),
+                                          Icon(getContactIcon(type), size: 24),
                                     );
                                   }).toList();
                                 },
@@ -539,14 +881,14 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                           hintStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface.withOpacity(0.5),
                           ),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.only(left: 12, right: 8),
-                            child: Icon(
-                              _contactIcons[selectedType],
-                              size: 20,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
+                          // prefixIcon: Padding(
+                          //   padding: const EdgeInsets.only(left: 12, right: 8),
+                          //   child: Icon(
+                          //     _contactIcons[selectedType],
+                          //     size: 20,
+                          //     color: theme.colorScheme.onSurface,
+                          //   ),
+                          // ),
                           suffixIcon: _contactControllers.length > 1
                               ? IconButton(
                                   icon: Icon(Icons.remove_circle,
@@ -674,11 +1016,42 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     );
   }
 
+  // Widget _buildOrganisationPicker(BuildContext context) {
+  //   return OrganisationPicker(
+  //     organisations: _notifier.supplierOrganisations,
+  //     initialOrganisationId: 1,
+  //     onOrganisationChanged: (id) {
+  //       // print("Selected organisation id: $id");
+  //     },
+  //   );
+  // }
+
+  String _getTypeText(String type) {
+    final lowercaseType = type.toLowerCase();
+    final contactTypes = _contactTypes.where((t) => t == lowercaseType);
+    return contactTypes.isEmpty ? _contactTypes.last : contactTypes.first;
+  }
+
+  IconData getContactIcon(String type) {
+    final lowercaseType = type.toLowerCase();
+
+    if (lowercaseType.contains('facebook')) return FontAwesomeIcons.facebook;
+    if (lowercaseType.contains('phone')) return FontAwesomeIcons.phone;
+    if (lowercaseType.contains('website')) return FontAwesomeIcons.globe;
+    if (lowercaseType.contains('instagram')) return FontAwesomeIcons.instagram;
+    if (lowercaseType.contains('email')) return FontAwesomeIcons.envelope;
+    if (lowercaseType.contains('whatsapp')) return FontAwesomeIcons.whatsapp;
+    if (lowercaseType.contains('tiktok')) return FontAwesomeIcons.tiktok;
+
+    return FontAwesomeIcons.addressCard; // default icon
+  }
+
   Widget _buildTextField(
     BuildContext context, {
     required String label,
     IconData? icon,
     String? Function(String?)? validator,
+    String? initialValue,
     void Function(String?)? onSaved,
   }) {
     return TextFormField(
@@ -691,6 +1064,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
       ),
       validator: validator,
       onSaved: onSaved,
+      initialValue: initialValue,
     );
   }
 }

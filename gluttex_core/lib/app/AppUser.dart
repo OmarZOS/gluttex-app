@@ -9,6 +9,7 @@ class AppUser {
   final String? app_user_password;
   final String? app_user_preferences;
   final String? app_user_type_desc;
+
   // final Uint8List? app_user_image;
   final String? app_user_image_url;
   final int idPerson;
@@ -201,7 +202,7 @@ class AppUser {
       personGender: personGender ?? "",
       personNationality: personNationality ?? "",
       idBloodType: idBloodType ?? 0,
-      idLocation: json['idLocation'] ?? 0,
+      idLocation: json['app_user_person']?["person_location_id"] ?? 0,
       locationLatitude: locationLatitude ?? 0.0,
       locationLongitude: locationLongitude ?? 0.0,
       locationName: locationName ?? "",
@@ -247,16 +248,46 @@ class AppUser {
   }
 
   Map<String, dynamic> toJson() {
+    double _locationLatitude = 36.42;
+    double _locationLongitude = 3.05;
+    if (locationLatitude != 0 && locationLongitude != 0) {
+      _locationLatitude = locationLatitude;
+      _locationLongitude = locationLongitude;
+    }
+
     return {
-      'id_app_user': id_app_user,
-      // 'app_user_person_id': app_user_person_id,
-      'app_user_type_id': app_user_type_id,
-      'app_user_name': app_user_name,
-      'app_user_password': app_user_password,
-      // 'app_user_preferences': app_user_preferences,
-      // 'app_user_type_desc': app_user_type_desc,
-      'app_user_image_url': app_user_image_url,
-      // 'app_user_image': app_user_image,
+      "user": {
+        "id_app_user": id_app_user,
+        "app_user_name": app_user_name,
+        "app_user_password": app_user_password,
+        "app_user_person_id": personDetailsId,
+        "app_user_preferences": app_user_preferences,
+        "app_user_image_url": app_user_image_url,
+        "app_user_type_id": app_user_type_id
+      },
+      "person_record": {
+        "id_person": app_user_person_id,
+        "person_details_id": personDetailsId,
+        "id_person_details": personDetailsId,
+        "person_first_name": personFirstName,
+        "person_last_name": personLastName,
+        "person_birth_date": personBirthDate,
+        "person_gender": personGender,
+        "person_nationality": personNationality,
+        "id_blood_type": idBloodType
+      },
+      "location_record": {
+        "id_location": idLocation,
+        "location_latitude": _locationLatitude,
+        "location_longitude": _locationLongitude,
+        "location_name": locationName,
+        "location_address_id": locationAddressId,
+        "id_address": locationAddressId,
+        "address_street": addressStreet,
+        "address_city": addressCity,
+        "address_postal_code": addressPostalCode,
+        "address_country": addressCountry
+      }
     };
   }
 }
