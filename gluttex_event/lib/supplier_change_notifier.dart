@@ -12,6 +12,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
   final SupplierService _supplierService =
       GluttexLocator.get<SupplierService>();
   List<Supplier> _suppliers = [];
+  List<Supplier> detailed_suppliers = [];
   List<Supplier> _filteredSuppliers = [];
   bool isLoading = false;
   // bool get isLoading => isLoading;
@@ -36,7 +37,14 @@ class SupplierChangeNotifier extends ChangeNotifier {
       _supplierOrganisations.values.toList();
 
   Future<Supplier?> getSupplierById(int id) async {
+    final data =
+        detailed_suppliers.where((element) => id == element.idProductProvider);
+
+    if (data.isNotEmpty) {
+      return data.firstOrNull;
+    }
     isLoading = true;
+
     notifyListeners();
 
     try {
@@ -48,12 +56,15 @@ class SupplierChangeNotifier extends ChangeNotifier {
                 (s) => s.idProductProvider == supplier.idProductProvider)] =
             supplier;
 
+        detailed_suppliers.add(supplier);
         _filteredSuppliers = List.from(_suppliers);
       }
       return supplier;
     } catch (e) {
-      debugPrint("Error fetching supplier by ID: $e");
-      return null;
+      debugPrint("Error fetching supplier by ID ($id): $e");
+      return _suppliers
+          .where((element) => id == element.idProductProvider)
+          .firstOrNull;
     } finally {
       isLoading = false;
       notifyListeners();
@@ -72,10 +83,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
       Supplier? data = (supplier.idProductProvider == 0
           ? await _supplierService.addSupplier(supplier)
           : await _supplierService.updateSupplier(supplier));
-      if (data != null) {
-        // updateLocalSupplier(supplier);
-        await fetchSuppliers(reset: true);
-      }
+      // updateLocalSupplier(supplier);
+      await fetchSuppliers(reset: true);
       return data;
     } catch (e) {
       log("Failed to add/update recipe: $e");
@@ -101,6 +110,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
     if (reset) {
       _currentPage = 0;
+      detailed_suppliers.clear();
       _suppliers.clear();
     }
 

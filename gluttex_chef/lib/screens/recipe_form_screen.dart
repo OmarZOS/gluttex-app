@@ -125,11 +125,11 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                           .textTheme
                           .navTitleTextStyle,
                     ),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: Text(AppLocalizations.of(context)!.confirmTxt),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                    // CupertinoButton(
+                    //   padding: EdgeInsets.zero,
+                    //   child: Text(AppLocalizations.of(context)!.confirmTxt),
+                    //   // onPressed: () => Navigator.pop(context),
+                    // ),
                   ],
                 ),
               ),
@@ -410,6 +410,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                   entityType: 'recipe',
                   ownerId: '$_recipe_owner_id',
                   entityId: '$_id_recipe',
+                  landscape: true,
                   onImageUploaded: (newImage) {
                     setState(() {
                       _recipeImage = newImage;
@@ -420,6 +421,19 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                 ),
               const SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary, // Button background color
+                  foregroundColor: Theme.of(context)
+                      .colorScheme
+                      .onPrimary, // Text & icon color
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12), // optional
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                  ),
+                ),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();

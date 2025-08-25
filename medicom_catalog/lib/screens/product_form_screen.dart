@@ -119,6 +119,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           key: _formKey,
           child: ListView(
             children: [
+              if (_id_product != null)
+                ImagePickerSection(
+                  initialImageUrl: imageUrl,
+                  entityType: 'product',
+                  ownerId: '$_product_owner_id',
+                  entityId: '$_id_product',
+                  onImageUploaded: (newImage) {
+                    setState(() {
+                      _productImage = newImage;
+                      _id_product_image =
+                          0; // Reset image ID to 0 for new uploads
+                    });
+                  },
+                ),
+              const SizedBox(height: 8),
               TextFormField(
                 initialValue: _productName,
                 decoration: InputDecoration(
@@ -230,21 +245,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 package: "medicom_catalog",
               ),
               const SizedBox(height: 16.0),
-              if (_id_product != null)
-                ImagePickerSection(
-                  initialImageUrl: imageUrl,
-                  entityType: 'product',
-                  ownerId: '$_product_owner_id',
-                  entityId: '$_id_product',
-                  onImageUploaded: (newImage) {
-                    setState(() {
-                      _productImage = newImage;
-                      _id_product_image =
-                          0; // Reset image ID to 0 for new uploads
-                    });
-                  },
-                ),
-              const SizedBox(height: 8),
               SupplierPicker(
                 onSupplierChanged: (selectedSupplier) {
                   // Handle supplier selection
@@ -264,7 +264,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   try {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
-                      Product? product = Product(
+                      Product product = Product(
                         id_product: _id_product ?? 0,
                         product_provider_id: selectedProviderId,
                         product_owner_id: _product_owner_id,
@@ -288,7 +288,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       if (_productImage != null)
                         // ignore: curly_braces_in_flow_control_structures
                         product.productImage = _productImage!;
-                      else {
+                      if (product.id_product == 0) {
                         product.product_image_url = await Navigator.pushNamed(
                             context, AppRoutes.imageUpload, arguments: {
                           "entity": "product",
@@ -296,10 +296,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         }) as String?;
                       }
 
-                      final inserted_product =
-                          await Provider.of<ProductNotifier>(context,
-                                  listen: false)
-                              .addOrUpdateProduct(product);
+                      await Provider.of<ProductNotifier>(context, listen: false)
+                          .addOrUpdateProduct(product);
 
                       ResponseHandler.handleResponse(
                         context: context,
@@ -323,6 +321,19 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   }
                 },
                 child: Text(AppLocalizations.of(context)!.submitText),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary, // Button background color
+                  foregroundColor: Theme.of(context)
+                      .colorScheme
+                      .onPrimary, // Text & icon color
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12), // optional
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                  ),
+                ),
               ),
             ],
           ),

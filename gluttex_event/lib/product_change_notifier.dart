@@ -41,11 +41,11 @@ class ProductNotifier extends ChangeNotifier {
     Product? res_product = (product.id_product == 0
         ? await _productService.addProduct(product)
         : await _productService.updateProduct(product));
-    product = res_product!;
+    // product = res_product!;
+    // _products[res_product.id_product ?? 0] = product;
 
-    _products[res_product.id_product ?? 0] = product;
-
-    notifyListeners();
+    await fetchProducts(reset: true);
+    // notifyListeners();
     return res_product;
   }
 

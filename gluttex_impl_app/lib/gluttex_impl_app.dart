@@ -24,11 +24,11 @@ class AppUserServiceImpl implements AppUserService {
   Future<AppUser?> updateAppUser(AppUser appUser) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
 
-    return await storageService.update(
+    return AppUser.fromJson(await storageService.update(
         GluttexConstants.apiBaseUrl + GluttexConstants.updateAppUserEndpoint,
         '${appUser.id_app_user}',
         {},
-        appUser.toJson());
+        appUser.toJson()));
   }
 
   @override

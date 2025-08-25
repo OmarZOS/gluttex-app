@@ -516,9 +516,10 @@
   "unitText": "Unit",
   "amountText": "Amount",
   "otherProductsFromSupplier": "Also from: {supplier_name}",
-  "similarProductsFromCategory": "Similar Products in: {category_name}",
-  "noOtherProductsAvailable": "No other products available from this supplier.",
-    "gallery": "Gallery",
+  "productsFromSupplier": "Provided by: {supplier_name}",
+  "similarProductsFromCategory": "Products from: {category_name}",
+  "noOtherProductsAvailable": "No products available from this supplier.",
+  "gallery": "Gallery",
   "camera": "Camera",
   "imagePickFailed": "Failed to pick image",
   "changeImage": "Change Image",
@@ -527,5 +528,13 @@
   "removeImage": "Remove Image",
   "noImageSelected": "No image selected",
   "searchSuppliersText": "Search suppliers...",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "selectOrganisationHintText": "Please select an organisation",
+  "providerImage": "Provider Image",
+  "selectOrganisation": "Select Organisation",
+  "searchOrganisations": "Search Organisations",
+  "noOrganisationsFound": "No organisations found",
+  "createNew": "Create New",
+  "organisationText": "Organisation",
+  "by_organisation": "By {org_name}"
 }

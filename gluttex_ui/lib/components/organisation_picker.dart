@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Organisation.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:provider/provider.dart';
@@ -11,12 +12,12 @@ class OrganisationPicker extends StatefulWidget {
   final bool showLabel;
 
   const OrganisationPicker({
-    Key? key,
+    super.key,
     this.onOrganisationSelected,
     this.initialValue,
-    this.hintText = "Select organisation",
+    required this.hintText,
     this.showLabel = true,
-  }) : super(key: key);
+  });
 
   @override
   _OrganisationPickerState createState() => _OrganisationPickerState();
@@ -143,7 +144,7 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                 child: Row(
                   children: [
                     Text(
-                      "Select Organisation",
+                      AppLocalizations.of(context)!.selectOrganisation,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -165,7 +166,7 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                   controller: _searchController,
                   autofocus: true,
                   decoration: InputDecoration(
-                    hintText: "Search organisations...",
+                    hintText: AppLocalizations.of(context)!.searchOrganisations,
                     prefixIcon: const Icon(Icons.search, size: 22),
                     filled: true,
                     fillColor: Theme.of(context).cardColor,
@@ -191,11 +192,11 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                         filteredOrganisations.isNotEmpty || showCreateOption;
 
                     if (!hasResults) {
-                      return const Center(
+                      return Center(
                         child: Padding(
                           padding: EdgeInsets.all(16.0),
                           child: Text(
-                            "No organisations found",
+                            AppLocalizations.of(context)!.noOrganisationsFound,
                             style: TextStyle(
                               color: Colors.grey,
                               fontSize: 16,
@@ -230,7 +231,9 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                               text: TextSpan(
                                 style: Theme.of(context).textTheme.bodyLarge,
                                 children: [
-                                  const TextSpan(text: "Create new: "),
+                                  TextSpan(
+                                      text: AppLocalizations.of(context)!
+                                          .createNew),
                                   TextSpan(
                                     text: _searchController.text,
                                     style: const TextStyle(
@@ -412,7 +415,7 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Organisation",
+                                AppLocalizations.of(context)!.organisationText,
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelSmall

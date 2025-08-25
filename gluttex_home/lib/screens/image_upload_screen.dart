@@ -63,6 +63,7 @@ class _UploadImagePageState extends State<UploadImagePage> {
                           _selectedImage = image;
                         });
                       },
+                      landscape: (entity == "recipe"),
                       ownerId: userNotifier.appUser!.id_app_user.toString(),
                       entityId: entityId,
                     ),

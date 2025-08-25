@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
@@ -11,16 +12,17 @@ class ImagePickerSection extends StatefulWidget {
   final String entityType;
   final String ownerId;
   final String entityId;
+  final bool landscape;
   final void Function(GluttexImage? newImageUrl)? onImageUploaded;
 
-  const ImagePickerSection({
-    super.key,
-    required this.initialImageUrl,
-    required this.entityType,
-    required this.ownerId,
-    required this.entityId,
-    this.onImageUploaded,
-  });
+  const ImagePickerSection(
+      {super.key,
+      required this.initialImageUrl,
+      required this.entityType,
+      required this.ownerId,
+      required this.entityId,
+      this.onImageUploaded,
+      this.landscape = false});
 
   @override
   State<ImagePickerSection> createState() => _ImagePickerSectionState();
@@ -31,6 +33,13 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
   bool _isUploading = false;
   bool _isHovering = false;
   late final ImagePicker _picker = ImagePicker();
+  late final landscape;
+
+  @override
+  void initState() {
+    landscape = widget.landscape;
+    super.initState();
+  }
 
   Future<void> _pickImage() async {
     final context = this.context;
@@ -141,8 +150,10 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
             onTap: _isUploading ? null : _pickImage,
             onHover: (hovering) => setState(() => _isHovering = hovering),
             child: Container(
-              height: 200,
-              width: double.infinity,
+              height: landscape ? 200 : MediaQuery.of(context).size.width * 0.5,
+              width: landscape
+                  ? double.infinity
+                  : MediaQuery.of(context).size.width * 0.5,
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(16),
@@ -175,7 +186,7 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
                             Icon(
                               hasImage ? Icons.edit : Icons.add_a_photo,
                               size: 36,
-                              color: theme.colorScheme.secondary,
+                              color: theme.colorScheme.onSurface,
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -199,32 +210,118 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
         Row(
           children: [
             Expanded(
-              child: FilledButton.icon(
-                icon: const Icon(Icons.camera_alt),
-                label: Text(loc.uploadImage),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: _isUploading
+                      ? null
+                      : LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(context).colorScheme.primary,
+                            Theme.of(context).colorScheme.primaryContainer,
+                          ],
+                        ),
+                  boxShadow: _isUploading
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                 ),
-                onPressed: _isUploading ? null : _pickImage,
+                child: FilledButton.icon(
+                  icon: _isUploading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                        )
+                      : const Icon(Icons.camera_alt, size: 22),
+                  label: _isUploading
+                      ? Text(
+                          "loc.uploadingImage",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        )
+                      : Text(
+                          hasImage ? loc.changeImage : loc.uploadImage,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 18, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor:
+                        _isUploading ? Colors.grey[300] : Colors.transparent,
+                    foregroundColor: _isUploading
+                        ? Colors.grey[600]
+                        : Theme.of(context).colorScheme.onPrimary,
+                    elevation: 0,
+                  ),
+                  onPressed: _isUploading ? null : _pickImage,
+                ),
               ),
             ),
-            if (hasImage) ...[
+            if (_pickedImageFile != null) ...[
               const SizedBox(width: 12),
-              IconButton.filled(
-                style: IconButton.styleFrom(
-                  padding: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              AnimatedScale(
+                duration: const Duration(milliseconds: 300),
+                scale: _isUploading ? 0.9 : 1.0,
+                child: Tooltip(
+                  message: loc.removeImage,
+                  child: IconButton.filledTonal(
+                    style: IconButton.styleFrom(
+                      padding: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: _isUploading
+                          ? Colors.grey[300]
+                          : Theme.of(context).colorScheme.errorContainer,
+                      foregroundColor: _isUploading
+                          ? Colors.grey[600]
+                          : Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+                    onPressed: _isUploading
+                        ? null
+                        : () {
+                            HapticFeedback.lightImpact();
+                            setState(() => _pickedImageFile = null);
+                          },
+                    icon: _isUploading
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.onErrorContainer,
+                              ),
+                            ),
+                          )
+                        : const Icon(Icons.delete_outline, size: 22),
                   ),
                 ),
-                onPressed: _isUploading
-                    ? null
-                    : () => setState(() => _pickedImageFile = null),
-                icon: const Icon(Icons.delete),
-                tooltip: loc.removeImage,
               ),
             ],
           ],

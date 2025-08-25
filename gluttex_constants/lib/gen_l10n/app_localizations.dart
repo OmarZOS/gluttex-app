@@ -124,120 +124,6 @@ abstract class AppLocalizations {
   /// **'No products to display.'**
   String get noProductsFound;
 
-  /// No description provided for @addToCart.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get addToCart;
-
-  /// No description provided for @aboutProvider.
-  ///
-  /// In en, this message translates to:
-  /// **'About'**
-  String get aboutProvider;
-
-  /// No description provided for @productQuantity.
-  ///
-  /// In en, this message translates to:
-  /// **'Quantity'**
-  String get productQuantity;
-
-  /// No description provided for @productReference.
-  ///
-  /// In en, this message translates to:
-  /// **'Reference'**
-  String get productReference;
-
-  /// No description provided for @priceText.
-  ///
-  /// In en, this message translates to:
-  /// **'Price'**
-  String get priceText;
-
-  /// No description provided for @noRecipesFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No recipes found'**
-  String get noRecipesFound;
-
-  /// No description provided for @noAppUsersFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No users found'**
-  String get noAppUsersFound;
-
-  /// No description provided for @successfullLoginMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Successfully signed up.'**
-  String get successfullLoginMsg;
-
-  /// No description provided for @welcomeBackMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome Back!'**
-  String get welcomeBackMsg;
-
-  /// No description provided for @loginText.
-  ///
-  /// In en, this message translates to:
-  /// **'Login'**
-  String get loginText;
-
-  /// No description provided for @pleaseLoginMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please login to your account'**
-  String get pleaseLoginMsg;
-
-  /// No description provided for @pleaseInputUsernameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter your username'**
-  String get pleaseInputUsernameMsg;
-
-  /// No description provided for @pleaseInputPasswordMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter your password'**
-  String get pleaseInputPasswordMsg;
-
-  /// No description provided for @passwordLengthConstraintMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
-  String get passwordLengthConstraintMsg;
-
-  /// No description provided for @suggestRegistrationMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Don\'t have an account? Register'**
-  String get suggestRegistrationMsg;
-
-  /// No description provided for @suggest3rdPartyLogintMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Or login with'**
-  String get suggest3rdPartyLogintMsg;
-
-  /// No description provided for @pleaseInputusernameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a username'**
-  String get pleaseInputusernameMsg;
-
-  /// No description provided for @pleaseInputpasswordMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a password'**
-  String get pleaseInputpasswordMsg;
-
-  /// No description provided for @pleaseInputUserTypeMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please select a user type'**
-  String get pleaseInputUserTypeMsg;
-
   String getLocalizedQuestion(int index) {
     switch (index) {
       case 1:
@@ -651,6 +537,120 @@ abstract class AppLocalizations {
         return notFoundError;
     }
   }
+
+  /// No description provided for @addToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addToCart;
+
+  /// No description provided for @aboutProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutProvider;
+
+  /// No description provided for @productQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get productQuantity;
+
+  /// No description provided for @productReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get productReference;
+
+  /// No description provided for @priceText.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get priceText;
+
+  /// No description provided for @noRecipesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found'**
+  String get noRecipesFound;
+
+  /// No description provided for @noAppUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get noAppUsersFound;
+
+  /// No description provided for @successfullLoginMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully signed up.'**
+  String get successfullLoginMsg;
+
+  /// No description provided for @welcomeBackMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome Back!'**
+  String get welcomeBackMsg;
+
+  /// No description provided for @loginText.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get loginText;
+
+  /// No description provided for @pleaseLoginMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login to your account'**
+  String get pleaseLoginMsg;
+
+  /// No description provided for @pleaseInputUsernameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your username'**
+  String get pleaseInputUsernameMsg;
+
+  /// No description provided for @pleaseInputPasswordMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get pleaseInputPasswordMsg;
+
+  /// No description provided for @passwordLengthConstraintMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordLengthConstraintMsg;
+
+  /// No description provided for @suggestRegistrationMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Register'**
+  String get suggestRegistrationMsg;
+
+  /// No description provided for @suggest3rdPartyLogintMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Or login with'**
+  String get suggest3rdPartyLogintMsg;
+
+  /// No description provided for @pleaseInputusernameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a username'**
+  String get pleaseInputusernameMsg;
+
+  /// No description provided for @pleaseInputpasswordMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get pleaseInputpasswordMsg;
+
+  /// No description provided for @pleaseInputUserTypeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a user type'**
+  String get pleaseInputUserTypeMsg;
 
   /// No description provided for @pleaseInputFirstNameMsg.
   ///
@@ -3520,10 +3520,16 @@ abstract class AppLocalizations {
   /// **'Also from: {supplier_name}'**
   String otherProductsFromSupplier(Object supplier_name);
 
+  /// No description provided for @productsFromSupplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Provided by: {supplier_name}'**
+  String productsFromSupplier(Object supplier_name);
+
   /// No description provided for @similarProductsFromCategory.
   ///
   /// In en, this message translates to:
-  /// **'Similar Products in: {category_name}'**
+  /// **'Products from: {category_name}'**
   String similarProductsFromCategory(Object category_name);
 
   /// No description provided for @noOtherProductsAvailable.
@@ -3591,6 +3597,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get confirm;
+
+  /// No description provided for @selectOrganisationHintText.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an organisation'**
+  String get selectOrganisationHintText;
+
+  /// No description provided for @providerImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider Image'**
+  String get providerImage;
+
+  /// No description provided for @selectOrganisation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Organisation'**
+  String get selectOrganisation;
+
+  /// No description provided for @searchOrganisations.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Organisations'**
+  String get searchOrganisations;
+
+  /// No description provided for @noOrganisationsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No organisations found'**
+  String get noOrganisationsFound;
+
+  /// No description provided for @createNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New'**
+  String get createNew;
+
+  /// No description provided for @organisationText.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation'**
+  String get organisationText;
+
+  /// No description provided for @by_organisation.
+  ///
+  /// In en, this message translates to:
+  /// **'By {org_name}'**
+  String by_organisation(Object org_name);
 }
 
 class _AppLocalizationsDelegate

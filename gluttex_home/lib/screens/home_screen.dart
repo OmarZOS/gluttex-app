@@ -193,7 +193,7 @@ class _HomePageState extends State<HomePage>
                   ? ClipOval(
                       child: Image.network(
                         GluttexConstants.fsBaseUrl +
-                            appUser!.app_user_image_url!,
+                            (appUser?.app_user_image_url ?? ""),
                         width: 24,
                         height: 24,
                         fit: BoxFit.cover,
@@ -226,7 +226,7 @@ class _HomePageState extends State<HomePage>
                       ),
                     )
                   : const Icon(size: 24.0, CupertinoIcons.profile_circled),
-              label: (appUser!.id_app_user == 0 || diplayName == " ")
+              label: ((appUser?.id_app_user ?? 0) == 0 || diplayName == " ")
                   ? AppLocalizations.of(context)!.profileText
                   : (diplayName),
               backgroundColor: Theme.of(context).brightness == Brightness.light

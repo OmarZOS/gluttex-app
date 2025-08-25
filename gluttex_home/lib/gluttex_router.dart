@@ -11,6 +11,8 @@ import 'package:gluttex_localiser/screens/supplier_form_page.dart';
 import 'package:gluttex_localiser/screens/suppliers_map_screen.dart';
 import 'package:gluttex_login/screens/login_screen.dart';
 import 'package:gluttex_login/screens/registration_screen.dart';
+import 'package:medicom_catalog/screens/cart_screen.dart';
+import 'package:medicom_catalog/screens/orders_screen.dart';
 import 'package:medicom_catalog/screens/product_catalog_screen.dart';
 import 'package:medicom_catalog/screens/product_form_screen.dart';
 import 'package:medicom_catalog/screens/product_screen.dart';
@@ -35,6 +37,9 @@ class AppRouter {
           case AppRoutes.recipeCreate:
             return _buildGuardedRoute(
                 appUser, const RecipeFormScreen(), const RecipeCatalogScreen());
+          case AppRoutes.cartPage:
+            return _buildGuardedRoute(
+                appUser, const CartScreen(), const HomePage());
           case AppRoutes.providerCreate:
             return _buildGuardedRoute(appUser, const SupplierFormScreen(),
                 const SuppliersMapScreen());
@@ -48,6 +53,8 @@ class AppRouter {
             return const ProductDetailsScreen();
           case AppRoutes.userEdit:
             return const AppUserEditFormScreen();
+          case AppRoutes.ordersPage:
+            return const OrdersScreen();
           // case AppRoutes.supplierDetails:
           //   final supplier = settings.arguments as Supplier;
           //   return SupplierDetailsSheet(

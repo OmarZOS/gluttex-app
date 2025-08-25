@@ -24,8 +24,7 @@
         "gluttex_impl_business",
         "gluttex_impl_app",
         "gluttex_impl_mediation",
-        "flutter_test",
-        "flutter_lints"
+        "flutter_test"
       ],
       "directDependencies": [
         "flutter",
@@ -47,29 +46,8 @@
         "gluttex_impl_mediation"
       ],
       "devDependencies": [
-        "flutter_test",
-        "flutter_lints"
+        "flutter_test"
       ]
-    },
-    {
-      "name": "flutter_lints",
-      "version": "5.0.0",
-      "kind": "dev",
-      "source": "hosted",
-      "dependencies": [
-        "lints"
-      ],
-      "directDependencies": [
-        "lints"
-      ]
-    },
-    {
-      "name": "lints",
-      "version": "5.1.1",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [],
-      "directDependencies": []
     },
     {
       "name": "flutter_test",

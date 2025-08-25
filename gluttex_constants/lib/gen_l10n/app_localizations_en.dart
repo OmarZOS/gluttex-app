@@ -1536,8 +1536,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String productsFromSupplier(Object supplier_name) {
+    return 'Provided by: $supplier_name';
+  }
+
+  @override
   String similarProductsFromCategory(Object category_name) {
-    return 'Similar Products in: $category_name';
+    return 'Products from: $category_name';
   }
 
   @override
@@ -1572,4 +1577,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirm => 'Confirm';
+
+  @override
+  String get selectOrganisationHintText => 'Please select an organisation';
+
+  @override
+  String get providerImage => 'Provider Image';
+
+  @override
+  String get selectOrganisation => 'Select Organisation';
+
+  @override
+  String get searchOrganisations => 'Search Organisations';
+
+  @override
+  String get noOrganisationsFound => 'No organisations found';
+
+  @override
+  String get createNew => 'Create New';
+
+  @override
+  String get organisationText => 'Organisation';
+
+  @override
+  String by_organisation(Object org_name) {
+    return 'By $org_name';
+  }
 }

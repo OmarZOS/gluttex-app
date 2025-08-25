@@ -118,16 +118,21 @@ class Supplier {
     String _address_postal_code = "";
     String _address_country = "";
     if (json["product_provider_location"]?["location_address"] != null) {
-      _location_address_id =
-          json["product_provider_location"]?["location_address"]?["id_address"];
+      _location_address_id = json["product_provider_location"]
+              ?["location_address"]?["id_address"] ??
+          0;
       _address_street = json["product_provider_location"]?["location_address"]
-          ["address_street"];
+              ["address_street"] ??
+          "";
       _address_city = json["product_provider_location"]?["location_address"]
-          ?["address_city"];
+              ?["address_city"] ??
+          "";
       _address_postal_code = json["product_provider_location"]
-          ["location_address"]?["address_postal_code"];
+              ["location_address"]?["address_postal_code"] ??
+          "";
       _address_country = json["product_provider_location"]?["location_address"]
-          ["address_country"];
+              ?["address_country"] ??
+          "";
     }
 
     return Supplier(
@@ -171,7 +176,7 @@ class Supplier {
         'provider_contact_info': providerContactInfo,
       },
       "image": {
-        "id_provider_image": supplier_image_id,
+        "id_provider_image": supplier_image_id ?? 0,
         "provider_image_url": supplier_image_url,
         "provider_ref_id": idProductProvider
       },

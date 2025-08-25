@@ -1536,12 +1536,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String similarProductsFromCategory(Object category_name) {
-    return 'Produits similaires de: $category_name';
+  String productsFromSupplier(Object supplier_name) {
+    return 'Fourni par: $supplier_name';
   }
 
   @override
-  String get noOtherProductsAvailable => 'Aucun autre produit disponible';
+  String similarProductsFromCategory(Object category_name) {
+    return 'Produits parmi: $category_name';
+  }
+
+  @override
+  String get noOtherProductsAvailable => 'Aucun produit disponible';
 
   @override
   String get gallery => 'Galerie';
@@ -1559,7 +1564,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get selectImage => 'Sélectionner une image';
 
   @override
-  String get uploadImage => 'Téléverser l\'image';
+  String get uploadImage => 'Téléverser une image';
 
   @override
   String get removeImage => 'Supprimer l\'image';
@@ -1572,4 +1577,30 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get confirm => 'Confirmer';
+
+  @override
+  String get selectOrganisationHintText => 'Veuillez sélectionner une organisation';
+
+  @override
+  String get providerImage => 'Image du fournisseur';
+
+  @override
+  String get selectOrganisation => 'Sélectionner une organisation';
+
+  @override
+  String get searchOrganisations => 'Rechercher des organisations';
+
+  @override
+  String get noOrganisationsFound => 'Aucune organisation trouvée';
+
+  @override
+  String get createNew => 'Créer nouveau';
+
+  @override
+  String get organisationText => 'Organisation';
+
+  @override
+  String by_organisation(Object org_name) {
+    return 'Par: $org_name';
+  }
 }

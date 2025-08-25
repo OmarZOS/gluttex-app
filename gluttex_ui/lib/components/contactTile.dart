@@ -73,7 +73,7 @@ Widget buildContactTile(BuildContext context, String type, String value) {
             Clipboard.setData(ClipboardData(text: displayValue));
           },
           child: Text(
-            displayValue,
+            displayValue.split(RegExp(r"[=/]")).where((t) => t != "").last,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.primary,
               decoration: TextDecoration.underline,

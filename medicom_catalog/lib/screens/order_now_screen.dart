@@ -255,9 +255,14 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
       child: ElevatedButton(
         onPressed: _isSubmitting ? null : _submitOrder,
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor:
+              Theme.of(context).colorScheme.primary, // Button background color
+          foregroundColor:
+              Theme.of(context).colorScheme.onPrimary, // Text & icon color
+          padding:
+              EdgeInsets.symmetric(horizontal: 20, vertical: 12), // optional
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12), // Rounded corners
           ),
         ),
         child: _isSubmitting

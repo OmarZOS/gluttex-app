@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
-import 'package:medicom_catalog/screens/product_screen.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -33,8 +32,8 @@ class ProductCard extends StatelessWidget {
           });
         },
         borderRadius: BorderRadius.circular(12),
-        splashColor: Theme.of(context).primaryColor.withOpacity(0.1),
-        highlightColor: Theme.of(context).primaryColor.withOpacity(0.05),
+        // splashColor: Theme.of(context).primaryColor.withOpacity(0.1),
+        // highlightColor: Theme.of(context).primaryColor.withOpacity(0.05),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -1,0 +1,1000 @@
+ 1005  docker-compose down gluttex-db
+ 1006  docker down gluttex-db
+ 1007  docker --hepl
+ 1008  docker --help
+ 1009  docker stop gluttex-db
+ 1010  docker rm gluttex-db
+ 1011  docker-compose down 
+ 1012  git add --all
+ 1013  git commit -a -m "paused blood type insertions"
+ 1014  git push
+ 1015  echo $GIT_PASS 
+ 1016  cd ../gluttex_constants/
+ 1017  flutter gen-l10n
+ 1018  cd ../gluttex_home/
+ 1019  flutter run
+ 1020  flutter build apk
+ 1021  cd gluttex_constants/
+ 1022  flutter gen-l10n
+ 1023  cd ../gluttex_home/
+ 1024  flutter run
+ 1025  flutter clean
+ 1026  flutter pub get
+ 1027  flutter run
+ 1028  flutter pub get
+ 1029  flutter run
+ 1030  flutter doctor
+ 1031  flutter run
+ 1032  flutter clean
+ 1033  flutter pub get
+ 1034  flutter run
+ 1035  ls assets/docs/
+ 1036  flutter clean
+ 1037  flutter run
+ 1038  flutter doctor
+ 1039  flutter clean
+ 1040  flutter pub get
+ 1041  flutter run
+ 1042  flutter clean
+ 1043  flutter pub get
+ 1044  cd ../gluttex_impl_mediation/
+ 1045  flutter clean
+ 1046  flutter pub get
+ 1047  cd ../gluttex_home/
+ 1048  flutter run
+ 1049  cd ../gluttex_lo
+ 1050  cd ../gluttex_login/
+ 1051  flutter clean
+ 1052  flutter pub get
+ 1053  cd ../gluttex_home/
+ 1054  flutter run
+ 1055  flutter clean
+ 1056  flutter pub get
+ 1057  flutter pub outdated
+ 1058  flutter pub upgrade
+ 1059  flutter run
+ 1060  cd ../gluttex_login/
+ 1061  flutter clean
+ 1062  flutter pub get
+ 1063  flutter run
+ 1064  cd ../gluttex_home/
+ 1065  flutter run
+ 1066  cd ../gluttex_constants/
+ 1067  flutter gen-l10n
+ 1068  cd ../gluttex_home/
+ 1069  cd ../gluttex_constants/
+ 1070  flutter gen-l10n
+ 1071  pip install rembg pillow
+ 1072  /home/omar/Projects/playground/.venv/bin/python "/home/omar/Projects/playground/background remove/main.py"
+ 1073  rembg setup
+ 1074  pip install onnxruntime
+ 1075  /home/omar/Projects/playground/.venv/bin/python "/home/omar/Projects/playground/background remove/main.py"
+ 1076  /bin/python3 /home/omar/.vscode/extensions/ms-python.python-2025.6.1-linux-x64/python_files/printEnvVariablesToFile.py /home/omar/.vscode/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash/envVars.txt
+ 1077  /home/omar/Projects/playground/.venv/bin/python "/home/omar/Projects/playground/background remove/main.py"
+ 1078  flutter run
+ 1079  fg
+ 1080  flutter run
+ 1081  cd ../gluttex_login/
+ 1082  flutter pub get
+ 1083  cd ../gluttex_home/
+ 1084  flutter run
+ 1085  flutter pub get
+ 1086  flutter run
+ 1087  flutter build apk
+ 1088  git add --all
+ 1089  git commit -a -m "improved UI/UX"
+ 1090  git push
+ 1091  cd gluttex_home/
+ 1092  flutter clean
+ 1093  flutter pub get
+ 1094  flutter run
+ 1095  flutter build apk
+ 1096  flutter run
+ 1097  cd ../gluttex_constants/
+ 1098  flutter gen-l10n
+ 1099  cd ../gluttex_home/
+ 1100  flutter run
+ 1101  flutter build web
+ 1102  # flutter build web --web-renderer html --release
+ 1103  flutter build web --web-renderer html --release
+ 1104  cd ../gluttex_constants/
+ 1105  flutter gen-l10n
+ 1106  cd ../gluttex_home/
+ 1107  flutter build web  --release
+ 1108  cd gluttex_constants/
+ 1109  flutter gen-l10n
+ 1110  cd ../gluttex_home/
+ 1111  flutter run
+ 1112  flutter build web --release
+ 1113  flutter build app --release
+ 1114  flutter build apk --release
+ 1115  flutter clean
+ 1116  flutter build apk --release
+ 1117  flutter build apk 
+ 1118  flutter clean
+ 1119  flutter pub get
+ 1120  flutter run
+ 1121  flutter build apk --release
+ 1122  code .
+ 1123  cd gluttex_home/
+ 1124  flutter run
+ 1125  cd ../gluttex_constants/
+ 1126  flutter gen-l10n
+ 1127  cd ../gluttex_home/
+ 1128  flutter run
+ 1129  cd gluttex_home/
+ 1130  flutter run
+ 1131  cd gluttex_home/
+ 1132  flutter run
+ 1133  cd gluttex_home/
+ 1134  flutter run
+ 1135  echo ""  > "mcmtest_activate.ini"
+ 1136  poweroff
+ 1137  code .
+ 1138  cd gluttex_home/
+ 1139  flutter run
+ 1140  cd gluttex_home/
+ 1141  flutter run
+ 1142  flutter doctor
+ 1143  flutter run
+ 1144  flutter
+ 1145  flutter run
+ 1146  cd gluttex_home/
+ 1147  flutter run
+ 1148  flutter clean
+ 1149  flutter pub get
+ 1150  flutter run
+ 1151  sqlacodegen --outfile=api_server/core/models.py   mysql+pymysql://doadmin:AVNS_nv4Vo-PZHHeMOp69jCx@dbaas-db-10408380-do-user-13698920-0.e.db.ondigitalocean.com/gluttex
+ 1152  sqlacodegen --outfile=api_server/core/models.py   mysql://doadmin:AVNS_nv4Vo-PZHHeMOp69jCx@dbaas-db-10408380-do-user-13698920-0.e.db.ondigitalocean.com/gluttex
+ 1153  sqlacodegen --outfile=api_server/core/models.py   mysql+pymysql://doadmin:AVNS_nv4Vo-PZHHeMOp69jCx@dbaas-db-10408380-do-user-13698920-0.e.db.ondigitalocean.com/gluttex
+ 1154  docker compose up -d
+ 1155  docker compose down
+ 1156  docker compose up -d
+ 1157  docker compose down
+ 1158  docker compose up -d
+ 1159  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1160  sudo docker exec -it gluttex-db mysql -u root gluttex 
+ 1161  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1162  sudo docker exec -it gluttex-db mysql -u dev_user gluttex -p
+ 1163  sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluttex-db
+ 1164  sqlacodegen --outfile=api_server/core/models.py   mysql+pymysql://dev_user:dev_password@172.19.0.5/gluttex
+ 1165  docker compose down
+ 1166  docker compose down gluttex-api
+ 1167  docker compose up -d gluttex-api
+ 1168  docker compose down 
+ 1169  flutter run
+ 1170  docker compose down 
+ 1171  flutter run
+ 1172  do-release-upgrade
+ 1173  flutter create wear-app
+ 1174  flutter create wearable.app
+ 1175  flutter create wearable
+ 1176  cd wearable/
+ 1177  flutter devices
+ 1178  flutter emulators
+ 1179  flutter emulators --launch Wear_OS_Large_Round_API_36
+ 1180  flutter devices
+ 1181  arp -a
+ 1182  code  .
+ 1183  adb connect 192.168.1.97
+ 1184  adb connect 192.168.1.97:8000
+ 1185  adb connect 192.168.1.97:5555
+ 1186  adb connect 192.168.1.97:33811
+ 1187  adb connect 192.168.1.97:46173
+ 1188  flutter run
+ 1189  adb connect 192.168.1.97:34811
+ 1190  flutter run
+ 1191  flutter doctor
+ 1192  flutter doctor --android-licenses
+ 1193  flutter devices
+ 1194  adb connect 192.168.1.97:34389
+ 1195  adb connect 192.168.1.97:43389
+ 1196  adb pair 192.168.1.97:42623
+ 1197  adb connect 192.168.1.97:5555
+ 1198  adb connect 192.168.1.97:42623
+ 1199  adb devices
+ 1200  adb connect 192.168.1.97:5555
+ 1201  adb devices
+ 1202  adb pair 192.168.1.97:37497
+ 1203  adb connect 192.168.1.97:5555
+ 1204  adb devices
+ 1205  adb connect 192.168.1.97:5555
+ 1206  snap list
+ 1207  snap remove opera
+ 1208  snap remove thunderbird 
+ 1209  snap remove firefox 
+ 1210  snap list
+ 1211  apt list
+ 1212  dpkg-query -Wf '${Installed-Size}' | awk '{s+=$1} END {print s/1024 " MB"}'
+ 1213  sudo du -sh /var/cache/apt/archives
+ 1214  dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -n
+ 1215  sudo apt remove libwine
+ 1216  sudo apt upgrade
+ 1217  sudo rm -r medicum/
+ 1218  cd gluttex_home/
+ 1219  flutter run
+ 1220  flutter clean
+ 1221  flutter run
+ 1222  source /home/omar/Projects/gluttex/gluttex-api/.venv/bin/activate
+ 1223  flutter run
+ 1224  code .
+ 1225  cd gluttex_home/
+ 1226  flutter run
+ 1227  poweroff
+ 1228  lsusb
+ 1229  dmesg | tail -n 20
+ 1230  sudo dmesg | tail -n 20
+ 1231  lsblk
+ 1232  sudo fsck -y /dev/sda
+ 1233  sudo e2fsck -b 8193 /dev/sda
+ 1234  sudo fdisk -l /dev/sda
+ 1235  sudo fdisk /dev/sda
+ 1236  lsblk
+ 1237  fdisk
+ 1238  flutter run
+ 1239  source /home/omar/Projects/gluttex/gluttex-api/.venv/bin/activate
+ 1240  flutter run
+ 1241  code .
+ 1242  cd gluttex_home/
+ 1243  flutter run
+ 1244  cd ..
+ 1245  git add --all
+ 1246  git commit -a -m "handled image upload and fetching"
+ 1247  git push
+ 1248  git add --all
+ 1249  git commit -a -m "changed features: user, recipe, product"
+ 1250  git push
+ 1251  cd gluttex_home/
+ 1252  flutter build apk
+ 1253  flutter run
+ 1254  flutter run --release
+ 1255  flutter build apk --release
+ 1256  flutter run --release
+ 1257  flutter run 
+ 1258  flutter build apk --release
+ 1259  flutter run --release
+ 1260  flutter run 
+ 1261  cd ..
+ 1262  git add --all
+ 1263  git commit -a -m "Changed UX in profile screen"
+ 1264  git push
+ 1265  fdisk
+ 1266  lsblk
+ 1267  cd gluttex_home/
+ 1268  flutter run
+ 1269  cat ingredient_data.csv 
+ 1270  mkdir svgs
+ 1271  awk '{ print > ("svgs/" FNR ".svg") }' ingredient_data.csv 
+ 1272  awk '{ print > ("svgs/" FNR-1 ".svg") }' ingredient_data.csv 
+ 1273  cd ..
+ 1274  git add --all
+ 1275  git commit -a -m "loading ingredients' svg icons from app"
+ 1276  git push
+ 1277  git add --all
+ 1278  git commit -a -m "added offset,limit for ingredient fetch feature"
+ 1279  git push
+ 1280  code .
+ 1281  ls
+ 1282  cd gluttex_home/
+ 1283  flutter run
+ 1284  flutter build --release
+ 1285  flutter build apk --release
+ 1286  cd ..
+ 1287  git add --all
+ 1288  git commit -a -m "fixed ingredient pagination feature"
+ 1289  git push
+ 1290  cd gluttex_home/
+ 1291  flutter run
+ 1292  cd gluttex_home/
+ 1293  flutter run
+ 1294  cd gluttex_home/
+ 1295  flutter run
+ 1296  restart
+ 1297  poweroff
+ 1298  flutter run
+ 1299  docker images
+ 1300  flutter run
+ 1301  cd gluttex_home/
+ 1302  flutter run
+ 1303  flutter clean
+ 1304  flutter run
+ 1305  flutter pub get
+ 1306  flutter run
+ 1307  flutter clean
+ 1308  flutter run
+ 1309  fg
+ 1310  flutter run
+ 1311  cd ..
+ 1312  git add --all
+ 1313  git commit -a -m "added horizontal product list to product/supplier screens"
+ 1314  git push
+ 1315  cd gluttex_home/
+ 1316  flutter run
+ 1317  cd ../gluttex_constants/
+ 1318  flutter gen-l10n
+ 1319  cd ../gluttex_home/
+ 1320  flutter run
+ 1321  git add --all
+ 1322  git commit -a -m "translatable units in ingredients amounts"
+ 1323  git push
+ 1324  flutter run
+ 1325  cd ../gluttex_constants/
+ 1326  flutter gen-l10n
+ 1327  cd ../gluttex_home/
+ 1328  flutter run
+ 1329  code .
+ 1330  flutter clean
+ 1331  flutter run
+ 1332  cd ..
+ 1333  cd gluttex_home/
+ 1334  flutter run
+ 1335  flutter build apk --release
+ 1336  cd gluttex_home/
+ 1337  flutter run
+ 1338  cd gluttex_home/
+ 1339  flutter run
+ 1340  fg
+ 1341  flutter run
+ 1342  cd ..
+ 1343  cd gluttex_home/
+ 1344  flutter run
+ 1345  code .
+ 1346  flutter run
+ 1347  cd ../gluttex_constants/
+ 1348  flutter gen-l10n
+ 1349  cd ../gluttex_home/
+ 1350  flutter run
+ 1351  flutter build apk --release
+ 1352  flutter run
+ 1353  cd ..
+ 1354  git add --all
+ 1355  git commit -a -m "added similar product sections"
+ 1356  git push
+ 1357  git add --all
+ 1358  git commit -a  -m "added provider_id parameter in querying products"
+ 1359  git push
+ 1360  cd gluttex_home/
+ 1361  flutter run
+ 1362  cd gluttex_home/
+ 1363  flutter run
+ 1364  dart devtools --appSizeBase=aab-code-size-analysis_01.json 
+ 1365  cd gluttex_home/
+ 1366  flutter build apk --analyze-size
+ 1367  flutter build apk --analyze-size --target-platform android-x64
+ 1368  flutter build appbundle --analyze-size
+ 1369  flutter build appbundle --analyze-size --target-platform android-arm
+ 1370  flutter build apk --release
+ 1371  flutter run
+ 1372  cd gluttex_home/
+ 1373  flutter build apk --analyze-size
+ 1374  flutter build apk --analyze-size --target-platform android-arm64
+ 1375  flutter build apk  --split-per-abi
+ 1376  flutter build appbundle
+ 1377  flutter run --profile
+ 1378  docker build -t omarzos/gluttex-api -f ./api_server/Dockerfile .
+ 1379  sudo docker build -t omarzos/gluttex-api -f ./api_server/Dockerfile .
+ 1380  docker images
+ 1381  sudo docker build -t omarzos/gluttex-auth -f ./auth_server/Dockerfile .
+ 1382  docker build --no-cache -t omarzos/gluttex-auth:latest -f ./auth_server/Dockerfile .
+ 1383  sudo docker build --no-cache -t omarzos/gluttex-auth:latest -f ./auth_server/Dockerfile .
+ 1384  docker system prune -a --volumes
+ 1385  sudo docker build --no-cache -t omarzos/gluttex-api:latest -f ./api_server/Dockerfile .
+ 1386  sudo docker build --no-cache -t omarzos/gluttex-auth:latest -f ./auth_server/Dockerfile .
+ 1387  sudo docker build --no-cache -t omarzos/gluttex-api:latest -f ./api_server/Dockerfile .
+ 1388  git add --all
+ 1389  git commit -a -m "fixed automated image build"
+ 1390  git push
+ 1391  git commit -a -m "fixed automated image build v2"
+ 1392  git push
+ 1393  git add --all
+ 1394  git commit -a -m "Snapshooted the db schema"
+ 1395  git push
+ 1396  docker system prune -af --volumes
+ 1397  docker images
+ 1398  docker ps
+ 1399  docker-compose down
+ 1400  docker system prune -af --volumes
+ 1401  docker ps
+ 1402  flutter run
+ 1403  /usr/bin/python3 /home/omar/Projects/spielgrund/main.py
+ 1404  pip install matplotlib
+ 1405  pip install --break-system-packages matplotlib
+ 1406  venv
+ 1407  python env
+ 1408  python3 env
+ 1409  python3 
+ 1410  /usr/bin/python3 /home/omar/Projects/spielgrund/main.py
+ 1411  python3 -m venv venv
+ 1412  source venv/bin/activate
+ 1413  /usr/bin/python3 /home/omar/Projects/spielgrund/main.py
+ 1414  pip install matplotlib networkx
+ 1415  /usr/bin/python3 /home/omar/Projects/spielgrund/main.py
+ 1416  python3 main.py 
+ 1417  pip install pyvis
+ 1418  python3 main.py 
+ 1419  pip install jsonpickle
+ 1420  python3 main.py 
+ 1421  code .
+ 1422  dart pub deps --json > deps.json
+ 1423  cd ..
+ 1424  ls
+ 1425  python3 dependencies.html 
+ 1426  git add --all
+ 1427  git commit -a -m "added dependecy graph"
+ 1428  git push
+ 1429  cd gluttex_home/
+ 1430  dart pub deps --json > ../deps.json
+ 1431  venv venv/bin/activate
+ 1432  env venv/bin/activate
+ 1433  source venv/bin/activate
+ 1434  cd ..
+ 1435  ls
+ 1436  source venv/bin/activate
+ 1437  python3 main.py 
+ 1438  cd gluttex_home/
+ 1439  flutter run
+ 1440  source venv/bin/activate
+ 1441  python3 main.py 
+ 1442  flutter run
+ 1443  flutter doctor
+ 1444  flutter run
+ 1445  ls
+ 1446  flutter run
+ 1447  ps aux | grep flutter
+ 1448  flutter run
+ 1449  flutter cleab
+ 1450  flutter clean
+ 1451  flutter run
+ 1452  flutter clean
+ 1453  flutter run
+ 1454  cd ..
+ 1455  flutter create --package gluttex_ui
+ 1456  flutter create  gluttex_ui
+ 1457  cd gluttex_home/
+ 1458  flutter run
+ 1459  flutter clean
+ 1460  flutter run
+ 1461  flutter clean
+ 1462  flutter run
+ 1463  cd gluttex_home/
+ 1464  flutter run
+ 1465  cd gluttex_home/
+ 1466  flutter run
+ 1467  fg
+ 1468  flutter run
+ 1469  cd ..
+ 1470  flutter create gluttex_event
+ 1471  cd gluttex_home/
+ 1472  flutter clean
+ 1473  flutter pub get
+ 1474  flutter run
+ 1475  flutter clean
+ 1476  flutter run
+ 1477  dart pub deps --json > ../deps.json
+ 1478  cd ..
+ 1479  python3 main.py
+ 1480  source venv/bin/activate
+ 1481  python3 main.py
+ 1482  cd gluttex_home/
+ 1483  flutter run
+ 1484  dart pub deps --json > ../deps.json
+ 1485  source venv/bin/activate
+ 1486  python3 main.py
+ 1487  cd ..
+ 1488  flutter create gluttex_io
+ 1489  cd gluttex_home/
+ 1490  flutter clean
+ 1491  flutter run
+ 1492  flutter clean
+ 1493  flutter run
+ 1494  flutter pub get
+ 1495  flutter run
+ 1496  flutter clean
+ 1497  flutter run
+ 1498  dart pub deps --json > ../deps.json
+ 1499  source venv/bin/activate
+ 1500  python3 main.py
+ 1501  cd ..
+ 1502  flutter create gluttex_launcher
+ 1503  cd gluttex_launcher/
+ 1504  flutter run
+ 1505  flutter clean
+ 1506  flutter pub get
+ 1507  dart pub deps --json > ../deps.json
+ 1508  source venv/bin/activate
+ 1509  python3 main.py
+ 1510  dart pub deps --json > ../deps.json
+ 1511  source venv/bin/activate
+ 1512  python3 main.py
+ 1513  flutter clean
+ 1514  flutter run
+ 1515  dart pub deps --json > ../deps.json
+ 1516  source venv/bin/activate
+ 1517  python3 main.py
+ 1518  cd ..
+ 1519  cd gluttex_constants/
+ 1520  flutter gen-l10n
+ 1521  cd ../gluttex_launcher/
+ 1522  flutter run
+ 1523  flutter build apk --split-per-abi
+ 1524  flutter run
+ 1525  cd ..
+ 1526  git add --all
+ 1527  git commit -a -m "better UI/UX"
+ 1528  git push
+ 1529  cd gluttex_launcher/
+ 1530  1
+ 1531  cd ..
+ 1532  git push
+ 1533  git add --all
+ 1534  git commit -a -m "fixed dependencies"
+ 1535  git push
+ 1536  git push --force
+ 1537  cd gluttex_launcher/
+ 1538  flutter run
+ 1539  rm -rf .dart_tool .packages
+ 1540  flutter clean
+ 1541  rm -rf .dart_tool .packages
+ 1542  flutter pub get
+ 1543  cd ../gluttex_home/
+ 1544  flutter clean
+ 1545  rm -rf .dart_tool .packages
+ 1546  cd ../gluttex_launcher/
+ 1547  flutter pub get
+ 1548  flutter doctor
+ 1549  flutter run
+ 1550  source venv/bin/activate
+ 1551  pip install tkinter
+ 1552  python3 vis.py 
+ 1553  python3 main.py 
+ 1554  pydeps
+ 1555  pip install pydeps
+ 1556  pip install pydeps --break-system-packages
+ 1557  pydeps api_server/ --max-bacon=2 --show-deps --rmprefix api_server
+ 1558  pydeps api_server/ --max-bacon=3 --show-deps --rmprefix .api_server
+ 1559  pydeps api_server/ --max-bacon=2 --show-deps --rmprefix .api_server
+ 1560  pydeps gluttex_api --json > deps.json
+ 1561  pydeps api_server/ --max-bacon=2 --show-deps --rmprefix .api_server -T json
+ 1562  pydeps api_server/ --max-bacon=2 --show-deps --rmprefix .api_server 
+ 1563  pydeps auth_server/ --max-bacon=2 --show-deps --rmprefix .auth_server 
+ 1564  pydeps file_server/ --max-bacon=2 --show-deps --rmprefix .file_server 
+ 1565  pydeps file_server/ --max-bacon=2 --show-deps --rmprefix home.omar.Projects.gluttex.gluttex-api.file_server.
+ 1566  pydeps auth_server/ --max-bacon=2 --show-deps --rmprefix .auth_server 
+ 1567  pydeps auth_server/ --max-bacon=2 --show-deps --rmprefix home.omar.Projects.gluttex.gluttex-api.auth_server.
+ 1568  pydeps auth_server/ --max-bacon=2 --show-deps --rmprefix .auth_server  -T json
+ 1569  flutter clean
+ 1570  flutter run
+ 1571  code .
+ 1572  docker-compose up -d
+ 1573  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1574  sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluttex-db
+ 1575  sqlacodegen --outfile=models.py   mysql+pymysql://dev_user:dev_password@172.18.0.2/gluttex
+ 1576  docker-compose down
+ 1577  rm -r data/
+ 1578  sudo rm -r data/
+ 1579  docker-compose up -d
+ 1580  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1581  sudo docker exec -it gluttex-db mysql -u root 
+ 1582  docker logs gluttex-db 
+ 1583  docker-compose down
+ 1584  sudo rm -r data/
+ 1585  docker-compose up -d
+ 1586  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1587  sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluttex-db
+ 1588  sqlacodegen --outfile=models.py   mysql+pymysql://dev_user:dev_password@172.18.0.2/gluttex
+ 1589  git add --all
+ 1590  git commit -a -m "added notification tables, management tables, more image tables and location tables"
+ 1591  git push
+ 1592  code .
+ 1593  sudo lsof -i :3306
+ 1594  sudo systemctl stop mariadbd
+ 1595  docker-compose -f docker-compose.dev.yml up -d
+ 1596  docker-compose down
+ 1597  rm -r data/
+ 1598  sudo rm -r data/
+ 1599  docker-compose -f docker-compose.dev.yml up -d
+ 1600  docker ps
+ 1601  docker-compose -f docker-compose.dev.yml up -d
+ 1602  docker-compose down
+ 1603  docker-compose -f docker-compose.dev.yml up -d
+ 1604  docker-compose 
+ 1605  docker-compose --file docker-compose.dev.yml up -d
+ 1606  sudo rm -r data/
+ 1607  docker-compose  up -d
+ 1608  docker images
+ 1609  docker-compose  up -d
+ 1610  docker network prune
+ 1611  docker volume prune
+ 1612  docker-compose  up -d
+ 1613  docker-compose  down
+ 1614  docker-compose  up -d
+ 1615  docker-compose  down
+ 1616  docker-compose  up -d
+ 1617  docker ps
+ 1618  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1619  sudo docker exec -it gluttex-db mysql -u dev_user gluttex -p
+ 1620  docker logs gluttex-db 
+ 1621  docker-compose down
+ 1622  sudo rm -r data/
+ 1623  docker-compose  up -d
+ 1624  sudo docker exec -it gluttex-db mysql -u dev_user gluttex -p
+ 1625  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1626  docker logs gluttex-db 
+ 1627  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1628  docker-compose down
+ 1629  sudo rm -r data/
+ 1630  docker-compose  up -d
+ 1631  docker logs gluttex-db 
+ 1632  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1633  sudo docker exec -it gluttex-db mysql -u dev_user gluttex -p
+ 1634  sudo docker exec -it gluttex-api bash
+ 1635  sudo docker exec -it gluttex-api sh
+ 1636  docker ps
+ 1637  docker-compose  down
+ 1638  docker-compose  up -d
+ 1639  docker ps
+ 1640  docker-compose  down
+ 1641  docker-compose  up -d
+ 1642  docker ps
+ 1643  docker-compose  down
+ 1644  docker-compose  up -d
+ 1645  docker-compose  down
+ 1646  docker-compose  up -d
+ 1647  docker logs gluttex-db 
+ 1648  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1649  sudo docker exec -it gluttex-db mysql -u dev_user gluttex -p
+ 1650  docker ps
+ 1651  sudo docker exec -it gluttex-api sh
+ 1652  docker-compose  down
+ 1653  docker-compose  up -d
+ 1654  docker ps
+ 1655  docker ps -a
+ 1656  docker-compose  down
+ 1657  docker ps -a
+ 1658  docker ps c62f1b031cc9a71917a877563f2fc405546b70bf343a4c43d1eb1b8b43b4591b
+ 1659  docker 
+ 1660  docker ps
+ 1661  docker ps --all
+ 1662  docker-compose  down
+ 1663  docker-compose  up -d
+ 1664  docker ps -a | grep 3306
+ 1665  docker-compose  down
+ 1666  docker-compose  up -d
+ 1667  docker ps
+ 1668  docker-compose  down
+ 1669  docker ps
+ 1670  docker-compose  up -d
+ 1671  docker-compose  down
+ 1672  sudo rm -r data/
+ 1673  docker-compose  up -d
+ 1674  docker logs gluttex-db 
+ 1675  docker-compose  down
+ 1676  docker-compose up -d
+ 1677  docker logs gluttex-db 
+ 1678  sudo docker exec -it gluttex-db mysql -u root gluttex -p
+ 1679  docker logs gluttex-api
+ 1680  sudo docker exec -it gluttex-db sh
+ 1681  sudo docker exec -it gluttex-api sh
+ 1682  docker logs gluttex-api
+ 1683  docker-compose  down
+ 1684  docker-compose up -d
+ 1685  docker-compose  
+ 1686  docker-compose down gluttex-api
+ 1687  docker ps
+ 1688  docker-compose down gluttex-api
+ 1689  docker-compose up -d
+ 1690  docker-compose up -d gluttex-api
+ 1691  docker-compose down gluttex-api
+ 1692  docker-compose restart gluttex-api
+ 1693  docker-compose up -d --build gluttex-api
+ 1694  docker-compose up -d  gluttex-api
+ 1695  docker-compose down 
+ 1696  docker-compose up -d  gluttex-api
+ 1697  docker-compose down 
+ 1698  docker-compose up -d  
+ 1699  docker-compose down 
+ 1700  docker-compose up -d  
+ 1701  docker logs gluttex-api
+ 1702  docker-compose up -d  
+ 1703  docker-compose down 
+ 1704  docker-compose up -d  
+ 1705  docker logs gluttex-api
+ 1706  docker-compose down 
+ 1707  docker-compose up -d  
+ 1708  docker logs gluttex-api
+ 1709  docker-compose up -d  
+ 1710  docker-compose down 
+ 1711  docker-compose up -d  
+ 1712  docker logs gluttex-api
+ 1713  sudo docker exec -it gluttex-api sh
+ 1714  docker logs gluttex-api
+ 1715  docker ps
+ 1716  docker rm gluttex-api
+ 1717  docker remove gluttex-api
+ 1718  docker stop gluttex-api
+ 1719  docker rm gluttex-api
+ 1720  docker-compose up -d  
+ 1721  docker logs gluttex-api
+ 1722  docker-compose up -d --build gluttex-api
+ 1723  docker-compose down
+ 1724  docker-compose up -d 
+ 1725  docker logs gluttex-api
+ 1726  docker-compose up -d --build gluttex-api
+ 1727  sudo docker-compose up -d --build gluttex-api
+ 1728  docker-compose down
+ 1729  docker-compose up -d 
+ 1730  docker logs gluttex-api
+ 1731  sudo docker-compose up -d --build gluttex-api
+ 1732  docker-compose down
+ 1733  docker-compose up -d 
+ 1734  sudo docker-compose up -d --build gluttex-api
+ 1735  docker images
+ 1736  docker ps
+ 1737  docker containers
+ 1738  docker pps -a
+ 1739  docker ps -a
+ 1740  docker prune
+ 1741  docker rm prune
+ 1742  docker images prune
+ 1743  docker image prune
+ 1744  docker containers
+ 1745  docker ps -a
+ 1746  docker ps prune
+ 1747  docker prune
+ 1748  sudo docker-compose up -d --build gluttex-api
+ 1749  sudo docker-compose up -d  gluttex-api
+ 1750  docker rm 0f022fb7c53e_gluttex-api
+ 1751  sudo docker-compose up -d  gluttex-api
+ 1752  docker logs gluttex-api
+ 1753  sudo docker-compose up -d  gluttex-api
+ 1754  docker rm gluttex-api
+ 1755  docker ps
+ 1756  sudo docker-compose up -d --build gluttex-api
+ 1757  docker rm 20dc234851c2_gluttex-api
+ 1758  sudo docker-compose up -d gluttex-api
+ 1759  docker logs gluttex-api
+ 1760  sudo docker-compose down
+ 1761  sudo docker-compose up -d 
+ 1762  sudo docker-compose down
+ 1763  sudo docker-compose up -d 
+ 1764  sudo docker-compose up -d --build gluttex-api
+ 1765  sudo docker-compose down
+ 1766  sudo docker-compose up -d 
+ 1767  docker logs gluttex-api
+ 1768  sudo docker-compose up -d 
+ 1769  docker logs gluttex-api
+ 1770  sudo docker-compose restart gluttex-api 
+ 1771  docker logs gluttex-api
+ 1772  sudo docker-compose up -d 
+ 1773  docker logs gluttex-api
+ 1774  sudo docker-compose restart gluttex-api 
+ 1775  docker logs gluttex-api
+ 1776  sudo docker-compose down
+ 1777  sudo docker-compose up 
+ 1778  sudo docker-compose up -d 
+ 1779  docker ps
+ 1780  docker logs gluttex-api
+ 1781  sudo docker exec -it gluttex-api sh
+ 1782  docker logs gluttex-api
+ 1783  docker-compose restart gluttex-api 
+ 1784  docker logs gluttex-api
+ 1785  docker-compose restart gluttex-api 
+ 1786  docker logs gluttex-api
+ 1787  docker-compose restart gluttex-api 
+ 1788  docker logs gluttex-api
+ 1789  docker-compose restart gluttex-api 
+ 1790  docker logs gluttex-api
+ 1791  docker-compose restart gluttex-api 
+ 1792  docker logs gluttex-api
+ 1793  docker-compose down
+ 1794  docker-compose 
+ 1795  git add --all
+ 1796  git commit -a -m "enhanced dev env, fixed supplier edit"
+ 1797  git push
+ 1798  docker-compose up -d
+ 1799  docker logs gluttex-api
+ 1800  flutter run
+ 1801  docker logs gluttex-api
+ 1802  docker logs --follow gluttex-api
+ 1803  cd api_server/
+ 1804  ls features/
+ 1805  ls -r features/
+ 1806  ls 
+ 1807  ls --recursive features/
+ 1808  cd ..
+ 1809  docker logs --follow gluttex-api
+ 1810  flutter run
+ 1811  docker logs --follow gluttex-api
+ 1812  git add --all
+ 1813  git commit -a -m "better handling exception, normalized error codes and status codes"
+ 1814  git push
+ 1815  openssl rand -base64 32
+ 1816  docker ps
+ 1817  docker-compose down
+ 1818  docker-compose up -d
+ 1819  docker ps
+ 1820  docker-compose down
+ 1821  docker-compose up -d
+ 1822  docker-compose down
+ 1823  docker-compose up -d
+ 1824  docker-compose down
+ 1825  docker-compose up -d
+ 1826  docker-compose down
+ 1827  docker-compose up -d --build
+ 1828  docker-compose down
+ 1829  docker-compose up -d --build
+ 1830  git add --all
+ 1831  git commit -a -m "better endpoint responses, fixed password update feature"
+ 1832  git push
+ 1833  docker logs gluttex-api --follow
+ 1834  /home/omar/Projects/gluttex/gluttex-api/.venv/bin/python /home/omar/Projects/gluttex/gluttex-api/api_server/core/messages.py
+ 1835  docker logs gluttex-auth --follow
+ 1836  sudo docker exec -it gluttex-auth  sh
+ 1837  docker logs gluttex-auth --follow
+ 1838  sudo docker exec -it gluttex-auth  sh
+ 1839  docker logs gluttex-auth --follow
+ 1840  docker logs --follow gluttex-api
+ 1841  docker-compose down
+ 1842  sudo rm -r data/
+ 1843  sudo rm -r auth_db/
+ 1844  sudo rm -r fs/
+ 1845  docker-compose up -d
+ 1846  docker-compose down
+ 1847  docker-compose up -d
+ 1848  docker logs gluttex-db
+ 1849  docker logs gluttex-auth
+ 1850  sudo docker exec gluttex-auth -it sh
+ 1851  sudo docker exec -it gluttex-auth  sh
+ 1852  docker-compose down
+ 1853  docker-compose up -d --build gluttex-auth 
+ 1854  sudo docker exec gluttex-auth -it sh
+ 1855  sudo docker exec -it gluttex-auth  sh
+ 1856  docker-compose up -d gluttex-auth 
+ 1857  docker-compose up -d gluttex-auth --build
+ 1858  docker-compose up -d --build gluttex-auth 
+ 1859  docker-compose up down
+ 1860  docker-compose  down
+ 1861  docker images
+ 1862  docker images rm omarzos/gluttex-auth
+ 1863  docker images prune 
+ 1864  docker-compose up -d --build 
+ 1865  docker-compose up -d 
+ 1866  docker-compose down
+ 1867  docker-compose up -d 
+ 1868  docker logs gluttex-fs
+ 1869  docker logs gluttex-auth
+ 1870  docker-compose up -d --build 
+ 1871  docker-compose up -d 
+ 1872  docker ps
+ 1873  docker images
+ 1874  docker ps -a
+ 1875  docker images
+ 1876  docker images rm 92e54ec7014c
+ 1877  docker images --help
+ 1878  docker rm 92e54ec7014c
+ 1879  docker prune 92e54ec7014c
+ 1880  docker images prune 92e54ec7014c
+ 1881  docker images prune 
+ 1882  docker image rm 92e54ec7014c 
+ 1883  docker-compose up -d 
+ 1884  docker-compose up -d --remove-orphans
+ 1885  docker-compose up -d 
+ 1886  docker-compose up -d --build
+ 1887  docker ps
+ 1888  docker-compose down
+ 1889  docker images prune
+ 1890  docker image prune
+ 1891  docker-compose up -d 
+ 1892  docker logs gluttex-auth 
+ 1893  docker logs gluttex-fs
+ 1894  sudo docker exec -it gluttex-fs  sh
+ 1895  docker logs gluttex-fs
+ 1896  docker logs gluttex-fs --follow
+ 1897  sudo docker exec -it gluttex-fs  sh
+ 1898  docker logs gluttex-fs --follow
+ 1899  sudo docker exec -it gluttex-fs  sh
+ 1900  docker logs gluttex-fs --follow
+ 1901  code .
+ 1902  docker logs gluttex-auth --follow
+ 1903  flutter clean
+ 1904  flutter run
+ 1905  flutter clean
+ 1906  flutter run
+ 1907  dart pub deps --json > ../deps.json
+ 1908  source venv/bin/activate
+ 1909  python3 main.py 
+ 1910  flutter clean
+ 1911  flutter run
+ 1912  dart pub deps --json > ../deps.json
+ 1913  source venv/bin/activate
+ 1914  python3 main.py 
+ 1915  flutter run
+ 1916  flutter clean
+ 1917  flutter run
+ 1918  dart pub deps --json > ../deps.json
+ 1919  source venv/bin/activate
+ 1920  python3 main.py 
+ 1921  flutter run
+ 1922  cd gluttex_home/
+ 1923  cd ../gluttex_launcher/
+ 1924  flutter run
+ 1925  flutter run --build apk 
+ 1926  flutter build apk 
+ 1927  flutter run --release
+ 1928  flutter run 
+ 1929  docker logs gluttex-fs --follow 
+ 1930  docker logs gluttex-api
+ 1931  docker logs gluttex-api --follow
+ 1932  docker-compose up -d
+ 1933  docker-compose down
+ 1934  docker-compose up -d
+ 1935  docker-compose down
+ 1936  git add --all
+ 1937  docker-compose up -d
+ 1938  docker-compose down
+ 1939  git add --all
+ 1940  git commit -a -m "fixed recipe update, ingredient route confusion, organisation get/post"
+ 1941  git push
+ 1942  flutter run 
+ 1943  cd gluttex_launcher/
+ 1944  flutter run
+ 1945  docker logs gluttex-api --follow
+ 1946  flutter run
+ 1947  npm run dev
+ 1948  docker ps
+ 1949  sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluttex-db
+ 1950  sqlacodegen --outfile=models.py   mysql+pymysql://dev_user:dev_password@172.18.0.4/gluttex
+ 1951  flutter run
+ 1952  docker logs gluttex-api --follow
+ 1953  docker push omarzos/gluttex-api
+ 1954  flutter run
+ 1955  docker-compose down
+ 1956  docker build -t omarzos/gluttex-api api_server/
+ 1957  git add --all
+ 1958  git commit -a -m "added location for suppliers"
+ 1959  git push
+ 1960  flutter run
+ 1961  docker logs gluttex-api
+ 1962  docker logs gluttex-api --follow
+ 1963  docker-compose up -d
+ 1964  docker-compose down
+ 1965  git add --all
+ 1966  git commit -a -m "fixed address fetch for suppliers"
+ 1967  git push
+ 1968  flutter run
+ 1969  docker logs gluttex-api --follow
+ 1970  docker-compose up -d
+ 1971  git add --all
+ 1972  git commit -a -m "fixed location and person details insertion/update"
+ 1973  git push
+ 1974  flutter run
+ 1975  /bin/python3
+ 1976  docker logs gluttex-api --follow
+ 1977  docker-compose up -d
+ 1978  docker-compose down
+ 1979  git add --all
+ 1980  git commit -a -m "fixed data position updates"
+ 1981  git push
+ 1982  flutter run
+ 1983  git add --all
+ 1984  git commit -a -m "enhanced supplier CRUD, user data Updates"
+ 1985  git push
+ 1986  cd gluttex_launcher/
+ 1987  flutter run
+ 1988  docker-compose up -d
+ 1989  docker-compose down
+ 1990  git commit -a -m "fixed provider insertion with attached image url"
+ 1991  git push
+ 1992  flutter run
+ 1993  flutter doctor
+ 1994  flutter run
+ 1995  flutter run --release
+ 1996  flutter run 
+ 1997  flutter run --release
+ 1998  git add --all 
+ 1999  git commit -a -m "fixed returning updating product"
+ 2000  git push
+ 2001  flutter build --split-by-abi
+ 2002  flutter build --split-per-abi
+ 2003  flutter run --split-per-abi
+ 2004  history | split

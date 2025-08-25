@@ -204,7 +204,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         child: SvgPicture.asset(
           'assets/icons/${_recipe.recipe_category_id}.svg',
           package: "gluttex_chef",
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.onPrimary,
           width: MediaQuery.of(context).size.width * 0.2,
           height: MediaQuery.of(context).size.width * 0.2,
         ),
@@ -421,15 +421,56 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: provider != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            package: "gluttex_home",
-                            height: 48,
-                            color: Colors.lightGreen,
-                          ),
-                        )
+                      ? provider.id_app_user != 0 &&
+                              provider.app_user_image_url != null
+                          ? ClipOval(
+                              child: Image.network(
+                                GluttexConstants.fsBaseUrl +
+                                    provider.app_user_image_url!,
+                                width: 24,
+                                height: 24,
+                                fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                (loadingProgress
+                                                        .expectedTotalBytes ??
+                                                    1)
+                                            : null,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const SizedBox(
+                                    height: 24,
+                                    // color: Colors.grey[200],
+                                    child: Center(
+                                      child: Icon(Icons.person, size: 24),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                package: "gluttex_home",
+                                height: 48,
+                                color: Colors.lightGreen,
+                              ),
+                            )
                       : _buildDefaultProviderIcon(),
                 ),
                 const SizedBox(width: 12),
@@ -448,7 +489,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (provider?.locationName != "") ...[
+                      if (provider?.addressCity != "") ...[
                         const SizedBox(height: 4),
                         Row(
                           children: [
@@ -459,7 +500,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              provider!.locationName!,
+                              provider!.addressCity,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurface.withOpacity(0.6),
                               ),

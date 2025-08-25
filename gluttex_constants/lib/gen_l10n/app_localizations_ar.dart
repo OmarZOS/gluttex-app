@@ -1536,12 +1536,17 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String productsFromSupplier(Object supplier_name) {
+    return 'منتجات من طرف: $supplier_name';
+  }
+
+  @override
   String similarProductsFromCategory(Object category_name) {
     return 'منتجات مشابهة من فئة $category_name';
   }
 
   @override
-  String get noOtherProductsAvailable => 'لا توجد منتجات أخرى متاحة من هذا المزود';
+  String get noOtherProductsAvailable => 'لا توجد منتجات متاحة من هذا المزود';
 
   @override
   String get gallery => 'المعرض';
@@ -1559,7 +1564,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectImage => 'اختر صورة';
 
   @override
-  String get uploadImage => 'رفع الصورة';
+  String get uploadImage => 'رفع صورة';
 
   @override
   String get removeImage => 'إزالة الصورة';
@@ -1572,4 +1577,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get confirm => 'تأكيد';
+
+  @override
+  String get selectOrganisationHintText => 'يرجى اختيار مؤسسة';
+
+  @override
+  String get providerImage => 'صورة المزود';
+
+  @override
+  String get selectOrganisation => 'اختر المؤسسة';
+
+  @override
+  String get searchOrganisations => 'ابحث عن المؤسسات';
+
+  @override
+  String get noOrganisationsFound => 'لم يتم العثور على مؤسسات';
+
+  @override
+  String get createNew => 'إنشاء جديد';
+
+  @override
+  String get organisationText => 'المؤسسة';
+
+  @override
+  String by_organisation(Object org_name) {
+    return 'من طرف: $org_name';
+  }
 }

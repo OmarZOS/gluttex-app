@@ -31,7 +31,7 @@ class ProductDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ProductDetailsScreenContent();
+    return const _ProductDetailsScreenContent();
   }
 }
 
@@ -51,7 +51,6 @@ class _ProductDetailsScreenContentState
   int _quantity = 1;
   Supplier? _provider;
   late Product _product;
-  bool _isLoadingProvider = true;
   late ProductNotifier productNotifier;
   bool _initialized = false; // to prevent re-initialization
 
@@ -70,6 +69,7 @@ class _ProductDetailsScreenContentState
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
       _product = args?["product"];
       _fetchProvider(); // Async operation without mounted check
+
       _initializeProducts();
       _initialized = true;
     }
@@ -90,28 +90,12 @@ class _ProductDetailsScreenContentState
     super.dispose();
   }
 
-  Future<void> _fetchProvider() async {
-    if (!mounted) return;
-
-    setState(() => _isLoadingProvider = true);
-
-    try {
-      final provider =
+  void _fetchProvider() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _provider =
           await Provider.of<SupplierChangeNotifier>(context, listen: false)
               .getSupplierById(_product.product_provider_id ?? 0);
-
-      if (mounted) {
-        setState(() {
-          _provider = provider;
-          _isLoadingProvider = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoadingProvider = false);
-      }
-      debugPrint('Error fetching provider: $e');
-    }
+    });
   }
 
   void _updateQuantity(int newValue) {
@@ -157,6 +141,7 @@ class _ProductDetailsScreenContentState
                       const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildProductHeader(context, isRTL, _product),
                     const SizedBox(height: GluttexConstants.kDefaultPaddin),
@@ -253,16 +238,20 @@ class _ProductDetailsScreenContentState
                                       borderRadius: BorderRadius.circular(16),
                                       onTap: () => Future.delayed(
                                         const Duration(milliseconds: 150),
-                                        () {
-                                          Navigator.pushNamed(
+                                        () async {
+                                          await Navigator.pushNamed(
                                               context, AppRoutes.productDetails,
                                               arguments: {"product": product});
+                                          // productNotifier.fetchProducts(
+                                          //     reset: true);
+                                          productNotifier.fetchProducts(
+                                              reset: true);
                                         },
                                       ),
                                       child: SupplierProductCard(
                                         product: product,
                                         supplierName:
-                                            _provider?.providerName ?? "",
+                                            product.product_brand ?? "",
                                         stockQuantity:
                                             product.product_quantity ?? 0,
                                         minOrderQty: '1',
@@ -276,7 +265,14 @@ class _ProductDetailsScreenContentState
                         );
                       },
                     ),
-                    _buildProviderTile(),
+                    Consumer<SupplierChangeNotifier>(
+                        builder: (context, notifier, _) {
+                      if (notifier.isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      return _buildProviderTile();
+                    }),
                     if (isLoggedIn) const SizedBox(height: 160),
                   ],
                 ),
@@ -390,10 +386,13 @@ class _ProductDetailsScreenContentState
     return FloatingActionButton(
       heroTag: 'floating-button-0',
       backgroundColor: Theme.of(context).colorScheme.primary,
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const CartScreen()),
-      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CartScreen()),
+        );
+        productNotifier.fetchProducts(reset: true);
+      },
       child: Consumer<CartChangeNotifier>(
         builder: (context, cart, child) {
           return Badge(
@@ -602,17 +601,9 @@ class _ProductDetailsScreenContentState
 
   Future<void> _navigateToEditScreen(
       BuildContext context, Product product) async {
-    // log('Owner Id: ${product.product_owner_id}');
-    // log('Image Id: ${product.id_product_image}');
-
     final updatedProduct = await Navigator.pushNamed(
         context, AppRoutes.productCreate,
         arguments: {"product": product});
-
-    // if (updatedProduct != null) {
-    //   Provider.of<ProductNotifier>(context, listen: false)
-    //       .addOrUpdateProduct(updatedProduct);
-    // }
   }
 
   void _addToCart(BuildContext context) {
@@ -635,9 +626,9 @@ class _ProductDetailsScreenContentState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    if (_isLoadingProvider) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    // if (_isLoadingProvider) {
+    //   return const Center(child: CircularProgressIndicator());
+    // }
 
     return Card(
       margin: const EdgeInsets.symmetric(
@@ -651,7 +642,9 @@ class _ProductDetailsScreenContentState
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          showSupplierDetails(context, _provider ?? Supplier.empty());
+          if ((_provider?.idProductProvider ?? 0) != 0) {
+            showSupplierDetails(context, _provider!);
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(12),

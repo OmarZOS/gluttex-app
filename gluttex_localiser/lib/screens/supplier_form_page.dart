@@ -263,38 +263,18 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           // ignore: curly_braces_in_flow_control_structures
           supplier.supplier_image = supplier_image!;
 
-        Supplier? finalSupplier = await Provider.of<SupplierChangeNotifier>(
-          context,
-          listen: false,
-        ).addOrUpdateRecipe(supplier);
-        // supplier = finalSupplier!;
         if (supplier.idProductProvider == 0) {
-          finalSupplier?.supplier_image_url = await Navigator.pushNamed(
+          supplier.supplier_image_url = await Navigator.pushNamed(
             context,
             AppRoutes.imageUpload,
             arguments: {
               "entity": "supplier",
-              "id": finalSupplier.idProductProvider,
+              "id": supplier.idProductProvider,
             },
           ) as String?;
-
-          supplier.idProviderDetails = finalSupplier?.idProviderDetails ?? 0;
-          supplier.idProductProvider = finalSupplier?.idProductProvider ?? 0;
-          supplier.productProviderDetailsId =
-              finalSupplier?.productProviderDetailsId ?? 0;
-          supplier.productProviderOwnerId =
-              finalSupplier?.productProviderOwnerId ?? 0;
-          supplier.productProviderTypeId =
-              finalSupplier?.productProviderTypeId ?? 0;
-          supplier.supplier_image_id = finalSupplier?.supplier_image_id;
-          supplier.location_address_id =
-              finalSupplier?.location_address_id ?? 0;
-          supplier.id_location = finalSupplier?.id_location ?? 0;
-          supplier.id_provider_organisation =
-              finalSupplier?.id_provider_organisation ?? 0;
         }
 
-        final insertedSupplier = await Provider.of<SupplierChangeNotifier>(
+        await Provider.of<SupplierChangeNotifier>(
           context,
           listen: false,
         ).addOrUpdateRecipe(supplier);
@@ -321,69 +301,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           finalMessage: AppLocalizations.of(context)!.putFailure,
         );
       }
-
-      // // Show loading indicator
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Row(
-      //       children: [
-      //         const CircularProgressIndicator(),
-      //         const SizedBox(width: 16),
-      //         Text(AppLocalizations.of(context)!.processingRequest),
-      //       ],
-      //     ),
-      //     duration:
-      //         const Duration(minutes: 1), // Long duration for async operation
-      //   ),
-      // );
-
-      // try {
-      // final result =
-      //     await GluttexLocator.get<SupplierService>().addSupplier(supplier);
-
-      // // Hide loading indicator
-      // ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      // final response = Response();
-      // switch (result) {
-      //   case 200:
-      //     response.color = Colors.green;
-      //     response.text = AppLocalizations.of(context)!.putSuccess;
-      //     break;
-      //   case 406:
-      //   case 422:
-      //     response.color = Colors.amber;
-      //     response.text = AppLocalizations.of(context)!.putFailure;
-      //     break;
-      //   default:
-      //     response.color = Colors.red;
-      //     response.text = AppLocalizations.of(context)!.serverError;
-      // }
-
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(response.text),
-      //     backgroundColor: response.color,
-      //     behavior: SnackBarBehavior.floating,
-      //     shape: RoundedRectangleBorder(
-      //       borderRadius: BorderRadius.circular(10),
-      //     ),
-      //   ),
-      // );
-
-      // if (result == 200) {
-      //   await Future.delayed(const Duration(seconds: 1));
-      //   if (mounted) Navigator.of(context).pop();
-      // }
-      // } catch (e) {
-      //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text('Error: ${e.toString()}'),
-      //       backgroundColor: Colors.red,
-      //     ),
-      //   );
-      // }
     }
   }
 
@@ -395,13 +312,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.addSupplierTxt),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.save),
-        //     onPressed: _submitForm,
-        //     tooltip: localizations.save,
-        //   ),
-        // ],
       ),
       body: Form(
         key: _formKey,
@@ -419,7 +329,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionHeader("localizations.ProviderImage"),
+                    _buildSectionHeader(localizations.providerImage),
                     ImagePickerSection(
                       initialImageUrl: _supplierImageUrl,
                       entityType: 'supplier',
@@ -446,7 +356,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                       ? localizations.addBusinessNameMsg
                       : null,
                   initialValue: _provider_name),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               _buildTextField(context,
                   label: localizations.streetText,
                   icon: Icons.business,
@@ -454,7 +364,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                   validator: (value) =>
                       value?.isEmpty ?? true ? localizations.streetText : null,
                   initialValue: _address_street),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               _buildTextField(context,
                   label: localizations.cityText,
                   icon: Icons.business,
@@ -462,7 +372,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                   validator: (value) =>
                       value?.isEmpty ?? true ? localizations.cityText : null,
                   initialValue: _address_city),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               _buildTextField(context,
                   label: localizations.postalCodeText,
                   icon: Icons.business,
@@ -472,7 +382,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                       : null,
                   initialValue: _address_postal_code),
 
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               _buildTextField(context,
                   label: localizations.countryText,
                   icon: Icons.business,
@@ -499,7 +409,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                       _provider_organisation_name =
                           value.provider_organisation_name;
                     },
-                    hintText: "localizations.selectOrganisationHintText",
+                    hintText: localizations.selectOrganisationHintText,
                   ),
                   // _buildOrgPicker(conterxt),
 
@@ -611,9 +521,16 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               ElevatedButton(
                 onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary, // Button background color
+                  foregroundColor: Theme.of(context)
+                      .colorScheme
+                      .onPrimary, // Text & icon color
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12), // optional
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
                   ),
                 ),
                 child: Text(

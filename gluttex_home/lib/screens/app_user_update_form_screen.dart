@@ -5,6 +5,7 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_constants/gluttex_response_codes.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
@@ -107,18 +108,20 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
             .updateAppUser(localUser);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.putSuccess),
-              backgroundColor: Colors.green,
-            ),
-          );
+          ResponseHandler.handleResponse(
+              context: context,
+              statusCode: 200,
+              responseCode: "PUT_SUCCESS",
+              finalMessage: AppLocalizations.of(context)!.putSuccess);
           Navigator.pop(context, localUser);
         }
-      } catch (_) {
-        if (mounted) {
-          _showErrorSnackbar(AppLocalizations.of(context)!.putFailure);
-        }
+      } on GluttexException catch (e) {
+        // _showErrorSnackbar(AppLocalizations.of(context)!.putFailure);
+        ResponseHandler.handleResponse(
+            context: context,
+            statusCode: 200,
+            responseCode: e.message,
+            finalMessage: AppLocalizations.of(context)!.putSuccess);
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -222,9 +225,17 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                     const SizedBox(height: 32),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .primary, // Button background color
+                        foregroundColor: Theme.of(context)
+                            .colorScheme
+                            .onPrimary, // Text & icon color
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12), // optional
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius:
+                              BorderRadius.circular(12), // Rounded corners
                         ),
                       ),
                       onPressed: _submitForm,

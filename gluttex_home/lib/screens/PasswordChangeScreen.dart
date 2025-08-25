@@ -252,9 +252,16 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary, // Button background color
+                  foregroundColor: Theme.of(context)
+                      .colorScheme
+                      .onPrimary, // Text & icon color
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12), // optional
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
                   ),
                 ),
                 child: _isSubmitting

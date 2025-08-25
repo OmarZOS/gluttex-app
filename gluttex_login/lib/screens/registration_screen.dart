@@ -115,9 +115,16 @@ class _RegistrationFormState extends State<RegistrationForm> {
               // Submit Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary, // Button background color
+                  foregroundColor: Theme.of(context)
+                      .colorScheme
+                      .onPrimary, // Text & icon color
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12), // optional
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
                   ),
                 ),
                 onPressed: _submitForm,

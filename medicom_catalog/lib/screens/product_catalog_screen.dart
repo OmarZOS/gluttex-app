@@ -7,9 +7,7 @@ import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/preferenceChangeNotifier.dart';
-import 'package:medicom_catalog/screens/cart_screen.dart';
 import 'package:medicom_catalog/screens/components/ProductCard.dart';
-import 'package:medicom_catalog/screens/orders_screen.dart';
 import 'package:provider/provider.dart';
 
 class ProductCatalogScreen extends StatefulWidget {
@@ -110,9 +108,9 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
                       .copyWith(color: Theme.of(context).colorScheme.onPrimary),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(builder: (context) => OrdersScreen()),
+                      AppRoutes.ordersPage,
                     );
                   },
                 ),
@@ -127,10 +125,9 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
                       .copyWith(color: Theme.of(context).colorScheme.onPrimary),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const CartScreen()),
+                      AppRoutes.cartPage,
                     );
                   },
                 ),
@@ -176,20 +173,6 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: Icon(Icons.add_circle,
-        //         color: Theme.of(context).colorScheme.onSurface),
-        //     onPressed: () {
-        //       Navigator.push(
-        //         context,
-        //         MaterialPageRoute(
-        //             builder: (context) => const ProductFormScreen()),
-        //       );
-        //     },
-        //   ),
-        //   const SizedBox(width: GluttexConstants.kDefaultPaddin / 2),
-        // ],
       ),
       body: Consumer<ProductNotifier>(
         builder: (context, productNotifier, child) {

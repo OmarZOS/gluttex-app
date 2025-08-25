@@ -286,4 +286,6 @@ class AppRoutes {
   static const String providerCreate = '/provider/create';
   static const String userEdit = '/user/edit';
   static const String imageUpload = '/image/upload';
+  static const String cartPage = '/cart';
+  static const String ordersPage = '/orders';
 }
