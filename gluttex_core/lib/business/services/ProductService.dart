@@ -12,6 +12,7 @@ abstract class ProductService {
       {int userId = 0,
       int providerId = 0,
       int category = 0,
+      String query = "",
       int page = 1,
       int limit = 10}) async {
     return null;

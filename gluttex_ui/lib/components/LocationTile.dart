@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_ui/components/contactTile.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 ListTile buildLocationTile(BuildContext context, Supplier supplier) {

@@ -16,6 +16,7 @@ class ProductNotifier extends ChangeNotifier {
   int currentCategory = 0;
   int currentUserId = 0;
   int currentProviderId = 0;
+  String currentSearchQuery = "";
 
   final int itemsPerPage = GluttexConstants.itemsPerPage;
   List<String> get categories => _productCategories;
@@ -91,22 +92,26 @@ class ProductNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchProducts(
-      {int categoryId = 0,
-      int userId = 0,
-      int providerId = 0,
-      bool reset = false}) async {
+  Future<void> fetchProducts({
+    int categoryId = 0,
+    int userId = 0,
+    int providerId = 0,
+    String query = "",
+    bool reset = false,
+  }) async {
     if (isLoading) return;
 
+    // Reset when filters change
     if (reset ||
         currentCategory != categoryId ||
         currentUserId != userId ||
-        currentProviderId != providerId) {
+        currentProviderId != providerId ||
+        currentSearchQuery != query) {
       currentCategory = categoryId;
       currentUserId = userId;
       currentProviderId = providerId;
+      currentSearchQuery = query;
       currentPage = 0;
-
       _products.clear();
     }
 
@@ -116,8 +121,9 @@ class ProductNotifier extends ChangeNotifier {
     try {
       final fetchedProducts = await _productService.getAllProducts(
         userId: currentUserId,
-        category: categoryId,
-        providerId: providerId,
+        category: currentCategory,
+        providerId: currentProviderId,
+        query: currentSearchQuery,
         page: currentPage * itemsPerPage,
         limit: itemsPerPage,
       );
@@ -127,7 +133,6 @@ class ProductNotifier extends ChangeNotifier {
           _products[product.id_product!] = product;
         }
         currentPage++;
-        notifyListeners();
       }
     } catch (e) {
       log("Failed to fetch products: $e");
@@ -135,6 +140,16 @@ class ProductNotifier extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> searchProducts(String query, {bool reset = true}) async {
+    await fetchProducts(
+      categoryId: currentCategory,
+      userId: currentUserId,
+      providerId: currentProviderId,
+      query: query,
+      reset: reset,
+    );
   }
 
   // Helper method to filter products by category

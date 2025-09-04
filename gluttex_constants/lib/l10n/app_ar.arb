@@ -612,6 +612,7 @@
   "noOrganisationsFound": "لم يتم العثور على مؤسسات",
   "createNew": "إنشاء جديد",
   "organisationText": "المؤسسة",
-  "by_organisation": "من طرف: {org_name}"
+  "by_organisation": "من طرف: {org_name}",
+  "no_location_information_available":"لا توجد معلومات عن الموقع"
   
 }

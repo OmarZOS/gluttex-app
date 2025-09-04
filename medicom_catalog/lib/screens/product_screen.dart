@@ -12,7 +12,7 @@ import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/preferenceChangeNotifier.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:gluttex_ui/SupplierProductCard.dart';
-import 'package:gluttex_ui/components/supplier_screen.dart';
+import 'package:gluttex_ui/components/supplier/supplier_screen.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
 import 'package:medicom_catalog/screens/components/ProductOwner.dart';
 import 'package:medicom_catalog/screens/components/add_to_cart.dart';

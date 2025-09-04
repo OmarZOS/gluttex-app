@@ -1603,4 +1603,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String by_organisation(Object org_name) {
     return 'من طرف: $org_name';
   }
+
+  @override
+  String get no_location_information_available => 'لا توجد معلومات عن الموقع';
 }

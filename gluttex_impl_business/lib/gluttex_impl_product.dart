@@ -30,6 +30,19 @@ class ProductServiceImpl implements ProductService {
         ProductId);
   }
 
+  Future<List<Product>> searchProductsByToken(
+      String token, int offset, int itemsPerPage) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    List<dynamic> data = await storageService.getAll(
+      '${GluttexConstants.apiBaseUrl}${GluttexConstants.getProductSearchByTokenEndpoint}/$token/$offset/$itemsPerPage',
+    );
+
+    List<Product> products = data
+        .map((data) => Product.fromSearchJson(data as Map<String, dynamic>))
+        .toList();
+    return products;
+  }
+
   @override
   Future<Product?> updateProduct(Product updatedProduct) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
@@ -56,6 +69,7 @@ class ProductServiceImpl implements ProductService {
       {int userId = 0,
       int providerId = 0,
       int category = 0,
+      String query = "",
       int page = 1,
       int limit = 10}) async {
     try {
@@ -63,8 +77,14 @@ class ProductServiceImpl implements ProductService {
       StorageService storageService = GluttexLocator.get<StorageService>();
 
       String route;
-      route =
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllProductsEndpoint}/$userId/$providerId/$category/$page/$limit";
+
+      if (query != "")
+        // ignore: curly_braces_in_flow_control_structures
+        return searchProductsByToken(query, page, limit);
+      else
+        // ignore: curly_braces_in_flow_control_structures
+        route =
+            "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllProductsEndpoint}/$userId/$providerId/$category/$page/$limit";
 
       // Make a call to get all products
       List<dynamic> responseData = await storageService.getAll(route);

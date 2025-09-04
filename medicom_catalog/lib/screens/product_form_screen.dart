@@ -10,7 +10,7 @@ import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_ui/Services/ResponseHandler.dart';
-import 'package:gluttex_ui/components/supplier_picker.dart';
+import 'package:gluttex_ui/components/supplier/supplier_picker.dart';
 import 'package:gluttex_ui/components/ImagePickerSection.dart';
 import 'package:gluttex_ui/components/category_picker.dart';
 import 'package:provider/provider.dart';

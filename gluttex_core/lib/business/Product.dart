@@ -87,6 +87,74 @@ class Product {
     );
   }
 
+  factory Product.fromSearchJson(dynamic json) {
+    if (json == null) {
+      return Product(
+        id_product: 0,
+        product_provider_id: 0,
+        product_category_id: 0,
+        id_product_category: 0,
+        id_product_image: 0,
+        product_ref_id: 0,
+        product_name: "",
+        product_brand: "",
+        product_barcode: "",
+        product_category_desc: "Missing",
+        product_image_url: "",
+        product_price: 0.0,
+        product_quantity: 0,
+        product_description: "",
+        product_created_at: DateTime.now(),
+        product_last_updated: DateTime.now(),
+        product_owner_id: 0,
+      );
+    }
+
+    // handle images if they exist
+    String? imageUrl;
+    int imageId = 0;
+    if (json['product_image'] != null && json['product_image'] is List) {
+      final images = json['product_image'] as List;
+      if (images.isNotEmpty) {
+        final lastImage = images.last as Map<String, dynamic>;
+        imageId = lastImage["id_product_image"] ?? 0;
+        imageUrl = lastImage["product_image_url"];
+      }
+    }
+
+    // handle category description if present
+    String productCategory = "Missing";
+    if (json['product_category'] != null &&
+        json['product_category'] is Map<String, dynamic>) {
+      productCategory =
+          json['product_category']?['product_category_desc'] ?? "Missing";
+    }
+
+    return Product(
+      id_product: json['id_product'] ?? 0,
+      product_provider_id: json['product_provider_id'] ?? 0,
+      product_category_id: json['product_category_id'] ?? 0,
+      id_product_category: json['product_category_id'] ?? 0,
+      id_product_image: imageId,
+      product_ref_id: json['product_ref_id'] ?? 0,
+      product_name: json['product_name'] ?? "",
+      product_brand: json['product_brand'] ?? "",
+      product_barcode: json['product_barcode'] ?? "",
+      product_category_desc: productCategory,
+      product_image_url: imageUrl ?? "",
+      product_price: (json['product_price'] is num)
+          ? (json['product_price'] as num).toDouble()
+          : 0.0,
+      product_quantity: json['product_quantity'] ?? 0,
+      product_description: json['product_description'] ?? "",
+      product_created_at:
+          DateTime.tryParse(json['created'] ?? "") ?? DateTime.now(),
+      product_last_updated:
+          DateTime.tryParse(json['last_updated'] ?? "") ?? DateTime.now(),
+      product_owner_id: json['product_owner'] ?? 0,
+    );
+  }
+
   Product copyWith({
     int? id_product,
     int? product_quantity,

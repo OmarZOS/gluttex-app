@@ -161,6 +161,81 @@ class Supplier {
     );
   }
 
+  factory Supplier.fromSearchJson(Map<String, dynamic> json) {
+    // Handle both flat and nested forms
+    final provider = (json['product_provider'] is List &&
+            (json['product_provider'] as List).isNotEmpty)
+        ? json['product_provider'][0] as Map<String, dynamic>
+        : json; // fallback: assume flat
+
+    final org = (provider['product_provider_org'] is Map)
+        ? provider['product_provider_org'] as Map<String, dynamic>
+        : {};
+
+    final loc = (provider['product_provider_location'] is Map)
+        ? provider['product_provider_location'] as Map<String, dynamic>
+        : {
+            "id_location": json['id_location'],
+            "position_wkt": json['position_wkt'],
+          };
+
+    final addr = (loc['location_address'] is Map)
+        ? loc['location_address'] as Map<String, dynamic>
+        : {
+            "id_address": json['id_address'],
+            "address_street": json['address_street'],
+            "address_city": json['address_city'],
+            "address_postal_code": json['address_postal_code'],
+            "address_country": json['address_country'],
+          };
+
+    // Parse WKT "POINT(lon lat)"
+    double? latitude;
+    double? longitude;
+    final wkt = loc['position_wkt'] ?? json['position_wkt'];
+    if (wkt is String) {
+      final match =
+          RegExp(r'POINT\(([-\d.]+)\s+([-\d.]+)\)').firstMatch(wkt.trim());
+      if (match != null) {
+        longitude = double.tryParse(match.group(1)!);
+        latitude = double.tryParse(match.group(2)!);
+      }
+    }
+
+    return Supplier(
+      idProviderDetails:
+          json['idprovider_details_id'] ?? provider['idprovider_details_id'],
+      idProductProvider:
+          provider['id_product_provider'] ?? json['id_product_provider'],
+      id_provider_organisation: org['idprovider_organisation'] ??
+          json['idprovider_organisation'] ??
+          0,
+      provider_organisation_name: org['provider_organisation_name'] ??
+          json['provider_organisation_name'],
+      provider_organisation_desc: org['provider_organisation_desc'] ?? "",
+      productProviderDetailsId: provider['product_provider_details_id'] ?? 0,
+      providerName:
+          json['provider_name'] ?? provider['provider_name'] ?? 'Unknown',
+      providerContactInfo:
+          json['provider_contact_info'] ?? provider['provider_contact_info'],
+      productProviderOwnerId:
+          provider['product_provider_owner'] ?? json['product_provider_owner'],
+      locationLatitude: latitude ?? 0.0,
+      locationLongitude: longitude ?? 0.0,
+      productProviderTypeId: provider['product_provider_type_id'] ??
+          json['product_provider_type_id'],
+      location_address_id: addr['id_address'],
+      address_street: addr['address_street'],
+      address_city: addr['address_city'],
+      address_postal_code: addr['address_postal_code'],
+      address_country: addr['address_country'],
+      locationName: loc['location_name'],
+      id_location: loc['id_location'],
+      supplier_image_url: json['supplier_image_url'],
+      supplier_image_id: json['supplier_image_id'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       "supplier": {

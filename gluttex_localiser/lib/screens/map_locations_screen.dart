@@ -169,7 +169,7 @@ class _MapScreenState extends State<MapScreen> {
           },
           initialCameraPosition: CameraPosition(
             target: initialPosition,
-            zoom: 12.0,
+            zoom: 10.0,
           ),
           markers: _markers,
           myLocationEnabled: true,

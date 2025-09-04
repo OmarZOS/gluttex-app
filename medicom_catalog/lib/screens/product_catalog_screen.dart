@@ -47,7 +47,10 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
         categs;
   }
 
-  void _filterProducts() {}
+  void _filterProducts() {
+    String query = _searchController.text;
+    Provider.of<ProductNotifier>(context, listen: false).searchProducts(query);
+  }
 
   void _selectCategory(int index) {
     _selectedCategoryId = index;

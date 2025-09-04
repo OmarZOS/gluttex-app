@@ -142,12 +142,108 @@ class SupplierChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void searchSuppliers(String query) {
+  Future<void> searchSuppliers(String query) async {
+    // Always filter locally first
     _filteredSuppliers = _suppliers
         .where((supplier) =>
             supplier.providerName.toLowerCase().contains(query.toLowerCase()))
         .toList();
+
+    isLoading = true;
     notifyListeners();
+
+    try {
+      // Fetch remote results
+      final fetchedSuppliers = await _supplierService.searchSuppliersByToken(
+        query,
+        currentOrganisationPage,
+        _currentPage * _itemsPerPage,
+      );
+
+      // Merge without duplicates
+      for (var newSupplier in fetchedSuppliers) {
+        final exists = _suppliers.any(
+          (existing) =>
+              existing.idProductProvider == newSupplier.idProductProvider,
+        );
+        if (!exists) {
+          _suppliers.add(newSupplier);
+        }
+      }
+
+      // Re-filter with updated supplier list
+      _filteredSuppliers = _suppliers
+          .where((supplier) =>
+              supplier.providerName.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+
+      _currentPage++;
+    } catch (e, st) {
+      debugPrint("Error fetching suppliers: $e\n$st");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> searchSuppliersByGeo({
+    required double longitude,
+    required double latitude,
+    required double distance,
+    int offset = 0,
+    int itemsPerPage = 20,
+    bool reset = false,
+  }) async {
+    if (reset) {
+      _currentPage = 0;
+      _suppliers.clear();
+      _filteredSuppliers.clear();
+      notifyListeners();
+    }
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final fetchedSuppliers = await _supplierService.searchSuppliersByGeo(
+        longitude,
+        latitude,
+        offset,
+        itemsPerPage,
+        distance,
+      );
+
+      // Only add non-duplicates
+      for (var newSupplier in fetchedSuppliers) {
+        final exists = _suppliers.any(
+          (existing) =>
+              existing.idProductProvider == newSupplier.idProductProvider,
+        );
+        if (!exists) {
+          _suppliers.add(newSupplier);
+        }
+      }
+
+      // Show only suppliers from the fetched set when filtering by geo
+      if (reset) {
+        _filteredSuppliers = List.from(fetchedSuppliers);
+      } else {
+        _filteredSuppliers.addAll(
+          fetchedSuppliers.where((s) => !_filteredSuppliers.any(
+                (existing) => existing.idProductProvider == s.idProductProvider,
+              )),
+        );
+      }
+
+      if (fetchedSuppliers.isNotEmpty) {
+        _currentPage++;
+      }
+    } catch (e, st) {
+      debugPrint("Error fetching suppliers by geo: $e\n$st");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> getCurrentLocation() async {

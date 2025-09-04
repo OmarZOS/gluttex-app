@@ -84,6 +84,80 @@ class Recipe {
         recipe_ingredients: ingredientsMap);
   }
 
+  factory Recipe.fromSearchJson(Map<String, dynamic> json) {
+    // 🖼 Handle image safely
+    String? imageUrl;
+    int cardImageId = 0;
+    if (json['recipe_image'] is List &&
+        (json['recipe_image'] as List).isNotEmpty) {
+      final lastImage = json['recipe_image'].last;
+      if (lastImage is Map<String, dynamic>) {
+        cardImageId = lastImage["id_recipe_image"] ?? 0;
+        imageUrl = lastImage["recipe_image_url"];
+      }
+    }
+
+    // ⏱ Parse preparation time safely ("1h15", "0h45", "2h", "30m", etc.)
+    Duration preparationDuration = Duration.zero;
+    final rawTime = json['recipe_preparation_time']?.toString() ?? "";
+    final timeMatch = RegExp(r'(?:(\d+)h)?(?:(\d+)m)?').firstMatch(rawTime);
+    if (timeMatch != null) {
+      final hours = int.tryParse(timeMatch.group(1) ?? "0") ?? 0;
+      final minutes = int.tryParse(timeMatch.group(2) ?? "0") ?? 0;
+      preparationDuration = Duration(hours: hours, minutes: minutes);
+    }
+
+    // 🥦 Ingredients
+    Map<int, String> ingredientsMap = {};
+    if (json['recipe_contains_ingredient'] is List) {
+      for (var ingredient in json['recipe_contains_ingredient']) {
+        if (ingredient is Map<String, dynamic>) {
+          final id = ingredient['contained_ingredient_id'];
+          if (id != null) {
+            ingredientsMap[id] =
+                ingredient['contained_quantity']?.toString() ?? "";
+          }
+        }
+      }
+    }
+
+    // 📂 Category
+    String category = "";
+    if (json['recipe_category'] is Map<String, dynamic>) {
+      category = json['recipe_category']?['recipe_category_desc'] ?? "";
+    }
+
+    // 🗓 Dates
+    DateTime? createdAt;
+    DateTime? updatedAt;
+    try {
+      if (json['recipe_creation'] != null) {
+        createdAt = DateTime.tryParse(json['recipe_creation']);
+      }
+      if (json['recipe_last_updated'] != null) {
+        updatedAt = DateTime.tryParse(json['recipe_last_updated']);
+      }
+    } catch (_) {
+      // fallback: keep null
+    }
+
+    return Recipe(
+      id_recipe: json['id_recipe'] ?? 0,
+      recipe_owner_id: json['recipe_owner_id'] ?? 0,
+      recipe_category_id: json['recipe_category_id'] ?? 0,
+      id_recipe_image: cardImageId,
+      recipe_image_url: imageUrl ?? "",
+      recipe_name: json['recipe_name'] ?? "",
+      recipe_description: json['recipe_description'] ?? "",
+      recipe_instruction: json['recipe_instructions'] ?? "",
+      recipe_preparation_time: preparationDuration,
+      recipe_created_at: createdAt,
+      recipe_last_updated: updatedAt,
+      recipe_category_desc: category,
+      recipe_ingredients: ingredientsMap,
+    );
+  }
+
   static Map<String, dynamic> ingredientsFromJson(List<dynamic> json) {
     throw UnimplementedError();
   }

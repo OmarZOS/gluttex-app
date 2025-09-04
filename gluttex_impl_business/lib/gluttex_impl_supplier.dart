@@ -87,6 +87,34 @@ class SupplierServiceImpl implements SupplierService {
   }
 
   @override
+  Future<List<Supplier>> searchSuppliersByToken(
+      String token, int offset, int itemsPerPage) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    List<dynamic> data = await storageService.getAll(
+      '${GluttexConstants.apiBaseUrl}${GluttexConstants.getSupplierSearchByTokenEndpoint}/$token/$offset/$itemsPerPage',
+    );
+
+    List<Supplier> suppliers = data
+        .map((data) => Supplier.fromSearchJson(data as Map<String, dynamic>))
+        .toList();
+    return suppliers;
+  }
+
+  @override
+  Future<List<Supplier>> searchSuppliersByGeo(double longitude, double latitude,
+      int offset, int itemsPerPage, double distance) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    List<dynamic> data = await storageService.getAll(
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.getSupplierSearchByGeoEndpoint}/$longitude/$latitude/$offset/$itemsPerPage',
+        params: {'distance_km': distance});
+
+    final suppliers = (data)
+        .map((item) => Supplier.fromSearchJson(item as Map<String, dynamic>))
+        .toList();
+    return suppliers;
+  }
+
+  @override
   Future<List<Supplier>> getAllSuppliers(
       int owner_id, int org_id, int offset, int itemsPerPage) async {
     try {

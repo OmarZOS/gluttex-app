@@ -32,7 +32,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
     _searchController.addListener(_onSearchChanged);
     _scrollController.addListener(_scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifier.fetchRecipes(_selectedCategoryId);
+      notifier.fetchRecipes(categoryId: _selectedCategoryId);
     });
     if (notifier.recipeIngredients.isEmpty) {
       log("Fetching ingredients again");
@@ -55,24 +55,25 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
   }
 
   void _onSearchChanged() {
-    setState(() => _isSearching = _searchController.text.isNotEmpty);
+    _filterRecipesBySearch();
+    // setState(() => _isSearching = _searchController.text.isNotEmpty);
   }
 
   void _selectCategory(int index) {
     setState(() => _selectedCategoryId = index);
-    notifier.fetchRecipes(_selectedCategoryId, reset: true);
+    notifier.fetchRecipes(categoryId: _selectedCategoryId, reset: true);
   }
 
   void _scrollListener() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 100 &&
         !notifier.isLoading) {
-      notifier.fetchRecipes(_selectedCategoryId);
+      notifier.fetchRecipes(categoryId: _selectedCategoryId);
     }
   }
 
   Future<void> _refreshRecipes() async {
-    await notifier.fetchRecipes(_selectedCategoryId, reset: true);
+    await notifier.fetchRecipes(categoryId: _selectedCategoryId, reset: true);
   }
 
   @override
@@ -114,7 +115,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
         builder: (context, recipeNotifier, child) {
           final recipes =
               recipeNotifier.filterRecipesByCategory(_selectedCategoryId);
-          final filteredRecipes = _filterRecipesBySearch(recipes);
+          // final filteredRecipes = _filterRecipesBySearch(recipes);
 
           return Column(
             children: [
@@ -123,7 +124,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: GluttexConstants.kDefaultPaddin),
-                  child: _buildRecipeList(recipeNotifier, filteredRecipes),
+                  child: _buildRecipeList(recipeNotifier, recipes),
                 ),
               ),
             ],
@@ -241,13 +242,10 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
     );
   }
 
-  List<Recipe> _filterRecipesBySearch(List<Recipe> recipes) {
-    if (_searchController.text.isEmpty) return recipes;
-
-    return recipes.where((recipe) {
-      final query = _searchController.text.toLowerCase();
-      return (recipe.recipe_name?.toLowerCase().contains(query) ?? false);
-    }).toList();
+  void _filterRecipesBySearch() {
+    final query = _searchController.text.toLowerCase();
+    Provider.of<RecipeNotifier>(context, listen: false)
+        .fetchRecipes(searchQuery: query, reset: true);
   }
 
   Widget _buildRecipeList(RecipeNotifier recipeNotifier, List<Recipe> recipes) {

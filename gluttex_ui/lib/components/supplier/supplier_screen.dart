@@ -11,39 +11,14 @@ import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_ui/Services/ResponseHandler.dart';
 import 'package:gluttex_ui/SupplierProductCard.dart';
-import 'package:gluttex_ui/components/BusinessOwner.dart';
+import 'package:gluttex_ui/components/supplier/BusinessOwner.dart';
 import 'package:gluttex_ui/components/LocationTile.dart';
 import 'package:gluttex_ui/components/confirmation_dialogue.dart';
-import 'package:gluttex_ui/components/contactTile.dart';
+import 'package:gluttex_ui/components/supplier/contactTile.dart';
+import 'package:gluttex_ui/components/location/location_info.dart';
+import 'package:gluttex_ui/components/supplier/delete_confirm.dart';
 // import 'package:gluttex_ui/components/SupplierProductCard.dart';
 import 'package:provider/provider.dart';
-
-void _showDeleteConfirmation(BuildContext context,
-    SupplierChangeNotifier supplierNotifer, int idProductProvider) {
-  showConfirmationDialog(
-    context,
-    AppLocalizations.of(context)!.recipedeletionConfirmationMessage,
-    () async {
-      try {
-        await supplierNotifer.deleteSupplier(idProductProvider);
-        ResponseHandler.handleResponse(
-          context: context,
-          statusCode: 200,
-          responseCode: "SUCCESS",
-          finalMessage: AppLocalizations.of(context)!.deleteSuccess,
-        );
-        Navigator.pop(context);
-      } on GluttexException catch (e) {
-        ResponseHandler.handleResponse(
-          context: context,
-          statusCode: e.statusCode ?? 300,
-          responseCode: e.message,
-          finalMessage: AppLocalizations.of(context)!.deleteFailure,
-        );
-      }
-    },
-  );
-}
 
 void showSupplierDetails(BuildContext context, Supplier supplier) {
   final theme = Theme.of(context);
@@ -204,7 +179,7 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                                         iconSize: 27,
                                         color: theme.colorScheme.tertiary,
                                         onPressed: () {
-                                          _showDeleteConfirmation(
+                                          showDeleteConfirmation(
                                             context,
                                             supplierNotifer,
                                             supplier.idProductProvider,
@@ -249,8 +224,7 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                         delegate: SliverChildListDelegate([
                           const SizedBox(height: 16),
                           _buildSectionHeader(context, loc!.locationText),
-                          _buildLocationInfo(
-                              context, supplierNotifer, supplier),
+                          buildLocationInfo(context, supplierNotifer, supplier),
                           const SizedBox(height: 24),
                           if (supplier.providerContactInfo != "")
                             _buildSectionHeader(context, loc.contactInfoMsg),
@@ -384,276 +358,6 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
         },
       );
     },
-  );
-}
-
-// Add this method to your _OrganisationPickerState class
-Widget _buildLocationInfo(BuildContext context,
-    SupplierChangeNotifier supplierNotifier, Supplier supplier) {
-  // Find the supplier by name
-
-  // // If supplier not found, show appropriate message
-  // if (supplier == null) {
-  //   return _buildNoLocationInfo();
-  // }
-
-  // Use FutureBuilder to handle the async operation
-  return FutureBuilder<Supplier?>(
-    future: supplierNotifier.getSupplierById(supplier.idProductProvider),
-    builder: (context, snapshot) {
-      // Show loading state
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return _buildLocationLoading();
-      }
-
-      // Show error state
-      if (snapshot.hasError) {
-        return _buildLocationError('Failed to load location data');
-      }
-
-      // Show data
-      final detailedSupplier = snapshot.data;
-      return _buildResponsiveLocationDetails(
-          context, detailedSupplier ?? supplier);
-    },
-  );
-}
-
-// Loading state widget
-Widget _buildLocationLoading() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 12.0),
-    child: Center(
-      child: SizedBox(
-        width: 18,
-        height: 18,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Colors.grey[400]!,
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-// Error state widget
-Widget _buildLocationError(String message) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
-    child: Row(
-      children: [
-        Icon(
-          Icons.error_outline,
-          size: 14,
-          color: Colors.red[400],
-        ),
-        const SizedBox(width: 6),
-        Text(
-          message,
-          style: TextStyle(
-            color: Colors.red[600],
-            fontSize: 12,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-// Enhanced no location info widget to match premium style
-Widget _buildNoLocationInfo() {
-  return Container(
-    margin: const EdgeInsets.only(top: 4, bottom: 8),
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      // color: Colors.grey[50],
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        // color: Colors.grey,
-        width: 1,
-      ),
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            // color: Colors.grey[200],
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.location_off_outlined,
-            size: 16,
-            // color: Colors.grey[500],
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            'No location information available',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-// Responsive grid version
-Widget _buildResponsiveLocationDetails(
-    BuildContext context, Supplier supplier) {
-  final hasLocationData = (supplier.address_street.isNotEmpty) ||
-      (supplier.address_city.isNotEmpty) ||
-      (supplier.address_postal_code.isNotEmpty) ||
-      (supplier.address_country.isNotEmpty);
-
-  if (!hasLocationData) {
-    return _buildNoLocationInfo();
-  }
-
-  return Container(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildLocationTile(context, supplier),
-        const SizedBox(height: 8),
-
-        // ✅ Responsive 2-column grid
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final double itemWidth =
-                (constraints.maxWidth - 8) / 2; // half width minus spacing
-
-            return Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (supplier.address_street.isNotEmpty)
-                  SizedBox(
-                    width: itemWidth,
-                    child: _buildGridLocationItem(
-                      context,
-                      supplier.address_street,
-                      'Street',
-                      FontAwesomeIcons.road,
-                      Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                if (supplier.address_city.isNotEmpty)
-                  SizedBox(
-                    width: itemWidth,
-                    child: _buildGridLocationItem(
-                      context,
-                      supplier.address_city,
-                      'City',
-                      Icons.location_city_outlined,
-                      Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                if (supplier.address_postal_code.isNotEmpty)
-                  SizedBox(
-                    width: itemWidth,
-                    child: _buildGridLocationItem(
-                      context,
-                      supplier.address_postal_code,
-                      'Postal Code',
-                      Icons.local_post_office_outlined,
-                      Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                if (supplier.address_country.isNotEmpty)
-                  SizedBox(
-                    width: itemWidth,
-                    child: _buildGridLocationItem(
-                      context,
-                      supplier.address_country,
-                      'Country',
-                      Icons.public_outlined,
-                      Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
-      ],
-    ),
-  );
-}
-
-// Premium grid item widget
-Widget _buildGridLocationItem(BuildContext context, String text, String label,
-    IconData icon, Color color) {
-  return Container(
-    padding: const EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      // color: Colors.white,
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(
-        color: Colors.grey[200]!,
-        width: 1,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.03),
-          blurRadius: 4,
-          offset: const Offset(0, 1),
-        ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            size: 14,
-            color: color,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                text,
-                style: TextStyle(
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                  fontSize: 12,
-                  // fontWeight: FontWeight.w500,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
   );
 }
 

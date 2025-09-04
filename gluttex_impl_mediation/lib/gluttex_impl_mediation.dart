@@ -48,9 +48,9 @@ class StorageServiceImpl implements StorageService<FormData> {
   }
 
   @override
-  Future<dynamic> getAll(String destination) async {
+  Future<dynamic> getAll(String destination, {params}) async {
     try {
-      final response = await _dio.get(destination);
+      final response = await _dio.get(destination, queryParameters: params);
       if (response.statusCode == 200) {
         // developer.log('${response.data}');
         return response.data;

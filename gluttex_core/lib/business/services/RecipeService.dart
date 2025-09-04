@@ -14,7 +14,12 @@ abstract class RecipeService {
   }
 
   Future<List<Recipe>?>? getAllRecipes(
-      int category, int page, int limit) async {
+    int category,
+    int page,
+    int limit, {
+    int user_id = 0,
+    String query = "",
+  }) async {
     return null;
   }
 

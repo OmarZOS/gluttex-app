@@ -15,6 +15,7 @@ class RecipeNotifier extends ChangeNotifier {
   final Map<int, Recipe> _recipes = {};
   final Map<int, RecipeIngredient> _recipeIngredients = {};
   bool isLoading = false;
+  String currentSearch = "";
   int currentPage = 0;
   int currentCategory = 0; // Track the current category
   final int itemsPerPage = GluttexConstants.itemsPerPage;
@@ -38,7 +39,7 @@ class RecipeNotifier extends ChangeNotifier {
 
   Future<void> initialize() async {
     // await fetchIngredients(reset: true);
-    await fetchRecipes(0, reset: true);
+    await fetchRecipes(reset: true);
   }
 
   RecipeNotifier() {
@@ -59,7 +60,7 @@ class RecipeNotifier extends ChangeNotifier {
           : await _recipeService.updateRecipe(recipe));
       if (data != null) {
         updateLocalRecipe(recipe);
-        await fetchRecipes(currentCategory, reset: true);
+        await fetchRecipes(categoryId: currentCategory, reset: true);
       }
       return data;
     } catch (e) {
@@ -105,15 +106,23 @@ class RecipeNotifier extends ChangeNotifier {
     }
   }
 
-  /// Fetches paginated recipes and prevents duplicates
-  Future<void> fetchRecipes(int categoryId, {bool reset = false}) async {
+  Future<void> fetchRecipes({
+    int categoryId = 0,
+    String searchQuery = "",
+    bool reset = false,
+  }) async {
     if (isLoading) return;
 
-    if (reset || currentCategory != categoryId) {
+    // Reset if category or search changes
+    if (reset ||
+        currentCategory != categoryId ||
+        currentSearch != searchQuery) {
       currentCategory = categoryId;
+      currentSearch = searchQuery;
       currentPage = 0;
+
       if (reset) {
-        _recipes.clear(); // Only clear recipes if reset is true
+        _recipes.clear(); // Clear recipes only if reset is true
       }
     }
 
@@ -122,11 +131,15 @@ class RecipeNotifier extends ChangeNotifier {
 
     try {
       final fetchedRecipes = await _recipeService.getAllRecipes(
-          categoryId, currentPage * itemsPerPage, itemsPerPage);
+        currentCategory,
+        currentPage * itemsPerPage,
+        itemsPerPage,
+        query: currentSearch, // pass the search query
+      );
 
       if (fetchedRecipes != null && fetchedRecipes.isNotEmpty) {
         for (var recipe in fetchedRecipes) {
-          _recipes[recipe.id_recipe!] = recipe;
+          _recipes[recipe.id_recipe!] = recipe; // Prevent duplicates
         }
         currentPage++;
         notifyListeners();

@@ -1,7 +1,7 @@
 // import 'package:dio/dio.dart';
 
 abstract class StorageService<T> {
-  Future<dynamic> getAll(String destination) async {
+  Future<dynamic> getAll(String destination, {params}) async {
     return null;
   }
 

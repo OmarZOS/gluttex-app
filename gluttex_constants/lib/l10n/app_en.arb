@@ -536,5 +536,7 @@
   "noOrganisationsFound": "No organisations found",
   "createNew": "Create New",
   "organisationText": "Organisation",
-  "by_organisation": "By {org_name}"
+  "by_organisation": "By {org_name}",
+  "no_location_information_available":"No available information about location"
+
 }

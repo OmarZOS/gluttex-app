@@ -162,7 +162,7 @@
   "showMoreText":"Afficher plus",
 
 
-"question_1": "Qu'est-ce que la maladie cœliaque ?",
+  "question_1": "Qu'est-ce que la maladie cœliaque ?",
   "options_1": "Une allergie au gluten,Une intolérance permanente au gluten,Une carence en vitamines,Une infection virale",
 
   "question_2": "Quel ingrédient contient du gluten ?",
@@ -631,5 +631,7 @@
   "noOrganisationsFound": "Aucune organisation trouvée",
   "createNew": "Créer nouveau",
   "organisationText": "Organisation",
-  "by_organisation": "Par: {org_name}"
+  "by_organisation": "Par: {org_name}",
+  "no_location_information_available":"Pas d'informations disponibles"
+
 }

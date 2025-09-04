@@ -9,6 +9,16 @@ abstract class SupplierService {
     throw UnimplementedError();
   }
 
+  Future<List<Supplier>> searchSuppliersByToken(
+      String token, int offset, int itemsPerPage) {
+    throw UnimplementedError();
+  }
+
+  Future<List<Supplier>> searchSuppliersByGeo(double longitude, double latitude,
+      int offset, int itemsPerPage, double distance) {
+    throw UnimplementedError();
+  }
+
   Future<SupplierCategory?> getCategoryById(int categoryId) {
     throw UnimplementedError();
     // throw UnimplementedError();

@@ -1603,4 +1603,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String by_organisation(Object org_name) {
     return 'Par: $org_name';
   }
+
+  @override
+  String get no_location_information_available => 'Pas d\'informations disponibles';
 }

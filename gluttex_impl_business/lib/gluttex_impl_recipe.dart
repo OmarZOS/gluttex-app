@@ -50,14 +50,24 @@ class RecipeServiceImpl implements RecipeService {
   }
 
   @override
-  Future<List<Recipe>?>? getAllRecipes(int category, int page, int limit,
-      {int user_id = 0}) async {
+  Future<List<Recipe>?>? getAllRecipes(
+    int category,
+    int page,
+    int limit, {
+    int user_id = 0,
+    String query = "",
+  }) async {
     try {
       // Get the storage service instance
       StorageService storageService = GluttexLocator.get<StorageService>();
       String route;
-      route =
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllRecipesEndpoint}/$user_id/$category/$page/$limit";
+      if (query != "")
+        // ignore: curly_braces_in_flow_control_structures
+        return searchRecipesByToken(query, page, limit);
+      else
+        // ignore: curly_braces_in_flow_control_structures
+        route =
+            "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllRecipesEndpoint}/$user_id/$category/$page/$limit";
       // if (category > 0) {
       // } else {
       //   route =
@@ -88,6 +98,19 @@ class RecipeServiceImpl implements RecipeService {
       // Handle exceptions here
       return [];
     }
+  }
+
+  Future<List<Recipe>> searchRecipesByToken(
+      String token, int offset, int itemsPerPage) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    List<dynamic> data = await storageService.getAll(
+      '${GluttexConstants.apiBaseUrl}${GluttexConstants.getRecipeSearchByTokenEndpoint}/$token/$offset/$itemsPerPage',
+    );
+
+    List<Recipe> recipes = data
+        .map((data) => Recipe.fromSearchJson(data as Map<String, dynamic>))
+        .toList();
+    return recipes;
   }
 
   @override

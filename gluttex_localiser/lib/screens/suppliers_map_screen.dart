@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,7 +7,7 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_localiser/screens/supplier_form_page.dart';
-import 'package:gluttex_ui/components/supplier_screen.dart';
+import 'package:gluttex_ui/components/supplier/supplier_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_localiser/screens/map_locations_screen.dart';
@@ -24,11 +26,12 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
   late final TextEditingController _searchController;
   GoogleMapController? _mapController;
   final PanelController _panelController = PanelController();
+  dynamic _selectedLocation;
+  final ValueNotifier<bool> _isFilterApplied = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
-
     _searchController = TextEditingController();
     _fetchLocation();
   }
@@ -36,18 +39,18 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _isFilterApplied.dispose();
     super.dispose();
   }
 
-// Helper method for consistent borders
-  OutlineInputBorder _buildOutlineInputBorder({Color? borderColor}) {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(
-        color: borderColor ?? Theme.of(context).dividerColor,
-        width: 1.2,
-      ),
+  void onDeleteLocationFilter() {
+    Provider.of<SupplierChangeNotifier>(context, listen: false).fetchSuppliers(
+      reset: true, // 👈 ensures fresh search each time
     );
+    setState(() {
+      _selectedLocation = null;
+      _isFilterApplied.value = false;
+    });
   }
 
   Future<void> _fetchLocation() async {
@@ -55,20 +58,44 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
         .getCurrentLocation();
   }
 
-  void _focusOnLocation(double latitude, double longitude) {
+  void _focusOnLocation(double latitude, double longitude,
+      {double zoomLevel = 5}) {
+    _panelController.close();
     _mapController?.animateCamera(
       CameraUpdate.newLatLngZoom(
         LatLng(latitude, longitude),
-        15, // Zoom level
+        zoomLevel,
       ),
     );
-    _panelController.close(); // Close panel when focusing on location
+  }
+
+  void _applyLocationFilter(dynamic location) {
+    _focusOnLocation(location["latitude"], location["longitude"],
+        zoomLevel: location["zoom_level"]);
+    setState(() {
+      _selectedLocation = location;
+      _isFilterApplied.value = true;
+      _handleGeoSearch(location);
+    });
+  }
+
+  void _handleGeoSearch(dynamic location) {
+    Provider.of<SupplierChangeNotifier>(context, listen: false)
+        .searchSuppliersByGeo(
+      longitude: location["longitude"],
+      latitude: location["latitude"],
+      distance: location["radius_km"],
+      offset: 0,
+      itemsPerPage: 20,
+      reset: true, // 👈 ensures fresh search each time
+    );
+    _panelController.open();
   }
 
   void _handleSearch(String query) {
     Provider.of<SupplierChangeNotifier>(context, listen: false)
         .searchSuppliers(query);
-    _panelController.open(); // Open panel when searching
+    _panelController.open();
   }
 
   @override
@@ -80,8 +107,9 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
       floatingActionButton: [
         GluttexConstants.cookingChefDBId,
         GluttexConstants.supplierDBId
-      ].contains(// Cooking Chef and Supplier id in the database
-              Provider.of<AppUserNotifier>(context).appUser?.app_user_type_id)
+      ].contains(Provider.of<AppUserNotifier>(context, listen: false)
+              .appUser
+              ?.app_user_type_id)
           ? FloatingActionButton(
               backgroundColor: theme.colorScheme.primary,
               foregroundColor: theme.colorScheme.onPrimary,
@@ -98,7 +126,6 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
             )
           : null,
       appBar: AppBar(
-        // leading: ,
         title: Container(
           height: 40,
           decoration: BoxDecoration(
@@ -112,6 +139,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
           child: TextField(
             controller: _searchController,
             textInputAction: TextInputAction.search,
+            onChanged: _handleSearch,
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context)?.searchTxt,
               prefixIcon: Icon(Icons.search_outlined,
@@ -125,13 +153,9 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
       ),
       body: Consumer<SupplierChangeNotifier>(
         builder: (context, supplierNotifier, child) {
-          final suppliers = supplierNotifier.suppliers;
-          final isLoading = supplierNotifier.isLoading;
-
           return Stack(
             children: [
-              // Fallback for Web or if Map Fails
-              if (kIsWeb) // Check if web or map not initialized
+              if (kIsWeb)
                 Container(
                   color: Theme.of(context).colorScheme.surfaceVariant,
                   alignment: Alignment.center,
@@ -158,11 +182,10 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                   ),
                 )
               else
-                // Map Screen (only for mobile)
                 MapScreen(
                   onMapCreated: (controller) => _mapController = controller,
                   userLocation: supplierNotifier.currentLocation,
-                  suppliers: suppliers,
+                  suppliers: supplierNotifier.suppliers,
                   onSupplierTap: (supplier) {
                     _focusOnLocation(
                       supplier.locationLatitude,
@@ -174,7 +197,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                   },
                 ),
 
-              // Sliding Panel (always visible)
+              // Sliding Panel with optimized rebuilds
               SlidingUpPanel(
                 controller: _panelController,
                 minHeight: 80,
@@ -184,8 +207,22 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                 backdropEnabled: true,
                 backdropOpacity: 0.2,
                 backdropColor: Theme.of(context).colorScheme.onSurface,
-                panelBuilder: (scrollController) => buildPanelContent(context,
-                    suppliers, isLoading, scrollController, _focusOnLocation),
+                panelBuilder: (scrollController) {
+                  // Use a separate consumer to prevent entire panel rebuilds
+                  return Consumer<SupplierChangeNotifier>(
+                    builder: (context, supplierNotifier, child) {
+                      return PanelContent(
+                        suppliers: supplierNotifier.suppliers,
+                        isLoading: supplierNotifier.isLoading,
+                        scrollController: scrollController,
+                        focusOnLocation: _focusOnLocation,
+                        selectedLocation: _selectedLocation,
+                        onDeleteLocationFilter: onDeleteLocationFilter,
+                        applyLocationFilter: _applyLocationFilter,
+                      );
+                    },
+                  );
+                },
                 color: Theme.of(context).colorScheme.surface,
                 collapsed: _buildCollapsedPanel(context),
               ),

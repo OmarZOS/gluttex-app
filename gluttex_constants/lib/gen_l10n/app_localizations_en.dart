@@ -1546,7 +1546,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noOtherProductsAvailable => 'No other products available from this supplier.';
+  String get noOtherProductsAvailable => 'No products available from this supplier.';
 
   @override
   String get gallery => 'Gallery';
@@ -1603,4 +1603,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String by_organisation(Object org_name) {
     return 'By $org_name';
   }
+
+  @override
+  String get no_location_information_available => 'No available information about location';
 }
