@@ -12,7 +12,7 @@ abstract class OrderService {
     return null;
   }
 
-  Future<Order?> addOrder(Order Order) async {
+  Future<Order?> addOrder(dynamic order) async {
     return null;
   }
 
@@ -22,5 +22,9 @@ abstract class OrderService {
 
   Future<int?> deleteOrder(String productId) async {
     return null;
+  }
+
+  Future<List<OrderedItem>> getOrderDetails(int idOrder) async {
+    return [];
   }
 }

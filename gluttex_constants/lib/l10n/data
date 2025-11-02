@@ -1,4 +1,34 @@
 
+  String labeledAmount(String quantifier) {
+    switch (quantifier) {
+      case "g":
+        return quantifier_g;
+      case "kg":
+        return quantifier_kg;
+      case "mg":
+        return quantifier_mg;
+      case "L":
+        return quantifier_L;
+      case "mL":
+        return quantifier_mL;
+      case "pc":
+        return quantifier_pc;
+      case "pkg":
+        return quantifier_pkg;
+      case "box":
+        return quantifier_box;
+      case "bag":
+        return quantifier_bag;
+      case "slice":
+        return quantifier_slice;
+      case "cup":
+        return quantifier_cup;
+      default:
+        return notFoundError;
+    }}
+
+
+
   String getLocalizedQuestion(int index) {
     switch (index) {
       case 1:

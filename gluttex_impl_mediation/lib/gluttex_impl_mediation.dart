@@ -76,7 +76,7 @@ class StorageServiceImpl implements StorageService<FormData> {
       log('Sending data to $destination');
       log(data.toString());
       // Make the PUT request
-      final response = await _dio.put(
+      final response = await _dio.post(
         destination,
         data: data,
         options: Options(headers: {'Content-Type': 'application/json'}),
@@ -110,7 +110,7 @@ class StorageServiceImpl implements StorageService<FormData> {
       log('Sending data to $destination');
       // log(json.encode(data));
       // Make the POST request
-      final response = await _dio.post(
+      final response = await _dio.put(
         destination,
         data: data,
         options: Options(headers: {
@@ -146,7 +146,7 @@ class StorageServiceImpl implements StorageService<FormData> {
       log('Sending data to $destination');
       // log(data.toString());
       log(data.toString());
-      final response = await _dio.post(destination,
+      final response = await _dio.put(destination,
           data: data,
           queryParameters: parameters,
           options: Options(headers: {'Content-Type': 'application/json'}));
@@ -167,7 +167,7 @@ class StorageServiceImpl implements StorageService<FormData> {
     try {
       log('Sending data: $data'); // ✅ Log request data
 
-      final response = await _dio.put(
+      final response = await _dio.post(
         destination,
         data: data, // ✅ Removed json.encode(data)
         options: Options(
@@ -230,7 +230,7 @@ class StorageServiceImpl implements StorageService<FormData> {
   Future<dynamic> signInUsingProvider(String destination, String providerName,
       Map<String, dynamic> data) async {
     try {
-      final response = await _dio.post(destination,
+      final response = await _dio.put(destination,
           data: json.encode(data),
           options: Options(headers: {
             'Content-Type': 'application/json',

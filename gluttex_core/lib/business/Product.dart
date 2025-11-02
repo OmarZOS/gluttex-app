@@ -16,6 +16,7 @@ class Product {
   final String? product_brand;
   final String? product_barcode;
   final double? product_price;
+  final String? product_quantifier;
   final int? product_quantity;
   final String? product_category_desc;
   String? product_image_url;
@@ -34,6 +35,7 @@ class Product {
       required this.product_ref_id,
       required this.product_name,
       required this.product_brand,
+      required this.product_quantifier,
       required this.product_barcode,
       required this.product_category_desc,
       // required this.product_image_data,
@@ -73,6 +75,7 @@ class Product {
       product_name: json['product_name'] ?? "",
       product_brand: json['product_brand'] ?? "",
       product_barcode: json['product_barcode'] ?? "",
+      product_quantifier: json['product_quantifier'] ?? "",
       product_category_desc: productCategory,
       // product_image_data: null,
       product_image_url: imageUrl ?? "",
@@ -99,6 +102,7 @@ class Product {
         product_name: "",
         product_brand: "",
         product_barcode: "",
+        product_quantifier: "",
         product_category_desc: "Missing",
         product_image_url: "",
         product_price: 0.0,
@@ -136,6 +140,7 @@ class Product {
       product_category_id: json['product_category_id'] ?? 0,
       id_product_category: json['product_category_id'] ?? 0,
       id_product_image: imageId,
+      product_quantifier: json['product_quantifier'] ?? "",
       product_ref_id: json['product_ref_id'] ?? 0,
       product_name: json['product_name'] ?? "",
       product_brand: json['product_brand'] ?? "",
@@ -169,6 +174,7 @@ class Product {
         product_name: product_name ?? product_name,
         product_brand: product_brand ?? product_brand,
         product_barcode: product_barcode ?? product_barcode,
+        product_quantifier: product_quantifier ?? product_quantifier,
         product_category_desc: product_category_desc ?? product_category_desc,
         product_image_url: product_image_url ?? product_image_url,
         product_price: product_price ?? product_price,
@@ -190,6 +196,7 @@ class Product {
         'product_name': product_name ?? "",
         'product_brand': product_brand ?? "",
         'product_barcode': product_barcode ?? "",
+        'product_quantifier': product_quantifier ?? "",
         'product_category_desc': product_category_desc ?? "",
         'product_price': product_price ?? 0,
         'product_quantity': product_quantity ?? 0,

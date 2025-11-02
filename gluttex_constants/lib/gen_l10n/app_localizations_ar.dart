@@ -1606,4 +1606,116 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get no_location_information_available => 'لا توجد معلومات عن الموقع';
+
+  @override
+  String get orderFor => 'طلب لـ';
+
+  @override
+  String get missingProductName => 'اسم المنتج مفقود';
+
+  @override
+  String amountTxtDisplay(Object amount, Object quantifier) {
+    return '$amount $quantifier';
+  }
+
+  @override
+  String get quantifier_g => 'غرام';
+
+  @override
+  String get quantifier_kg => 'كيلوغرام';
+
+  @override
+  String get quantifier_mg => 'مليغرام';
+
+  @override
+  String get quantifier_L => 'لتر';
+
+  @override
+  String get quantifier_mL => 'مليلتر';
+
+  @override
+  String get quantifier_pc => 'قطعة';
+
+  @override
+  String get quantifier_pkg => 'عبوة';
+
+  @override
+  String get quantifier_box => 'صندوق';
+
+  @override
+  String get quantifier_bag => 'كيس';
+
+  @override
+  String get quantifier_slice => 'شريحة';
+
+  @override
+  String get quantifier_cup => 'كوب';
+
+  @override
+  String order_number(Object n) {
+    return 'رقم الطلب: $n';
+  }
+
+  @override
+  String get orderItemsTxt => 'عناصر الطلب';
+
+  @override
+  String get dateTimeNotAvailable => 'التاريخ غير متوفر';
+
+  @override
+  String dateTimeFormat(Object day, Object hour, Object min, Object month, Object year) {
+    return '$hour سا $min دقيقة، $day/$month/$year';
+  }
+
+  @override
+  String dateFormat(Object day, Object month, Object year) {
+    return '$day/$month/$year';
+  }
+
+  @override
+  String get completedTxt => 'مكتمل';
+
+  @override
+  String get deliveredTxt => 'تم التوصيل';
+
+  @override
+  String get pendingTxt => 'قيد الانتظار';
+
+  @override
+  String get cancelledTxt => 'ملغي';
+
+  @override
+  String get processingTxt => 'قيد المعالجة';
+
+  @override
+  String get unknownTxt => 'غير معروف';
+
+  @override
+  String get spentTxt => 'تم إنفاق';
+
+  @override
+  String qtyTxt(Object price, Object quantity) {
+    return 'الكمية: $price × $quantity';
+  }
+
+  @override
+  String get loadingOrders => 'جاري التحميل...';
+
+  @override
+  String get loadingOrderDetails => 'جاري تحميل تفاصيل الطلب...';
+
+  @override
+  String get failedToLoadDetails => 'فشل تحميل التفاصيل';
+
+  @override
+  String get yourOrdersWillAppearHere => 'ستظهر طلباتك هنا';
+
+  @override
+  String get refreshTxt => 'تحديث';
+
+  @override
+  String get yourOrderStats => 'إحصائيات طلباتك';
+
+  @override
+  String get viewDetails => 'عرض التفاصيل';
 }

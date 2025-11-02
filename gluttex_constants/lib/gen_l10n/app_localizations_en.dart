@@ -25,7 +25,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutProvider => 'About';
 
   @override
-  String get productQuantity => 'Quantity';
+  String get productQuantity => 'Amount';
 
   @override
   String get productReference => 'Reference';
@@ -220,7 +220,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseInputProductDescriptionMsg => 'Please enter a product description';
 
   @override
-  String get pleaseInputProductQuantityMsg => 'Please enter a product quantity';
+  String get pleaseInputProductQuantityMsg => 'Please enter a product amount';
 
   @override
   String get recipeNameText => 'Recipe Name';
@@ -244,7 +244,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get numberConstraintMsg => 'Please enter a number between 0 and 999999';
 
   @override
-  String get productQuantityText => 'Product Quantity';
+  String get productQuantityText => 'Product Amount';
 
   @override
   String get productDescriptionText => 'Product Description';
@@ -387,7 +387,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ingredientSearch => 'Search Ingredient';
 
   @override
-  String get ingredientQuantity => 'Enter Quantity';
+  String get ingredientQuantity => 'Enter Amount';
 
   @override
   String get addText => 'Add';
@@ -448,7 +448,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String orderAmountText(Object amount) {
-    return 'Quantity: $amount';
+    return 'Amount: $amount';
   }
 
   @override
@@ -1606,4 +1606,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get no_location_information_available => 'No available information about location';
+
+  @override
+  String get orderFor => 'Order for';
+
+  @override
+  String get missingProductName => 'Product name missing';
+
+  @override
+  String amountTxtDisplay(Object amount, Object quantifier) {
+    return '$amount $quantifier';
+  }
+
+  @override
+  String get quantifier_g => 'g';
+
+  @override
+  String get quantifier_kg => 'kg';
+
+  @override
+  String get quantifier_mg => 'mg';
+
+  @override
+  String get quantifier_L => 'L';
+
+  @override
+  String get quantifier_mL => 'mL';
+
+  @override
+  String get quantifier_pc => 'piece';
+
+  @override
+  String get quantifier_pkg => 'package';
+
+  @override
+  String get quantifier_box => 'box';
+
+  @override
+  String get quantifier_bag => 'bag';
+
+  @override
+  String get quantifier_slice => 'slice';
+
+  @override
+  String get quantifier_cup => 'cup';
+
+  @override
+  String order_number(Object n) {
+    return 'Order Number: $n';
+  }
+
+  @override
+  String get orderItemsTxt => 'Order Items';
+
+  @override
+  String get dateTimeNotAvailable => 'Date not available';
+
+  @override
+  String dateTimeFormat(Object day, Object hour, Object min, Object month, Object year) {
+    return '$day/$month/$year $hour:$min';
+  }
+
+  @override
+  String dateFormat(Object day, Object month, Object year) {
+    return '$day/$month/$year';
+  }
+
+  @override
+  String get completedTxt => 'Completed';
+
+  @override
+  String get deliveredTxt => 'Delivered';
+
+  @override
+  String get pendingTxt => 'Pending';
+
+  @override
+  String get cancelledTxt => 'Cancelled';
+
+  @override
+  String get processingTxt => 'Processing';
+
+  @override
+  String get unknownTxt => 'Unknown';
+
+  @override
+  String get spentTxt => 'Spent';
+
+  @override
+  String qtyTxt(Object price, Object quantity) {
+    return 'Qty: $quantity × $price';
+  }
+
+  @override
+  String get loadingOrders => 'Loading...';
+
+  @override
+  String get loadingOrderDetails => 'Loading order details...';
+
+  @override
+  String get failedToLoadDetails => 'Failed to load details';
+
+  @override
+  String get yourOrdersWillAppearHere => 'Your orders will appear here';
+
+  @override
+  String get refreshTxt => 'Refresh';
+
+  @override
+  String get yourOrderStats => 'Your Order Stats';
+
+  @override
+  String get viewDetails => 'View Details';
 }

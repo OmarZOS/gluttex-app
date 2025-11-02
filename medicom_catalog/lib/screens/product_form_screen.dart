@@ -34,6 +34,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   int? _productTypeId;
   double? _productPrice;
   int? _productQuantity;
+  String? _productQuantifier;
   int? _product_owner_id;
   int? _product_provider_id;
   int? _product_category_id;
@@ -83,6 +84,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _productTypeId = product?.product_category_id ?? 1;
       _productPrice = product?.product_price;
       _productQuantity = product?.product_quantity;
+      _productQuantifier = product?.product_quantifier ?? "";
       _product_owner_id =
           product?.product_owner_id ?? userNotifier.appUser!.id_app_user ?? 1;
       _productDescription = product?.product_description;
@@ -92,6 +94,35 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _id_product_image = product?.id_product_image;
 
       _initialized = true; // prevents running this block again
+    }
+  }
+
+  String _getUnitText(String unit, AppLocalizations loc) {
+    switch (unit) {
+      case 'g':
+        return loc.quantifier_g;
+      case 'kg':
+        return loc.quantifier_kg;
+      case 'mg':
+        return loc.quantifier_mg;
+      case 'L':
+        return loc.quantifier_L;
+      case 'mL':
+        return loc.quantifier_mL;
+      case 'pc':
+        return loc.quantifier_pc;
+      case 'pkg':
+        return loc.quantifier_pkg;
+      case 'box':
+        return loc.quantifier_box;
+      case 'bag':
+        return loc.quantifier_bag;
+      case 'slice':
+        return loc.quantifier_slice;
+      case 'cup':
+        return loc.quantifier_cup;
+      default:
+        return loc.quantifier_pc;
     }
   }
 
@@ -174,7 +205,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 },
               ),
               TextFormField(
-                initialValue: '$_productPrice',
+                initialValue: '${_productPrice ?? ''}',
                 decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.productPriceTxt),
                 keyboardType: TextInputType.number,
@@ -196,7 +227,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     _productPrice = double.tryParse(value ?? "0.0"),
               ),
               TextFormField(
-                initialValue: '$_productQuantity',
+                initialValue: '${_productQuantity ?? ''}',
                 decoration: InputDecoration(
                     labelText:
                         AppLocalizations.of(context)!.productQuantityText),
@@ -213,6 +244,27 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         .pleaseInputProductNameMsg;
                   }
                   return null;
+                },
+              ),
+              DropdownButtonFormField<String>(
+                // value:
+                //     _productQuantifier, // The saved unit code (e.g., "kg", "L")
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.unitText,
+                ),
+                items: GluttexConstants.productUnits.map((unit) {
+                  return DropdownMenuItem<String>(
+                    value: unit, // 🔹 Save the raw unit (not the localized one)
+                    child:
+                        Text(_getUnitText(unit, AppLocalizations.of(context)!)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _productQuantifier = value; // 🔹 Save the raw code
+                    });
+                  }
                 },
               ),
               TextFormField(
@@ -267,6 +319,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       Product product = Product(
                         id_product: _id_product ?? 0,
                         product_provider_id: selectedProviderId,
+                        product_quantifier: _productQuantifier,
                         product_owner_id: _product_owner_id,
                         product_category_id:
                             _productTypeId ?? _product_category_id,

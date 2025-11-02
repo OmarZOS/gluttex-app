@@ -1606,4 +1606,116 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get no_location_information_available => 'Pas d\'informations disponibles';
+
+  @override
+  String get orderFor => 'Commande pour';
+
+  @override
+  String get missingProductName => 'Nom du produit manquant';
+
+  @override
+  String amountTxtDisplay(Object amount, Object quantifier) {
+    return '$amount $quantifier';
+  }
+
+  @override
+  String get quantifier_g => 'g';
+
+  @override
+  String get quantifier_kg => 'kg';
+
+  @override
+  String get quantifier_mg => 'mg';
+
+  @override
+  String get quantifier_L => 'L';
+
+  @override
+  String get quantifier_mL => 'mL';
+
+  @override
+  String get quantifier_pc => 'pièce';
+
+  @override
+  String get quantifier_pkg => 'paquet';
+
+  @override
+  String get quantifier_box => 'boîte';
+
+  @override
+  String get quantifier_bag => 'sac';
+
+  @override
+  String get quantifier_slice => 'tranche';
+
+  @override
+  String get quantifier_cup => 'tasse';
+
+  @override
+  String order_number(Object n) {
+    return 'Commande n° $n';
+  }
+
+  @override
+  String get orderItemsTxt => 'Articles commandés';
+
+  @override
+  String get dateTimeNotAvailable => 'Date non disponible';
+
+  @override
+  String dateTimeFormat(Object day, Object hour, Object min, Object month, Object year) {
+    return '$day/$month/$year $hour:$min';
+  }
+
+  @override
+  String dateFormat(Object day, Object month, Object year) {
+    return '$day/$month/$year';
+  }
+
+  @override
+  String get completedTxt => 'Terminée';
+
+  @override
+  String get deliveredTxt => 'Livrée';
+
+  @override
+  String get pendingTxt => 'En attente';
+
+  @override
+  String get cancelledTxt => 'Annulée';
+
+  @override
+  String get processingTxt => 'Traitement en cours';
+
+  @override
+  String get unknownTxt => 'Inconnu';
+
+  @override
+  String get spentTxt => 'Dépensé';
+
+  @override
+  String qtyTxt(Object price, Object quantity) {
+    return 'Qté : $quantity × $price';
+  }
+
+  @override
+  String get loadingOrders => 'Chargement en cours...';
+
+  @override
+  String get loadingOrderDetails => 'Chargement des détails de la commande...';
+
+  @override
+  String get failedToLoadDetails => 'Échec du chargement des détails';
+
+  @override
+  String get yourOrdersWillAppearHere => 'Vos commandes apparaîtront ici';
+
+  @override
+  String get refreshTxt => 'Rafraîchir';
+
+  @override
+  String get yourOrderStats => 'Statistiques de vos commandes';
+
+  @override
+  String get viewDetails => 'Voir les détails';
 }

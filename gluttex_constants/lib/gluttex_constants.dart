@@ -178,6 +178,20 @@ class GluttexConstants {
     'pinch',
   ];
 
+  static List<String> productUnits = [
+    'g',
+    'kg',
+    'mg',
+    'L',
+    'mL',
+    'pc',
+    'pkg',
+    'box',
+    'bag',
+    'slice',
+    'cup',
+  ];
+
   static Color get backgroundColor => const Color(0xFF2ECC71);
   static Color get backgroundDarkColor => const Color(0xFF186A3B);
 
@@ -208,6 +222,7 @@ class GluttexConstants {
 
   static const String addOrderEndpoint = '/business/order/add';
   static const String getAllOrdersEndpoint = '/business/user/orders/all';
+  static const String getOrderDetailsEndpoint = '/business/user/orders';
 
   static const String addSupplierEndpoint = '/supplier/add';
   static const String updateSupplierEndpoint = '/supplier';
@@ -278,6 +293,14 @@ class GluttexPageIndex {
   static const int recipes = 2;
   static const int games = 3;
   static const int profile = 4;
+}
+
+class OrderStates {
+  static const String COMPLETED_ORDER_STATE = "COMPLETED";
+  static const String DELIVERED_ORDER_STATE = "DELIVERED";
+  static const String PENDING_ORDER_STATE = "PENDING";
+  static const String CANCELLED_ORDER_STATE = "CANCELLED";
+  static const String PROCESSING_ORDER_STATE = "PROCESSING";
 }
 
 class AppRoutes {

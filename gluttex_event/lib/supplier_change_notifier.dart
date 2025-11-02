@@ -50,15 +50,29 @@ class SupplierChangeNotifier extends ChangeNotifier {
     try {
       final supplier = await _supplierService.getSupplier(id.toString());
       if (supplier != null) {
-        // Add to local cache
+        // Find the index of the supplier in the cache
+        final index = _suppliers.indexWhere(
+          (s) => s.idProductProvider == supplier.idProductProvider,
+        );
 
-        _suppliers[_suppliers.indexWhere(
-                (s) => s.idProductProvider == supplier.idProductProvider)] =
-            supplier;
+        if (index != -1) {
+          // Update existing supplier
+          _suppliers[index] = supplier;
+        } else {
+          // Insert if it's new
+          _suppliers.add(supplier);
+        }
 
-        detailed_suppliers.add(supplier);
+        // Keep detailed cache in sync (avoid duplicates)
+        if (!detailed_suppliers
+            .any((s) => s.idProductProvider == supplier.idProductProvider)) {
+          detailed_suppliers.add(supplier);
+        }
+
+        // Refresh filtered list
         _filteredSuppliers = List.from(_suppliers);
       }
+
       return supplier;
     } catch (e) {
       debugPrint("Error fetching supplier by ID ($id): $e");

@@ -165,10 +165,41 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
                   if (_isUploading)
                     const Center(child: CircularProgressIndicator())
                   else if (_pickedImageFile != null)
-                    _buildImageFile(_pickedImageFile!)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.file(
+                        _pickedImageFile!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    )
                   else if (widget.initialImageUrl != null &&
                       widget.initialImageUrl!.isNotEmpty)
-                    _buildNetworkImage(widget.initialImageUrl!)
+                    ClipRRect(
+                      // Make sure this matches the condition above
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        widget.initialImageUrl!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildPlaceholder(theme, loc);
+                        },
+                      ),
+                    )
                   else
                     _buildPlaceholder(theme, loc),
 

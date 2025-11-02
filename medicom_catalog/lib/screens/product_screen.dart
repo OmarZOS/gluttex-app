@@ -434,8 +434,8 @@ class _ProductDetailsScreenContentState
 
   Widget _buildSlidingPanel(BuildContext context) {
     final theme = Theme.of(context);
-    final price =
-        (_product?.product_price ?? 0) * (_product?.product_quantity ?? 0);
+    // final price =
+    //     (_product?.product_price ?? 0) * (_product?.product_quantity ?? 0);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -463,8 +463,9 @@ class _ProductDetailsScreenContentState
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      AppLocalizations.of(context)!
-                          .price(price.toStringAsFixed(2)),
+                      AppLocalizations.of(context)!.price(
+                          ((_product.product_price ?? 0) * _quantity)
+                              .toStringAsFixed(2)),
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -542,8 +543,10 @@ class _ProductDetailsScreenContentState
         Row(
           children: [
             IconButton(
-              onPressed: () =>
-                  {log('$_quantity'), _updateQuantity(_quantity - 1)},
+              onPressed: () => {
+                log('$_quantity'),
+                if (_quantity > 1) _updateQuantity(_quantity - 1)
+              },
               icon: Icon(Icons.remove_circle,
                   size: 32, color: theme.colorScheme.error),
             ),

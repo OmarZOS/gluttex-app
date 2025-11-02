@@ -61,7 +61,7 @@ void main() {
         requestOptions: RequestOptions(path: '/supplier/add'),
       );
 
-      when(mockDio.put(
+      when(mockDio.post(
         '/supplier/add',
         data: supplierData, // Fixed: Removed JSON encoding
         options: anyNamed('options'),

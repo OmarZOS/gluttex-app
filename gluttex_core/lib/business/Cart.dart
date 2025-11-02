@@ -61,27 +61,31 @@ class Cart {
     double discount = 0.0,
     double taxRate = 0.0,
   }) {
-    assert(quantity > 0, 'Quantity must be positive');
-    assert(product.id_product != null, 'Product ID cannot be null');
+    if (quantity <= 0) {
+      throw ArgumentError('Quantity must be positive');
+    }
+    if (product.id_product == null) {
+      throw ArgumentError('Product ID cannot be null');
+    }
 
     return {
       "ordered_items": [
         {
           "id_ordered_item": 0,
-          "ordered_product_id": product.id_product,
+          "ordered_product_id": product.id_product!,
           "order_ref": 0,
           "product_discount": discount.clamp(0.0, 1.0),
           "ordered_quantity": quantity,
           "unit_price": product.product_price ?? 0.0,
           "applied_vat": taxRate.clamp(0.0, 1.0),
-        }
+        },
       ],
       "submitted_order": {
         "id_placed_order": 0,
         "ordered_timestamp": DateTime.now().toIso8601String(),
         "order_discount": discount.clamp(0.0, 1.0),
         "ordering_user_id": orderingUserId,
-      }
+      },
     };
   }
 
@@ -90,21 +94,24 @@ class Cart {
     List<CartItem> cartItems,
     int orderingUserId,
   ) {
-    if (cartItems.isEmpty)
+    if (cartItems.isEmpty) {
       throw StateError('Cannot build order with empty cart');
+    }
 
     final orderedItems = cartItems.map((item) {
-      if (item.product.id_product == null) {
-        throw StateError('Product ID cannot be null for order');
+      final product = item.product;
+
+      if (product.id_product == null) {
+        throw ArgumentError('Product ID cannot be null for order');
       }
 
       return {
         "id_ordered_item": 0,
-        "ordered_product_id": item.product.id_product,
+        "ordered_product_id": product.id_product!,
         "order_ref": 0,
         "product_discount": 0.0,
         "ordered_quantity": item.quantity,
-        "unit_price": item.product.product_price ?? 0.0,
+        "unit_price": product.product_price ?? 0.0,
         "applied_vat": 0.0,
       };
     }).toList();
@@ -112,9 +119,11 @@ class Cart {
     return {
       "ordered_items": orderedItems,
       "submitted_order": {
-        "ordering_user_id": orderingUserId,
+        "id_placed_order": 0,
         "ordered_timestamp": DateTime.now().toIso8601String(),
-      }
+        "order_discount": 0.0,
+        "ordering_user_id": orderingUserId,
+      },
     };
   }
 

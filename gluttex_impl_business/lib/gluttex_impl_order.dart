@@ -11,13 +11,13 @@ import 'package:locator/locator.dart';
 
 class OrderServiceImpl implements OrderService {
   @override
-  Future<Order?> addOrder(Order Order) async {
-    throw UnimplementedError(
-        "Already using another implementation in the change notifier.");
+  Future<Order?> addOrder(dynamic order) async {
+    //     "Already using another implementation in the change notifier.");
     StorageService storageService = GluttexLocator.get<StorageService>();
-    return await storageService.insert(
+
+    return Order.fromJson(await storageService.insert(
         GluttexConstants.apiBaseUrl + GluttexConstants.addOrderEndpoint,
-        Order.toJson());
+        order));
   }
 
   @override
@@ -34,7 +34,7 @@ class OrderServiceImpl implements OrderService {
     StorageService storageService = GluttexLocator.get<StorageService>();
     final result = await storageService.update(
         GluttexConstants.apiBaseUrl + GluttexConstants.productEndpoint,
-        '${updatedOrder.id_order}',
+        '${updatedOrder.idOrder}',
         {},
         updatedOrder.toJson());
     return Order.fromJson(result);
@@ -65,6 +65,30 @@ class OrderServiceImpl implements OrderService {
           .map((data) => Order.fromJson(data as Map<String, dynamic>))
           .toList();
       return products;
+    } catch (e, stacktrace) {
+      developer.log(e.toString());
+      developer.log(stacktrace.toString());
+      // Handle exceptions here
+      return [];
+    }
+  }
+
+  @override
+  Future<List<OrderedItem>> getOrderDetails(int idOrder) async {
+    try {
+      // Get the storage service instance
+      StorageService storageService = GluttexLocator.get<StorageService>();
+
+      // Make a call to get all products
+      List<dynamic> responseData = await storageService.getAll(
+          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getOrderDetailsEndpoint}/$idOrder");
+      // Check if the response data is not null and is a list
+      // Convert the list of dynamic maps to a list of Order objects
+      List dateien = responseData;
+      List<OrderedItem> orderedItems = dateien
+          .map((data) => OrderedItem.fromJson(data as Map<String, dynamic>))
+          .toList();
+      return orderedItems;
     } catch (e, stacktrace) {
       developer.log(e.toString());
       developer.log(stacktrace.toString());
