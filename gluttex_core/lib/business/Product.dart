@@ -189,10 +189,10 @@ class Product {
     return {
       "product": {
         'id_product': id_product ?? 0,
-        'product_provider_id': product_provider_id ?? "",
-        'product_category_id': product_category_id ?? "",
-        'id_product_category': id_product_category ?? 0,
-        'id_product_image': id_product_image ?? "",
+        'product_provider_id': product_provider_id ?? 0,
+        'product_category_id': product_category_id ?? 0,
+        'id_product_category': product_category_id ?? 0,
+        'id_product_image': id_product_image ?? 0,
         'product_name': product_name ?? "",
         'product_brand': product_brand ?? "",
         'product_barcode': product_barcode ?? "",

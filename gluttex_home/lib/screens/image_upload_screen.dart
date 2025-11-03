@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_ui/components/ImagePickerSection.dart';
@@ -81,10 +82,9 @@ class _UploadImagePageState extends State<UploadImagePage> {
 
             const SizedBox(height: 24),
 
+            // const SizedBox(height: 24),
+
             // Image Picker Section
-
-            const SizedBox(height: 24),
-
             // Upload Button
             SizedBox(
               width: double.infinity,
@@ -96,7 +96,9 @@ class _UploadImagePageState extends State<UploadImagePage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.cloud_upload),
-                label: Text(_isUploading ? 'Uploading...' : 'Upload Image'),
+                label: Text(_isUploading
+                    ? AppLocalizations.of(context)!.uploadingImage
+                    : AppLocalizations.of(context)!.uploadImage),
                 onPressed: _selectedImage != null && !_isUploading
                     ? _handleUpload
                     : null,
@@ -105,6 +107,30 @@ class _UploadImagePageState extends State<UploadImagePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonalIcon(
+                icon: const Icon(Icons.schedule_outlined, size: 20),
+                label: Text(
+                  AppLocalizations.of(context)!.laterText,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                onPressed: () {
+                  // Handle later action
+                  Navigator.pop(context, "");
+                },
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),

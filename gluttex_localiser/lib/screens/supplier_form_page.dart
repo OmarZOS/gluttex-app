@@ -67,6 +67,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   String _address_city = "";
   String _address_postal_code = "";
   String _address_country = "";
+  bool updatePage = false;
 
   GluttexImage? supplier_image;
 
@@ -88,6 +89,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
       final Supplier? supplier = args?["supplier"];
       if (supplier != null) {
+        updatePage = true;
         _idprovider_details_id = supplier.idProviderDetails;
         _id_product_provider = supplier.idProductProvider;
         _id_provider_organisation = supplier.id_provider_organisation;
@@ -228,7 +230,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               '${_selectedContactTypes[entry.key]}:${entry.value.text}')
           .join(',');
 
-      log("${_provider_contact_info}");
+      // log("${_provider_contact_info}");
 
       Supplier supplier = Supplier(
         id_location: _id_location ?? 0,
@@ -311,7 +313,9 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.addSupplierTxt),
+        title: Text(updatePage
+            ? localizations.supplierText
+            : localizations.addSupplierTxt),
       ),
       body: Form(
         key: _formKey,
@@ -331,7 +335,8 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                   children: [
                     _buildSectionHeader(localizations.providerImage),
                     ImagePickerSection(
-                      initialImageUrl: _supplierImageUrl,
+                      initialImageUrl: GluttexConstants.fsBaseUrl +
+                          (_supplierImageUrl ?? ""),
                       entityType: 'supplier',
                       ownerId: '$_id_provider_organisation',
                       entityId: '$_id_product_provider',

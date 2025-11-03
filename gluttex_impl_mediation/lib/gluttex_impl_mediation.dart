@@ -110,7 +110,7 @@ class StorageServiceImpl implements StorageService<FormData> {
       log('Sending data to $destination');
       // log(json.encode(data));
       // Make the POST request
-      final response = await _dio.put(
+      final response = await _dio.post(
         destination,
         data: data,
         options: Options(headers: {

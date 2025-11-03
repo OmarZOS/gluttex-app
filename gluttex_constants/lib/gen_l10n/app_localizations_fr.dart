@@ -1718,4 +1718,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get viewDetails => 'Voir les détails';
+
+  @override
+  String get uploadingImage => 'Téléchargement en cours...';
+
+  @override
+  String get laterText => 'Plus tard';
 }

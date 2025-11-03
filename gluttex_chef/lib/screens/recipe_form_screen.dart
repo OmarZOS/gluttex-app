@@ -42,6 +42,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   late Duration preparationTime;
   int? _recipe_category_id;
   int? _recipe_owner_id;
+  bool updatePage = false;
   int? _id_recipe;
   int? _id_recipe_image;
   DateTime? recipe_created_at;
@@ -70,19 +71,20 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
       int? owner_id = recipe?.recipe_owner_id ?? 0;
       if (owner_id == 0)
         owner_id = Provider.of<AppUserNotifier>(context)!.appUser!.id_app_user;
-
+      if (recipe?.id_recipe != 0) {
+        updatePage = true;
+      }
       _recipeName = recipe?.recipe_name;
       _recipeDescription = recipe?.recipe_description;
       _initialRecipeImageUrl = recipe?.recipe_image_url ?? "";
       _recipeInstruction = recipe?.recipe_instruction;
       _recipe_category_id = recipe?.recipe_category_id;
       _id_recipe = recipe?.id_recipe;
-      _id_recipe_image = 0;
       _recipePreparationTime = recipe?.recipe_preparation_time;
       _recipe_owner_id = owner_id;
-      preparationTime = _recipePreparationTime!;
       _selectedIngredients = recipe?.recipe_ingredients ?? {};
-
+      _id_recipe_image = 0;
+      preparationTime = _recipePreparationTime!;
       _initialized = true; // prevents running this block again
     }
   }
@@ -184,7 +186,9 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
         AppLocalizations.of(context)!.ingredientTextList.split(',');
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.updateRecipeMsg),
+        title: Text(updatePage
+            ? AppLocalizations.of(context)!.updateRecipeMsg
+            : AppLocalizations.of(context)!.insertRecipeText),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -406,7 +410,8 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               const SizedBox(height: 16.0),
               if (_id_recipe != null && _id_recipe != 0)
                 ImagePickerSection(
-                  initialImageUrl: _initialRecipeImageUrl,
+                  initialImageUrl:
+                      GluttexConstants.fsBaseUrl + _initialRecipeImageUrl,
                   entityType: 'recipe',
                   ownerId: '$_recipe_owner_id',
                   entityId: '$_id_recipe',

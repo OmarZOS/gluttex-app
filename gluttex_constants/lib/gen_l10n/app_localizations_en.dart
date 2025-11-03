@@ -1718,4 +1718,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewDetails => 'View Details';
+
+  @override
+  String get uploadingImage => 'Uploading...';
+
+  @override
+  String get laterText => 'Later';
 }

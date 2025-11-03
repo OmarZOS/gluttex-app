@@ -639,7 +639,7 @@
   "cancelledTxt": "ملغي",
   "processingTxt": "قيد المعالجة",
   "unknownTxt": "غير معروف",
-    "spentTxt": "تم إنفاق",
+  "spentTxt": "تم إنفاق",
   "qtyTxt": "الكمية: {price} × {quantity}",
   "loadingOrders": "جاري التحميل...",
   "loadingOrderDetails": "جاري تحميل تفاصيل الطلب...",
@@ -647,5 +647,7 @@
   "yourOrdersWillAppearHere": "ستظهر طلباتك هنا",
   "refreshTxt": "تحديث",
   "yourOrderStats": "إحصائيات طلباتك",
-  "viewDetails": "عرض التفاصيل"
+  "viewDetails": "عرض التفاصيل",
+  "uploadingImage" : "جاري التحميل...",  
+  "laterText" : "لاحقا"
 }

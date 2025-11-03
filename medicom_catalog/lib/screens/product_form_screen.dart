@@ -41,6 +41,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   int? _id_product;
   int? _id_product_image;
   String? imageUrl;
+  bool updatePage = false;
   String? _productDescription;
   DateTime? product_created_at;
   DateTime? product_last_updated;
@@ -77,23 +78,28 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
       final Product? product = args?["product"];
 
-      _productName = product?.product_name;
-      _productBrand = product?.product_brand;
-      _productBarcode = product?.product_barcode;
-      imageUrl = product?.product_image_url ?? "";
-      _productTypeId = product?.product_category_id ?? 1;
-      _productPrice = product?.product_price;
-      _productQuantity = product?.product_quantity;
-      _productQuantifier = product?.product_quantifier ?? "";
-      _product_owner_id =
-          product?.product_owner_id ?? userNotifier.appUser!.id_app_user ?? 1;
-      _productDescription = product?.product_description;
-      _product_provider_id = product?.product_provider_id;
-      _product_category_id = product?.product_category_id;
-      _id_product = product?.id_product;
-      _id_product_image = product?.id_product_image;
+      _productQuantifier = GluttexConstants.productUnits.first;
+      _product_category_id = 1;
 
-      _initialized = true; // prevents running this block again
+      if (product != null) {
+        updatePage = true;
+        _productName = product.product_name;
+        _productBrand = product.product_brand;
+        _productBarcode = product.product_barcode;
+        imageUrl = product.product_image_url ?? "";
+        _productTypeId = product.product_category_id ?? 1;
+        _productPrice = product.product_price;
+        _productQuantity = product.product_quantity;
+        _productQuantifier = product.product_quantifier ?? "";
+        _product_owner_id =
+            product.product_owner_id ?? userNotifier.appUser!.id_app_user ?? 1;
+        _productDescription = product.product_description;
+        _product_provider_id = product.product_provider_id;
+        _product_category_id = product.product_category_id;
+        _id_product = product.id_product;
+        _id_product_image = product.id_product_image;
+      } else
+        _product_owner_id = userNotifier.appUser!.id_app_user ?? 1;
     }
   }
 
@@ -134,7 +140,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.updateProductText),
+        title: Text(updatePage
+            ? AppLocalizations.of(context)!.updateProductText
+            : AppLocalizations.of(context)!.addProductTxt),
       ),
       // floatingActionButton: FloatingActionButton(
       //   heroTag: 'floating-button-01',
@@ -152,7 +160,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             children: [
               if (_id_product != null)
                 ImagePickerSection(
-                  initialImageUrl: imageUrl,
+                  initialImageUrl:
+                      GluttexConstants.fsBaseUrl + (imageUrl ?? ""),
                   entityType: 'product',
                   ownerId: '$_product_owner_id',
                   entityId: '$_id_product',
@@ -247,8 +256,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 },
               ),
               DropdownButtonFormField<String>(
-                // value:
-                //     _productQuantifier, // The saved unit code (e.g., "kg", "L")
+                value: _productQuantifier, // 🔹 fallback to first unit
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.unitText,
                 ),
@@ -320,7 +328,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         id_product: _id_product ?? 0,
                         product_provider_id: selectedProviderId,
                         product_quantifier: _productQuantifier,
-                        product_owner_id: _product_owner_id,
+                        product_owner_id: userNotifier.appUser!.id_app_user,
                         product_category_id:
                             _productTypeId ?? _product_category_id,
                         id_product_category: _productTypeId,
@@ -338,20 +346,31 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         product_last_updated: null,
                       );
 
-                      if (_productImage != null)
-                        // ignore: curly_braces_in_flow_control_structures
+                      String? finalImageUrl;
+
+                      // Handle image logic
+                      if (_productImage != null) {
+                        // If we have a new image, set it directly
                         product.productImage = _productImage!;
-                      if (product.id_product == 0) {
-                        product.product_image_url = await Navigator.pushNamed(
+                      } else if (product.id_product == 0) {
+                        // If it's a new product without image, navigate to upload
+                        finalImageUrl = await Navigator.pushNamed(
                             context, AppRoutes.imageUpload, arguments: {
                           "entity": "product",
-                          "id": product.id_product ?? 0
+                          "id": product.id_product
                         }) as String?;
+
+                        // Update product with the uploaded image URL
+                        if (finalImageUrl != null && finalImageUrl.isNotEmpty) {
+                          product.product_image_url = finalImageUrl;
+                        }
                       }
 
+                      // Save the product
                       await Provider.of<ProductNotifier>(context, listen: false)
                           .addOrUpdateProduct(product);
 
+                      // Show success message
                       ResponseHandler.handleResponse(
                         context: context,
                         statusCode: 200,
@@ -359,10 +378,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         finalMessage: AppLocalizations.of(context)!.putSuccess,
                       );
 
-                      Navigator.popUntil(context,
-                          (route) => route.settings.name == AppRoutes.home);
-                      // _handleResponse(inserted_product);
-                      // You can use a provider or any state management to save the product
+                      // Navigate home only after everything is complete
+                      if (mounted) {
+                        Navigator.popUntil(context,
+                            (route) => route.settings.name == AppRoutes.home);
+                      }
                     }
                   } on GluttexException catch (e) {
                     ResponseHandler.handleResponse(
@@ -370,6 +390,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       statusCode: e.statusCode ?? 500,
                       responseCode: e.message,
                       finalMessage: e.error,
+                    );
+                  } catch (e) {
+                    // Handle any other unexpected errors
+                    ResponseHandler.handleResponse(
+                      context: context,
+                      statusCode: 500,
+                      responseCode: 'UNKNOWN_ERROR',
+                      finalMessage:
+                          'An unexpected error occurred: ${e.toString()}',
                     );
                   }
                 },

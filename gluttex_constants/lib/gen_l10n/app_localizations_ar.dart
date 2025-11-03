@@ -1664,7 +1664,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String dateTimeFormat(Object day, Object hour, Object min, Object month, Object year) {
-    return '$hour سا $min دقيقة، $day/$month/$year';
+    return '$hour سا $min دقيقة، $year/$month/$day';
   }
 
   @override
@@ -1718,4 +1718,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get viewDetails => 'عرض التفاصيل';
+
+  @override
+  String get uploadingImage => 'جاري التحميل...';
+
+  @override
+  String get laterText => 'لاحقا';
 }

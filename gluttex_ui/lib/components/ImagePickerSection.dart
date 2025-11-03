@@ -284,7 +284,7 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
                       : const Icon(Icons.camera_alt, size: 22),
                   label: _isUploading
                       ? Text(
-                          "loc.uploadingImage",
+                          loc.uploadingImage,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),

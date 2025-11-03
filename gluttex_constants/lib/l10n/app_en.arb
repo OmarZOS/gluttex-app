@@ -571,5 +571,7 @@
  "yourOrdersWillAppearHere":"Your orders will appear here",
  "refreshTxt":"Refresh",
  "yourOrderStats":"Your Order Stats",
- "viewDetails":"View Details"
+ "viewDetails":"View Details",
+  "uploadingImage" : "Uploading...",  
+  "laterText" : "Later"
 }
