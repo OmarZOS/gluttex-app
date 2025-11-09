@@ -24,6 +24,7 @@ import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 import 'package:gluttex_event/preferenceChangeNotifier.dart';
+import 'package:gluttex_login/screens/web_view.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -50,7 +51,8 @@ Future<void> main() async {
 
   setupLocator();
   WidgetsFlutterBinding.ensureInitialized();
-
+  // Initialize GoogleLoginManager
+  GoogleLoginManager.initialize();
   runApp(GluttexApp(localeProvider));
 }
 

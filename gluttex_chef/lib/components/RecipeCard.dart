@@ -150,7 +150,7 @@ class RecipeCard extends StatelessWidget {
                 child: Hero(
                     tag: 'recipe-image-${recipe.id_recipe}',
                     child: Image.network(
-                      GluttexConstants.fsBaseUrl + recipe.recipe_image_url!,
+                      recipe.recipe_image_url!,
                       fit: BoxFit.cover, // Covers all available space
                       alignment: Alignment.center, // Centers the image
                       loadingBuilder: (context, child, loadingProgress) {

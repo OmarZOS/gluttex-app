@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_ui/components/ImagePickerSection.dart';
@@ -146,7 +147,6 @@ class _UploadImagePageState extends State<UploadImagePage> {
     setState(() => _isUploading = true);
 
     try {
-      // TODO: Implement your actual upload logic here
       final url = await _selectedImage?.uploadImage();
 
       // await Future.delayed(const Duration(seconds: 2)); // Simulate upload
@@ -161,7 +161,11 @@ class _UploadImagePageState extends State<UploadImagePage> {
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
-      Navigator.pop(context, url); // Return success
+      Navigator.pop(
+          context,
+          ((url != null)
+              ? (GluttexConstants.fsBaseUrl + url)
+              : "")); // Return success
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

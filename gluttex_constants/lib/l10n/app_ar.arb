@@ -649,5 +649,12 @@
   "yourOrderStats": "إحصائيات طلباتك",
   "viewDetails": "عرض التفاصيل",
   "uploadingImage" : "جاري التحميل...",  
-  "laterText" : "لاحقا"
+  "laterText" : "لاحقا",
+  "failedAuthAfterSignIn": "فشل التحقق بعد تسجيل الدخول.",
+  "loginTimeoutMsg": "انتهت مهلة تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+  "failedLogin": "فشل تسجيل الدخول. تحقق من بيانات الاعتماد الخاصة بك.",
+  "signInWithText": "تسجيل الدخول بواسطة",
+  "google": "جوجل",
+  "loggingOutText": "جاري تسجيل الخروج...",
+  "logoutConsentText": "هل أنت متأكد أنك تريد تسجيل الخروج؟"
 }

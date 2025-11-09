@@ -160,8 +160,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             children: [
               if (_id_product != null)
                 ImagePickerSection(
-                  initialImageUrl:
-                      GluttexConstants.fsBaseUrl + (imageUrl ?? ""),
+                  initialImageUrl: (imageUrl ?? ""),
                   entityType: 'product',
                   ownerId: '$_product_owner_id',
                   entityId: '$_id_product',

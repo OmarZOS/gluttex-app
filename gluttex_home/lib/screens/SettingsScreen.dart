@@ -31,38 +31,102 @@ class SettingsScreen extends StatelessWidget {
                 _SettingsSection(
                   title: AppLocalizations.of(context)!.appearanceText,
                   children: [
-                    _LanguageTile(
-                        localeProvider: Provider.of<LocaleProvider>(context,
-                            listen: false)),
+                    Consumer<LocaleProvider>(
+                      builder: (context, localeProvider, child) =>
+                          _LanguageTile(localeProvider: localeProvider),
+                    ),
                     const SizedBox(height: 8),
                     _ThemeModeTile(),
                   ],
                 ),
                 const SizedBox(height: 24),
-                _SettingsSection(
-                  title: AppLocalizations.of(context)!.accountText,
-                  children: [
-                    if (Provider.of<AppUserNotifier>(context, listen: false)
-                        .isLoggedIn)
-                      Column(
-                        children: [
-                          _ProfileUpdateTile(),
-                          const SizedBox(height: 8),
-                          _PasswordUpdateTile(),
-                          const SizedBox(height: 8),
-                        ],
-                      ),
-                    _LegalDocumentsTile(),
-                    const SizedBox(height: 8),
-                    _AboutTile(),
-                    const SizedBox(height: 8),
-                    _LogOutTile()
-                  ],
+                Consumer<AppUserNotifier>(
+                  builder: (context, authProvider, child) {
+                    return _SettingsSection(
+                      title: AppLocalizations.of(context)!.accountText,
+                      children: [
+                        if (authProvider.isAuthenticated)
+                          Column(
+                            children: [
+                              _ProfileUpdateTile(),
+                              const SizedBox(height: 8),
+                              _PasswordUpdateTile(),
+                              const SizedBox(height: 8),
+                            ],
+                          ),
+                        _LegalDocumentsTile(),
+                        const SizedBox(height: 8),
+                        _AboutTile(),
+                        const SizedBox(height: 8),
+                        _LogOutTile(
+                          () => _handleLogout(context, authProvider),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ]),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _handleLogout(BuildContext context, AppUserNotifier authProvider) {
+    if (authProvider.isAuthenticated) {
+      // Show confirmation dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.loggingOutText),
+            content: Text(AppLocalizations.of(context)!.logoutConsentText),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.cancelTxt),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  _performLogout(context, authProvider);
+                },
+                child: Text(AppLocalizations.of(context)!.logoutText),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // User is not logged in - navigate to login
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+    }
+  }
+
+  void _performLogout(BuildContext context, AppUserNotifier authProvider) {
+    // Close settings screen first
+    Navigator.pop(context);
+
+    // Sign out from auth provider
+    authProvider.signOut();
+
+    // Navigate to login screen and remove all routes
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.login,
+      (route) => false,
+    );
+
+    // Optional: Show logout success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.logoutText),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -272,26 +336,34 @@ class _PasswordUpdateTile extends StatelessWidget {
 }
 
 class _LogOutTile extends StatelessWidget {
+  final VoidCallback onLogout;
+
+  const _LogOutTile(this.onLogout);
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
+    return Consumer<AppUserNotifier>(
+      builder: (context, authProvider, child) {
+        return ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              authProvider.isAuthenticated ? Icons.logout : Icons.login,
+            ),
           ),
-          child: const Icon(Icons.logout),
-        ),
-        title: Text(
-            Provider.of<AppUserNotifier>(context, listen: false).isLoggedIn
+          title: Text(
+            authProvider.isAuthenticated
                 ? AppLocalizations.of(context)!.logoutText
-                : AppLocalizations.of(context)!.loginText),
-        // trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          // Navigator.popUntil(context, (route) => route.),
-          Provider.of<AppUserNotifier>(context, listen: false).logout();
-        });
+                : AppLocalizations.of(context)!.loginText,
+          ),
+          onTap: onLogout,
+        );
+      },
+    );
   }
 }
 

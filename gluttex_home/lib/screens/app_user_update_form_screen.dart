@@ -368,8 +368,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                       child: _editedUser.app_user_image_url != null
                           ? ClipOval(
                               child: Image.network(
-                                GluttexConstants.fsBaseUrl +
-                                    _editedUser.app_user_image_url!,
+                                _editedUser.app_user_image_url!,
                                 width: MediaQuery.of(context).size.width * 0.5,
                                 height: MediaQuery.of(context).size.width * 0.5,
                                 fit: BoxFit.cover,

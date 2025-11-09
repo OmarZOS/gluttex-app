@@ -1724,4 +1724,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get laterText => 'لاحقا';
+
+  @override
+  String get failedAuthAfterSignIn => 'فشل التحقق بعد تسجيل الدخول.';
+
+  @override
+  String get loginTimeoutMsg => 'انتهت مهلة تسجيل الدخول. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get failedLogin => 'فشل تسجيل الدخول. تحقق من بيانات الاعتماد الخاصة بك.';
+
+  @override
+  String get signInWithText => 'تسجيل الدخول بواسطة';
+
+  @override
+  String get google => 'جوجل';
+
+  @override
+  String get loggingOutText => 'جاري تسجيل الخروج...';
+
+  @override
+  String get logoutConsentText => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
 }

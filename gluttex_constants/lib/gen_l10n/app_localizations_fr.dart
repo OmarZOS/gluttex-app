@@ -1724,4 +1724,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get laterText => 'Plus tard';
+
+  @override
+  String get failedAuthAfterSignIn => 'Échec de l’authentification après la connexion.';
+
+  @override
+  String get loginTimeoutMsg => 'Délai de connexion dépassé. Veuillez réessayer.';
+
+  @override
+  String get failedLogin => 'Échec de la connexion. Vérifiez vos identifiants.';
+
+  @override
+  String get signInWithText => 'Se connecter avec';
+
+  @override
+  String get google => 'Google';
+
+  @override
+  String get loggingOutText => 'Déconnexion en cours...';
+
+  @override
+  String get logoutConsentText => 'Êtes-vous sûr de vouloir vous déconnecter ?';
 }

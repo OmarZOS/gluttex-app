@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_home/screens/profile_screen.dart';
@@ -19,224 +20,109 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
+  static const _animationDuration = Duration(milliseconds: 600);
+
+  late final AnimationController _animationController;
+  late final ProductNotifier _productNotifier;
+
   int _selectedIndex = 0;
   int _animationCount = 0;
-  late AnimationController _controller;
-  late ProductNotifier provider;
-
-  @override
-  void initState() {
-    provider = Provider.of<ProductNotifier>(context, listen: false);
-
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    // Start the animation sequence
-    // _startIconAnimation();
-  }
-
-  void _startIconAnimation() {
-    if (_selectedIndex != GluttexPageIndex.profile)
-      return; // Only animate in profile
-    _controller.forward().then((_) {
-      _controller.reverse().then((_) {
-        _animationCount++;
-        if (_animationCount < 2 && _selectedIndex == GluttexPageIndex.profile) {
-          _startIconAnimation(); // repeat only while on profile
-        }
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   static final List<Widget> _pages = <Widget>[
     const ProductCatalogScreen(),
     const SuppliersMapScreen(),
     const RecipeCatalogScreen(),
-    // CeliacScreen(),
     GameSelectionScreen(),
-    const ProfileScreen()
+    const ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _productNotifier = context.read<ProductNotifier>();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: _animationDuration,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _startIconAnimation() {
+    if (_selectedIndex != GluttexPageIndex.profile) return;
+
+    _animationController.forward().then((_) {
+      _animationController.reverse().then((_) {
+        _animationCount++;
+        if (_animationCount < 2 && _selectedIndex == GluttexPageIndex.profile) {
+          _startIconAnimation();
+        }
+      });
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      if (_selectedIndex == GluttexPageIndex.catalog) {
-        final currentCategory = provider.currentCategory;
-        log('Current Category: $currentCategory');
-        provider.fetchProducts(categoryId: currentCategory, reset: true);
-      }
-      if (_selectedIndex == GluttexPageIndex.profile) {
-        _animationCount = 0;
-        _startIconAnimation();
-      }
-      if (_selectedIndex == GluttexPageIndex.suppliers) {
-        Provider.of<SupplierChangeNotifier>(context, listen: false)
-            .fetchOrganisations();
-      }
+      _handlePageSpecificLogic(index);
     });
   }
 
-  String _getTitle(selectedIndex) {
+  void _handlePageSpecificLogic(int index) {
+    switch (index) {
+      case GluttexPageIndex.catalog:
+        _handleCatalogPage();
+        break;
+      case GluttexPageIndex.profile:
+        _handleProfilePage();
+        break;
+      case GluttexPageIndex.suppliers:
+        _handleSuppliersPage();
+        break;
+    }
+  }
+
+  void _handleCatalogPage() {
+    final currentCategory = _productNotifier.currentCategory;
+    log('Current Category: $currentCategory');
+    _productNotifier.fetchProducts(categoryId: currentCategory, reset: true);
+  }
+
+  void _handleProfilePage() {
+    _animationCount = 0;
+    _startIconAnimation();
+  }
+
+  void _handleSuppliersPage() {
+    context.read<SupplierChangeNotifier>().fetchOrganisations();
+  }
+
+  String _getTitle(int selectedIndex) {
+    final localizations = AppLocalizations.of(context);
+
     switch (selectedIndex) {
       case GluttexPageIndex.catalog:
-        return AppLocalizations.of(context)!.productsText;
+        return localizations!.productsText;
       case GluttexPageIndex.suppliers:
-        return AppLocalizations.of(context)!.providersText;
+        return localizations!.providersText;
       case GluttexPageIndex.recipes:
-        return AppLocalizations.of(context)!.recipesText;
+        return localizations!.recipesText;
       case GluttexPageIndex.games:
-        return AppLocalizations.of(context)!.gamesText;
+        return localizations!.gamesText;
       case GluttexPageIndex.profile:
-        return AppLocalizations.of(context)!.profileText;
+        return localizations!.profileText;
       default:
         return '';
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final notifier = Provider.of<AppUserNotifier>(context);
-    if (notifier.appUser == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, AppRoutes.login);
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final appUser = Provider.of<AppUserNotifier>(context).appUser;
-    final diplayName = '${appUser?.personFirstName} ${appUser?.personLastName}';
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_getTitle(_selectedIndex)),
-        actions: [
-          if (_selectedIndex == GluttexPageIndex.profile)
-            RotationTransition(
-              turns: Tween(begin: -0.05, end: 0.05)
-                  .chain(CurveTween(curve: Curves.easeInOut))
-                  .animate(_controller),
-              child: IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () => _navigateToSettings(context),
-              ),
-            ),
-        ],
-        backgroundColor: isDarkMode
-            ? GluttexConstants.backgroundDarkColor
-            : GluttexConstants.backgroundColor,
-
-        // actions: [
-        //   IconButton(
-        //       onPressed: () async {
-        //         Navigator.push(context, MaterialPageRoute(builder: (context) {
-        //           // Provider.of<AppUserNotifier>(context, listen: false)
-        //           //     .fetchAppUser('1');
-        //           return const ProfileScreen();
-        //         }));
-        //       },
-        //       icon: const Icon(CupertinoIcons.profile_circled))
-        // ],
-      ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        selectedItemColor: Theme.of(context).colorScheme.onPrimary,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              icon: const Icon(CupertinoIcons.cube_box_fill),
-              label: AppLocalizations.of(context)!.productsText,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? GluttexConstants.backgroundColor
-                  : GluttexConstants.backgroundDarkColor),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.store_sharp),
-            label: AppLocalizations.of(context)!.providersText,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? GluttexConstants.backgroundColor
-                : GluttexConstants.backgroundDarkColor,
-          ),
-          BottomNavigationBarItem(
-              icon: const Icon(Icons.restaurant_menu_outlined),
-              label: AppLocalizations.of(context)!.recipesText,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? GluttexConstants.backgroundColor
-                  : GluttexConstants.backgroundDarkColor),
-          BottomNavigationBarItem(
-            icon: const Icon(CupertinoIcons.gamecontroller_alt_fill),
-            label: AppLocalizations.of(context)!.gamesText,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? GluttexConstants.backgroundColor
-                : GluttexConstants.backgroundDarkColor,
-          ),
-          BottomNavigationBarItem(
-              icon: appUser?.id_app_user != 0 &&
-                      appUser?.app_user_image_url != null
-                  ? ClipOval(
-                      child: Image.network(
-                        GluttexConstants.fsBaseUrl +
-                            (appUser?.app_user_image_url ?? ""),
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        (loadingProgress.expectedTotalBytes ??
-                                            1)
-                                    : null,
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return const SizedBox(
-                            height: 24,
-                            // color: Colors.grey[200],
-                            child: Center(
-                              child: Icon(Icons.person, size: 24),
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  : const Icon(size: 24.0, CupertinoIcons.profile_circled),
-              label: ((appUser?.id_app_user ?? 0) == 0 || diplayName == " ")
-                  ? AppLocalizations.of(context)!.profileText
-                  : (diplayName),
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? GluttexConstants.backgroundColor
-                  : GluttexConstants.backgroundDarkColor),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
-    );
   }
 
   void _navigateToSettings(BuildContext context) {
@@ -245,11 +131,173 @@ class _HomePageState extends State<HomePage>
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => const SettingsScreen(),
         transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
+          return FadeTransition(opacity: animation, child: child);
         },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final backgroundColor = isDarkMode
+        ? GluttexConstants.backgroundDarkColor
+        : GluttexConstants.backgroundColor;
+
+    return Scaffold(
+      appBar: _buildAppBar(theme, backgroundColor),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
+      bottomNavigationBar: _buildBottomNavigationBar(backgroundColor),
+    );
+  }
+
+  AppBar _buildAppBar(ThemeData theme, Color backgroundColor) {
+    return AppBar(
+      title: Text(_getTitle(_selectedIndex)),
+      actions: [
+        _buildSettingsButton() ?? Container(),
+      ],
+      backgroundColor: backgroundColor,
+    );
+  }
+
+  Widget? _buildSettingsButton() {
+    if (_selectedIndex != GluttexPageIndex.profile) return null;
+
+    return RotationTransition(
+      turns: Tween(begin: -0.05, end: 0.05)
+          .chain(CurveTween(curve: Curves.easeInOut))
+          .animate(_animationController),
+      child: IconButton(
+        icon: const Icon(Icons.settings),
+        onPressed: () => _navigateToSettings(context),
+      ),
+    );
+  }
+
+  BottomNavigationBar _buildBottomNavigationBar(Color backgroundColor) {
+    return BottomNavigationBar(
+      unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+      selectedItemColor: Theme.of(context).colorScheme.onPrimary,
+      backgroundColor: backgroundColor,
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+      items: _buildNavigationItems(),
+    );
+  }
+
+  List<BottomNavigationBarItem> _buildNavigationItems() {
+    final localizations = AppLocalizations.of(context)!;
+    final appUser = context.watch<AppUserNotifier>().appUser;
+    final displayName =
+        '${appUser?.personFirstName} ${appUser?.personLastName}'.trim();
+    final backgroundColor = Theme.of(context).brightness == Brightness.light
+        ? GluttexConstants.backgroundColor
+        : GluttexConstants.backgroundDarkColor;
+
+    return [
+      _buildNavigationItem(
+        icon: const Icon(CupertinoIcons.cube_box_fill),
+        label: localizations.productsText,
+        backgroundColor: backgroundColor,
+      ),
+      _buildNavigationItem(
+        icon: const Icon(Icons.store_sharp),
+        label: localizations.providersText,
+        backgroundColor: backgroundColor,
+      ),
+      _buildNavigationItem(
+        icon: const Icon(Icons.restaurant_menu_outlined),
+        label: localizations.recipesText,
+        backgroundColor: backgroundColor,
+      ),
+      _buildNavigationItem(
+        icon: const Icon(CupertinoIcons.gamecontroller_alt_fill),
+        label: localizations.gamesText,
+        backgroundColor: backgroundColor,
+      ),
+      _buildProfileNavigationItem(
+          appUser, displayName, localizations, backgroundColor),
+    ];
+  }
+
+  BottomNavigationBarItem _buildNavigationItem({
+    required Widget icon,
+    required String label,
+    required Color backgroundColor,
+  }) {
+    return BottomNavigationBarItem(
+      icon: icon,
+      label: label,
+      backgroundColor: backgroundColor,
+    );
+  }
+
+  BottomNavigationBarItem _buildProfileNavigationItem(
+    AppUser? appUser,
+    String displayName,
+    AppLocalizations localizations,
+    Color backgroundColor,
+  ) {
+    final isGuestUser = (appUser?.id_app_user ?? 0) == 0;
+    final profileLabel = isGuestUser || displayName.isEmpty
+        ? localizations.profileText
+        : displayName;
+
+    return BottomNavigationBarItem(
+      icon: _buildProfileIcon(appUser),
+      label: profileLabel,
+      backgroundColor: backgroundColor,
+    );
+  }
+
+  Widget _buildProfileIcon(AppUser? appUser) {
+    final hasProfileImage = appUser?.id_app_user != 0 &&
+        appUser?.app_user_image_url != null &&
+        appUser!.app_user_image_url!.isNotEmpty;
+
+    if (!hasProfileImage) {
+      return const Icon(size: 24.0, CupertinoIcons.profile_circled);
+    }
+
+    return ClipOval(
+      child: Image.network(
+        appUser!.app_user_image_url!,
+        width: 24,
+        height: 24,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return _buildProfileLoadingIndicator(loadingProgress);
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return _buildProfileErrorWidget();
+        },
+      ),
+    );
+  }
+
+  Widget _buildProfileLoadingIndicator(ImageChunkEvent loadingProgress) {
+    return SizedBox(
+      height: 24,
+      width: 24,
+      child: Center(
+        child: CircularProgressIndicator(
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  (loadingProgress.expectedTotalBytes ?? 1)
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileErrorWidget() {
+    return const SizedBox(
+      height: 24,
+      child: Center(
+        child: Icon(Icons.person, size: 24),
       ),
     );
   }

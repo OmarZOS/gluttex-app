@@ -246,7 +246,7 @@ class _PanelContentState extends State<PanelContent> {
         radius: 40,
         backgroundColor: theme.colorScheme.primaryContainer,
         child: Image.network(
-          GluttexConstants.fsBaseUrl + (supplier.supplier_image_url ?? ""),
+          (supplier.supplier_image_url ?? ""),
           width: 40,
           height: 40,
           alignment: Alignment.center,

@@ -236,8 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: user.app_user_image_url != null
                         ? ClipOval(
                             child: Image.network(
-                              GluttexConstants.fsBaseUrl +
-                                  user.app_user_image_url!,
+                              user.app_user_image_url!,
                               width: MediaQuery.of(context).size.width * 0.5,
                               height: MediaQuery.of(context).size.width * 0.5,
                               fit: BoxFit.cover,

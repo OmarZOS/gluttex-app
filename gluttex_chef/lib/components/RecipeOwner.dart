@@ -48,7 +48,7 @@ class RecipeOwner extends StatelessWidget {
                     width: double
                         .infinity, // Make the container take up the full width
                     child: Image.network(
-                      GluttexConstants.fsBaseUrl + recipe.recipe_image_url!,
+                      recipe.recipe_image_url!,
                       fit: BoxFit.fill, // Fit the image within the space
                     )),
               ),

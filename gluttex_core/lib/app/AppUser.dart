@@ -215,6 +215,75 @@ class AppUser {
     );
   }
 
+  factory AppUser.fromGoogleJson(Map<String, dynamic> json) {
+    // Extract user data from the Google response
+    final userData = json['user'];
+    final tokenData = json['token'];
+    final userInfo = tokenData?['userinfo'] ?? {};
+
+    // Extract basic user information
+    final idAppUser = userData?['id_app_user'] ?? 0;
+    final appUserName = userData?['app_user_name'] ?? userInfo['email'] ?? "";
+    final appUserImageUrl =
+        userData?['app_user_image_url'] ?? userInfo['picture'] ?? "";
+    final appUserTypeId = userData?['app_user_type_id'] ?? 0;
+
+    // Extract person information from userinfo
+    final givenName = userInfo['given_name'] ?? "";
+    final familyName = userInfo['family_name'] ?? "";
+    final fullName = userInfo['name'] ?? "$givenName $familyName".trim();
+    final email = userInfo['email'] ?? appUserName;
+    final emailVerified = userInfo['email_verified'] ?? false;
+
+    // Split full name into first and last names if not provided separately
+    String personFirstName = givenName;
+    String personLastName = familyName;
+
+    if (personFirstName.isEmpty &&
+        personLastName.isEmpty &&
+        fullName.isNotEmpty) {
+      final nameParts = fullName.split(' ');
+      personFirstName = nameParts.first;
+      personLastName =
+          nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+    }
+
+    return AppUser(
+      id_app_user: idAppUser,
+      app_user_person_id: userData?['app_user_person_id'] ?? 0,
+      app_user_type_id: appUserTypeId,
+      app_user_name: appUserName,
+      app_user_password:
+          userData?['app_user_password'] ?? "", // Empty for social logins
+      app_user_preferences: userData?['app_user_preferences'] ?? "",
+      app_user_type_desc:
+          "", // You might need to map this based on app_user_type_id
+      app_user_image_url: appUserImageUrl,
+
+      // Person details from Google userinfo
+      idPerson: 0, // This will likely be set by your backend
+      personDetailsId: 0, // This will likely be set by your backend
+      personFirstName: personFirstName,
+      personLastName: personLastName,
+      personBirthDate: "", // Google doesn't provide birthdate by default
+      personGender: "", // Google doesn't provide gender by default
+      personNationality: "", // Google doesn't provide nationality by default
+
+      // Location information (not provided by Google)
+      idBloodType: 0,
+      idLocation: 0,
+      locationLatitude: 0.0,
+      locationLongitude: 0.0,
+      locationName: "",
+      locationAddressId: 0,
+      addressStreet: "",
+      addressCity: "",
+      addressPostalCode: "",
+      addressCountry: "",
+      bloodTypeDesc: "",
+    );
+  }
+
   factory AppUser.empty() {
     return AppUser(
       id_app_user: 0,

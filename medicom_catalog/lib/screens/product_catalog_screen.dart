@@ -79,78 +79,73 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
   Widget build(BuildContext context) {
     final isRTL = context.read<LocaleProvider>().locale?.languageCode == "ar";
     return Scaffold(
-      floatingActionButton: (Provider.of<AppUserNotifier>(context,
-                  listen: false)
-              .isLoggedIn)
-          ? SpeedDial(
-              animatedIcon: AnimatedIcons.menu_close,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              overlayOpacity: 0.5,
-              spacing: 10,
-              direction:
-                  isRTL ? SpeedDialDirection.right : SpeedDialDirection.left,
-              switchLabelPosition:
-                  true, // ✅ Forces labels to appear on the other side (RTL aware)
-              isOpenOnStart: false,
-              spaceBetweenChildren: 8,
-              childMargin: EdgeInsets.symmetric(
-                horizontal:
-                    Localizations.localeOf(context).toString() == 'ar' ? 16 : 8,
-              ),
+      floatingActionButton: SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        overlayOpacity: 0.5,
+        spacing: 10,
+        direction: isRTL ? SpeedDialDirection.right : SpeedDialDirection.left,
+        switchLabelPosition:
+            true, // ✅ Forces labels to appear on the other side (RTL aware)
+        isOpenOnStart: false,
+        spaceBetweenChildren: 8,
+        childMargin: EdgeInsets.symmetric(
+          horizontal:
+              Localizations.localeOf(context).toString() == 'ar' ? 16 : 8,
+        ),
 
-              children: [
-                SpeedDialChild(
-                  child: Icon(Icons.shopping_basket,
-                      color: Theme.of(context).colorScheme.onPrimary),
-                  label: AppLocalizations.of(context)?.ordersText,
-                  labelBackgroundColor: Theme.of(context).colorScheme.primary,
-                  labelStyle: Theme.of(context)
-                      .textTheme
-                      .bodyMedium!
-                      .copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.ordersPage,
-                    );
-                  },
-                ),
-                SpeedDialChild(
-                  child: Icon(Icons.shopping_cart,
-                      color: Theme.of(context).colorScheme.onPrimary),
-                  label: AppLocalizations.of(context)?.cartText,
-                  labelBackgroundColor: Theme.of(context).colorScheme.primary,
-                  labelStyle: Theme.of(context)
-                      .textTheme
-                      .bodyMedium!
-                      .copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.cartPage,
-                    );
-                  },
-                ),
-                SpeedDialChild(
-                  child: Icon(Icons.add_box_outlined,
-                      color: Theme.of(context).colorScheme.onPrimary),
-                  label: AppLocalizations.of(context)?.addProductTxt,
-                  labelBackgroundColor: Theme.of(context).colorScheme.primary,
-                  labelStyle: Theme.of(context)
-                      .textTheme
-                      .bodyMedium!
-                      .copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.productCreate);
-                  },
-                ),
-              ],
-            )
-          : null,
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.shopping_basket,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.ordersText,
+            labelBackgroundColor: Theme.of(context).colorScheme.primary,
+            labelStyle: Theme.of(context)
+                .textTheme
+                .bodyMedium!
+                .copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.ordersPage,
+              );
+            },
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.shopping_cart,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.cartText,
+            labelBackgroundColor: Theme.of(context).colorScheme.primary,
+            labelStyle: Theme.of(context)
+                .textTheme
+                .bodyMedium!
+                .copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.cartPage,
+              );
+            },
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.add_box_outlined,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.addProductTxt,
+            labelBackgroundColor: Theme.of(context).colorScheme.primary,
+            labelStyle: Theme.of(context)
+                .textTheme
+                .bodyMedium!
+                .copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.productCreate);
+            },
+          ),
+        ],
+      ),
       appBar: AppBar(
         elevation: 0,
         title: Container(

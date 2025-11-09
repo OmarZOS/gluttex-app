@@ -107,7 +107,7 @@ class _ProductDetailsScreenContentState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isRTL = context.read<LocaleProvider>().locale?.languageCode == "ar";
-    final isLoggedIn = context.read<AppUserNotifier>().isLoggedIn;
+    final isLoggedIn = context.read<AppUserNotifier>().isAuthenticated;
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
@@ -311,7 +311,7 @@ class _ProductDetailsScreenContentState
                   child: Hero(
                     tag: "product-image-${product.id_product}-card",
                     child: Image.network(
-                      GluttexConstants.fsBaseUrl + product.product_image_url!,
+                      product.product_image_url!,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.broken_image, size: 64),

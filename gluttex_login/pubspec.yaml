@@ -43,8 +43,11 @@ dependencies:
   gluttex_event:
     path: ../gluttex_event
 
-  url_launcher: ^6.2.5
+  # url_launcher: ^6.2.5
   flutter_svg: ^2.0.17
+  url_launcher: ^6.1.11
+  app_links: ^6.3.2  # For handling deep links
+  # http: ^1.2.0
 
 
   # The following adds the Cupertino Icons font to your application.

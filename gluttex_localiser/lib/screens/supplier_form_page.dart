@@ -335,8 +335,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                   children: [
                     _buildSectionHeader(localizations.providerImage),
                     ImagePickerSection(
-                      initialImageUrl: GluttexConstants.fsBaseUrl +
-                          (_supplierImageUrl ?? ""),
+                      initialImageUrl: (_supplierImageUrl ?? ""),
                       entityType: 'supplier',
                       ownerId: '$_id_provider_organisation',
                       entityId: '$_id_product_provider',

@@ -48,8 +48,7 @@ class ProductCard extends StatelessWidget {
                       ? Hero(
                           tag: 'product-image-${product.id_product}-card',
                           child: Image.network(
-                            GluttexConstants.fsBaseUrl +
-                                product.product_image_url!,
+                            product.product_image_url!,
                             key: ValueKey(product.id_product_image),
                             fit: BoxFit
                                 .contain, // or BoxFit.scaleDown based on preference

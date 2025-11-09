@@ -97,8 +97,7 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                                   backgroundColor:
                                       theme.colorScheme.primaryContainer,
                                   child: Image.network(
-                                    GluttexConstants.fsBaseUrl +
-                                        (supplier.supplier_image_url ?? ""),
+                                    (supplier.supplier_image_url ?? ""),
                                     fit: BoxFit.cover,
                                     alignment: Alignment.center,
                                     key: ValueKey(supplier.supplier_image_url),

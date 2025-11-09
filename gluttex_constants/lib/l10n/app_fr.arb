@@ -668,7 +668,14 @@
   "yourOrderStats": "Statistiques de vos commandes",
   "viewDetails": "Voir les détails",
   "uploadingImage" : "Téléchargement en cours...",  
-  "laterText" : "Plus tard"
+  "laterText" : "Plus tard",
+  "failedAuthAfterSignIn": "Échec de l’authentification après la connexion.",
+  "loginTimeoutMsg": "Délai de connexion dépassé. Veuillez réessayer.",
+  "failedLogin": "Échec de la connexion. Vérifiez vos identifiants.",
+  "signInWithText": "Se connecter avec",
+  "google": "Google",
+  "loggingOutText": "Déconnexion en cours...",
+  "logoutConsentText": "Êtes-vous sûr de vouloir vous déconnecter ?"
 
 
 }

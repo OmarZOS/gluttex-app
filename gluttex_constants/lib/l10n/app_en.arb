@@ -573,5 +573,14 @@
  "yourOrderStats":"Your Order Stats",
  "viewDetails":"View Details",
   "uploadingImage" : "Uploading...",  
-  "laterText" : "Later"
+  "laterText" : "Later",
+
+  "failedAuthAfterSignIn": "Authentication failed after signing in.",
+  "loginTimeoutMsg": "Login timed out. Please try again.",
+  "failedLogin": "Login failed. Check your credentials.",
+  "signInWithText": "Sign in with",
+  "google": "Google",
+  "loggingOutText": "Logging out...",
+  "logoutConsentText": "Are you sure you want to logout?"
+
 }

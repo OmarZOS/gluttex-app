@@ -189,8 +189,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
     });
   }
 
-  Widget _buildHeader(int orderCount, AppLocalizations loc, ThemeData theme,
-      List<dynamic> orders) {
+  Widget _buildHeader(
+    int orderCount,
+    AppLocalizations loc,
+    ThemeData theme,
+    List<dynamic> orders,
+  ) {
     final totalPaid = _calculateTotalPaid(orders);
     final completedOrders = orders
         .where((order) =>
@@ -203,11 +207,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.1),
-        ),
+        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.1)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Icon section
           Container(
@@ -222,7 +225,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               size: 24,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
 
           // Stats section
           Expanded(
@@ -235,22 +238,26 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     fontWeight: FontWeight.w600,
                     color: theme.colorScheme.onSurface,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 8),
-                Row(
+
+                // Mini stats row that wraps if needed
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
                   children: [
                     _buildMiniStat(
                       value: orderCount.toString(),
                       label: loc.ordersText,
                       theme: theme,
                     ),
-                    const SizedBox(width: 16),
                     _buildMiniStat(
                       value: loc.price(totalPaid.toStringAsFixed(0)),
                       label: loc.spentTxt,
                       theme: theme,
                     ),
-                    const SizedBox(width: 16),
                     _buildMiniStat(
                       value: completedOrders.toString(),
                       label: loc.completedTxt,
@@ -262,8 +269,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
           ),
 
-          // Achievement badge for frequent customers
-          if (orderCount >= 5)
+          // Achievement badge (keeps its space minimal)
+          if (orderCount >= 5) ...[
+            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
@@ -277,6 +285,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 size: 20,
               ),
             ),
+          ],
         ],
       ),
     );

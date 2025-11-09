@@ -161,7 +161,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         ? Hero(
             tag: 'recipe-image-${_recipe.id_recipe}',
             child: Image.network(
-              GluttexConstants.fsBaseUrl + _recipe.recipe_image_url!,
+              _recipe.recipe_image_url!,
               height: size.height * _imageHeightRatio,
               fit: BoxFit.cover,
               loadingBuilder: (context, child, loadingProgress) {
@@ -425,8 +425,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                               provider.app_user_image_url != null
                           ? ClipOval(
                               child: Image.network(
-                                GluttexConstants.fsBaseUrl +
-                                    provider.app_user_image_url!,
+                                provider.app_user_image_url!,
                                 width: 24,
                                 height: 24,
                                 fit: BoxFit.cover,

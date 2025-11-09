@@ -219,7 +219,7 @@ class SupplierProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: product.product_image_url != null
               ? Image.network(
-                  GluttexConstants.fsBaseUrl + product.product_image_url!,
+                  product.product_image_url!,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;

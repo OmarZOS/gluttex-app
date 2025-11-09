@@ -1724,4 +1724,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get laterText => 'Later';
+
+  @override
+  String get failedAuthAfterSignIn => 'Authentication failed after signing in.';
+
+  @override
+  String get loginTimeoutMsg => 'Login timed out. Please try again.';
+
+  @override
+  String get failedLogin => 'Login failed. Check your credentials.';
+
+  @override
+  String get signInWithText => 'Sign in with';
+
+  @override
+  String get google => 'Google';
+
+  @override
+  String get loggingOutText => 'Logging out...';
+
+  @override
+  String get logoutConsentText => 'Are you sure you want to logout?';
 }

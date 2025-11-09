@@ -410,8 +410,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               const SizedBox(height: 16.0),
               if (_id_recipe != null && _id_recipe != 0)
                 ImagePickerSection(
-                  initialImageUrl:
-                      GluttexConstants.fsBaseUrl + _initialRecipeImageUrl,
+                  initialImageUrl: _initialRecipeImageUrl,
                   entityType: 'recipe',
                   ownerId: '$_recipe_owner_id',
                   entityId: '$_id_recipe',

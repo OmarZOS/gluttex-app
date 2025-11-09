@@ -25,56 +25,80 @@ class AppRouter {
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     return MaterialPageRoute(
       builder: (context) {
-        final appUser = context.read<AppUserNotifier>().appUser;
+        // Use Consumer to get the latest appUser state
+        return Consumer<AppUserNotifier>(
+          builder: (context, authProvider, child) {
+            final appUser = authProvider.appUser;
+            final isAuthenticated = authProvider.isAuthenticated;
 
-        switch (settings.name) {
-          case AppRoutes.home:
-            return _buildGuardedRoute(
-                appUser, const HomePage(), const LoginScreen());
-          case AppRoutes.productCreate:
-            return _buildGuardedRoute(appUser, const ProductFormScreen(),
-                const ProductCatalogScreen());
-          case AppRoutes.recipeCreate:
-            return _buildGuardedRoute(
-                appUser, const RecipeFormScreen(), const RecipeCatalogScreen());
-          case AppRoutes.cartPage:
-            return _buildGuardedRoute(
-                appUser, const CartScreen(), const HomePage());
-          case AppRoutes.providerCreate:
-            return _buildGuardedRoute(appUser, const SupplierFormScreen(),
-                const SuppliersMapScreen());
-          case AppRoutes.login:
-            return const LoginScreen();
-          case AppRoutes.registration:
-            return const RegistrationForm();
-          case AppRoutes.imageUpload:
-            return const UploadImagePage();
-          case AppRoutes.productDetails:
-            return const ProductDetailsScreen();
-          case AppRoutes.userEdit:
-            return const AppUserEditFormScreen();
-          case AppRoutes.ordersPage:
-            return const OrdersScreen();
-          // case AppRoutes.supplierDetails:
-          //   final supplier = settings.arguments as Supplier;
-          //   return SupplierDetailsSheet(
-          //     supplier: supplier,
-          //   );
+            print(
+                'Router - appUser: $appUser, isAuthenticated: $isAuthenticated');
 
-          default:
-            return const LoginScreen();
-        }
+            switch (settings.name) {
+              case AppRoutes.home:
+                return _buildGuardedRoute(
+                    isAuthenticated, const HomePage(), const LoginScreen());
+              case AppRoutes.productCreate:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const ProductFormScreen(),
+                  const ProductCatalogScreen(),
+                );
+              case AppRoutes.recipeCreate:
+                return _buildGuardedRoute(isAuthenticated,
+                    const RecipeFormScreen(), const RecipeCatalogScreen());
+              case AppRoutes.cartPage:
+                return _buildGuardedRoute(
+                    isAuthenticated, const CartScreen(), const HomePage());
+              case AppRoutes.providerCreate:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const SupplierFormScreen(),
+                  const SuppliersMapScreen(),
+                );
+              case AppRoutes.login:
+                // If already authenticated, redirect to home
+                if (isAuthenticated) {
+                  return const HomePage();
+                }
+                return const LoginScreen();
+              case AppRoutes.registration:
+                return const RegistrationForm();
+              case AppRoutes.imageUpload:
+                return const UploadImagePage();
+              case AppRoutes.productDetails:
+                return const ProductDetailsScreen();
+              case AppRoutes.userEdit:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const AppUserEditFormScreen(),
+                  const LoginScreen(),
+                );
+              case AppRoutes.ordersPage:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const OrdersScreen(),
+                  const LoginScreen(),
+                );
+              default:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const HomePage(),
+                  const LoginScreen(),
+                );
+            }
+          },
+        );
       },
       settings: settings,
     );
   }
 
   static Widget _buildGuardedRoute(
-      AppUser? appUser, Widget authorizedScreen, Widget unauthorizedScreen) {
-    if (appUser != null) {
-      return authorizedScreen;
-    } else {
-      return unauthorizedScreen;
-    }
+    bool isAuthenticated,
+    Widget authorizedScreen,
+    Widget unauthorizedScreen,
+  ) {
+    return isAuthenticated ? authorizedScreen : unauthorizedScreen;
   }
 }
