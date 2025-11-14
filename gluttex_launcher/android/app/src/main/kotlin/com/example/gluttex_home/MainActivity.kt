@@ -1,4 +1,4 @@
-package com.gluttex.gluttex_home
+package com.gluttex.gluttex_launcher
 
 import io.flutter.embedding.android.FlutterActivity
 

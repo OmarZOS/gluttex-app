@@ -147,7 +147,14 @@ class _HomePageState extends State<HomePage>
 
     return Scaffold(
       appBar: _buildAppBar(theme, backgroundColor),
-      body: IndexedStack(index: _selectedIndex, children: _pages),
+      body: Column(
+        children: [
+          Expanded(
+            child: IndexedStack(index: _selectedIndex, children: _pages),
+          ),
+          // _buildBannerAd(), // Banner ad above navigation
+        ],
+      ),
       bottomNavigationBar: _buildBottomNavigationBar(backgroundColor),
     );
   }

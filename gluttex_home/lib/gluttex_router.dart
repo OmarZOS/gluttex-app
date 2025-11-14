@@ -11,6 +11,9 @@ import 'package:gluttex_localiser/screens/supplier_form_page.dart';
 import 'package:gluttex_localiser/screens/suppliers_map_screen.dart';
 import 'package:gluttex_login/screens/login_screen.dart';
 import 'package:gluttex_login/screens/registration_screen.dart';
+import 'package:gluttex_scanner/screens/qr_scanner.dart';
+import 'package:gluttex_scanner/screens/barcode_scanner.dart';
+import 'package:gluttex_scanner/screens/product_scanner.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
 import 'package:medicom_catalog/screens/orders_screen.dart';
 import 'package:medicom_catalog/screens/product_catalog_screen.dart';
@@ -42,6 +45,28 @@ class AppRouter {
                 return _buildGuardedRoute(
                   isAuthenticated,
                   const ProductFormScreen(),
+                  const ProductCatalogScreen(),
+                );
+              case AppRoutes.productScanPage:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  BarcodeScannerScreen(
+                    onBarcodeScanned: (String code) {},
+                  ),
+                  const ProductCatalogScreen(),
+                );
+              case AppRoutes.QRScanPage:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  QRScannerScreen(
+                    onQRcodeScanned: (String code) {},
+                  ),
+                  const ProductCatalogScreen(),
+                );
+              case AppRoutes.productCapturePage:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const ProductCaptureScreen(),
                   const ProductCatalogScreen(),
                 );
               case AppRoutes.recipeCreate:

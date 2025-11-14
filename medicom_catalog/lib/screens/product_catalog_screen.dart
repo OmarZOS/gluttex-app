@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,6 +9,7 @@ import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/preferenceChangeNotifier.dart';
 import 'package:medicom_catalog/screens/components/ProductCard.dart';
+import 'package:medicom_catalog/screens/components/floating_buttons.dart';
 import 'package:provider/provider.dart';
 
 class ProductCatalogScreen extends StatefulWidget {
@@ -79,32 +81,14 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
   Widget build(BuildContext context) {
     final isRTL = context.read<LocaleProvider>().locale?.languageCode == "ar";
     return Scaffold(
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
+      floatingActionButton: CustomSpeedDial(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        overlayOpacity: 0.5,
-        spacing: 10,
-        direction: isRTL ? SpeedDialDirection.right : SpeedDialDirection.left,
-        switchLabelPosition:
-            true, // ✅ Forces labels to appear on the other side (RTL aware)
-        isOpenOnStart: false,
-        spaceBetweenChildren: 8,
-        childMargin: EdgeInsets.symmetric(
-          horizontal:
-              Localizations.localeOf(context).toString() == 'ar' ? 16 : 8,
-        ),
-
-        children: [
-          SpeedDialChild(
-            child: Icon(Icons.shopping_basket,
+        horizontalButtons: [
+          SpeedDialButton(
+            icon: Icon(Icons.shopping_basket,
                 color: Theme.of(context).colorScheme.onPrimary),
             label: AppLocalizations.of(context)?.ordersText,
-            labelBackgroundColor: Theme.of(context).colorScheme.primary,
-            labelStyle: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: Theme.of(context).colorScheme.onPrimary),
             backgroundColor: Theme.of(context).colorScheme.primary,
             onTap: () {
               Navigator.pushNamed(
@@ -113,15 +97,24 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
               );
             },
           ),
-          SpeedDialChild(
-            child: Icon(Icons.shopping_cart,
+          SpeedDialButton(
+            icon: Icon(CupertinoIcons.barcode_viewfinder,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.ordersText,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.productScanPage,
+              );
+            },
+          ),
+        ],
+        verticalButtons: [
+          SpeedDialButton(
+            icon: Icon(Icons.shopping_cart,
                 color: Theme.of(context).colorScheme.onPrimary),
             label: AppLocalizations.of(context)?.cartText,
-            labelBackgroundColor: Theme.of(context).colorScheme.primary,
-            labelStyle: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: Theme.of(context).colorScheme.onPrimary),
             backgroundColor: Theme.of(context).colorScheme.primary,
             onTap: () {
               Navigator.pushNamed(
@@ -130,15 +123,10 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
               );
             },
           ),
-          SpeedDialChild(
-            child: Icon(Icons.add_box_outlined,
+          SpeedDialButton(
+            icon: Icon(Icons.add_box_outlined,
                 color: Theme.of(context).colorScheme.onPrimary),
             label: AppLocalizations.of(context)?.addProductTxt,
-            labelBackgroundColor: Theme.of(context).colorScheme.primary,
-            labelStyle: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: Theme.of(context).colorScheme.onPrimary),
             backgroundColor: Theme.of(context).colorScheme.primary,
             onTap: () {
               Navigator.pushNamed(context, AppRoutes.productCreate);

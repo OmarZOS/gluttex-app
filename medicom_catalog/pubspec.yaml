@@ -40,6 +40,8 @@ dependencies:
     path: ../gluttex_event
   gluttex_ui:
     path: ../gluttex_ui
+  gluttex_scanner:
+    path: ../gluttex_scanner
   
 
 

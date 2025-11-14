@@ -317,4 +317,13 @@ class AppRoutes {
   static const String imageUpload = '/image/upload';
   static const String cartPage = '/cart';
   static const String ordersPage = '/orders';
+  static const String productScanPage = '/product/scan';
+  static const String QRScanPage = '/qr/scan';
+  static const String productCapturePage = '/product/capture';
+
+  static const String productCatalog = '/productCatalog';
+  static const String suppliersMap = '/suppliersMap';
+  static const String recipeCatalog = '/recipeCatalog';
+  static const String games = '/games';
+  static const String profile = '/profile';
 }
