@@ -35,7 +35,7 @@ class GluttexImage<T> {
     // });
   }
 
-  Future<String?> uploadImage() async {
+  Future<dynamic> uploadImage() async {
     // StorageService storageService = GluttexLocator.get<StorageService>();
     // return await storageService.insertBinary(
     //     '${GluttexConstants.fsBaseUrl}${GluttexConstants.postImageEndpoint}/$entityType/$ownerId/$entityId/',

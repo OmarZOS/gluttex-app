@@ -1,0 +1,346 @@
+import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_event/assistant_change_notifier.dart';
+import 'package:provider/provider.dart';
+
+// Smart Form Field Widget
+class SmartFormField extends StatefulWidget {
+  final String fieldId;
+  final TextEditingController controller;
+  final String labelText;
+  final String? Function(String?) validator;
+  final void Function(String?) onSaved;
+  final TextInputType? keyboardType;
+  final Widget? suffixIcon;
+  final int? maxLines;
+  final bool showSourceBadge;
+
+  const SmartFormField({
+    Key? key,
+    required this.fieldId,
+    required this.controller,
+    required this.labelText,
+    required this.validator,
+    required this.onSaved,
+    this.keyboardType,
+    this.suffixIcon,
+    this.maxLines,
+    this.showSourceBadge = true,
+  }) : super(key: key);
+
+  @override
+  State<SmartFormField> createState() => _SmartFormFieldState();
+}
+
+class _SmartFormFieldState extends State<SmartFormField> {
+  bool _hasUserInteracted = false;
+  late TextEditingController _internalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _internalController = widget.controller;
+    _internalController.addListener(_onTextChanged);
+  }
+
+  @override
+  void didUpdateWidget(SmartFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _internalController.removeListener(_onTextChanged);
+      _internalController = widget.controller;
+      _internalController.addListener(_onTextChanged);
+    }
+  }
+
+  void _onTextChanged() {
+    if (!_hasUserInteracted && _internalController.text.isNotEmpty) {
+      setState(() {
+        _hasUserInteracted = true;
+      });
+      // Mark field as edited in AssistantNotifier
+      context.read<AssistantNotifier>().markFieldAsEdited(widget.fieldId);
+    }
+  }
+
+  @override
+  void dispose() {
+    _internalController.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final assistantNotifier = context.watch<AssistantNotifier>();
+    final fieldData = assistantNotifier.fieldData[widget.fieldId];
+    final showBadge = widget.showSourceBadge &&
+        fieldData != null &&
+        !fieldData.isEdited &&
+        !_hasUserInteracted;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (showBadge) ...{
+          _buildSourceBadge(fieldData.source, context),
+          const SizedBox(height: 8),
+        },
+        TextFormField(
+          controller: _internalController,
+          decoration: InputDecoration(
+            labelText: widget.labelText,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            suffixIcon: widget.suffixIcon,
+            // Add subtle border color based on source when not edited
+            enabledBorder: showBadge
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: _getBorderColor(fieldData!.source, context),
+                      width: 1.5,
+                    ),
+                  )
+                : null,
+            focusedBorder: showBadge
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: _getBorderColor(fieldData!.source, context),
+                      width: 2,
+                    ),
+                  )
+                : null,
+          ),
+          keyboardType: widget.keyboardType,
+          maxLines: widget.maxLines,
+          validator: widget.validator,
+          onSaved: widget.onSaved,
+          onTap: () {
+            if (!_hasUserInteracted) {
+              setState(() {
+                _hasUserInteracted = true;
+              });
+              context
+                  .read<AssistantNotifier>()
+                  .markFieldAsEdited(widget.fieldId);
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSourceBadge(DataSource source, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
+
+    final (color, text, icon) = switch (source) {
+      DataSource.aiGenerated => (
+          colorScheme.tertiaryContainer,
+          "loc.aiGenerated",
+          Icons.auto_awesome_outlined,
+        ),
+      DataSource.databaseFetched => (
+          colorScheme.secondaryContainer,
+          "loc.databaseFetched",
+          Icons.storage_outlined,
+        ),
+      DataSource.userInput => (
+          colorScheme.surfaceVariant,
+          "loc.userInput",
+          Icons.edit_outlined,
+        ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: colorScheme.onTertiaryContainer,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onTertiaryContainer,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getBorderColor(DataSource source, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return switch (source) {
+      DataSource.aiGenerated => colorScheme.tertiary,
+      DataSource.databaseFetched => colorScheme.secondary,
+      DataSource.userInput => colorScheme.outline,
+    };
+  }
+}
+
+// Smart Dropdown Field
+class SmartDropdownField<T> extends StatefulWidget {
+  final String fieldId;
+  final T value;
+  final String labelText;
+  final List<DropdownMenuItem<T>> items;
+  final void Function(T?) onChanged;
+  final bool showSourceBadge;
+
+  const SmartDropdownField({
+    Key? key,
+    required this.fieldId,
+    required this.value,
+    required this.labelText,
+    required this.items,
+    required this.onChanged,
+    this.showSourceBadge = true,
+  }) : super(key: key);
+
+  @override
+  State<SmartDropdownField> createState() => _SmartDropdownFieldState<T>();
+}
+
+class _SmartDropdownFieldState<T> extends State<SmartDropdownField<T>> {
+  bool _hasUserInteracted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final assistantNotifier = context.watch<AssistantNotifier>();
+    final fieldData = assistantNotifier.fieldData[widget.fieldId];
+    final showBadge = widget.showSourceBadge &&
+        fieldData != null &&
+        !fieldData.isEdited &&
+        !_hasUserInteracted;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (showBadge) ...{
+          _buildSourceBadge(fieldData.source, context),
+          const SizedBox(height: 8),
+        },
+        DropdownButtonFormField<T>(
+          value: widget.value,
+          decoration: InputDecoration(
+            labelText: widget.labelText,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            enabledBorder: showBadge
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: _getBorderColor(fieldData!.source, context),
+                      width: 1.5,
+                    ),
+                  )
+                : null,
+            focusedBorder: showBadge
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: _getBorderColor(fieldData!.source, context),
+                      width: 2,
+                    ),
+                  )
+                : null,
+          ),
+          items: widget.items,
+          onChanged: (value) {
+            if (!_hasUserInteracted) {
+              setState(() {
+                _hasUserInteracted = true;
+              });
+              context
+                  .read<AssistantNotifier>()
+                  .markFieldAsEdited(widget.fieldId);
+            }
+            widget.onChanged(value);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSourceBadge(DataSource source, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
+
+    final (color, text, icon) = switch (source) {
+      DataSource.aiGenerated => (
+          colorScheme.tertiaryContainer,
+          "loc.aiGenerated",
+          Icons.auto_awesome_outlined,
+        ),
+      DataSource.databaseFetched => (
+          colorScheme.secondaryContainer,
+          "loc.databaseFetched",
+          Icons.storage_outlined,
+        ),
+      DataSource.userInput => (
+          colorScheme.surfaceVariant,
+          "loc.userInput",
+          Icons.edit_outlined,
+        ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: colorScheme.onTertiaryContainer,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onTertiaryContainer,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getBorderColor(DataSource source, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return switch (source) {
+      DataSource.aiGenerated => colorScheme.tertiary,
+      DataSource.databaseFetched => colorScheme.secondary,
+      DataSource.userInput => colorScheme.outline,
+    };
+  }
+}

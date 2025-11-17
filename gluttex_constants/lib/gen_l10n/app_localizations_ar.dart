@@ -277,7 +277,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noImageSelectedTxt => 'لم يتم اختيار صورة';
 
   @override
-  String get addProductTxt => 'إضافة منتج';
+  String get addProductTxt => 'إضافة';
 
   @override
   String get orderNowTxt => 'اطلب الآن';
@@ -1745,4 +1745,94 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get logoutConsentText => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
+
+  @override
+  String get scanBarcode => 'مسح الباركود';
+
+  @override
+  String get alignBarcode => 'قم بمحاذاة الباركود داخل الإطار';
+
+  @override
+  String get positionBarcode => 'ضع الباركود داخل منطقة المسح للكشف التلقائي';
+
+  @override
+  String get barcodeScanSuccess => 'تم مسح الباركود بنجاح!';
+
+  @override
+  String get initCam => 'جاري تهيئة الكاميرا...';
+
+  @override
+  String get captureProduct => 'التقاط المنتج';
+
+  @override
+  String get positionProductInFrame => 'وضع المنتج في الإطار';
+
+  @override
+  String get scanHint => 'تأكد من الإضاءة الجودة والتركيز الواضح';
+
+  @override
+  String get tapHint => 'انقر للالتقاط';
+
+  @override
+  String get reviewPhoto => 'مراجعة الصورة';
+
+  @override
+  String get croppedToFrame => 'مقطوع حسب الإطار';
+
+  @override
+  String get usePhoto => 'استخدم هذه الصورة';
+
+  @override
+  String get takeAgain => 'التقط مرة أخرى';
+
+  @override
+  String get processingImage => 'جاري معالجة الصورة...';
+
+  @override
+  String get waitText => 'قد يستغرق هذا بضع ثوانٍ';
+
+  @override
+  String get aiAnalysing => 'الذكاء الاصطناعي يحلل منتجك...';
+
+  @override
+  String get aiAssistantSubtitle => 'ملء تفاصيل المنتج تلقائياً';
+
+  @override
+  String get aiAssistantTitle => 'مساعد المنتج بالذكاء الاصطناعي';
+
+  @override
+  String get productDetailsFilled => 'تم ملء تفاصيل المنتج تلقائياً!';
+
+  @override
+  String get scanQR => 'مسح رمز الاستجابة السريعة';
+
+  @override
+  String get scannerHint => 'ضع رمز الاستجابة السريعة في الإطار';
+
+  @override
+  String get alignQR => 'قم بمحاذاة رمز الاستجابة السريعة داخل منطقة المسح للكشف التلقائي';
+
+  @override
+  String get manualInput => 'إدخال يدوي';
+
+  @override
+  String get qrSuccess => 'تم مسح رمز الاستجابة السريعة بنجاح!';
+
+  @override
+  String get manualQR => 'أدخل رمز الاستجابة السريعة يدوياً';
+
+  @override
+  String get manualQRHint => 'الصق أو اكتب محتوى رمز الاستجابة السريعة...';
+
+  @override
+  String get scannerTxt => 'مسح';
+
+  @override
+  String get takeProductPhoto => 'التقاط صورة المنتج';
+
+  @override
+  String get aiWillAnalyseImage => 'سيقوم الذكاء الاصطناعي بتحليل صورة المنتج';
+
+  @override
+  String get automaticallyFillDetailsFromBarcode => 'ملء التفاصيل تلقائياً من الباركود';
 }

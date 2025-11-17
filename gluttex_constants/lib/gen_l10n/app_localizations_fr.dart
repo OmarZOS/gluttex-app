@@ -277,7 +277,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noImageSelectedTxt => 'Aucune image sélectionnée';
 
   @override
-  String get addProductTxt => 'Ajouter un produit';
+  String get addProductTxt => 'Ajouter';
 
   @override
   String get orderNowTxt => 'Commander maintenant';
@@ -1745,4 +1745,94 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get logoutConsentText => 'Êtes-vous sûr de vouloir vous déconnecter ?';
+
+  @override
+  String get scanBarcode => 'Scanner le Code-Barre';
+
+  @override
+  String get alignBarcode => 'Aligner le code-barres dans le cadre';
+
+  @override
+  String get positionBarcode => 'Positionnez le code-barres dans la zone de scan pour une détection automatique';
+
+  @override
+  String get barcodeScanSuccess => 'Code-barres scanné avec succès !';
+
+  @override
+  String get initCam => 'Initialisation de la caméra...';
+
+  @override
+  String get captureProduct => 'Capturer le Produit';
+
+  @override
+  String get positionProductInFrame => 'Positionner le Produit dans le Cadre';
+
+  @override
+  String get scanHint => 'Assurez un bon éclairage et une mise au point nette';
+
+  @override
+  String get tapHint => 'Tapper pour Capturer';
+
+  @override
+  String get reviewPhoto => 'Vérifier la Photo';
+
+  @override
+  String get croppedToFrame => 'Rogné selon le cadre';
+
+  @override
+  String get usePhoto => 'Utiliser cette Photo';
+
+  @override
+  String get takeAgain => 'Reprendre';
+
+  @override
+  String get processingImage => 'Traitement de l\'image...';
+
+  @override
+  String get waitText => 'Cela peut prendre quelques secondes';
+
+  @override
+  String get aiAnalysing => 'L\'IA analyse votre produit...';
+
+  @override
+  String get aiAssistantSubtitle => 'Remplir automatiquement les détails du produit';
+
+  @override
+  String get aiAssistantTitle => 'Assistant Produit IA';
+
+  @override
+  String get productDetailsFilled => 'Détails du produit remplis automatiquement !';
+
+  @override
+  String get scanQR => 'Scanner le QR Code';
+
+  @override
+  String get scannerHint => 'Positionner le QR Code dans le Cadre';
+
+  @override
+  String get alignQR => 'Aligner le QR code dans la zone de scan pour une détection automatique';
+
+  @override
+  String get manualInput => 'Saisie Manuelle';
+
+  @override
+  String get qrSuccess => 'QR Code scanné avec succès !';
+
+  @override
+  String get manualQR => 'Saisir le QR Code Manuellement';
+
+  @override
+  String get manualQRHint => 'Collez ou tapez le contenu du QR code...';
+
+  @override
+  String get scannerTxt => 'Scanner';
+
+  @override
+  String get takeProductPhoto => 'Prendre une photo du produit';
+
+  @override
+  String get aiWillAnalyseImage => 'L\'IA analysera l\'image du produit';
+
+  @override
+  String get automaticallyFillDetailsFromBarcode => 'Remplir automatiquement les détails à partir du code-barres';
 }

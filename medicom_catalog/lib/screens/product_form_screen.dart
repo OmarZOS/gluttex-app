@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
@@ -9,6 +8,8 @@ import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/Supplier.dart';
+import 'package:gluttex_core/business/iProduct.dart';
+import 'package:gluttex_event/assistant_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
@@ -16,7 +17,10 @@ import 'package:gluttex_ui/Services/ResponseHandler.dart';
 import 'package:gluttex_ui/components/supplier/supplier_picker.dart';
 import 'package:gluttex_ui/components/ImagePickerSection.dart';
 import 'package:gluttex_ui/components/category_picker.dart';
+import 'package:locator/locator.dart';
+import 'package:medicom_catalog/screens/components/smart_form.dart';
 import 'package:provider/provider.dart';
+import 'package:path/path.dart' as path;
 
 class ProductFormScreen extends StatefulWidget {
   const ProductFormScreen({Key? key}) : super(key: key);
@@ -33,6 +37,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   String? _productBrand;
   String? _productBarcode;
   GluttexImage? _productImage;
+  File? _productImageFile;
   int? _productTypeId;
   double? _productPrice;
   int? _productQuantity;
@@ -61,12 +66,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   late Supplier _initialSupplier;
   late AppUserNotifier _userNotifier;
   late SupplierChangeNotifier _supplierNotifier;
+  String? _currentProductId;
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
     _initializeProviders();
+    _currentProductId = 'product_${DateTime.now().millisecondsSinceEpoch}';
   }
 
   void _initializeControllers() {
@@ -182,83 +189,192 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     });
   }
 
+  // ======= PREMIUM AI ASSISTANCE =======
   Future<void> _showAiAssistanceOptions() async {
-    final option = await showModalBottomSheet<int>(
+    final loc = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: colorScheme.surface,
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'AI Product Assistant',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  CupertinoIcons.barcode_viewfinder,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: const Text('Scan Barcode'),
-                subtitle: const Text('Automatically fill details from barcode'),
-                onTap: () => Navigator.pop(context, 1),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.qr_code_scanner,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: const Text('Scan QR Code'),
-                subtitle: const Text('Automatically fill details from QR Code'),
-                onTap: () => Navigator.pop(context, 2),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.camera_alt,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: const Text('Take Product Photo'),
-                subtitle: const Text('AI will analyze the product image'),
-                onTap: () => Navigator.pop(context, 3),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+              // Header
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
                 ),
+                child: Row(
+                  children: [
+                    Icon(Icons.auto_awesome,
+                        color: colorScheme.primary, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            loc.aiAssistantTitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                ),
+                          ),
+                          Text(
+                            loc.aiAssistantSubtitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: colorScheme.onSurface.withOpacity(0.7),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
+
+              // Options
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildAiOption(
+                      icon: CupertinoIcons.barcode_viewfinder,
+                      title: loc.scanBarcode,
+                      subtitle: loc.automaticallyFillDetailsFromBarcode,
+                      color: colorScheme.primary,
+                      onTap: () => Navigator.pop(context, 1),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildAiOption(
+                      icon: Icons.camera_alt,
+                      title: loc.takeProductPhoto,
+                      subtitle: loc.aiWillAnalyseImage,
+                      color: colorScheme.secondary,
+                      onTap: () => Navigator.pop(context, 3),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Footer
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: colorScheme.outline.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(loc.cancelTxt),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ),
-    );
+    ).then((option) {
+      if (option != null) {
+        _handleAiAssistanceOption(option);
+      }
+    });
+  }
 
-    if (option != null) {
-      await _handleAiAssistanceOption(option);
-    }
+  Widget _buildAiOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: ListTile(
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+          ),
+        ),
+        trailing: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.arrow_forward, color: color, size: 16),
+        ),
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+    );
   }
 
   Future<void> _handleAiAssistanceOption(int option) async {
+    final assistantNotifier = context.read<AssistantNotifier>();
+
     setState(() {
       _isAiProcessing = true;
     });
@@ -266,8 +382,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     try {
       if (option == 1) {
         await _handleBarcodeScanning();
-      } else if (option == 2) {
-        await _handleQRScanning();
       } else if (option == 3) {
         await _handleProductPhotoCapture();
       }
@@ -289,18 +403,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     ) as String?;
 
     if (scannedCode != null && scannedCode.isNotEmpty) {
-      await _simulateAiProcessingWithBarcode(scannedCode);
-    }
-  }
+      final assistantNotifier = context.read<AssistantNotifier>();
 
-  Future<void> _handleQRScanning() async {
-    final String? scannedCode = await Navigator.pushNamed(
-      context,
-      AppRoutes.QRScanPage,
-    ) as String?;
+      // Try to fetch from database first
+      final product = await assistantNotifier.getProductByBarcode(
+        scannedCode,
+        operationId: 'barcode_scan',
+      );
 
-    if (scannedCode != null && scannedCode.isNotEmpty) {
-      await _simulateAiProcessingWithBarcode(scannedCode);
+      if (product != null) {
+        _updateFormWithProductData(product, source: DataSource.databaseFetched);
+        _showSuccessSnackBar('Product found in database!');
+      } else {
+        // Fallback to AI simulation
+        await _simulateAiProcessingWithBarcode(scannedCode);
+      }
     }
   }
 
@@ -311,7 +428,31 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     ) as File?;
 
     if (capturedImage != null) {
-      await _simulateAiProcessingWithImage(capturedImage);
+      GluttexImage gluttexImage = GluttexLocator.get<GluttexImage>();
+
+      gluttexImage.setupImage(
+        filepath: capturedImage.path,
+        filename: path.basename(capturedImage.path),
+        entityType: "product",
+        ownerId: "$_productOwnerId",
+        entityId: '$_idProduct',
+      );
+
+      setState(() {
+        _productImageFile = capturedImage;
+        _productImage = gluttexImage;
+      });
+
+      final assistantNotifier = context.read<AssistantNotifier>();
+      // In real implementation, you would use:
+      final product =
+          await assistantNotifier.getProductFromImage(capturedImage);
+
+      if (mounted) {
+        _updateFormWithAiData(product!.toJson());
+      }
+      // For now, simulate AI processing
+      // await _simulateAiProcessingWithImage(capturedImage);
     }
   }
 
@@ -334,37 +475,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   }
 
   Map<String, dynamic> _getMockProductDataFromBarcode(String barcode) {
-    if (barcode.contains('613')) {
-      return {
-        'name': 'Organic Whole Wheat Bread',
-        'brand': 'Nature\'s Best',
-        'price': 4.99,
-        'quantity': 1,
-        'description': 'Fresh organic whole wheat bread with no preservatives',
-        'category': 1,
-        'unit': 'pc',
-      };
-    } else if (barcode.contains('456')) {
-      return {
-        'name': 'Almond Milk Unsweetened',
-        'brand': 'PureHarvest',
-        'price': 3.49,
-        'quantity': 1,
-        'description': 'Unsweetened almond milk, dairy-free and gluten-free',
-        'category': 7,
-        'unit': 'L',
-      };
-    } else {
-      return {
-        'name': 'Product from Barcode: $barcode',
-        'brand': 'Unknown Brand',
-        'price': 0.0,
-        'quantity': 1,
-        'description': 'Product information retrieved from barcode scan',
-        'category': 1,
-        'unit': 'pc',
-      };
-    }
+    // ... your existing mock data logic ...
+    return {
+      'name': 'Organic Whole Wheat Bread',
+      'brand': 'Nature\'s Best',
+      'price': 4.99,
+      'quantity': 1,
+      'description': 'Fresh organic whole wheat bread with no preservatives',
+      'category': 1,
+      'unit': 'pc',
+    };
   }
 
   Map<String, dynamic> _getMockProductDataFromImage() {
@@ -380,6 +500,24 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   }
 
   void _updateFormWithAiData(Map<String, dynamic> productData) {
+    final assistantNotifier = context.read<AssistantNotifier>();
+
+    // Set AI-generated field data
+    assistantNotifier.setMultipleFields(
+      fieldValues: {
+        'name': productData['name'],
+        'brand': productData['brand'],
+        'price': productData['price'].toString(),
+        'quantity': productData['quantity'].toString(),
+        'description': productData['description'],
+        'quantifier': productData['unit'],
+      },
+      source: DataSource.aiGenerated,
+      productId: _currentProductId,
+      confidence: 0.8,
+      operationId: 'ai_analysis',
+    );
+
     setState(() {
       _nameController.text = productData['name'] ?? '';
       _brandController.text = productData['brand'] ?? '';
@@ -397,18 +535,59 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _productDescription = productData['description'];
     });
 
-    _showSuccessSnackBar('Product details filled automatically!');
+    _showSuccessSnackBar('AI analysis complete!');
+  }
+
+  void _updateFormWithProductData(IProduct product,
+      {required DataSource source}) {
+    final assistantNotifier = context.read<AssistantNotifier>();
+
+    assistantNotifier.setMultipleFields(
+      fieldValues: {
+        'name': product.iproductName,
+        'brand': product.iproductBrand,
+        'barcode': product.iproductBarcode,
+        'price': product.iproductEstimatedPriceDA?.toString(),
+        // 'description': product.iproductDescription,
+        'gluten_status': product.iproductGlutenStatus,
+      },
+      source: source,
+      productId: _currentProductId,
+      confidence: 0.95,
+      operationId: 'database_lookup',
+    );
+
+    setState(() {
+      _nameController.text = product.iproductName ?? '';
+      _brandController.text = product.iproductBrand ?? '';
+      _barcodeController.text = product.iproductBarcode ?? '';
+      _priceController.text =
+          product.iproductEstimatedPriceDA?.toString() ?? '';
+      _descriptionController.text = product.iproductName ?? '';
+
+      _productName = product.iproductName;
+      _productBrand = product.iproductBrand;
+      _productBarcode = product.iproductBarcode;
+      _productPrice = product.iproductEstimatedPriceDA;
+      // _productDescription = product.iproductDescription;
+    });
   }
 
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        content: Row(
+          children: [
+            Icon(Icons.check_circle,
+                color: Theme.of(context).colorScheme.onPrimary),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
         ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -416,34 +595,58 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
+        content: Row(
+          children: [
+            Icon(Icons.error_outline,
+                color: Theme.of(context).colorScheme.onError),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 
-  Widget _buildAiAssistanceButton() {
+  Widget _buildAiAssistanceButton(AppLocalizations loc) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: ListTile(
-          leading: Icon(
-            Icons.auto_awesome,
-            color: Theme.of(context).colorScheme.primary,
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primaryContainer,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.auto_awesome,
+                color: Theme.of(context).colorScheme.onPrimary, size: 20),
           ),
           title: Text(
-            'AI Product Assistant',
+            loc.aiAssistantTitle,
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          subtitle: const Text('Automatically fill product details'),
+          subtitle: Text(
+            loc.aiAssistantSubtitle,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
           trailing: _isAiProcessing
               ? SizedBox(
                   width: 20,
@@ -455,17 +658,29 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     ),
                   ),
                 )
-              : Icon(Icons.arrow_forward_ios_rounded, size: 16),
+              : Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.arrow_forward_ios_rounded,
+                      size: 14, color: Theme.of(context).colorScheme.primary),
+                ),
           onTap: _isAiProcessing ? null : _showAiAssistanceOptions,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFormField({
+  // ======= PREMIUM SMART FORM FIELDS =======
+  Widget _buildSmartFormField({
+    required String fieldId,
     required TextEditingController controller,
     required String labelText,
     required String? Function(String?) validator,
@@ -474,22 +689,142 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     Widget? suffixIcon,
     int? maxLines,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
+    return Consumer<AssistantNotifier>(
+      builder: (context, assistantNotifier, child) {
+        return SmartFormField(
+          fieldId: fieldId,
+          controller: controller,
           labelText: labelText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          validator: validator,
+          onSaved: onSaved,
+          keyboardType: keyboardType,
           suffixIcon: suffixIcon,
-        ),
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        validator: validator,
-        onSaved: onSaved,
-      ),
+          maxLines: maxLines,
+          // productId: _currentProductId,
+        );
+      },
+    );
+  }
+
+  Widget _buildSmartDropdownField({
+    required String fieldId,
+    required String value,
+    required String labelText,
+    required List<DropdownMenuItem<String>> items,
+    required void Function(String?) onChanged,
+  }) {
+    return Consumer<AssistantNotifier>(
+      builder: (context, assistantNotifier, child) {
+        return SmartDropdownField<String>(
+          fieldId: fieldId,
+          value: value,
+          labelText: labelText,
+          items: items,
+          onChanged: onChanged,
+          // productId: _currentProductId,
+        );
+      },
+    );
+  }
+
+  // ======= PREMIUM SUBMIT BUTTON =======
+  Widget _buildSubmitButton(AppLocalizations loc, ColorScheme colorScheme) {
+    return Consumer<AssistantNotifier>(
+      builder: (context, assistantNotifier, child) {
+        final confidence =
+            assistantNotifier.getProductConfidenceScore(_currentProductId!);
+        final hasAiData = confidence > 0;
+
+        return Column(
+          children: [
+            if (hasAiData) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: colorScheme.primaryContainer.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.auto_awesome,
+                      color: colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'AI Assistant',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            '${(confidence * 100).toStringAsFixed(0)}% fields filled automatically',
+                            style: TextStyle(
+                              color: colorScheme.onSurface.withOpacity(0.7),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${(confidence * 100).toStringAsFixed(0)}%',
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isAiProcessing ? null : _submitForm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 2,
+                  shadowColor: colorScheme.primary.withOpacity(0.3),
+                ),
+                child: Text(
+                  loc.submitText,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -520,7 +855,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           product_last_updated: null,
         );
 
-        // Handle image upload for new products
+        // Handle image upload
         if (_productImage != null) {
           product.productImage = _productImage!;
         } else if (product.id_product == 0) {
@@ -580,6 +915,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_updatePage ? loc.updateProductText : loc.addProductTxt),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        elevation: 0,
+        centerTitle: false,
       ),
       floatingActionButton: _isAiProcessing
           ? null
@@ -591,6 +930,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             ),
       body: Stack(
         children: [
+          // Background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  colorScheme.surface,
+                  colorScheme.surfaceVariant.withOpacity(0.3),
+                ],
+              ),
+            ),
+          ),
+
+          // Content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Form(
@@ -598,10 +952,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               child: ListView(
                 children: [
                   // AI Assistance Button
-                  if (!_updatePage) _buildAiAssistanceButton(),
+                  if (!_updatePage) _buildAiAssistanceButton(loc),
 
                   // Image Picker
-                  if (_idProduct != null)
+                  if (_productImage != null)
                     ImagePickerSection(
                       initialImageUrl: _imageUrl ?? "",
                       entityType: 'product',
@@ -613,12 +967,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           _idProductImage = 0;
                         });
                       },
+                      capturedImageFile: _productImageFile,
                     ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-                  // Product Name
-                  _buildFormField(
+                  // Product Name - Smart Field
+                  _buildSmartFormField(
+                    fieldId: 'name',
                     controller: _nameController,
                     labelText: loc.productNameTxt,
                     validator: (value) {
@@ -630,8 +986,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     onSaved: (value) => _productName = value,
                   ),
 
-                  // Product Brand
-                  _buildFormField(
+                  const SizedBox(height: 16),
+
+                  // Product Brand - Smart Field
+                  _buildSmartFormField(
+                    fieldId: 'brand',
                     controller: _brandController,
                     labelText: loc.productBrandTxt,
                     validator: (value) {
@@ -643,8 +1002,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     onSaved: (value) => _productBrand = value,
                   ),
 
-                  // Barcode with scanner
-                  _buildFormField(
+                  const SizedBox(height: 16),
+
+                  // Barcode with scanner - Smart Field
+                  _buildSmartFormField(
+                    fieldId: 'barcode',
                     controller: _barcodeController,
                     labelText: loc.productBarcodeTxt,
                     validator: (value) {
@@ -670,13 +1032,24 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             _productBarcode = scannedCode;
                             _barcodeController.text = scannedCode;
                           });
+
+                          // Mark as database source
+                          context.read<AssistantNotifier>().setFieldData(
+                                fieldId: 'barcode',
+                                value: scannedCode,
+                                source: DataSource.databaseFetched,
+                                productId: _currentProductId,
+                              );
                         }
                       },
                     ),
                   ),
 
-                  // Price
-                  _buildFormField(
+                  const SizedBox(height: 16),
+
+                  // Price - Smart Field
+                  _buildSmartFormField(
+                    fieldId: 'price',
                     controller: _priceController,
                     labelText: loc.productPriceTxt,
                     keyboardType: TextInputType.number,
@@ -696,8 +1069,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         _productPrice = double.tryParse(value ?? "0.0"),
                   ),
 
-                  // Quantity
-                  _buildFormField(
+                  const SizedBox(height: 16),
+
+                  // Quantity - Smart Field
+                  _buildSmartFormField(
+                    fieldId: 'quantity',
                     controller: _quantityController,
                     labelText: loc.productQuantityText,
                     keyboardType: TextInputType.number,
@@ -714,35 +1090,34 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         _productQuantity = int.tryParse(value ?? "0"),
                   ),
 
-                  // Quantifier Dropdown
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: DropdownButtonFormField<String>(
-                      value: _productQuantifier,
-                      decoration: InputDecoration(
-                        labelText: loc.unitText,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      items: GluttexConstants.productUnits.map((unit) {
-                        return DropdownMenuItem<String>(
-                          value: unit,
-                          child: Text(_getUnitText(unit, loc)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _productQuantifier = value;
-                          });
-                        }
-                      },
-                    ),
+                  const SizedBox(height: 16),
+
+                  // Quantifier Dropdown - Smart Field
+                  _buildSmartDropdownField(
+                    fieldId: 'quantifier',
+                    value: _productQuantifier ??
+                        GluttexConstants.productUnits.first,
+                    labelText: loc.unitText,
+                    items: GluttexConstants.productUnits.map((unit) {
+                      return DropdownMenuItem<String>(
+                        value: unit,
+                        child: Text(_getUnitText(unit, loc)),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _productQuantifier = value;
+                        });
+                      }
+                    },
                   ),
 
-                  // Description
-                  _buildFormField(
+                  const SizedBox(height: 16),
+
+                  // Description - Smart Field
+                  _buildSmartFormField(
+                    fieldId: 'description',
                     controller: _descriptionController,
                     labelText: loc.productDescriptionText,
                     validator: (value) {
@@ -758,7 +1133,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     maxLines: 3,
                   ),
 
-                  const SizedBox(height: 16.0),
+                  const SizedBox(height: 24),
 
                   // Category Picker
                   CategoryPicker(
@@ -770,7 +1145,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     package: "medicom_catalog",
                   ),
 
-                  const SizedBox(height: 16.0),
+                  const SizedBox(height: 24),
 
                   // Supplier Picker
                   SupplierPicker(
@@ -789,31 +1164,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     initialSelection: _initialSupplier,
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  // Submit Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isAiProcessing ? null : _submitForm,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        loc.submitText,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Submit Button with AI Confidence
+                  _buildSubmitButton(loc, colorScheme),
                 ],
               ),
             ),
@@ -822,38 +1176,60 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           // AI Processing Overlay
           if (_isAiProcessing)
             Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withOpacity(0.8),
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  width: 280,
+                  padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
                     color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 32,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          colorScheme.primary,
-                        ),
-                        strokeWidth: 3,
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  colorScheme.primary),
+                              strokeWidth: 4,
+                            ),
+                          ),
+                          Icon(
+                            Icons.auto_awesome,
+                            size: 32,
+                            color: colorScheme.primary,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
                       Text(
-                        'AI is analyzing your product...',
+                        loc.aiAnalysing,
                         style: TextStyle(
                           color: colorScheme.onSurface,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'This may take a few seconds',
+                        loc.waitText,
                         style: TextStyle(
                           color: colorScheme.onSurface.withOpacity(0.7),
                           fontSize: 14,
+                          // textAlign: TextAlign.center,
                         ),
                       ),
                     ],

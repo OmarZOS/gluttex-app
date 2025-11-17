@@ -99,7 +99,7 @@ class IProduct {
     try {
       // Validate barcode
       if (barcode.isEmpty) {
-        throw ArgumentError('Barcode cannot be empty');
+        // throw ArgumentError('Barcode cannot be empty');
       }
 
       // Extract and clean data

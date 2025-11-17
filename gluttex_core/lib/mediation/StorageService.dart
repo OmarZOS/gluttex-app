@@ -9,7 +9,7 @@ abstract class StorageService<T> {
     return null;
   }
 
-  Future<String?> insertBinary(String destination, T data) async {
+  Future<dynamic> insertBinary(String destination, T data) async {
     return null;
   }
 

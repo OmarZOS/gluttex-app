@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
@@ -13,6 +12,7 @@ class ImagePickerSection extends StatefulWidget {
   final String ownerId;
   final String entityId;
   final bool landscape;
+  final File? capturedImageFile;
   final void Function(GluttexImage? newImageUrl)? onImageUploaded;
 
   const ImagePickerSection(
@@ -22,7 +22,8 @@ class ImagePickerSection extends StatefulWidget {
       required this.ownerId,
       required this.entityId,
       this.onImageUploaded,
-      this.landscape = false});
+      this.landscape = false,
+      this.capturedImageFile = null});
 
   @override
   State<ImagePickerSection> createState() => _ImagePickerSectionState();
@@ -39,6 +40,20 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
   void initState() {
     landscape = widget.landscape;
     super.initState();
+    _pickedImageFile =
+        widget.capturedImageFile; // Initialize with captured image
+  }
+
+  @override
+  void didUpdateWidget(ImagePickerSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Update when capturedImageFile changes
+    if (widget.capturedImageFile != oldWidget.capturedImageFile) {
+      setState(() {
+        _pickedImageFile = widget.capturedImageFile;
+      });
+    }
   }
 
   Future<void> _pickImage() async {
@@ -361,40 +376,6 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
     );
   }
 
-  Widget _buildImageFile(File file) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Image.file(
-        file,
-        fit: BoxFit.cover,
-        width: double.infinity,
-      ),
-    );
-  }
-
-  Widget _buildNetworkImage(String url) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Image.network(
-        "${GluttexConstants.fsBaseUrl}$url",
-        fit: BoxFit.cover,
-        width: double.infinity,
-        errorBuilder: (context, error, stackTrace) => _buildErrorState(),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildPlaceholder(ThemeData theme, AppLocalizations loc) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -412,19 +393,6 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildErrorState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 48, color: Colors.red),
-          SizedBox(height: 8),
-          Text('Failed to load image'),
-        ],
-      ),
     );
   }
 }

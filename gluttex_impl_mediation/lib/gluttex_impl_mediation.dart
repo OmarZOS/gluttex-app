@@ -103,7 +103,7 @@ class StorageServiceImpl implements StorageService<FormData> {
   }
 
   @override
-  Future<String?> insertBinary(String destination, FormData data) async {
+  Future<dynamic> insertBinary(String destination, FormData data) async {
     try {
       // Log the request data
       // log('Request data: ${data.files}');
@@ -124,7 +124,7 @@ class StorageServiceImpl implements StorageService<FormData> {
       log('Response data uploading image: ${response.data}');
 
       // Check the response status code
-      return response.data['path'].toString().replaceFirst("files/", "");
+      return response.data;
 
       // Return success message
     } on DioException catch (e, stacktrace) {

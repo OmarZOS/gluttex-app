@@ -118,6 +118,438 @@ abstract class AppLocalizations {
   /// **'An error occurred. Please try again later.'**
   String get errorOccurred;
 
+  /// No description provided for @noProductsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No products to display.'**
+  String get noProductsFound;
+
+  /// No description provided for @addToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addToCart;
+
+  /// No description provided for @aboutProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutProvider;
+
+  /// No description provided for @productQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get productQuantity;
+
+  /// No description provided for @productReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get productReference;
+
+  /// No description provided for @priceText.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get priceText;
+
+  /// No description provided for @noRecipesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found'**
+  String get noRecipesFound;
+
+  /// No description provided for @noAppUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get noAppUsersFound;
+
+  /// No description provided for @successfullLoginMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully signed up.'**
+  String get successfullLoginMsg;
+
+  /// No description provided for @welcomeBackMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome Back!'**
+  String get welcomeBackMsg;
+
+  /// No description provided for @loginText.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get loginText;
+
+  /// No description provided for @pleaseLoginMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login to your account'**
+  String get pleaseLoginMsg;
+
+  /// No description provided for @pleaseInputUsernameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your username'**
+  String get pleaseInputUsernameMsg;
+
+  /// No description provided for @pleaseInputPasswordMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get pleaseInputPasswordMsg;
+
+  /// No description provided for @passwordLengthConstraintMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordLengthConstraintMsg;
+
+  /// No description provided for @suggestRegistrationMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Register'**
+  String get suggestRegistrationMsg;
+
+  /// No description provided for @suggest3rdPartyLogintMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Or login with'**
+  String get suggest3rdPartyLogintMsg;
+
+  /// No description provided for @pleaseInputusernameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a username'**
+  String get pleaseInputusernameMsg;
+
+  /// No description provided for @pleaseInputpasswordMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get pleaseInputpasswordMsg;
+
+  /// No description provided for @pleaseInputUserTypeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a user type'**
+  String get pleaseInputUserTypeMsg;
+
+  /// No description provided for @pleaseInputFirstNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a first name'**
+  String get pleaseInputFirstNameMsg;
+
+  /// No description provided for @pleaseInputLastNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a last name'**
+  String get pleaseInputLastNameMsg;
+
+  /// No description provided for @pleaseInputBirthdateMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your birthdate'**
+  String get pleaseInputBirthdateMsg;
+
+  /// No description provided for @pleaseInputLocationNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please input location name'**
+  String get pleaseInputLocationNameMsg;
+
+  /// No description provided for @pleaseInputgenderMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a gender'**
+  String get pleaseInputgenderMsg;
+
+  /// No description provided for @pleaseInputnationalityMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a nationality'**
+  String get pleaseInputnationalityMsg;
+
+  /// No description provided for @pleaseInputBloodTypeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a blood type'**
+  String get pleaseInputBloodTypeMsg;
+
+  /// No description provided for @pleaseInputCountryMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a country'**
+  String get pleaseInputCountryMsg;
+
+  /// No description provided for @birthdayText.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthdate'**
+  String get birthdayText;
+
+  /// No description provided for @loginSuccessfullMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully signed up.'**
+  String get loginSuccessfullMsg;
+
+  /// No description provided for @registerText.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get registerText;
+
+  /// No description provided for @registerationFormText.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Form'**
+  String get registerationFormText;
+
+  /// No description provided for @usernameText.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get usernameText;
+
+  /// No description provided for @passwordText.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordText;
+
+  /// No description provided for @userTypeText.
+  ///
+  /// In en, this message translates to:
+  /// **'User Type'**
+  String get userTypeText;
+
+  /// No description provided for @firstNameText.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstNameText;
+
+  /// No description provided for @lastNameText.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastNameText;
+
+  /// No description provided for @genderText.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get genderText;
+
+  /// No description provided for @nationalityText.
+  ///
+  /// In en, this message translates to:
+  /// **'Nationality'**
+  String get nationalityText;
+
+  /// No description provided for @bloodTypeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Type'**
+  String get bloodTypeText;
+
+  /// No description provided for @latitudeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get latitudeText;
+
+  /// No description provided for @longitudeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get longitudeText;
+
+  /// No description provided for @locationNameText.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Name'**
+  String get locationNameText;
+
+  /// No description provided for @locationText.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationText;
+
+  /// No description provided for @myLocationText.
+  ///
+  /// In en, this message translates to:
+  /// **'My Location'**
+  String get myLocationText;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Photo'**
+  String get removePhoto;
+
+  /// No description provided for @mapNotAvailableText.
+  ///
+  /// In en, this message translates to:
+  /// **'Map actually not available on this device'**
+  String get mapNotAvailableText;
+
+  /// No description provided for @pdfNotSupportedOnWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF files are not supported on web. Please use a mobile device.'**
+  String get pdfNotSupportedOnWeb;
+
+  /// No description provided for @registrationConditionsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions of registration'**
+  String get registrationConditionsText;
+
+  /// No description provided for @streetText.
+  ///
+  /// In en, this message translates to:
+  /// **'Street'**
+  String get streetText;
+
+  /// No description provided for @cityText.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get cityText;
+
+  /// No description provided for @postalCodeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal Code'**
+  String get postalCodeText;
+
+  /// No description provided for @countryText.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get countryText;
+
+  /// No description provided for @clientText.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get clientText;
+
+  /// No description provided for @cookingChefText.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking Chef'**
+  String get cookingChefText;
+
+  /// No description provided for @genderTextList.
+  ///
+  /// In en, this message translates to:
+  /// **'Male,Female,Other'**
+  String get genderTextList;
+
+  /// No description provided for @nationalityTextList.
+  ///
+  /// In en, this message translates to:
+  /// **'Algerian,Other'**
+  String get nationalityTextList;
+
+  /// No description provided for @missingText.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing'**
+  String get missingText;
+
+  /// No description provided for @productdeletionConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this product?'**
+  String get productdeletionConfirmationMessage;
+
+  /// No description provided for @recipedeletionConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this recipe?'**
+  String get recipedeletionConfirmationMessage;
+
+  /// No description provided for @cartAddConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Add to Cart'**
+  String get cartAddConfirmationMessage;
+
+  /// No description provided for @updateProductText.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Product'**
+  String get updateProductText;
+
+  /// No description provided for @pleaseInputProductNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a product name'**
+  String get pleaseInputProductNameMsg;
+
+  /// No description provided for @pleaseInputProductPriceMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a product price'**
+  String get pleaseInputProductPriceMsg;
+
+  /// No description provided for @pleaseInputProductBrandMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a product brand'**
+  String get pleaseInputProductBrandMsg;
+
+  /// No description provided for @pleaseInputProductBarcodeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a product bar code'**
+  String get pleaseInputProductBarcodeMsg;
+
+  /// No description provided for @pleaseInputvalidnumberMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number'**
+  String get pleaseInputvalidnumberMsg;
+
+  /// No description provided for @pleaseInputProductDescriptionMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a product description'**
+  String get pleaseInputProductDescriptionMsg;
+
+  /// No description provided for @pleaseInputProductQuantityMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a product amount'**
+  String get pleaseInputProductQuantityMsg;
+
+  /// No description provided for @recipeNameText.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Name'**
+  String get recipeNameText;
+
+  /// No description provided for @pleaseInputRecipeNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a recipe name'**
+  String get pleaseInputRecipeNameMsg;
+
+  /// No description provided for @recipeDescriptionText.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe description'**
+  String get recipeDescriptionText;
+
   String labeledAmount(String quantifier) {
     switch (quantifier) {
       case "g":
@@ -561,438 +993,6 @@ abstract class AppLocalizations {
     }
   }
 
-  /// No description provided for @noProductsFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No products to display.'**
-  String get noProductsFound;
-
-  /// No description provided for @addToCart.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get addToCart;
-
-  /// No description provided for @aboutProvider.
-  ///
-  /// In en, this message translates to:
-  /// **'About'**
-  String get aboutProvider;
-
-  /// No description provided for @productQuantity.
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get productQuantity;
-
-  /// No description provided for @productReference.
-  ///
-  /// In en, this message translates to:
-  /// **'Reference'**
-  String get productReference;
-
-  /// No description provided for @priceText.
-  ///
-  /// In en, this message translates to:
-  /// **'Price'**
-  String get priceText;
-
-  /// No description provided for @noRecipesFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No recipes found'**
-  String get noRecipesFound;
-
-  /// No description provided for @noAppUsersFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No users found'**
-  String get noAppUsersFound;
-
-  /// No description provided for @successfullLoginMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Successfully signed up.'**
-  String get successfullLoginMsg;
-
-  /// No description provided for @welcomeBackMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome Back!'**
-  String get welcomeBackMsg;
-
-  /// No description provided for @loginText.
-  ///
-  /// In en, this message translates to:
-  /// **'Login'**
-  String get loginText;
-
-  /// No description provided for @pleaseLoginMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please login to your account'**
-  String get pleaseLoginMsg;
-
-  /// No description provided for @pleaseInputUsernameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter your username'**
-  String get pleaseInputUsernameMsg;
-
-  /// No description provided for @pleaseInputPasswordMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter your password'**
-  String get pleaseInputPasswordMsg;
-
-  /// No description provided for @passwordLengthConstraintMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
-  String get passwordLengthConstraintMsg;
-
-  /// No description provided for @suggestRegistrationMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Don\'t have an account? Register'**
-  String get suggestRegistrationMsg;
-
-  /// No description provided for @suggest3rdPartyLogintMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Or login with'**
-  String get suggest3rdPartyLogintMsg;
-
-  /// No description provided for @pleaseInputusernameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a username'**
-  String get pleaseInputusernameMsg;
-
-  /// No description provided for @pleaseInputpasswordMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a password'**
-  String get pleaseInputpasswordMsg;
-
-  /// No description provided for @pleaseInputUserTypeMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please select a user type'**
-  String get pleaseInputUserTypeMsg;
-
-  /// No description provided for @pleaseInputFirstNameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a first name'**
-  String get pleaseInputFirstNameMsg;
-
-  /// No description provided for @pleaseInputLastNameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a last name'**
-  String get pleaseInputLastNameMsg;
-
-  /// No description provided for @pleaseInputBirthdateMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please select your birthdate'**
-  String get pleaseInputBirthdateMsg;
-
-  /// No description provided for @pleaseInputLocationNameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please input location name'**
-  String get pleaseInputLocationNameMsg;
-
-  /// No description provided for @pleaseInputgenderMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please select a gender'**
-  String get pleaseInputgenderMsg;
-
-  /// No description provided for @pleaseInputnationalityMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please select a nationality'**
-  String get pleaseInputnationalityMsg;
-
-  /// No description provided for @pleaseInputBloodTypeMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please select a blood type'**
-  String get pleaseInputBloodTypeMsg;
-
-  /// No description provided for @pleaseInputCountryMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please select a country'**
-  String get pleaseInputCountryMsg;
-
-  /// No description provided for @birthdayText.
-  ///
-  /// In en, this message translates to:
-  /// **'Birthdate'**
-  String get birthdayText;
-
-  /// No description provided for @loginSuccessfullMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Successfully signed up.'**
-  String get loginSuccessfullMsg;
-
-  /// No description provided for @registerText.
-  ///
-  /// In en, this message translates to:
-  /// **'Register'**
-  String get registerText;
-
-  /// No description provided for @registerationFormText.
-  ///
-  /// In en, this message translates to:
-  /// **'Registration Form'**
-  String get registerationFormText;
-
-  /// No description provided for @usernameText.
-  ///
-  /// In en, this message translates to:
-  /// **'Username'**
-  String get usernameText;
-
-  /// No description provided for @passwordText.
-  ///
-  /// In en, this message translates to:
-  /// **'Password'**
-  String get passwordText;
-
-  /// No description provided for @userTypeText.
-  ///
-  /// In en, this message translates to:
-  /// **'User Type'**
-  String get userTypeText;
-
-  /// No description provided for @firstNameText.
-  ///
-  /// In en, this message translates to:
-  /// **'First Name'**
-  String get firstNameText;
-
-  /// No description provided for @lastNameText.
-  ///
-  /// In en, this message translates to:
-  /// **'Last Name'**
-  String get lastNameText;
-
-  /// No description provided for @genderText.
-  ///
-  /// In en, this message translates to:
-  /// **'Gender'**
-  String get genderText;
-
-  /// No description provided for @nationalityText.
-  ///
-  /// In en, this message translates to:
-  /// **'Nationality'**
-  String get nationalityText;
-
-  /// No description provided for @bloodTypeText.
-  ///
-  /// In en, this message translates to:
-  /// **'Blood Type'**
-  String get bloodTypeText;
-
-  /// No description provided for @latitudeText.
-  ///
-  /// In en, this message translates to:
-  /// **'Latitude'**
-  String get latitudeText;
-
-  /// No description provided for @longitudeText.
-  ///
-  /// In en, this message translates to:
-  /// **'Longitude'**
-  String get longitudeText;
-
-  /// No description provided for @locationNameText.
-  ///
-  /// In en, this message translates to:
-  /// **'Location Name'**
-  String get locationNameText;
-
-  /// No description provided for @locationText.
-  ///
-  /// In en, this message translates to:
-  /// **'Location'**
-  String get locationText;
-
-  /// No description provided for @myLocationText.
-  ///
-  /// In en, this message translates to:
-  /// **'My Location'**
-  String get myLocationText;
-
-  /// No description provided for @removePhoto.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove Photo'**
-  String get removePhoto;
-
-  /// No description provided for @mapNotAvailableText.
-  ///
-  /// In en, this message translates to:
-  /// **'Map actually not available on this device'**
-  String get mapNotAvailableText;
-
-  /// No description provided for @pdfNotSupportedOnWeb.
-  ///
-  /// In en, this message translates to:
-  /// **'PDF files are not supported on web. Please use a mobile device.'**
-  String get pdfNotSupportedOnWeb;
-
-  /// No description provided for @registrationConditionsText.
-  ///
-  /// In en, this message translates to:
-  /// **'Conditions of registration'**
-  String get registrationConditionsText;
-
-  /// No description provided for @streetText.
-  ///
-  /// In en, this message translates to:
-  /// **'Street'**
-  String get streetText;
-
-  /// No description provided for @cityText.
-  ///
-  /// In en, this message translates to:
-  /// **'City'**
-  String get cityText;
-
-  /// No description provided for @postalCodeText.
-  ///
-  /// In en, this message translates to:
-  /// **'Postal Code'**
-  String get postalCodeText;
-
-  /// No description provided for @countryText.
-  ///
-  /// In en, this message translates to:
-  /// **'Country'**
-  String get countryText;
-
-  /// No description provided for @clientText.
-  ///
-  /// In en, this message translates to:
-  /// **'Client'**
-  String get clientText;
-
-  /// No description provided for @cookingChefText.
-  ///
-  /// In en, this message translates to:
-  /// **'Cooking Chef'**
-  String get cookingChefText;
-
-  /// No description provided for @genderTextList.
-  ///
-  /// In en, this message translates to:
-  /// **'Male,Female,Other'**
-  String get genderTextList;
-
-  /// No description provided for @nationalityTextList.
-  ///
-  /// In en, this message translates to:
-  /// **'Algerian,Other'**
-  String get nationalityTextList;
-
-  /// No description provided for @missingText.
-  ///
-  /// In en, this message translates to:
-  /// **'Missing'**
-  String get missingText;
-
-  /// No description provided for @productdeletionConfirmationMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete this product?'**
-  String get productdeletionConfirmationMessage;
-
-  /// No description provided for @recipedeletionConfirmationMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete this recipe?'**
-  String get recipedeletionConfirmationMessage;
-
-  /// No description provided for @cartAddConfirmationMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Add to Cart'**
-  String get cartAddConfirmationMessage;
-
-  /// No description provided for @updateProductText.
-  ///
-  /// In en, this message translates to:
-  /// **'Update Product'**
-  String get updateProductText;
-
-  /// No description provided for @pleaseInputProductNameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a product name'**
-  String get pleaseInputProductNameMsg;
-
-  /// No description provided for @pleaseInputProductPriceMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a product price'**
-  String get pleaseInputProductPriceMsg;
-
-  /// No description provided for @pleaseInputProductBrandMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a product brand'**
-  String get pleaseInputProductBrandMsg;
-
-  /// No description provided for @pleaseInputProductBarcodeMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a product bar code'**
-  String get pleaseInputProductBarcodeMsg;
-
-  /// No description provided for @pleaseInputvalidnumberMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a valid number'**
-  String get pleaseInputvalidnumberMsg;
-
-  /// No description provided for @pleaseInputProductDescriptionMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a product description'**
-  String get pleaseInputProductDescriptionMsg;
-
-  /// No description provided for @pleaseInputProductQuantityMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a product amount'**
-  String get pleaseInputProductQuantityMsg;
-
-  /// No description provided for @recipeNameText.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe Name'**
-  String get recipeNameText;
-
-  /// No description provided for @pleaseInputRecipeNameMsg.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a recipe name'**
-  String get pleaseInputRecipeNameMsg;
-
-  /// No description provided for @recipeDescriptionText.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe description'**
-  String get recipeDescriptionText;
-
   /// No description provided for @pleaseInputRecipeDescriptionMsg.
   ///
   /// In en, this message translates to:
@@ -1086,7 +1086,7 @@ abstract class AppLocalizations {
   /// No description provided for @addProductTxt.
   ///
   /// In en, this message translates to:
-  /// **'Add Product'**
+  /// **'Add'**
   String get addProductTxt;
 
   /// No description provided for @orderNowTxt.
@@ -3939,6 +3939,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to logout?'**
   String get logoutConsentText;
+
+  /// No description provided for @scanBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Barcode'**
+  String get scanBarcode;
+
+  /// No description provided for @alignBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Align barcode within the frame'**
+  String get alignBarcode;
+
+  /// No description provided for @positionBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Position the barcode inside the scanning area for automatic detection'**
+  String get positionBarcode;
+
+  /// No description provided for @barcodeScanSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode scanned successfully!'**
+  String get barcodeScanSuccess;
+
+  /// No description provided for @initCam.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing Camera...'**
+  String get initCam;
+
+  /// No description provided for @captureProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Product'**
+  String get captureProduct;
+
+  /// No description provided for @positionProductInFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Position Product in Frame'**
+  String get positionProductInFrame;
+
+  /// No description provided for @scanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure good lighting and clear focus'**
+  String get scanHint;
+
+  /// No description provided for @tapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to Capture'**
+  String get tapHint;
+
+  /// No description provided for @reviewPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Photo'**
+  String get reviewPhoto;
+
+  /// No description provided for @croppedToFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Cropped to frame'**
+  String get croppedToFrame;
+
+  /// No description provided for @usePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Use This Photo'**
+  String get usePhoto;
+
+  /// No description provided for @takeAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Again'**
+  String get takeAgain;
+
+  /// No description provided for @processingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Image...'**
+  String get processingImage;
+
+  /// No description provided for @waitText.
+  ///
+  /// In en, this message translates to:
+  /// **'This may take a few seconds'**
+  String get waitText;
+
+  /// No description provided for @aiAnalysing.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is analyzing your product...'**
+  String get aiAnalysing;
+
+  /// No description provided for @aiAssistantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically fill product details'**
+  String get aiAssistantSubtitle;
+
+  /// No description provided for @aiAssistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Product Assistant'**
+  String get aiAssistantTitle;
+
+  /// No description provided for @productDetailsFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Product details filled automatically!'**
+  String get productDetailsFilled;
+
+  /// No description provided for @scanQR.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get scanQR;
+
+  /// No description provided for @scannerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Position QR Code in Frame'**
+  String get scannerHint;
+
+  /// No description provided for @alignQR.
+  ///
+  /// In en, this message translates to:
+  /// **'Align the QR code within the scanning area for automatic detection'**
+  String get alignQR;
+
+  /// No description provided for @manualInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Input'**
+  String get manualInput;
+
+  /// No description provided for @qrSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code scanned successfully!'**
+  String get qrSuccess;
+
+  /// No description provided for @manualQR.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter QR Code Manually'**
+  String get manualQR;
+
+  /// No description provided for @manualQRHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste or type QR code content...'**
+  String get manualQRHint;
+
+  /// No description provided for @scannerTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanner'**
+  String get scannerTxt;
+
+  /// No description provided for @takeProductPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Product Photo'**
+  String get takeProductPhoto;
+
+  /// No description provided for @aiWillAnalyseImage.
+  ///
+  /// In en, this message translates to:
+  /// **'AI will analyze the product image'**
+  String get aiWillAnalyseImage;
+
+  /// No description provided for @automaticallyFillDetailsFromBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically fill details from barcode'**
+  String get automaticallyFillDetailsFromBarcode;
 }
 
 class _AppLocalizationsDelegate

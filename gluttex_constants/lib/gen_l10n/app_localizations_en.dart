@@ -277,7 +277,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noImageSelectedTxt => 'No image selected';
 
   @override
-  String get addProductTxt => 'Add Product';
+  String get addProductTxt => 'Add';
 
   @override
   String get orderNowTxt => 'Order Now';
@@ -1745,4 +1745,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutConsentText => 'Are you sure you want to logout?';
+
+  @override
+  String get scanBarcode => 'Scan Barcode';
+
+  @override
+  String get alignBarcode => 'Align barcode within the frame';
+
+  @override
+  String get positionBarcode => 'Position the barcode inside the scanning area for automatic detection';
+
+  @override
+  String get barcodeScanSuccess => 'Barcode scanned successfully!';
+
+  @override
+  String get initCam => 'Initializing Camera...';
+
+  @override
+  String get captureProduct => 'Capture Product';
+
+  @override
+  String get positionProductInFrame => 'Position Product in Frame';
+
+  @override
+  String get scanHint => 'Ensure good lighting and clear focus';
+
+  @override
+  String get tapHint => 'Tap to Capture';
+
+  @override
+  String get reviewPhoto => 'Review Photo';
+
+  @override
+  String get croppedToFrame => 'Cropped to frame';
+
+  @override
+  String get usePhoto => 'Use This Photo';
+
+  @override
+  String get takeAgain => 'Take Again';
+
+  @override
+  String get processingImage => 'Processing Image...';
+
+  @override
+  String get waitText => 'This may take a few seconds';
+
+  @override
+  String get aiAnalysing => 'AI is analyzing your product...';
+
+  @override
+  String get aiAssistantSubtitle => 'Automatically fill product details';
+
+  @override
+  String get aiAssistantTitle => 'AI Product Assistant';
+
+  @override
+  String get productDetailsFilled => 'Product details filled automatically!';
+
+  @override
+  String get scanQR => 'Scan QR Code';
+
+  @override
+  String get scannerHint => 'Position QR Code in Frame';
+
+  @override
+  String get alignQR => 'Align the QR code within the scanning area for automatic detection';
+
+  @override
+  String get manualInput => 'Manual Input';
+
+  @override
+  String get qrSuccess => 'QR Code scanned successfully!';
+
+  @override
+  String get manualQR => 'Enter QR Code Manually';
+
+  @override
+  String get manualQRHint => 'Paste or type QR code content...';
+
+  @override
+  String get scannerTxt => 'Scanner';
+
+  @override
+  String get takeProductPhoto => 'Take Product Photo';
+
+  @override
+  String get aiWillAnalyseImage => 'AI will analyze the product image';
+
+  @override
+  String get automaticallyFillDetailsFromBarcode => 'Automatically fill details from barcode';
 }

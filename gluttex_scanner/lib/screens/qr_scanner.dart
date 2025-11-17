@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:vibration/vibration.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 
 class QRScannerScreen extends StatefulWidget {
   final Function(String) onQRcodeScanned;
@@ -46,12 +47,12 @@ class _QRScannerScreenState extends State<QRScannerScreen>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text(
-          'Scan QR Code',
+        title: Text(
+          loc.scanQR,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -97,7 +98,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
               final List<Barcode> barcodes = capture.barcodes;
               for (final barcode in barcodes) {
                 if (barcode.rawValue != null) {
-                  _onQRCodeDetected(barcode.rawValue!);
+                  _onQRCodeDetected(barcode.rawValue!, loc);
                   break;
                 }
               }
@@ -150,7 +151,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
           ),
 
           // Corner indicators
-          _buildCornerIndicators(colorScheme.primary),
+          _buildCornerIndicators(colorScheme.primary, loc),
 
           // Instructions with improved design
           Positioned(
@@ -182,7 +183,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Position QR Code in Frame',
+                    loc.scannerHint,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: isDark ? Colors.white : Colors.black87,
@@ -192,7 +193,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Align the QR code within the scanning area for automatic detection',
+                    loc.alignQR,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black54,
@@ -216,7 +217,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
                 // Manual input button
                 _buildActionButton(
                   icon: Icons.keyboard,
-                  label: 'Manual Input',
+                  label: loc.manualInput,
                   color: colorScheme.secondary,
                   onTap: _showManualInputDialog,
                 ),
@@ -224,7 +225,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
                 // Gallery button
                 _buildActionButton(
                   icon: Icons.photo_library,
-                  label: 'From Gallery',
+                  label: loc.gallery,
                   color: colorScheme.tertiary ?? colorScheme.primary,
                   onTap: _pickImageFromGallery,
                 ),
@@ -297,7 +298,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
     );
   }
 
-  Widget _buildCornerIndicators(Color color) {
+  Widget _buildCornerIndicators(Color color, AppLocalizations loc) {
     final size = MediaQuery.of(context).size.width * 0.6;
     final top = MediaQuery.of(context).size.height * 0.35 - size / 2;
     final left = MediaQuery.of(context).size.width * 0.2;
@@ -380,7 +381,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
     cameraController.switchCamera();
   }
 
-  Future<void> _onQRCodeDetected(String code) async {
+  Future<void> _onQRCodeDetected(String code, AppLocalizations loc) async {
     setState(() {
       _isScanning = false;
     });
@@ -391,7 +392,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
     }
 
     // Show success feedback
-    _showSuccessFeedback();
+    _showSuccessFeedback(loc);
 
     // Process after a short delay to show feedback
     await Future.delayed(const Duration(milliseconds: 800));
@@ -402,7 +403,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
     }
   }
 
-  void _showSuccessFeedback() {
+  void _showSuccessFeedback(AppLocalizations loc) {
     final colorScheme = Theme.of(context).colorScheme;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -413,7 +414,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'QR Code scanned successfully!',
+                loc.qrSuccess,
                 style: TextStyle(
                   color: colorScheme.onPrimary,
                   fontWeight: FontWeight.w500,
@@ -433,13 +434,14 @@ class _QRScannerScreenState extends State<QRScannerScreen>
   }
 
   void _showManualInputDialog() {
+    final loc = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Enter QR Code Manually'),
+        title: Text(loc.manualQR),
         content: TextField(
           decoration: InputDecoration(
-            hintText: 'Paste or type QR code content...',
+            hintText: loc.manualQRHint,
             border: OutlineInputBorder(),
           ),
           maxLines: 3,
@@ -447,14 +449,14 @@ class _QRScannerScreenState extends State<QRScannerScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text(loc.cancelTxt),
           ),
           ElevatedButton(
             onPressed: () {
               // Handle manual input
               Navigator.pop(context);
             },
-            child: Text('Submit'),
+            child: Text(loc.submitText),
           ),
         ],
       ),

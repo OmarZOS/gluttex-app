@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:image/image.dart' as img;
@@ -237,6 +238,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final safeAreaPadding = MediaQuery.of(context).padding;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -245,13 +247,14 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
         switchInCurve: Curves.easeInOut,
         switchOutCurve: Curves.easeInOut,
         child: _capturedImage == null
-            ? _buildCameraMode(colorScheme, safeAreaPadding)
-            : _buildPreviewMode(colorScheme, safeAreaPadding),
+            ? _buildCameraMode(colorScheme, safeAreaPadding, loc)
+            : _buildPreviewMode(colorScheme, safeAreaPadding, loc),
       ),
     );
   }
 
-  Widget _buildCameraMode(ColorScheme colorScheme, EdgeInsets safeAreaPadding) {
+  Widget _buildCameraMode(ColorScheme colorScheme, EdgeInsets safeAreaPadding,
+      AppLocalizations loc) {
     return Stack(
       children: [
         // Camera Preview
@@ -263,24 +266,24 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
             ),
           )
         else
-          _buildLoadingCamera(colorScheme),
+          _buildLoadingCamera(colorScheme, loc),
 
         // Scanner Overlay & Guides
-        if (_isCameraInitialized) _buildScannerOverlay(colorScheme),
+        if (_isCameraInitialized) _buildScannerOverlay(colorScheme, loc),
 
         // Top Bar with Controls
-        _buildTopBar(colorScheme, safeAreaPadding),
+        _buildTopBar(colorScheme, safeAreaPadding, loc),
 
         // Bottom Capture Button
-        _buildCameraControls(colorScheme, safeAreaPadding),
+        _buildCameraControls(colorScheme, safeAreaPadding, loc),
 
         // Processing Overlay
-        if (_isTakingPicture) _buildProcessingOverlay(colorScheme),
+        if (_isTakingPicture) _buildProcessingOverlay(colorScheme, loc),
       ],
     );
   }
 
-  Widget _buildLoadingCamera(ColorScheme colorScheme) {
+  Widget _buildLoadingCamera(ColorScheme colorScheme, AppLocalizations loc) {
     return Container(
       color: Colors.black,
       child: Center(
@@ -297,7 +300,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              'Initializing Camera...',
+              loc.initCam,
               style: TextStyle(
                 color: colorScheme.onPrimary,
                 fontSize: 16,
@@ -310,7 +313,8 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
     );
   }
 
-  Widget _buildTopBar(ColorScheme colorScheme, EdgeInsets safeAreaPadding) {
+  Widget _buildTopBar(ColorScheme colorScheme, EdgeInsets safeAreaPadding,
+      AppLocalizations loc) {
     return Positioned(
       top: 0,
       left: 0,
@@ -343,7 +347,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
             ),
             const SizedBox(width: 16),
             Text(
-              'Capture Product',
+              loc.captureProduct,
               style: TextStyle(
                 color: colorScheme.onPrimary,
                 fontSize: 20,
@@ -395,7 +399,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
     );
   }
 
-  Widget _buildScannerOverlay(ColorScheme colorScheme) {
+  Widget _buildScannerOverlay(ColorScheme colorScheme, AppLocalizations loc) {
     return Positioned.fill(
       child: IgnorePointer(
         child: Column(
@@ -464,7 +468,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Position Product in Frame',
+                          loc.positionProductInFrame,
                           style: TextStyle(
                             color: colorScheme.onPrimary,
                             fontSize: 16,
@@ -473,7 +477,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Ensure good lighting and clear focus',
+                          loc.scanHint,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: colorScheme.onPrimary.withOpacity(0.7),
@@ -555,8 +559,8 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
     );
   }
 
-  Widget _buildCameraControls(
-      ColorScheme colorScheme, EdgeInsets safeAreaPadding) {
+  Widget _buildCameraControls(ColorScheme colorScheme,
+      EdgeInsets safeAreaPadding, AppLocalizations loc) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -627,7 +631,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Tap to Capture',
+              loc.tapHint,
               style: TextStyle(
                 color: colorScheme.onPrimary,
                 fontSize: 14,
@@ -646,8 +650,8 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
     );
   }
 
-  Widget _buildPreviewMode(
-      ColorScheme colorScheme, EdgeInsets safeAreaPadding) {
+  Widget _buildPreviewMode(ColorScheme colorScheme, EdgeInsets safeAreaPadding,
+      AppLocalizations loc) {
     // Show cropped image if available, otherwise show original
     final imageToShow = _croppedImage ??
         (_capturedImage != null ? File(_capturedImage!.path) : null);
@@ -708,7 +712,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Review Photo',
+                      loc.reviewPhoto,
                       style: TextStyle(
                         color: colorScheme.onPrimary,
                         fontSize: 20,
@@ -717,7 +721,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
                     ),
                     if (_croppedImage != null)
                       Text(
-                        'Cropped to frame',
+                        loc.croppedToFrame,
                         style: TextStyle(
                           color: colorScheme.primary,
                           fontSize: 12,
@@ -732,13 +736,13 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
         ),
 
         // Bottom Actions
-        _buildPreviewActions(colorScheme, safeAreaPadding),
+        _buildPreviewActions(colorScheme, safeAreaPadding, loc),
       ],
     );
   }
 
-  Widget _buildPreviewActions(
-      ColorScheme colorScheme, EdgeInsets safeAreaPadding) {
+  Widget _buildPreviewActions(ColorScheme colorScheme,
+      EdgeInsets safeAreaPadding, AppLocalizations loc) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -771,8 +775,8 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
               child: ElevatedButton.icon(
                 onPressed: _useImage,
                 icon: const Icon(Icons.check_circle_outline, size: 24),
-                label: const Text(
-                  'Use This Photo',
+                label: Text(
+                  loc.usePhoto,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -796,8 +800,8 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
               child: OutlinedButton.icon(
                 onPressed: _retakePicture,
                 icon: const Icon(Icons.refresh, size: 24),
-                label: const Text(
-                  'Take Again',
+                label: Text(
+                  loc.takeAgain,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -821,7 +825,8 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
     );
   }
 
-  Widget _buildProcessingOverlay(ColorScheme colorScheme) {
+  Widget _buildProcessingOverlay(
+      ColorScheme colorScheme, AppLocalizations loc) {
     return Container(
       color: Colors.black.withOpacity(0.85),
       child: Center(
@@ -852,7 +857,7 @@ class _ProductCaptureScreenState extends State<ProductCaptureScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'Processing Image...',
+                loc.processingImage,
                 style: TextStyle(
                   color: colorScheme.onSurface,
                   fontSize: 16,

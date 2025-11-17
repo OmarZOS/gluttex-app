@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_chef/screens/recipe_form_screen.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_home/screens/app_user_update_form_screen.dart';
 import 'package:gluttex_home/screens/home_screen.dart';
 import 'package:gluttex_event/user_change_notifier.dart';

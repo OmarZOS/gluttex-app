@@ -86,6 +86,29 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         horizontalButtons: [
           SpeedDialButton(
+            icon: Icon(CupertinoIcons.barcode_viewfinder,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.scannerTxt,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.productScanPage,
+              );
+            },
+          ),
+          SpeedDialButton(
+            icon: Icon(Icons.add_box_outlined,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.addProductTxt,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.productCreate);
+            },
+          ),
+        ],
+        verticalButtons: [
+          SpeedDialButton(
             icon: Icon(Icons.shopping_basket,
                 color: Theme.of(context).colorScheme.onPrimary),
             label: AppLocalizations.of(context)?.ordersText,
@@ -98,20 +121,6 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
             },
           ),
           SpeedDialButton(
-            icon: Icon(CupertinoIcons.barcode_viewfinder,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.ordersText,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.productScanPage,
-              );
-            },
-          ),
-        ],
-        verticalButtons: [
-          SpeedDialButton(
             icon: Icon(Icons.shopping_cart,
                 color: Theme.of(context).colorScheme.onPrimary),
             label: AppLocalizations.of(context)?.cartText,
@@ -121,15 +130,6 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
                 context,
                 AppRoutes.cartPage,
               );
-            },
-          ),
-          SpeedDialButton(
-            icon: Icon(Icons.add_box_outlined,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.addProductTxt,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(context, AppRoutes.productCreate);
             },
           ),
         ],

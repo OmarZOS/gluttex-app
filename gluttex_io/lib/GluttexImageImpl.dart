@@ -22,8 +22,9 @@ class GluttexImageImpl extends GluttexImage<FormData> {
   @override
   Future<String?> uploadImage() async {
     StorageService storageService = GluttexLocator.get<StorageService>();
-    return await storageService.insertBinary(
+    dynamic result = await storageService.insertBinary(
         '${GluttexConstants.fsBaseUrl}${GluttexConstants.postImageEndpoint}/$entityType/$ownerId/$entityId/',
         await formData());
+    return result['path'].toString().replaceFirst("files/", "");
   }
 }

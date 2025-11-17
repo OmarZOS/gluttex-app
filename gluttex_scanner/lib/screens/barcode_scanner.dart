@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:vibration/vibration.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
   final Function(String) onBarcodeScanned;
@@ -38,12 +39,13 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text(
-          'Scan Barcode',
+        title: Text(
+          loc.scanBarcode,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -79,7 +81,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               for (final barcode in barcodes) {
                 if (barcode.rawValue != null &&
                     _isValidBarcode(barcode.rawValue!)) {
-                  _onBarcodeDetected(barcode.rawValue!);
+                  _onBarcodeDetected(barcode.rawValue!, loc);
                   break;
                 }
               }
@@ -164,7 +166,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Align barcode within the frame',
+                    loc.alignBarcode,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: isDark ? Colors.white : Colors.black87,
@@ -174,7 +176,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Position the barcode inside the scanning area for automatic detection',
+                    loc.positionBarcode,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black54,
@@ -286,7 +288,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     cameraController.toggleTorch();
   }
 
-  Future<void> _onBarcodeDetected(String barcode) async {
+  Future<void> _onBarcodeDetected(String barcode, AppLocalizations loc) async {
     setState(() {
       _isScanning = false;
     });
@@ -297,7 +299,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     }
 
     // Show success feedback
-    _showSuccessFeedback();
+    _showSuccessFeedback(loc);
 
     // Process after a short delay
     await Future.delayed(const Duration(milliseconds: 500));
@@ -308,7 +310,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     }
   }
 
-  void _showSuccessFeedback() {
+  void _showSuccessFeedback(AppLocalizations loc) {
     final colorScheme = Theme.of(context).colorScheme;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -318,7 +320,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             Icon(Icons.check_circle, color: colorScheme.onPrimary),
             const SizedBox(width: 12),
             Text(
-              'Barcode scanned successfully!',
+              loc.barcodeScanSuccess,
               style: TextStyle(
                 color: colorScheme.onPrimary,
                 fontWeight: FontWeight.w500,

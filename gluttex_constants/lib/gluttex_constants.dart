@@ -237,6 +237,9 @@ class GluttexConstants {
   static const String getRecipeSearchByTokenEndpoint = '/search/recipe';
   static const String getProductSearchByTokenEndpoint = '/search/product';
 
+  static const String getProductSearchByBarcodeEndpoint = '/product/barcode';
+  static const String getProductSearchByImageEndpoint = '/product/barcode';
+
   static const String getSupplierSearchByGeoEndpoint =
       '/search/position/supplier';
 
