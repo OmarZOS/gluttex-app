@@ -238,7 +238,7 @@ class GluttexConstants {
   static const String getProductSearchByTokenEndpoint = '/search/product';
 
   static const String getProductSearchByBarcodeEndpoint = '/product/barcode';
-  static const String getProductSearchByImageEndpoint = '/product/barcode';
+  static const String getProductSearchByImageEndpoint = '/product/search/image';
 
   static const String getSupplierSearchByGeoEndpoint =
       '/search/position/supplier';
@@ -296,6 +296,18 @@ class GluttexPageIndex {
   static const int recipes = 2;
   static const int games = 3;
   static const int profile = 4;
+}
+
+class ProductAssistedFields {
+  static const String IPRODUCT_NAME = "iproduct_name";
+  static const String IPRODUCT_BRAND = "iproduct_brand";
+  static const String IPRODUCT_BARCODE = "iproduct_barcode";
+  static const String IPRODUCT_ESTIMATED_PRICE_DA =
+      "iproduct_estimated_price_DA";
+  static const String IPRODUCT_GLUTEN_STATUS = "iproduct_gluten_status";
+  static const String DESCRIPTION = "iproduct_desc";
+  static const String QUANTIFIER = "iproduct_quantifier";
+  static const String QUANTITY = "iproduct_quantity";
 }
 
 class OrderStates {

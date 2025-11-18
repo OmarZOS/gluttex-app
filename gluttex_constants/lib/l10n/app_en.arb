@@ -613,6 +613,9 @@
   
   "takeProductPhoto":"Take Product Photo",
   "aiWillAnalyseImage":"AI will analyze the product image",
-  "automaticallyFillDetailsFromBarcode":"Automatically fill details from barcode"
+  "automaticallyFillDetailsFromBarcode":"Automatically fill details from barcode",
 
+  "aiGenerated": "AI-Generated",
+  "databaseFetched": "Retrieved from database",
+  "userInput": "User-Provided"
 }

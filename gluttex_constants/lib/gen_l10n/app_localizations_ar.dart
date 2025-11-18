@@ -1835,4 +1835,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get automaticallyFillDetailsFromBarcode => 'ملء التفاصيل تلقائياً من الباركود';
+
+  @override
+  String get aiGenerated => 'مولد بالذكاء الاصطناعي';
+
+  @override
+  String get databaseFetched => 'مسترجع من قاعدة البيانات';
+
+  @override
+  String get userInput => 'مُدخل من المستخدم';
 }

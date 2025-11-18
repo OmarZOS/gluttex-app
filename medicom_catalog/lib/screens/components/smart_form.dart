@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_event/assistant_change_notifier.dart';
 import 'package:provider/provider.dart';
+import 'package:gluttex_event/components/lib.dart';
 
 // Smart Form Field Widget
 class SmartFormField extends StatefulWidget {
@@ -40,32 +41,28 @@ class _SmartFormFieldState extends State<SmartFormField> {
   void initState() {
     super.initState();
     _internalController = widget.controller;
-    _internalController.addListener(_onTextChanged);
+    // Don't add listener here to avoid redundant calls
   }
 
   @override
   void didUpdateWidget(SmartFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      _internalController.removeListener(_onTextChanged);
       _internalController = widget.controller;
-      _internalController.addListener(_onTextChanged);
     }
   }
 
-  void _onTextChanged() {
-    if (!_hasUserInteracted && _internalController.text.isNotEmpty) {
+  void _markAsEdited() {
+    if (!_hasUserInteracted) {
       setState(() {
         _hasUserInteracted = true;
       });
-      // Mark field as edited in AssistantNotifier
       context.read<AssistantNotifier>().markFieldAsEdited(widget.fieldId);
     }
   }
 
   @override
   void dispose() {
-    _internalController.removeListener(_onTextChanged);
     super.dispose();
   }
 
@@ -117,14 +114,11 @@ class _SmartFormFieldState extends State<SmartFormField> {
           maxLines: widget.maxLines,
           validator: widget.validator,
           onSaved: widget.onSaved,
-          onTap: () {
-            if (!_hasUserInteracted) {
-              setState(() {
-                _hasUserInteracted = true;
-              });
-              context
-                  .read<AssistantNotifier>()
-                  .markFieldAsEdited(widget.fieldId);
+          onTap: _markAsEdited, // Single call to mark as edited
+          onChanged: (value) {
+            // Only mark as edited on first meaningful change
+            if (!_hasUserInteracted && value.isNotEmpty) {
+              _markAsEdited();
             }
           },
         ),
@@ -139,17 +133,22 @@ class _SmartFormFieldState extends State<SmartFormField> {
     final (color, text, icon) = switch (source) {
       DataSource.aiGenerated => (
           colorScheme.tertiaryContainer,
-          "loc.aiGenerated",
+          loc.aiGenerated,
           Icons.auto_awesome_outlined,
         ),
       DataSource.databaseFetched => (
           colorScheme.secondaryContainer,
-          "loc.databaseFetched",
+          loc.databaseFetched,
           Icons.storage_outlined,
         ),
       DataSource.userInput => (
+          colorScheme.tertiary,
+          loc.userInput,
+          Icons.edit_outlined,
+        ),
+      DataSource.gluttexInput => (
           colorScheme.surfaceVariant,
-          "loc.userInput",
+          loc.userInput,
           Icons.edit_outlined,
         ),
     };
@@ -189,9 +188,10 @@ class _SmartFormFieldState extends State<SmartFormField> {
   Color _getBorderColor(DataSource source, BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return switch (source) {
-      DataSource.aiGenerated => colorScheme.tertiary,
-      DataSource.databaseFetched => colorScheme.secondary,
+      DataSource.aiGenerated => colorScheme.secondary,
+      DataSource.databaseFetched => colorScheme.primary,
       DataSource.userInput => colorScheme.outline,
+      DataSource.gluttexInput => colorScheme.outline,
     };
   }
 }
@@ -202,7 +202,7 @@ class SmartDropdownField<T> extends StatefulWidget {
   final T value;
   final String labelText;
   final List<DropdownMenuItem<T>> items;
-  final void Function(T?) onChanged;
+  final void Function(T?)? onChanged;
   final bool showSourceBadge;
 
   const SmartDropdownField({
@@ -221,6 +221,15 @@ class SmartDropdownField<T> extends StatefulWidget {
 
 class _SmartDropdownFieldState<T> extends State<SmartDropdownField<T>> {
   bool _hasUserInteracted = false;
+
+  void _markAsEdited() {
+    if (!_hasUserInteracted) {
+      setState(() {
+        _hasUserInteracted = true;
+      });
+      context.read<AssistantNotifier>().markFieldAsEdited(widget.fieldId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -266,15 +275,8 @@ class _SmartDropdownFieldState<T> extends State<SmartDropdownField<T>> {
           ),
           items: widget.items,
           onChanged: (value) {
-            if (!_hasUserInteracted) {
-              setState(() {
-                _hasUserInteracted = true;
-              });
-              context
-                  .read<AssistantNotifier>()
-                  .markFieldAsEdited(widget.fieldId);
-            }
-            widget.onChanged(value);
+            _markAsEdited(); // Single call to mark as edited
+            widget.onChanged?.call(value);
           },
         ),
       ],
@@ -288,17 +290,22 @@ class _SmartDropdownFieldState<T> extends State<SmartDropdownField<T>> {
     final (color, text, icon) = switch (source) {
       DataSource.aiGenerated => (
           colorScheme.tertiaryContainer,
-          "loc.aiGenerated",
+          loc.aiGenerated,
           Icons.auto_awesome_outlined,
         ),
       DataSource.databaseFetched => (
           colorScheme.secondaryContainer,
-          "loc.databaseFetched",
+          loc.databaseFetched,
           Icons.storage_outlined,
         ),
       DataSource.userInput => (
+          colorScheme.tertiary,
+          loc.userInput,
+          Icons.edit_outlined,
+        ),
+      DataSource.gluttexInput => (
           colorScheme.surfaceVariant,
-          "loc.userInput",
+          loc.userInput,
           Icons.edit_outlined,
         ),
     };
@@ -340,7 +347,8 @@ class _SmartDropdownFieldState<T> extends State<SmartDropdownField<T>> {
     return switch (source) {
       DataSource.aiGenerated => colorScheme.tertiary,
       DataSource.databaseFetched => colorScheme.secondary,
-      DataSource.userInput => colorScheme.outline,
+      DataSource.userInput => colorScheme.tertiary,
+      DataSource.gluttexInput => colorScheme.outline,
     };
   }
 }

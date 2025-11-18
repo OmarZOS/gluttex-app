@@ -705,6 +705,9 @@
   "scannerTxt": "Scanner",
   "takeProductPhoto": "Prendre une photo du produit",
   "aiWillAnalyseImage": "L'IA analysera l'image du produit", 
-  "automaticallyFillDetailsFromBarcode": "Remplir automatiquement les détails à partir du code-barres"
+  "automaticallyFillDetailsFromBarcode": "Remplir automatiquement les détails à partir du code-barres",
+  "aiGenerated": "Généré par IA",
+  "databaseFetched": "Récupéré depuis la base de données",
+  "userInput": "Saisi par l'utilisateur"
 
 }

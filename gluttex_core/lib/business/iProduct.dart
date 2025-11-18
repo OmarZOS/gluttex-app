@@ -225,25 +225,63 @@ class IProduct {
     return 'unknown';
   }
 
-  // Factory constructor from JSON
   factory IProduct.fromJson(Map<String, dynamic> json) {
+    // Helper to safely read strings
+    String readString(String key, {String fallback = ''}) {
+      final value = json[key];
+      return (value is String && value.isNotEmpty) ? value : fallback;
+    }
+
+    // Helper to safely read numbers
+    double readDouble(String key, {double fallback = 0.0}) {
+      final value = json[key];
+      if (value is num) return value.toDouble();
+      if (value is String) {
+        return double.tryParse(value) ?? fallback;
+      }
+      return fallback;
+    }
+
+    // Helper to safely parse DateTime
+    DateTime? readDate(String key, {bool required = false}) {
+      final value = json[key];
+      if (value == null)
+        return required ? DateTime.fromMillisecondsSinceEpoch(0) : null;
+
+      if (value is String) {
+        try {
+          return DateTime.parse(value);
+        } catch (_) {}
+      }
+      return required ? DateTime.fromMillisecondsSinceEpoch(0) : null;
+    }
+
     return IProduct(
-      idIproduct: json['id_iproduct'] as int?,
-      iproductBarcode: json['iproduct_barcode'] as String? ?? '',
-      iproductName: json['iproduct_name'] as String? ?? '',
-      iproductBrand: json['iproduct_brand'] as String? ?? '',
-      iproductEstimatedPriceDA:
-          (json['iproduct_estimated_price_DA'] as num?)?.toDouble() ?? 0.0,
+      idIproduct:
+          json['id_iproduct'] is int ? json['id_iproduct'] as int : null,
+
+      iproductBarcode: readString('iproduct_barcode'),
+      iproductName: readString('iproduct_name'),
+      iproductBrand: readString('iproduct_brand'),
+      iproductSource: readString('iproduct_source'),
+      iproductModelName: readString('iproduct_model_name'),
+
+      iproductEstimatedPriceDA: readDouble('iproduct_estimated_price_DA'),
+
       iproductGlutenStatus:
-          json['iproduct_gluten_status'] as String? ?? 'unknown',
-      iproductSource: json['iproduct_source'] as String? ?? '',
-      iproductLastPriceUpdate: json['iproduct_last_price_update'] != null
-          ? DateTime.parse(json['iproduct_last_price_update'] as String)
+          readString('iproduct_gluten_status', fallback: 'unknown'),
+
+      iproductImageUrl: (json['iproduct_image_url'] is String &&
+              (json['iproduct_image_url'] as String).isNotEmpty)
+          ? json['iproduct_image_url'] as String
           : null,
-      iproductImageUrl: json['iproduct_image_url'] as String?,
-      iproductCreatedAt: DateTime.parse(json['iproduct_created_at'] as String),
-      iproductUpdatedAt: DateTime.parse(json['iproduct_updated_at'] as String),
-      iproductModelName: json['iproduct_model_name'] as String? ?? '',
+
+      iproductLastPriceUpdate: readDate('iproduct_last_price_update'),
+
+      // Required timestamps — fallback to epoch if malformed
+      iproductCreatedAt: readDate('iproduct_created_at', required: true)!,
+
+      iproductUpdatedAt: readDate('iproduct_updated_at', required: true)!,
     );
   }
 

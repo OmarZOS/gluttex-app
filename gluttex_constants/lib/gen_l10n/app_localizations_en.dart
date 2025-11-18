@@ -1835,4 +1835,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get automaticallyFillDetailsFromBarcode => 'Automatically fill details from barcode';
+
+  @override
+  String get aiGenerated => 'AI-Generated';
+
+  @override
+  String get databaseFetched => 'Retrieved from database';
+
+  @override
+  String get userInput => 'User-Provided';
 }

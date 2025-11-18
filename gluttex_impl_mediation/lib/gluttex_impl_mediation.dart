@@ -105,11 +105,10 @@ class StorageServiceImpl implements StorageService<FormData> {
   @override
   Future<dynamic> insertBinary(String destination, FormData data) async {
     try {
-      // Log the request data
-      // log('Request data: ${data.files}');
       log('Sending data to $destination');
-      // log(json.encode(data));
-      // Make the POST request
+      log('Fields: ${data.fields}');
+      log('Files: ${data.files.map((f) => f.value.filename).toList()}');
+
       final response = await _dio.post(
         destination,
         data: data,
@@ -119,22 +118,19 @@ class StorageServiceImpl implements StorageService<FormData> {
         }),
       );
 
-      // Log the response status code and data
-      // //log('Response status code: ${response.statusCode}');
       log('Response data uploading image: ${response.data}');
-
-      // Check the response status code
       return response.data;
-
-      // Return success message
     } on DioException catch (e, stacktrace) {
-      // Log the error and stack trace for better debugging
-      log('Error: $e');
+      log('Error: ${e.message}');
       log('Stack trace: $stacktrace');
 
-      throw GluttexException(e.response?.data["error_code"],
-          statusCode: e.response?.statusCode, error: e);
+      throw GluttexException(
+        "${e.response?.data["error_code"]}",
+        statusCode: e.response?.statusCode,
+        error: e,
+      );
     } catch (e) {
+      log("Unexpected error: $e");
       return "";
     }
   }
@@ -245,6 +241,13 @@ class StorageServiceImpl implements StorageService<FormData> {
       throw GluttexException(e.response?.data["error_code"],
           statusCode: e.response?.statusCode, error: e);
     }
+  }
+
+  @override
+  FormData toFormData(dynamic destination) {
+    return FormData.fromMap({
+      'file': destination,
+    });
   }
 
   // String getErrorCode(DioException e) {

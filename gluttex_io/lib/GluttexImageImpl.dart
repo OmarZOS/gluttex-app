@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
@@ -22,9 +23,11 @@ class GluttexImageImpl extends GluttexImage<FormData> {
   @override
   Future<String?> uploadImage() async {
     StorageService storageService = GluttexLocator.get<StorageService>();
+    log("uploading");
     dynamic result = await storageService.insertBinary(
         '${GluttexConstants.fsBaseUrl}${GluttexConstants.postImageEndpoint}/$entityType/$ownerId/$entityId/',
         await formData());
+
     return result['path'].toString().replaceFirst("files/", "");
   }
 }

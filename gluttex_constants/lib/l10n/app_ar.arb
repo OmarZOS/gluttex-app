@@ -686,6 +686,9 @@
   "scannerTxt": "مسح",
   "takeProductPhoto": "التقاط صورة المنتج",
   "aiWillAnalyseImage": "سيقوم الذكاء الاصطناعي بتحليل صورة المنتج",
-  "automaticallyFillDetailsFromBarcode": "ملء التفاصيل تلقائياً من الباركود"
+  "automaticallyFillDetailsFromBarcode": "ملء التفاصيل تلقائياً من الباركود",
+  "aiGenerated": "مولد بالذكاء الاصطناعي",
+  "databaseFetched": "مسترجع من قاعدة البيانات",
+  "userInput": "مُدخل من المستخدم"
 
 }

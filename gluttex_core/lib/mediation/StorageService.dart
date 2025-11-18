@@ -9,6 +9,10 @@ abstract class StorageService<T> {
     return null;
   }
 
+  T toFormData(T data) {
+    throw UnimplementedError();
+  }
+
   Future<dynamic> insertBinary(String destination, T data) async {
     return null;
   }

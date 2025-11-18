@@ -478,7 +478,7 @@ packages:
     source: path
     version: "1.0.0+1"
   gluttex_scanner:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../gluttex_scanner"
       relative: true
