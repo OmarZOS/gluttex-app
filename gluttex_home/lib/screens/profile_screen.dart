@@ -4,6 +4,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_home/screens/SettingsScreen.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:gluttex_home/screens/components/flipping_avatar.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -222,45 +223,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Stack(
               alignment: Alignment.bottomRight,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: theme.colorScheme.primary,
-                      width: 2,
-                    ),
-                  ),
-                  child: CircleAvatar(
-                    radius: MediaQuery.of(context).size.width * 0.25,
-                    backgroundColor: theme.colorScheme.surfaceVariant,
-                    child: user.app_user_image_url != null
-                        ? ClipOval(
-                            child: Image.network(
-                              user.app_user_image_url!,
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              height: MediaQuery.of(context).size.width * 0.5,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.5,
-                                  // color: Colors.grey[200],
-                                  child: Center(
-                                    child: Icon(Icons.person,
-                                        size:
-                                            MediaQuery.of(context).size.width *
-                                                0.4),
-                                  ),
-                                );
-                              },
-                            ),
-                          )
-                        : Icon(
-                            Icons.person,
-                            size: 50,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                  ),
+                FlippingAvatar(
+                  imageUrl: user.app_user_image_url!,
+                  qrData: "user:${user.id_app_user!}",
+                  size: MediaQuery.of(context).size.width * 0.25,
+                  borderColor: Theme.of(context).colorScheme.primary,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                 ),
               ],
             ),
