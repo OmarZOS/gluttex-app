@@ -9,6 +9,7 @@ import 'package:gluttex_localiser/screens/supplier_form_page.dart';
 import 'package:gluttex_localiser/screens/suppliers_map_screen.dart';
 import 'package:gluttex_login/screens/login_screen.dart';
 import 'package:gluttex_login/screens/registration_screen.dart';
+import 'package:gluttex_personnel/personnel_management_screen.dart';
 import 'package:gluttex_personnel/supplier_dashboard_screen.dart';
 import 'package:gluttex_personnel/supplier_entities_screen.dart';
 import 'package:gluttex_scanner/screens/qr_scanner.dart';
@@ -36,6 +37,8 @@ class AppRouter {
 
             print(
                 'Router - appUser: $appUser, isAuthenticated: $isAuthenticated');
+
+            final args = settings.arguments as Map<String, dynamic>?;
 
             switch (settings.name) {
               case AppRoutes.home:
@@ -79,6 +82,16 @@ class AppRouter {
                 return _buildGuardedRoute(
                   isAuthenticated,
                   const SupplierFormScreen(),
+                  const SuppliersMapScreen(),
+                );
+              case AppRoutes.supplierManage:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  PersonnelManagementScreen(
+                    supplierName: args?['supplierName'],
+                    orgId: args?['orgId'],
+                    supplierId: args?['supplierId'],
+                  ),
                   const SuppliersMapScreen(),
                 );
               case AppRoutes.login:

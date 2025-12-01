@@ -743,7 +743,7 @@
   "status_suspended": "Suspendu",
   "status_obsolete": "Obsolète",
   "status_active": "Actif",
-    "inventory_view_title": "Voir l'Inventaire",
+  "inventory_view_title": "Voir l'Inventaire",
   "inventory_view_description": "Peut visualiser les niveaux de stock actuels et l'inventaire",
   "inventory_manage_title": "Gérer l'Inventaire",
   "inventory_manage_description": "Peut mettre à jour les niveaux de stock et gérer les produits",
@@ -754,6 +754,22 @@
   "personnel_view_title": "Voir l'Équipe",
   "personnel_view_description": "Peut visualiser les autres membres de l'équipe",
   "personnel_manage_title": "Gérer l'Équipe",
-  "personnel_manage_description": "Peut ajouter/supprimer des membres d'équipe et définir les permissions"
+  "personnel_manage_description": "Peut ajouter/supprimer des membres d'équipe et définir les permissions",
+
+  "manage_permissions": "Gérer les permissions",
+  "cancel": "Annuler",
+  "save_permissions": "Enregistrer les permissions",
+  "no_username": "Aucun nom d’utilisateur",
+  "category_inventory": "Gestion des stocks",
+  "category_orders": "Gestion des commandes",
+  "category_personnel": "Gestion du personnel",
+  "roleAdmin": "Administrateur",
+  "roleManager": "Gestionnaire",
+  "roleSupervisor": "Superviseur",
+  "roleStaff": "Employé",
+  "roleViewer": "Lecteur",
+  "roleNoPrivileges": "Aucun privilège",
+  "actionManagePermissions": "Permissions",
+  "actionNotify": "Notifier"
 
 }

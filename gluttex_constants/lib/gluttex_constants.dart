@@ -353,6 +353,7 @@ class AppRoutes {
   static const String recipeCatalog = '/recipeCatalog';
   static const String games = '/games';
   static const String profile = '/profile';
+  static const String supplierManage = '/manage';
 }
 
 class RuleStates {

@@ -441,6 +441,47 @@ class NotificationItem extends StatelessWidget {
 
   void _handleActionPress(BuildContext context, NotificationAction action) {
     HapticFeedback.selectionClick();
+
+    // Handle role invitation accept/reject actions directly with PersonnelNotifier
+    if (action.type == ActionType.accept || action.type == ActionType.reject) {
+      final metadata = action.metadata;
+      if (metadata != null && metadata['rule_id'] != null) {
+        final ruleId = metadata['rule_id'] as int;
+        final answer =
+            action.type == ActionType.accept ? 0 : 1; // 0 = accept, 1 = reject
+
+        // Call PersonnelNotifier to handle the invitation
+        context
+            .read<PersonnelNotifier>()
+            .answerInvitation(
+              ruleId: ruleId,
+              answer: answer,
+            )
+            .then((success) {
+          if (success) {
+            // Remove the notification or update it
+            onAction?.call(action);
+
+            // Show feedback
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  action.type == ActionType.accept
+                      ? 'Invitation accepted'
+                      : 'Invitation declined',
+                ),
+                backgroundColor: action.type == ActionType.accept
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+        });
+        return;
+      }
+    }
+
+    // For other actions, use the NotificationActionHandler
     NotificationActionHandler.handle(context, action);
   }
 
@@ -582,7 +623,6 @@ class NotificationItem extends StatelessWidget {
           .read<SupplierChangeNotifier>()
           .getSupplierById(invitation.providerId);
 
-      final roleName = _getRoleName(invitation.role, localizations);
       return '${supplier?.provider_organisation_name} • ${supplier?.providerName}';
     }
 
@@ -596,10 +636,6 @@ class NotificationItem extends StatelessWidget {
     }
   }
 
-  String _getRoleName(int role, AppLocalizations localizations) {
-    return RoleBitMapper.numberToPrivilegeIds(role).toString();
-  }
-
   Future<String> _getNotificationMessage(
     BuildContext context,
     AppLocalizations localizations,
@@ -610,22 +646,40 @@ class NotificationItem extends StatelessWidget {
       case 'role_invitation':
         if (notification.content is RoleInvitation) {
           final invitation = notification.content as RoleInvitation;
-          final privileges =
-              RoleBitMapper.numberToPrivilegeItems(invitation.role);
-          final privilegeTitles = privileges
-              .map((privilege) =>
-                  PrivilegeUIManager.getPrivilege(privilege.id)
-                      ?.getTitle(context) ??
-                  privilege.id)
-              .join(', ');
+
+          // Get privilege IDs from the role bitmask
+          final privilegeIds =
+              RoleBitMapper.numberToPrivilegeIds(invitation.role);
+
+          // Optimize the privilege list (remove redundancies - e.g., remove inventory_view if inventory_manage exists)
+          final optimizedPrivilegeIds =
+              PrivilegeUIManager.getOptimizedPrivilegeIds(privilegeIds);
+
+          // Get the highest/most significant role from the optimized privileges
+          final highestRole = PrivilegeUIManager.getHighestRole(
+            optimizedPrivilegeIds,
+            context: context,
+          );
 
           final appUser = await _fetchUserResponsible(context);
           final userName = appUser != null
               ? "${appUser.personFirstName} ${appUser.personLastName}".trim()
-              : "unknownUser";
+              : localizations.no_username ?? "Someone";
+
+          // If we have a highest role, use it for a concise message
+          if (highestRole != null && highestRole.isNotEmpty) {
+            return localizations.notificationRoleInvitationMessage(
+                userName, highestRole);
+          }
+
+          // Fallback to access level summary if no specific role found
+          final accessSummary = PrivilegeUIManager.getAccessLevelSummary(
+            optimizedPrivilegeIds,
+            context: context,
+          );
 
           return localizations.notificationRoleInvitationMessage(
-              userName, privilegeTitles);
+              userName, accessSummary);
         }
         return localizations.notificationRoleInvitationDefaultMessage;
       case 'product_updated':
@@ -819,9 +873,9 @@ class NotificationItem extends StatelessWidget {
       case ActionType.accept:
         return colorScheme.primary;
       case ActionType.reject:
-        return colorScheme.error;
-      case ActionType.download:
         return colorScheme.tertiary;
+      case ActionType.download:
+        return colorScheme.error;
       case ActionType.view:
         return colorScheme.secondary;
       default:

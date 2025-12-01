@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_core/app/Notifications/Notifications/RoleInvitation.dart';
 import 'package:gluttex_event/notification_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:provider/provider.dart';
@@ -160,7 +162,12 @@ class NotificationActionHandler {
       BuildContext context, NotificationAction action) async {
     Navigator.pushNamed(
       context,
-      "/notification/${action.notificationId}",
+      AppRoutes.supplierManage,
+      arguments: {
+        "supplierName": "",
+        "orgId": action.metadata['organization_id'],
+        "supplierId": action.metadata['provider_id'],
+      },
     );
   }
 

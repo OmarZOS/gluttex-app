@@ -663,5 +663,23 @@
   "personnel_view_title": "View Team",
   "personnel_view_description": "Can view other team members",
   "personnel_manage_title": "Manage Team",
-  "personnel_manage_description": "Can add/remove team members and set permissions"
+  "personnel_manage_description": "Can add/remove team members and set permissions",
+
+  "manage_permissions": "Manage Permissions",
+  "cancel": "Cancel",
+  "save_permissions": "Save Permissions",
+  "no_username": "No username",
+  "category_inventory": "Inventory Management",
+  "category_orders": "Order Management",
+  "category_personnel": "Personnel Management",
+  "roleStaff": "Employee",
+  "roleAdmin": "Admin",
+  "roleManager": "Manager",
+  "roleSupervisor": "Supervisor",
+  "roleViewer": "Viewer",
+  "roleNoPrivileges": "No Privileges",
+  "actionManagePermissions": "Permissions",
+  "actionNotify": "Notify"
+
+
 }

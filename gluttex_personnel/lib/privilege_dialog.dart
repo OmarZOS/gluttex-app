@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/business/role_bit_mapper.dart';
 import 'package:gluttex_personnel/privilege_ui.dart';
@@ -58,6 +59,7 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Dialog(
       backgroundColor: colorScheme.surface,
@@ -70,7 +72,7 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
-            _buildHeader(theme, colorScheme),
+            _buildHeader(theme, colorScheme, loc),
             // User Info
             _buildUserInfo(theme, colorScheme),
             // Privileges List
@@ -85,14 +87,15 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildHeader(
+      ThemeData theme, ColorScheme colorScheme, AppLocalizations loc) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Manage Permissions',
+            loc.manage_permissions,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: colorScheme.onSurface,
@@ -198,7 +201,7 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
                 padding: EdgeInsets.only(
                     bottom: 16, top: categoryIndex > 0 ? 24 : 0),
                 child: Text(
-                  category,
+                  PrivilegeUIManager.localizeCategory(context, category),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.primary,

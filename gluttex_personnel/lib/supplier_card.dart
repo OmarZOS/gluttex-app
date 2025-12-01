@@ -236,7 +236,7 @@ class SupplierCard extends StatelessWidget {
         Expanded(
           child: Text(
             supplier.app_user_name?.isNotEmpty == true
-                ? '@${supplier.app_user_name!}'
+                ? '${supplier.app_user_name!}'
                 : 'No username',
             style: textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,

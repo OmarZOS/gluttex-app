@@ -2002,4 +2002,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get personnel_manage_description => 'القدرة على إضافة/إزالة أعضاء الفريق وتعيين الصلاحيات';
+
+  @override
+  String get manage_permissions => 'إدارة الصلاحيات';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get save_permissions => 'حفظ الصلاحيات';
+
+  @override
+  String get no_username => 'لا يوجد اسم مستخدم';
+
+  @override
+  String get category_inventory => 'إدارة الجرد';
+
+  @override
+  String get category_orders => 'إدارة الطلبات';
+
+  @override
+  String get category_personnel => 'إدارة الموظفين';
+
+  @override
+  String get roleStaff => 'موظف';
+
+  @override
+  String get roleAdmin => 'مسؤول';
+
+  @override
+  String get roleManager => 'مدير';
+
+  @override
+  String get roleSupervisor => 'مشرف';
+
+  @override
+  String get roleViewer => 'عارض';
+
+  @override
+  String get roleNoPrivileges => 'بدون صلاحيات';
+
+  @override
+  String get actionManagePermissions => 'الصلاحيات';
+
+  @override
+  String get actionNotify => 'إشعار';
 }

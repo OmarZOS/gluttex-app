@@ -2002,4 +2002,49 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get personnel_manage_description => 'Peut ajouter/supprimer des membres d\'équipe et définir les permissions';
+
+  @override
+  String get manage_permissions => 'Gérer les permissions';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get save_permissions => 'Enregistrer les permissions';
+
+  @override
+  String get no_username => 'Aucun nom d’utilisateur';
+
+  @override
+  String get category_inventory => 'Gestion des stocks';
+
+  @override
+  String get category_orders => 'Gestion des commandes';
+
+  @override
+  String get category_personnel => 'Gestion du personnel';
+
+  @override
+  String get roleStaff => 'Employé';
+
+  @override
+  String get roleAdmin => 'Administrateur';
+
+  @override
+  String get roleManager => 'Gestionnaire';
+
+  @override
+  String get roleSupervisor => 'Superviseur';
+
+  @override
+  String get roleViewer => 'Lecteur';
+
+  @override
+  String get roleNoPrivileges => 'Aucun privilège';
+
+  @override
+  String get actionManagePermissions => 'Permissions';
+
+  @override
+  String get actionNotify => 'Notifier';
 }
