@@ -1844,4 +1844,162 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get userInput => 'Saisi par l\'utilisateur';
+
+  @override
+  String get notificationOrderReceivedTitle => 'Commande Reçue ! 🎉';
+
+  @override
+  String get notificationRoleInvitationTitle => 'Invitation d\'Équipe';
+
+  @override
+  String get notificationProductUpdatedTitle => 'Produit Mis à Jour';
+
+  @override
+  String get notificationDefaultTitle => 'Notification';
+
+  @override
+  String get notificationOrderReceivedSubtitle => 'Prêt pour le traitement';
+
+  @override
+  String get notificationProductUpdatedSubtitle => 'Nouveaux changements disponibles';
+
+  @override
+  String get notificationOrderReceivedMessage => 'Votre commande a été reçue avec succès et est en cours de traitement. Vous pouvez suivre son statut dans vos commandes.';
+
+  @override
+  String notificationRoleInvitationMessage(Object ruleName, Object ruleType) {
+    return 'Vous avez été invité à rejoindre \"$ruleName\" en tant que $ruleType. Acceptez pour commencer !';
+  }
+
+  @override
+  String get notificationRoleInvitationDefaultMessage => 'Vous avez été invité à rejoindre une équipe.';
+
+  @override
+  String get notificationProductUpdatedMessage => 'Un produit que vous suivez a été mis à jour avec de nouvelles fonctionnalités et améliorations. Découvrez-le !';
+
+  @override
+  String get notificationDefaultMessage => 'Vous avez une nouvelle notification';
+
+  @override
+  String get timeJustNow => 'À l\'instant';
+
+  @override
+  String timeMinutesAgo(Object minutes) {
+    return 'il y a $minutes min';
+  }
+
+  @override
+  String timeMinutesAgoPlural(Object minutes) {
+    return 'il y a $minutes min';
+  }
+
+  @override
+  String timeHoursAgo(Object hours) {
+    return 'il y a $hours h';
+  }
+
+  @override
+  String timeHoursAgoPlural(Object hours) {
+    return 'il y a $hours h';
+  }
+
+  @override
+  String timeDaysAgo(Object days) {
+    return 'il y a $days jour';
+  }
+
+  @override
+  String timeDaysAgoPlural(Object days) {
+    return 'il y a $days jours';
+  }
+
+  @override
+  String timeWeeksAgo(Object weeks) {
+    return 'il y a $weeks semaine';
+  }
+
+  @override
+  String timeWeeksAgoPlural(Object weeks) {
+    return 'il y a $weeks semaines';
+  }
+
+  @override
+  String timeDate(Object day, Object month, Object year) {
+    return '$day/$month/$year';
+  }
+
+  @override
+  String get actionTrackOrder => 'Suivre la Commande';
+
+  @override
+  String get actionDownloadInvoice => 'Télécharger la Facture';
+
+  @override
+  String get actionAccept => 'Accepter';
+
+  @override
+  String get actionDecline => 'Refuser';
+
+  @override
+  String get actionViewTeam => 'Voir l\'Équipe';
+
+  @override
+  String get actionSeeChanges => 'Voir les Changements';
+
+  @override
+  String get actionUpdateNow => 'Mettre à Jour';
+
+  @override
+  String get actionViewDetails => 'Voir les Détails';
+
+  @override
+  String get status_pending => 'En attente';
+
+  @override
+  String get status_rejected => 'Rejeté';
+
+  @override
+  String get status_suspended => 'Suspendu';
+
+  @override
+  String get status_obsolete => 'Obsolète';
+
+  @override
+  String get status_active => 'Actif';
+
+  @override
+  String get inventory_view_title => 'Voir l\'Inventaire';
+
+  @override
+  String get inventory_view_description => 'Peut visualiser les niveaux de stock actuels et l\'inventaire';
+
+  @override
+  String get inventory_manage_title => 'Gérer l\'Inventaire';
+
+  @override
+  String get inventory_manage_description => 'Peut mettre à jour les niveaux de stock et gérer les produits';
+
+  @override
+  String get orders_view_title => 'Voir les Commandes';
+
+  @override
+  String get orders_view_description => 'Peut visualiser les commandes clients et fournisseurs';
+
+  @override
+  String get orders_manage_title => 'Gérer les Commandes';
+
+  @override
+  String get orders_manage_description => 'Peut créer, modifier et traiter les commandes';
+
+  @override
+  String get personnel_view_title => 'Voir l\'Équipe';
+
+  @override
+  String get personnel_view_description => 'Peut visualiser les autres membres de l\'équipe';
+
+  @override
+  String get personnel_manage_title => 'Gérer l\'Équipe';
+
+  @override
+  String get personnel_manage_description => 'Peut ajouter/supprimer des membres d\'équipe et définir les permissions';
 }

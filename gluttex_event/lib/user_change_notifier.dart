@@ -20,6 +20,8 @@ class AppUserNotifier extends ChangeNotifier {
   bool _isLoading = false;
   int _selectedTabIndex = 0;
 
+  Map<int, AppUser> users = {};
+
   // Getters
   AppUser? get appUser => _appUser;
   String? get token => _token;
@@ -84,6 +86,18 @@ class AppUserNotifier extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Fetch user data
+  Future<AppUser?> fetchUserPassively(String userId) async {
+    try {
+      if (users.containsKey(int.parse(userId))) return users[int.parse(userId)];
+      AppUser? appUser = await _appUserService.getAppUser(userId);
+      users[int.parse(userId)] = appUser!;
+      return appUser;
+    } catch (e) {
       rethrow;
     }
   }

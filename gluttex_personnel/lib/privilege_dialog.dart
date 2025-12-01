@@ -1,100 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/business/role_bit_mapper.dart';
+import 'package:gluttex_personnel/privilege_ui.dart';
 
 class PrivilegeDialog extends StatefulWidget {
   final AppUser user;
   final String supplierName;
-  final Function(List<String>) onPrivilegesUpdated;
+  final int? initialPrivileges; // Optional initial privileges bitmask
 
   const PrivilegeDialog({
-    Key? key,
+    super.key,
     required this.user,
     required this.supplierName,
-    required this.onPrivilegesUpdated,
-  }) : super(key: key);
+    this.initialPrivileges,
+  });
 
   @override
   State<PrivilegeDialog> createState() => _PrivilegeDialogState();
 }
 
 class _PrivilegeDialogState extends State<PrivilegeDialog> {
-  final List<PrivilegeItem> _availablePrivileges = [
-    PrivilegeItem(
-      id: 'inventory_view',
-      title: 'View Inventory',
-      description: 'Can view current inventory levels and stock',
-      category: 'Inventory Management',
-      icon: Icons.inventory_2,
-    ),
-    PrivilegeItem(
-      id: 'inventory_manage',
-      title: 'Manage Inventory',
-      description: 'Can update stock levels and manage products',
-      category: 'Inventory Management',
-      icon: Icons.inventory,
-    ),
-    PrivilegeItem(
-      id: 'orders_view',
-      title: 'View Orders',
-      description: 'Can view customer and supplier orders',
-      category: 'Order Management',
-      icon: Icons.shopping_cart,
-    ),
-    PrivilegeItem(
-      id: 'orders_manage',
-      title: 'Manage Orders',
-      description: 'Can create, edit, and process orders',
-      category: 'Order Management',
-      icon: Icons.receipt_long,
-    ),
-    PrivilegeItem(
-      id: 'personnel_view',
-      title: 'View Team',
-      description: 'Can view other team members',
-      category: 'Personnel Management',
-      icon: Icons.people,
-    ),
-    PrivilegeItem(
-      id: 'personnel_manage',
-      title: 'Manage Team',
-      description: 'Can add/remove team members and set permissions',
-      category: 'Personnel Management',
-      icon: Icons.manage_accounts,
-    ),
-    PrivilegeItem(
-      id: 'reports_view',
-      title: 'View Reports',
-      description: 'Can access sales and performance reports',
-      category: 'Analytics',
-      icon: Icons.analytics,
-    ),
-    PrivilegeItem(
-      id: 'settings_manage',
-      title: 'Manage Settings',
-      description: 'Can modify supplier settings and preferences',
-      category: 'System',
-      icon: Icons.settings,
-    ),
-  ];
-
   final Map<String, bool> _selectedPrivileges = {};
 
   @override
   void initState() {
     super.initState();
-    // Initialize with user's current privileges
     _initializePrivileges();
   }
 
   void _initializePrivileges() {
-    // Mock initialization - in real app, load from user data
-    if (widget.user.isAdmin) {
+    // If initial privileges are provided, use them
+    if (widget.initialPrivileges != null) {
+      final initialPrivilegeIds =
+          RoleBitMapper.numberToPrivilegeIds(widget.initialPrivileges!);
+      for (var privilege in PrivilegeManager.allPrivileges) {
+        _selectedPrivileges[privilege.id] =
+            initialPrivilegeIds.contains(privilege.id);
+      }
+    } else if (widget.user.isAdmin) {
       // Admins get all privileges
-      for (var privilege in _availablePrivileges) {
+      for (var privilege in PrivilegeManager.allPrivileges) {
         _selectedPrivileges[privilege.id] = true;
       }
     } else {
       // Default privileges for non-admins
+      for (var privilege in PrivilegeManager.allPrivileges) {
+        _selectedPrivileges[privilege.id] = false;
+      }
+      // Set some basic defaults
       _selectedPrivileges['inventory_view'] = true;
       _selectedPrivileges['orders_view'] = true;
       _selectedPrivileges['personnel_view'] = true;
@@ -103,9 +56,13 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 8,
       child: Container(
         width: double.infinity,
         constraints: const BoxConstraints(maxHeight: 600),
@@ -113,50 +70,54 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
-            _buildHeader(),
+            _buildHeader(theme, colorScheme),
             // User Info
-            _buildUserInfo(),
+            _buildUserInfo(theme, colorScheme),
             // Privileges List
             Expanded(
-              child: _buildPrivilegesList(),
+              child: _buildPrivilegesList(theme, colorScheme),
             ),
             // Actions
-            _buildActions(),
+            _buildActions(theme, colorScheme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
+          Text(
             'Manage Permissions',
-            style: TextStyle(
-              fontSize: 20,
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
             ),
           ),
           IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close, size: 24),
+            onPressed: () => Navigator.pop(context), // Pop with null
+            icon: Icon(Icons.close_rounded,
+                size: 24, color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildUserInfo() {
+  Widget _buildUserInfo(ThemeData theme, ColorScheme colorScheme) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue[50],
+        color: colorScheme.primaryContainer.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.primaryContainer.withOpacity(0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -172,11 +133,12 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
                     )
                   : null,
               color: widget.user.app_user_image_url == null
-                  ? Colors.blue[100]
+                  ? colorScheme.primary.withOpacity(0.1)
                   : null,
             ),
             child: widget.user.app_user_image_url == null
-                ? Icon(Icons.person, color: Colors.blue[600], size: 24)
+                ? Icon(Icons.person_rounded,
+                    color: colorScheme.primary, size: 24)
                 : null,
           ),
           const SizedBox(width: 16),
@@ -186,25 +148,23 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
               children: [
                 Text(
                   '${widget.user.personFirstName} ${widget.user.personLastName}',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   widget.user.app_user_name ?? 'No username',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   widget.supplierName,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue[600],
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -216,7 +176,7 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
     );
   }
 
-  Widget _buildPrivilegesList() {
+  Widget _buildPrivilegesList(ThemeData theme, ColorScheme colorScheme) {
     final categories = _getCategories();
 
     return Padding(
@@ -226,7 +186,7 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
         itemCount: categories.length,
         itemBuilder: (context, categoryIndex) {
           final category = categories[categoryIndex];
-          final categoryPrivileges = _availablePrivileges
+          final categoryPrivileges = PrivilegeManager.allPrivileges
               .where((privilege) => privilege.category == category)
               .toList();
 
@@ -239,16 +199,15 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
                     bottom: 16, top: categoryIndex > 0 ? 24 : 0),
                 child: Text(
                   category,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.blue,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
               // Privileges in this category
-              ...categoryPrivileges
-                  .map((privilege) => _buildPrivilegeItem(privilege)),
+              ...categoryPrivileges.map((privilege) =>
+                  _buildPrivilegeItem(privilege, theme, colorScheme)),
             ],
           );
         },
@@ -256,21 +215,28 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
     );
   }
 
-  Widget _buildPrivilegeItem(PrivilegeItem privilege) {
+  Widget _buildPrivilegeItem(
+      PrivilegeItem privilege, ThemeData theme, ColorScheme colorScheme) {
+    final PrivilegeUI? privilegeUI =
+        PrivilegeUIManager.getPrivilege(privilege.id);
     final isSelected = _selectedPrivileges[privilege.id] ?? false;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.blue[50] : Colors.white,
+        color: isSelected
+            ? colorScheme.primaryContainer.withOpacity(0.2)
+            : colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSelected ? Colors.blue[300]! : Colors.grey[300]!,
+          color: isSelected
+              ? colorScheme.primary
+              : colorScheme.outline.withOpacity(0.3),
           width: isSelected ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isSelected ? 0.1 : 0.05),
+            color: colorScheme.shadow.withOpacity(isSelected ? 0.1 : 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -281,26 +247,30 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: isSelected ? Colors.blue[100] : Colors.grey[100],
+            color: isSelected
+                ? colorScheme.primaryContainer
+                : colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
-            privilege.icon,
-            color: isSelected ? Colors.blue[600] : Colors.grey[600],
+            privilegeUI?.icon,
+            color:
+                isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
           ),
         ),
         title: Text(
-          privilege.title,
-          style: TextStyle(
+          privilegeUI?.getTitle(context) ?? "",
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.blue[800] : Colors.grey[800],
+            color: isSelected ? colorScheme.primary : colorScheme.onSurface,
           ),
         ),
         subtitle: Text(
-          privilege.description,
-          style: TextStyle(
-            fontSize: 12,
-            color: isSelected ? Colors.blue[600] : Colors.grey[600],
+          privilegeUI?.getDescription(context) ?? "",
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: isSelected
+                ? colorScheme.primary.withOpacity(0.8)
+                : colorScheme.onSurfaceVariant,
           ),
         ),
         trailing: Switch(
@@ -312,7 +282,8 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
                     _selectedPrivileges[privilege.id] = value;
                   });
                 },
-          activeColor: Colors.blue[600],
+          activeColor: colorScheme.primary,
+          activeTrackColor: colorScheme.primary.withOpacity(0.5),
         ),
         onTap: widget.user.isAdmin && privilege.id == 'full_access'
             ? null
@@ -325,21 +296,25 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
     );
   }
 
-  Widget _buildActions() {
+  Widget _buildActions(ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context), // Pop with null
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                side: BorderSide(color: colorScheme.outline),
               ),
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: colorScheme.onSurface),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -347,15 +322,18 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
             child: ElevatedButton(
               onPressed: _savePrivileges,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Save Permissions',
-                style: TextStyle(color: Colors.white),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -365,40 +343,24 @@ class _PrivilegeDialogState extends State<PrivilegeDialog> {
   }
 
   void _savePrivileges() {
+    // Get selected privilege IDs
     final selectedPrivilegeIds = _selectedPrivileges.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
 
-    widget.onPrivilegesUpdated(selectedPrivilegeIds);
+    // Convert to bitmask number using RoleBitMapper
+    final privilegesBitmask =
+        RoleBitMapper.privilegesToNumber(selectedPrivilegeIds);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Permissions updated for ${widget.user.personFirstName}'),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    Navigator.pop(context);
+    // Pop the dialog and return the integer value
+    Navigator.pop(context, privilegesBitmask);
   }
 
   List<String> _getCategories() {
-    return _availablePrivileges.map((p) => p.category).toSet().toList();
+    return PrivilegeManager.allPrivileges
+        .map((p) => p.category)
+        .toSet()
+        .toList();
   }
-}
-
-class PrivilegeItem {
-  final String id;
-  final String title;
-  final String description;
-  final String category;
-  final IconData icon;
-
-  PrivilegeItem({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.category,
-    required this.icon,
-  });
 }

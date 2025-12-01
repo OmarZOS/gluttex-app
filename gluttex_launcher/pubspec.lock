@@ -513,6 +513,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0+1"
+  gluttex_personnel:
+    dependency: transitive
+    description:
+      path: "../gluttex_personnel"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   gluttex_play:
     dependency: "direct main"
     description:

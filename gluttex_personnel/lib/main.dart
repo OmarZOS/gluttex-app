@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
-import 'package:gluttex_personnel/supplier_dashboard_provider.dart';
+import 'package:gluttex_event/supplier_dashboard_provider.dart';
 import 'package:gluttex_personnel/supplier_dashboard_screen.dart';
 import 'package:gluttex_personnel/supplier_entities_screen.dart';
 import 'package:provider/provider.dart';

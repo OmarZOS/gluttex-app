@@ -12,7 +12,7 @@ class BarcodeScannerScreen extends StatefulWidget {
 }
 
 class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   MobileScannerController cameraController = MobileScannerController();
   late AnimationController _animationController;
   bool _isScanning = true;

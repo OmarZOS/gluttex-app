@@ -10,7 +10,7 @@ class HealthInfoScreen extends StatefulWidget {
 }
 
 class _HealthInfoScreenState extends State<HealthInfoScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

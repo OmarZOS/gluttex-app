@@ -207,6 +207,14 @@ class GluttexConstants {
   static const String updateAppUserImageEndpoint = '/app_user/update_image_url';
   static const String updateAppUserEndpoint = '/app_user/update';
 
+  static const String getNotificationsEndpoint = '/notifications';
+  static const String putNotificationsEndpoint = '/notification';
+
+  static const String addRuleEndpoint = '/staff/add';
+
+  static const String searchAppUserEndpoint = '/search/personnel';
+  static const String getAppUserStaffEndpoint = '/staff';
+
   static const String getAppUserCategoriesEndpoint = '/app_user/categorie/all';
 
   static const String postImageEndpoint = '/fs/upload';
@@ -236,6 +244,7 @@ class GluttexConstants {
   static const String getSupplierSearchByTokenEndpoint = '/search/supplier';
   static const String getRecipeSearchByTokenEndpoint = '/search/recipe';
   static const String getProductSearchByTokenEndpoint = '/search/product';
+  static const String putRuleAnswerEndpoint = '/rule/answer';
 
   static const String getProductSearchByBarcodeEndpoint = '/product/barcode';
   static const String getProductSearchByImageEndpoint = '/product/search/image';
@@ -336,9 +345,29 @@ class AppRoutes {
   static const String QRScanPage = '/qr/scan';
   static const String productCapturePage = '/product/capture';
 
+  static const String supplierEntitiesPage = '/supplier/entities';
+  static const String dashboardPage = '/dashboard/business';
+
   static const String productCatalog = '/productCatalog';
   static const String suppliersMap = '/suppliersMap';
   static const String recipeCatalog = '/recipeCatalog';
   static const String games = '/games';
   static const String profile = '/profile';
+}
+
+class RuleStates {
+  static const String pending = 'PENDING';
+  static const String rejected = 'REJECTED';
+  static const String suspended = 'SUSPENDED';
+  static const String obsolete = 'OBSOLETE';
+  static const String active = 'ACTIVE';
+}
+
+class RoleTypes {
+  static const String inventory_view = 'inventory_view';
+  static const String inventory_manage = 'inventory_manage';
+  static const String orders_view = 'orders_view';
+  static const String orders_manage = 'orders_manage';
+  static const String personnel_view = 'personnel_view';
+  static const String personnel_manage = 'personnel_manage';
 }

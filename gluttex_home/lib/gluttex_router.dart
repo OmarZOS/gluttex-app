@@ -9,6 +9,8 @@ import 'package:gluttex_localiser/screens/supplier_form_page.dart';
 import 'package:gluttex_localiser/screens/suppliers_map_screen.dart';
 import 'package:gluttex_login/screens/login_screen.dart';
 import 'package:gluttex_login/screens/registration_screen.dart';
+import 'package:gluttex_personnel/supplier_dashboard_screen.dart';
+import 'package:gluttex_personnel/supplier_entities_screen.dart';
 import 'package:gluttex_scanner/screens/qr_scanner.dart';
 import 'package:gluttex_scanner/screens/barcode_scanner.dart';
 import 'package:gluttex_scanner/screens/product_scanner.dart';
@@ -89,6 +91,12 @@ class AppRouter {
                 return const RegistrationForm();
               case AppRoutes.imageUpload:
                 return const UploadImagePage();
+
+              case AppRoutes.dashboardPage:
+                return const SupplierDashboardScreen();
+              case AppRoutes.supplierEntitiesPage:
+                return const SupplierEntitiesScreen();
+
               case AppRoutes.productDetails:
                 return const ProductDetailsScreen();
               case AppRoutes.userEdit:

@@ -25,7 +25,7 @@ class CustomSpeedDial extends StatefulWidget {
 }
 
 class _CustomSpeedDialState extends State<CustomSpeedDial>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotationAnimation;

@@ -22,7 +22,7 @@ class FlippingAvatar extends StatefulWidget {
 }
 
 class _FlippingAvatarState extends State<FlippingAvatar>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _showFront = true;
@@ -194,7 +194,7 @@ class _FlippingAvatarState extends State<FlippingAvatar>
               color: Colors.black,
             ),
             // Add a scan animation overlay
-            embeddedImage: const AssetImage('assets/images/scan_icon.png'),
+            // embeddedImage: const AssetImage('assets/images/scan_icon.png'),
             embeddedImageStyle: QrEmbeddedImageStyle(
               size: Size(widget.size * 0.3, widget.size * 0.3),
             ),

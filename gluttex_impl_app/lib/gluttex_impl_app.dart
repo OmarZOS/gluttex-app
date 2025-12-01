@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
@@ -70,6 +71,94 @@ class AppUserServiceImpl implements AppUserService {
   }
 
   @override
+  Future<ManagementRule?> addUserToSupplier(
+      int appUserId, int supplierId, int orgId, int privilege,
+      {bool fromQR = false}) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+
+    Map<String, dynamic> payload = {};
+
+    payload["id_management_rule"] = 0;
+    payload["rule_ref_org"] = orgId;
+    payload["rule_ref_provider"] = supplierId;
+    payload["rule_ref_user"] = appUserId;
+    payload["management_rule_code"] = privilege;
+    payload["management_rule_status"] = fromQR ? "ACCEPTED" : "PENDING";
+    payload["management_rule_expiry"] = "";
+
+    try {
+      var data = await storageService.insert(
+          GluttexConstants.apiBaseUrl + GluttexConstants.addRuleEndpoint,
+          payload);
+
+      ManagementRule managementRule =
+          ManagementRule.fromJson(data as Map<String, dynamic>);
+
+      // Now fetch the actual user data
+      // You'll need to implement getUserById in your service
+      // AppUser? user = await getUserById(appUserId);
+      return managementRule;
+    } catch (e, stacktrace) {
+      log('$e');
+      log('$stacktrace');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<ManagementRule>?> getManagementRules(
+    int orgId,
+    int supplierId,
+    int userId,
+    int offset,
+    int limit,
+  ) async {
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final route =
+          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAppUserStaffEndpoint}/"
+          "$orgId/$supplierId/$userId/0/$offset/$limit";
+
+      final data = await storageService.getAll(route);
+
+      if (data is! List) return null;
+
+      return data
+          .map((json) => ManagementRule.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e, stacktrace) {
+      log("ERROR (getManagementRules): $e");
+      log(stacktrace.toString());
+      return null;
+    }
+  }
+
+  @override
+  Future<List<AppUser>?> searchAppUsers(
+    String query,
+    int offset,
+    int limit,
+  ) async {
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final route =
+          "${GluttexConstants.apiBaseUrl}${GluttexConstants.searchAppUserEndpoint}/$query/$offset/$limit";
+
+      final data = await storageService.getAll(route);
+
+      if (data is! List) return null;
+
+      return AppUser.fromJsonList(data);
+    } catch (e, stacktrace) {
+      log("ERROR (searchAppUsers): $e");
+      log(stacktrace.toString());
+      return null;
+    }
+  }
+
+  @override
   Future<List<AppUserCategory>>? getCategories() async {
     if (categories.isNotEmpty) return categories;
     try {
@@ -94,5 +183,18 @@ class AppUserServiceImpl implements AppUserService {
       // Handle exceptions here
       return [];
     }
+  }
+
+  @override
+  Future<int?> updateUserPrivileges(AppUser appUser) {
+    // TODO: implement updateUserPrivileges
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<int?> removeUserFromSupplier(
+      int appUserId, int supplierId, int orgId) {
+    // TODO: implement removeUserFromSupplier
+    throw UnimplementedError();
   }
 }

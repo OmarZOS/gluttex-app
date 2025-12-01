@@ -1,5 +1,6 @@
 // UserService.dart
 import 'package:gluttex_core/app/GluttexImage.dart';
+import 'package:gluttex_core/app/ManagementRule.dart';
 
 import '../AppUser.dart';
 
@@ -13,6 +14,24 @@ abstract class AppUserService {
     return null;
   }
 
+  Future<List<ManagementRule>?>? getManagementRules(
+    int orgId,
+    int supplierId,
+    int userId,
+    int offset,
+    int limit,
+  ) async {
+    return null;
+  }
+
+  Future<List<AppUser>?> searchAppUsers(
+    String query,
+    int offset,
+    int limit,
+  ) async {
+    return null;
+  }
+
   Future<AppUser?> updateAppUser(AppUser appUser) async {
     return null;
   }
@@ -21,11 +40,26 @@ abstract class AppUserService {
     return null;
   }
 
+  Future<int?> updateUserPrivileges(AppUser appUser) async {
+    return null;
+  }
+
   Future<int?> updateAppUserImage(AppUser updatedAppUser) async {
     return null;
   }
 
   Future<int?> deleteAppUser(String appUserId) async {
+    return null;
+  }
+
+  Future<ManagementRule?> addUserToSupplier(
+      int appUserId, int supplierId, int orgId, int privilege,
+      {bool fromQR = false}) async {
+    return null;
+  }
+
+  Future<int?> removeUserFromSupplier(
+      int appUserId, int supplierId, int orgId) async {
     return null;
   }
 }

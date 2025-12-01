@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
+import 'package:gluttex_core/app/Services/NotificationService.dart';
 import 'package:gluttex_event/assistant_change_notifier.dart';
+import 'package:gluttex_event/notification_notifier.dart';
+import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:gluttex_event/supplier_dashboard_provider.dart';
+import 'package:gluttex_impl_app/gluttex_impl_notification.dart';
 import 'package:gluttex_io/GluttexImageImpl.dart';
 import 'package:gluttex_core/app/Services/AuthService.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
@@ -37,6 +42,8 @@ void setupLocator() {
   GluttexLocator.registerSingletonService<RecipeService>(RecipeServiceImpl());
   GluttexLocator.registerSingletonService<SupplierService>(
       SupplierServiceImpl());
+  GluttexLocator.registerSingletonService<NotificationService>(
+      GluttexImplNotification());
   GluttexLocator.registerSingletonService<ProductService>(ProductServiceImpl());
   GluttexLocator.registerSingletonService<OrderService>(OrderServiceImpl());
   GluttexLocator.registerSingletonService<AuthService>(AuthServiceImpl());
@@ -77,6 +84,12 @@ class GluttexApp extends StatelessWidget {
             create: (_) => AssistantNotifier()),
         ChangeNotifierProvider<SupplierChangeNotifier>(
             create: (_) => SupplierChangeNotifier()),
+        ChangeNotifierProvider<SupplierDashboardProvider>(
+            create: (_) => SupplierDashboardProvider()),
+        ChangeNotifierProvider<NotificationNotifier>(
+            create: (_) => NotificationNotifier()),
+        ChangeNotifierProvider<PersonnelNotifier>(
+            create: (_) => PersonnelNotifier()),
         ChangeNotifierProvider<LocaleProvider>(create: (_) => localeProvider),
       ],
       child: Consumer<LocaleProvider>(

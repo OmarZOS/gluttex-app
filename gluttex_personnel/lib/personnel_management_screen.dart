@@ -1,8 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_personnel/privilege_dialog.dart';
-import 'package:gluttex_personnel/qr_scanner_dialog.dart';
-import 'package:gluttex_personnel/qr_scanner_service.dart';
 import 'package:gluttex_personnel/search_invite_dialog.dart';
 import 'package:gluttex_personnel/supplier_user_card.dart';
 import 'package:provider/provider.dart';
@@ -11,10 +13,12 @@ import 'package:gluttex_core/app/AppUser.dart';
 class PersonnelManagementScreen extends StatefulWidget {
   final String supplierName;
   final int supplierId;
+  final int orgId;
 
   const PersonnelManagementScreen({
     Key? key,
     required this.supplierName,
+    required this.orgId,
     required this.supplierId,
   }) : super(key: key);
 
@@ -30,11 +34,19 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      int userId = context.read<AppUserNotifier>().appUser!.id_app_user ?? 0;
+      context
+          .read<PersonnelNotifier>()
+          .loadPersonnel(userId, supplierId: widget.supplierId);
+    });
   }
 
   void _onSearchChanged() {
     final query = _searchController.text;
-    context.read<PersonnelProvider>().searchSuppliers(query);
+    context.read<PersonnelNotifier>().searchPersonnel(
+        query, context.read<AppUserNotifier>().appUser!.id_app_user ?? 0,
+        supplierId: widget.supplierId);
   }
 
   @override
@@ -45,27 +57,30 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: colorScheme.surface,
       body: Column(
         children: [
           // Header with Supplier Context
-          _buildHeader(),
+          _buildHeader(theme, colorScheme),
           // Quick Stats
-          _buildQuickStats(),
+          _buildQuickStats(theme, colorScheme),
           // Search Bar
-          _buildSearchBar(),
+          _buildSearchBar(theme, colorScheme),
           // Content
           Expanded(
-            child: _buildContent(),
+            child: _buildContent(theme, colorScheme),
           ),
         ],
       ),
-      floatingActionButton: _buildFloatingActionButton(),
+      floatingActionButton: _buildFloatingActionButton(colorScheme),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(ThemeData theme, ColorScheme colorScheme) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(
@@ -79,8 +94,8 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.blue[700]!,
-            Colors.indigo[800]!,
+            colorScheme.primary,
+            colorScheme.primaryContainer,
           ],
         ),
         borderRadius: const BorderRadius.only(
@@ -95,8 +110,8 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
             children: [
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon:
-                    const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                icon: Icon(Icons.arrow_back,
+                    color: colorScheme.onPrimary, size: 24),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -105,24 +120,22 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
                   children: [
                     Text(
                       widget.supplierName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: colorScheme.onPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Personnel Management',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onPrimary.withOpacity(0.9),
                       ),
                     ),
                   ],
                 ),
               ),
-              _buildAdminBadge(),
+              _buildAdminBadge(colorScheme),
             ],
           ),
         ],
@@ -130,22 +143,22 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
     );
   }
 
-  Widget _buildAdminBadge() {
+  Widget _buildAdminBadge(ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: colorScheme.onPrimary.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.shield, color: Colors.white, size: 16),
-          SizedBox(width: 4),
+          Icon(Icons.shield, color: colorScheme.onPrimary, size: 16),
+          const SizedBox(width: 4),
           Text(
             'Admin',
             style: TextStyle(
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -155,13 +168,13 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
     );
   }
 
-  Widget _buildQuickStats() {
-    return Consumer<PersonnelProvider>(
-      builder: (context, provider, child) {
-        final totalUsers = provider.suppliers.length;
+  Widget _buildQuickStats(ThemeData theme, ColorScheme colorScheme) {
+    return Consumer<PersonnelNotifier>(
+      builder: (context, notifier, child) {
+        final totalUsers = notifier.personnel.length;
         final activeAdmins =
-            provider.suppliers.where((user) => user.isAdmin).length;
-        final managers = provider.suppliers
+            notifier.personnel.where((user) => user.isAdmin).length;
+        final managers = notifier.personnel
             .where((user) => user.app_user_type_desc == 'Manager')
             .length;
 
@@ -169,23 +182,25 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                color: colorScheme.shadow.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatItem('Total', totalUsers, Icons.people_alt),
               _buildStatItem(
-                  'Admins', activeAdmins, Icons.admin_panel_settings),
-              _buildStatItem('Managers', managers, Icons.manage_accounts),
+                  'Total', totalUsers, Icons.people_alt, colorScheme),
+              _buildStatItem('Admins', activeAdmins, Icons.admin_panel_settings,
+                  colorScheme),
+              _buildStatItem(
+                  'Managers', managers, Icons.manage_accounts, colorScheme),
             ],
           ),
         );
@@ -193,16 +208,17 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
     );
   }
 
-  Widget _buildStatItem(String label, int count, IconData icon) {
+  Widget _buildStatItem(
+      String label, int count, IconData icon, ColorScheme colorScheme) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.blue[50],
-            borderRadius: BorderRadius.circular(15),
+            color: colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: Colors.blue[600], size: 24),
+          child: Icon(icon, color: colorScheme.onPrimaryContainer, size: 24),
         ),
         const SizedBox(height: 8),
         Text(
@@ -210,7 +226,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.blue[800],
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 4),
@@ -218,25 +234,25 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[600],
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: colorScheme.shadow.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -244,43 +260,55 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
           controller: _searchController,
           decoration: InputDecoration(
             hintText: 'Search team members...',
-            prefixIcon: const Icon(Icons.search, color: Colors.grey),
+            prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.clear, color: Colors.grey),
+                    icon:
+                        Icon(Icons.clear, color: colorScheme.onSurfaceVariant),
                     onPressed: () {
                       _searchController.clear();
-                      context.read<PersonnelProvider>().clearSearch();
+                      context.read<PersonnelNotifier>().clearSearch();
                     },
                   )
                 : null,
             border: InputBorder.none,
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildContent() {
-    return Consumer<PersonnelProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading && provider.suppliers.isEmpty) {
-          return _buildLoadingShimmer();
+  Widget _buildContent(ThemeData theme, ColorScheme colorScheme) {
+    return Consumer<PersonnelNotifier>(
+      builder: (context, notifier, child) {
+        // Get personnel for this specific supplier
+        final supplierPersonnel =
+            notifier.getPersonnelForSupplier(widget.supplierId);
+
+        if (notifier.isLoading && supplierPersonnel.isEmpty) {
+          return _buildLoadingShimmer(colorScheme);
         }
 
-        if (provider.suppliers.isEmpty) {
-          return _buildEmptyState();
+        if (supplierPersonnel.isEmpty) {
+          return _buildEmptyState(theme, colorScheme);
         }
 
         return RefreshIndicator(
-          onRefresh: () => provider.loadMockSuppliers(),
+          onRefresh: () {
+            int userId =
+                context.read<AppUserNotifier>().appUser!.id_app_user ?? 0;
+            return notifier.loadPersonnel(userId,
+                supplierId: widget.supplierId);
+          },
+          backgroundColor: colorScheme.surface,
+          color: colorScheme.primary,
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: provider.suppliers.length,
+            itemCount: supplierPersonnel.length,
             itemBuilder: (context, index) {
-              final user = provider.suppliers[index];
+              final user = supplierPersonnel[index];
               return SupplierUserCard(
                 user: user,
                 onManagePrivileges: () => _showPrivilegeDialog(user),
@@ -293,7 +321,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
     );
   }
 
-  Widget _buildLoadingShimmer() {
+  Widget _buildLoadingShimmer(ColorScheme colorScheme) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 3,
@@ -302,13 +330,13 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: colorScheme.shadow.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -318,7 +346,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
@@ -330,13 +358,13 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
                     Container(
                       width: 120,
                       height: 16,
-                      color: Colors.grey[300],
+                      color: colorScheme.surfaceVariant,
                     ),
                     const SizedBox(height: 8),
                     Container(
                       width: 80,
                       height: 14,
-                      color: Colors.grey[300],
+                      color: colorScheme.surfaceVariant,
                     ),
                   ],
                 ),
@@ -348,62 +376,67 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ThemeData theme, ColorScheme colorScheme) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.people_outline,
-            size: 80,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No Team Members',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.people_outline,
+              size: 80,
+              color: colorScheme.onSurfaceVariant,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Add team members to manage ${widget.supplierName}',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
+            const SizedBox(height: 16),
+            Text(
+              'No Team Members',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: _showAddOptions,
-            icon: const Icon(Icons.person_add),
-            label: const Text('Add First Member'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[600],
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            const SizedBox(height: 8),
+            Text(
+              'Add team members to manage ${widget.supplierName}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _showAddOptions,
+              icon: const Icon(Icons.person_add),
+              label: const Text('Add First Member'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildFloatingActionButton() {
+  Widget _buildFloatingActionButton(ColorScheme colorScheme) {
     return FloatingActionButton.extended(
       onPressed: _showAddOptions,
-      backgroundColor: Colors.blue[600],
-      foregroundColor: Colors.white,
-      elevation: 8,
+      backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
+      elevation: 4,
       icon: const Icon(Icons.person_add),
       label: const Text('Add Member'),
     );
   }
 
   void _showAddOptions() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -411,11 +444,11 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
         return Container(
           margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: colorScheme.shadow.withOpacity(0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -428,18 +461,16 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
               children: [
                 Text(
                   'Add Team Member',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 Text(
                   'Add users to manage ${widget.supplierName}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -449,21 +480,24 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
                   title: 'Scan QR Code',
                   subtitle: 'Scan user profile QR code',
                   onTap: _showQRScanner,
+                  colorScheme: colorScheme,
                 ),
                 const SizedBox(height: 12),
                 _buildOptionButton(
                   icon: Icons.search,
                   title: 'Search & Invite',
                   subtitle: 'Search and invite existing users',
-                  onTap: _showSearchInviteDialog,
+                  onTap: () => {_showSearchInviteDialog(widget.supplierId)},
+                  colorScheme: colorScheme,
                 ),
-                const SizedBox(height: 12),
-                _buildOptionButton(
-                  icon: Icons.person_add_alt_1,
-                  title: 'Create New User',
-                  subtitle: 'Create new user profile',
-                  onTap: _createNewUser,
-                ),
+                // const SizedBox(height: 12),
+                // _buildOptionButton(
+                //   icon: Icons.person_add_alt_1,
+                //   title: 'Create New User',
+                //   subtitle: 'Create new user profile',
+                //   onTap: _createNewUser,
+                //   colorScheme: colorScheme,
+                // ),
                 const SizedBox(height: 8),
               ],
             ),
@@ -478,28 +512,30 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    required ColorScheme colorScheme,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: Colors.grey[200]!),
+            color: colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(12),
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: Colors.blue[600], size: 24),
+                child:
+                    Icon(icon, color: colorScheme.onPrimaryContainer, size: 22),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -508,9 +544,10 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -518,13 +555,13 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey[400]),
+              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
             ],
           ),
         ),
@@ -534,57 +571,57 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
 
   void _showQRScanner() {
     Navigator.pop(context);
-    final qrService = QRScannerService();
-    showDialog(
-      context: context,
-      builder: (context) => QRScannerDialog(
-        qrScannerService: qrService,
-        onUserScanned: (user) {
-          _addTeamMember(user);
-        },
-      ),
-    );
+    String? qr_code =
+        Navigator.pushNamed(context, AppRoutes.QRScanPage) as String?;
   }
 
-  void _showSearchInviteDialog() {
+  void _showSearchInviteDialog(int supplierId) {
     Navigator.pop(context);
     showDialog(
       context: context,
       builder: (context) => SearchInviteDialog(
-        onUserSelected: (user) {
-          _inviteUser(user);
+        orgId: widget.orgId,
+        onUserSelected: (user, privileges) {
+          _addUserToSupplier(user, privileges);
         },
+        userId: context.read<AppUserNotifier>().appUser!.id_app_user ?? 0,
+        supplierId: widget.supplierId,
+        supplierName: widget.supplierName,
       ),
     );
   }
 
-  void _createNewUser() {
-    Navigator.pop(context);
-    // Navigate to create new user screen
-    print('Create new user for ${widget.supplierName}');
-  }
+  Future<void> _addUserToSupplier(AppUser user, int privileges) async {
+    final notifier = context.read<PersonnelNotifier>();
+    final currentUserId =
+        context.read<AppUserNotifier>().appUser!.id_app_user ?? 0;
 
-  void _addTeamMember(AppUser user) {
-    final provider = context.read<PersonnelProvider>();
-    provider.addSupplier(user);
+    final success = await notifier.addTeamMember(user.id_app_user ?? 0,
+        supplierId: widget.supplierId,
+        orgId: widget.orgId, // Use actual org ID if available
+        privilege: privileges);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-            'Added ${user.personFirstName} ${user.personLastName} to ${widget.supplierName}'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _inviteUser(AppUser user) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-            'Invitation sent to ${user.personFirstName} ${user.personLastName}'),
-        backgroundColor: Colors.blue,
-      ),
-    );
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Added ${user.personFirstName} ${user.personLastName} to ${widget.supplierName}'),
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+    } else {
+      final error = notifier.error ?? 'Unknown error';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add ${user.personFirstName}: $error'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+    }
   }
 
   void _showPrivilegeDialog(AppUser user) {
@@ -593,40 +630,49 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen> {
       builder: (context) => PrivilegeDialog(
         user: user,
         supplierName: widget.supplierName,
-        onPrivilegesUpdated: (privileges) {
-          context
-              .read<PersonnelProvider>()
-              .updateSupplierPrivileges(user, privileges);
-        },
+        // onPrivilegesUpdated: (privileges) {
+        //   // context
+        //   //     .read<PersonnelNotifier>()
+        //   //     .updateSupplierPrivileges(user, privileges);
+        // },
       ),
     );
   }
 
   void _showRemoveDialog(AppUser user) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Team Member'),
+        title: Text('Remove Team Member',
+            style: TextStyle(color: colorScheme.onSurface)),
         content: Text(
-            'Are you sure you want to remove ${user.personFirstName} ${user.personLastName} from ${widget.supplierName}?'),
+            'Are you sure you want to remove ${user.personFirstName} ${user.personLastName} from ${widget.supplierName}?',
+            style: TextStyle(color: colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel',
+                style: TextStyle(color: colorScheme.onSurfaceVariant)),
           ),
           TextButton(
             onPressed: () {
-              context.read<PersonnelProvider>().removeSupplier(user);
+              // context.read<PersonnelNotifier>().removeSupplier(user);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
                       'Removed ${user.personFirstName} from ${widget.supplierName}'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: colorScheme.error,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               );
             },
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text('Remove', style: TextStyle(color: colorScheme.error)),
           ),
         ],
       ),

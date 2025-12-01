@@ -12,7 +12,7 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<QRScannerScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   MobileScannerController cameraController = MobileScannerController();
   late AnimationController _animationController;
   bool _isScanning = true;

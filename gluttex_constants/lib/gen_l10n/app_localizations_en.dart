@@ -1844,4 +1844,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userInput => 'User-Provided';
+
+  @override
+  String get notificationOrderReceivedTitle => 'Order Received! 🎉';
+
+  @override
+  String get notificationRoleInvitationTitle => 'Team Invitation';
+
+  @override
+  String get notificationProductUpdatedTitle => 'Product Updated';
+
+  @override
+  String get notificationDefaultTitle => 'Notification';
+
+  @override
+  String get notificationOrderReceivedSubtitle => 'Ready for processing';
+
+  @override
+  String get notificationProductUpdatedSubtitle => 'New changes available';
+
+  @override
+  String get notificationOrderReceivedMessage => 'Your order has been successfully received and is being processed. You can track its status in your orders.';
+
+  @override
+  String notificationRoleInvitationMessage(Object ruleName, Object ruleType) {
+    return 'You have been invited to join \"$ruleName\" as $ruleType. Accept to get started!';
+  }
+
+  @override
+  String get notificationRoleInvitationDefaultMessage => 'You have been invited to join a team.';
+
+  @override
+  String get notificationProductUpdatedMessage => 'A product you are following has been updated with new features and improvements. Check it out!';
+
+  @override
+  String get notificationDefaultMessage => 'You have a new notification';
+
+  @override
+  String get timeJustNow => 'Just now';
+
+  @override
+  String timeMinutesAgo(Object minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String timeMinutesAgoPlural(Object minutes) {
+    return '$minutes mins ago';
+  }
+
+  @override
+  String timeHoursAgo(Object hours) {
+    return '$hours hr ago';
+  }
+
+  @override
+  String timeHoursAgoPlural(Object hours) {
+    return '$hours hrs ago';
+  }
+
+  @override
+  String timeDaysAgo(Object days) {
+    return '$days day ago';
+  }
+
+  @override
+  String timeDaysAgoPlural(Object days) {
+    return '$days days ago';
+  }
+
+  @override
+  String timeWeeksAgo(Object weeks) {
+    return '$weeks week ago';
+  }
+
+  @override
+  String timeWeeksAgoPlural(Object weeks) {
+    return '$weeks weeks ago';
+  }
+
+  @override
+  String timeDate(Object day, Object month, Object year) {
+    return '$day/$month/$year';
+  }
+
+  @override
+  String get actionTrackOrder => 'Track Order';
+
+  @override
+  String get actionDownloadInvoice => 'Download Invoice';
+
+  @override
+  String get actionAccept => 'Accept';
+
+  @override
+  String get actionDecline => 'Decline';
+
+  @override
+  String get actionViewTeam => 'View Team';
+
+  @override
+  String get actionSeeChanges => 'See Changes';
+
+  @override
+  String get actionUpdateNow => 'Update Now';
+
+  @override
+  String get actionViewDetails => 'View Details';
+
+  @override
+  String get status_pending => 'Pending';
+
+  @override
+  String get status_rejected => 'Rejected';
+
+  @override
+  String get status_suspended => 'Suspended';
+
+  @override
+  String get status_obsolete => 'Obsolete';
+
+  @override
+  String get status_active => 'Active';
+
+  @override
+  String get inventory_view_title => 'View Inventory';
+
+  @override
+  String get inventory_view_description => 'Can view current inventory levels and stock';
+
+  @override
+  String get inventory_manage_title => 'Manage Inventory';
+
+  @override
+  String get inventory_manage_description => 'Can update stock levels and manage products';
+
+  @override
+  String get orders_view_title => 'View Orders';
+
+  @override
+  String get orders_view_description => 'Can view customer and supplier orders';
+
+  @override
+  String get orders_manage_title => 'Manage Orders';
+
+  @override
+  String get orders_manage_description => 'Can create, edit, and process orders';
+
+  @override
+  String get personnel_view_title => 'View Team';
+
+  @override
+  String get personnel_view_description => 'Can view other team members';
+
+  @override
+  String get personnel_manage_title => 'Manage Team';
+
+  @override
+  String get personnel_manage_description => 'Can add/remove team members and set permissions';
 }

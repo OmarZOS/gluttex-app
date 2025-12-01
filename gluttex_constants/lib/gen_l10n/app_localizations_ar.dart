@@ -1844,4 +1844,162 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get userInput => 'مُدخل من المستخدم';
+
+  @override
+  String get notificationOrderReceivedTitle => 'تم استلام الطلب! 🎉';
+
+  @override
+  String get notificationRoleInvitationTitle => 'دعوة للفريق';
+
+  @override
+  String get notificationProductUpdatedTitle => 'تم تحديث المنتج';
+
+  @override
+  String get notificationDefaultTitle => 'إشعار';
+
+  @override
+  String get notificationOrderReceivedSubtitle => 'جاهز للمعالجة';
+
+  @override
+  String get notificationProductUpdatedSubtitle => 'تغييرات جديدة متاحة';
+
+  @override
+  String get notificationOrderReceivedMessage => 'تم استلام طلبك بنجاح ويتم معالجته الآن. يمكنك تتبع حالته في طلباتك.';
+
+  @override
+  String notificationRoleInvitationMessage(Object ruleName, Object ruleType) {
+    return 'لقد تمت دعوتك للانضمام إلى \"$ruleName\" كـ $ruleType. قبالقبول للبدء!';
+  }
+
+  @override
+  String get notificationRoleInvitationDefaultMessage => 'لقد تمت دعوتك للانضمام إلى فريق.';
+
+  @override
+  String get notificationProductUpdatedMessage => 'تم تحديث منتج تتابعه بميزات وتحسينات جديدة. تحقق منه!';
+
+  @override
+  String get notificationDefaultMessage => 'لديك إشعار جديد';
+
+  @override
+  String get timeJustNow => 'الآن';
+
+  @override
+  String timeMinutesAgo(Object minutes) {
+    return 'قبل $minutes دقيقة';
+  }
+
+  @override
+  String timeMinutesAgoPlural(Object minutes) {
+    return 'قبل $minutes دقيقة';
+  }
+
+  @override
+  String timeHoursAgo(Object hours) {
+    return 'قبل $hours ساعة';
+  }
+
+  @override
+  String timeHoursAgoPlural(Object hours) {
+    return 'قبل $hours ساعة';
+  }
+
+  @override
+  String timeDaysAgo(Object days) {
+    return 'قبل $days يوم';
+  }
+
+  @override
+  String timeDaysAgoPlural(Object days) {
+    return 'قبل $days يوم';
+  }
+
+  @override
+  String timeWeeksAgo(Object weeks) {
+    return 'قبل $weeks أسبوع';
+  }
+
+  @override
+  String timeWeeksAgoPlural(Object weeks) {
+    return 'قبل $weeks أسبوع';
+  }
+
+  @override
+  String timeDate(Object day, Object month, Object year) {
+    return '$day/$month/$year';
+  }
+
+  @override
+  String get actionTrackOrder => 'تتبع الطلب';
+
+  @override
+  String get actionDownloadInvoice => 'تحميل الفاتورة';
+
+  @override
+  String get actionAccept => 'قبول';
+
+  @override
+  String get actionDecline => 'رفض';
+
+  @override
+  String get actionViewTeam => 'عرض الفريق';
+
+  @override
+  String get actionSeeChanges => 'رؤية التغييرات';
+
+  @override
+  String get actionUpdateNow => 'تحديث الآن';
+
+  @override
+  String get actionViewDetails => 'عرض التفاصيل';
+
+  @override
+  String get status_pending => 'قيد الانتظار';
+
+  @override
+  String get status_rejected => 'مرفوض';
+
+  @override
+  String get status_suspended => 'معلّق';
+
+  @override
+  String get status_obsolete => 'متقادم';
+
+  @override
+  String get status_active => 'نشط';
+
+  @override
+  String get inventory_view_title => 'عرض المخزون';
+
+  @override
+  String get inventory_view_description => 'القدرة على عرض مستويات المخزون الحالية والموجودات';
+
+  @override
+  String get inventory_manage_title => 'إدارة المخزون';
+
+  @override
+  String get inventory_manage_description => 'القدرة على تحديث مستويات المخزون وإدارة المنتجات';
+
+  @override
+  String get orders_view_title => 'عرض الطلبات';
+
+  @override
+  String get orders_view_description => 'القدرة على عرض طلبات العملاء والموردين';
+
+  @override
+  String get orders_manage_title => 'إدارة الطلبات';
+
+  @override
+  String get orders_manage_description => 'القدرة على إنشاء وتعديل ومعالجة الطلبات';
+
+  @override
+  String get personnel_view_title => 'عرض الفريق';
+
+  @override
+  String get personnel_view_description => 'القدرة على عرض أعضاء الفريق الآخرين';
+
+  @override
+  String get personnel_manage_title => 'إدارة الفريق';
+
+  @override
+  String get personnel_manage_description => 'القدرة على إضافة/إزالة أعضاء الفريق وتعيين الصلاحيات';
 }

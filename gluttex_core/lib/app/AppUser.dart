@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
+
+import 'package:gluttex_core/app/ManagementRule.dart';
 
 class AppUser {
   final int? id_app_user;
@@ -30,6 +33,7 @@ class AppUser {
   final String addressCity;
   final String addressPostalCode;
   final String addressCountry;
+  final List<ManagementRule>? privileges;
 
   get isAdmin => app_user_type_id == 3; // Assuming 3 is the admin type ID
 
@@ -61,66 +65,69 @@ class AppUser {
     required this.addressCity,
     required this.addressPostalCode,
     required this.addressCountry,
+    required this.privileges,
   });
-  AppUser copyWith({
-    Uint8List? app_user_image,
-    String? app_user_image_url,
-    String? personFirstName,
-    int? id_app_user,
-    int? app_user_person_id,
-    int? app_user_type_id,
-    String? app_user_name,
-    String? app_user_password,
-    String? app_user_preferences,
-    String? app_user_type_desc,
-    int? idPerson,
-    int? personDetailsId,
-    String? personLastName,
-    String? personBirthDate,
-    String? personGender,
-    String? personNationality,
-    int? idBloodType,
-    String? bloodTypeDesc,
-    int? idLocation,
-    double? locationLatitude,
-    double? locationLongitude,
-    String? locationName,
-    int? locationAddressId,
-    String? addressStreet,
-    String? addressCity,
-    String? addressPostalCode,
-    String? addressCountry,
-    // ... all other fields
-  }) {
+  AppUser copyWith(
+      {Uint8List? app_user_image,
+      String? app_user_image_url,
+      String? personFirstName,
+      int? id_app_user,
+      int? app_user_person_id,
+      int? app_user_type_id,
+      String? app_user_name,
+      String? app_user_password,
+      String? app_user_preferences,
+      String? app_user_type_desc,
+      int? idPerson,
+      int? personDetailsId,
+      String? personLastName,
+      String? personBirthDate,
+      String? personGender,
+      String? personNationality,
+      int? idBloodType,
+      String? bloodTypeDesc,
+      int? idLocation,
+      double? locationLatitude,
+      double? locationLongitude,
+      String? locationName,
+      int? locationAddressId,
+      String? addressStreet,
+      String? addressCity,
+      String? addressPostalCode,
+      String? addressCountry,
+      List<ManagementRule>? privileges
+
+      // ... all other fields
+      }) {
     return AppUser(
-      // app_user_image: app_user_image ?? this.app_user_image,
-      app_user_image_url: app_user_image_url ?? this.app_user_image_url,
-      personFirstName: personFirstName ?? this.personFirstName,
-      id_app_user: id_app_user ?? this.id_app_user,
-      app_user_person_id: app_user_person_id ?? this.app_user_person_id,
-      app_user_type_id: app_user_type_id ?? this.app_user_type_id,
-      app_user_name: app_user_name ?? this.app_user_name,
-      app_user_password: app_user_password ?? this.app_user_password,
-      app_user_preferences: app_user_preferences ?? this.app_user_preferences,
-      app_user_type_desc: app_user_type_desc ?? this.app_user_type_desc,
-      idPerson: idPerson ?? this.idPerson,
-      personDetailsId: personDetailsId ?? this.personDetailsId,
-      personLastName: personLastName ?? this.personLastName,
-      personBirthDate: personBirthDate ?? this.personBirthDate,
-      personGender: personGender ?? this.personGender,
-      personNationality: personNationality ?? this.personNationality,
-      idBloodType: idBloodType ?? this.idBloodType,
-      idLocation: idLocation ?? this.idLocation,
-      locationLatitude: locationLatitude ?? this.locationLatitude,
-      locationLongitude: locationLongitude ?? this.locationLongitude,
-      locationName: locationName ?? this.locationName,
-      locationAddressId: locationAddressId ?? this.locationAddressId,
-      addressStreet: addressStreet ?? this.addressStreet,
-      addressCity: addressCity ?? this.addressCity,
-      addressPostalCode: addressPostalCode ?? this.addressPostalCode,
-      addressCountry: addressCountry ?? this.addressCountry,
-      bloodTypeDesc: bloodTypeDesc ?? this.bloodTypeDesc,
-    );
+        // app_user_image: app_user_image ?? this.app_user_image,
+        app_user_image_url: app_user_image_url ?? this.app_user_image_url,
+        personFirstName: personFirstName ?? this.personFirstName,
+        id_app_user: id_app_user ?? this.id_app_user,
+        app_user_person_id: app_user_person_id ?? this.app_user_person_id,
+        app_user_type_id: app_user_type_id ?? this.app_user_type_id,
+        app_user_name: app_user_name ?? this.app_user_name,
+        app_user_password: app_user_password ?? this.app_user_password,
+        app_user_preferences: app_user_preferences ?? this.app_user_preferences,
+        app_user_type_desc: app_user_type_desc ?? this.app_user_type_desc,
+        idPerson: idPerson ?? this.idPerson,
+        personDetailsId: personDetailsId ?? this.personDetailsId,
+        personLastName: personLastName ?? this.personLastName,
+        personBirthDate: personBirthDate ?? this.personBirthDate,
+        personGender: personGender ?? this.personGender,
+        personNationality: personNationality ?? this.personNationality,
+        idBloodType: idBloodType ?? this.idBloodType,
+        idLocation: idLocation ?? this.idLocation,
+        locationLatitude: locationLatitude ?? this.locationLatitude,
+        locationLongitude: locationLongitude ?? this.locationLongitude,
+        locationName: locationName ?? this.locationName,
+        locationAddressId: locationAddressId ?? this.locationAddressId,
+        addressStreet: addressStreet ?? this.addressStreet,
+        addressCity: addressCity ?? this.addressCity,
+        addressPostalCode: addressPostalCode ?? this.addressPostalCode,
+        addressCountry: addressCountry ?? this.addressCountry,
+        bloodTypeDesc: bloodTypeDesc ?? this.bloodTypeDesc,
+        privileges: privileges ?? this.privileges);
   }
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
@@ -184,35 +191,158 @@ class AppUser {
       }
     }
 
+    // log("locking in");
     return AppUser(
-      id_app_user: json['id_app_user'] ?? 0,
-      app_user_person_id: json['app_user_person_id'] ?? 0,
-      app_user_type_id: json['app_user_type_id'] ?? 0,
-      app_user_name: json['app_user_name'] ?? "",
-      app_user_password: json['app_user_password'] ?? "",
-      app_user_preferences: json['app_user_preferences'] ?? "",
-      app_user_type_desc: json['app_user_type']?['app_user_type_desc'] ?? "",
-      // app_user_image: imageData,
-      app_user_image_url: json['app_user_image_url'] ?? "",
-      idPerson: json['idPerson'] ?? 0,
-      personDetailsId: idPersonDetails ?? 0,
-      personFirstName: personFirstName ?? "",
-      personLastName: personLastName ?? "",
-      personBirthDate: personBirthDate ?? "",
-      personGender: personGender ?? "",
-      personNationality: personNationality ?? "",
-      idBloodType: idBloodType ?? 0,
-      idLocation: json['app_user_person']?["person_location_id"] ?? 0,
-      locationLatitude: locationLatitude ?? 0.0,
-      locationLongitude: locationLongitude ?? 0.0,
-      locationName: locationName ?? "",
-      locationAddressId: locationAddressId ?? 0,
-      addressStreet: addressStreet ?? "",
-      addressCity: addressCity ?? "",
-      addressPostalCode: addressPostalCode ?? "",
-      addressCountry: addressCountry ?? "",
-      bloodTypeDesc: bloodTypeDesc ?? "",
-    );
+        id_app_user: json['id_app_user'] ?? 0,
+        app_user_person_id: json['app_user_person_id'] ?? 0,
+        app_user_type_id: json['app_user_type_id'] ?? 0,
+        app_user_name: json['app_user_name'] ?? "",
+        app_user_password: json['app_user_password'] ?? "",
+        app_user_preferences: json['app_user_preferences'] ?? "",
+        app_user_type_desc: json['app_user_type']?['app_user_type_desc'] ?? "",
+        // app_user_image: imageData,
+        app_user_image_url: json['app_user_image_url'] ?? "",
+        idPerson: json['idPerson'] ?? 0,
+        personDetailsId: idPersonDetails ?? 0,
+        personFirstName: personFirstName ?? "",
+        personLastName: personLastName ?? "",
+        personBirthDate: personBirthDate ?? "",
+        personGender: personGender ?? "",
+        personNationality: personNationality ?? "",
+        idBloodType: idBloodType ?? 0,
+        idLocation: json['app_user_person']?["person_location_id"] ?? 0,
+        locationLatitude: locationLatitude ?? 0.0,
+        locationLongitude: locationLongitude ?? 0.0,
+        locationName: locationName ?? "",
+        locationAddressId: locationAddressId ?? 0,
+        addressStreet: addressStreet ?? "",
+        addressCity: addressCity ?? "",
+        addressPostalCode: addressPostalCode ?? "",
+        addressCountry: addressCountry ?? "",
+        bloodTypeDesc: bloodTypeDesc ?? "",
+        privileges: null);
+  }
+
+  // Parse multiple users from JSON list
+  // Parse multiple users from JSON list - WITH GROUPING
+  static List<AppUser> fromJsonList(List<dynamic> jsonList) {
+    if (jsonList.isEmpty) {
+      return [];
+    }
+
+    // Group by app_user_name (if you still want grouping)
+    final userGroups = <String, List<Map<String, dynamic>>>{};
+
+    for (final jsonItem in jsonList) {
+      final appUserJson = jsonItem as Map<String, dynamic>;
+      final userName = _parseString(appUserJson['app_user_name']);
+
+      if (!userGroups.containsKey(userName)) {
+        userGroups[userName] = [];
+      }
+      userGroups[userName]!.add(appUserJson);
+    }
+
+    // Create AppUser objects for each unique user
+    return userGroups.entries.map((entry) {
+      final userName = entry.key;
+      final userDataList = entry.value;
+
+      // Use the first item for user details
+      final firstUserData = userDataList.first;
+      final personJson =
+          firstUserData['app_user_person'] as Map<String, dynamic>? ?? {};
+      final personDetailsJson =
+          personJson['person_details'] as Map<String, dynamic>? ?? {};
+
+      return AppUser(
+        id_app_user: _parseInt(firstUserData['id_app_user']),
+        app_user_person_id: _parseInt(firstUserData['app_user_person_id']),
+        app_user_type_id: _parseInt(firstUserData['app_user_type_id']),
+        app_user_name: userName,
+        app_user_password:
+            _parseStringNullable(firstUserData['app_user_password']),
+        app_user_preferences:
+            _parseString(firstUserData['app_user_preferences']),
+        app_user_type_desc:
+            _getRoleFromTypeId(_parseInt(firstUserData['app_user_type_id'])),
+        app_user_image_url: _parseString(firstUserData['app_user_image_url']),
+        idPerson: _parseInt(personJson['id_person']),
+        personDetailsId: _parseInt(personJson['person_details_id']),
+        personFirstName: _parseString(personDetailsJson['person_first_name']),
+        personLastName: _parseString(personDetailsJson['person_last_name']),
+        personBirthDate: _parseString(personDetailsJson['person_birth_date']),
+        personGender: _parseString(personDetailsJson['person_gender']),
+        personNationality:
+            _parseString(personDetailsJson['person_nationality']),
+        idBloodType: _parseIntNullable(personJson['person_blood_type_id']) ?? 0,
+        bloodTypeDesc: '',
+        idLocation: _parseInt(personJson['person_location_id']),
+        locationLatitude: 0.0,
+        locationLongitude: 0.0,
+        locationName: '',
+        locationAddressId: 0,
+        addressStreet: '',
+        addressCity: '',
+        addressPostalCode: '',
+        addressCountry: '',
+        privileges: null,
+      );
+    }).toList();
+  }
+
+// Helper method to determine role from type ID
+  static String _getRoleFromTypeId(int typeId) {
+    switch (typeId) {
+      case 3:
+        return 'Admin';
+      case 2:
+        return 'Manager';
+      case 1:
+        return 'User';
+      default:
+        return 'User';
+    }
+  }
+
+  // Safe parsing helpers
+  static int _parseInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static int? _parseIntNullable(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static String _parseString(dynamic value) {
+    if (value == null) return '';
+    if (value is String) return value;
+    return value.toString();
+  }
+
+  static String? _parseStringNullable(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value.isEmpty ? null : value;
+    return value.toString();
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is DateTime) return value;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+    return DateTime.now();
   }
 
   factory AppUser.fromGoogleJson(Map<String, dynamic> json) {
@@ -249,71 +379,71 @@ class AppUser {
     }
 
     return AppUser(
-      id_app_user: idAppUser,
-      app_user_person_id: userData?['app_user_person_id'] ?? 0,
-      app_user_type_id: appUserTypeId,
-      app_user_name: appUserName,
-      app_user_password:
-          userData?['app_user_password'] ?? "", // Empty for social logins
-      app_user_preferences: userData?['app_user_preferences'] ?? "",
-      app_user_type_desc:
-          "", // You might need to map this based on app_user_type_id
-      app_user_image_url: appUserImageUrl,
+        id_app_user: idAppUser,
+        app_user_person_id: userData?['app_user_person_id'] ?? 0,
+        app_user_type_id: appUserTypeId,
+        app_user_name: appUserName,
+        app_user_password:
+            userData?['app_user_password'] ?? "", // Empty for social logins
+        app_user_preferences: userData?['app_user_preferences'] ?? "",
+        app_user_type_desc:
+            "", // You might need to map this based on app_user_type_id
+        app_user_image_url: appUserImageUrl,
 
-      // Person details from Google userinfo
-      idPerson: 0, // This will likely be set by your backend
-      personDetailsId: 0, // This will likely be set by your backend
-      personFirstName: personFirstName,
-      personLastName: personLastName,
-      personBirthDate: "", // Google doesn't provide birthdate by default
-      personGender: "", // Google doesn't provide gender by default
-      personNationality: "", // Google doesn't provide nationality by default
+        // Person details from Google userinfo
+        idPerson: 0, // This will likely be set by your backend
+        personDetailsId: 0, // This will likely be set by your backend
+        personFirstName: personFirstName,
+        personLastName: personLastName,
+        personBirthDate: "", // Google doesn't provide birthdate by default
+        personGender: "", // Google doesn't provide gender by default
+        personNationality: "", // Google doesn't provide nationality by default
 
-      // Location information (not provided by Google)
-      idBloodType: 0,
-      idLocation: 0,
-      locationLatitude: 0.0,
-      locationLongitude: 0.0,
-      locationName: "",
-      locationAddressId: 0,
-      addressStreet: "",
-      addressCity: "",
-      addressPostalCode: "",
-      addressCountry: "",
-      bloodTypeDesc: "",
-    );
+        // Location information (not provided by Google)
+        idBloodType: 0,
+        idLocation: 0,
+        locationLatitude: 0.0,
+        locationLongitude: 0.0,
+        locationName: "",
+        locationAddressId: 0,
+        addressStreet: "",
+        addressCity: "",
+        addressPostalCode: "",
+        addressCountry: "",
+        bloodTypeDesc: "",
+        privileges: null);
   }
 
   factory AppUser.empty() {
     return AppUser(
-      id_app_user: 0,
-      app_user_person_id: 0,
-      app_user_type_id: 0,
-      app_user_name: "",
-      app_user_password: "",
-      app_user_preferences: "",
-      app_user_type_desc: "",
-      // app_user_image: null,
-      app_user_image_url: "",
-      idPerson: 0,
-      personDetailsId: 0,
-      personFirstName: "",
-      personLastName: "",
-      personBirthDate: "",
-      personGender: "",
-      personNationality: "",
-      idBloodType: 0,
-      idLocation: 0,
-      locationLatitude: 0.0,
-      locationLongitude: 0.0,
-      locationName: "",
-      locationAddressId: 0,
-      addressStreet: "",
-      addressCity: "",
-      addressPostalCode: "",
-      addressCountry: "",
-      bloodTypeDesc: '',
-    );
+        id_app_user: 0,
+        app_user_person_id: 0,
+        app_user_type_id: 0,
+        app_user_name: "",
+        app_user_password: "",
+        app_user_preferences: "",
+        app_user_type_desc: "",
+        // app_user_image: null,
+        app_user_image_url: "",
+        idPerson: 0,
+        personDetailsId: 0,
+        personFirstName: "",
+        personLastName: "",
+        personBirthDate: "",
+        personGender: "",
+        personNationality: "",
+        idBloodType: 0,
+        idLocation: 0,
+        locationLatitude: 0.0,
+        locationLongitude: 0.0,
+        locationName: "",
+        locationAddressId: 0,
+        addressStreet: "",
+        addressCity: "",
+        addressPostalCode: "",
+        addressCountry: "",
+        bloodTypeDesc: '',
+        privileges: null);
   }
 
   Map<String, dynamic> toJson() {

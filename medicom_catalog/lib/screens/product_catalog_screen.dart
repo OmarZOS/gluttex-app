@@ -9,7 +9,7 @@ import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/preferenceChangeNotifier.dart';
 import 'package:medicom_catalog/screens/components/ProductCard.dart';
-import 'package:medicom_catalog/screens/components/floating_buttons.dart';
+import 'package:gluttex_ui/components/floating_buttons.dart';
 import 'package:provider/provider.dart';
 
 class ProductCatalogScreen extends StatefulWidget {

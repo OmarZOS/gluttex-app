@@ -52,6 +52,8 @@ dependencies:
     path: ../gluttex_login
   gluttex_event:
     path: ../gluttex_event
+  gluttex_personnel:
+    path: ../gluttex_personnel
 
   
 

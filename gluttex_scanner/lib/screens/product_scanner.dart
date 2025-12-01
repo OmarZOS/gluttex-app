@@ -14,7 +14,7 @@ class ProductCaptureScreen extends StatefulWidget {
 }
 
 class _ProductCaptureScreenState extends State<ProductCaptureScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _isTakingPicture = false;

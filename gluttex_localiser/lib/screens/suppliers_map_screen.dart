@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_localiser/screens/supplier_form_page.dart';
+import 'package:gluttex_ui/components/floating_buttons.dart';
 import 'package:gluttex_ui/components/supplier/supplier_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
@@ -104,27 +106,47 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      floatingActionButton: [
-        GluttexConstants.cookingChefDBId,
-        GluttexConstants.supplierDBId
-      ].contains(Provider.of<AppUserNotifier>(context, listen: false)
-              .appUser
-              ?.app_user_type_id)
-          ? FloatingActionButton(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-              heroTag: 'floating-button-12',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SupplierFormScreen(),
-                  ),
-                );
-              },
-              child: const Icon(Icons.add_business),
-            )
-          : null,
+      floatingActionButton: CustomSpeedDial(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        horizontalButtons: [
+          SpeedDialButton(
+            icon: Icon(Icons.add_business,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.scannerTxt,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.providerCreate,
+              );
+            },
+          ),
+        ],
+        verticalButtons: [
+          SpeedDialButton(
+            icon: Icon(Icons.business_center,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.addProductTxt,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.supplierEntitiesPage);
+            },
+          ),
+          // SpeedDialButton(
+          //   icon: Icon(Icons.dashboard,
+          //       color: Theme.of(context).colorScheme.onPrimary),
+          //   label: AppLocalizations.of(context)?.cartText,
+          //   backgroundColor: Theme.of(context).colorScheme.primary,
+          //   onTap: () {
+          //     Navigator.pushNamed(
+          //       context,
+          //       AppRoutes.dashboardPage,
+          //     );
+          //   },
+          // ),
+        ],
+      ),
       appBar: AppBar(
         title: Container(
           height: 40,
