@@ -368,7 +368,11 @@ class NotificationItem extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        _buildActions(context, localizations),
+        Consumer<PersonnelNotifier>(
+          builder: (context, personnel, _) {
+            return _buildActions(context, localizations);
+          },
+        ),
       ],
     );
   }

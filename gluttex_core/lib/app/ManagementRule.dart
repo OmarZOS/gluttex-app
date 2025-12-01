@@ -7,14 +7,25 @@ class ManagementRule {
   final String? ruleStatus;
   final ProductProvider? productProvider;
   final AppUser? appUser;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? acceptedAt;
+  final DateTime? rejectedAt;
+  final bool isActive;
 
-  ManagementRule(
-      {required this.id_management_rule,
-      required this.management_rule_code,
-      this.providerOrganisation,
-      this.productProvider,
-      this.appUser,
-      this.ruleStatus});
+  ManagementRule({
+    required this.id_management_rule,
+    required this.management_rule_code,
+    this.providerOrganisation,
+    this.productProvider,
+    this.appUser,
+    this.ruleStatus,
+    this.createdAt,
+    this.updatedAt,
+    this.acceptedAt,
+    this.rejectedAt,
+    this.isActive = false,
+  });
 
   factory ManagementRule.fromJson(Map<String, dynamic> json) {
     return ManagementRule(
@@ -29,23 +40,182 @@ class ManagementRule {
       ruleStatus: json['management_rule_status'] ?? "PENDING",
       appUser:
           json['app_user'] != null ? AppUser.fromJson(json['app_user']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'])
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'])
+          : null,
+      acceptedAt: json['accepted_at'] != null
+          ? DateTime.tryParse(json['accepted_at'])
+          : null,
+      rejectedAt: json['rejected_at'] != null
+          ? DateTime.tryParse(json['rejected_at'])
+          : null,
+      isActive: json['is_active'] == true ||
+          (json['management_rule_status']?.toString().toUpperCase() ==
+              'ACTIVE'),
     );
   }
 
   Map<String, dynamic> toJson(int user, int ruleCode, String? expiry) {
     return {
-      "id_management_rule": 0,
+      "id_management_rule": id_management_rule,
       "rule_ref_org": providerOrganisation,
       "rule_ref_provider": productProvider,
       "rule_ref_user": user,
       "management_rule_code": ruleCode,
       "management_rule_status": ruleStatus,
-      "management_rule_expiry": expiry
+      "management_rule_expiry": expiry,
+      "created_at": createdAt?.toIso8601String(),
+      "updated_at": updatedAt?.toIso8601String(),
+      "accepted_at": acceptedAt?.toIso8601String(),
+      "rejected_at": rejectedAt?.toIso8601String(),
+      "is_active": isActive,
     };
+  }
+
+  /// Creates a copy of this ManagementRule with the given fields replaced
+  ManagementRule copyWith({
+    int? id_management_rule,
+    int? management_rule_code,
+    ProviderOrganisation? providerOrganisation,
+    String? ruleStatus,
+    ProductProvider? productProvider,
+    AppUser? appUser,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? acceptedAt,
+    DateTime? rejectedAt,
+    bool? isActive,
+  }) {
+    return ManagementRule(
+      id_management_rule: id_management_rule ?? this.id_management_rule,
+      management_rule_code: management_rule_code ?? this.management_rule_code,
+      providerOrganisation: providerOrganisation ?? this.providerOrganisation,
+      ruleStatus: ruleStatus ?? this.ruleStatus,
+      productProvider: productProvider ?? this.productProvider,
+      appUser: appUser ?? this.appUser,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
+      rejectedAt: rejectedAt ?? this.rejectedAt,
+      isActive: isActive ?? this.isActive,
+    );
+  }
+
+  /// Creates a copy with status updated and sets acceptance/rejection timestamps
+  ManagementRule copyWithStatus({
+    required String newStatus,
+    bool updateTimestamps = true,
+  }) {
+    final now = DateTime.now();
+    final statusUpper = newStatus.toUpperCase();
+
+    return copyWith(
+      ruleStatus: newStatus,
+      isActive: statusUpper == 'ACTIVE',
+      updatedAt: now,
+      acceptedAt:
+          updateTimestamps && statusUpper == 'ACTIVE' ? now : acceptedAt,
+      rejectedAt: updateTimestamps &&
+              (statusUpper == 'REJECTED' || statusUpper == 'DECLINED')
+          ? now
+          : rejectedAt,
+    );
+  }
+
+  /// Creates a copy marking the rule as accepted
+  ManagementRule copyAsAccepted() {
+    final now = DateTime.now();
+    return copyWith(
+      ruleStatus: 'ACTIVE',
+      isActive: true,
+      updatedAt: now,
+      acceptedAt: now,
+    );
+  }
+
+  /// Creates a copy marking the rule as rejected
+  ManagementRule copyAsRejected() {
+    final now = DateTime.now();
+    return copyWith(
+      ruleStatus: 'REJECTED',
+      isActive: false,
+      updatedAt: now,
+      rejectedAt: now,
+    );
+  }
+
+  /// Creates a copy with updated provider information
+  ManagementRule copyWithProvider({
+    required ProductProvider newProvider,
+    ProviderOrganisation? newOrganisation,
+  }) {
+    return copyWith(
+      productProvider: newProvider,
+      providerOrganisation: newOrganisation ?? providerOrganisation,
+    );
+  }
+
+  /// Creates a copy with updated user information
+  ManagementRule copyWithUser(AppUser newUser) {
+    return copyWith(
+      appUser: newUser,
+    );
+  }
+
+  /// Checks if this rule is pending
+  bool get isPending => (ruleStatus?.toUpperCase() ?? 'PENDING') == 'PENDING';
+
+  /// Checks if this rule is active
+  bool get isActiveStatus => (ruleStatus?.toUpperCase() ?? '') == 'ACTIVE';
+
+  /// Checks if this rule is rejected/declined
+  bool get isRejected {
+    final status = ruleStatus?.toUpperCase() ?? '';
+    return status == 'REJECTED' || status == 'DECLINED';
+  }
+
+  /// Gets the display status
+  String get displayStatus {
+    switch (ruleStatus?.toUpperCase()) {
+      case 'PENDING':
+        return 'Pending';
+      case 'ACTIVE':
+        return 'Active';
+      case 'REJECTED':
+        return 'Rejected';
+      case 'DECLINED':
+        return 'Declined';
+      case 'EXPIRED':
+        return 'Expired';
+      default:
+        return ruleStatus ?? 'Unknown';
+    }
   }
 
   static int _parseInt(dynamic value) =>
       value is int ? value : int.tryParse(value) ?? 0;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ManagementRule &&
+          runtimeType == other.runtimeType &&
+          id_management_rule == other.id_management_rule &&
+          productProvider?.id_product_provider ==
+              other.productProvider?.id_product_provider;
+
+  @override
+  int get hashCode => id_management_rule.hashCode;
+
+  @override
+  String toString() {
+    return 'ManagementRule(id: $id_management_rule, code: $management_rule_code, '
+        'status: $ruleStatus, provider: ${productProvider?.product_provider_details.provider_name}, '
+        'user: ${appUser?.app_user_name})';
+  }
 }
 
 class ProviderOrganisation {

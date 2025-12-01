@@ -398,7 +398,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
     await Future.delayed(const Duration(milliseconds: 800));
 
     if (mounted) {
-      Navigator.pop(context);
+      Navigator.pop(context, code);
       _processScannedCode(code);
     }
   }

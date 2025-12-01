@@ -169,8 +169,8 @@ class NotificationActionHandler {
     final _personnelNotifier = context.read<PersonnelNotifier>();
     final _notificationNotifier = context.read<NotificationNotifier>();
     log("Making it for : ${action.metadata['rule_id']}");
-    final data =
-        await _personnelNotifier.answerInvitation(action.metadata['rule_id']);
+    final data = await _personnelNotifier.answerInvitation(
+        ruleId: action.metadata['rule_id'], answer: 0);
     print(data);
     if (data) {
       _notificationNotifier.markAsRead(action.notificationId);
@@ -182,8 +182,8 @@ class NotificationActionHandler {
     final _personnelNotifier = context.read<PersonnelNotifier>();
     final _notificationNotifier = context.read<NotificationNotifier>();
 
-    final data = await _personnelNotifier
-        .answerInvitation(action.metadata['rule_id'], answer: 1);
+    final data = await _personnelNotifier.answerInvitation(
+        ruleId: action.metadata['rule_id'], answer: 1);
     print(data);
     if (data) {
       _notificationNotifier.markAsRead(action.notificationId);

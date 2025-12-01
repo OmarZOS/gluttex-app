@@ -395,46 +395,232 @@ class PersonnelNotifier with ChangeNotifier {
     return filteredRules.isNotEmpty ? filteredRules : null;
   }
 
-  /// Get a specific management rule for a user
-  Future<ManagementRule?> getSpecificRule({
-    required int ruleId,
-    required int userId,
-    int supplierId = 0,
-  }) async {
-    final rules = await getUserPrivileges(
-      ruleId: ruleId,
-      userId: userId,
-      supplierId: supplierId,
-    );
+  /// Returns (userId, supplierId) for a given ruleId.
+  /// If ruleId = 0 OR rule not found → return null.
+  Map<String, int>? getRuleUserAndSupplier(int ruleId) {
+    if (ruleId == 0) return null;
 
-    if (rules == null || rules.isEmpty) {
-      return null;
+    // Iterate through each user's list of rules
+    for (final rules in _userPrivileges.values) {
+      for (final rule in rules) {
+        if (rule.id_management_rule == ruleId) {
+          final userId = rule.appUser?.id_app_user ?? 0;
+          final supplierId = rule.productProvider?.id_product_provider ?? 0;
+
+          return {
+            "userId": userId,
+            "supplierId": supplierId,
+          };
+        }
+      }
     }
 
-    // Return the first matching rule
-    return rules.firstWhere(
-      (rule) => rule.id_management_rule == ruleId,
-      orElse: () => rules.first,
-    );
+    // If no match
+    return null;
   }
 
-  /// Answer invitation (accept/reject)
-  Future<bool> answerInvitation(int invitationId, {int answer = 0}) async {
+  /// Answer invitation (accept/reject) and update local state accordingly
+  Future<bool> answerInvitation({
+    required int ruleId,
+    // required int userId,
+    // required int supplierId,
+    required int answer, // 0 = accept, 1 = reject
+  }) async {
     try {
+      // log('Answering invitation: invitationId=$invitationId, ruleId=$ruleId, userId=$userId, supplierId=$supplierId, answer=$answer');
+
       final response = await _storageService.update(
-        "${GluttexConstants.apiBaseUrl}${GluttexConstants.putRuleAnswerEndpoint}/$invitationId",
-        invitationId.toString(),
+        "${GluttexConstants.apiBaseUrl}${GluttexConstants.putRuleAnswerEndpoint}/$ruleId",
+        "",
         {"answer": answer},
         {},
       );
 
       log('Invitation response: $response');
+
+      // Find the rule in user's privileges
+      final data = getRuleUserAndSupplier(ruleId);
+      final userId = data?["userId"];
+      final supplierId = data?["supplierId"];
+
+      final userRules = _userPrivileges[userId];
+      if (userRules != null) {
+        final ruleIndex = userRules.indexWhere((rule) =>
+            rule.id_management_rule == ruleId &&
+            rule.productProvider?.id_product_provider == supplierId);
+
+        if (ruleIndex != -1) {
+          final rule = userRules[ruleIndex];
+
+          if (answer == 0) {
+            // ACCEPT: Update rule status to active
+            final updatedRule = rule.copyWith(
+              ruleStatus: RuleStates.active,
+              // Update any other fields that change when accepted
+              // e.g., isActive: true, acceptedAt: DateTime.now()
+            );
+
+            userRules[ruleIndex] = updatedRule;
+            log('Updated rule $ruleId to ACTIVE for user $userId');
+
+            // Also update in personnel list if this user exists there
+
+            if (userId != 0 && supplierId != 0) {
+              _updateUserRuleInPersonnel(userId!, supplierId!, updatedRule);
+            }
+          } else {
+            // REJECT: Remove the rule from privileges
+            userRules.removeAt(ruleIndex);
+            log('Removed rule $ruleId for user $userId (rejected)');
+
+            // Remove supplier mapping if this was the only rule for this supplier
+            if (userId != 0 && supplierId != 0) {
+              _cleanupSupplierMapping(userId!, supplierId!);
+            }
+
+            // Also remove from personnel list for this supplier
+            if (userId != 0 && supplierId != 0) {
+              _removeUserFromSupplierPersonnel(userId!, supplierId!);
+            }
+          }
+
+          // Notify listeners about the change
+          notifyListeners();
+        } else {
+          log('Rule $ruleId not found in user $userId privileges');
+        }
+      } else {
+        log('No privileges found for user $userId');
+      }
+
       return true;
     } catch (e, stacktrace) {
       log('Error answering invitation: $e');
       log('Stack trace: $stacktrace');
       return false;
     }
+  }
+
+  /// Helper: Update rule in personnel list
+  void _updateUserRuleInPersonnel(
+      int userId, int supplierId, ManagementRule updatedRule) {
+    // Find the user in personnel list
+    final userIndex =
+        _personnel.indexWhere((user) => user.id_app_user == userId);
+
+    if (userIndex != -1) {
+      final user = _personnel[userIndex];
+
+      // Update user's role based on new privileges
+      final userPrivileges = _userPrivileges[userId] ?? [];
+      if (userPrivileges.isNotEmpty) {
+        // user.app_user_type_desc = _determineUserRole(userPrivileges);
+        // user.privileges = userPrivileges;
+      }
+
+      // Update filtered personnel if needed
+      _filteredPersonnel = _getUsersForSupplier(supplierId);
+    }
+  }
+
+  /// Helper: Clean up supplier mapping when rule is removed
+  void _cleanupSupplierMapping(int userId, int supplierId) {
+    final userSupplierIds = _userSupplierMappings[userId];
+    if (userSupplierIds != null) {
+      // Check if user has any other rules for this supplier
+      final userRules = _userPrivileges[userId] ?? [];
+      final hasOtherRulesForSupplier = userRules.any(
+          (rule) => rule.productProvider?.id_product_provider == supplierId);
+
+      // If no other rules for this supplier, remove the mapping
+      if (!hasOtherRulesForSupplier) {
+        userSupplierIds.remove(supplierId);
+        log('Removed supplier $supplierId mapping for user $userId');
+
+        // If no suppliers left, remove user entry entirely
+        if (userSupplierIds.isEmpty) {
+          _userSupplierMappings.remove(userId);
+        }
+      }
+    }
+  }
+
+  /// Helper: Remove user from filtered personnel for specific supplier
+  void _removeUserFromSupplierPersonnel(int userId, int supplierId) {
+    // Remove from filtered personnel for this supplier
+    _filteredPersonnel =
+        _filteredPersonnel.where((user) => user.id_app_user != userId).toList();
+
+    // Note: We don't remove from main _personnel list because user might have other suppliers
+  }
+
+  /// Alternative: Method to update rule status directly
+  Future<bool> updateRuleStatus({
+    required int userId,
+    required int ruleId,
+    required int supplierId,
+    required String newStatus, // e.g., RuleStates.active, RuleStates.rejected
+  }) async {
+    final userRules = _userPrivileges[userId];
+    if (userRules == null) return false;
+
+    final ruleIndex = userRules.indexWhere((rule) =>
+        rule.id_management_rule == ruleId &&
+        rule.productProvider?.id_product_provider == supplierId);
+
+    if (ruleIndex != -1) {
+      final oldRule = userRules[ruleIndex];
+      final updatedRule = oldRule.copyWith(ruleStatus: newStatus);
+      userRules[ruleIndex] = updatedRule;
+
+      log('Updated rule $ruleId status to $newStatus for user $userId');
+
+      // Update in personnel if exists
+      _updateUserRuleInPersonnel(userId, supplierId, updatedRule);
+
+      notifyListeners();
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Get invitation status for notification actions
+  String? getInvitationStatus({
+    required int userId,
+    required int ruleId,
+    int supplierId = 0,
+  }) {
+    final userRules = _userPrivileges[userId];
+    if (userRules == null) return null;
+
+    final rule = userRules.firstWhere(
+      (rule) {
+        final matchesRuleId = rule.id_management_rule == ruleId;
+        if (supplierId == 0) return matchesRuleId;
+
+        final providerId = rule.productProvider?.id_product_provider;
+        return matchesRuleId && providerId == supplierId;
+      },
+      // orElse: () => null,
+    );
+
+    return rule?.ruleStatus;
+  }
+
+  /// Check if invitation is pending
+  bool isInvitationPending({
+    required int userId,
+    required int ruleId,
+    int supplierId = 0,
+  }) {
+    final status = getInvitationStatus(
+      userId: userId,
+      ruleId: ruleId,
+      supplierId: supplierId,
+    );
+
+    return status?.toUpperCase() == RuleStates.pending;
   }
 
   /// Get all suppliers a user has access to
