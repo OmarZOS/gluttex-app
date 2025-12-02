@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
@@ -125,9 +126,9 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
         ],
         verticalButtons: [
           SpeedDialButton(
-            icon: Icon(Icons.business_center,
+            icon: Icon(FontAwesomeIcons.peopleGroup,
                 color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.addProductTxt,
+            label: AppLocalizations.of(context)?.personnel_manage_title,
             backgroundColor: Theme.of(context).colorScheme.primary,
             onTap: () {
               Navigator.pushNamed(context, AppRoutes.supplierEntitiesPage);

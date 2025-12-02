@@ -37,7 +37,7 @@ class ManagementRule {
       productProvider: json['product_provider'] != null
           ? ProductProvider.fromJson(json['product_provider'])
           : null,
-      ruleStatus: json['management_rule_status'] ?? "PENDING",
+      ruleStatus: json['management_rule_status'] ?? "REJECTED",
       appUser:
           json['app_user'] != null ? AppUser.fromJson(json['app_user']) : null,
       createdAt: json['created_at'] != null

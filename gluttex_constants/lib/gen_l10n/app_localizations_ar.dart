@@ -1941,7 +1941,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionDecline => 'رفض';
 
   @override
-  String get actionViewTeam => 'عرض الفريق';
+  String get actionViewTeam => 'رؤية الفريق';
 
   @override
   String get actionSeeChanges => 'رؤية التغييرات';
@@ -1950,7 +1950,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionUpdateNow => 'تحديث الآن';
 
   @override
-  String get actionViewDetails => 'عرض التفاصيل';
+  String get actionViewDetails => 'رؤية التفاصيل';
 
   @override
   String get status_pending => 'قيد الانتظار';
@@ -1968,10 +1968,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get status_active => 'نشط';
 
   @override
-  String get inventory_view_title => 'عرض المخزون';
+  String get inventory_view_title => 'رؤية المخزون';
 
   @override
-  String get inventory_view_description => 'القدرة على عرض مستويات المخزون الحالية والموجودات';
+  String get inventory_view_description => 'القدرة على رؤية مستويات المخزون الحالية والموجودات';
 
   @override
   String get inventory_manage_title => 'إدارة المخزون';
@@ -1980,10 +1980,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inventory_manage_description => 'القدرة على تحديث مستويات المخزون وإدارة المنتجات';
 
   @override
-  String get orders_view_title => 'عرض الطلبات';
+  String get orders_view_title => 'رؤية الطلبات';
 
   @override
-  String get orders_view_description => 'القدرة على عرض طلبات العملاء والموردين';
+  String get orders_view_description => 'القدرة على رؤية طلبات العملاء والموردين';
 
   @override
   String get orders_manage_title => 'إدارة الطلبات';
@@ -1992,10 +1992,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orders_manage_description => 'القدرة على إنشاء وتعديل ومعالجة الطلبات';
 
   @override
-  String get personnel_view_title => 'عرض الفريق';
+  String get personnel_view_title => 'رؤية الفريق';
 
   @override
-  String get personnel_view_description => 'القدرة على عرض أعضاء الفريق الآخرين';
+  String get personnel_view_description => 'القدرة على رؤية أعضاء الفريق الآخرين';
 
   @override
   String get personnel_manage_title => 'إدارة الفريق';
@@ -2037,7 +2037,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleSupervisor => 'مشرف';
 
   @override
-  String get roleViewer => 'عارض';
+  String get roleViewer => 'مشاهد';
 
   @override
   String get roleNoPrivileges => 'بدون صلاحيات';
@@ -2047,4 +2047,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get actionNotify => 'إشعار';
+
+  @override
+  String get pendingInvitationMessage => 'هذا المستخدم لديه دعوة معلّقة.';
+
+  @override
+  String get actionResendInvite => 'إعادة إرسال الدعوة';
+
+  @override
+  String get actionCancelInvite => 'إلغاء الدعوة';
 }

@@ -2047,4 +2047,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get actionNotify => 'Notifier';
+
+  @override
+  String get pendingInvitationMessage => 'Cet utilisateur a une invitation en attente.';
+
+  @override
+  String get actionResendInvite => 'Renvoyer l\'invitation';
+
+  @override
+  String get actionCancelInvite => 'Annuler l\'invitation';
 }

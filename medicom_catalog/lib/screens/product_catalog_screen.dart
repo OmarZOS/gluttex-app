@@ -84,53 +84,30 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
       floatingActionButton: CustomSpeedDial(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        uniqueId: 'product_fab', // Added for stability
         horizontalButtons: [
           SpeedDialButton(
-            icon: Icon(CupertinoIcons.barcode_viewfinder,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.scannerTxt,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.productScanPage,
-              );
-            },
+            icon: Icon(CupertinoIcons.barcode_viewfinder),
+            label: AppLocalizations.of(context)!.scannerTxt,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.productScanPage),
           ),
           SpeedDialButton(
-            icon: Icon(Icons.add_box_outlined,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.addProductTxt,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(context, AppRoutes.productCreate);
-            },
+            icon: Icon(Icons.add_box_outlined),
+            label: AppLocalizations.of(context)!.addProductTxt,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.productCreate),
           ),
         ],
         verticalButtons: [
           SpeedDialButton(
-            icon: Icon(Icons.shopping_basket,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.ordersText,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.ordersPage,
-              );
-            },
+            icon: Icon(CupertinoIcons.list_dash),
+            label: AppLocalizations.of(context)!.ordersText,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.ordersPage),
           ),
           SpeedDialButton(
-            icon: Icon(Icons.shopping_cart,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.cartText,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.cartPage,
-              );
-            },
+            icon: Icon(Icons.shopping_cart),
+            label: AppLocalizations.of(context)!.cartText,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.cartPage),
           ),
         ],
       ),

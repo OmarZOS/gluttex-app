@@ -7,20 +7,21 @@ import 'package:gluttex_personnel/privilege_ui.dart';
 
 class SupplierUserCard extends StatelessWidget {
   final AppUser user;
+  final bool isPending;
   final VoidCallback onManagePrivileges;
   final VoidCallback onRemove;
-  final int?
-      privilegesBitmask; // Optional: If you have the bitmask for this user
-  final int? supplierId; // Optional: For context-specific privileges
+  final VoidCallback? onResendInvite;
+  final VoidCallback? onCancelInvite;
 
   const SupplierUserCard({
-    Key? key,
+    super.key,
     required this.user,
+    this.isPending = false,
     required this.onManagePrivileges,
     required this.onRemove,
-    this.privilegesBitmask,
-    this.supplierId,
-  }) : super(key: key);
+    this.onResendInvite,
+    this.onCancelInvite,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +35,16 @@ class SupplierUserCard extends StatelessWidget {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
-          width: 1,
+          color: isPending
+              ? Colors.orange.withOpacity(0.3)
+              : colorScheme.outline.withOpacity(0.1),
+          width: isPending ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
+            color: isPending
+                ? Colors.orange.withOpacity(0.1)
+                : colorScheme.shadow.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -52,130 +57,252 @@ class SupplierUserCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Avatar with Role Badge
-                _buildAvatarWithBadge(context),
+                // Avatar with Status Badge
+                Stack(
+                  children: [
+                    _buildAvatar(context),
+                    if (isPending)
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: colorScheme.surface,
+                              width: 2,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.access_time,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
                 const SizedBox(width: 16),
                 // User Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Name and Username
-                      _buildUserInfo(context),
+                      // Name with pending indicator
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${user.personFirstName ?? ''} ${user.personLastName ?? ''}',
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    ),
+                                    if (isPending)
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 8),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            localizations.pendingTxt,
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  user.app_user_name ?? 'No username',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 8),
-                      // Privilege Tags
-                      _buildPrivilegeTags(context, localizations),
-                      // Status Badge (if applicable)
-                      if (_getRuleStatus(context) != null)
+                      // Email if available
+                      if (user.app_user_name?.isNotEmpty == true)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.email_outlined,
+                                size: 14,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                user.app_user_name!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      // Privilege Tags (only for active users)
+                      if (!isPending)
+                        _buildPrivilegeTags(context, localizations),
+                      // Additional status info for pending users
+                      if (isPending)
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
-                          child: _buildStatusBadge(context),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.orange.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 16,
+                                  color: Colors.orange,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    localizations.pendingInvitationMessage,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.orange,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                     ],
                   ),
                 ),
-                // Role Badge
-                _buildRoleBadge(context),
+                // Role Badge with status indicator
+                _buildRoleBadgeWithStatus(context, isPending),
               ],
             ),
           ),
-          // Actions
+          // Actions - Different actions for pending vs active users
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.3),
+              color: isPending
+                  ? Colors.orange.withOpacity(0.05)
+                  : colorScheme.surfaceVariant.withOpacity(0.3),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
               ),
+              border: Border.all(
+                color: isPending
+                    ? Colors.orange.withOpacity(0.1)
+                    : Colors.transparent,
+              ),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    icon: Icons.admin_panel_settings,
-                    text: localizations.actionManagePermissions,
-                    onTap: onManagePrivileges,
-                    color: colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    icon: Icons.notifications,
-                    text: localizations.actionNotify,
-                    onTap: () {}, // Implement notification
-                    color: colorScheme.secondary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                _buildIconButton(
-                  context: context,
-                  icon: Icons.delete_outline,
-                  onTap: onRemove,
-                  color: colorScheme.error,
-                ),
-              ],
-            ),
+            child: _buildActionButtons(context, localizations, isPending),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAvatarWithBadge(BuildContext context) {
+  Widget _buildAvatar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Stack(
-      children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: colorScheme.outline.withOpacity(0.2),
-              width: 2,
-            ),
-            image: user.app_user_image_url != null &&
-                    user.app_user_image_url!.isNotEmpty
-                ? DecorationImage(
-                    image: NetworkImage(user.app_user_image_url!),
-                    fit: BoxFit.cover,
-                  )
-                : null,
-            color: user.app_user_image_url == null
-                ? colorScheme.primaryContainer
-                : null,
-          ),
-          child: user.app_user_image_url == null
-              ? Icon(
-                  Icons.person,
-                  color: colorScheme.onPrimaryContainer,
-                  size: 28,
-                )
-              : null,
-        ),
-        if (user.isAdmin)
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: colorScheme.error,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colorScheme.surface,
-                  width: 2,
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        image: user.app_user_image_url != null
+            ? DecorationImage(
+                image: NetworkImage(user.app_user_image_url!),
+                fit: BoxFit.cover,
+              )
+            : null,
+        color: user.app_user_image_url == null
+            ? colorScheme.primary.withOpacity(0.1)
+            : null,
+      ),
+      child: user.app_user_image_url == null
+          ? Center(
+              child: Text(
+                '${user.personFirstName?[0] ?? ''}${user.personLastName?[0] ?? ''}'
+                    .toUpperCase(),
+                style: TextStyle(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
-              child: Icon(
-                Icons.shield,
-                color: colorScheme.onError,
-                size: 14,
+            )
+          : null,
+    );
+  }
+
+  Widget _buildRoleBadgeWithStatus(BuildContext context, bool isPending) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Role badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: user.isAdmin
+                ? Colors.red.withOpacity(0.1)
+                : colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            user.isAdmin ? 'Admin' : user.app_user_type_desc ?? 'Member',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color:
+                  user.isAdmin ? Colors.red : colorScheme.onSecondaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        // Status indicator
+        if (isPending)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              'Pending',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: Colors.orange,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -183,45 +310,163 @@ class SupplierUserCard extends StatelessWidget {
     );
   }
 
-  Widget _buildUserInfo(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+  Widget _buildActionButtons(
+      BuildContext context, AppLocalizations localizations, bool isPending) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Name
-        Text(
-          '${user.personFirstName ?? ''} ${user.personLastName ?? ''}'.trim(),
-          style: textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
+    if (isPending) {
+      // For pending users: Show resend and cancel options
+      return Row(
+        children: [
+          // Expanded(
+          //   child: _buildActionButton(
+          //     context: context,
+          //     icon: Icons.refresh,
+          //     text: localizations.actionResendInvite,
+          //     onTap: () {
+          //       if (onResendInvite != null) {
+          //         onResendInvite!();
+          //       }
+          //     },
+          //     color: Colors.orange,
+          //     backgroundColor: Colors.orange.withOpacity(0.1),
+          //   ),
+          // ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildActionButton(
+              context: context,
+              icon: Icons.cancel_outlined,
+              text: localizations.actionCancelInvite,
+              onTap: () {
+                if (onCancelInvite != null) {
+                  onCancelInvite!();
+                }
+              },
+              color: colorScheme.error,
+              backgroundColor: colorScheme.error.withOpacity(0.1),
+            ),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 2),
-        // Username
-        if (user.app_user_name != null && user.app_user_name!.isNotEmpty)
-          Row(
+        ],
+      );
+    } else {
+      // For active users: Show manage and notify options
+      return Row(
+        children: [
+          Expanded(
+            child: _buildActionButton(
+              context: context,
+              icon: Icons.admin_panel_settings,
+              text: localizations.actionManagePermissions,
+              onTap: onManagePrivileges,
+              color: colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildActionButton(
+              context: context,
+              icon: Icons.notifications,
+              text: localizations.actionNotify,
+              onTap: () {
+                _showNotificationOptions(context);
+              },
+              color: colorScheme.secondary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          _buildIconButton(
+            context: context,
+            icon: Icons.delete_outline,
+            onTap: onRemove,
+            color: colorScheme.error,
+          ),
+        ],
+      );
+    }
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+    required Color color,
+    Color? backgroundColor,
+  }) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: backgroundColor ?? Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.alternate_email_rounded,
-                size: 12,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '@${user.app_user_name!}',
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  text,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
-      ],
+        ),
+      ),
+    );
+  }
+
+  void _showNotificationOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.message),
+                title: Text('Send Message'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement message sending
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.email),
+                title: Text('Send Email'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement email sending
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.notifications),
+                title: Text('Send Notification'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement push notification
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -289,138 +534,6 @@ class SupplierUserCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRoleBadge(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final localizations = AppLocalizations.of(context)!;
-    final role = _getUserRole(localizations);
-    final color = _getRoleColor(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            _getRoleIcon(),
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            role,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final status = _getRuleStatus(context);
-    if (status == null) return const SizedBox.shrink();
-
-    final isActive = status.toUpperCase() == RuleStates.active;
-    final isPending = status.toUpperCase() == RuleStates.pending;
-    final isRejected = status.toUpperCase() == RuleStates.rejected;
-
-    Color statusColor;
-    IconData statusIcon;
-    String statusText;
-
-    if (isActive) {
-      statusColor = colorScheme.tertiary;
-      statusIcon = Icons.check_circle;
-      statusText = 'Active';
-    } else if (isPending) {
-      statusColor = colorScheme.secondary;
-      statusIcon = Icons.access_time;
-      statusText = 'Pending';
-    } else if (isRejected) {
-      statusColor = colorScheme.error;
-      statusIcon = Icons.cancel;
-      statusText = 'Rejected';
-    } else {
-      statusColor = colorScheme.outline;
-      statusIcon = Icons.help_outline;
-      statusText = status;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(statusIcon, size: 12, color: statusColor),
-          const SizedBox(width: 4),
-          Text(
-            statusText,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: statusColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required BuildContext context,
-    required IconData icon,
-    required String text,
-    required VoidCallback onTap,
-    required Color color,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: colorScheme.surface,
-            border: Border.all(color: color.withOpacity(0.2)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Text(
-                text,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildIconButton({
     required BuildContext context,
     required IconData icon,
@@ -450,87 +563,48 @@ class SupplierUserCard extends StatelessWidget {
   // Helper methods
 
   List<String> _getUserPrivilegeIds() {
-    if (privilegesBitmask != null) {
-      return RoleBitMapper.numberToPrivilegeIds(privilegesBitmask!);
-    }
-    // If no bitmask provided, check user's privileges
-    // You might need to access user.privileges or similar
+    // If user has privilege bitmask in their data
+    // if (user.privilege != null) {
+    //   return RoleBitMapper.numberToPrivilegeIds(user.privilege!);
+    // }
+
+    // // If user has privileges directly in their data
+    // if (user.privileges != null && user.privileges!.isNotEmpty) {
+    //   return user.privileges!;
+    // }
+
     return [];
-  }
-
-  String _getUserRole(AppLocalizations localizations) {
-    final privilegeCount = _getUserPrivilegeIds().length;
-
-    if (user.isAdmin) {
-      return localizations.roleAdmin;
-    } else if (privilegeCount >= 4) {
-      return localizations.roleManager;
-    } else if (privilegeCount >= 2) {
-      return localizations.roleSupervisor;
-    } else if (privilegeCount >= 1) {
-      return localizations.roleStaff;
-    }
-
-    return localizations.roleViewer;
-  }
-
-  Color _getRoleColor(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final privilegeCount = _getUserPrivilegeIds().length;
-
-    if (user.isAdmin) {
-      return colorScheme.error;
-    } else if (privilegeCount >= 4) {
-      return colorScheme.primary;
-    } else if (privilegeCount >= 2) {
-      return colorScheme.secondary;
-    } else if (privilegeCount >= 1) {
-      return colorScheme.tertiary;
-    }
-
-    return colorScheme.outline;
-  }
-
-  IconData _getRoleIcon() {
-    final privilegeCount = _getUserPrivilegeIds().length;
-
-    if (user.isAdmin) {
-      return Icons.security;
-    } else if (privilegeCount >= 4) {
-      return Icons.manage_accounts;
-    } else if (privilegeCount >= 2) {
-      return Icons.supervisor_account;
-    } else if (privilegeCount >= 1) {
-      return Icons.badge;
-    }
-
-    return Icons.visibility;
   }
 
   Color _getPrivilegeColor(String privilegeId, BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    switch (privilegeId) {
-      case RoleTypes.inventory_view:
-      case RoleTypes.inventory_manage:
-        return colorScheme.primary;
-      case RoleTypes.orders_view:
-      case RoleTypes.orders_manage:
-        return colorScheme.secondary;
-      case RoleTypes.personnel_view:
-      case RoleTypes.personnel_manage:
-        return colorScheme.tertiary;
-      default:
-        return colorScheme.outline;
+    // Map privilege IDs to colors
+    if (privilegeId.contains('inventory')) {
+      return colorScheme.primary;
+    } else if (privilegeId.contains('orders')) {
+      return colorScheme.secondary;
+    } else if (privilegeId.contains('personnel')) {
+      return colorScheme.tertiary;
+    } else if (privilegeId.contains('admin') ||
+        privilegeId.contains('full_access')) {
+      return colorScheme.error;
     }
+
+    return colorScheme.outline;
   }
 
-  String? _getRuleStatus(BuildContext context) {
-    // This depends on your data structure
-    // You might need to get this from user.privileges or context
-    // For example:
-    // final rule = context.read<PersonnelNotifier>().getRuleForUser(user.id_app_user, supplierId);
-    // return rule?.ruleStatus;
-    return null; // Implement based on your data
-  }
+  // Add localization strings to your AppLocalizations class
+  // In your ARB files or localization class:
+  // String get statusPending => 'Pending';
+  // String get pendingInvitationMessage => 'Awaiting user acceptance';
+  // String get actionResendInvite => 'Resend';
+  // String get actionCancelInvite => 'Cancel';
+  // String get resendInvitation => 'Resend Invitation';
+  // String get resendInvitationConfirmation(String name) => 'Resend invitation to $name?';
+  // String get invitationResent => 'Invitation resent';
+  // String get cancelInvitation => 'Cancel Invitation';
+  // String get cancelInvitationConfirmation(String name) => 'Cancel invitation to $name? This action cannot be undone.';
+  // String get confirmCancel => 'Cancel Invite';
+  // String get invitationCanceled => 'Invitation canceled';
 }

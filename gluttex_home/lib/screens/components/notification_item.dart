@@ -770,6 +770,7 @@ class NotificationItem extends StatelessWidget {
               ruleId: invitation.ruleId,
               userId: invitation.addedBy,
               supplierId: invitation.providerId);
+
       debugPrint(privileges.toString());
       // Debug: Print all privileges to see the structure
       debugPrint("=== DEBUG PRIVILEGES ===");

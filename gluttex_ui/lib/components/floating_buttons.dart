@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomSpeedDial extends StatefulWidget {
   final List<SpeedDialButton> verticalButtons;
@@ -8,6 +10,9 @@ class CustomSpeedDial extends StatefulWidget {
   final double buttonSpacing;
   final double buttonSize;
   final bool showLabels;
+  final IconData? mainIcon;
+  final String? mainButtonTooltip;
+  final String uniqueId;
 
   const CustomSpeedDial({
     Key? key,
@@ -18,51 +23,58 @@ class CustomSpeedDial extends StatefulWidget {
     this.buttonSpacing = 72.0,
     this.buttonSize = 56.0,
     this.showLabels = true,
-  }) : super(key: key);
+    this.mainIcon,
+    this.mainButtonTooltip,
+    this.uniqueId = 'default',
+  })  : assert(buttonSize >= 40.0, 'buttonSize must be at least 40.0'),
+        super(key: key);
 
   @override
   State<CustomSpeedDial> createState() => _CustomSpeedDialState();
 }
 
 class _CustomSpeedDialState extends State<CustomSpeedDial>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotationAnimation;
-  late Animation<double> _fadeAnimation;
   bool _isOpen = false;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 250), // Reduced from 400ms
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
+    _scaleAnimation = CurvedAnimation(
       parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
-    ));
+      curve: Curves.easeOutBack,
+    );
 
     _rotationAnimation = Tween<double>(
       begin: 0.0,
-      end: 0.5,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+      end: 0.125,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+  }
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+  @override
+  void didUpdateWidget(CustomSpeedDial oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.verticalButtons.length != oldWidget.verticalButtons.length ||
+        widget.horizontalButtons.length != oldWidget.horizontalButtons.length) {
+      _animationController.value = 0;
+      if (_isOpen) {
+        _animationController.forward();
+      }
+    }
   }
 
   @override
@@ -72,6 +84,8 @@ class _CustomSpeedDialState extends State<CustomSpeedDial>
   }
 
   void _toggle() {
+    if (!mounted) return;
+
     setState(() {
       _isOpen = !_isOpen;
       if (_isOpen) {
@@ -82,59 +96,89 @@ class _CustomSpeedDialState extends State<CustomSpeedDial>
     });
   }
 
+  void _onButtonTap(SpeedDialButton button) {
+    if (!mounted) return;
+
+    if (_isOpen) {
+      _toggle();
+    }
+
+    // Reduced delay to match faster animation
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (button.onTap != null && mounted) {
+        button.onTap!();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final safeAreaBottom = MediaQuery.of(context).padding.bottom;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Stack(
       alignment: Alignment.bottomRight,
       clipBehavior: Clip.none,
       children: [
-        // Semi-transparent overlay
+        // Semi-transparent overlay with blur effect - Fixed positioning
         if (_isOpen)
-          Positioned.fill(
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
             child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
               onTap: _toggle,
-              child: Container(
-                color: colorScheme.onSurface.withOpacity(0.4),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 150), // Faster
+                opacity: _isOpen ? 1.0 : 0.0,
+                child: Container(
+                  color: Colors.transparent,
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                        sigmaX: 1.5, sigmaY: 1.5), // Reduced blur
+                    child: SizedBox.shrink(),
+                  ),
+                ),
               ),
             ),
           ),
 
-        // Vertical buttons (above main FAB)
-        ..._buildVerticalButtons(colorScheme, isRTL),
+        // Main FAB - Fixed positioning
+        Positioned(
+          right: isRTL ? null : 16, // Right for LTR, null for RTL
+          left: isRTL ? 16 : null, // Left for RTL, null for LTR
+          bottom: 16 + safeAreaBottom,
+          child: _buildMainFab(colorScheme),
+        ),
 
-        // Horizontal buttons (to the left/right of main FAB)
-        ..._buildHorizontalButtons(colorScheme, isRTL),
+        // Vertical buttons (above main FAB) - Fixed positioning
+        for (var i = 0; i < widget.verticalButtons.length; i++)
+          _buildVerticalButton(
+            widget.verticalButtons[i],
+            i,
+            colorScheme,
+            textTheme,
+            isRTL,
+            safeAreaBottom,
+            screenHeight,
+          ),
 
-        // Main FAB
-        _buildMainFab(colorScheme),
+        // Horizontal buttons (to the left/right of main FAB) - Fixed positioning
+        for (var i = 0; i < widget.horizontalButtons.length; i++)
+          _buildHorizontalButton(
+            widget.horizontalButtons[i],
+            i,
+            colorScheme,
+            textTheme,
+            isRTL,
+            safeAreaBottom,
+          ),
       ],
-    );
-  }
-
-  List<Widget> _buildVerticalButtons(ColorScheme colorScheme, bool isRTL) {
-    return List<Widget>.generate(
-      widget.verticalButtons.length,
-      (index) => _buildVerticalButton(
-        widget.verticalButtons[index],
-        index,
-        colorScheme,
-        isRTL,
-      ),
-    );
-  }
-
-  List<Widget> _buildHorizontalButtons(ColorScheme colorScheme, bool isRTL) {
-    return List<Widget>.generate(
-      widget.horizontalButtons.length,
-      (index) => _buildHorizontalButton(
-        widget.horizontalButtons[index],
-        index,
-        colorScheme,
-        isRTL,
-      ),
     );
   }
 
@@ -142,34 +186,52 @@ class _CustomSpeedDialState extends State<CustomSpeedDial>
     SpeedDialButton button,
     int index,
     ColorScheme colorScheme,
+    TextTheme textTheme,
     bool isRTL,
+    double safeAreaBottom,
+    double screenHeight,
   ) {
     final offset = (index + 1) * widget.buttonSpacing;
+    final staggerDelay = index * 0.05;
 
     return Positioned(
-      right: 20,
-      bottom: 80 + offset,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
+      right: isRTL ? null : 16, // Use right for LTR, null for RTL
+      left: isRTL ? 16 : null, // Use left for RTL, null for LTR
+      bottom: 16 + safeAreaBottom + widget.buttonSize + 12 + offset,
+      child: Directionality(
+        textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+        child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            final animationValue = _animationController.value;
+            final delayedValue =
+                (animationValue - staggerDelay).clamp(0.0, 1.0);
+
+            return Opacity(
+              opacity: delayedValue,
+              child: Transform.translate(
+                offset: Offset(0, (1 - delayedValue) * 16),
+                child: Transform.scale(
+                  scale: delayedValue,
+                  child: child,
+                ),
+              ),
+            );
+          },
           child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (!isRTL && button.label != null && widget.showLabels) ...[
-                _buildLabel(button.label!, colorScheme),
-                const SizedBox(width: 16),
+              if (button.label != null && widget.showLabels) ...[
+                _buildLabel(button.label!, colorScheme, textTheme, isRTL),
+                const SizedBox(width: 8),
               ],
               _buildActionButton(
                 button: button,
                 colorScheme: colorScheme,
-                heroTag: 'vertical_$index',
+                uniqueKey: '${widget.uniqueId}_vertical_$index',
+                index: index,
               ),
-              if (isRTL && button.label != null && widget.showLabels) ...[
-                const SizedBox(width: 16),
-                _buildLabel(button.label!, colorScheme),
-              ],
             ],
           ),
         ),
@@ -181,35 +243,52 @@ class _CustomSpeedDialState extends State<CustomSpeedDial>
     SpeedDialButton button,
     int index,
     ColorScheme colorScheme,
+    TextTheme textTheme,
     bool isRTL,
+    double safeAreaBottom,
   ) {
     final offset = (index + 1) * widget.buttonSpacing;
-    final horizontalOffset = 80 + offset;
+    final staggerDelay = index * 0.05; // Reduced from 0.08
 
     return Positioned(
-      right: isRTL ? null : horizontalOffset,
-      left: isRTL ? horizontalOffset : null,
-      bottom: 20,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment:
-                isRTL ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-            children: [
-              if (button.label != null && widget.showLabels) ...[
-                _buildLabel(button.label!, colorScheme),
-                const SizedBox(height: 12),
-              ],
-              _buildActionButton(
-                button: button,
-                colorScheme: colorScheme,
-                heroTag: 'horizontal_$index',
+      right: isRTL
+          ? null
+          : 16 + widget.buttonSize + 12 + offset, // Consistent spacing
+      left: isRTL ? 16 + widget.buttonSize + 12 + offset : null,
+      bottom: 16 + safeAreaBottom,
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          final animationValue = _animationController.value;
+          final delayedValue = (animationValue - staggerDelay).clamp(0.0, 1.0);
+
+          return Opacity(
+            opacity: delayedValue,
+            child: Transform.translate(
+              offset: Offset((1 - delayedValue) * (isRTL ? -16 : 16),
+                  0), // Reduced from 20
+              child: Transform.scale(
+                scale: delayedValue,
+                child: child,
               ),
+            ),
+          );
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (button.label != null && widget.showLabels) ...[
+              _buildLabel(button.label!, colorScheme, textTheme, isRTL),
+              const SizedBox(height: 8), // Reduced from 12
             ],
-          ),
+            _buildActionButton(
+              button: button,
+              colorScheme: colorScheme,
+              uniqueKey: '${widget.uniqueId}_horizontal_$index',
+              index: index,
+            ),
+          ],
         ),
       ),
     );
@@ -218,73 +297,66 @@ class _CustomSpeedDialState extends State<CustomSpeedDial>
   Widget _buildActionButton({
     required SpeedDialButton button,
     required ColorScheme colorScheme,
-    required String heroTag,
+    required String uniqueKey,
+    required int index,
   }) {
-    return Container(
-      width: widget.buttonSize,
-      height: widget.buttonSize,
-      decoration: BoxDecoration(
-        color: button.backgroundColor ?? colorScheme.primaryContainer,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.onSurface.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
+    return Material(
+      key: ValueKey(uniqueKey),
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      child: Tooltip(
+        message: button.label ?? '',
+        waitDuration: const Duration(milliseconds: 300), // Reduced from 500
         child: InkWell(
           borderRadius: BorderRadius.circular(widget.buttonSize / 2),
-          onTap: () {
-            button.onTap?.call();
-            _toggle();
-          },
-          child: IconTheme(
-            data: IconThemeData(
-              color: button.foregroundColor ?? colorScheme.onPrimaryContainer,
-              size: 24,
+          onTap: () => _onButtonTap(button),
+          splashColor:
+              (button.foregroundColor ?? colorScheme.onPrimaryContainer)
+                  .withOpacity(0.3),
+          highlightColor:
+              (button.foregroundColor ?? colorScheme.onPrimaryContainer)
+                  .withOpacity(0.1),
+          child: Container(
+            width: widget.buttonSize,
+            height: widget.buttonSize,
+            decoration: BoxDecoration(
+              gradient: button.gradient ??
+                  LinearGradient(
+                    colors: [
+                      button.backgroundColor ?? colorScheme.primaryContainer,
+                      (button.backgroundColor ?? colorScheme.primaryContainer)
+                          .withOpacity(0.9),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15), // Reduced opacity
+                  blurRadius: 8, // Reduced from 12
+                  offset: const Offset(0, 3), // Fixed offset - was too large
+                  spreadRadius: -1, // Reduced from -2
+                ),
+                BoxShadow(
+                  color:
+                      (button.backgroundColor ?? colorScheme.primaryContainer)
+                          .withOpacity(0.2), // Reduced opacity
+                  blurRadius: 6, // Reduced from 8
+                  offset: const Offset(0, 1.5), // Fixed offset - was too large
+                ),
+              ],
             ),
-            child: button.icon,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMainFab(ColorScheme colorScheme) {
-    return Positioned(
-      right: 20,
-      bottom: 20,
-      child: Container(
-        width: widget.buttonSize,
-        height: widget.buttonSize,
-        decoration: BoxDecoration(
-          color: widget.backgroundColor ?? colorScheme.primary,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.onSurface.withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(widget.buttonSize / 2),
-            onTap: _toggle,
-            child: RotationTransition(
-              turns: _rotationAnimation,
+            child: Center(
               child: IconTheme(
                 data: IconThemeData(
-                  color: widget.foregroundColor ?? colorScheme.onPrimary,
-                  size: 24,
+                  color:
+                      button.foregroundColor ?? colorScheme.onPrimaryContainer,
+                  size: 22, // Reduced from 24 for better balance
                 ),
-                child: const Icon(Icons.add),
+                child: button.icon,
               ),
             ),
           ),
@@ -293,30 +365,123 @@ class _CustomSpeedDialState extends State<CustomSpeedDial>
     );
   }
 
-  Widget _buildLabel(String label, ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.onSurface.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+  Widget _buildMainFab(ColorScheme colorScheme) {
+    return Material(
+      key: const ValueKey('main_speed_dial_fab'),
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      elevation: 0,
+      child: Tooltip(
+        message: widget.mainButtonTooltip ?? 'More options',
+        waitDuration: const Duration(milliseconds: 300), // Reduced from 500
+        child: InkWell(
+          borderRadius: BorderRadius.circular(widget.buttonSize / 2),
+          onTap: _toggle,
+          onLongPress: () {
+            HapticFeedback.mediumImpact();
+          },
+          splashColor: (widget.foregroundColor ?? colorScheme.onPrimary)
+              .withOpacity(0.3),
+          highlightColor: (widget.foregroundColor ?? colorScheme.onPrimary)
+              .withOpacity(0.1),
+          child: AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return Container(
+                width: widget.buttonSize,
+                height: widget.buttonSize,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      widget.backgroundColor ?? colorScheme.primary,
+                      (widget.backgroundColor ?? colorScheme.primary)
+                          .withOpacity(0.95),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2), // Reduced opacity
+                      blurRadius: _isOpen ? 16 : 12, // Reduced
+                      offset: Offset(
+                          0, _isOpen ? 6 : 4), // Fixed offset - was too large
+                      spreadRadius: -2, // Reduced from -4
+                    ),
+                    BoxShadow(
+                      color: (widget.backgroundColor ?? colorScheme.primary)
+                          .withOpacity(0.3), // Reduced opacity
+                      blurRadius: _isOpen ? 12 : 8, // Reduced
+                      offset: Offset(0, _isOpen ? 3 : 2), // Fixed offset
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: RotationTransition(
+                    turns: _rotationAnimation,
+                    child: IconTheme(
+                      data: IconThemeData(
+                        color: widget.foregroundColor ?? colorScheme.onPrimary,
+                        size: 24, // Reduced from 28 for better balance
+                      ),
+                      child: Icon(
+                        widget.mainIcon ?? Icons.add_rounded,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        ],
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-          width: 1,
         ),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: colorScheme.onSurface,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+    );
+  }
+
+  Widget _buildLabel(
+    String label,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    bool isRTL,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 180), // Reduced from 200
+        padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Reduced
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(10), // Reduced from 12
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1), // Reduced opacity
+              blurRadius: 6, // Reduced from 10
+              offset: const Offset(0, 2), // Fixed offset - was too large
+              spreadRadius: -1, // Reduced from -2
+            ),
+            BoxShadow(
+              color: colorScheme.primary.withOpacity(0.08), // Reduced opacity
+              blurRadius: 4, // Reduced from 6
+              offset: const Offset(0, 1), // Fixed offset
+            ),
+          ],
+          border: Border.all(
+            color: colorScheme.outline.withOpacity(0.15), // Reduced opacity
+            width: 0.5, // Reduced from 1
+          ),
+        ),
+        child: Text(
+          label,
+          style: textTheme.labelLarge?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w500, // Reduced from 600
+            fontSize: 12, // Reduced from 13
+            letterSpacing: -0.05, // Reduced from -0.1
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
@@ -329,6 +494,7 @@ class SpeedDialButton {
   final VoidCallback? onTap;
   final Color? backgroundColor;
   final Color? foregroundColor;
+  final Gradient? gradient;
 
   const SpeedDialButton({
     required this.icon,
@@ -336,5 +502,44 @@ class SpeedDialButton {
     this.onTap,
     this.backgroundColor,
     this.foregroundColor,
+    this.gradient,
   });
+
+  SpeedDialButton copyWith({
+    Widget? icon,
+    String? label,
+    VoidCallback? onTap,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    Gradient? gradient,
+  }) {
+    return SpeedDialButton(
+      icon: icon ?? this.icon,
+      label: label ?? this.label,
+      onTap: onTap ?? this.onTap,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      foregroundColor: foregroundColor ?? this.foregroundColor,
+      gradient: gradient ?? this.gradient,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SpeedDialButton &&
+        other.label == label &&
+        other.backgroundColor == backgroundColor &&
+        other.foregroundColor == foregroundColor &&
+        other.gradient == gradient;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      label,
+      backgroundColor,
+      foregroundColor,
+      gradient,
+    );
+  }
 }

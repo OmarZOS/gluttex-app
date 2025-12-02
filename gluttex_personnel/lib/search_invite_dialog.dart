@@ -8,11 +8,11 @@ import 'package:gluttex_personnel/privilege_dialog.dart';
 import 'package:provider/provider.dart';
 
 class SearchInviteDialog extends StatefulWidget {
-  final Function(AppUser, int) onUserSelected; // Updated to include privileges
+  final Function(AppUser, int) onUserSelected;
   final int userId;
   final int? orgId;
   final int? supplierId;
-  final String supplierName; // Added supplier name for privilege dialog
+  final String supplierName;
 
   const SearchInviteDialog({
     Key? key,
@@ -20,7 +20,7 @@ class SearchInviteDialog extends StatefulWidget {
     required this.orgId,
     required this.userId,
     this.supplierId = 0,
-    required this.supplierName, // Required for privilege dialog
+    required this.supplierName,
   }) : super(key: key);
 
   @override
@@ -55,6 +55,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
           query,
           userId,
           supplierId: widget.supplierId ?? 0,
+          // includePending: true, // Include pending users in search
         );
       }
     });
@@ -73,11 +74,8 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             _buildHeader(),
-            // Search Bar
             _buildSearchBar(),
-            // Loading indicator or results
             Expanded(
               child: Consumer<PersonnelNotifier>(
                 builder: (context, notifier, child) {
@@ -122,7 +120,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Find team members to collaborate with',
+                      'Find users to add to ${widget.supplierName}',
                       style: TextStyle(
                         fontSize: 14,
                         color: colorScheme.onPrimaryContainer.withOpacity(0.8),
@@ -244,7 +242,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Search for team members',
+          'Search for users',
           style: TextStyle(
             fontSize: 16,
             color: colorScheme.onSurfaceVariant,
@@ -324,6 +322,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
             _searchController.clear();
             context.read<PersonnelNotifier>().clearSearch(
                   supplierId: widget.supplierId ?? 0,
+                  // includePending: true,
                 );
           },
           icon: const Icon(Icons.refresh, size: 18),
@@ -339,6 +338,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
   }
 
   Widget _buildResults(PersonnelNotifier notifier) {
+    final searchResults = notifier.searchResults;
     return Column(
       children: [
         Padding(
@@ -346,7 +346,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
           child: Row(
             children: [
               Text(
-                'Found ${notifier.personnel.length} user${notifier.personnel.length == 1 ? '' : 's'}',
+                'Found ${notifier.searchResults.length} user${notifier.searchResults.length == 1 ? '' : 's'}',
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -359,10 +359,10 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: notifier.personnel.length,
+            itemCount: searchResults.length,
             itemBuilder: (context, index) {
-              final user = notifier.personnel[index];
-              return _buildUserTile(user);
+              final user = searchResults[index];
+              return _buildUserTile(user, notifier);
             },
           ),
         ),
@@ -370,30 +370,13 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     );
   }
 
-  Future<void> _showPrivilegeDialog(AppUser user) async {
-    // Show privilege dialog and wait for the result
-    final int? privilegesBitmask = await showDialog<int>(
-      context: context,
-      builder: (context) => PrivilegeDialog(
-        user: user,
-        supplierName: widget.supplierName,
-        // initialPrivileges: 0, // Start with no privileges, or pass existing if editing
-      ),
-    );
-
-    // If user selected privileges (didn't cancel)
-    if (privilegesBitmask != null && mounted) {
-      // Close the search dialog and call the callback with user and privileges
-      Navigator.pop(context);
-      widget.onUserSelected(user, privilegesBitmask);
-    }
-    // If privilegesBitmask is null, user cancelled the privilege dialog
-    // so we stay in the search dialog
-  }
-
-  Widget _buildUserTile(AppUser user) {
+  Widget _buildUserTile(AppUser user, PersonnelNotifier notifier) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    // Check if user is already in the team
+    final isUserInTeam = _isUserAlreadyInTeam(user.id_app_user ?? 0, notifier);
+    final isPending = _isUserPending(user.id_app_user ?? 0, notifier);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -401,7 +384,12 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showPrivilegeDialog(user),
+          onTap: isUserInTeam && !isPending
+              ? () {
+                  // Show info that user is already in the team
+                  _showAlreadyInTeamDialog(user);
+                }
+              : () => _showPrivilegeDialog(user, isUserInTeam, isPending),
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -409,8 +397,12 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
               color: colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: colorScheme.outline.withOpacity(0.1),
-                width: 1,
+                color: isUserInTeam
+                    ? (isPending
+                        ? Colors.orange.withOpacity(0.3)
+                        : Colors.green.withOpacity(0.3))
+                    : colorScheme.outline.withOpacity(0.1),
+                width: isUserInTeam ? 2 : 1,
               ),
               boxShadow: [
                 BoxShadow(
@@ -422,28 +414,57 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
             ),
             child: Row(
               children: [
-                // Avatar
-                _buildUserAvatar(user),
+                _buildUserAvatar(user, isUserInTeam, isPending),
                 const SizedBox(width: 16),
-
-                // User Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Name
-                      Text(
-                        '${user.personFirstName} ${user.personLastName}'.trim(),
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Text(
+                            '${user.personFirstName} ${user.personLastName}'
+                                .trim(),
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (isUserInTeam)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isPending
+                                      ? Colors.orange.withOpacity(0.1)
+                                      : Colors.green.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isPending
+                                        ? Colors.orange.withOpacity(0.3)
+                                        : Colors.green.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  isPending ? 'Pending' : 'In Team',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: isPending
+                                        ? Colors.orange
+                                        : Colors.green,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 4),
-
-                      // Username
                       if (user.app_user_name != null &&
                           user.app_user_name!.isNotEmpty)
                         Row(
@@ -464,17 +485,13 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                             ),
                           ],
                         ),
-
-                      // Role
                       const SizedBox(height: 4),
                       _buildUserRole(
                           user.app_user_type_desc, colorScheme, textTheme),
                     ],
                   ),
                 ),
-
-                // Add Button
-                _buildAddButton(colorScheme),
+                _buildAddButton(colorScheme, isUserInTeam, isPending),
               ],
             ),
           ),
@@ -483,18 +500,21 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     );
   }
 
-  Widget _buildUserAvatar(AppUser user) {
+  Widget _buildUserAvatar(AppUser user, bool isUserInTeam, bool isPending) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Stack(
       children: [
-        // Avatar Container
         Container(
           width: 56,
           height: 56,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            color: colorScheme.surfaceVariant,
+            color: isUserInTeam
+                ? (isPending
+                    ? Colors.orange.withOpacity(0.1)
+                    : Colors.green.withOpacity(0.1))
+                : colorScheme.surfaceVariant,
             boxShadow: [
               BoxShadow(
                 color: colorScheme.shadow.withOpacity(0.1),
@@ -502,6 +522,14 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                 offset: const Offset(0, 2),
               ),
             ],
+            border: Border.all(
+              color: isUserInTeam
+                  ? (isPending
+                      ? Colors.orange.withOpacity(0.3)
+                      : Colors.green.withOpacity(0.3))
+                  : colorScheme.outline.withOpacity(0.2),
+              width: isUserInTeam ? 2 : 1,
+            ),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
@@ -511,7 +539,8 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                     user.app_user_image_url!,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return _buildFallbackAvatar(colorScheme, user);
+                      return _buildFallbackAvatar(
+                          colorScheme, user, isUserInTeam, isPending);
                     },
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
@@ -527,39 +556,38 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                       );
                     },
                   )
-                : _buildFallbackAvatar(colorScheme, user),
+                : _buildFallbackAvatar(
+                    colorScheme, user, isUserInTeam, isPending),
           ),
         ),
-
-        // Online Status Indicator
-        Positioned(
-          bottom: 2,
-          right: 2,
-          child: Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(
-              color: _getStatusColor(user),
-              borderRadius: BorderRadius.circular(7),
-              border: Border.all(
-                color: colorScheme.surface,
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withOpacity(0.3),
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
+        if (isUserInTeam)
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: isPending ? Colors.orange : Colors.green,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: colorScheme.surface,
+                  width: 2,
                 ),
-              ],
+              ),
+              child: Icon(
+                isPending ? Icons.access_time : Icons.check,
+                size: 12,
+                color: Colors.white,
+              ),
             ),
           ),
-        ),
       ],
     );
   }
 
-  Widget _buildFallbackAvatar(ColorScheme colorScheme, AppUser user) {
+  Widget _buildFallbackAvatar(ColorScheme colorScheme, AppUser user,
+      bool isUserInTeam, bool isPending) {
     final colors = [
       colorScheme.primary,
       colorScheme.secondary,
@@ -569,7 +597,6 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       Colors.teal,
     ];
     final color = colors[user.id_app_user! % colors.length];
-
     final initials = _getUserInitials(user);
 
     return Container(
@@ -587,7 +614,9 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
         child: Text(
           initials,
           style: TextStyle(
-            color: color,
+            color: isUserInTeam
+                ? (isPending ? Colors.orange : Colors.green)
+                : color,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -633,22 +662,129 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     );
   }
 
-  Widget _buildAddButton(ColorScheme colorScheme) {
+  Widget _buildAddButton(
+      ColorScheme colorScheme, bool isUserInTeam, bool isPending) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(0.08),
+        color: isUserInTeam
+            ? (isPending
+                ? Colors.orange.withOpacity(0.1)
+                : Colors.green.withOpacity(0.1))
+            : colorScheme.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: isUserInTeam
+              ? (isPending
+                  ? Colors.orange.withOpacity(0.2)
+                  : Colors.green.withOpacity(0.2))
+              : colorScheme.primary.withOpacity(0.2),
           width: 1,
         ),
       ),
       child: Icon(
-        Icons.person_add_alt_1_rounded,
+        isUserInTeam
+            ? (isPending ? Icons.access_time : Icons.check)
+            : Icons.person_add_alt_1_rounded,
         size: 20,
-        color: colorScheme.primary,
+        color: isUserInTeam
+            ? (isPending ? Colors.orange : Colors.green)
+            : colorScheme.primary,
+      ),
+    );
+  }
+
+  bool _isUserAlreadyInTeam(int userId, PersonnelNotifier notifier) {
+    // Check if user is in the team (active or pending)
+    final users = notifier.getPersonnelForSupplier(
+      widget.supplierId ?? 0,
+      includePending: true,
+    );
+
+    return users.any((user) => user.id_app_user == userId);
+  }
+
+  bool _isUserPending(int userId, PersonnelNotifier notifier) {
+    // Check if user has pending rules for this supplier
+    return notifier.hasPendingRulesForSupplier(userId, widget.supplierId ?? 0);
+  }
+
+  Future<void> _showPrivilegeDialog(
+      AppUser user, bool isUserInTeam, bool isPending) async {
+    if (isUserInTeam && isPending) {
+      // User is pending - show appropriate message
+      _showPendingUserDialog(user);
+      return;
+    }
+
+    // Get existing privileges if user is already in the team
+    int? existingPrivileges;
+    if (isUserInTeam) {
+      final notifier = context.read<PersonnelNotifier>();
+      final rules = await notifier.getUserPrivileges(
+        ruleId: 0,
+        userId: user.id_app_user ?? 0,
+        supplierId: widget.supplierId ?? 0,
+      );
+
+      if (rules != null && rules.isNotEmpty) {
+        final ruleForSupplier = rules.firstWhere(
+          (rule) =>
+              rule.productProvider?.id_product_provider == widget.supplierId,
+          orElse: () => rules.first,
+        );
+        // existingPrivileges = ruleForSupplier.privilege ?? 0;
+      }
+    }
+
+    final int? privilegesBitmask = await showDialog<int>(
+      context: context,
+      builder: (context) => PrivilegeDialog(
+        user: user,
+        supplierName: widget.supplierName,
+        initialPrivileges: existingPrivileges,
+      ),
+    );
+
+    if (privilegesBitmask != null && mounted) {
+      Navigator.pop(context);
+      widget.onUserSelected(user, privilegesBitmask);
+    }
+  }
+
+  void _showAlreadyInTeamDialog(AppUser user) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('User Already in Team'),
+        content: Text(
+          '${user.personFirstName} ${user.personLastName} is already an active member of ${widget.supplierName}.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPendingUserDialog(AppUser user) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Pending Invitation'),
+        content: Text(
+          '${user.personFirstName} ${user.personLastName} has a pending invitation for ${widget.supplierName}. Please wait for them to accept or resend the invitation from the pending tab.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
       ),
     );
   }
@@ -665,10 +801,6 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     final lastInitial = lastName.isNotEmpty ? lastName[0] : '';
 
     return '$firstInitial$lastInitial'.toUpperCase();
-  }
-
-  Color _getStatusColor(AppUser user) {
-    return Colors.green;
   }
 
   Color _getRoleColor(String role, ColorScheme colorScheme) {

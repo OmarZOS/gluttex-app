@@ -770,6 +770,9 @@
   "roleViewer": "Lecteur",
   "roleNoPrivileges": "Aucun privilège",
   "actionManagePermissions": "Permissions",
-  "actionNotify": "Notifier"
+  "actionNotify": "Notifier",
+  "pendingInvitationMessage": "Cet utilisateur a une invitation en attente.",
+  "actionResendInvite": "Renvoyer l'invitation",
+  "actionCancelInvite": "Annuler l'invitation"
 
 }

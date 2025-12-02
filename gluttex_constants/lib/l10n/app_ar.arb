@@ -751,6 +751,9 @@
   "roleViewer": "مشاهد",
   "roleNoPrivileges": "بدون صلاحيات",
   "actionManagePermissions": "الصلاحيات",
-  "actionNotify": "إشعار"
+  "actionNotify": "إشعار",
+  "pendingInvitationMessage": "هذا المستخدم لديه دعوة معلّقة.",
+  "actionResendInvite": "إعادة إرسال الدعوة",
+  "actionCancelInvite": "إلغاء الدعوة"
 
 }

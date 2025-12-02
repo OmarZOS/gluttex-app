@@ -679,7 +679,10 @@
   "roleViewer": "Viewer",
   "roleNoPrivileges": "No Privileges",
   "actionManagePermissions": "Permissions",
-  "actionNotify": "Notify"
+  "actionNotify": "Notify",
+  "pendingInvitationMessage": "This user has a pending invitation.",
+  "actionResendInvite": "Resend Invitation",
+  "actionCancelInvite": "Cancel Invitation"
 
 
 }
