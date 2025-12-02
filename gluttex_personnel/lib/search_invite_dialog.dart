@@ -55,7 +55,6 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
           query,
           userId,
           supplierId: widget.supplierId ?? 0,
-          // includePending: true, // Include pending users in search
         );
       }
     });
@@ -214,15 +213,18 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
   }
 
   Widget _buildContent(PersonnelNotifier notifier) {
-    if (notifier.isLoading && notifier.personnel.isEmpty) {
+    // FIXED: Check searchQuery instead of personnel for search state
+    final hasSearchQuery = notifier.searchQuery.isNotEmpty;
+
+    if (notifier.isLoading && notifier.searchResults.isEmpty) {
       return _buildLoadingState();
     }
 
-    if (notifier.searchQuery.isEmpty && notifier.personnel.isEmpty) {
+    if (!hasSearchQuery && notifier.searchResults.isEmpty) {
       return _buildInitialState();
     }
 
-    if (notifier.personnel.isEmpty && notifier.searchQuery.isNotEmpty) {
+    if (hasSearchQuery && notifier.searchResults.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -322,7 +324,6 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
             _searchController.clear();
             context.read<PersonnelNotifier>().clearSearch(
                   supplierId: widget.supplierId ?? 0,
-                  // includePending: true,
                 );
           },
           icon: const Icon(Icons.refresh, size: 18),
@@ -338,7 +339,10 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
   }
 
   Widget _buildResults(PersonnelNotifier notifier) {
+    // FIXED: Use searchResults instead of personnel
     final searchResults = notifier.searchResults;
+    final hasSearchQuery = notifier.searchQuery.isNotEmpty;
+
     return Column(
       children: [
         Padding(
@@ -346,7 +350,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
           child: Row(
             children: [
               Text(
-                'Found ${notifier.searchResults.length} user${notifier.searchResults.length == 1 ? '' : 's'}',
+                '${hasSearchQuery ? 'Search results' : 'All users'}: ${searchResults.length} user${searchResults.length == 1 ? '' : 's'}',
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -757,14 +761,14 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('User Already in Team'),
+        title: const Text('User Already in Team'),
         content: Text(
           '${user.personFirstName} ${user.personLastName} is already an active member of ${widget.supplierName}.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -775,14 +779,14 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Pending Invitation'),
+        title: const Text('Pending Invitation'),
         content: Text(
           '${user.personFirstName} ${user.personLastName} has a pending invitation for ${widget.supplierName}. Please wait for them to accept or resend the invitation from the pending tab.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),

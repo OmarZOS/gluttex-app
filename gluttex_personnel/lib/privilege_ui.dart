@@ -90,11 +90,11 @@ class PrivilegeUIManager {
     final l = AppLocalizations.of(context)!;
 
     switch (categoryId) {
-      case 'inventory':
+      case 'inventory_management':
         return l.category_inventory;
-      case 'orders':
+      case 'order_management':
         return l.category_orders;
-      case 'personnel':
+      case 'personnel_management':
         return l.category_personnel;
       default:
         return categoryId;

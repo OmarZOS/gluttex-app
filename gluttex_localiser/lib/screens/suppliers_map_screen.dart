@@ -178,7 +178,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
         builder: (context, supplierNotifier, child) {
           return Stack(
             children: [
-              if (kIsWeb)
+              if (kIsWeb || defaultTargetPlatform == TargetPlatform.linux)
                 Container(
                   color: Theme.of(context).colorScheme.surfaceVariant,
                   alignment: Alignment.center,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Supplier.dart';
+import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_personnel/personnel_management_screen.dart';
 import 'package:provider/provider.dart';
@@ -21,10 +22,19 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     super.initState();
     // Initialize data when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = context.read<SupplierChangeNotifier>();
-      if (notifier.suppliers.isEmpty) {
-        notifier.fetchSuppliers(reset: true);
+      final supplierNotifier = context.read<SupplierChangeNotifier>();
+      final personnelNotifier = context.read<PersonnelNotifier>();
+
+      if (supplierNotifier.suppliers.isEmpty) {
+        supplierNotifier.fetchSuppliers(reset: true);
       }
+
+      // Load global personnel statistics
+      personnelNotifier.loadPersonnel(
+        0, // userId
+        supplierId: 0, // Global (all suppliers)
+        includePending: true,
+      );
     });
   }
 
@@ -95,21 +105,47 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 6),
-                            Consumer<SupplierChangeNotifier>(
-                              builder: (context, notifier, child) {
+                            Consumer2<SupplierChangeNotifier,
+                                PersonnelNotifier>(
+                              builder: (context, supplierNotifier,
+                                  personnelNotifier, child) {
                                 final totalSuppliers =
-                                    notifier.suppliers.length;
-                                final totalPersonnel = _calculateTotalPersonnel(
-                                    notifier.suppliers);
+                                    supplierNotifier.suppliers.length;
 
-                                return Text(
-                                  '$totalSuppliers locations • $totalPersonnel team members',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color:
-                                        colorScheme.onPrimary.withOpacity(0.9),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                // Get global statistics from your PersonnelNotifier
+                                final globalStats =
+                                    personnelNotifier.getGlobalStats();
+                                final totalActiveUsers =
+                                    globalStats['totalActiveUsers'] ?? 0;
+                                final totalPendingUsers =
+                                    globalStats['totalPendingUsers'] ?? 0;
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '$totalSuppliers locations • $totalActiveUsers team members',
+                                      style:
+                                          theme.textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.onPrimary
+                                            .withOpacity(0.9),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (totalPendingUsers > 0)
+                                      Text(
+                                        '$totalPendingUsers pending invitations',
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
+                                          color: colorScheme.onPrimary
+                                              .withOpacity(0.7),
+                                          fontSize: 12,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
                                 );
                               },
                             ),
@@ -131,12 +167,6 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     );
   }
 
-  int _calculateTotalPersonnel(List<Supplier> suppliers) {
-    // You'll need to adjust this based on your actual Supplier model
-    // This is a placeholder - replace with actual personnel count logic
-    return suppliers.length * 3; // Example calculation
-  }
-
   Widget _buildAddBusinessButton(ThemeData theme, ColorScheme colorScheme) {
     return FloatingActionButton.small(
       onPressed: _addNewBusiness,
@@ -151,11 +181,16 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   }
 
   Widget _buildPerformanceIndicator(ThemeData theme, ColorScheme colorScheme) {
-    return Consumer<SupplierChangeNotifier>(
-      builder: (context, notifier, child) {
-        final activeBusinesses = notifier.suppliers.length;
-        final totalRevenue = _calculateTotalRevenue(notifier.suppliers);
-        final growthPercentage = _calculateGrowthPercentage(notifier.suppliers);
+    return Consumer2<SupplierChangeNotifier, PersonnelNotifier>(
+      builder: (context, supplierNotifier, personnelNotifier, child) {
+        final activeBusinesses = supplierNotifier.suppliers.length;
+        // final totalRevenue = _calculateTotalRevenue(supplierNotifier.suppliers);
+
+        // Get personnel statistics
+        final globalStats = personnelNotifier.getGlobalStats();
+        final totalPersonnel = globalStats['totalActiveUsers'] ?? 0;
+        final admins = globalStats['admins'] ?? 0;
+        final managers = globalStats['managers'] ?? 0;
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -170,26 +205,34 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildPerformanceItem(
-                'Active',
+                'Businesses',
                 '$activeBusinesses',
-                Icons.check_circle_rounded,
-                Colors.green,
+                Icons.business_rounded,
+                colorScheme.primary,
                 theme,
                 colorScheme,
               ),
               _buildPerformanceItem(
-                'Revenue',
-                '\$${totalRevenue.toStringAsFixed(0)}',
-                Icons.trending_up_rounded,
-                Colors.amber,
+                'Team',
+                '$totalPersonnel',
+                Icons.people_alt_rounded,
+                colorScheme.secondary,
                 theme,
                 colorScheme,
               ),
+              // _buildPerformanceItem(
+              //   'Revenue',
+              //   '\$${totalRevenue.toStringAsFixed(0)}',
+              //   Icons.trending_up_rounded,
+              //   Colors.amber,
+              //   theme,
+              //   colorScheme,
+              // ),
               _buildPerformanceItem(
-                'Growth',
-                '$growthPercentage%',
-                Icons.rocket_launch_rounded,
-                Colors.blue,
+                'Management',
+                '${admins + managers}',
+                Icons.manage_accounts_rounded,
+                colorScheme.tertiary,
                 theme,
                 colorScheme,
               ),
@@ -200,15 +243,10 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     );
   }
 
-  double _calculateTotalRevenue(List<Supplier> suppliers) {
-    // Placeholder - replace with actual revenue calculation from your Supplier model
-    return suppliers.length * 10000.0;
-  }
-
-  String _calculateGrowthPercentage(List<Supplier> suppliers) {
-    // Placeholder - replace with actual growth calculation
-    return suppliers.isNotEmpty ? '+12' : '0';
-  }
+  // double _calculateTotalRevenue(List<Supplier> suppliers) {
+  //   // Placeholder - replace with actual revenue calculation from your Supplier model
+  //   return suppliers.length * 10000.0;
+  // }
 
   Widget _buildPerformanceItem(
     String label,
@@ -583,7 +621,20 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
               _buildSupplierImage(supplier, colorScheme),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildSupplierInfo(supplier, theme, colorScheme),
+                child: Consumer<PersonnelNotifier>(
+                  builder: (context, personnelNotifier, child) {
+                    // Get personnel statistics for this specific supplier
+                    final supplierStats = personnelNotifier.getSupplierStats(
+                      supplier.idProductProvider,
+                    );
+
+                    final activeCount = supplierStats['active'] ?? 0;
+                    final pendingCount = supplierStats['pending'] ?? 0;
+
+                    return _buildSupplierInfo(supplier, activeCount,
+                        pendingCount, theme, colorScheme);
+                  },
+                ),
               ),
               _buildSupplierActions(supplier, colorScheme),
             ],
@@ -652,8 +703,8 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     );
   }
 
-  Widget _buildSupplierInfo(
-      Supplier supplier, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildSupplierInfo(Supplier supplier, int activePersonnel,
+      int pendingInvitations, ThemeData theme, ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -673,31 +724,32 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.category_rounded,
-                          size: 14, color: colorScheme.onSurfaceVariant),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          supplier.provider_organisation_desc ??
-                              'No description',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // const SizedBox(height: 4),
+                  // Row(
+                  //   children: [
+                  //     Icon(Icons.category_rounded,
+                  //         size: 14, color: colorScheme.onSurfaceVariant),
+                  //     const SizedBox(width: 4),
+                  //     Expanded(
+                  //       child: Text(
+                  //         supplier.provider_organisation_desc ??
+                  //             'No description',
+                  //         style: theme.textTheme.bodySmall?.copyWith(
+                  //           color: colorScheme.onSurfaceVariant,
+                  //           fontWeight: FontWeight.w500,
+                  //         ),
+                  //         maxLines: 1,
+                  //         overflow: TextOverflow.ellipsis,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            _buildRatingBadge(4.5, theme, colorScheme), // Placeholder rating
+            // You can replace this with actual business rating if available
+            // _buildRatingBadge(4.5, theme, colorScheme), // Placeholder rating
           ],
         ),
         const SizedBox(height: 8),
@@ -728,60 +780,39 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                 children: [
                   _buildInfoChip(
                     icon: Icons.people_alt_rounded,
-                    value: '${0}', // Adjust based on your model
+                    value: '$activePersonnel',
                     label: 'Team',
                     color: colorScheme.primary,
                     theme: theme,
                   ),
-                  _buildInfoChip(
-                    icon: Icons.attach_money_rounded,
-                    value:
-                        '${(0).toStringAsFixed(0)}', // Adjust based on your model
-                    label: 'Revenue',
-                    color: colorScheme.tertiary,
-                    theme: theme,
-                  ),
+                  if (pendingInvitations > 0)
+                    _buildInfoChip(
+                      icon: Icons.pending_actions_rounded,
+                      value: '$pendingInvitations',
+                      label: 'Pending',
+                      color: Colors.orange,
+                      theme: theme,
+                    ),
+                  // _buildInfoChip(
+                  //   icon: Icons.attach_money_rounded,
+                  //   value:
+                  //       '\$${_calculateSupplierRevenue(supplier).toStringAsFixed(0)}',
+                  //   label: 'Revenue',
+                  //   color: colorScheme.tertiary,
+                  //   theme: theme,
+                  // ),
                 ],
               ),
             ),
-            Text(
-              'Recently active', // Placeholder - adjust based on your model
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-              ),
-            ),
+            // Text(
+            //   'Recently active',
+            //   style: theme.textTheme.labelSmall?.copyWith(
+            //     color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+            //   ),
+            // ),
           ],
         ),
       ],
-    );
-  }
-
-  // ... Rest of your helper methods (_buildRatingBadge, _buildInfoChip, _buildSupplierActions, etc.)
-  // Keep all the other helper methods from your previous code
-
-  Widget _buildRatingBadge(
-      double rating, ThemeData theme, ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.amber.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.amber.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.star_rounded, size: 12, color: Colors.amber),
-          const SizedBox(width: 2),
-          Text(
-            rating.toString(),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: Colors.amber[800],
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -829,81 +860,123 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          onPressed: () => _navigateToPersonnelManagement(supplier),
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.people_alt_rounded,
-                color: colorScheme.onPrimaryContainer, size: 18),
-          ),
+        Consumer<PersonnelNotifier>(
+          builder: (context, personnelNotifier, child) {
+            final supplierStats = personnelNotifier.getSupplierStats(
+              supplier.idProductProvider,
+            );
+            final activeCount = supplierStats['active'] ?? 0;
+
+            return IconButton(
+              onPressed: () => _navigateToPersonnelManagement(supplier),
+              icon: Stack(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.people_alt_rounded,
+                        color: colorScheme.onPrimaryContainer, size: 18),
+                  ),
+                  if (activeCount > 0)
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: colorScheme.surface,
+                            width: 1.5,
+                          ),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '$activeCount',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: colorScheme.onPrimary,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
         ),
         const SizedBox(height: 4),
-        PopupMenuButton<String>(
-          onSelected: (value) => _handleMenuAction(value, supplier),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'analytics',
-              child: Row(
-                children: [
-                  Icon(Icons.analytics_rounded,
-                      color: colorScheme.primary, size: 18),
-                  const SizedBox(width: 8),
-                  const Text('Analytics'),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit_rounded,
-                      color: colorScheme.secondary, size: 18),
-                  const SizedBox(width: 8),
-                  const Text('Edit'),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'settings',
-              child: Row(
-                children: [
-                  Icon(Icons.settings_rounded,
-                      color: colorScheme.tertiary, size: 18),
-                  const SizedBox(width: 8),
-                  const Text('Settings'),
-                ],
-              ),
-            ),
-            const PopupMenuDivider(),
-            PopupMenuItem(
-              value: 'archive',
-              child: Row(
-                children: [
-                  Icon(Icons.archive_rounded,
-                      color: colorScheme.error, size: 18),
-                  const SizedBox(width: 8),
-                  const Text('Archive'),
-                ],
-              ),
-            ),
-          ],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.more_vert_rounded,
-                color: colorScheme.onSurfaceVariant, size: 18),
-          ),
-        ),
+        // PopupMenuButton<String>(
+        //   onSelected: (value) => _handleMenuAction(value, supplier),
+        //   itemBuilder: (context) => [
+        //     PopupMenuItem(
+        //       value: 'analytics',
+        //       child: Row(
+        //         children: [
+        //           Icon(Icons.analytics_rounded,
+        //               color: colorScheme.primary, size: 18),
+        //           const SizedBox(width: 8),
+        //           const Text('Analytics'),
+        //         ],
+        //       ),
+        //     ),
+        //     PopupMenuItem(
+        //       value: 'edit',
+        //       child: Row(
+        //         children: [
+        //           Icon(Icons.edit_rounded,
+        //               color: colorScheme.secondary, size: 18),
+        //           const SizedBox(width: 8),
+        //           const Text('Edit'),
+        //         ],
+        //       ),
+        //     ),
+        //     PopupMenuItem(
+        //       value: 'settings',
+        //       child: Row(
+        //         children: [
+        //           Icon(Icons.settings_rounded,
+        //               color: colorScheme.tertiary, size: 18),
+        //           const SizedBox(width: 8),
+        //           const Text('Settings'),
+        //         ],
+        //       ),
+        //     ),
+        //     const PopupMenuDivider(),
+        //     PopupMenuItem(
+        //       value: 'archive',
+        //       child: Row(
+        //         children: [
+        //           Icon(Icons.archive_rounded,
+        //               color: colorScheme.error, size: 18),
+        //           const SizedBox(width: 8),
+        //           const Text('Archive'),
+        //         ],
+        //       ),
+        //     ),
+        //   ],
+        //   shape: RoundedRectangleBorder(
+        //     borderRadius: BorderRadius.circular(12),
+        //   ),
+        //   child: Container(
+        //     padding: const EdgeInsets.all(8),
+        //     decoration: BoxDecoration(
+        //       color: colorScheme.surfaceVariant,
+        //       borderRadius: BorderRadius.circular(10),
+        //     ),
+        //     child: Icon(Icons.more_vert_rounded,
+        //         color: colorScheme.onSurfaceVariant, size: 18),
+        //   ),
+        // ),
       ],
     );
   }

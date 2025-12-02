@@ -45,6 +45,25 @@ class IProduct {
     required this.iproductModelName,
   });
 
+  // Add this factory method to your IProduct class:
+  factory IProduct.empty() {
+    final now = DateTime.now();
+    return IProduct(
+      idIproduct: null,
+      iproductBarcode: '',
+      iproductName: '',
+      iproductBrand: '',
+      iproductEstimatedPriceDA: 0.0,
+      iproductGlutenStatus: 'unknown',
+      iproductSource: 'manual',
+      iproductLastPriceUpdate: null,
+      iproductImageUrl: null,
+      iproductCreatedAt: now,
+      iproductUpdatedAt: now,
+      iproductModelName: 'manual',
+    );
+  }
+
   // Helper method to validate gluten status
   static String _validateGlutenStatus(String status) {
     const validStatuses = [

@@ -5,11 +5,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_core/business/iProduct.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/preferenceChangeNotifier.dart';
 import 'package:medicom_catalog/screens/components/ProductCard.dart';
 import 'package:gluttex_ui/components/floating_buttons.dart';
+import 'package:medicom_catalog/screens/iproduct_details_screen.dart';
 import 'package:provider/provider.dart';
 
 class ProductCatalogScreen extends StatefulWidget {
@@ -87,11 +89,19 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
         uniqueId: 'product_fab', // Added for stability
         horizontalButtons: [
           SpeedDialButton(
-            icon: Icon(CupertinoIcons.barcode_viewfinder),
-            label: AppLocalizations.of(context)!.scannerTxt,
-            onTap: () =>
-                Navigator.pushNamed(context, AppRoutes.productScanPage),
-          ),
+              icon: Icon(CupertinoIcons.barcode_viewfinder),
+              label: AppLocalizations.of(context)!.scannerTxt,
+              onTap: () => {
+                    // String codeBar = Navigator.pushNamed(context, AppRoutes.productScanPage),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => IProductDetailsScreen(
+                          iproduct: IProduct.empty(),
+                        ),
+                      ),
+                    )
+                  }),
           SpeedDialButton(
             icon: Icon(Icons.add_box_outlined),
             label: AppLocalizations.of(context)!.addProductTxt,

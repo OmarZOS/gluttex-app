@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 
@@ -22,8 +23,7 @@ class SupplierCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -111,29 +111,7 @@ class SupplierCard extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
-            child: supplier.app_user_image_url != null &&
-                    supplier.app_user_image_url!.isNotEmpty
-                ? Image.network(
-                    supplier.app_user_image_url!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return _buildFallbackAvatar(colorScheme);
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                          strokeWidth: 2,
-                          color: colorScheme.primary,
-                        ),
-                      );
-                    },
-                  )
-                : _buildFallbackAvatar(colorScheme),
+            child: _buildAvatarImage(colorScheme),
           ),
         ),
 
@@ -165,24 +143,136 @@ class SupplierCard extends StatelessWidget {
     );
   }
 
+  Widget _buildAvatarImage(ColorScheme colorScheme) {
+    final imageUrl = supplier.app_user_image_url;
+
+    // Check if URL is valid
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return _buildFallbackAvatar(colorScheme);
+    }
+
+    // Validate URL format
+    final uri = Uri.tryParse(imageUrl);
+    if (uri == null ||
+        !uri.hasScheme ||
+        (uri.scheme != 'http' && uri.scheme != 'https')) {
+      return _buildFallbackAvatar(colorScheme);
+    }
+
+    // Check if URL might be a local file path
+    if (imageUrl.startsWith('file://') || imageUrl.startsWith('/')) {
+      return _buildLocalImage(imageUrl, colorScheme);
+    }
+
+    // For network images, use error handling
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        debugPrint('Failed to load network image: $error');
+        return _buildFallbackAvatar(colorScheme);
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+            strokeWidth: 2,
+            color: colorScheme.primary,
+          ),
+        );
+      },
+      headers: const {
+        'Accept': 'image/*',
+      },
+      cacheWidth: 112, // 2x size for retina displays
+      cacheHeight: 112,
+    );
+  }
+
+  Widget _buildLocalImage(String path, ColorScheme colorScheme) {
+    final filePath = path.replaceFirst('file://', '');
+    final file = File(filePath);
+
+    return FutureBuilder<bool>(
+      future: file.exists(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colorScheme.primary,
+            ),
+          );
+        }
+
+        if (snapshot.data == true) {
+          return Image.file(
+            file,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('Failed to load local image: $error');
+              return _buildFallbackAvatar(colorScheme);
+            },
+          );
+        } else {
+          return _buildFallbackAvatar(colorScheme);
+        }
+      },
+    );
+  }
+
   Widget _buildFallbackAvatar(ColorScheme colorScheme) {
+    final initials = _getInitials();
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            colorScheme.primary.withOpacity(0.1),
-            colorScheme.secondary.withOpacity(0.1),
+            colorScheme.primary.withOpacity(0.2),
+            colorScheme.secondary.withOpacity(0.2),
           ],
         ),
       ),
-      child: Icon(
-        Icons.person,
-        size: 28,
-        color: colorScheme.primary.withOpacity(0.6),
+      child: Center(
+        child: initials.isNotEmpty
+            ? Text(
+                initials,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.primary,
+                ),
+              )
+            : Icon(
+                Icons.person,
+                size: 28,
+                color: colorScheme.primary.withOpacity(0.6),
+              ),
       ),
     );
+  }
+
+  String _getInitials() {
+    final firstName = supplier.personFirstName ?? '';
+    final lastName = supplier.personLastName ?? '';
+
+    if (firstName.isEmpty && lastName.isEmpty) {
+      final username = supplier.app_user_name ?? '';
+      if (username.isNotEmpty) {
+        return username.substring(0, 1).toUpperCase();
+      }
+      return '';
+    }
+
+    final firstInitial = firstName.isNotEmpty ? firstName[0].toUpperCase() : '';
+    final lastInitial = lastName.isNotEmpty ? lastName[0].toUpperCase() : '';
+    return '$firstInitial$lastInitial';
   }
 
   Widget _buildNameSection(TextTheme textTheme, ColorScheme colorScheme) {
@@ -197,11 +287,35 @@ class SupplierCard extends StatelessWidget {
       );
     }
 
+    final fullName =
+        '${supplier.personFirstName ?? ''} ${supplier.personLastName ?? ''}'
+            .trim();
+
+    if (fullName.isEmpty) {
+      return Row(
+        children: [
+          Icon(
+            Icons.person_outline,
+            size: 14,
+            color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'No name provided',
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${supplier.personFirstName} ${supplier.personLastName}'.trim(),
+          fullName,
           style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: colorScheme.onSurface,
@@ -225,6 +339,8 @@ class SupplierCard extends StatelessWidget {
       );
     }
 
+    final username = supplier.app_user_name;
+
     return Row(
       children: [
         Icon(
@@ -235,11 +351,12 @@ class SupplierCard extends StatelessWidget {
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            supplier.app_user_name?.isNotEmpty == true
-                ? '${supplier.app_user_name!}'
-                : 'No username',
+            username?.isNotEmpty == true ? '@$username' : 'No username',
             style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+              color: username?.isNotEmpty == true
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.onSurfaceVariant.withOpacity(0.5),
+              fontStyle: username?.isNotEmpty == true ? null : FontStyle.italic,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -261,6 +378,8 @@ class SupplierCard extends StatelessWidget {
       );
     }
 
+    final location = supplier.locationName;
+
     return Row(
       children: [
         Icon(
@@ -271,11 +390,12 @@ class SupplierCard extends StatelessWidget {
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            supplier.locationName?.isNotEmpty == true
-                ? supplier.locationName!
-                : 'No location set',
+            location?.isNotEmpty == true ? location! : 'No location set',
             style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+              color: location?.isNotEmpty == true
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.onSurfaceVariant.withOpacity(0.5),
+              fontStyle: location?.isNotEmpty == true ? null : FontStyle.italic,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -364,6 +484,7 @@ class SupplierCard extends StatelessWidget {
               text: 'Message',
               onTap: onMessage ?? () {},
               color: colorScheme.secondary,
+              enabled: onMessage != null,
             ),
           ),
           const SizedBox(width: 12),
@@ -382,11 +503,12 @@ class SupplierCard extends StatelessWidget {
     required String text,
     required VoidCallback onTap,
     required Color color,
+    bool enabled = true,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -396,14 +518,18 @@ class SupplierCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: color),
+              Icon(
+                icon,
+                size: 16,
+                color: enabled ? color : color.withOpacity(0.3),
+              ),
               const SizedBox(width: 6),
               Text(
                 text,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: color,
+                  color: enabled ? color : color.withOpacity(0.3),
                 ),
               ),
             ],
@@ -469,36 +595,26 @@ class SupplierCard extends StatelessWidget {
   }
 
   Color _getRoleColor(String role, ColorScheme colorScheme) {
-    switch (role.toLowerCase()) {
-      case 'admin':
-        return colorScheme.error;
-      case 'manager':
-        return colorScheme.primary;
-      case 'chef':
-        return colorScheme.secondary;
-      case 'supplier':
-        return colorScheme.tertiary;
-      case 'staff':
-        return Colors.orange;
-      default:
-        return colorScheme.onSurfaceVariant;
-    }
+    final roleLower = role.toLowerCase();
+
+    if (roleLower.contains('admin')) return colorScheme.error;
+    if (roleLower.contains('manager')) return colorScheme.primary;
+    if (roleLower.contains('chef')) return colorScheme.secondary;
+    if (roleLower.contains('supplier')) return colorScheme.tertiary;
+    if (roleLower.contains('staff')) return Colors.orange;
+
+    return colorScheme.onSurfaceVariant;
   }
 
   IconData _getRoleIcon(String role) {
-    switch (role.toLowerCase()) {
-      case 'admin':
-        return Icons.security;
-      case 'manager':
-        return Icons.manage_accounts;
-      case 'chef':
-        return Icons.restaurant_menu;
-      case 'supplier':
-        return Icons.inventory;
-      case 'staff':
-        return Icons.badge;
-      default:
-        return Icons.person;
-    }
+    final roleLower = role.toLowerCase();
+
+    if (roleLower.contains('admin')) return Icons.security;
+    if (roleLower.contains('manager')) return Icons.manage_accounts;
+    if (roleLower.contains('chef')) return Icons.restaurant_menu;
+    if (roleLower.contains('supplier')) return Icons.inventory;
+    if (roleLower.contains('staff')) return Icons.badge;
+
+    return Icons.person;
   }
 }
