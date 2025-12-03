@@ -300,3 +300,19 @@ class ProductProviderDetails {
     );
   }
 }
+
+class ManagementRuleData {
+  final List<ManagementRule> all;
+  final List<ManagementRule> active;
+  final List<ManagementRule> pending;
+  final ManagementRule? activeForSupplier;
+  final ManagementRule? pendingForSupplier;
+
+  ManagementRuleData({
+    required this.all,
+    required this.active,
+    required this.pending,
+    required this.activeForSupplier,
+    required this.pendingForSupplier,
+  });
+}

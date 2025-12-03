@@ -40,10 +40,6 @@ abstract class AppUserService {
     return null;
   }
 
-  Future<int?> updateUserPrivileges(AppUser appUser) async {
-    return null;
-  }
-
   Future<int?> updateAppUserImage(AppUser updatedAppUser) async {
     return null;
   }
@@ -58,8 +54,17 @@ abstract class AppUserService {
     return null;
   }
 
-  Future<int?> removeUserFromSupplier(
-      int appUserId, int supplierId, int orgId) async {
+  Future<ManagementRule?> updateManagementRule(
+    int ruleId,
+    int appUserId,
+    int supplierId,
+    int orgId,
+    int privilege,
+  ) async {
     return null;
+  }
+
+  Future<bool> deleteManagementRule(int ruleId) async {
+    return false;
   }
 }

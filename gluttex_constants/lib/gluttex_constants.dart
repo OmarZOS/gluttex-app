@@ -214,6 +214,8 @@ class GluttexConstants {
 
   static const String searchAppUserEndpoint = '/search/personnel';
   static const String getAppUserStaffEndpoint = '/staff';
+  static const String deleteAppUserStaffEndpoint = '/staff/delete';
+  static const String putAppUserStaffEndpoint = '/staff';
 
   static const String getAppUserCategoriesEndpoint = '/app_user/categorie/all';
 

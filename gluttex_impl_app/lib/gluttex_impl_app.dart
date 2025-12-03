@@ -71,41 +71,6 @@ class AppUserServiceImpl implements AppUserService {
   }
 
   @override
-  Future<ManagementRule?> addUserToSupplier(
-      int appUserId, int supplierId, int orgId, int privilege,
-      {bool fromQR = false}) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
-
-    Map<String, dynamic> payload = {};
-
-    payload["id_management_rule"] = 0;
-    payload["rule_ref_org"] = orgId;
-    payload["rule_ref_provider"] = supplierId;
-    payload["rule_ref_user"] = appUserId;
-    payload["management_rule_code"] = privilege;
-    payload["management_rule_status"] = fromQR ? "ACCEPTED" : "PENDING";
-    payload["management_rule_expiry"] = "";
-
-    try {
-      var data = await storageService.insert(
-          GluttexConstants.apiBaseUrl + GluttexConstants.addRuleEndpoint,
-          payload);
-
-      ManagementRule managementRule =
-          ManagementRule.fromJson(data as Map<String, dynamic>);
-
-      // Now fetch the actual user data
-      // You'll need to implement getUserById in your service
-      // AppUser? user = await getUserById(appUserId);
-      return managementRule;
-    } catch (e, stacktrace) {
-      log('$e');
-      log('$stacktrace');
-      return null;
-    }
-  }
-
-  @override
   Future<List<ManagementRule>?> getManagementRules(
     int orgId,
     int supplierId,
@@ -186,15 +151,101 @@ class AppUserServiceImpl implements AppUserService {
   }
 
   @override
-  Future<int?> updateUserPrivileges(AppUser appUser) {
-    // TODO: implement updateUserPrivileges
-    throw UnimplementedError();
+  Future<ManagementRule?> addUserToSupplier(
+      int appUserId, int supplierId, int orgId, int privilege,
+      {bool fromQR = false}) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+
+    Map<String, dynamic> payload = {
+      "id_management_rule": 0,
+      "rule_ref_org": orgId,
+      "rule_ref_provider": supplierId,
+      "rule_ref_user": appUserId,
+      "management_rule_code": privilege,
+      "management_rule_status": fromQR ? "ACCEPTED" : "PENDING",
+      "management_rule_expiry": "",
+    };
+
+    try {
+      var data = await storageService.insert(
+          GluttexConstants.apiBaseUrl + GluttexConstants.addRuleEndpoint,
+          payload);
+
+      ManagementRule managementRule =
+          ManagementRule.fromJson(data as Map<String, dynamic>);
+
+      // Now fetch the actual user data
+      // You'll need to implement getUserById in your service
+      // AppUser? user = await getUserById(appUserId);
+      return managementRule;
+    } catch (e, stacktrace) {
+      log('$e');
+      log('$stacktrace');
+      return null;
+    }
   }
 
   @override
-  Future<int?> removeUserFromSupplier(
-      int appUserId, int supplierId, int orgId) {
-    // TODO: implement removeUserFromSupplier
-    throw UnimplementedError();
+  Future<ManagementRule?> updateManagementRule(
+    int ruleId,
+    int appUserId,
+    int supplierId,
+    int orgId,
+    int privilege,
+  ) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+
+    Map<String, dynamic> payload = {
+      "id_management_rule": ruleId,
+      "rule_ref_org": orgId,
+      "rule_ref_provider": supplierId,
+      "rule_ref_user": appUserId,
+      "management_rule_code": privilege,
+      "management_rule_status": "ACTIVE",
+      "management_rule_expiry": "",
+    };
+
+    try {
+      var data = await storageService.update(
+          GluttexConstants.apiBaseUrl +
+              GluttexConstants.putAppUserStaffEndpoint +
+              "/${ruleId.toString()}",
+          '',
+          {},
+          payload);
+
+      ManagementRule managementRule =
+          ManagementRule.fromJson(data as Map<String, dynamic>);
+
+      // Now fetch the actual user data
+      // You'll need to implement getUserById in your service
+      // AppUser? user = await getUserById(appUserId);
+      return managementRule;
+    } catch (e, stacktrace) {
+      log('$e');
+      log('$stacktrace');
+      return null;
+    }
+  }
+
+  @override
+  Future<bool> deleteManagementRule(int ruleId) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+
+    try {
+      var data = await storageService.delete(
+        GluttexConstants.apiBaseUrl +
+            GluttexConstants.deleteAppUserStaffEndpoint,
+        ruleId.toString(),
+      );
+      // Now fetch the actual user data
+      // You'll need to implement getUserById in your service
+      // AppUser? user = await getUserById(appUserId);
+      return true;
+    } catch (e, stacktrace) {
+      log('$e');
+      log('$stacktrace');
+      return false;
+    }
   }
 }

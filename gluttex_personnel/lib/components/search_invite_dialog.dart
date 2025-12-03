@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
-import 'package:gluttex_personnel/privilege_dialog.dart';
+import 'package:gluttex_personnel/components/privilege_dialog.dart';
 import 'package:provider/provider.dart';
 
 class SearchInviteDialog extends StatefulWidget {
@@ -53,7 +53,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
             context.read<AppUserNotifier>().appUser!.id_app_user ?? 0;
         notifier.searchPersonnel(
           query,
-          userId,
+          // userId,
           supplierId: widget.supplierId ?? 0,
         );
       }

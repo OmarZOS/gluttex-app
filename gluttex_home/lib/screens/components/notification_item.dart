@@ -12,7 +12,7 @@ import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_home/screens/components/NotificationAction.dart';
-import 'package:gluttex_personnel/privilege_ui.dart';
+import 'package:gluttex_personnel/components/privilege_ui.dart';
 import 'package:provider/provider.dart';
 
 class NotificationItem extends StatelessWidget {

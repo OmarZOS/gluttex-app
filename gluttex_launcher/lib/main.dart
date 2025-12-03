@@ -113,9 +113,9 @@ class GluttexApp extends StatelessWidget {
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: const Color(0xFF2ECC71),
-                primary: const Color(0xFF2ECC71),
+                primary: const Color.fromRGBO(46, 204, 113, 1),
                 secondary: const Color(0xFF3498DB), // Complementary blue
-                tertiary: const Color(0xFFE74C3C), // Accent red
+                tertiary: const Color.fromARGB(255, 255, 128, 43), // Accent red
                 onPrimaryFixed: Colors.white,
                 // background: const Color(0xFFF8F9FA), // Light background
                 // onBackground: const Color(0xFF212121), // Main text color
@@ -132,7 +132,7 @@ class GluttexApp extends StatelessWidget {
                 primaryContainer: const Color(0xFF27AE60), // Darker green
                 secondary: const Color(0xFF3498DB), // Blue
                 secondaryContainer: const Color(0xFF2980B9), // Darker blue
-                tertiary: const Color(0xFFE74C3C), // Red accent
+                tertiary: const Color.fromARGB(255, 255, 128, 43), // Red accent
                 background: const Color(0xFF121212), // Dark background
                 surface: const Color(0xFF1E1E1E), // Card surfaces
                 surfaceVariant: const Color(0xFF2D2D2D), // Lighter surfaces
