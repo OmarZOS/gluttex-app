@@ -234,13 +234,13 @@ class SupplierUserCard extends StatelessWidget {
             margin: const EdgeInsets.only(left: 8),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: colorScheme.tertiaryContainer,
+              color: colorScheme.secondary,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               localizations.pendingTxt,
               style: TextStyle(
-                color: colorScheme.onErrorContainer,
+                color: colorScheme.onSecondary,
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
               ),
@@ -288,13 +288,13 @@ class SupplierUserCard extends StatelessWidget {
         : Icons.work_outline_rounded;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: roleColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
+        color: roleColor.withOpacity(0.08), // More subtle background
+        borderRadius: BorderRadius.circular(8), // Smaller radius for tag
         border: Border.all(
-          color: roleColor.withOpacity(0.3),
-          width: 1,
+          color: roleColor.withOpacity(0.15), // More subtle border
+          width: 0.5, // Thinner border
         ),
       ),
       child: Row(
@@ -302,16 +302,17 @@ class SupplierUserCard extends StatelessWidget {
         children: [
           Icon(
             roleIcon,
-            size: isCompact ? 10 : 12,
-            color: roleColor,
+            size: isCompact ? 12 : 14, // Slightly smaller
+            color: roleColor.withOpacity(0.8), // Slightly muted
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 4), // Less spacing
           Text(
             _getRoleText(context),
             style: textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: roleColor,
-              fontSize: isCompact ? 10 : 11,
+              fontWeight: FontWeight.w500, // Lighter weight
+              color: roleColor.withOpacity(0.9), // Slightly muted
+              fontSize: isCompact ? 11 : 12, // Smaller text
+              letterSpacing: -0.2, // Tighter letter spacing for tags
             ),
           ),
         ],

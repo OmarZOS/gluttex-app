@@ -11,7 +11,6 @@ import 'package:gluttex_personnel/components/pending_tab_content.dart';
 import 'package:gluttex_personnel/components/personnel_tab_content.dart';
 import 'package:gluttex_personnel/components/privilege_dialog.dart';
 import 'package:gluttex_personnel/components/search_invite_dialog.dart';
-import 'package:gluttex_personnel/components/supplier_user_card.dart';
 import 'package:provider/provider.dart';
 
 class PersonnelManagementScreen extends StatefulWidget {
@@ -36,18 +35,34 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   final TextEditingController _searchController = TextEditingController();
   late TabController _tabController;
   Timer? _debounceTimer;
+  bool _isInitialLoadComplete = false;
+  late PersonnelNotifier _personnelNotifier;
+  late AppUserNotifier _userNotifier;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _searchController.addListener(_onSearchChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadInitialData());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Initialize notifiers once
+    _personnelNotifier = context.read<PersonnelNotifier>();
+    _userNotifier = context.read<AppUserNotifier>();
+
+    // Load initial data only once
+    if (!_isInitialLoadComplete) {
+      _isInitialLoadComplete = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadInitialData());
+    }
   }
 
   void _loadInitialData() {
-    final personnelNotifier = context.read<PersonnelNotifier>();
-    personnelNotifier.loadPersonnel(
+    _personnelNotifier.loadPersonnel(
       supplierId: widget.supplierId,
       reset: true,
       includePending: true,
@@ -55,16 +70,19 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   }
 
   void _onSearchChanged() {
-    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
+    // Cancel previous timer
+    _debounceTimer?.cancel();
 
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      final query = _searchController.text.trim();
-      final personnelNotifier = context.read<PersonnelNotifier>();
+    final query = _searchController.text.trim();
+    if (query.isEmpty) {
+      _personnelNotifier.clearSearch(supplierId: widget.supplierId);
+      return;
+    }
 
-      if (query.isEmpty) {
-        personnelNotifier.clearSearch(supplierId: widget.supplierId);
-      } else {
-        personnelNotifier.searchPersonnel(
+    // Debounce search
+    _debounceTimer = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) {
+        _personnelNotifier.searchPersonnel(
           query,
           supplierId: widget.supplierId,
         );
@@ -73,8 +91,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   }
 
   Future<void> _refreshData() async {
-    final personnelNotifier = context.read<PersonnelNotifier>();
-    await personnelNotifier.loadPersonnel(
+    await _personnelNotifier.loadPersonnel(
       supplierId: widget.supplierId,
       reset: true,
       includePending: true,
@@ -169,7 +186,9 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   Widget _buildQuickStats() {
     return Consumer<PersonnelNotifier>(
       builder: (context, notifier, _) {
+        // Listen only to notifier changes, rebuild only when stats change
         final stats = notifier.getSupplierStats(widget.supplierId);
+
         return Container(
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(20),
@@ -260,6 +279,14 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),
+                onTap: (index) {
+                  // Update filtered personnel when tab changes
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  });
+                },
                 tabs: [
                   Tab(
                     child: Row(
@@ -305,6 +332,8 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Consumer<PersonnelNotifier>(
         builder: (context, notifier, _) {
+          final isLoading = notifier.isLoading;
+
           return Container(
             decoration: BoxDecoration(
               color: colorScheme.surface,
@@ -335,9 +364,8 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
                               ),
                               onPressed: () {
                                 _searchController.clear();
-                                context
-                                    .read<PersonnelNotifier>()
-                                    .clearSearch(supplierId: widget.supplierId);
+                                notifier.clearSearch(
+                                    supplierId: widget.supplierId);
                               },
                             )
                           : null,
@@ -349,7 +377,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
                     ),
                   ),
                 ),
-                if (notifier.isLoading)
+                if (isLoading)
                   const Padding(
                     padding: EdgeInsets.only(right: 16),
                     child: SizedBox(
@@ -383,44 +411,63 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     return TabBarView(
       controller: _tabController,
       children: [
-        PersonnelTabContent(
-          supplierId: widget.supplierId,
-          includePending: true,
-          onRefresh: _refreshData,
-          onShowPrivilegeDialog: _showPrivilegeDialog,
-          onShowRemoveDialog: _showRemoveDialog,
-          // onResendInvitation: _resendInvitation,
-          onCancelInvitation: _cancelInvitation,
+        // All tab
+        Consumer<PersonnelNotifier>(
+          builder: (context, notifier, child) {
+            return PersonnelTabContent(
+              supplierId: widget.supplierId,
+              includePending: true,
+              onRefresh: _refreshData,
+              onShowPrivilegeDialog: _showPrivilegeDialog,
+              onShowRemoveDialog: _showRemoveDialog,
+              onCancelInvitation: _cancelInvitation,
+              // key: ValueKey(
+              //     'all_${notifier.personnel.length}_${notifier.isLoading}'),
+            );
+          },
         ),
-        PersonnelTabContent(
-          supplierId: widget.supplierId,
-          includePending: false,
-          onRefresh: _refreshData,
-          onShowPrivilegeDialog: _showPrivilegeDialog,
-          onShowRemoveDialog: _showRemoveDialog,
-          // onResendInvitation: _resendInvitation,
-          onCancelInvitation: _cancelInvitation,
+        // Active tab
+        Consumer<PersonnelNotifier>(
+          builder: (context, notifier, child) {
+            return PersonnelTabContent(
+              supplierId: widget.supplierId,
+              includePending: false,
+              onRefresh: _refreshData,
+              onShowPrivilegeDialog: _showPrivilegeDialog,
+              onShowRemoveDialog: _showRemoveDialog,
+              onCancelInvitation: _cancelInvitation,
+              key: ValueKey(
+                  'active_${notifier.personnel.length}_${notifier.isLoading}'),
+            );
+          },
         ),
-        PendingTabContent(
-          supplierId: widget.supplierId,
-          supplierName: widget.supplierName,
-          onRefresh: _refreshData,
-          onShowPrivilegeDialog: _showPrivilegeDialog,
-          onShowRemoveDialog: _showRemoveDialog,
-          // onResendInvitation: _resendInvitation,
-          onCancelInvitation: _cancelInvitation,
-          onShowAddOptions: _showAddOptions,
+        // Pending tab
+        Consumer<PersonnelNotifier>(
+          builder: (context, notifier, child) {
+            return PendingTabContent(
+              supplierId: widget.supplierId,
+              supplierName: widget.supplierName,
+              onRefresh: _refreshData,
+              onShowPrivilegeDialog: _showPrivilegeDialog,
+              onShowRemoveDialog: _showRemoveDialog,
+              onCancelInvitation: _cancelInvitation,
+              onShowAddOptions: _showAddOptions,
+              // key: ValueKey(
+              //     'pending_${notifier.personnel.length}_${notifier.isLoading}'),
+            );
+          },
         ),
       ],
     );
   }
 
   // Dialog and action methods
-  Future<void> _showPrivilegeDialog(user, bool isPending, int ruleId) async {
+  Future<void> _showPrivilegeDialog(
+      AppUser user, bool isPending, int ruleId) async {
     int? existingPrivileges;
+
     if (!isPending) {
-      final personnelNotifier = context.read<PersonnelNotifier>();
-      final rules = await personnelNotifier.getUserPrivileges(
+      final rules = await _personnelNotifier.getUserPrivileges(
         ruleId: ruleId,
         userId: user.id_app_user ?? 0,
         supplierId: widget.supplierId,
@@ -436,6 +483,8 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
       }
     }
 
+    if (!mounted) return;
+
     final privilegesBitmask = await showDialog<int>(
       context: context,
       builder: (context) => PrivilegeDialog(
@@ -450,11 +499,10 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     }
   }
 
-  Future<void> _modifyUserPrivileges(user, int privileges,
+  Future<void> _modifyUserPrivileges(AppUser user, int privileges,
       {int ruleId = 0}) async {
-    final notifier = context.read<PersonnelNotifier>();
     try {
-      final rules = await notifier.getUserPrivileges(
+      final rules = await _personnelNotifier.getUserPrivileges(
         ruleId: ruleId,
         userId: user.id_app_user ?? 0,
         supplierId: widget.supplierId,
@@ -468,7 +516,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
         orElse: () => rules.first,
       );
 
-      final success = await notifier.updateTeamMemberPrivileges(
+      final success = await _personnelNotifier.updateTeamMemberPrivileges(
         ruleId: ruleForSupplier.id_management_rule,
         userId: user.id_app_user ?? 0,
         supplierId: widget.supplierId,
@@ -489,13 +537,14 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
                 : Theme.of(context).colorScheme.error,
           ),
         );
+        _refreshData();
       }
     } catch (e) {
       log('Error modifying user privileges: $e');
     }
   }
 
-  Future<void> _cancelInvitation(user, int ruleId) async {
+  Future<void> _cancelInvitation(AppUser user, int ruleId) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -509,7 +558,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             ),
             child: const Text('Cancel Invitation'),
           ),
@@ -518,8 +567,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     );
 
     if (result == true && mounted) {
-      final notifier = context.read<PersonnelNotifier>();
-      final success = await notifier.removeUserFromSupplier(
+      final success = await _personnelNotifier.removeUserFromSupplier(
         ruleId,
         user.id_app_user ?? 0,
         widget.supplierId,
@@ -529,6 +577,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Invitation canceled')),
         );
+        _refreshData();
       }
     }
   }
@@ -636,15 +685,15 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   }
 
   void _showSearchInviteDialog() {
-    final currentUserId = context.read<AppUserNotifier>().appUser?.id_app_user;
-    if (currentUserId == null) return;
+    final currentUserId = _userNotifier.appUser?.id_app_user;
+    if (currentUserId == null || !mounted) return;
 
     showDialog(
       context: context,
       builder: (context) => SearchInviteDialog(
         orgId: widget.orgId,
         onUserSelected: (user, privileges) =>
-            _addUserToSupplier(user, privileges),
+            {_addUserToSupplier(user, privileges), _refreshData()},
         userId: currentUserId,
         supplierId: widget.supplierId,
         supplierName: widget.supplierName,
@@ -652,14 +701,15 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     );
   }
 
-  Future<void> _addUserToSupplier(user, int privileges,
+  Future<void> _addUserToSupplier(AppUser user, int privileges,
       {bool fromQR = false}) async {
-    final notifier = context.read<PersonnelNotifier>();
-    final success = await notifier.addTeamMember(user.id_app_user ?? 0,
-        supplierId: widget.supplierId,
-        orgId: widget.orgId,
-        privilege: privileges,
-        fromQR: fromQR);
+    final success = await _personnelNotifier.addTeamMember(
+      user.id_app_user ?? 0,
+      supplierId: widget.supplierId,
+      orgId: widget.orgId,
+      privilege: privileges,
+      fromQR: fromQR,
+    );
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -702,8 +752,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   }
 
   Future<void> _removeUserFromSupplier(int ruleId, AppUser user) async {
-    final notifier = context.read<PersonnelNotifier>();
-    final success = await notifier.removeUserFromSupplier(
+    final success = await _personnelNotifier.removeUserFromSupplier(
       ruleId,
       user.id_app_user ?? 0,
       widget.supplierId,
