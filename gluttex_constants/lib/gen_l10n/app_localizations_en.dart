@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2056,4 +2058,173 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actionCancelInvite => 'Cancel Invitation';
+
+  @override
+  String suppliersCountCategoryCount(num categoryCount, num totalSuppliers) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalSuppliers,
+      locale: localeName,
+      other: '$totalSuppliers locations',
+      one: '1 location',
+      zero: 'No locations',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      categoryCount,
+      locale: localeName,
+      other: '$categoryCount in category',
+      one: '1 in category',
+      zero: 'no category',
+    );
+    return '$_temp0 • $_temp1';
+  }
+
+  @override
+  String get myBusinessesTitle => 'My Businesses';
+
+  @override
+  String get categories => 'Categories';
+
+  @override
+  String get filteredTxt => 'Filtered';
+
+  @override
+  String get noBusinessesFound => 'No businesses found';
+
+  @override
+  String get adjustFilterBusinessHint => 'Try adjusting your search or filters';
+
+  @override
+  String get addFirstBusinessHint => 'Add your first business to get started';
+
+  @override
+  String get addMemberText => 'Add Member';
+
+  @override
+  String get addTeamMemberText => 'Add Team Member';
+
+  @override
+  String addUsersToManageText(Object supplierName) {
+    return 'Add users to manage $supplierName';
+  }
+
+  @override
+  String get scanQrCodeText => 'Scan QR Code';
+
+  @override
+  String get scanUserProfileQrText => 'Scan user profile QR code';
+
+  @override
+  String get searchAndInviteText => 'Search & Invite';
+
+  @override
+  String get searchAndInviteExistingUsersText => 'Search and invite existing users';
+
+  @override
+  String get cancelText => 'Cancel';
+
+  @override
+  String get cancelInvitationTitle => 'Cancel Invitation';
+
+  @override
+  String get cancelInvitationMessage => 'Cancel invitation? This cannot be undone.';
+
+  @override
+  String get cancelInvitationAction => 'Cancel Invitation';
+
+  @override
+  String get removeTeamMemberTitle => 'Remove Team Member';
+
+  @override
+  String removeTeamMemberMessage(Object supplierName, Object userName) {
+    return 'Remove $userName from $supplierName?';
+  }
+
+  @override
+  String get removeAction => 'Remove';
+
+  @override
+  String get personnelManagement => 'Personnel Management';
+
+  @override
+  String privilegesUpdatedMessage(Object userName) {
+    return 'Updated privileges for $userName';
+  }
+
+  @override
+  String get privilegesUpdateFailedMessage => 'Failed to update privileges';
+
+  @override
+  String get privilegesUpdateError => 'An error occurred while updating privileges';
+
+  @override
+  String get barcodeText => 'Barcode';
+
+  @override
+  String get barcodeCopiedText => 'Barcode copied to clipboard';
+
+  @override
+  String get sourceText => 'Source';
+
+  @override
+  String get modelText => 'Model';
+
+  @override
+  String get recentText => 'Recent';
+
+  @override
+  String get productDetailsText => 'Product Details';
+
+  @override
+  String get createdText => 'Created';
+
+  @override
+  String get lastUpdatedText => 'Last Updated';
+
+  @override
+  String get priceUpdatedText => 'Price Updated';
+
+  @override
+  String get noProductDataTitle => 'Product Not Found';
+
+  @override
+  String get noProductDataDescription => 'No product information found for this barcode. The product may be new or not in our database yet.';
+
+  @override
+  String get noProductDataHelp => 'You can try scanning again or add the product details manually.';
+
+  @override
+  String get scanAgainText => 'Scan Again';
+
+  @override
+  String get addManuallyText => 'Add Product Manually';
+
+  @override
+  String get ownedText => 'Owned';
+
+  @override
+  String get managedText => 'Managed';
+
+  @override
+  String get noOwnedBusinessesTitle => 'No Owned Businesses';
+
+  @override
+  String get noOwnedBusinessesDescription => 'You don\'t own any businesses yet';
+
+  @override
+  String get noManagedBusinessesTitle => 'No Managed Businesses';
+
+  @override
+  String get noManagedBusinessesDescription => 'You\'re not managing any businesses';
+
+  @override
+  String get noBusinessesTitle => 'No Businesses';
+
+  @override
+  String get noBusinessesDescription => 'You don\'t own or manage any businesses yet';
+
+  @override
+  String get noResultsTitle => 'No Results';
+
+  @override
+  String get adjustSearchFiltersText => 'Try adjusting your search or filters';
 }

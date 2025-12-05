@@ -1,45 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:gluttex_core/app/ManagementRule.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_personnel/personnel_management_screen.dart';
-import 'package:provider/provider.dart';
 
 class SupplierCard extends StatelessWidget {
-  final Supplier supplier;
+  final ManagementRule managementRule;
+  final VoidCallback? onTap;
 
   const SupplierCard({
     super.key,
-    required this.supplier,
+    required this.managementRule,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final productProvider = managementRule.productProvider;
+    final providerDetails = productProvider?.product_provider_details;
 
-    return Material(
-      color: colorScheme.surface,
-      borderRadius: BorderRadius.circular(16),
+    if (productProvider == null || providerDetails == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
       elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
       child: InkWell(
-        onTap: () => _navigateToPersonnelManagement(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap ?? () => _navigateToPersonnelManagement(context),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSupplierImage(context),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Consumer<PersonnelNotifier>(
-                  builder: (context, personnelNotifier, child) {
-                    final stats = personnelNotifier
-                        .getSupplierStats(supplier.idProductProvider);
-                    return _buildSupplierInfo(context, stats);
-                  },
-                ),
-              ),
-              _buildSupplierActions(context),
+              // Supplier Logo/Status
+              _buildSupplierLogo(context),
+              const SizedBox(width: 16),
+
+              // Supplier Info
+              Expanded(child: _buildSupplierInfo(context)),
+
+              // Action Button
+              _buildActionButton(context),
             ],
           ),
         ),
@@ -47,250 +55,181 @@ class SupplierCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSupplierImage(BuildContext context) {
+  Widget _buildSupplierLogo(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final productProvider = managementRule.productProvider!;
 
     return Stack(
       children: [
         Container(
-          width: 70,
-          height: 70,
+          width: 60,
+          height: 60,
           decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(12),
-            image: supplier.supplier_image_url != null &&
-                    supplier.supplier_image_url!.isNotEmpty
-                ? DecorationImage(
-                    image: NetworkImage(supplier.supplier_image_url!),
-                    fit: BoxFit.cover,
-                  )
-                : null,
-            color: supplier.supplier_image_url == null
-                ? colorScheme.surfaceVariant
-                : null,
           ),
-          child: supplier.supplier_image_url == null
+          child: productProvider.product_provider_type_id == 0
               ? Icon(
-                  Icons.business_rounded,
-                  size: 30,
-                  color: colorScheme.onSurfaceVariant,
+                  _getCategoryIcon(productProvider.product_provider_type_id),
+                  color: colorScheme.onPrimaryContainer,
+                  size: 28,
                 )
-              : null,
-        ),
-        Positioned(
-          top: -2,
-          right: -2,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.green, // TODO: Use actual status color
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withOpacity(0.2),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
+              : SvgPicture.asset(
+                  'assets/icons/${productProvider.product_provider_type_id + 1}.svg',
+                  package: "gluttex_localiser",
+                  width: 20,
+                  height: 20,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-              ],
-            ),
-            child: Text(
-              'ACTIVE', // TODO: Use actual status text
-              style: TextStyle(
-                color: colorScheme.onPrimary,
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                height: 1.0,
-              ),
-            ),
-          ),
         ),
+
+        // Status Badge
       ],
     );
   }
 
-  Widget _buildSupplierInfo(BuildContext context, Map<String, int> stats) {
+  Widget _buildSupplierInfo(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final activeCount = stats['active'] ?? 0;
-    final pendingCount = stats['pending'] ?? 0;
+    final providerDetails =
+        managementRule.productProvider!.product_provider_details;
+    final localizations = AppLocalizations.of(context)!;
+    final categories = localizations.providerCategoryTextList.split(",");
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    supplier.providerName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colorScheme.onSurface,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+        // Supplier Name
+        Text(
+          providerDetails.provider_name,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+
+        const SizedBox(height: 4),
+
+        // Contact/Location Info
+        if (providerDetails.provider_contact_info.isNotEmpty)
+          Row(
+            children: [
+              Icon(
+                Icons.location_on_outlined,
+                size: 14,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  providerDetails.provider_contact_info,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
-                ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+
         const SizedBox(height: 8),
+
+        // Status and Category Row
         Row(
           children: [
-            Icon(Icons.location_on_rounded,
-                size: 14, color: colorScheme.onSurfaceVariant),
-            const SizedBox(width: 4),
-            Expanded(
+            // Category Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(6),
+              ),
               child: Text(
-                supplier.locationName ?? 'No location',
-                style: theme.textTheme.bodySmall?.copyWith(
+                categories[
+                    managementRule.productProvider!.product_provider_type_id],
+                style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 6,
-          runSpacing: 4,
-          children: [
-            _buildInfoChip(
-              icon: Icons.people_alt_rounded,
-              value: '$activeCount',
-              label: 'Team',
-              color: colorScheme.primary,
-              theme: theme,
-            ),
-            if (pendingCount > 0)
-              _buildInfoChip(
-                icon: Icons.pending_actions_rounded,
-                value: '$pendingCount',
-                label: 'Pending',
-                color: Colors.orange,
-                theme: theme,
-              ),
+
+            const Spacer(),
+
+            // Privilege Indicator
           ],
         ),
       ],
     );
   }
 
-  Widget _buildInfoChip({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-    required ThemeData theme,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 10, color: color),
-          const SizedBox(width: 3),
-          Text(
-            value,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-              fontSize: 10,
-            ),
-          ),
-          const SizedBox(width: 1),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: color.withOpacity(0.7),
-              fontSize: 10,
-            ),
-          ),
-        ],
+  Widget _buildActionButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return IconButton(
+      onPressed: () => _navigateToPersonnelManagement(context),
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: managementRule.isActiveStatus
+              ? colorScheme.primaryContainer
+              : colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(
+          managementRule.isActiveStatus
+              ? Icons.people_alt_rounded
+              : Icons.pending_actions_rounded,
+          color: managementRule.isActiveStatus
+              ? colorScheme.onPrimaryContainer
+              : colorScheme.onSurfaceVariant,
+          size: 20,
+        ),
       ),
     );
   }
 
-  Widget _buildSupplierActions(BuildContext context) {
-    return Consumer<PersonnelNotifier>(
-      builder: (context, personnelNotifier, child) {
-        final activeCount = personnelNotifier
-                .getSupplierStats(supplier.idProductProvider)['active'] ??
-            0;
+  Color _getStatusColor(BuildContext context) {
+    final theme = Theme.of(context);
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              onPressed: () => _navigateToPersonnelManagement(context),
-              icon: Stack(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(Icons.people_alt_rounded,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        size: 18),
-                  ),
-                  if (activeCount > 0)
-                    Positioned(
-                      top: -2,
-                      right: -2,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.surface,
-                            width: 1.5,
-                          ),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          '$activeCount',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    if (managementRule.isActiveStatus) {
+      return theme.colorScheme.primary;
+    } else if (managementRule.isPending) {
+      return theme.colorScheme.secondary;
+    } else if (managementRule.isRejected) {
+      return theme.colorScheme.error;
+    } else {
+      return theme.colorScheme.onSurfaceVariant;
+    }
+  }
+
+  IconData _getCategoryIcon(int categoryId) {
+    const icons = [
+      Icons.restaurant_rounded,
+      Icons.store_rounded,
+      Icons.local_offer_rounded,
+      Icons.build_rounded,
+      Icons.medical_services_rounded,
+      Icons.school_rounded,
+      Icons.home_work_rounded,
+      Icons.business_rounded,
+    ];
+    return icons[categoryId % icons.length];
   }
 
   void _navigateToPersonnelManagement(BuildContext context) {
+    final productProvider = managementRule.productProvider;
+    if (productProvider == null) return;
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PersonnelManagementScreen(
-          supplierName: supplier.providerName,
-          orgId: supplier.id_provider_organisation,
-          supplierId: supplier.idProductProvider,
+          supplierName: productProvider.product_provider_details.provider_name,
+          orgId: productProvider.product_provider_org_id,
+          supplierId: productProvider.id_product_provider,
         ),
       ),
     );

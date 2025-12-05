@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
-import 'package:gluttex_personnel/components/privilege_dialog.dart';
+import 'package:gluttex_personnel/components/privilege_dialog/privilege_dialog.dart';
 import 'package:provider/provider.dart';
 
 class SearchInviteDialog extends StatefulWidget {

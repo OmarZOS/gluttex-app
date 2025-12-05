@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2056,4 +2058,173 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get actionCancelInvite => 'إلغاء الدعوة';
+
+  @override
+  String suppliersCountCategoryCount(num categoryCount, num totalSuppliers) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalSuppliers,
+      locale: localeName,
+      other: '$totalSuppliers موقع',
+      one: 'موقع واحد',
+      zero: 'لا توجد مواقع',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      categoryCount,
+      locale: localeName,
+      other: '$categoryCount في الفئة',
+      one: '1 في الفئة',
+      zero: 'لا توجد فئة',
+    );
+    return '$_temp0 • $_temp1';
+  }
+
+  @override
+  String get myBusinessesTitle => 'أعمالي';
+
+  @override
+  String get categories => 'الفئات';
+
+  @override
+  String get filteredTxt => 'تم التصفية';
+
+  @override
+  String get noBusinessesFound => 'لم يتم العثور على أعمال';
+
+  @override
+  String get adjustFilterBusinessHint => 'حاول ضبط البحث أو الفلاتر';
+
+  @override
+  String get addFirstBusinessHint => 'أضف عملك الأول للبدء';
+
+  @override
+  String get addMemberText => 'إضافة عضو';
+
+  @override
+  String get addTeamMemberText => 'إضافة عضو للفريق';
+
+  @override
+  String addUsersToManageText(Object supplierName) {
+    return 'إضافة مستخدمين لإدارة $supplierName';
+  }
+
+  @override
+  String get scanQrCodeText => 'مسح رمز الاستجابة السريعة';
+
+  @override
+  String get scanUserProfileQrText => 'مسح رمز الاستجابة السريعة لملف المستخدم';
+
+  @override
+  String get searchAndInviteText => 'البحث والدعوة';
+
+  @override
+  String get searchAndInviteExistingUsersText => 'البحث ودعوة المستخدمين الحاليين';
+
+  @override
+  String get cancelText => 'إلغاء';
+
+  @override
+  String get cancelInvitationTitle => 'إلغاء الدعوة';
+
+  @override
+  String get cancelInvitationMessage => 'إلغاء الدعوة؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get cancelInvitationAction => 'إلغاء الدعوة';
+
+  @override
+  String get removeTeamMemberTitle => 'إزالة عضو الفريق';
+
+  @override
+  String removeTeamMemberMessage(Object supplierName, Object userName) {
+    return 'إزالة $userName من $supplierName؟';
+  }
+
+  @override
+  String get removeAction => 'إزالة';
+
+  @override
+  String get personnelManagement => 'إدارة الموظفين';
+
+  @override
+  String privilegesUpdatedMessage(Object userName) {
+    return 'تم تحديث الصلاحيات لـ $userName';
+  }
+
+  @override
+  String get privilegesUpdateFailedMessage => 'فشل تحديث الصلاحيات';
+
+  @override
+  String get privilegesUpdateError => 'حدث خطأ أثناء تحديث الصلاحيات';
+
+  @override
+  String get barcodeText => 'الباركود';
+
+  @override
+  String get barcodeCopiedText => 'تم نسخ الباركود إلى الحافظة';
+
+  @override
+  String get sourceText => 'المصدر';
+
+  @override
+  String get modelText => 'النموذج';
+
+  @override
+  String get recentText => 'حديث';
+
+  @override
+  String get productDetailsText => 'تفاصيل المنتج';
+
+  @override
+  String get createdText => 'تاريخ الإنشاء';
+
+  @override
+  String get lastUpdatedText => 'آخر تحديث';
+
+  @override
+  String get priceUpdatedText => 'آخر تحديث للسعر';
+
+  @override
+  String get noProductDataTitle => 'المنتج غير موجود';
+
+  @override
+  String get noProductDataDescription => 'لم يتم العثور على معلومات المنتج لهذا الباركود. قد يكون المنتج جديدًا أو غير موجود في قاعدة البيانات بعد.';
+
+  @override
+  String get noProductDataHelp => 'يمكنك محاولة المسح مرة أخرى أو إضافة تفاصيل المنتج يدويًا.';
+
+  @override
+  String get scanAgainText => 'المسح مرة أخرى';
+
+  @override
+  String get addManuallyText => 'إضافة المنتج يدويًا';
+
+  @override
+  String get ownedText => 'مملوكة';
+
+  @override
+  String get managedText => 'مُدارة';
+
+  @override
+  String get noOwnedBusinessesTitle => 'لا توجد أعمال مملوكة';
+
+  @override
+  String get noOwnedBusinessesDescription => 'ليس لديك أي أعمال مملوكة بعد';
+
+  @override
+  String get noManagedBusinessesTitle => 'لا توجد أعمال مُدارة';
+
+  @override
+  String get noManagedBusinessesDescription => 'أنت لا تدير أي أعمال حالياً';
+
+  @override
+  String get noBusinessesTitle => 'لا توجد أعمال';
+
+  @override
+  String get noBusinessesDescription => 'ليس لديك أي أعمال مملوكة أو مُدارة بعد';
+
+  @override
+  String get noResultsTitle => 'لا توجد نتائج';
+
+  @override
+  String get adjustSearchFiltersText => 'حاول تعديل البحث أو الفلاتر';
 }

@@ -249,6 +249,8 @@ class GluttexConstants {
   static const String putRuleAnswerEndpoint = '/rule/answer';
 
   static const String getProductSearchByBarcodeEndpoint = '/product/barcode';
+  static const String getProductDBSearchByBarcodeEndpoint =
+      '/product/db/barcode';
   static const String getProductSearchByImageEndpoint = '/product/search/image';
 
   static const String getSupplierSearchByGeoEndpoint =

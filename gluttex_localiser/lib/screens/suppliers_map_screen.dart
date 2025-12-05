@@ -114,7 +114,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
           SpeedDialButton(
             icon: Icon(Icons.add_business,
                 color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.scannerTxt,
+            label: AppLocalizations.of(context)?.addSupplierTxt,
             backgroundColor: Theme.of(context).colorScheme.primary,
             onTap: () {
               Navigator.pushNamed(

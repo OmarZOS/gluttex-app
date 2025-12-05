@@ -91,17 +91,21 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
           SpeedDialButton(
               icon: Icon(CupertinoIcons.barcode_viewfinder),
               label: AppLocalizations.of(context)!.scannerTxt,
-              onTap: () => {
-                    // String codeBar = Navigator.pushNamed(context, AppRoutes.productScanPage),
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => IProductDetailsScreen(
-                          iproduct: IProduct.empty(),
-                        ),
+              onTap: () async {
+                String? barcode = await Navigator.pushNamed(
+                    context, AppRoutes.productScanPage) as String?;
+
+                if (barcode != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => IProductDetailsScreen(
+                        barcode: barcode,
                       ),
-                    )
-                  }),
+                    ),
+                  );
+                }
+              }),
           SpeedDialButton(
             icon: Icon(Icons.add_box_outlined),
             label: AppLocalizations.of(context)!.addProductTxt,

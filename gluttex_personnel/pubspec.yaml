@@ -44,6 +44,8 @@ dependencies:
     path: ../gluttex_home
   gluttex_impl_business:
     path: ../gluttex_impl_business
+  gluttex_ui:
+    path: ../gluttex_ui
   gluttex_impl_app:
     path: ../gluttex_impl_app
   gluttex_impl_mediation:
@@ -54,6 +56,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_svg: ^2.2.0
   # qr_code_scanner: ^1.0.1
 
 dev_dependencies:

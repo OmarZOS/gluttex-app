@@ -538,6 +538,449 @@ abstract class AppLocalizations {
   /// **'Recipe Name'**
   String get recipeNameText;
 
+  String labeledAmount(String quantifier) {
+    switch (quantifier) {
+      case "g":
+        return quantifier_g;
+      case "kg":
+        return quantifier_kg;
+      case "mg":
+        return quantifier_mg;
+      case "L":
+        return quantifier_L;
+      case "mL":
+        return quantifier_mL;
+      case "pc":
+        return quantifier_pc;
+      case "pkg":
+        return quantifier_pkg;
+      case "box":
+        return quantifier_box;
+      case "bag":
+        return quantifier_bag;
+      case "slice":
+        return quantifier_slice;
+      case "cup":
+        return quantifier_cup;
+      default:
+        return notFoundError;
+    }
+  }
+
+  String getLocalizedQuestion(int index) {
+    switch (index) {
+      case 1:
+        return question_1;
+      case 2:
+        return question_2;
+      case 3:
+        return question_3;
+      case 4:
+        return question_4;
+      case 5:
+        return question_5;
+      case 6:
+        return question_6;
+      case 7:
+        return question_7;
+      case 8:
+        return question_8;
+      case 9:
+        return question_9;
+      case 10:
+        return question_10;
+      case 11:
+        return question_11;
+      case 12:
+        return question_12;
+      case 13:
+        return question_13;
+      case 14:
+        return question_14;
+      case 15:
+        return question_15;
+      case 16:
+        return question_16;
+      case 17:
+        return question_17;
+      case 18:
+        return question_18;
+      case 19:
+        return question_19;
+      case 20:
+        return question_20;
+      case 21:
+        return question_21;
+      case 22:
+        return question_22;
+      case 23:
+        return question_23;
+      case 24:
+        return question_24;
+      case 25:
+        return question_25;
+      case 26:
+        return question_26;
+      case 27:
+        return question_27;
+      case 28:
+        return question_28;
+      case 29:
+        return question_29;
+      case 30:
+        return question_30;
+      case 31:
+        return question_31;
+      case 32:
+        return question_32;
+      case 33:
+        return question_33;
+      case 34:
+        return question_34;
+      case 35:
+        return question_35;
+      case 36:
+        return question_36;
+      case 37:
+        return question_37;
+      case 38:
+        return question_38;
+      case 39:
+        return question_39;
+      case 40:
+        return question_40;
+      case 41:
+        return question_41;
+      case 42:
+        return question_42;
+      case 43:
+        return question_43;
+      case 44:
+        return question_44;
+      case 45:
+        return question_45;
+      case 46:
+        return question_46;
+      case 47:
+        return question_47;
+      case 48:
+        return question_48;
+      case 49:
+        return question_49;
+      case 50:
+        return question_50;
+      case 51:
+        return question_51;
+      case 52:
+        return question_52;
+      case 53:
+        return question_53;
+      case 54:
+        return question_54;
+      case 55:
+        return question_55;
+      case 56:
+        return question_56;
+      case 57:
+        return question_57;
+      case 58:
+        return question_58;
+      case 59:
+        return question_59;
+      case 60:
+        return question_60;
+      case 61:
+        return question_61;
+      case 62:
+        return question_62;
+      case 63:
+        return question_63;
+      case 64:
+        return question_64;
+      case 65:
+        return question_65;
+      case 66:
+        return question_66;
+      case 67:
+        return question_67;
+      case 68:
+        return question_68;
+      case 69:
+        return question_69;
+      case 70:
+        return question_70;
+      case 71:
+        return question_71;
+      case 72:
+        return question_72;
+      case 73:
+        return question_73;
+      case 74:
+        return question_74;
+      case 75:
+        return question_75;
+      case 76:
+        return question_76;
+      case 77:
+        return question_77;
+      case 78:
+        return question_78;
+      case 79:
+        return question_79;
+      case 80:
+        return question_80;
+      case 81:
+        return question_81;
+      case 82:
+        return question_82;
+      case 83:
+        return question_83;
+      case 84:
+        return question_84;
+      case 85:
+        return question_85;
+      case 86:
+        return question_86;
+      case 87:
+        return question_87;
+      case 88:
+        return question_88;
+      case 89:
+        return question_89;
+      case 90:
+        return question_90;
+      case 91:
+        return question_91;
+      case 92:
+        return question_92;
+      case 93:
+        return question_93;
+      case 94:
+        return question_94;
+      case 95:
+        return question_95;
+      case 96:
+        return question_96;
+      case 97:
+        return question_97;
+      case 98:
+        return question_98;
+      case 99:
+        return question_99;
+      case 100:
+        return question_100;
+      default:
+        return notFoundError;
+    }
+  }
+
+  String getLocalizedAnswerList(int index) {
+    switch (index) {
+      case 1:
+        return options_1;
+      case 2:
+        return options_2;
+      case 3:
+        return options_3;
+      case 4:
+        return options_4;
+      case 5:
+        return options_5;
+      case 6:
+        return options_6;
+      case 7:
+        return options_7;
+      case 8:
+        return options_8;
+      case 9:
+        return options_9;
+      case 10:
+        return options_10;
+      case 11:
+        return options_11;
+      case 12:
+        return options_12;
+      case 13:
+        return options_13;
+      case 14:
+        return options_14;
+      case 15:
+        return options_15;
+      case 16:
+        return options_16;
+      case 17:
+        return options_17;
+      case 18:
+        return options_18;
+      case 19:
+        return options_19;
+      case 20:
+        return options_20;
+      case 21:
+        return options_21;
+      case 22:
+        return options_22;
+      case 23:
+        return options_23;
+      case 24:
+        return options_24;
+      case 25:
+        return options_25;
+      case 26:
+        return options_26;
+      case 27:
+        return options_27;
+      case 28:
+        return options_28;
+      case 29:
+        return options_29;
+      case 30:
+        return options_30;
+      case 31:
+        return options_31;
+      case 32:
+        return options_32;
+      case 33:
+        return options_33;
+      case 34:
+        return options_34;
+      case 35:
+        return options_35;
+      case 36:
+        return options_36;
+      case 37:
+        return options_37;
+      case 38:
+        return options_38;
+      case 39:
+        return options_39;
+      case 40:
+        return options_40;
+      case 41:
+        return options_41;
+      case 42:
+        return options_42;
+      case 43:
+        return options_43;
+      case 44:
+        return options_44;
+      case 45:
+        return options_45;
+      case 46:
+        return options_46;
+      case 47:
+        return options_47;
+      case 48:
+        return options_48;
+      case 49:
+        return options_49;
+      case 50:
+        return options_50;
+      case 51:
+        return options_51;
+      case 52:
+        return options_52;
+      case 53:
+        return options_53;
+      case 54:
+        return options_54;
+      case 55:
+        return options_55;
+      case 56:
+        return options_56;
+      case 57:
+        return options_57;
+      case 58:
+        return options_58;
+      case 59:
+        return options_59;
+      case 60:
+        return options_60;
+      case 61:
+        return options_61;
+      case 62:
+        return options_62;
+      case 63:
+        return options_63;
+      case 64:
+        return options_64;
+      case 65:
+        return options_65;
+      case 66:
+        return options_66;
+      case 67:
+        return options_67;
+      case 68:
+        return options_68;
+      case 69:
+        return options_69;
+      case 70:
+        return options_70;
+      case 71:
+        return options_71;
+      case 72:
+        return options_72;
+      case 73:
+        return options_73;
+      case 74:
+        return options_74;
+      case 75:
+        return options_75;
+      case 76:
+        return options_76;
+      case 77:
+        return options_77;
+      case 78:
+        return options_78;
+      case 79:
+        return options_79;
+      case 80:
+        return options_80;
+      case 81:
+        return options_81;
+      case 82:
+        return options_82;
+      case 83:
+        return options_83;
+      case 84:
+        return options_84;
+      case 85:
+        return options_85;
+      case 86:
+        return options_86;
+      case 87:
+        return options_87;
+      case 88:
+        return options_88;
+      case 89:
+        return options_89;
+      case 90:
+        return options_90;
+      case 91:
+        return options_91;
+      case 92:
+        return options_92;
+      case 93:
+        return options_93;
+      case 94:
+        return options_94;
+      case 95:
+        return options_95;
+      case 96:
+        return options_96;
+      case 97:
+        return options_97;
+      case 98:
+        return options_98;
+      case 99:
+        return options_99;
+      case 100:
+        return options_100;
+      default:
+        return notFoundError;
+    }
+  }
+
   /// No description provided for @pleaseInputRecipeNameMsg.
   ///
   /// In en, this message translates to:
@@ -987,449 +1430,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restaurant,Bakery,Factory,Supermarket,Grocery Store,Distributor'**
   String get providerCategoryTextList;
-
-  String labeledAmount(String quantifier) {
-    switch (quantifier) {
-      case "g":
-        return quantifier_g;
-      case "kg":
-        return quantifier_kg;
-      case "mg":
-        return quantifier_mg;
-      case "L":
-        return quantifier_L;
-      case "mL":
-        return quantifier_mL;
-      case "pc":
-        return quantifier_pc;
-      case "pkg":
-        return quantifier_pkg;
-      case "box":
-        return quantifier_box;
-      case "bag":
-        return quantifier_bag;
-      case "slice":
-        return quantifier_slice;
-      case "cup":
-        return quantifier_cup;
-      default:
-        return notFoundError;
-    }
-  }
-
-  String getLocalizedQuestion(int index) {
-    switch (index) {
-      case 1:
-        return question_1;
-      case 2:
-        return question_2;
-      case 3:
-        return question_3;
-      case 4:
-        return question_4;
-      case 5:
-        return question_5;
-      case 6:
-        return question_6;
-      case 7:
-        return question_7;
-      case 8:
-        return question_8;
-      case 9:
-        return question_9;
-      case 10:
-        return question_10;
-      case 11:
-        return question_11;
-      case 12:
-        return question_12;
-      case 13:
-        return question_13;
-      case 14:
-        return question_14;
-      case 15:
-        return question_15;
-      case 16:
-        return question_16;
-      case 17:
-        return question_17;
-      case 18:
-        return question_18;
-      case 19:
-        return question_19;
-      case 20:
-        return question_20;
-      case 21:
-        return question_21;
-      case 22:
-        return question_22;
-      case 23:
-        return question_23;
-      case 24:
-        return question_24;
-      case 25:
-        return question_25;
-      case 26:
-        return question_26;
-      case 27:
-        return question_27;
-      case 28:
-        return question_28;
-      case 29:
-        return question_29;
-      case 30:
-        return question_30;
-      case 31:
-        return question_31;
-      case 32:
-        return question_32;
-      case 33:
-        return question_33;
-      case 34:
-        return question_34;
-      case 35:
-        return question_35;
-      case 36:
-        return question_36;
-      case 37:
-        return question_37;
-      case 38:
-        return question_38;
-      case 39:
-        return question_39;
-      case 40:
-        return question_40;
-      case 41:
-        return question_41;
-      case 42:
-        return question_42;
-      case 43:
-        return question_43;
-      case 44:
-        return question_44;
-      case 45:
-        return question_45;
-      case 46:
-        return question_46;
-      case 47:
-        return question_47;
-      case 48:
-        return question_48;
-      case 49:
-        return question_49;
-      case 50:
-        return question_50;
-      case 51:
-        return question_51;
-      case 52:
-        return question_52;
-      case 53:
-        return question_53;
-      case 54:
-        return question_54;
-      case 55:
-        return question_55;
-      case 56:
-        return question_56;
-      case 57:
-        return question_57;
-      case 58:
-        return question_58;
-      case 59:
-        return question_59;
-      case 60:
-        return question_60;
-      case 61:
-        return question_61;
-      case 62:
-        return question_62;
-      case 63:
-        return question_63;
-      case 64:
-        return question_64;
-      case 65:
-        return question_65;
-      case 66:
-        return question_66;
-      case 67:
-        return question_67;
-      case 68:
-        return question_68;
-      case 69:
-        return question_69;
-      case 70:
-        return question_70;
-      case 71:
-        return question_71;
-      case 72:
-        return question_72;
-      case 73:
-        return question_73;
-      case 74:
-        return question_74;
-      case 75:
-        return question_75;
-      case 76:
-        return question_76;
-      case 77:
-        return question_77;
-      case 78:
-        return question_78;
-      case 79:
-        return question_79;
-      case 80:
-        return question_80;
-      case 81:
-        return question_81;
-      case 82:
-        return question_82;
-      case 83:
-        return question_83;
-      case 84:
-        return question_84;
-      case 85:
-        return question_85;
-      case 86:
-        return question_86;
-      case 87:
-        return question_87;
-      case 88:
-        return question_88;
-      case 89:
-        return question_89;
-      case 90:
-        return question_90;
-      case 91:
-        return question_91;
-      case 92:
-        return question_92;
-      case 93:
-        return question_93;
-      case 94:
-        return question_94;
-      case 95:
-        return question_95;
-      case 96:
-        return question_96;
-      case 97:
-        return question_97;
-      case 98:
-        return question_98;
-      case 99:
-        return question_99;
-      case 100:
-        return question_100;
-      default:
-        return notFoundError;
-    }
-  }
-
-  String getLocalizedAnswerList(int index) {
-    switch (index) {
-      case 1:
-        return options_1;
-      case 2:
-        return options_2;
-      case 3:
-        return options_3;
-      case 4:
-        return options_4;
-      case 5:
-        return options_5;
-      case 6:
-        return options_6;
-      case 7:
-        return options_7;
-      case 8:
-        return options_8;
-      case 9:
-        return options_9;
-      case 10:
-        return options_10;
-      case 11:
-        return options_11;
-      case 12:
-        return options_12;
-      case 13:
-        return options_13;
-      case 14:
-        return options_14;
-      case 15:
-        return options_15;
-      case 16:
-        return options_16;
-      case 17:
-        return options_17;
-      case 18:
-        return options_18;
-      case 19:
-        return options_19;
-      case 20:
-        return options_20;
-      case 21:
-        return options_21;
-      case 22:
-        return options_22;
-      case 23:
-        return options_23;
-      case 24:
-        return options_24;
-      case 25:
-        return options_25;
-      case 26:
-        return options_26;
-      case 27:
-        return options_27;
-      case 28:
-        return options_28;
-      case 29:
-        return options_29;
-      case 30:
-        return options_30;
-      case 31:
-        return options_31;
-      case 32:
-        return options_32;
-      case 33:
-        return options_33;
-      case 34:
-        return options_34;
-      case 35:
-        return options_35;
-      case 36:
-        return options_36;
-      case 37:
-        return options_37;
-      case 38:
-        return options_38;
-      case 39:
-        return options_39;
-      case 40:
-        return options_40;
-      case 41:
-        return options_41;
-      case 42:
-        return options_42;
-      case 43:
-        return options_43;
-      case 44:
-        return options_44;
-      case 45:
-        return options_45;
-      case 46:
-        return options_46;
-      case 47:
-        return options_47;
-      case 48:
-        return options_48;
-      case 49:
-        return options_49;
-      case 50:
-        return options_50;
-      case 51:
-        return options_51;
-      case 52:
-        return options_52;
-      case 53:
-        return options_53;
-      case 54:
-        return options_54;
-      case 55:
-        return options_55;
-      case 56:
-        return options_56;
-      case 57:
-        return options_57;
-      case 58:
-        return options_58;
-      case 59:
-        return options_59;
-      case 60:
-        return options_60;
-      case 61:
-        return options_61;
-      case 62:
-        return options_62;
-      case 63:
-        return options_63;
-      case 64:
-        return options_64;
-      case 65:
-        return options_65;
-      case 66:
-        return options_66;
-      case 67:
-        return options_67;
-      case 68:
-        return options_68;
-      case 69:
-        return options_69;
-      case 70:
-        return options_70;
-      case 71:
-        return options_71;
-      case 72:
-        return options_72;
-      case 73:
-        return options_73;
-      case 74:
-        return options_74;
-      case 75:
-        return options_75;
-      case 76:
-        return options_76;
-      case 77:
-        return options_77;
-      case 78:
-        return options_78;
-      case 79:
-        return options_79;
-      case 80:
-        return options_80;
-      case 81:
-        return options_81;
-      case 82:
-        return options_82;
-      case 83:
-        return options_83;
-      case 84:
-        return options_84;
-      case 85:
-        return options_85;
-      case 86:
-        return options_86;
-      case 87:
-        return options_87;
-      case 88:
-        return options_88;
-      case 89:
-        return options_89;
-      case 90:
-        return options_90;
-      case 91:
-        return options_91;
-      case 92:
-        return options_92;
-      case 93:
-        return options_93;
-      case 94:
-        return options_94;
-      case 95:
-        return options_95;
-      case 96:
-        return options_96;
-      case 97:
-        return options_97;
-      case 98:
-        return options_98;
-      case 99:
-        return options_99;
-      case 100:
-        return options_100;
-      default:
-        return notFoundError;
-    }
-  }
 
   /// No description provided for @recipeCategoryTextList.
   ///
@@ -4521,6 +4521,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel Invitation'**
   String get actionCancelInvite;
+
+  /// No description provided for @suppliersCountCategoryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{totalSuppliers,plural, =0{No locations}=1{1 location}other{{totalSuppliers} locations}} • {categoryCount,plural, =0{no category}=1{1 in category}other{{categoryCount} in category}}'**
+  String suppliersCountCategoryCount(num categoryCount, num totalSuppliers);
+
+  /// No description provided for @myBusinessesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Businesses'**
+  String get myBusinessesTitle;
+
+  /// No description provided for @categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categories;
+
+  /// No description provided for @filteredTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtered'**
+  String get filteredTxt;
+
+  /// No description provided for @noBusinessesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No businesses found'**
+  String get noBusinessesFound;
+
+  /// No description provided for @adjustFilterBusinessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search or filters'**
+  String get adjustFilterBusinessHint;
+
+  /// No description provided for @addFirstBusinessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first business to get started'**
+  String get addFirstBusinessHint;
+
+  /// No description provided for @addMemberText.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Member'**
+  String get addMemberText;
+
+  /// No description provided for @addTeamMemberText.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Team Member'**
+  String get addTeamMemberText;
+
+  /// No description provided for @addUsersToManageText.
+  ///
+  /// In en, this message translates to:
+  /// **'Add users to manage {supplierName}'**
+  String addUsersToManageText(Object supplierName);
+
+  /// No description provided for @scanQrCodeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get scanQrCodeText;
+
+  /// No description provided for @scanUserProfileQrText.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan user profile QR code'**
+  String get scanUserProfileQrText;
+
+  /// No description provided for @searchAndInviteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Search & Invite'**
+  String get searchAndInviteText;
+
+  /// No description provided for @searchAndInviteExistingUsersText.
+  ///
+  /// In en, this message translates to:
+  /// **'Search and invite existing users'**
+  String get searchAndInviteExistingUsersText;
+
+  /// No description provided for @cancelText.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelText;
+
+  /// No description provided for @cancelInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Invitation'**
+  String get cancelInvitationTitle;
+
+  /// No description provided for @cancelInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel invitation? This cannot be undone.'**
+  String get cancelInvitationMessage;
+
+  /// No description provided for @cancelInvitationAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Invitation'**
+  String get cancelInvitationAction;
+
+  /// No description provided for @removeTeamMemberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Team Member'**
+  String get removeTeamMemberTitle;
+
+  /// No description provided for @removeTeamMemberMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {userName} from {supplierName}?'**
+  String removeTeamMemberMessage(Object supplierName, Object userName);
+
+  /// No description provided for @removeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeAction;
+
+  /// No description provided for @personnelManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Personnel Management'**
+  String get personnelManagement;
+
+  /// No description provided for @privilegesUpdatedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated privileges for {userName}'**
+  String privilegesUpdatedMessage(Object userName);
+
+  /// No description provided for @privilegesUpdateFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update privileges'**
+  String get privilegesUpdateFailedMessage;
+
+  /// No description provided for @privilegesUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while updating privileges'**
+  String get privilegesUpdateError;
+
+  /// No description provided for @barcodeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get barcodeText;
+
+  /// No description provided for @barcodeCopiedText.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode copied to clipboard'**
+  String get barcodeCopiedText;
+
+  /// No description provided for @sourceText.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get sourceText;
+
+  /// No description provided for @modelText.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get modelText;
+
+  /// No description provided for @recentText.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recentText;
+
+  /// No description provided for @productDetailsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Details'**
+  String get productDetailsText;
+
+  /// No description provided for @createdText.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get createdText;
+
+  /// No description provided for @lastUpdatedText.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated'**
+  String get lastUpdatedText;
+
+  /// No description provided for @priceUpdatedText.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Updated'**
+  String get priceUpdatedText;
+
+  /// No description provided for @noProductDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Not Found'**
+  String get noProductDataTitle;
+
+  /// No description provided for @noProductDataDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No product information found for this barcode. The product may be new or not in our database yet.'**
+  String get noProductDataDescription;
+
+  /// No description provided for @noProductDataHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'You can try scanning again or add the product details manually.'**
+  String get noProductDataHelp;
+
+  /// No description provided for @scanAgainText.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Again'**
+  String get scanAgainText;
+
+  /// No description provided for @addManuallyText.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Product Manually'**
+  String get addManuallyText;
+
+  /// No description provided for @ownedText.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get ownedText;
+
+  /// No description provided for @managedText.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed'**
+  String get managedText;
+
+  /// No description provided for @noOwnedBusinessesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Owned Businesses'**
+  String get noOwnedBusinessesTitle;
+
+  /// No description provided for @noOwnedBusinessesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t own any businesses yet'**
+  String get noOwnedBusinessesDescription;
+
+  /// No description provided for @noManagedBusinessesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Managed Businesses'**
+  String get noManagedBusinessesTitle;
+
+  /// No description provided for @noManagedBusinessesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not managing any businesses'**
+  String get noManagedBusinessesDescription;
+
+  /// No description provided for @noBusinessesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Businesses'**
+  String get noBusinessesTitle;
+
+  /// No description provided for @noBusinessesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t own or manage any businesses yet'**
+  String get noBusinessesDescription;
+
+  /// No description provided for @noResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Results'**
+  String get noResultsTitle;
+
+  /// No description provided for @adjustSearchFiltersText.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search or filters'**
+  String get adjustSearchFiltersText;
 }
 
 class _AppLocalizationsDelegate

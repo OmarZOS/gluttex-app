@@ -33,7 +33,8 @@ class AssistantNotifier extends ChangeNotifier {
   // PRODUCT FETCHING
   // ================================================================
 
-  Future<void> fetchProductByBarcode(String barcode) async {
+  Future<void> fetchProductByBarcode(String barcode,
+      {bool onlyFromDB = false}) async {
     if (barcode.trim().isEmpty) {
       _setError("Invalid barcode", operation: "barcode_invalid");
       return;
@@ -42,9 +43,12 @@ class AssistantNotifier extends ChangeNotifier {
     _beginOperation("barcode_lookup");
 
     try {
+      final endpoint = onlyFromDB
+          ? GluttexConstants.getProductDBSearchByBarcodeEndpoint
+          : GluttexConstants.getProductSearchByBarcodeEndpoint;
+
       final result = await _storageService.get(
-        GluttexConstants.apiBaseUrl +
-            GluttexConstants.getProductSearchByBarcodeEndpoint,
+        GluttexConstants.apiBaseUrl + endpoint,
         barcode,
       );
 

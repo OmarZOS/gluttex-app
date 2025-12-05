@@ -9,8 +9,15 @@ import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_personnel/components/pending_tab_content.dart';
 import 'package:gluttex_personnel/components/personnel_tab_content.dart';
-import 'package:gluttex_personnel/components/privilege_dialog.dart';
+import 'package:gluttex_personnel/components/privilege_dialog/privilege_dialog.dart';
 import 'package:gluttex_personnel/components/search_invite_dialog.dart';
+import 'package:gluttex_personnel/components/dashboard/add_options_sheet.dart';
+import 'package:gluttex_personnel/components/dashboard/confirmation_dialogs.dart';
+import 'package:gluttex_personnel/components/dashboard/personnel_header_widget.dart';
+import 'package:gluttex_personnel/components/dashboard/privilege_dialog_manager.dart';
+import 'package:gluttex_personnel/components/dashboard/qr_utils.dart';
+import 'package:gluttex_personnel/components/dashboard/quick_stats_widget.dart';
+import 'package:gluttex_personnel/components/dashboard/search_bar_widget.dart';
 import 'package:provider/provider.dart';
 
 class PersonnelManagementScreen extends StatefulWidget {
@@ -50,11 +57,9 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Initialize notifiers once
     _personnelNotifier = context.read<PersonnelNotifier>();
     _userNotifier = context.read<AppUserNotifier>();
 
-    // Load initial data only once
     if (!_isInitialLoadComplete) {
       _isInitialLoadComplete = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadInitialData());
@@ -70,22 +75,18 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   }
 
   void _onSearchChanged() {
-    // Cancel previous timer
     _debounceTimer?.cancel();
-
     final query = _searchController.text.trim();
+
     if (query.isEmpty) {
       _personnelNotifier.clearSearch(supplierId: widget.supplierId);
       return;
     }
 
-    // Debounce search
     _debounceTimer = Timer(const Duration(milliseconds: 350), () {
       if (mounted) {
-        _personnelNotifier.searchPersonnel(
-          query,
-          supplierId: widget.supplierId,
-        );
+        _personnelNotifier.searchPersonnel(query,
+            supplierId: widget.supplierId);
       }
     });
   }
@@ -117,10 +118,19 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(theme, colorScheme),
-            _buildQuickStats(),
+            PersonnelHeaderWidget(
+              supplierName: widget.supplierName,
+              onBack: () => Navigator.pop(context),
+              colorScheme: colorScheme,
+              theme: theme,
+            ),
+            QuickStatsWidget(supplierId: widget.supplierId),
             _buildTabBar(theme, colorScheme, localizations),
-            _buildSearchBar(theme, colorScheme),
+            SearchBarWidget(
+              controller: _searchController,
+              tabIndex: _tabController.index,
+              supplierId: widget.supplierId,
+            ),
             Expanded(child: _buildContent()),
           ],
         ),
@@ -130,126 +140,18 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         icon: const Icon(Icons.person_add),
-        label: const Text('Add Member'),
+        label: Text(localizations.addMemberText),
       ),
     );
   }
 
-  Widget _buildHeader(ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildTabBar(
+    ThemeData theme,
+    ColorScheme colorScheme,
+    AppLocalizations localizations,
+  ) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(top: 20, bottom: 20, left: 24, right: 24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colorScheme.primary, colorScheme.primaryContainer],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
-        ),
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.arrow_back, color: colorScheme.onPrimary),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.supplierName,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Personnel Management',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onPrimary.withOpacity(0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickStats() {
-    return Consumer<PersonnelNotifier>(
-      builder: (context, notifier, _) {
-        // Listen only to notifier changes, rebuild only when stats change
-        final stats = notifier.getSupplierStats(widget.supplierId);
-
-        return Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem('Active', stats['active'] ?? 0, Icons.people_alt,
-                  Colors.green),
-              _buildStatItem('Pending', stats['pending'] ?? 0,
-                  Icons.access_time, Colors.orange),
-              _buildStatItem('Total', stats['total'] ?? 0, Icons.group,
-                  Theme.of(context).colorScheme.primary),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildStatItem(String label, int count, IconData icon, Color color) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          count.toString(),
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabBar(ThemeData theme, ColorScheme colorScheme,
-      AppLocalizations localizations) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -279,14 +181,6 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),
-                onTap: (index) {
-                  // Update filtered personnel when tab changes
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      setState(() {});
-                    }
-                  });
-                },
                 tabs: [
                   Tab(
                     child: Row(
@@ -327,91 +221,10 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     );
   }
 
-  Widget _buildSearchBar(ThemeData theme, ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Consumer<PersonnelNotifier>(
-        builder: (context, notifier, _) {
-          final isLoading = notifier.isLoading;
-
-          return Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withOpacity(0.1),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: _getSearchHint(),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.clear,
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                              onPressed: () {
-                                _searchController.clear();
-                                notifier.clearSearch(
-                                    supplierId: widget.supplierId);
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                  ),
-                ),
-                if (isLoading)
-                  const Padding(
-                    padding: EdgeInsets.only(right: 16),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  String _getSearchHint() {
-    switch (_tabController.index) {
-      case 0:
-        return 'Search all team members...';
-      case 1:
-        return 'Search active members...';
-      case 2:
-        return 'Search pending invitations...';
-      default:
-        return 'Search team members...';
-    }
-  }
-
   Widget _buildContent() {
     return TabBarView(
       controller: _tabController,
       children: [
-        // All tab
         Consumer<PersonnelNotifier>(
           builder: (context, notifier, child) {
             return PersonnelTabContent(
@@ -421,12 +234,9 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
               onShowPrivilegeDialog: _showPrivilegeDialog,
               onShowRemoveDialog: _showRemoveDialog,
               onCancelInvitation: _cancelInvitation,
-              // key: ValueKey(
-              //     'all_${notifier.personnel.length}_${notifier.isLoading}'),
             );
           },
         ),
-        // Active tab
         Consumer<PersonnelNotifier>(
           builder: (context, notifier, child) {
             return PersonnelTabContent(
@@ -436,12 +246,9 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
               onShowPrivilegeDialog: _showPrivilegeDialog,
               onShowRemoveDialog: _showRemoveDialog,
               onCancelInvitation: _cancelInvitation,
-              key: ValueKey(
-                  'active_${notifier.personnel.length}_${notifier.isLoading}'),
             );
           },
         ),
-        // Pending tab
         Consumer<PersonnelNotifier>(
           builder: (context, notifier, child) {
             return PendingTabContent(
@@ -452,8 +259,6 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
               onShowRemoveDialog: _showRemoveDialog,
               onCancelInvitation: _cancelInvitation,
               onShowAddOptions: _showAddOptions,
-              // key: ValueKey(
-              //     'pending_${notifier.personnel.length}_${notifier.isLoading}'),
             );
           },
         ),
@@ -461,225 +266,17 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     );
   }
 
-  // Dialog and action methods
-  Future<void> _showPrivilegeDialog(
-      AppUser user, bool isPending, int ruleId) async {
-    int? existingPrivileges;
-
-    if (!isPending) {
-      final rules = await _personnelNotifier.getUserPrivileges(
-        ruleId: ruleId,
-        userId: user.id_app_user ?? 0,
-        supplierId: widget.supplierId,
-      );
-
-      if (rules != null && rules.isNotEmpty) {
-        final ruleForSupplier = rules.firstWhere(
-          (rule) =>
-              rule.productProvider?.id_product_provider == widget.supplierId,
-          orElse: () => rules.first,
-        );
-        existingPrivileges = ruleForSupplier.management_rule_code;
-      }
-    }
-
+  void _showAddOptions() {
     if (!mounted) return;
 
-    final privilegesBitmask = await showDialog<int>(
-      context: context,
-      builder: (context) => PrivilegeDialog(
-        user: user,
-        supplierName: widget.supplierName,
-        initialPrivileges: existingPrivileges,
-      ),
-    );
-
-    if (privilegesBitmask != null && mounted && !isPending) {
-      await _modifyUserPrivileges(user, privilegesBitmask, ruleId: ruleId);
-    }
-  }
-
-  Future<void> _modifyUserPrivileges(AppUser user, int privileges,
-      {int ruleId = 0}) async {
-    try {
-      final rules = await _personnelNotifier.getUserPrivileges(
-        ruleId: ruleId,
-        userId: user.id_app_user ?? 0,
-        supplierId: widget.supplierId,
-      );
-
-      if (rules == null || rules.isEmpty) return;
-
-      final ruleForSupplier = rules.firstWhere(
-        (rule) =>
-            rule.productProvider?.id_product_provider == widget.supplierId,
-        orElse: () => rules.first,
-      );
-
-      final success = await _personnelNotifier.updateTeamMemberPrivileges(
-        ruleId: ruleForSupplier.id_management_rule,
-        userId: user.id_app_user ?? 0,
-        supplierId: widget.supplierId,
-        orgId: widget.orgId,
-        privilege: privileges,
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? 'Updated privileges for ${user.personFirstName}'
-                  : 'Failed to update privileges',
-            ),
-            backgroundColor: success
-                ? Theme.of(context).colorScheme.tertiary
-                : Theme.of(context).colorScheme.error,
-          ),
-        );
-        _refreshData();
-      }
-    } catch (e) {
-      log('Error modifying user privileges: $e');
-    }
-  }
-
-  Future<void> _cancelInvitation(AppUser user, int ruleId) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Invitation'),
-        content: const Text('Cancel invitation? This cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            ),
-            child: const Text('Cancel Invitation'),
-          ),
-        ],
-      ),
-    );
-
-    if (result == true && mounted) {
-      final success = await _personnelNotifier.removeUserFromSupplier(
-        ruleId,
-        user.id_app_user ?? 0,
-        widget.supplierId,
-      );
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invitation canceled')),
-        );
-        _refreshData();
-      }
-    }
-  }
-
-  void _showAddOptions() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Add Team Member',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Add users to manage ${widget.supplierName}',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              _buildOptionButton(
-                icon: Icons.qr_code_scanner,
-                title: 'Scan QR Code',
-                subtitle: 'Scan user profile QR code',
-                onTap: () => Navigator.pop(context),
-              ),
-              const SizedBox(height: 12),
-              _buildOptionButton(
-                icon: Icons.search,
-                title: 'Search & Invite',
-                subtitle: 'Search and invite existing users',
-                onTap: () {
-                  Navigator.pop(context);
-                  _showSearchInviteDialog();
-                },
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionButton({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: colorScheme.onPrimaryContainer),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    Text(subtitle),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
-            ],
-          ),
-        ),
+      builder: (context) => AddOptionsSheet(
+        supplierName: widget.supplierName,
+        onQROption: _handleQRCodeOption,
+        onSearchOption: _showSearchInviteDialog,
       ),
     );
   }
@@ -692,13 +289,43 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
       context: context,
       builder: (context) => SearchInviteDialog(
         orgId: widget.orgId,
-        onUserSelected: (user, privileges) =>
-            {_addUserToSupplier(user, privileges), _refreshData()},
+        onUserSelected: (user, privileges) async {
+          await _addUserToSupplier(user, privileges);
+          _refreshData();
+        },
         userId: currentUserId,
         supplierId: widget.supplierId,
         supplierName: widget.supplierName,
       ),
     );
+  }
+
+  Future<void> _handleQRCodeOption() async {
+    if (!mounted) return;
+
+    Navigator.pop(context);
+
+    final qrCode = await Navigator.pushNamed(context, AppRoutes.QRScanPage);
+    if (qrCode is! String || qrCode.isEmpty) return;
+
+    final userId = extractUserIdFromQR(qrCode);
+    if (userId == null) return;
+
+    final AppUser? user = await _userNotifier.fetchUserPassively(userId);
+    if (user == null || !mounted) return;
+
+    final privilegesBitmask = await showDialog<int>(
+      context: context,
+      builder: (context) => PrivilegeDialog(
+        user: user,
+        supplierName: widget.supplierName,
+        initialPrivileges: 0,
+      ),
+    );
+
+    if (privilegesBitmask != null && mounted) {
+      await _addUserToSupplier(user, privilegesBitmask, fromQR: true);
+    }
   }
 
   Future<void> _addUserToSupplier(AppUser user, int privileges,
@@ -727,27 +354,51 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     }
   }
 
-  void _showRemoveDialog(int ruleId, AppUser user) {
-    showDialog(
+  Future<void> _showPrivilegeDialog(
+      AppUser user, bool isPending, int ruleId) async {
+    await PrivilegeDialogManager.showPrivilegeDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove Team Member'),
-        content:
-            Text('Remove ${user.personFirstName} from ${widget.supplierName}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _removeUserFromSupplier(ruleId, user);
-            },
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
+      user: user,
+      isPending: isPending,
+      ruleId: ruleId,
+      supplierId: widget.supplierId,
+      supplierName: widget.supplierName,
+      personnelNotifier: _personnelNotifier,
+      orgId: widget.orgId,
+      onRefresh: _refreshData,
+    );
+  }
+
+  Future<void> _cancelInvitation(AppUser user, int ruleId) async {
+    await ConfirmationDialogs.showCancelInvitationDialog(
+      context: context,
+      user: user,
+      onConfirm: () async {
+        final success = await _personnelNotifier.removeUserFromSupplier(
+          ruleId,
+          user.id_app_user ?? 0,
+          widget.supplierId,
+        );
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  '${user.personFirstName}\'s invitation has been cancelled'),
+            ),
+          );
+          _refreshData();
+        }
+      },
+    );
+  }
+
+  void _showRemoveDialog(int ruleId, AppUser user) {
+    ConfirmationDialogs.showRemoveMemberDialog(
+      context: context,
+      userName: user.personFirstName,
+      supplierName: widget.supplierName,
+      onConfirm: () => _removeUserFromSupplier(ruleId, user),
     );
   }
 
@@ -768,6 +419,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
           ),
         ),
       );
+      _refreshData();
     }
   }
 }

@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2056,4 +2058,173 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get actionCancelInvite => 'Annuler l\'invitation';
+
+  @override
+  String suppliersCountCategoryCount(num categoryCount, num totalSuppliers) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalSuppliers,
+      locale: localeName,
+      other: '$totalSuppliers établissements',
+      one: '1 établissement',
+      zero: 'Aucun établissement',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      categoryCount,
+      locale: localeName,
+      other: '$categoryCount dans la catégorie',
+      one: '1 dans la catégorie',
+      zero: 'aucune catégorie',
+    );
+    return '$_temp0 • $_temp1';
+  }
+
+  @override
+  String get myBusinessesTitle => 'Mes Entreprises';
+
+  @override
+  String get categories => 'Catégories';
+
+  @override
+  String get filteredTxt => 'Filtré';
+
+  @override
+  String get noBusinessesFound => 'Aucune entreprise trouvée';
+
+  @override
+  String get adjustFilterBusinessHint => 'Essayez d\'ajuster votre recherche ou vos filtres';
+
+  @override
+  String get addFirstBusinessHint => 'Ajoutez votre première entreprise pour commencer';
+
+  @override
+  String get addMemberText => 'Ajouter Membre';
+
+  @override
+  String get addTeamMemberText => 'Ajouter un Membre d\'Équipe';
+
+  @override
+  String addUsersToManageText(Object supplierName) {
+    return 'Ajouter des utilisateurs pour gérer $supplierName';
+  }
+
+  @override
+  String get scanQrCodeText => 'Scanner QR Code';
+
+  @override
+  String get scanUserProfileQrText => 'Scanner le QR code du profil utilisateur';
+
+  @override
+  String get searchAndInviteText => 'Rechercher & Inviter';
+
+  @override
+  String get searchAndInviteExistingUsersText => 'Rechercher et inviter des utilisateurs existants';
+
+  @override
+  String get cancelText => 'Annuler';
+
+  @override
+  String get cancelInvitationTitle => 'Annuler l\'Invitation';
+
+  @override
+  String get cancelInvitationMessage => 'Annuler l\'invitation ? Cette action est irréversible.';
+
+  @override
+  String get cancelInvitationAction => 'Annuler l\'Invitation';
+
+  @override
+  String get removeTeamMemberTitle => 'Retirer un Membre d\'Équipe';
+
+  @override
+  String removeTeamMemberMessage(Object supplierName, Object userName) {
+    return 'Retirer $userName de $supplierName ?';
+  }
+
+  @override
+  String get removeAction => 'Retirer';
+
+  @override
+  String get personnelManagement => 'Gestion du Personnel';
+
+  @override
+  String privilegesUpdatedMessage(Object userName) {
+    return 'Privilèges mis à jour pour $userName';
+  }
+
+  @override
+  String get privilegesUpdateFailedMessage => 'Échec de la mise à jour des privilèges';
+
+  @override
+  String get privilegesUpdateError => 'Une erreur s\'est produite lors de la mise à jour des privilèges';
+
+  @override
+  String get barcodeText => 'Code-barres';
+
+  @override
+  String get barcodeCopiedText => 'Code-barres copié dans le presse-papiers';
+
+  @override
+  String get sourceText => 'Source';
+
+  @override
+  String get modelText => 'Modèle';
+
+  @override
+  String get recentText => 'Récent';
+
+  @override
+  String get productDetailsText => 'Détails du produit';
+
+  @override
+  String get createdText => 'Créé le';
+
+  @override
+  String get lastUpdatedText => 'Dernière mise à jour';
+
+  @override
+  String get priceUpdatedText => 'Prix mis à jour';
+
+  @override
+  String get noProductDataTitle => 'Produit non trouvé';
+
+  @override
+  String get noProductDataDescription => 'Aucune information sur le produit trouvée pour ce code-barres. Le produit peut être nouveau ou pas encore dans notre base de données.';
+
+  @override
+  String get noProductDataHelp => 'Vous pouvez réessayer de scanner ou ajouter les détails du produit manuellement.';
+
+  @override
+  String get scanAgainText => 'Scanner à nouveau';
+
+  @override
+  String get addManuallyText => 'Ajouter le produit manuellement';
+
+  @override
+  String get ownedText => 'Possédées';
+
+  @override
+  String get managedText => 'Gérées';
+
+  @override
+  String get noOwnedBusinessesTitle => 'Aucune Entreprise Possédée';
+
+  @override
+  String get noOwnedBusinessesDescription => 'Vous ne possédez pas encore d\'entreprise';
+
+  @override
+  String get noManagedBusinessesTitle => 'Aucune Entreprise Gérée';
+
+  @override
+  String get noManagedBusinessesDescription => 'Vous ne gérez actuellement aucune entreprise';
+
+  @override
+  String get noBusinessesTitle => 'Aucune Entreprise';
+
+  @override
+  String get noBusinessesDescription => 'Vous ne possédez ni ne gérez d\'entreprise pour le moment';
+
+  @override
+  String get noResultsTitle => 'Aucun Résultat';
+
+  @override
+  String get adjustSearchFiltersText => 'Essayez d\'ajuster votre recherche ou vos filtres';
 }

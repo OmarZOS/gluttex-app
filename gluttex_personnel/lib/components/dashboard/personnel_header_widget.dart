@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+
+class PersonnelHeaderWidget extends StatelessWidget {
+  final String supplierName;
+  final VoidCallback onBack;
+  final ColorScheme colorScheme;
+  final ThemeData theme;
+
+  const PersonnelHeaderWidget({
+    super.key,
+    required this.supplierName,
+    required this.onBack,
+    required this.colorScheme,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 20, bottom: 20, left: 24, right: 24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [colorScheme.primary, colorScheme.primaryContainer],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: onBack,
+            icon: Icon(Icons.arrow_back, color: colorScheme.onPrimary),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  supplierName,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  localizations.personnelManagement,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onPrimary.withOpacity(0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
