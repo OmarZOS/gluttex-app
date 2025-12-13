@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_core/business/Cart.dart';
+import 'package:gluttex_core/business/finance/Cart.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';

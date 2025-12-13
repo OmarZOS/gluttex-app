@@ -76,7 +76,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     super.initState();
 
     _notifier = Provider.of<SupplierChangeNotifier>(context, listen: false);
-    organizations = _notifier.supplierOrganisations;
+    organizations = _notifier.organisations;
     filteredOrganizations = organizations;
     _organizationController.addListener(_filterOrganizations);
   }
@@ -279,7 +279,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         await Provider.of<SupplierChangeNotifier>(
           context,
           listen: false,
-        ).addOrUpdateRecipe(supplier);
+        ).createOrUpdateSupplier(supplier);
 
         ResponseHandler.handleResponse(
           context: context,

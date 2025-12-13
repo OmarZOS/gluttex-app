@@ -87,9 +87,9 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
         .searchSuppliersByGeo(
       longitude: location["longitude"],
       latitude: location["latitude"],
-      distance: location["radius_km"],
-      offset: 0,
-      itemsPerPage: 20,
+      radiusKm: location["radius_km"],
+      // offset: 0,
+      // itemsPerPage: 20,
       reset: true, // 👈 ensures fresh search each time
     );
     _panelController.open();
@@ -132,6 +132,16 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
             backgroundColor: Theme.of(context).colorScheme.primary,
             onTap: () {
               Navigator.pushNamed(context, AppRoutes.supplierEntitiesPage);
+            },
+          ),
+
+          SpeedDialButton(
+            icon: Icon(FontAwesomeIcons.fileInvoice,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.inventory_view_title,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.storeManage);
             },
           ),
           // SpeedDialButton(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/business/Order.dart';
+import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
@@ -672,7 +672,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             size: 20,
           ),
         ),
-        title: Text(item.orderedProduct.productName),
+        title: Text(item.orderedProduct?.productName ?? ""),
         subtitle: Text(loc.qtyTxt(item.orderedQuantity,
             loc.price(item.unitPrice.toStringAsFixed(2)))),
         trailing: Text(

@@ -47,6 +47,29 @@ class Product {
       required this.product_last_updated,
       required this.product_owner_id});
 
+  factory Product.empty() {
+    return Product(
+      id_product: null,
+      product_provider_id: null,
+      product_category_id: null,
+      id_product_category: null,
+      id_product_image: null,
+      product_ref_id: null,
+      product_name: '',
+      product_brand: '',
+      product_quantifier: '',
+      product_barcode: '',
+      product_category_desc: '',
+      product_image_url: null,
+      product_price: 0.0,
+      product_quantity: 0,
+      product_description: '',
+      product_created_at: null,
+      product_last_updated: null,
+      product_owner_id: null,
+    );
+  }
+
   factory Product.fromJson(dynamic json) {
     String? imageUrl;
     int imageId = 0;

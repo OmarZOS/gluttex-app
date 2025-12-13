@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_core/business/role_bit_mapper.dart';
+import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_personnel/components/privilege_ui.dart';
 
 class PrivilegeItemWidget extends StatelessWidget {

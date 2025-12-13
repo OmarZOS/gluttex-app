@@ -2227,4 +2227,606 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adjustSearchFiltersText => 'Try adjusting your search or filters';
+
+  @override
+  String get orderManagement => 'Order Management';
+
+  @override
+  String get processing => 'Processing';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get selectSupplier => 'Select Supplier';
+
+  @override
+  String get noOrderManagementPrivileges => 'No order management privileges';
+
+  @override
+  String get orderDetails => 'Order Details';
+
+  @override
+  String get noPendingOrders => 'No pending orders';
+
+  @override
+  String get noProcessingOrders => 'No orders in processing';
+
+  @override
+  String get noCompletedOrders => 'No completed orders';
+
+  @override
+  String get noOrdersFound => 'No orders found';
+
+  @override
+  String get noOrdersFoundForStatus => 'No orders found for this status';
+
+  @override
+  String get financeAndPricing => 'Finance & Pricing';
+
+  @override
+  String get manageInvoicesAndConfigurePricing => 'Manage invoices & configure pricing';
+
+  @override
+  String get exportData => 'Export data';
+
+  @override
+  String get exportingData => 'Exporting data...';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get thisQuarter => 'This Quarter';
+
+  @override
+  String get thisYear => 'This Year';
+
+  @override
+  String get allTime => 'All Time';
+
+  @override
+  String get invoices => 'Invoices';
+
+  @override
+  String get analytics => 'Analytics';
+
+  @override
+  String get pricing => 'Pricing & Costs';
+
+  @override
+  String get newInvoice => 'New Invoice';
+
+  @override
+  String get selectSupplierFirstText => 'Select a Supplier First';
+
+  @override
+  String get selectSupplierToViewText => 'Please select a supplier to view their product inventory';
+
+  @override
+  String get noProductsText => 'No Products Available';
+
+  @override
+  String get noProductsFoundText => 'No Products Found';
+
+  @override
+  String get tryDifferentSearchText => 'Try a different search term or browse other suppliers';
+
+  @override
+  String get addFirstProductText => 'Add your first product to start selling';
+
+  @override
+  String get quickTransactions => 'Quick Transactions';
+
+  @override
+  String get barcodeScanningComingSoon => 'Barcode scanning coming soon';
+
+  @override
+  String get chooseStoreToViewProducts => 'Choose a store to view products';
+
+  @override
+  String get added => 'Added';
+
+  @override
+  String get noInventoryPrivilegesText => 'Inventory Access Restricted';
+
+  @override
+  String get toCart => 'to cart';
+
+  @override
+  String get businesses => 'Businesses';
+
+  @override
+  String get inventory => 'Inventory';
+
+  @override
+  String get orders => 'Orders';
+
+  @override
+  String get pointOfSale => 'Seller';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get addProduct => 'Add Product';
+
+  @override
+  String get createNewOrder => 'Create Order';
+
+  @override
+  String get openCart => 'Open Cart';
+
+  @override
+  String get createNewInvoice => 'Create Invoice';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get accessRequired => 'Access Required';
+
+  @override
+  String get pleaseLoginToAccessDashboard => 'Please log in to access the dashboard.';
+
+  @override
+  String get needBusinessAssignment => 'You need to be assigned to a business to access management features.';
+
+  @override
+  String get contactAdminOrJoinTeam => 'Contact your administrator or join a business team.';
+
+  @override
+  String get checkAccessStatus => 'Check Access Status';
+
+  @override
+  String get viewPendingInvitations => 'View Pending Invitations';
+
+  @override
+  String get pendingInvitations => 'Pending Invitations';
+
+  @override
+  String get noPendingInvitations => 'No pending invitations';
+
+  @override
+  String get unknownBusiness => 'Unknown Business';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get invitationAccepted => 'Invitation accepted!';
+
+  @override
+  String get invitationDeclined => 'Invitation declined.';
+
+  @override
+  String get noRoleAssigned => 'No role assigned';
+
+  @override
+  String get noAnalyticsData => 'No Analytics Data';
+
+  @override
+  String get generateInvoicesToSeeAnalytics => 'Generate invoices to see analytics data';
+
+  @override
+  String get financialOverview => 'Financial Overview';
+
+  @override
+  String get totalRevenue => 'Total Revenue';
+
+  @override
+  String get netProfit => 'Net Profit';
+
+  @override
+  String get growthRate => 'Growth Rate';
+
+  @override
+  String get totalOrders => 'Total Orders';
+
+  @override
+  String get averageOrder => 'Average Order';
+
+  @override
+  String get taxCollected => 'Tax Collected';
+
+  @override
+  String get recentTransactions => 'Recent Transactions';
+
+  @override
+  String get last5Transactions => 'Last 5 transactions';
+
+  @override
+  String get viewAllTransactions => 'View All Transactions';
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get profit => 'Profit';
+
+  @override
+  String get expenses => 'Expenses';
+
+  @override
+  String get tax => 'Tax';
+
+  @override
+  String get discount => 'Discount';
+
+  @override
+  String get refund => 'Refund';
+
+  @override
+  String get paid => 'Paid';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get cancelled => 'Cancelled';
+
+  @override
+  String get refunded => 'Refunded';
+
+  @override
+  String get invoice => 'Invoice';
+
+  @override
+  String get items => 'Items';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get noInvoicesYet => 'No Invoices Yet';
+
+  @override
+  String get noInvoicesDescription => 'Your invoices will appear here once you complete sales';
+
+  @override
+  String get createFirstInvoice => 'Create First Invoice';
+
+  @override
+  String get loadingInvoices => 'Loading invoices...';
+
+  @override
+  String get card => 'Card';
+
+  @override
+  String get cash => 'Cash';
+
+  @override
+  String get bankTransfer => 'Bank Transfer';
+
+  @override
+  String get mobilePayment => 'Mobile Payment';
+
+  @override
+  String get sharingInvoice => 'Sharing invoice';
+
+  @override
+  String get downloadingInvoice => 'Downloading invoice';
+
+  @override
+  String get invoiceDetails => 'Invoice Details';
+
+  @override
+  String get currencySymbol => 'DZD';
+
+  @override
+  String get accessRefreshed => 'Refreshed access';
+
+  @override
+  String get manageSuppliers => 'Manage Suppliers';
+
+  @override
+  String get addFirstProduct => 'Add first product';
+
+  @override
+  String get services => 'Services';
+
+  @override
+  String get addService => 'Add Service';
+
+  @override
+  String serviceDiscount(Object label, Object percent) {
+    return '$percent% $label';
+  }
+
+  @override
+  String get serviceDiscountOff => 'off';
+
+  @override
+  String get servicesAvailable => 'available';
+
+  @override
+  String get loadingServices => 'Loading services...';
+
+  @override
+  String get pleaseWait => 'Please wait';
+
+  @override
+  String get noServicesFound => 'No services found';
+
+  @override
+  String get noServicesDescription => 'Add your first service to start offering healthcare services to patients.';
+
+  @override
+  String get proTip => 'Pro Tip';
+
+  @override
+  String get addServicesToManage => 'Add services to manage appointments, pricing, and resource allocation efficiently.';
+
+  @override
+  String get status_inactive => 'Inactive';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get searchServices => 'Search services...';
+
+  @override
+  String get profitMargin => 'Profit Margin';
+
+  @override
+  String get serviceDetails => 'Service Details';
+
+  @override
+  String get serviceDescription => 'Description';
+
+  @override
+  String get duration => 'Duration';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get createdAt => 'Created';
+
+  @override
+  String get deletedAt => 'Deleted';
+
+  @override
+  String get basePrice => 'Base Price';
+
+  @override
+  String get finalPrice => 'Final Price';
+
+  @override
+  String get totalCost => 'Total Cost';
+
+  @override
+  String get discountApplied => 'Discount applied from base price';
+
+  @override
+  String get resourceRequirements => 'Resource Requirements';
+
+  @override
+  String get staffRequirements => 'Staff Requirements';
+
+  @override
+  String get totalResourceCost => 'Total Resource Cost';
+
+  @override
+  String get totalStaffCost => 'Total Staff Cost';
+
+  @override
+  String get costSummary => 'Cost Summary';
+
+  @override
+  String get resourceCost => 'Resource Cost';
+
+  @override
+  String get staffCost => 'Staff Cost';
+
+  @override
+  String get totalServiceCost => 'Total Service Cost';
+
+  @override
+  String get servicePrice => 'Service Price';
+
+  @override
+  String get businessOperations => 'Business Operations';
+
+  @override
+  String get overdue => 'Overdue';
+
+  @override
+  String get unpaid => 'Unpaid';
+
+  @override
+  String get partial => 'Partial';
+
+  @override
+  String get noBusinessOperations => 'No Business Operations';
+
+  @override
+  String get generateOperationsToSeeData => 'Generate business operations to see detailed analytics and transaction data';
+
+  @override
+  String get exportOperations => 'Export Operations';
+
+  @override
+  String get viewAllBusinessTransactions => 'View all business transactions and operations';
+
+  @override
+  String get topSuppliers => 'Top Suppliers';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get source => 'Source';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get carts => 'Carts';
+
+  @override
+  String get clearFilters => 'Clear Filters';
+
+  @override
+  String get totalAmount => 'Total Amount';
+
+  @override
+  String get totalPaid => 'Total Paid';
+
+  @override
+  String get outstanding => 'Outstanding';
+
+  @override
+  String get balance => 'Balance';
+
+  @override
+  String get byStatus => 'By Status';
+
+  @override
+  String get bySource => 'By Source';
+
+  @override
+  String get operationDetails => 'Operation Details';
+
+  @override
+  String get transactionDetails => 'Transaction Details';
+
+  @override
+  String get cartBasedTransaction => 'Cart-based Transaction';
+
+  @override
+  String get orderBasedTransaction => 'Order-based Transaction';
+
+  @override
+  String get operationSummary => 'Operation Summary';
+
+  @override
+  String get operationId => 'Operation ID';
+
+  @override
+  String get client => 'Client';
+
+  @override
+  String get supplier => 'Supplier';
+
+  @override
+  String get seller => 'Seller';
+
+  @override
+  String get cartBased => 'Cart-based';
+
+  @override
+  String get orderBased => 'Order-based';
+
+  @override
+  String get paymentDetails => 'Payment Details';
+
+  @override
+  String get totalDeposited => 'Total Deposited';
+
+  @override
+  String get balanceDue => 'Balance Due';
+
+  @override
+  String get processPayment => 'Process Payment';
+
+  @override
+  String get sendReminder => 'Send Reminder';
+
+  @override
+  String get print => 'Print';
+
+  @override
+  String get sharingOperation => 'Sharing operation...';
+
+  @override
+  String get printingOperation => 'Printing operation...';
+
+  @override
+  String get processingPayment => 'Processing payment...';
+
+  @override
+  String get sendingReminder => 'Sending reminder...';
+
+  @override
+  String get noItemsFound => 'No items found';
+
+  @override
+  String get itemsWillBeLoadedFromServer => 'Items will be loaded from the server';
+
+  @override
+  String get loadItems => 'Load Items';
+
+  @override
+  String get loadingItems => 'Loading items...';
+
+  @override
+  String get subtotal => 'Subtotal';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get fullyPaid => 'Fully Paid';
+
+  @override
+  String get partiallyPaid => 'Partially Paid';
+
+  @override
+  String get cart => 'Cart';
+
+  @override
+  String get order => 'Order';
+
+  @override
+  String get noSuppliersAvailable => 'No suppliers available';
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get products => 'Products';
+
+  @override
+  String get browseAndSelectServices => 'Browse and select services';
+
+  @override
+  String get noServicesAvailable => 'No services available';
+
+  @override
+  String get servicesWillAppearHere => 'Services will appear here when available';
+
+  @override
+  String get loadingProducts => 'Loading products...';
+
+  @override
+  String get noProductsAvailable => 'No products available';
+
+  @override
+  String get preparingServiceCatalog => 'Preparing your service catalog';
+
+  @override
+  String get refreshServices => 'Refresh Services';
 }

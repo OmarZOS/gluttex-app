@@ -4,7 +4,7 @@ import 'dart:developer' as developer;
 import 'dart:typed_data';
 
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/business/Order.dart';
+import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_core/business/services/OrderService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
@@ -50,14 +50,15 @@ class OrderServiceImpl implements OrderService {
   }
 
   @override
-  Future<List<Order>> getAllOrders(int idUser) async {
+  Future<List<Order>> getAllOrders(int offset, int limit,
+      {int idUser = 0}) async {
     try {
       // Get the storage service instance
       StorageService storageService = GluttexLocator.get<StorageService>();
 
       // Make a call to get all products
       List<dynamic> responseData = await storageService.getAll(
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllOrdersEndpoint}/$idUser");
+          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllOrdersEndpoint}/$idUser/$offset/$limit");
       // Check if the response data is not null and is a list
       // Convert the list of dynamic maps to a list of Order objects
       List dateien = responseData;

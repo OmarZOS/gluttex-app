@@ -196,8 +196,8 @@ class GluttexConstants {
   static Color get backgroundDarkColor => const Color(0xFF186A3B);
 
   // API endpoints
-  static const String apiBaseUrl = 'https://gluttex.com/api';
-  static const String fsBaseUrl = 'https://gluttex.com';
+  static const String apiBaseUrl = 'http://localhost:9000/api';
+  static const String fsBaseUrl = 'http://localhost:9000/fs';
 
   // static const String authApiBaseUrl = 'http://localhost:9090';
   static const String addAppUserEndpoint = '/app_user';
@@ -231,7 +231,7 @@ class GluttexConstants {
   static const String getProductFeedEndpoint = '/product/observer';
 
   static const String addOrderEndpoint = '/business/order/add';
-  static const String getAllOrdersEndpoint = '/business/user/orders/all';
+  static const String getAllOrdersEndpoint = '/business/user';
   static const String getOrderDetailsEndpoint = '/business/user/orders';
 
   static const String addSupplierEndpoint = '/supplier/add';
@@ -247,6 +247,16 @@ class GluttexConstants {
   static const String getRecipeSearchByTokenEndpoint = '/search/recipe';
   static const String getProductSearchByTokenEndpoint = '/search/product';
   static const String putRuleAnswerEndpoint = '/rule/answer';
+
+  static const String getCartsEndpoint = "/business/cart";
+  static const String cartEndpoint = "/business/cart";
+  static const String getCartDetailsEndpoint = "/business/cart";
+
+  static const String getBusinessOperationsEndpoint = "/business/order";
+
+  static const String addServiceEndpoint = "";
+  static const String deleteServiceEndpoint = "";
+  static const String serviceEndpoint = "/business/service";
 
   static const String getProductSearchByBarcodeEndpoint = '/product/barcode';
   static const String getProductDBSearchByBarcodeEndpoint =
@@ -358,6 +368,7 @@ class AppRoutes {
   static const String games = '/games';
   static const String profile = '/profile';
   static const String supplierManage = '/manage';
+  static const String storeManage = '/store';
 }
 
 class RuleStates {

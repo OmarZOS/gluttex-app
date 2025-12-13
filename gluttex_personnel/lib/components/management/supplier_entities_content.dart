@@ -6,7 +6,6 @@ import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_personnel/components/supplier_card.dart';
-import 'package:gluttex_personnel/personnel_management_screen.dart';
 import 'package:gluttex_ui/components/supplier/supplier_screen.dart';
 import 'package:provider/provider.dart';
 import 'supplier_entities_controller.dart';
@@ -29,11 +28,60 @@ class SupplierEntitiesContent extends StatefulWidget {
 class _SupplierEntitiesContentState extends State<SupplierEntitiesContent>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _initialTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _determineInitialTab();
+  }
+
+  void _determineInitialTab() {
+    final supplierNotifier = context.read<SupplierChangeNotifier>();
+    final personnelNotifier = context.read<PersonnelNotifier>();
+    final userNotifier = context.read<AppUserNotifier>();
+    final userId = userNotifier.appUser?.id_app_user;
+
+    if (userId == null) return;
+
+    final ownedSuppliers = widget.controller.filterOwnedSuppliers(
+      supplierNotifier.suppliers
+          .where((s) => s.productProviderOwnerId == userId)
+          .toList(),
+      widget.state.searchQuery,
+      widget.state.selectedCategoryId,
+    );
+
+    final managedRules = widget.controller.filterManagedRules(
+      personnelNotifier
+          .getRulesForUser(userId)
+          .where((r) => r.isActiveStatus)
+          .toList(),
+      widget.state.searchQuery,
+      widget.state.selectedCategoryId,
+    );
+
+    // Select first non-empty tab, default to owned (0)
+    final newIndex = ownedSuppliers.isNotEmpty
+        ? 0
+        : managedRules.isNotEmpty
+            ? 1
+            : 0;
+
+    if (newIndex != _initialTabIndex) {
+      _initialTabIndex = newIndex;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_tabController.index != _initialTabIndex) {
+          _tabController.animateTo(_initialTabIndex);
+        }
+      });
+    }
   }
 
   @override

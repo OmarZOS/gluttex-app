@@ -3,17 +3,23 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/NotificationService.dart';
+import 'package:gluttex_core/business/services/CartService.dart';
+import 'package:gluttex_core/business/services/ProvidedServiceManagementService.dart';
 import 'package:gluttex_event/assistant_change_notifier.dart';
 import 'package:gluttex_event/notification_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:gluttex_event/service_change_notifier.dart';
 import 'package:gluttex_event/supplier_dashboard_provider.dart';
+import 'package:gluttex_event/views/finance_view_model.dart';
 import 'package:gluttex_impl_app/gluttex_impl_notification.dart';
+import 'package:gluttex_impl_business/finance/gluttex_impl_business_operation.dart';
 import 'package:gluttex_io/GluttexImageImpl.dart';
 import 'package:gluttex_core/app/Services/AuthService.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/business/services/OrderService.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
+import 'package:gluttex_core/business/services/BusinessOperationService.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_home/gluttex_router.dart';
@@ -23,7 +29,9 @@ import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:gluttex_impl_business/gluttex_impl_order.dart';
 import 'package:gluttex_impl_business/gluttex_impl_product.dart';
+import 'package:gluttex_impl_business/gluttex_impl_cart.dart';
 import 'package:gluttex_impl_business/gluttex_impl_recipe.dart';
+import 'package:gluttex_impl_business/gluttex_impl_service.dart';
 import 'package:gluttex_impl_business/gluttex_impl_supplier.dart';
 import 'package:gluttex_event/recipe_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
@@ -32,6 +40,7 @@ import 'package:gluttex_impl_mediation/gluttex_impl_mediation.dart';
 import 'package:gluttex_event/preferenceChangeNotifier.dart';
 import 'package:gluttex_login/screens/web_view.dart';
 import 'package:locator/locator.dart';
+import 'package:medicom_catalog/screens/components/form/pricing_state.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -46,7 +55,14 @@ void setupLocator() {
       GluttexImplNotification());
   GluttexLocator.registerSingletonService<ProductService>(ProductServiceImpl());
   GluttexLocator.registerSingletonService<OrderService>(OrderServiceImpl());
+  GluttexLocator.registerSingletonService<CartService>(CartServiceImpl());
   GluttexLocator.registerSingletonService<AuthService>(AuthServiceImpl());
+  GluttexLocator.registerSingletonService<ProvidedServiceManagementService>(
+      ProvidedServiceManagementImpl());
+
+  GluttexLocator.registerSingletonService<BusinessOperationService>(
+      BusinessOperationServiceImpl());
+
   GluttexLocator.registerFactory<GluttexImage>(() => GluttexImageImpl());
 }
 
@@ -90,6 +106,13 @@ class GluttexApp extends StatelessWidget {
             create: (_) => NotificationNotifier()),
         ChangeNotifierProvider<PersonnelNotifier>(
             create: (_) => PersonnelNotifier()),
+        ChangeNotifierProvider<ServiceNotifier>(
+            create: (_) => ServiceNotifier()),
+        ChangeNotifierProvider<FinanceViewModel>(
+            create: (_) => FinanceViewModel(
+                businessOperationService:
+                    GluttexLocator.get<BusinessOperationService>())),
+        ChangeNotifierProvider<PricingState>(create: (_) => PricingState()),
         ChangeNotifierProvider<LocaleProvider>(create: (_) => localeProvider),
       ],
       child: Consumer<LocaleProvider>(

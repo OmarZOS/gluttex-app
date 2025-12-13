@@ -39,7 +39,7 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
   void initState() {
     super.initState();
     notifier = Provider.of<SupplierChangeNotifier>(context, listen: false);
-    organisations = notifier.supplierOrganisations;
+    organisations = notifier.organisations;
     selectedOrganisationId = widget.initialValue;
     filteredOrganisations = List.from(organisations);
     _searchController.addListener(_onSearchChanged);

@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
-import '../Order.dart';
+import '../finance/Order.dart';
 
 // OrderService.dart
 abstract class OrderService {
-  Future<List<Order>> getAllOrders(int idUser) async {
+  Future<List<Order>> getAllOrders(int offset, int limit,
+      {int idUser = 0}) async {
     throw UnimplementedError();
   }
 

@@ -15,6 +15,7 @@ import 'package:gluttex_personnel/supplier_entities_screen.dart';
 import 'package:gluttex_scanner/screens/qr_scanner.dart';
 import 'package:gluttex_scanner/screens/barcode_scanner.dart';
 import 'package:gluttex_scanner/screens/product_scanner.dart';
+import 'package:gluttex_store/screens/dashboard_screen.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
 import 'package:medicom_catalog/screens/orders_screen.dart';
 import 'package:medicom_catalog/screens/product_catalog_screen.dart';
@@ -36,7 +37,7 @@ class AppRouter {
             final isAuthenticated = authProvider.isAuthenticated;
 
             print(
-                'Router - appUser: $appUser, isAuthenticated: $isAuthenticated');
+                'Router - appUser: ${appUser?.id_app_user}, isAuthenticated: $isAuthenticated');
 
             final args = settings.arguments as Map<String, dynamic>?;
 
@@ -84,6 +85,7 @@ class AppRouter {
                   const SupplierFormScreen(),
                   const SuppliersMapScreen(),
                 );
+
               case AppRoutes.supplierManage:
                 return _buildGuardedRoute(
                   isAuthenticated,
@@ -94,6 +96,8 @@ class AppRouter {
                   ),
                   const SuppliersMapScreen(),
                 );
+              case AppRoutes.storeManage:
+                return const DashboardScreen();
               case AppRoutes.login:
                 // If already authenticated, redirect to home
                 if (isAuthenticated) {

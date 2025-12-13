@@ -15,6 +15,7 @@ class SmartFormField extends StatefulWidget {
   final Widget? suffixIcon;
   final int? maxLines;
   final bool showSourceBadge;
+  final ValueChanged<String>? onChanged; // ADD THIS LINE
 
   const SmartFormField({
     Key? key,
@@ -27,6 +28,7 @@ class SmartFormField extends StatefulWidget {
     this.suffixIcon,
     this.maxLines,
     this.showSourceBadge = true,
+    this.onChanged, // ADD THIS LINE
   }) : super(key: key);
 
   @override
@@ -114,9 +116,12 @@ class _SmartFormFieldState extends State<SmartFormField> {
           maxLines: widget.maxLines,
           validator: widget.validator,
           onSaved: widget.onSaved,
-          onTap: _markAsEdited, // Single call to mark as edited
+          onTap: _markAsEdited,
           onChanged: (value) {
-            // Only mark as edited on first meaningful change
+            // Call the external onChanged callback
+            widget.onChanged?.call(value);
+
+            // Mark as edited on first meaningful change
             if (!_hasUserInteracted && value.isNotEmpty) {
               _markAsEdited();
             }
@@ -202,7 +207,7 @@ class SmartDropdownField<T> extends StatefulWidget {
   final T value;
   final String labelText;
   final List<DropdownMenuItem<T>> items;
-  final void Function(T?)? onChanged;
+  final void Function(T?)? onChanged; // This already exists
   final bool showSourceBadge;
 
   const SmartDropdownField({
@@ -211,10 +216,9 @@ class SmartDropdownField<T> extends StatefulWidget {
     required this.value,
     required this.labelText,
     required this.items,
-    required this.onChanged,
+    required this.onChanged, // This already exists
     this.showSourceBadge = true,
   }) : super(key: key);
-
   @override
   State<SmartDropdownField> createState() => _SmartDropdownFieldState<T>();
 }
@@ -247,6 +251,7 @@ class _SmartDropdownFieldState<T> extends State<SmartDropdownField<T>> {
           _buildSourceBadge(fieldData.source, context),
           const SizedBox(height: 8),
         },
+        // In _SmartDropdownFieldState build method
         DropdownButtonFormField<T>(
           value: widget.value,
           decoration: InputDecoration(
@@ -275,8 +280,8 @@ class _SmartDropdownFieldState<T> extends State<SmartDropdownField<T>> {
           ),
           items: widget.items,
           onChanged: (value) {
-            _markAsEdited(); // Single call to mark as edited
-            widget.onChanged?.call(value);
+            _markAsEdited();
+            widget.onChanged?.call(value); // This properly calls the callback
           },
         ),
       ],

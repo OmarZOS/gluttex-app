@@ -7,7 +7,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/Notifications/GluttexNotification.dart';
 import 'package:gluttex_core/app/Notifications/Notifications/RoleInvitation.dart';
-import 'package:gluttex_core/business/role_bit_mapper.dart';
+import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';

@@ -534,6 +534,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0+1"
+  gluttex_store:
+    dependency: "direct main"
+    description:
+      path: "../gluttex_store"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   gluttex_ui:
     dependency: "direct main"
     description:

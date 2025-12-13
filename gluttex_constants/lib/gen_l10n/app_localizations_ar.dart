@@ -2227,4 +2227,606 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adjustSearchFiltersText => 'حاول تعديل البحث أو الفلاتر';
+
+  @override
+  String get orderManagement => 'إدارة الطلبات';
+
+  @override
+  String get processing => 'قيد المعالجة';
+
+  @override
+  String get completed => 'مكتمل';
+
+  @override
+  String get selectSupplier => 'اختر المورد';
+
+  @override
+  String get noOrderManagementPrivileges => 'لا توجد صلاحيات لإدارة الطلبات';
+
+  @override
+  String get orderDetails => 'تفاصيل الطلب';
+
+  @override
+  String get noPendingOrders => 'لا توجد طلبات قيد الانتظار';
+
+  @override
+  String get noProcessingOrders => 'لا توجد طلبات قيد المعالجة';
+
+  @override
+  String get noCompletedOrders => 'لا توجد طلبات مكتملة';
+
+  @override
+  String get noOrdersFound => 'لم يتم العثور على طلبات';
+
+  @override
+  String get noOrdersFoundForStatus => 'لم يتم العثور على طلبات بهذه الحالة';
+
+  @override
+  String get financeAndPricing => 'المالية والتسعير';
+
+  @override
+  String get manageInvoicesAndConfigurePricing => 'إدارة الفواتير وتكوين الأسعار';
+
+  @override
+  String get exportData => 'تصدير البيانات';
+
+  @override
+  String get exportingData => 'جارٍ تصدير البيانات...';
+
+  @override
+  String get today => 'اليوم';
+
+  @override
+  String get thisWeek => 'هذا الأسبوع';
+
+  @override
+  String get thisMonth => 'هذا الشهر';
+
+  @override
+  String get thisQuarter => 'هذا الربع';
+
+  @override
+  String get thisYear => 'هذه السنة';
+
+  @override
+  String get allTime => 'كل الوقت';
+
+  @override
+  String get invoices => 'الفواتير';
+
+  @override
+  String get analytics => 'التحليلات';
+
+  @override
+  String get pricing => 'التسعير والتكاليف';
+
+  @override
+  String get newInvoice => 'فاتورة جديدة';
+
+  @override
+  String get selectSupplierFirstText => 'اختر موردًا أولاً';
+
+  @override
+  String get selectSupplierToViewText => 'يرجى اختيار مورد لعرض مخزون منتجاته';
+
+  @override
+  String get noProductsText => 'لا توجد منتجات متاحة';
+
+  @override
+  String get noProductsFoundText => 'لم يتم العثور على منتجات';
+
+  @override
+  String get tryDifferentSearchText => 'جرب مصطلح بحث مختلف أو استعرض موردين آخرين';
+
+  @override
+  String get addFirstProductText => 'أضف منتجك الأول لبدء البيع';
+
+  @override
+  String get quickTransactions => 'معاملات سريعة';
+
+  @override
+  String get barcodeScanningComingSoon => 'مسح الباركود قريبًا';
+
+  @override
+  String get chooseStoreToViewProducts => 'اختر متجرًا لعرض المنتجات';
+
+  @override
+  String get added => 'تمت إضافة';
+
+  @override
+  String get noInventoryPrivilegesText => 'الوصول للمخزون مقيد';
+
+  @override
+  String get toCart => 'إلى السلة';
+
+  @override
+  String get businesses => 'الأعمال';
+
+  @override
+  String get inventory => 'المخزون';
+
+  @override
+  String get orders => 'الطلبات';
+
+  @override
+  String get pointOfSale => 'البائع';
+
+  @override
+  String get loading => 'جاري التحميل...';
+
+  @override
+  String get addProduct => 'إضافة منتج';
+
+  @override
+  String get createNewOrder => 'إنشاء طلب';
+
+  @override
+  String get openCart => 'فتح السلة';
+
+  @override
+  String get createNewInvoice => 'إنشاء فاتورة';
+
+  @override
+  String get add => 'إضافة';
+
+  @override
+  String get accessRequired => 'الوصول مطلوب';
+
+  @override
+  String get pleaseLoginToAccessDashboard => 'يرجى تسجيل الدخول للوصول إلى لوحة التحكم.';
+
+  @override
+  String get needBusinessAssignment => 'تحتاج إلى تعيينك إلى عمل للوصول إلى ميزات الإدارة.';
+
+  @override
+  String get contactAdminOrJoinTeam => 'اتصل بمسؤولك أو انضم إلى فريق عمل.';
+
+  @override
+  String get checkAccessStatus => 'فحص حالة الوصول';
+
+  @override
+  String get viewPendingInvitations => 'عرض الدعوات المعلقة';
+
+  @override
+  String get pendingInvitations => 'الدعوات المعلقة';
+
+  @override
+  String get noPendingInvitations => 'لا توجد دعوات معلقة';
+
+  @override
+  String get unknownBusiness => 'عمل غير معروف';
+
+  @override
+  String get role => 'الدور';
+
+  @override
+  String get accept => 'قبول';
+
+  @override
+  String get decline => 'رفض';
+
+  @override
+  String get invitationAccepted => 'تم قبول الدعوة!';
+
+  @override
+  String get invitationDeclined => 'تم رفض الدعوة.';
+
+  @override
+  String get noRoleAssigned => 'لم يتم تعيين دور';
+
+  @override
+  String get noAnalyticsData => 'لا توجد بيانات تحليلية';
+
+  @override
+  String get generateInvoicesToSeeAnalytics => 'قم بإنشاء فواتير لرؤية بيانات التحليل';
+
+  @override
+  String get financialOverview => 'نظرة عامة مالية';
+
+  @override
+  String get totalRevenue => 'إجمالي الإيرادات';
+
+  @override
+  String get netProfit => 'صافي الربح';
+
+  @override
+  String get growthRate => 'معدل النمو';
+
+  @override
+  String get totalOrders => 'إجمالي الطلبات';
+
+  @override
+  String get averageOrder => 'متوسط الطلب';
+
+  @override
+  String get taxCollected => 'الضريبة المحصلة';
+
+  @override
+  String get recentTransactions => 'المعاملات الحديثة';
+
+  @override
+  String get last5Transactions => 'آخر 5 معاملات';
+
+  @override
+  String get viewAllTransactions => 'عرض كل المعاملات';
+
+  @override
+  String get revenue => 'الإيرادات';
+
+  @override
+  String get profit => 'الربح';
+
+  @override
+  String get expenses => 'المصروفات';
+
+  @override
+  String get tax => 'الضريبة';
+
+  @override
+  String get discount => 'الخصم';
+
+  @override
+  String get refund => 'الاسترداد';
+
+  @override
+  String get paid => 'مدفوع';
+
+  @override
+  String get pending => 'قيد الانتظار';
+
+  @override
+  String get cancelled => 'ملغى';
+
+  @override
+  String get refunded => 'تم الاسترداد';
+
+  @override
+  String get invoice => 'فاتورة';
+
+  @override
+  String get items => 'العناصر';
+
+  @override
+  String get share => 'مشاركة';
+
+  @override
+  String get download => 'تنزيل';
+
+  @override
+  String get noInvoicesYet => 'لا توجد فواتير بعد';
+
+  @override
+  String get noInvoicesDescription => 'ستظهر فواتيرك هنا بمجرد اكتمال المبيعات';
+
+  @override
+  String get createFirstInvoice => 'أنشئ أول فاتورة';
+
+  @override
+  String get loadingInvoices => 'جاري تحميل الفواتير...';
+
+  @override
+  String get card => 'بطاقة';
+
+  @override
+  String get cash => 'نقدي';
+
+  @override
+  String get bankTransfer => 'تحويل بنكي';
+
+  @override
+  String get mobilePayment => 'دفع عبر الهاتف';
+
+  @override
+  String get sharingInvoice => 'مشاركة الفاتورة';
+
+  @override
+  String get downloadingInvoice => 'تنزيل الفاتورة';
+
+  @override
+  String get invoiceDetails => 'تفاصيل الفاتورة';
+
+  @override
+  String get currencySymbol => 'ر.س';
+
+  @override
+  String get accessRefreshed => 'تم تديد الصلاحيات';
+
+  @override
+  String get manageSuppliers => 'إدارة الموردين';
+
+  @override
+  String get addFirstProduct => 'إضافة أول منتج';
+
+  @override
+  String get services => 'الخدمات';
+
+  @override
+  String get addService => 'إضافة خدمة';
+
+  @override
+  String serviceDiscount(Object label, Object percent) {
+    return '$percent% $label';
+  }
+
+  @override
+  String get serviceDiscountOff => 'خصم';
+
+  @override
+  String get servicesAvailable => 'متاحة';
+
+  @override
+  String get loadingServices => 'جاري تحميل الخدمات...';
+
+  @override
+  String get pleaseWait => 'يرجى الانتظار';
+
+  @override
+  String get noServicesFound => 'لم يتم العثور على خدمات';
+
+  @override
+  String get noServicesDescription => 'أضف خدمتك الأولى لبدء تقديم خدمات الرعاية الصحية للمرضى.';
+
+  @override
+  String get proTip => 'نصيحة احترافية';
+
+  @override
+  String get addServicesToManage => 'أضف خدمات لإدارة المواعيد والتسعير وتخصيص الموارد بكفاءة.';
+
+  @override
+  String get status_inactive => 'غير نشط';
+
+  @override
+  String get edit => 'تعديل';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get searchServices => 'بحث في الخدمات...';
+
+  @override
+  String get profitMargin => 'هامش الربح';
+
+  @override
+  String get serviceDetails => 'تفاصيل الخدمة';
+
+  @override
+  String get serviceDescription => 'الوصف';
+
+  @override
+  String get duration => 'المدة';
+
+  @override
+  String get category => 'الفئة';
+
+  @override
+  String get createdAt => 'تم الإنشاء';
+
+  @override
+  String get deletedAt => 'تم الحذف';
+
+  @override
+  String get basePrice => 'السعر الأساسي';
+
+  @override
+  String get finalPrice => 'السعر النهائي';
+
+  @override
+  String get totalCost => 'التكلفة الإجمالية';
+
+  @override
+  String get discountApplied => 'تم تطبيق الخصم من السعر الأساسي';
+
+  @override
+  String get resourceRequirements => 'متطلبات الموارد';
+
+  @override
+  String get staffRequirements => 'متطلبات الموظفين';
+
+  @override
+  String get totalResourceCost => 'التكلفة الإجمالية للموارد';
+
+  @override
+  String get totalStaffCost => 'التكلفة الإجمالية للموظفين';
+
+  @override
+  String get costSummary => 'ملخص التكاليف';
+
+  @override
+  String get resourceCost => 'تكلفة الموارد';
+
+  @override
+  String get staffCost => 'تكلفة الموظفين';
+
+  @override
+  String get totalServiceCost => 'التكلفة الإجمالية للخدمة';
+
+  @override
+  String get servicePrice => 'سعر الخدمة';
+
+  @override
+  String get businessOperations => 'العمليات التجارية';
+
+  @override
+  String get overdue => 'متأخر';
+
+  @override
+  String get unpaid => 'غير مدفوع';
+
+  @override
+  String get partial => 'جزئي';
+
+  @override
+  String get noBusinessOperations => 'لا توجد عمليات تجارية';
+
+  @override
+  String get generateOperationsToSeeData => 'أنشئ عمليات تجارية لرؤية تحليلات مفصلة وبيانات المعاملات';
+
+  @override
+  String get exportOperations => 'تصدير العمليات';
+
+  @override
+  String get viewAllBusinessTransactions => 'عرض جميع المعاملات التجارية';
+
+  @override
+  String get topSuppliers => 'أفضل الموردين';
+
+  @override
+  String get status => 'الحالة';
+
+  @override
+  String get source => 'المصدر';
+
+  @override
+  String get all => 'الكل';
+
+  @override
+  String get carts => 'عربات التسوق';
+
+  @override
+  String get clearFilters => 'مسح الفلاتر';
+
+  @override
+  String get totalAmount => 'المبلغ الإجمالي';
+
+  @override
+  String get totalPaid => 'إجمالي المدفوع';
+
+  @override
+  String get outstanding => 'المستحقات';
+
+  @override
+  String get balance => 'الرصيد';
+
+  @override
+  String get byStatus => 'حسب الحالة';
+
+  @override
+  String get bySource => 'حسب المصدر';
+
+  @override
+  String get operationDetails => 'تفاصيل العملية';
+
+  @override
+  String get transactionDetails => 'تفاصيل المعاملة';
+
+  @override
+  String get cartBasedTransaction => 'معاملة مبنية على السلة';
+
+  @override
+  String get orderBasedTransaction => 'معاملة مبنية على الطلب';
+
+  @override
+  String get operationSummary => 'ملخص العملية';
+
+  @override
+  String get operationId => 'معرف العملية';
+
+  @override
+  String get client => 'العميل';
+
+  @override
+  String get supplier => 'المورد';
+
+  @override
+  String get seller => 'البائع';
+
+  @override
+  String get cartBased => 'مبني على السلة';
+
+  @override
+  String get orderBased => 'مبني على الطلب';
+
+  @override
+  String get paymentDetails => 'تفاصيل الدفع';
+
+  @override
+  String get totalDeposited => 'إجمالي المودع';
+
+  @override
+  String get balanceDue => 'الرصيد المستحق';
+
+  @override
+  String get processPayment => 'معالجة الدفع';
+
+  @override
+  String get sendReminder => 'إرسال تذكير';
+
+  @override
+  String get print => 'طباعة';
+
+  @override
+  String get sharingOperation => 'جارٍ مشاركة العملية...';
+
+  @override
+  String get printingOperation => 'جارٍ طباعة العملية...';
+
+  @override
+  String get processingPayment => 'جارٍ معالجة الدفع...';
+
+  @override
+  String get sendingReminder => 'جارٍ إرسال التذكير...';
+
+  @override
+  String get noItemsFound => 'لم يتم العثور على عناصر';
+
+  @override
+  String get itemsWillBeLoadedFromServer => 'سيتم تحميل العناصر من الخادم';
+
+  @override
+  String get loadItems => 'تحميل العناصر';
+
+  @override
+  String get loadingItems => 'جارٍ تحميل العناصر...';
+
+  @override
+  String get subtotal => 'المجموع الفرعي';
+
+  @override
+  String get total => 'الإجمالي';
+
+  @override
+  String get quantity => 'الكمية';
+
+  @override
+  String get fullyPaid => 'مدفوع بالكامل';
+
+  @override
+  String get partiallyPaid => 'مدفوع جزئياً';
+
+  @override
+  String get cart => 'سلة';
+
+  @override
+  String get order => 'طلب';
+
+  @override
+  String get noSuppliersAvailable => 'لا يوجد موردون متاحون';
+
+  @override
+  String get selectAll => 'اختر الكل';
+
+  @override
+  String get products => 'المنتجات';
+
+  @override
+  String get browseAndSelectServices => 'تصفح واختر الخدمات';
+
+  @override
+  String get noServicesAvailable => 'لا توجد خدمات متاحة';
+
+  @override
+  String get servicesWillAppearHere => 'ستظهر الخدمات هنا عند توفرها';
+
+  @override
+  String get loadingProducts => 'جاري تحميل المنتجات...';
+
+  @override
+  String get noProductsAvailable => 'لا توجد منتجات متاحة';
+
+  @override
+  String get preparingServiceCatalog => 'جاري إعداد كتالوج الخدمات الخاص بك';
+
+  @override
+  String get refreshServices => 'تحديث الخدمات';
 }

@@ -6,6 +6,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
+import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 
@@ -125,80 +126,6 @@ class PersonnelNotifier with ChangeNotifier {
     return allUsers;
   }
 
-  Future<void> loadPersonnel({
-    int userId = 0,
-    bool reset = false,
-    int supplierId = 0,
-    bool includePending = false,
-  }) async {
-    // Early returns for better performance
-    if (_isLoading && !reset) return;
-    if (!_hasMore && !reset) {
-      _rebuildUserState(userId);
-      return;
-    }
-
-    if (reset) {
-      _currentPage = 0;
-      _filteredPersonnel = const [];
-      _searchResults = const [];
-      _hasMore = true;
-      _error = null;
-    }
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final rules = await _userService.getManagementRules(
-        0, // org
-        supplierId,
-        userId,
-        _currentPage * _itemsPerPage,
-        _itemsPerPage,
-      );
-
-      if (rules == null || rules.isEmpty) {
-        _hasMore = false;
-      } else {
-        final updatedUserIds = <int>{};
-
-        // Pre-allocate memory
-        for (final rule in rules) {
-          final user = rule.appUser;
-          if (user == null) continue;
-
-          final userIdKey = user.id_app_user ?? 0;
-          updatedUserIds.add(userIdKey);
-
-          // Update cache only if needed
-          final cachedUser = _userCache[userIdKey];
-          if (cachedUser == null || cachedUser != user) {
-            _userCache[userIdKey] = user;
-          }
-
-          _updateUserRule(userIdKey, rule);
-        }
-
-        if (reset && updatedUserIds.isNotEmpty) {
-          _cleanupRemovedUsers(updatedUserIds, supplierId);
-        }
-
-        _currentPage++;
-      }
-
-      _rebuildUserState(userId);
-      _error = null;
-    } catch (e) {
-      _error = 'Failed to load personnel: ${e.toString()}';
-      log('Error loading personnel: $e',
-          error: e, stackTrace: StackTrace.current);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
   void _updateUserRule(int userId, ManagementRule updatedRule) {
     final ruleId = updatedRule.id_management_rule;
     if (ruleId == null) return;
@@ -245,34 +172,6 @@ class PersonnelNotifier with ChangeNotifier {
 
     // 5. Notify listeners with debounce
     _scheduleNotifyListeners();
-  }
-
-  void _cleanupRemovedUsers(Set<int> updatedUserIds, int supplierId) {
-    final usersToRemove = <int>[];
-
-    for (final userId in _userPrivileges.keys) {
-      if (updatedUserIds.contains(userId)) continue;
-
-      final rules = _userPrivileges[userId]!;
-      bool hasSupplierRules = false;
-
-      for (final rule in rules) {
-        final providerId = rule.productProvider?.id_product_provider;
-        if (providerId == supplierId ||
-            (supplierId == 0 && providerId != null)) {
-          hasSupplierRules = true;
-          break;
-        }
-      }
-
-      if (!hasSupplierRules) {
-        usersToRemove.add(userId);
-      }
-    }
-
-    for (final userId in usersToRemove) {
-      _cleanupUserFromSupplier(userId, supplierId);
-    }
   }
 
   void _cleanupUserFromSupplier(int userId, int supplierId) {
@@ -393,7 +292,7 @@ class PersonnelNotifier with ChangeNotifier {
     required int answer, // 0 = accept, 1 = reject
   }) async {
     try {
-      log('Answering invitation for ruleId: $ruleId, answer: $answer');
+      debugPrint('Answering invitation for ruleId: $ruleId, answer: $answer');
 
       final response = await _storageService.update(
         "${GluttexConstants.apiBaseUrl}${GluttexConstants.putRuleAnswerEndpoint}/$ruleId",
@@ -418,7 +317,7 @@ class PersonnelNotifier with ChangeNotifier {
       }
 
       if (targetRule == null || targetUserId == null) {
-        log("Rule $ruleId not found in privileges");
+        debugPrint("Rule $ruleId not found in privileges");
         return false;
       }
 
@@ -432,7 +331,7 @@ class PersonnelNotifier with ChangeNotifier {
           r.productProvider?.id_product_provider == supplierId);
 
       if (index == -1) {
-        log("Rule $ruleId not found in pending list");
+        debugPrint("Rule $ruleId not found in pending list");
         return false;
       }
 
@@ -461,7 +360,7 @@ class PersonnelNotifier with ChangeNotifier {
           (_supplierPersonnelMappings[supplierId] ??= []).add(targetUserId);
         }
 
-        log("Rule $ruleId ACCEPTED → moved to ACTIVE");
+        debugPrint("Rule $ruleId ACCEPTED → moved to ACTIVE");
       } else {
         // REJECT
         pendingList.removeAt(index);
@@ -474,13 +373,13 @@ class PersonnelNotifier with ChangeNotifier {
           _userPrivileges.remove(targetUserId);
         }
 
-        log("Rule $ruleId REJECTED → removed");
+        debugPrint("Rule $ruleId REJECTED → removed");
       }
 
       _scheduleNotifyListeners();
       return true;
     } catch (e, st) {
-      log("Error answering invitation: $e", stackTrace: st);
+      debugPrint("Error answering invitation: $e");
       return false;
     }
   }
@@ -510,7 +409,7 @@ class PersonnelNotifier with ChangeNotifier {
             try {
               return ManagementRule.fromJson(json as Map<String, dynamic>);
             } catch (e) {
-              log('Error parsing rule: $e');
+              debugPrint('Error parsing rule: $e');
               return null;
             }
           })
@@ -524,7 +423,7 @@ class PersonnelNotifier with ChangeNotifier {
 
       return _filterRules(allRules, ruleId, supplierId);
     } catch (e) {
-      log('Error fetching user privileges: $e');
+      debugPrint('Error fetching user privileges: $e');
       return null;
     }
   }
@@ -572,7 +471,7 @@ class PersonnelNotifier with ChangeNotifier {
       return true;
     } catch (e) {
       _error = 'Failed to add team member: ${e.toString()}';
-      log('Error adding team member: $e', error: e);
+      debugPrint('Error adding team member: $e');
       return false;
     } finally {
       _isLoading = false;
@@ -679,7 +578,7 @@ class PersonnelNotifier with ChangeNotifier {
       );
 
       if (updatedRule == null) {
-        log("updateManagementRule returned null");
+        debugPrint("updateManagementRule returned null");
         return false;
       }
 
@@ -687,7 +586,7 @@ class PersonnelNotifier with ChangeNotifier {
       return true;
     } catch (e) {
       _error = 'Failed to update team member privileges: ${e.toString()}';
-      log('Error updating team member privileges: $e', error: e);
+      debugPrint('Error updating team member privileges: $e');
       return false;
     } finally {
       _isLoading = false;
@@ -765,7 +664,7 @@ class PersonnelNotifier with ChangeNotifier {
       _error = null;
     } catch (e) {
       _error = 'Search failed: ${e.toString()}';
-      log('Error searching personnel: $e', error: e);
+      debugPrint('Error searching personnel: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -813,18 +712,12 @@ class PersonnelNotifier with ChangeNotifier {
     });
   }
 
-  @override
-  void dispose() {
-    _debounceTimer?.cancel();
-    super.dispose();
-  }
-
   // ------------------------------------------------------------------
   // DEBUG/PERFORMANCE METHODS
   // ------------------------------------------------------------------
 
   void logCacheStats() {
-    log('''
+    debugPrint('''
     PersonnelNotifier Cache Stats:
     - Users: ${_userCache.length}
     - Privileges: ${_userPrivileges.length}
@@ -847,5 +740,193 @@ class PersonnelNotifier with ChangeNotifier {
     _currentPage = 0;
     _hasMore = true;
     notifyListeners();
+  }
+
+// In your PersonnelNotifier class
+  bool hasPrivilege(int userId, int supplierId, String privilegeId) {
+    final rules = getRulesForUser(userId, supplierId: supplierId);
+    if (rules.isEmpty) return false;
+
+    for (final rule in rules) {
+      if (RoleBitMapper.hasPrivilege(
+        rule.management_rule_code ?? 0,
+        privilegeId,
+      )) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Check if user has ANY access to a supplier
+  bool hasAnyAccessToSupplier(int userId, int supplierId) {
+    final rules = getRulesForUser(userId, supplierId: supplierId);
+    return rules.isNotEmpty;
+  }
+
+  /// Get all suppliers user has access to
+  List<int> getAccessibleSupplierIds(int userId) {
+    final rules = getRulesForUser(userId);
+    final supplierIds = <int>{};
+
+    for (final rule in rules) {
+      final supplierId = rule.productProvider?.id_product_provider;
+      if (supplierId != null && supplierId > 0) {
+        supplierIds.add(supplierId);
+      }
+    }
+
+    return supplierIds.toList();
+  }
+
+  bool _isDisposed = false;
+  Completer<void>? _currentLoadOperation;
+
+  Future<void> loadPersonnel({
+    int userId = 0,
+    bool reset = false,
+    int supplierId = 0,
+    bool includePending = false,
+  }) async {
+    // Prevent overlapping operations
+    if (_currentLoadOperation != null && !reset) {
+      return _currentLoadOperation!.future;
+    }
+
+    _currentLoadOperation = Completer();
+
+    try {
+      await _loadPersonnelInternal(
+        userId: userId,
+        reset: reset,
+        supplierId: supplierId,
+        includePending: includePending,
+      );
+      _currentLoadOperation!.complete();
+    } catch (e) {
+      _currentLoadOperation!.completeError(e);
+      rethrow;
+    } finally {
+      _currentLoadOperation = null;
+    }
+  }
+
+  Future<void> _loadPersonnelInternal({
+    int userId = 0,
+    bool reset = false,
+    int supplierId = 0,
+    bool includePending = false,
+  }) async {
+    if (_isLoading && !reset) return;
+    if (!_hasMore && !reset) {
+      _rebuildUserState(userId);
+      return;
+    }
+
+    if (reset) {
+      _currentPage = 0;
+      _filteredPersonnel = const [];
+      _searchResults = const [];
+      _hasMore = true;
+      _error = null;
+    }
+
+    _isLoading = true;
+    if (!_isDisposed) notifyListeners();
+
+    try {
+      final rules = await _userService.getManagementRules(
+        0,
+        supplierId,
+        userId,
+        _currentPage * _itemsPerPage,
+        _itemsPerPage,
+      );
+
+      if (rules == null || rules.isEmpty) {
+        _hasMore = false;
+      } else {
+        final updatedUserIds = <int>{};
+        final newRules = <ManagementRule>[];
+
+        // Process all rules first
+        for (final rule in rules) {
+          final user = rule.appUser;
+          if (user == null) continue;
+
+          final userIdKey = user.id_app_user ?? 0;
+          updatedUserIds.add(userIdKey);
+          newRules.add(rule);
+        }
+
+        // Update caches in a batch
+        _updateUserRulesBatch(newRules);
+
+        if (reset && updatedUserIds.isNotEmpty) {
+          _cleanupRemovedUsers(updatedUserIds, supplierId);
+        }
+
+        _currentPage++;
+      }
+
+      _rebuildUserState(userId);
+      _error = null;
+    } catch (e) {
+      _error = 'Failed to load personnel: ${e.toString()}';
+      log('Error loading personnel: $e',
+          error: e, stackTrace: StackTrace.current);
+    } finally {
+      _isLoading = false;
+      if (!_isDisposed) notifyListeners();
+    }
+  }
+
+  void _updateUserRulesBatch(List<ManagementRule> rules) {
+    for (final rule in rules) {
+      final userId = rule.appUser?.id_app_user;
+      if (userId == null) continue;
+
+      _updateUserRule(userId, rule);
+    }
+  }
+
+  void _cleanupRemovedUsers(Set<int> updatedUserIds, int supplierId) {
+    // Create copy to avoid modification during iteration
+    final userPrivilegesCopy =
+        Map<int, List<ManagementRule>>.from(_userPrivileges);
+    final usersToRemove = <int>[];
+
+    for (final entry in userPrivilegesCopy.entries) {
+      final userId = entry.key;
+      if (updatedUserIds.contains(userId)) continue;
+
+      final rules = entry.value;
+      bool hasSupplierRules = false;
+
+      for (final rule in rules) {
+        final providerId = rule.productProvider?.id_product_provider;
+        if (providerId == supplierId ||
+            (supplierId == 0 && providerId != null)) {
+          hasSupplierRules = true;
+          break;
+        }
+      }
+
+      if (!hasSupplierRules) {
+        usersToRemove.add(userId);
+      }
+    }
+
+    for (final userId in usersToRemove) {
+      _cleanupUserFromSupplier(userId, supplierId);
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _debounceTimer?.cancel();
+    _currentLoadOperation?.complete(); // Complete any pending operations
+    super.dispose();
   }
 }

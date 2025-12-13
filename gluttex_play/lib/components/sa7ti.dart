@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/custom_localizations.dart';
 import 'package:gluttex_play/components/QuizAnswerIndexes.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 
@@ -138,7 +139,7 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  AppLocalizations.of(context)!.getLocalizedQuestion(
+                  CustomLocalizations(context).getLocalizedQuestion(
                       _selectedQuestions[_currentQuestionIndex]),
                   style: TextStyle(
                       fontSize: 16,
@@ -149,7 +150,7 @@ class _GlutenFreeQuizState extends State<GlutenFreeQuiz> {
               // ),
               SizedBox(height: 20),
               // 选项按钮
-              ...AppLocalizations.of(context)!
+              ...CustomLocalizations(context)
                   .getLocalizedAnswerList(
                       _selectedQuestions[_currentQuestionIndex])
                   .split(",")

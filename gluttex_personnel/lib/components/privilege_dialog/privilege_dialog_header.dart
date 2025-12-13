@@ -109,19 +109,19 @@ class PrivilegeDialogHeader extends StatelessWidget {
     return Container(
       width: 50,
       height: 50,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        image: hasImage
-            ? DecorationImage(
-                image: NetworkImage(user.app_user_image_url!),
-                fit: BoxFit.cover,
-              )
-            : null,
-        color: !hasImage ? colorScheme.primary.withOpacity(0.1) : null,
-      ),
-      child: !hasImage
-          ? Icon(Icons.person_rounded, color: colorScheme.primary, size: 24)
-          : null,
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(25),
+      //   image: hasImage
+      //       ? DecorationImage(
+      //           image: NetworkImage(user.app_user_image_url!),
+      //           fit: BoxFit.cover,
+      //         )
+      //       : null,
+      //   color: !hasImage ? colorScheme.primary.withOpacity(0.1) : null,
+      // ),
+      // child: !hasImage
+      //     ? Icon(Icons.person_rounded, color: colorScheme.primary, size: 24)
+      //     : null,
     );
   }
 }

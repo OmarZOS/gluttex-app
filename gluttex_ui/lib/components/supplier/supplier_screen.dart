@@ -195,7 +195,7 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                                             AppRoutes.providerCreate,
                                             arguments: {
                                               "supplier": supplierNotifer
-                                                  .detailed_suppliers
+                                                  .detailedSuppliers
                                                   .where((e) =>
                                                       e.idProductProvider ==
                                                       supplier
