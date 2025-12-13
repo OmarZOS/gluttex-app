@@ -1019,6 +1019,19 @@
   "noProductsAvailable": "No products available",
   "loadingServices": "Loading services...",
   "preparingServiceCatalog": "Preparing your service catalog",
-  "refreshServices": "Refresh Services"
+  "refreshServices": "Refresh Services",
+
+  "invoice": "Invoice",
+  "order": "Order",
+  "cart": "Cart",
+  "transaction": "Transaction",
+  "client": "Client",
+  "supplier": "Supplier",
+  "seller": "Seller",
+  "documentType": "Document Type",
+  "operationType": "Operation Type",
+  "invoiceStatus": "Invoice Status",
+  "deposited": "Deposited"
+
 
 }

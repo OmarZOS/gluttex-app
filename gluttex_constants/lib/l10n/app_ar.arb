@@ -1100,6 +1100,18 @@
   "noProductsAvailable": "لا توجد منتجات متاحة",
   "loadingServices": "جاري تحميل الخدمات...",
   "preparingServiceCatalog": "جاري إعداد كتالوج الخدمات الخاص بك",
-  "refreshServices": "تحديث الخدمات"
+  "refreshServices": "تحديث الخدمات",
   
+  "invoice": "فاتورة",
+  "order": "طلب",
+  "cart": "سلة",
+  "transaction": "معاملة",
+  "client": "زبون",
+  "supplier": "مورد",
+  "seller": "بائع",
+  "documentType": "نوع الوثيقة",
+  "operationType": "نوع العملية",
+  "invoiceStatus": "حالة الفاتورة",
+  "deposited": "مودَع"
+
 }

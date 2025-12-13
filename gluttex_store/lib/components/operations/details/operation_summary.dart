@@ -65,7 +65,7 @@ class _SummaryGrid extends StatelessWidget {
         ),
         _SummaryItem(
           label: localizations.client,
-          value: operation.client != null ? '#${operation.client}' : 'N/A',
+          value: operation.clientId != null ? '#${operation.clientId}' : 'N/A',
           icon: Icons.person,
           color: colorScheme.secondary,
         ),

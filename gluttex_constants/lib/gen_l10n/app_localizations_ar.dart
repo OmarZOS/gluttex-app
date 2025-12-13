@@ -2723,13 +2723,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get operationId => 'معرف العملية';
 
   @override
-  String get client => 'العميل';
+  String get client => 'زبون';
 
   @override
-  String get supplier => 'المورد';
+  String get supplier => 'مورد';
 
   @override
-  String get seller => 'البائع';
+  String get seller => 'بائع';
 
   @override
   String get cartBased => 'مبني على السلة';
@@ -2829,4 +2829,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get refreshServices => 'تحديث الخدمات';
+
+  @override
+  String get transaction => 'معاملة';
+
+  @override
+  String get documentType => 'نوع الوثيقة';
+
+  @override
+  String get operationType => 'نوع العملية';
+
+  @override
+  String get invoiceStatus => 'حالة الفاتورة';
+
+  @override
+  String get deposited => 'مودَع';
 }

@@ -39,7 +39,7 @@ class TabSelector extends StatelessWidget {
               label: localizations.services,
               isSelected: selectedTab == 1,
               onTap: () => onTabChanged(1),
-              icon: Icons.medical_services_outlined,
+              icon: Icons.handyman,
             ),
           ),
         ],

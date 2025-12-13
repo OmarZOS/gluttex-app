@@ -2829,4 +2829,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refreshServices => 'Refresh Services';
+
+  @override
+  String get transaction => 'Transaction';
+
+  @override
+  String get documentType => 'Document Type';
+
+  @override
+  String get operationType => 'Operation Type';
+
+  @override
+  String get invoiceStatus => 'Invoice Status';
+
+  @override
+  String get deposited => 'Deposited';
 }

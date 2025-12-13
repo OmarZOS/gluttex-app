@@ -46,8 +46,7 @@ class _ServicesGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
-        final itemWidth = (constraints.maxWidth - (16 * (crossAxisCount - 1))) /
-            crossAxisCount;
+        final itemWidth = constraints.maxWidth / 2;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

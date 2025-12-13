@@ -2829,4 +2829,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get refreshServices => 'Actualiser les services';
+
+  @override
+  String get transaction => 'Transaction';
+
+  @override
+  String get documentType => 'Type de document';
+
+  @override
+  String get operationType => 'Type d’opération';
+
+  @override
+  String get invoiceStatus => 'Statut de la facture';
+
+  @override
+  String get deposited => 'Déposé';
 }

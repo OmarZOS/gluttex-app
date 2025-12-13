@@ -5568,6 +5568,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refresh Services'**
   String get refreshServices;
+
+  /// No description provided for @transaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get transaction;
+
+  /// No description provided for @documentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Type'**
+  String get documentType;
+
+  /// No description provided for @operationType.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation Type'**
+  String get operationType;
+
+  /// No description provided for @invoiceStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice Status'**
+  String get invoiceStatus;
+
+  /// No description provided for @deposited.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposited'**
+  String get deposited;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

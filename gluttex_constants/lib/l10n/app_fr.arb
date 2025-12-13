@@ -1117,7 +1117,19 @@
   "noProductsAvailable": "Aucun produit disponible",
   "loadingServices": "Chargement des services...",
   "preparingServiceCatalog": "Préparation de votre catalogue de services",
-  "refreshServices": "Actualiser les services"
+  "refreshServices": "Actualiser les services",
+
+    "invoice": "Facture",
+  "order": "Commande",
+  "cart": "Panier",
+  "transaction": "Transaction",
+  "client": "Client",
+  "supplier": "Fournisseur",
+  "seller": "Vendeur",
+  "documentType": "Type de document",
+  "operationType": "Type d’opération",
+  "invoiceStatus": "Statut de la facture",
+  "deposited": "Déposé"
   
 
 }
