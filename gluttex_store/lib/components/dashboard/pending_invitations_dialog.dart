@@ -75,11 +75,11 @@ class PendingInvitationItem extends StatelessWidget {
         rule.productProvider?.product_provider_details.provider_name ??
             localizations?.unknownBusiness ??
             'Unknown Business';
-    final privilegeIds = RoleBitMapper.numberToPrivilegeIds(
-      rule.management_rule_code ?? 0,
-    );
+    // final privilegeIds = RoleBitMapper.numberToPrivilegeIds(
+    //   rule.management_rule_code ?? 0,
+    // );
     final accessSummary = PrivilegeUIManager.getAccessLevelSummary(
-      privilegeIds,
+      rule.management_rule_code,
       context: context,
     );
 

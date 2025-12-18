@@ -18,7 +18,7 @@ class DashboardItem {
     this.privilegeLevel,
   });
 
-  bool get showFloatingAction => type != DashboardScreenType.suppliers;
+  bool get showFloatingAction => type != DashboardScreenType.suppliersPersonnel;
 
   IconData get floatingActionIcon {
     switch (type) {

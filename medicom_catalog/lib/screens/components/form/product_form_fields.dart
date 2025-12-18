@@ -286,7 +286,7 @@ class ProductFormFields extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '\$${aiPrice.toStringAsFixed(2)}',
+                  'DZD${aiPrice.toStringAsFixed(2)}',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
@@ -297,8 +297,8 @@ class ProductFormFields extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
                       isHigher
-                          ? 'Your price is \$${priceDifference.toStringAsFixed(2)} higher'
-                          : 'Your price is \$${priceDifference.toStringAsFixed(2)} lower',
+                          ? 'Your price is DZD${priceDifference.toStringAsFixed(2)} higher'
+                          : 'Your price is DZD${priceDifference.toStringAsFixed(2)} lower',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: isHigher ? Colors.orange : Colors.green,
                       ),
@@ -374,7 +374,7 @@ class ProductFormFields extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'AI Suggested Price: \$${aiSuggestedPrice.toStringAsFixed(2)}',
+                  'AI Suggested Price: DZD${aiSuggestedPrice.toStringAsFixed(2)}',
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: colorScheme.onSurface,
                     fontWeight: FontWeight.w600,

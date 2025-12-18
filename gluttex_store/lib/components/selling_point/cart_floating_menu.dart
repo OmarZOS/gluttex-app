@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_store/components/selling_point/cart_summary/cart_summary_screen.dart';
+import 'package:provider/provider.dart';
 
 class CartFloatingMenu extends StatefulWidget {
   final VoidCallback onCheckout;
   final VoidCallback onSaveQuote;
   final VoidCallback onEmailReceipt;
   final VoidCallback onPrintReceipt;
+  final VoidCallback onViewCart; // Add this callback
 
   const CartFloatingMenu({
     super.key,
@@ -12,6 +16,7 @@ class CartFloatingMenu extends StatefulWidget {
     required this.onSaveQuote,
     required this.onEmailReceipt,
     required this.onPrintReceipt,
+    required this.onViewCart, // Add this
   });
 
   @override
@@ -41,6 +46,32 @@ class _CartFloatingMenuState extends State<CartFloatingMenu>
     }
   }
 
+  // Method to show the cart summary sheet
+  void _showCartSummary(BuildContext context) {
+    // First close the floating menu
+    if (_isExpanded) {
+      _toggleMenu();
+    }
+
+    // Then show the bottom sheet
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Makes the sheet take up most of the screen
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        // You'll need to provide your CartChangeNotifier instance here
+        // This might come from a provider, inherited widget, or passed as a parameter
+
+        // For now, I'll show a placeholder. Replace this with your actual CartSummarySheet
+        return CartSummarySheet(
+          // You'll need to pass the cart instance here
+          cart: context.read<
+              CartChangeNotifier>(), // Replace with your actual cart instance
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -50,6 +81,13 @@ class _CartFloatingMenuState extends State<CartFloatingMenu>
       children: [
         // Expanded menu items
         if (_isExpanded) ...[
+          _buildMenuItem(
+            icon: Icons.shopping_cart,
+            label: 'View Cart',
+            onTap: () => _showCartSummary(context),
+            index: 0,
+            colorScheme: colorScheme,
+          ),
           _buildMenuItem(
             icon: Icons.email,
             label: 'Email Receipt',
@@ -104,52 +142,43 @@ class _CartFloatingMenuState extends State<CartFloatingMenu>
           parent: _controller,
           curve: Interval(0.1 * index, 1.0, curve: Curves.easeOut),
         ),
-        child: Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.shadow.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.1),
-                  shape: BoxShape.circle,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-                child: Icon(icon, size: 18, color: colorScheme.primary),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 18, color: colorScheme.primary),
                 ),
-              ),
-              const SizedBox(width: 4),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onTap,
-                  borderRadius: BorderRadius.circular(24),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

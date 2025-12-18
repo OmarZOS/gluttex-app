@@ -3,9 +3,11 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/NotificationService.dart';
+import 'package:gluttex_core/business/finance/services/InvoiceService.dart';
 import 'package:gluttex_core/business/services/CartService.dart';
 import 'package:gluttex_core/business/services/ProvidedServiceManagementService.dart';
 import 'package:gluttex_event/assistant_change_notifier.dart';
+import 'package:gluttex_event/finance_change_notifier.dart';
 import 'package:gluttex_event/notification_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/service_change_notifier.dart';
@@ -13,6 +15,7 @@ import 'package:gluttex_event/supplier_dashboard_provider.dart';
 import 'package:gluttex_event/views/finance_view_model.dart';
 import 'package:gluttex_impl_app/gluttex_impl_notification.dart';
 import 'package:gluttex_impl_business/finance/gluttex_impl_business_operation.dart';
+import 'package:gluttex_impl_business/finance/gluttex_impl_invoice.dart';
 import 'package:gluttex_io/GluttexImageImpl.dart';
 import 'package:gluttex_core/app/Services/AuthService.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
@@ -59,9 +62,10 @@ void setupLocator() {
   GluttexLocator.registerSingletonService<AuthService>(AuthServiceImpl());
   GluttexLocator.registerSingletonService<ProvidedServiceManagementService>(
       ProvidedServiceManagementImpl());
-
   GluttexLocator.registerSingletonService<BusinessOperationService>(
       BusinessOperationServiceImpl());
+
+  GluttexLocator.registerSingletonService<InvoiceService>(InvoiceServiceImpl());
 
   GluttexLocator.registerFactory<GluttexImage>(() => GluttexImageImpl());
 }
@@ -108,6 +112,8 @@ class GluttexApp extends StatelessWidget {
             create: (_) => PersonnelNotifier()),
         ChangeNotifierProvider<ServiceNotifier>(
             create: (_) => ServiceNotifier()),
+        ChangeNotifierProvider<FinanceChangeNotifier>(
+            create: (_) => FinanceChangeNotifier()),
         ChangeNotifierProvider<FinanceViewModel>(
             create: (_) => FinanceViewModel(
                 businessOperationService:

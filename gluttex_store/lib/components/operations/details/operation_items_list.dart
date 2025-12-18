@@ -247,7 +247,7 @@ class _ItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isCartItem = item is CartItem;
     final colorScheme = Theme.of(context).colorScheme;
-
+    final AppLocalizations loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -288,10 +288,11 @@ class _ItemCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    _buildInfoText(context, 'Qty: ${_getQuantity()}'),
+                    _buildInfoText(
+                        context, loc.orderAmountText(_getQuantity())),
                     const SizedBox(width: 12),
-                    _buildInfoText(context,
-                        'Price: \$${_getUnitPrice().toStringAsFixed(2)}'),
+                    _buildInfoText(
+                        context, loc.price(_getUnitPrice().toStringAsFixed(2))),
                   ],
                 ),
                 if (_getItemDescription() != null) ...[
@@ -311,7 +312,7 @@ class _ItemCard extends StatelessWidget {
 
           // Item Total
           Text(
-            '\$${_getTotal().toStringAsFixed(2)}',
+            loc.price(_getTotal().toStringAsFixed(2)),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: colorScheme.primary,
@@ -401,6 +402,8 @@ class _ItemsTotalSummary extends StatelessWidget {
   }
 
   Widget _buildSummaryRow(BuildContext context, String label, double amount) {
+    AppLocalizations loc = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -411,7 +414,7 @@ class _ItemsTotalSummary extends StatelessWidget {
               ),
         ),
         Text(
-          '\$${amount.toStringAsFixed(2)}',
+          loc.price(amount.toStringAsFixed(2)),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -431,7 +434,7 @@ class _ItemsTotalSummary extends StatelessWidget {
               ),
         ),
         Text(
-          '\$${amount.toStringAsFixed(2)}',
+          AppLocalizations.of(context)!.price(amount.toStringAsFixed(2)),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: Theme.of(context).colorScheme.primary,

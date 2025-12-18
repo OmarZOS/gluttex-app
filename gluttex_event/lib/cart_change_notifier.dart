@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/finance/Cart.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:gluttex_core/business/services/OrderService.dart';
 import 'package:gluttex_core/business/services/CartService.dart';
 import 'package:locator/locator.dart';
@@ -24,12 +23,16 @@ class CartFilter {
   final bool? hasInvoice;
   final DateTime? startDate;
   final DateTime? endDate;
+  final bool? showProductsOnly; // NEW: Filter for product items
+  final bool? showServicesOnly; // NEW: Filter for service items
 
   const CartFilter({
     this.status,
     this.hasInvoice,
     this.startDate,
     this.endDate,
+    this.showProductsOnly,
+    this.showServicesOnly,
   });
 
   CartFilter copyWith({
@@ -37,12 +40,16 @@ class CartFilter {
     bool? hasInvoice,
     DateTime? startDate,
     DateTime? endDate,
+    bool? showProductsOnly,
+    bool? showServicesOnly,
   }) {
     return CartFilter(
       status: status ?? this.status,
       hasInvoice: hasInvoice ?? this.hasInvoice,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      showProductsOnly: showProductsOnly ?? this.showProductsOnly,
+      showServicesOnly: showServicesOnly ?? this.showServicesOnly,
     );
   }
 
@@ -77,14 +84,25 @@ class CartChangeNotifier with ChangeNotifier {
   // ============ PUBLIC GETTERS ============
   List<Order> get orders => List.unmodifiable(_orders.values);
   List<CartItem> get cartItems => _localCart.items;
+  List<CartItem> get productItems =>
+      _localCart.productItems; // NEW: Get only products
+  List<CartItem> get serviceItems =>
+      _localCart.serviceItems; // NEW: Get only services
   Cart get cart => _localCart;
   int get cartItemCount => _localCart.totalQuantity;
+  int get productItemCount =>
+      _localCart.productItems.length; // NEW: Product count
+  int get serviceItemCount =>
+      _localCart.serviceItems.length; // NEW: Service count
   bool get isLoading => _isLoading;
   String? get lastError => _lastError;
-  double get cartTotal => _localCart.totalPrice;
+  double get cartSubtotal => _localCart.subtotal; // UPDATED: Use subtotal
+  double get cartTotal => _localCart.totalAmount; // UPDATED: Use totalAmount
   List<Cart> get apiCarts => List.unmodifiable(_apiCarts);
   CartFilter get filter => _filter;
   bool get hasCartService => _cartService != null;
+  bool get hasProductsInCart => _localCart.productItems.isNotEmpty; // NEW
+  bool get hasServicesInCart => _localCart.serviceItems.isNotEmpty; // NEW
 
   List<Cart> get filteredCarts => _apiCarts.where(_filter.matches).toList();
 
@@ -143,26 +161,106 @@ class CartChangeNotifier with ChangeNotifier {
     notifyListeners();
   }
 
-  // ============ LOCAL CART METHODS ============
-  void addItem(Product product, [int quantity = 1]) {
-    _localCart.addProduct(product, quantity);
-    _clearError();
+  void filterProductsOnly() {
+    // NEW
+    setFilter(
+        _filter.copyWith(showProductsOnly: true, showServicesOnly: false));
   }
 
-  void removeItem(Product product) {
-    _localCart.removeProduct(product.id_product ?? 0);
+  void filterServicesOnly() {
+    // NEW
+    setFilter(
+        _filter.copyWith(showProductsOnly: false, showServicesOnly: true));
+  }
+
+  void showAllItems() {
+    // NEW
+    setFilter(_filter.copyWith(showProductsOnly: null, showServicesOnly: null));
+  }
+
+  // ============ LOCAL CART METHODS ============
+  // UPDATED: Renamed to addProduct for clarity
+  void addProduct(Product product, [int quantity = 1]) {
+    _localCart.addProduct(product, quantity);
+    _clearError();
     notifyListeners();
   }
 
-  void updateQuantity(Product product, int newQuantity) {
-    if (newQuantity > 0) {
-      _localCart.updateQuantity(product.id_product ?? 0, newQuantity);
+  // NEW: Add service to cart
+  void addService(
+    ProvidedService service, {
+    int quantity = 1,
+    String? scheduledDate,
+    String? scheduledTime,
+  }) {
+    _localCart.addService(
+      service,
+      quantity: quantity,
+      scheduledDate: scheduledDate,
+      scheduledTime: scheduledTime,
+    );
+    _clearError();
+    notifyListeners();
+  }
+
+  // UPDATED: Generic add item method
+  void addItem(dynamic item, [int quantity = 1]) {
+    if (item is Product) {
+      addProduct(item, quantity);
+    } else if (item is ProvidedService) {
+      addService(item, quantity: quantity);
     } else {
-      removeItem(product);
+      throw ArgumentError('Item must be either Product or ProvidedService');
+    }
+  }
+
+  // UPDATED: Remove item method
+  void removeItem({Product? product, ProvidedService? service}) {
+    _localCart.removeItem(
+      productId: product?.id_product,
+      serviceId: service?.id,
+    );
+    notifyListeners();
+  }
+
+  // UPDATED: Update quantity method
+  void updateQuantity({
+    Product? product,
+    ProvidedService? service,
+    required int newQuantity,
+  }) {
+    if (product != null) {
+      if (newQuantity > 0) {
+        _localCart.updateQuantity(
+            productId: product.id_product, quantity: newQuantity);
+      } else {
+        removeItem(product: product);
+      }
+    } else if (service != null) {
+      if (newQuantity > 0) {
+        _localCart.updateQuantity(serviceId: service.id, quantity: newQuantity);
+      } else {
+        removeItem(service: service);
+      }
     }
     notifyListeners();
   }
 
+  // NEW: Update service scheduling
+  void updateServiceScheduling({
+    required ProvidedService service,
+    String? scheduledDate,
+    String? scheduledTime,
+  }) {
+    _localCart.updateServiceScheduling(
+      serviceId: service.id,
+      scheduledDate: scheduledDate,
+      scheduledTime: scheduledTime,
+    );
+    notifyListeners();
+  }
+
+  // UPDATED: Clear cart method
   void clearCart() {
     _localCart.clear();
     notifyListeners();
@@ -171,6 +269,26 @@ class CartChangeNotifier with ChangeNotifier {
   void clearError() {
     _lastError = null;
     notifyListeners();
+  }
+
+  // NEW: Check if product is in cart
+  bool hasProductInCart(Product product) {
+    return _localCart.hasProduct(product.id_product ?? 0);
+  }
+
+  // NEW: Check if service is in cart
+  bool hasServiceInCart(ProvidedService service) {
+    return _localCart.hasService(service.id);
+  }
+
+  // NEW: Get cart item for a product
+  CartItem? getProductCartItem(Product product) {
+    return _localCart.getProductItem(product.id_product ?? 0);
+  }
+
+  // NEW: Get cart item for a service
+  CartItem? getServiceCartItem(ProvidedService service) {
+    return _localCart.getServiceItem(service.id);
   }
 
   // ============ ORDER METHODS ============
@@ -230,9 +348,20 @@ class CartChangeNotifier with ChangeNotifier {
     return order != null && order.items != null ? order : null;
   }
 
+  // UPDATED: Submit order with both products and services
   Future<OrderResult> submitOrder(Map<String, dynamic> orderData) async {
     _setLoading(true);
     try {
+      // Add cart items to order data
+      final cartItemsJson =
+          _localCart.items.map((item) => item.toJson()).toList();
+      orderData['items'] = cartItemsJson;
+      orderData['item_count'] = _localCart.itemCount;
+      orderData['subtotal'] = _localCart.subtotal;
+      orderData['total'] = _localCart.totalAmount;
+      orderData['product_count'] = _localCart.productItems.length;
+      orderData['service_count'] = _localCart.serviceItems.length;
+
       final data = await _orderService.addOrder(orderData);
       if (data != null) {
         _localCart.clear();
@@ -281,8 +410,9 @@ class CartChangeNotifier with ChangeNotifier {
     try {
       final cart = await _cartService.getCart(cartId);
 
-      log("Found the cart: ${cart?.cartId}");
-      log("Found  ${cart?.orderedItems.length} items.");
+      // log("Found the cart: ${cart?.cartId}");
+      // log("Found  ${cart?.orderedItems.length} product items.");
+      // log("Found  ${cart?.orderedServices.length} service items."); // UPDATED
 
       if (cart != null) _updateCartInList(cart);
     } catch (e, stackTrace) {
@@ -306,6 +436,7 @@ class CartChangeNotifier with ChangeNotifier {
     }
   }
 
+  // UPDATED: Create cart with local cart items
   Future<Cart?> createCart({
     required int providerId,
     String? notes,
@@ -319,6 +450,9 @@ class CartChangeNotifier with ChangeNotifier {
 
     _setLoading(true);
     try {
+      // Prepare cart with local items
+      final cartData = _localCart.toJsonForApi();
+
       final newCart = Cart(
         cartProductProviderId: providerId,
         cartNotes: notes,
@@ -327,6 +461,7 @@ class CartChangeNotifier with ChangeNotifier {
         cartStatus: 'open',
         cartCreatedAt: DateTime.now().toIso8601String(),
         cartUpdatedAt: DateTime.now().toIso8601String(),
+        cartTotalAmount: _localCart.totalAmount,
       );
 
       final createdCart = await _cartService!.addCart(newCart);
@@ -378,23 +513,13 @@ class CartChangeNotifier with ChangeNotifier {
     }
   }
 
-  // ============ DISPLAY & UTILITY METHODS ============
-  List<Cart> getAllCartsForDisplay() {
-    final allCarts = List<Cart>.from(_apiCarts);
-    if (_localCart.isNotEmpty) {
-      allCarts.insert(
-          0,
-          Cart(
-            cartId: null,
-            cartStatus: 'local',
-            cartNotes: 'Current shopping cart',
-            cartTotalAmount: _localCart.totalPrice,
-            cartCreatedAt: DateTime.now().toIso8601String(),
-          ));
-    }
-    return allCarts;
+  // NEW: Merge local cart with API cart
+  void mergeLocalCartWithApiCart(Cart apiCart) {
+    // _localCart.mergeWithApiCart(apiCart);
+    notifyListeners();
   }
 
+  // NEW: Checkout local cart with items
   Future<Cart?> checkoutLocalCart({
     required int providerId,
     String? notes,
@@ -413,7 +538,66 @@ class CartChangeNotifier with ChangeNotifier {
       sellingUserId: sellingUserId,
     );
 
-    if (cart != null) _localCart.clear();
+    if (cart != null) {
+      _localCart.clear();
+      notifyListeners();
+    }
     return cart;
+  }
+
+  // NEW: Get filtered items for display
+  List<CartItem> getFilteredItems() {
+    if (_filter.showProductsOnly == true) {
+      return _localCart.productItems;
+    } else if (_filter.showServicesOnly == true) {
+      return _localCart.serviceItems;
+    }
+    return _localCart.items;
+  }
+
+  // NEW: Calculate service duration total
+  int get totalServiceDuration {
+    return _localCart.serviceItems.fold(0, (total, item) {
+      final service = item.service;
+      if (service != null) {
+        return total + (service.actualDuration * item.quantity);
+      }
+      return total;
+    });
+  }
+
+  // NEW: Get service scheduling summary
+  Map<String, List<CartItem>> get scheduledServicesByDate {
+    final Map<String, List<CartItem>> result = {};
+
+    for (final item in _localCart.serviceItems) {
+      if (item.scheduledDate != null) {
+        result.putIfAbsent(item.scheduledDate!, () => []).add(item);
+      }
+    }
+
+    return result;
+  }
+
+  // NEW: Check if cart has scheduled services
+  bool get hasScheduledServices {
+    return _localCart.serviceItems.any((item) => item.scheduledDate != null);
+  }
+
+  // UPDATED: Display all carts
+  List<Cart> getAllCartsForDisplay() {
+    final allCarts = List<Cart>.from(_apiCarts);
+    if (_localCart.isNotEmpty) {
+      allCarts.insert(
+          0,
+          Cart(
+            cartId: null,
+            cartStatus: 'local',
+            cartNotes: 'Current shopping cart',
+            cartTotalAmount: _localCart.totalAmount,
+            cartCreatedAt: DateTime.now().toIso8601String(),
+          ));
+    }
+    return allCarts;
   }
 }

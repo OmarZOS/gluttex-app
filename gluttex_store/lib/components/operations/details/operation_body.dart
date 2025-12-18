@@ -36,7 +36,7 @@ class OperationBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                localizations.items,
+                localizations.itemsText,
                 style: TextStyle(
                   color: colorScheme.onSurface,
                   fontSize: 20,
@@ -68,6 +68,7 @@ class _PaymentDetails extends StatelessWidget {
     final localizations = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.all(20),
@@ -90,17 +91,17 @@ class _PaymentDetails extends StatelessWidget {
           const SizedBox(height: 16),
           _PaymentRow(
             label: localizations.totalAmount,
-            value: _formatCurrency(operation.totalAmount),
+            value: _formatCurrency(operation.totalAmount, loc),
             color: colorScheme.onSurface,
           ),
           _PaymentRow(
             label: localizations.totalPaid,
-            value: _formatCurrency(operation.totalPaid),
+            value: _formatCurrency(operation.totalPaid, loc),
             color: colorScheme.primary,
           ),
           _PaymentRow(
             label: localizations.totalDeposited,
-            value: _formatCurrency(operation.totalDeposited),
+            value: _formatCurrency(operation.totalDeposited, loc),
             color: colorScheme.secondary,
           ),
           Divider(
@@ -109,7 +110,7 @@ class _PaymentDetails extends StatelessWidget {
           ),
           _PaymentRow(
             label: localizations.balanceDue,
-            value: _formatCurrency(operation.balanceDue),
+            value: _formatCurrency(operation.balanceDue, loc),
             color: operation.balanceDue > 0
                 ? colorScheme.error
                 : colorScheme.onSurface,
@@ -226,8 +227,8 @@ class _FooterActions extends StatelessWidget {
 // HELPERS
 // -----------------------------------------------------------------------------
 
-String _formatCurrency(double amount) {
-  return '\$${amount.toStringAsFixed(2)}';
+String _formatCurrency(double amount, AppLocalizations loc) {
+  return loc.price(amount.toStringAsFixed(2));
 }
 
 String _formatStatus(String status, BuildContext context) {

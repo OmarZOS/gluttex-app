@@ -166,8 +166,8 @@ class _HeaderDetails extends StatelessWidget {
 
   const _HeaderDetails({required this.operation});
 
-  String _formatCurrency(double amount) {
-    return '\$${amount.toStringAsFixed(2)}';
+  String _formatCurrency(double amount, AppLocalizations loc) {
+    return loc.price(amount.toStringAsFixed(2));
   }
 
   @override
@@ -180,7 +180,7 @@ class _HeaderDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _formatCurrency(operation.totalAmount),
+          _formatCurrency(operation.totalAmount, localizations),
           style: theme.textTheme.headlineLarge?.copyWith(
             color: colorScheme.onPrimary,
             fontWeight: FontWeight.w800,

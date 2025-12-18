@@ -212,7 +212,7 @@ class ProvidedService {
 
   @override
   String toString() {
-    return 'ProvidedService(id: $id, name: $name, category: $categoryId, price: \$$finalPrice, resources: ${resourceRequirements.length}, staff: ${staffRequirements.length})';
+    return 'ProvidedService(id: $id, name: $name, category: $categoryId, price: DZD$finalPrice, resources: ${resourceRequirements.length}, staff: ${staffRequirements.length})';
   }
 }
 

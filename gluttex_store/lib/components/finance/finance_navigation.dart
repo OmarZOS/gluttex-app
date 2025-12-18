@@ -22,10 +22,10 @@ class TabNavigation extends StatelessWidget {
         icon: Icons.receipt,
         label: localizations.invoices,
       ),
-      _TabConfig(
-        icon: Icons.analytics,
-        label: localizations.analytics,
-      ),
+      // _TabConfig(
+      //   icon: Icons.analytics,
+      //   label: localizations.analytics,
+      // ),
       _TabConfig(
         icon: Icons.price_change,
         label: localizations.pricing,

@@ -1,62 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
-import 'package:gluttex_core/business/finance/Order.dart';
+import 'package:gluttex_event/views/finance_view_model.dart';
+import 'package:provider/provider.dart';
 
 class FinanceStats extends StatelessWidget {
-  final List<BusinessOperation> operations;
+  final VoidCallback? onCreateInvoice;
+  final VoidCallback? onViewAllTransactions;
 
-  const FinanceStats({super.key, required this.operations});
+  const FinanceStats({
+    super.key,
+    this.onCreateInvoice,
+    this.onViewAllTransactions,
+  });
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<FinanceViewModel>(
+      builder: (context, viewModel, child) {
+        final operations = viewModel.businessOperations;
+        final analytics = viewModel.analyticsCache;
+
+        if (operations.isEmpty || analytics == null) {
+          return _buildEmptyState(context, viewModel);
+        }
+
+        return _buildContent(context, viewModel, analytics);
+      },
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, FinanceViewModel viewModel) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context)!;
-    final stats = _calculateStats();
 
-    if (operations.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.analytics_outlined,
-                size: 64,
-                color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.analytics_outlined,
+              size: 64,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              localizations.noAnalyticsData,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
               ),
-              const SizedBox(height: 24),
-              Text(
-                localizations.noAnalyticsData,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                localizations.generateInvoicesToSeeAnalytics,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  localizations.generateInvoicesToSeeAnalytics,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 24),
+            ),
+            const SizedBox(height: 24),
+            if (viewModel.isCalculatingAnalytics)
+              const CircularProgressIndicator()
+            else
               FilledButton.icon(
                 onPressed: () {
-                  // TODO: Navigate to invoice creation
+                  viewModel.refreshAnalytics();
                 },
                 icon: Icon(
-                  Icons.receipt_long,
+                  Icons.refresh,
                   color: colorScheme.onPrimary,
                 ),
                 label: Text(
-                  localizations.createFirstInvoice,
+                  "localizations.loadAnalyticsData",
                   style: TextStyle(color: colorScheme.onPrimary),
                 ),
                 style: FilledButton.styleFrom(
@@ -70,67 +92,51 @@ class FinanceStats extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
-      );
-    }
+      ),
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    FinanceViewModel viewModel,
+    AnalyticsCache analytics,
+  ) {
+    final localizations = AppLocalizations.of(context)!;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildSummaryCard(context, stats, localizations),
+          // Summary Card
+          _buildSummaryCard(context, viewModel, analytics, localizations),
           const SizedBox(height: 16),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.2,
-            children: [
-              _buildStatCard(
-                context,
-                title: localizations.totalRevenue,
-                value: _formatCurrency(stats['totalRevenue'], context),
-                icon: Icons.euro,
-                color: colorScheme.primary,
-              ),
-              _buildStatCard(
-                context,
-                title: localizations.totalOrders,
-                value: '${stats['totalOrders']}',
-                icon: Icons.shopping_cart,
-                color: colorScheme.secondary,
-              ),
-              _buildStatCard(
-                context,
-                title: localizations.averageOrder,
-                value: _formatCurrency(stats['avgOrderValue'], context),
-                icon: Icons.analytics,
-                color: colorScheme.tertiary,
-              ),
-              _buildStatCard(
-                context,
-                title: localizations.taxCollected,
-                value: _formatCurrency(stats['taxCollected'], context),
-                icon: Icons.account_balance,
-                color: colorScheme.inversePrimary,
-              ),
-            ],
-          ),
+
+          // Stats Grid
+          _buildStatsGrid(context, analytics, localizations),
           const SizedBox(height: 16),
-          _buildRecentTransactions(context, localizations),
+
+          // Recent Transactions
+          _buildRecentTransactions(context, viewModel, localizations),
         ],
       ),
     );
   }
 
   Widget _buildSummaryCard(
-      BuildContext context, Map<String, dynamic> stats, AppLocalizations l10n) {
+    BuildContext context,
+    FinanceViewModel viewModel,
+    AnalyticsCache analytics,
+    AppLocalizations localizations,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
+
+    // Calculate growth (simplified - compare with previous period)
+    final recentOperations = viewModel.recentOperations;
+    final growth =
+        recentOperations.length > 5 ? 12.5 : 0.0; // Simplified growth
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -154,10 +160,13 @@ class FinanceStats extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.trending_up, color: colorScheme.onPrimary),
+              Icon(
+                growth >= 0 ? Icons.trending_up : Icons.trending_down,
+                color: colorScheme.onPrimary,
+              ),
               const SizedBox(width: 8),
               Text(
-                l10n.financialOverview,
+                localizations.financialOverview,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: colorScheme.onPrimary,
                   fontWeight: FontWeight.w600,
@@ -167,7 +176,7 @@ class FinanceStats extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            _formatCurrency(stats['totalRevenue'], context),
+            _formatCurrency(analytics.totalRevenue, context),
             style: theme.textTheme.headlineLarge?.copyWith(
               color: colorScheme.onPrimary,
               fontWeight: FontWeight.w800,
@@ -176,7 +185,7 @@ class FinanceStats extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            l10n.totalRevenue,
+            localizations.totalRevenue,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onPrimary.withOpacity(0.9),
             ),
@@ -186,16 +195,224 @@ class FinanceStats extends StatelessWidget {
             children: [
               _buildMiniStat(
                 context,
-                label: l10n.netProfit,
-                value: _formatCurrency(stats['netProfit'], context),
+                label: "localizations.collectionRate",
+                value: '${analytics.collectionRate.toStringAsFixed(1)}%',
                 color: colorScheme.onPrimary,
               ),
               const SizedBox(width: 16),
               _buildMiniStat(
                 context,
-                label: l10n.growthRate,
-                value: '+${stats['growthRate']?.toStringAsFixed(1)}%',
+                label: "localizations.totalTransactions",
+                value: '${analytics.transactionCount}',
                 color: colorScheme.onPrimary,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsGrid(
+    BuildContext context,
+    AnalyticsCache analytics,
+    AppLocalizations localizations,
+  ) {
+    final averageTransaction = analytics.transactionCount > 0
+        ? analytics.totalRevenue / analytics.transactionCount
+        : 0.0;
+
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 1.2,
+      children: [
+        // Total Collected Card
+        _buildStatCard(
+          context,
+          title: "localizations.totalCollected",
+          value: _formatCurrency(analytics.totalCollected, context),
+          icon: Icons.money,
+          color: Colors.green,
+        ),
+        // Total Outstanding Card
+        _buildStatCard(
+          context,
+          title: "localizations.totalOutstanding",
+          value: _formatCurrency(analytics.totalOutstanding, context),
+          icon: Icons.pending_actions,
+          color: Colors.orange,
+        ),
+        // Average Transaction Card
+        _buildStatCard(
+          context,
+          title: localizations.averageTransaction,
+          value: _formatCurrency(averageTransaction, context),
+          icon: Icons.analytics,
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        // Transactions Count Card
+        _buildStatCard(
+          context,
+          title: localizations.transactions,
+          value: '${analytics.transactionCount}',
+          icon: Icons.receipt,
+          color: Theme.of(context).colorScheme.inversePrimary,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentTransactions(
+    BuildContext context,
+    FinanceViewModel viewModel,
+    AppLocalizations localizations,
+  ) {
+    final recentOperations = viewModel.recentOperations;
+    if (recentOperations.isEmpty) return const SizedBox();
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.receipt_long,
+                size: 20,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                localizations.recentTransactions,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${localizations.last} 10 ${localizations.businessOperations}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Column(
+            children: recentOperations.map((operation) {
+              return _buildOperationRow(context, operation);
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          if (viewModel.businessOperations.length > 10)
+            Center(
+              child: TextButton(
+                onPressed: onViewAllTransactions,
+                child: Text(
+                  localizations.viewAllTransactions,
+                  style: TextStyle(color: colorScheme.primary),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOperationRow(BuildContext context, BusinessOperation operation) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final isPaid = operation.balanceDue <= 0;
+    final sourceName = operation.sourceTable;
+    final loc = AppLocalizations.of(context)!;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isPaid
+            ? colorScheme.primary.withOpacity(0.05)
+            : colorScheme.secondary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isPaid
+                  ? colorScheme.primary.withOpacity(0.1)
+                  : colorScheme.tertiary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isPaid ? Icons.check_circle : Icons.pending,
+              size: 16,
+              color: isPaid ? colorScheme.primary : colorScheme.tertiary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$sourceName #${operation.cartId}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'Supplier: ${operation.supplierId ?? 'N/A'}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                loc.price(operation.totalAmount.toStringAsFixed(2)),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                operation.paymentStatus,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: isPaid ? colorScheme.primary : colorScheme.tertiary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -292,196 +509,7 @@ class FinanceStats extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentTransactions(BuildContext context, AppLocalizations l10n) {
-    if (operations.isEmpty) return const SizedBox();
-
-    final recentOrders = operations.take(5).toList();
-    final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.receipt_long,
-                size: 20,
-                color: colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                l10n.recentTransactions,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                l10n.last5Transactions,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...recentOrders.map((operations) {
-            return _buildTransactionRow(context, operations);
-          }),
-          if (operations.length > 5) ...[
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  // TODO: Navigate to all transactions
-                },
-                child: Text(
-                  l10n.viewAllTransactions,
-                  style: TextStyle(color: colorScheme.primary),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionRow(
-      BuildContext context, BusinessOperation operation) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-    final isPaid = operation.paymentStatus.toLowerCase() == 'paid';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isPaid
-            ? colorScheme.primary.withOpacity(0.05)
-            : colorScheme.secondary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: isPaid
-                  ? colorScheme.primary.withOpacity(0.1)
-                  : colorScheme.tertiary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isPaid ? Icons.check_circle : Icons.pending,
-              size: 16,
-              color: isPaid ? colorScheme.primary : colorScheme.tertiary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '#${operation.sellerId}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  "s",
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '\$${operation.balanceDue.toStringAsFixed(2)}',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                operation.paymentStatus,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: isPaid ? colorScheme.primary : colorScheme.tertiary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Map<String, dynamic> _calculateStats() {
-    if (operations.isEmpty) {
-      return {
-        'totalRevenue': 0.0,
-        'totalOrders': 0,
-        'avgOrderValue': 0.0,
-        'taxCollected': 0.0,
-        'netProfit': 0.0,
-        'growthRate': 0.0,
-      };
-    }
-
-    final totalRevenue =
-        operations.fold(0.0, (sum, operation) => sum + operation.balanceDue);
-    final totalOrders = operations.length;
-    final avgOrderValue = totalRevenue / totalOrders;
-    final taxCollected = operations.fold(
-        0.0, (sum, operation) => sum + (operation.balanceDue * 0.19));
-    final netProfit = totalRevenue * 0.8; // Assuming 20% profit margin
-    final growthRate = 12.5; // Mock growth rate
-
-    return {
-      'totalRevenue': totalRevenue,
-      'totalOrders': totalOrders,
-      'avgOrderValue': avgOrderValue,
-      'taxCollected': taxCollected,
-      'netProfit': netProfit,
-      'growthRate': growthRate,
-    };
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
   String _formatCurrency(double amount, BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    // Use your app's currency symbol or get from localizations
-    final currencySymbol = localizations?.currencySymbol ?? '\$';
-
-    return '$currencySymbol${amount.toStringAsFixed(2)}';
+    return AppLocalizations.of(context)!.price(amount.toStringAsFixed(2));
   }
 }

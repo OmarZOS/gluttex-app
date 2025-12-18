@@ -122,13 +122,13 @@ class CartScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: ListTile(
           leading: SvgPicture.asset(
-            'assets/icons/${item.product.product_category_id}.svg',
+            'assets/icons/${item.product?.product_category_id}.svg',
             package: "medicom_catalog",
             color: colorScheme.primary,
             width: 36,
           ),
           title: Text(
-            item.product.product_name ?? localizations.missingText,
+            item.product?.product_name ?? localizations.missingText,
             style: theme.textTheme.bodyLarge,
           ),
           subtitle: Row(
@@ -139,7 +139,7 @@ class CartScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () => cartNotifier.updateQuantity(
-                    item.product, item.quantity - 1),
+                    product: item.product, newQuantity: item.quantity - 1),
               ),
 
               // Quantity display
@@ -160,13 +160,13 @@ class CartScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () => cartNotifier.updateQuantity(
-                    item.product, item.quantity + 1),
+                    product: item.product, newQuantity: item.quantity + 1),
               ),
             ],
           ),
           trailing: IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
-            onPressed: () => cartNotifier.removeItem(item.product),
+            onPressed: () => cartNotifier.removeItem(product: item.product),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12),
           minVerticalPadding: 0,

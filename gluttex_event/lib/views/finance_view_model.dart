@@ -10,8 +10,8 @@ import 'package:gluttex_event/views/pricing_config_view_model.dart';
 enum FinanceTab {
   invoices(0, 'Invoices'),
   businessOperations(1, 'Business Operations'),
-  analytics(2, 'Analytics'),
-  pricingConfig(3, 'Pricing Config');
+  // analytics(2, 'Analytics'),
+  pricingConfig(2, 'Pricing Config');
 
   final String title;
   const FinanceTab(index, this.title);
@@ -107,11 +107,11 @@ class FinanceViewModel extends ChangeNotifier {
         // Calculate summaries
         _calculateBusinessSummaries();
         // Pre-calculate analytics if on analytics tab
-        if (_selectedTab == FinanceTab.analytics) {
-          log("calculateAnalytics");
-          await calculateAnalytics();
-          log("Done");
-        }
+        // if (_selectedTab == FinanceTab.analytics) {
+        //   log("calculateAnalytics");
+        //   await calculateAnalytics();
+        //   log("Done");
+        // }
       } else {
         _hasMore = false;
       }
@@ -282,10 +282,10 @@ class FinanceViewModel extends ChangeNotifier {
       case FinanceTab.businessOperations:
         await loadBusinessOperations();
         break;
-      case FinanceTab.analytics:
-        await loadBusinessOperations(); // Need operations for analytics
-        await calculateAnalytics();
-        break;
+      // case FinanceTab.analytics:
+      //   await loadBusinessOperations(); // Need operations for analytics
+      //   await calculateAnalytics();
+      //   break;
       case FinanceTab.invoices:
         await loadInvoices();
         break;

@@ -2,36 +2,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_core/app/ManagementRule.dart';
-import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
-import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
-import 'package:gluttex_event/product_change_notifier.dart';
-import 'package:gluttex_event/service_change_notifier.dart';
-import 'package:gluttex_event/user_change_notifier.dart';
-import 'package:gluttex_personnel/components/privilege_ui.dart';
-import 'package:gluttex_personnel/supplier_entities_screen.dart';
-import 'package:gluttex_store/screens/business_operations_screen.dart';
-import 'package:gluttex_store/screens/finance_screen.dart';
-import 'package:gluttex_store/screens/inventory_screen.dart';
-import 'package:gluttex_store/screens/orders_screen.dart';
-import 'package:gluttex_store/screens/selling_screen.dart';
-import 'package:gluttex_store/screens/services_screen.dart';
-import 'package:provider/provider.dart';
+import 'package:gluttex_store/components/selling_point/cart_summary/cart_summary_screen.dart';
 import 'dashboard_item.dart';
 import 'dashboard_body.dart';
 import 'dashboard_bottom_nav.dart';
 import 'dashboard_fab.dart';
 import 'no_access_screen.dart';
-import 'pending_invitations_dialog.dart';
+import 'package:provider/provider.dart';
 
 class DashboardContent extends StatefulWidget {
   final AppUser currentUser;
   final PersonnelNotifier personnelNotifier;
 
   const DashboardContent({
+    super.key,
     required this.currentUser,
     required this.personnelNotifier,
   });
@@ -90,12 +77,19 @@ class DashboardContentState extends State<DashboardContent> {
     final items = <DashboardItem>[];
 
     // Suppliers screen
-    items.add(DashboardItem(
-      type: DashboardScreenType.suppliers,
-      icon: Icons.business_rounded,
-      label: localizations?.businesses ?? 'Businesses',
-      index: 0,
-    ));
+    final personnelPrivilege = _getHighestPrivilege(
+      userId,
+      accessibleSuppliers,
+      ['personnel_manage', 'personnel_view'],
+    );
+    if (personnelPrivilege != null) {
+      items.add(DashboardItem(
+        type: DashboardScreenType.suppliersPersonnel,
+        icon: Icons.business_rounded,
+        label: localizations?.manageSuppliers ?? 'Businesses',
+        index: items.length,
+      ));
+    }
 
     // Inventory
     final inventoryPrivilege = _getHighestPrivilege(
@@ -129,40 +123,73 @@ class DashboardContentState extends State<DashboardContent> {
       ));
     }
 
+    // POS
+    final posPrivilege = _getHighestPrivilege(
+      userId,
+      accessibleSuppliers,
+      ['pos_manage', 'pos_view'],
+    );
+
+    // POS
+    if (posPrivilege != null) {
+      items.add(DashboardItem(
+        type: DashboardScreenType.pos,
+        icon: Icons.point_of_sale,
+        label: localizations?.pointOfSale ?? 'Seller',
+        index: items.length,
+        privilegeLevel: posPrivilege,
+      ));
+    }
+
     // Orders
     final ordersPrivilege = _getHighestPrivilege(
       userId,
       accessibleSuppliers,
       ['orders_manage', 'orders_view'],
     );
+
     if (ordersPrivilege != null) {
       items.add(DashboardItem(
-        type: DashboardScreenType.operations,
-        icon: Icons.sell,
-        label: localizations?.businessOperations ?? 'Orders',
+        type: DashboardScreenType.orders,
+        icon: Icons.delivery_dining,
+        label: localizations?.ordersText ?? 'Orders',
         index: items.length,
         privilegeLevel: ordersPrivilege,
       ));
     }
 
-    // POS
-    if (ordersPrivilege != null) {
+    final operationsPrivilege = _getHighestPrivilege(
+      userId,
+      accessibleSuppliers,
+      ['operations_manage', 'operations_view'],
+    );
+
+    if (operationsPrivilege != null) {
       items.add(DashboardItem(
-        type: DashboardScreenType.pos,
-        icon: Icons.point_of_sale,
-        label: localizations?.pointOfSale ?? 'Seller',
+        type: DashboardScreenType.operations,
+        icon: Icons.sell,
+        label: localizations?.businessOperations ?? 'operations',
         index: items.length,
-        privilegeLevel: ordersPrivilege,
+        privilegeLevel: operationsPrivilege,
       ));
     }
 
     // Finance
-    items.add(DashboardItem(
-      type: DashboardScreenType.finance,
-      icon: CupertinoIcons.money_euro,
-      label: localizations?.financeAndPricing ?? 'Finance',
-      index: items.length,
-    ));
+    final financePrivilege = _getHighestPrivilege(
+      userId,
+      accessibleSuppliers,
+      ['finance_manage', 'finance_view'],
+    );
+
+    if (financePrivilege != null) {
+      items.add(DashboardItem(
+        type: DashboardScreenType.finance,
+        icon: CupertinoIcons.money_euro,
+        label: localizations?.financeAndPricing ?? 'Finance',
+        index: items.length,
+        privilegeLevel: financePrivilege,
+      ));
+    }
 
     return items;
   }
@@ -207,6 +234,28 @@ class DashboardContentState extends State<DashboardContent> {
     BuildContext context,
     DashboardScreenType type,
   ) {
+    if (type == DashboardScreenType.pos) {
+      final cartNotifier = context.read<CartChangeNotifier>();
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          snap: true,
+          snapSizes: const [0.5, 0.85, 0.95],
+          builder: (context, scrollController) => CartSummarySheet(
+            cart: cartNotifier,
+            scrollController: scrollController,
+          ),
+        ),
+      );
+
+      return;
+    }
+
     final localizations = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final messages = {
@@ -225,34 +274,5 @@ class DashboardContentState extends State<DashboardContent> {
         ),
       );
     }
-  }
-
-  List<ProductProvider> _getSuppliersFromRules(List<ManagementRule> rules) {
-    final suppliers = <ProductProvider>[];
-    final supplierIds = <int>{};
-
-    for (final rule in rules) {
-      final supplier = rule.productProvider;
-      if (supplier != null &&
-          !supplierIds.contains(supplier.id_product_provider)) {
-        supplierIds.add(supplier.id_product_provider);
-        suppliers.add(supplier);
-      }
-    }
-
-    return suppliers;
-  }
-
-  bool _checkInvoicePrivilege(List<ManagementRule> userRules) {
-    for (final rule in userRules) {
-      if (rule.isActiveStatus) {
-        final ruleCode = rule.management_rule_code ?? 0;
-        if (RoleBitMapper.hasPrivilege(ruleCode, 'finance_manage') ||
-            RoleBitMapper.hasPrivilege(ruleCode, 'orders_manage')) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 }

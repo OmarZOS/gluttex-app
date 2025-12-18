@@ -1,65 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/services/BusinessOperationService.dart';
-import 'package:gluttex_store/components/finance/finance_content.dart';
-import 'package:gluttex_store/components/finance/finance_stats.dart';
+import 'package:gluttex_event/finance_change_notifier.dart';
+// REMOVED: import 'package:gluttex_store/components/finance/finance_content.dart'; // Not used
+// import 'package:gluttex_store/components/finance/finance_stats.dart';
 import 'package:gluttex_store/components/finance/invoice_list.dart';
+// CHANGED: Removed InvoiceList import since you're using EnhancedInvoiceList
 import 'package:gluttex_store/components/finance/pricing_config.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_event/views/finance_view_model.dart';
-import '../components/finance/finance_navigation.dart';
-import '../components/finance/finance_filters.dart';
+// ADDED: Import for EnhancedInvoiceList
+// ADDED: Import for TabNavigation
+import 'package:gluttex_store/components/finance/finance_navigation.dart';
+// ADDED: Import for DateFilterSelector
+import 'package:gluttex_store/components/finance/finance_filters.dart';
 
 class FinanceScreen extends StatefulWidget {
-  const FinanceScreen({super.key});
+  final FinanceChangeNotifier financeNotifier;
+  const FinanceScreen({super.key, required this.financeNotifier});
 
   @override
   State<FinanceScreen> createState() => _FinanceScreenState();
 }
 
 class _FinanceScreenState extends State<FinanceScreen> {
-  late final PageController _pageController;
-  late final FinanceViewModel _viewModel;
+  // REMOVED: late final PageController _pageController; // Moved to child widget
+  // late final FinanceViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
-    _viewModel = FinanceViewModel(
-        businessOperationService:
-            GluttexLocator.get<BusinessOperationService>());
-    _viewModel.loadBusinessOperations();
+    // REMOVED: _pageController = PageController();
+    // _viewModel = FinanceViewModel(
+    //     businessOperationService:
+    //         GluttexLocator.get<BusinessOperationService>());
+    // _viewModel.loadBusinessOperations();
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
-    _viewModel.dispose();
+    // REMOVED: _pageController.dispose();
+    // _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _viewModel,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        body: const _FinanceLayout(),
-      ),
-    );
+    return _FinanceLayout(model: widget.financeNotifier);
   }
 }
 
+// CHANGED: Fixed class name from __FinanceLayoutState to _FinanceLayoutState
 class _FinanceLayout extends StatefulWidget {
-  const _FinanceLayout();
+  final FinanceChangeNotifier model;
+  _FinanceLayout({required this.model});
 
   @override
-  State<_FinanceLayout> createState() => __FinanceLayoutState();
+  State<_FinanceLayout> createState() => _FinanceLayoutState();
 }
 
-class __FinanceLayoutState extends State<_FinanceLayout> {
+class _FinanceLayoutState extends State<_FinanceLayout> {
   late PageController _pageController;
+  // final FinanceChangeNotifier financeNotifier;
 
   @override
   void initState() {
@@ -87,7 +90,7 @@ class __FinanceLayoutState extends State<_FinanceLayout> {
       child: Column(
         children: [
           const _AppBar(),
-          const DateFilterSelector(),
+          const DateFilterSelector(), // Make sure this widget exists
           TabNavigation(
             currentTab: viewModel.selectedTab.index,
             onTabSelected: (index) {
@@ -109,12 +112,12 @@ class __FinanceLayoutState extends State<_FinanceLayout> {
                   viewModel.selectTab(tab);
                 }
               },
-              children: const [
+              children: [
                 // Invoices Tab
                 _InvoiceListView(),
-                // Analytics Tab
-                _AnalyticsView(),
-                // Pricing Tab
+                // Analytics Tab - Make sure AnalyticsView exists
+                // FinanceStats(),
+                // Pricing Tab - Make sure PricingConfigScreen exists
                 _PricingConfigView(),
               ],
             ),
@@ -133,33 +136,7 @@ class _InvoiceListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<FinanceViewModel>(
       builder: (context, viewModel, child) {
-        return InvoiceList(
-          orders: viewModel.orders,
-          isLoading: viewModel.isLoadingInvoices,
-          onRefresh: viewModel.refreshInvoices,
-          onViewInvoiceDetails: viewModel.viewInvoiceDetails,
-          onShareInvoice: viewModel.shareInvoice,
-          onDownloadInvoice: viewModel.downloadInvoice,
-          onCreateFirstInvoice: viewModel.createNewInvoice,
-        );
-      },
-    );
-  }
-}
-
-// Analytics View (wrapped in Consumer)
-class _AnalyticsView extends StatelessWidget {
-  const _AnalyticsView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<FinanceViewModel>(
-      builder: (context, viewModel, child) {
-        return AnalyticsView(
-          operations: viewModel.businessOperations,
-          isLoading: viewModel.isLoadingAnalytics,
-          onCreateInvoice: viewModel.createNewInvoice,
-        );
+        return EnhancedInvoiceList();
       },
     );
   }

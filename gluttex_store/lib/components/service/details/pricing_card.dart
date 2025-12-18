@@ -62,7 +62,7 @@ class PricingCard extends StatelessWidget {
           Text(
             isPercentage
                 ? '${amount.toStringAsFixed(1)}%'
-                : '\$${amount.toStringAsFixed(2)}',
+                : 'DZD${amount.toStringAsFixed(2)}',
             style: theme.textTheme.headlineSmall?.copyWith(
               color: textColor,
               fontWeight: FontWeight.w800,

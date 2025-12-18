@@ -217,6 +217,8 @@ class _OperationDetailsLoaderScreenState
   }
 
   Widget _buildLoadingScreen(ThemeData theme, ColorScheme colorScheme) {
+    AppLocalizations loc = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: colorScheme.background,
       body: Center(
@@ -311,7 +313,8 @@ class _OperationDetailsLoaderScreenState
                         ),
                       ),
                       Text(
-                        '\$${widget.operation.totalAmount.toStringAsFixed(2)}',
+                        loc.price(
+                            widget.operation.totalAmount.toStringAsFixed(2)),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: colorScheme.primary,

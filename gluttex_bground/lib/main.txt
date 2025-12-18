@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:gluttex_bground/background.dart';
+import 'package:gluttex_bground/background.txt';
 
 void main() {
   runApp(const MyApp());

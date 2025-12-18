@@ -1,205 +1,174 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_core/business/finance/Order.dart';
+import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_event/finance_change_notifier.dart';
+import 'package:gluttex_store/components/finance/document/document_details_sheet.dart';
+// REMOVED: import 'package:gluttex_store/components/finance/document/filter_dialog.dart'; // Not used
+import 'package:gluttex_store/components/finance/document/new_document_sheet.dart';
+import 'package:gluttex_store/components/finance/document/payment_recording_sheet.dart';
+import 'package:gluttex_ui/components/finance/financial_ui_manager.dart';
+import 'package:gluttex_ui/components/finance/payment_list_screen.dart';
+import 'package:gluttex_ui/screens/payment_form_screen.dart';
+import 'package:provider/provider.dart';
 
-class InvoiceList extends StatelessWidget {
-  final List<Order> orders;
-  final bool isLoading;
-  final Function() onRefresh;
-  final Function(Order) onViewInvoiceDetails;
-  final Function(Order) onShareInvoice;
-  final Function(Order) onDownloadInvoice;
-  final Function() onCreateFirstInvoice;
+class EnhancedInvoiceList extends StatefulWidget {
   final int? currentUserId;
+  final FinanceChangeNotifier? externalNotifier;
+  final Function(FinancialDocument)? onDocumentTap;
+  final Function(FinancialDocument)? onDocumentLongPress;
+  final Function()? onCreateDocument;
+  final bool showSummary;
+  final bool showFilters;
+  final bool showSearch;
+  final bool enablePagination;
 
-  const InvoiceList({
+  const EnhancedInvoiceList({
     super.key,
-    required this.orders,
-    required this.isLoading,
-    required this.onRefresh,
-    required this.onViewInvoiceDetails,
-    required this.onShareInvoice,
-    required this.onDownloadInvoice,
-    required this.onCreateFirstInvoice,
     this.currentUserId,
+    this.externalNotifier,
+    this.onDocumentTap,
+    this.onDocumentLongPress,
+    this.onCreateDocument,
+    this.showSummary = true,
+    this.showFilters = true,
+    this.showSearch = true,
+    this.enablePagination = true,
   });
 
   @override
+  State<EnhancedInvoiceList> createState() => _EnhancedInvoiceListState();
+}
+
+class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
+  late FinanceChangeNotifier _notifier;
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _notifier = widget.externalNotifier ?? FinanceChangeNotifier();
+
+    // Setup scroll listener for infinite scroll
+    if (widget.enablePagination) {
+      _scrollController.addListener(_onScroll);
+    }
+
+    // Initial load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _notifier.fetchDocuments(reset: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (_notifier.hasMoreDocuments && !_notifier.isLoading) {
+        _notifier.fetchDocuments(reset: false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    return ChangeNotifierProvider.value(
+      value: _notifier,
+      child: Consumer<FinanceChangeNotifier>(
+        builder: (context, notifier, child) {
+          return Scaffold(
+            backgroundColor: Theme.of(context).colorScheme.background,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  // Header with search
+                  // if (widget.showSearch) _buildHeader(context, notifier),
 
-    if (isLoading) {
-      return _buildLoadingState(context, localizations);
-    }
+                  // Summary section - FIXED: Added null check
+                  if (widget.showSummary &&
+                      notifier.filteredDocuments.isNotEmpty)
+                    _buildSummarySection(context, notifier),
 
-    if (orders.isEmpty) {
-      return _buildEmptyState(context, localizations);
-    }
+                  // Filter section
+                  if (widget.showFilters)
+                    _buildFilterSection(context, notifier),
 
-    return RefreshIndicator(
-      onRefresh: () => onRefresh(),
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: orders.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          return _buildInvoiceCard(context, orders[index], localizations);
+                  // Main content
+                  Expanded(
+                    child: _buildContent(context, notifier),
+                  ),
+                ],
+              ),
+            ),
+            floatingActionButton: _buildFloatingActionButton(context, notifier),
+          );
         },
       ),
     );
   }
 
-  Widget _buildInvoiceCard(
-    BuildContext context,
-    Order order,
-    AppLocalizations localizations,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isPaid = order.paymentStatus.toLowerCase() == 'paid';
+  Widget _buildSummarySection(
+      BuildContext context, FinanceChangeNotifier notifier) {
+    final totalAmount = notifier.totalAmount;
+    final paidAmount = notifier.filteredDocuments
+        .where((doc) => doc.isPaid)
+        .fold(0.0, (sum, doc) => sum + doc.documentAmount);
+    final overdueAmount = notifier.filteredDocuments
+        .where((doc) => doc.isOverdue && !doc.isPaid)
+        .fold(0.0, (sum, doc) => sum + doc.documentAmount);
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
-      ),
-      child: InkWell(
-        onTap: () => onViewInvoiceDetails(order),
-        borderRadius: BorderRadius.circular(16),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '${localizations.invoice} #${order.idOrder}',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  _buildSummaryItem(
+                    'Total',
+                    FinancialUIManager.formatCurrency(totalAmount, context),
+                    FinancialUIManager.infoColor,
                   ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: isPaid
-                          ? colorScheme.primaryContainer
-                          : colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      isPaid ? localizations.paid : localizations.pending,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: isPaid
-                            ? colorScheme.onPrimaryContainer
-                            : colorScheme.onErrorContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  _buildSummaryItem(
+                    'Paid',
+                    FinancialUIManager.formatCurrency(paidAmount, context),
+                    FinancialUIManager.paidColor,
+                  ),
+                  _buildSummaryItem(
+                    'Overdue',
+                    FinancialUIManager.formatCurrency(overdueAmount, context),
+                    FinancialUIManager.unpaidColor,
+                  ),
+                  _buildSummaryItem(
+                    'Count',
+                    '${notifier.filteredDocuments.length}',
+                    FinancialUIManager.pendingColor,
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _formatDate(order.orderedTimestamp),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    Icons.attach_money,
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '\$${order.totalPrice.toStringAsFixed(2)}',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.shopping_cart,
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${order.itemCount} ${localizations.items}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    Icons.payment,
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _formatPaymentMethod(order.paymentMethod, localizations),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => onShareInvoice(order),
-                      icon: Icon(
-                        Icons.share,
-                        size: 18,
-                        color: colorScheme.primary,
-                      ),
-                      label: Text(localizations.share),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        side: BorderSide(color: colorScheme.outline),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => onDownloadInvoice(order),
-                      icon: Icon(
-                        Icons.download,
-                        size: 18,
-                        color: colorScheme.onPrimary,
-                      ),
-                      label: Text(localizations.download),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              if (totalAmount > 0)
+                LinearProgressIndicator(
+                  value: paidAmount / totalAmount,
+                  backgroundColor:
+                      FinancialUIManager.unpaidColor.withOpacity(0.2),
+                  color: FinancialUIManager.paidColor,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(3),
+                ),
             ],
           ),
         ),
@@ -207,145 +176,688 @@ class InvoiceList extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(
-    BuildContext context,
-    AppLocalizations localizations,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+  Widget _buildSummaryItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildFilterSection(
+      BuildContext context, FinanceChangeNotifier notifier) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.receipt_long,
-                size: 48,
-                color: colorScheme.onSurfaceVariant,
+            _buildFilterChip(
+              'All',
+              notifier.filter.documentType == null &&
+                  notifier.filter.status == null,
+              () => notifier.setFilter(FinanceDocumentFilter()),
+            ),
+            _buildFilterChip(
+              'Invoices',
+              notifier.filter.documentType == 'invoice',
+              () => notifier.setFilter(
+                notifier.filter.copyWith(
+                  documentType: notifier.filter.documentType == 'invoice'
+                      ? null
+                      : 'invoice',
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
-              localizations.noInvoicesYet,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+            _buildFilterChip(
+              'Deposits',
+              notifier.filter.documentType == 'deposit',
+              () => notifier.setFilter(
+                notifier.filter.copyWith(
+                  documentType: notifier.filter.documentType == 'deposit'
+                      ? null
+                      : 'deposit',
+                ),
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              localizations.noInvoicesDescription,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: onCreateFirstInvoice,
-              icon: Icon(
-                Icons.add,
-                color: colorScheme.onPrimary,
-              ),
-              label: Text(localizations.createFirstInvoice),
-              style: FilledButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
+            _buildFilterChip(
+              'Unpaid',
+              notifier.filter.status == 'unpaid',
+              () => notifier.setFilter(
+                notifier.filter.copyWith(
+                  status: notifier.filter.status == 'unpaid' ? null : 'unpaid',
+                ),
               ),
             ),
+            _buildFilterChip(
+              'Overdue',
+              notifier.filter.status == 'overdue',
+              () => notifier.setFilter(
+                notifier.filter.copyWith(
+                  status:
+                      notifier.filter.status == 'overdue' ? null : 'overdue',
+                ),
+              ),
+            ),
+            if (widget.currentUserId != null)
+              _buildFilterChip(
+                'My Documents',
+                notifier.filter.clientId == widget.currentUserId,
+                () => notifier.setFilter(
+                  notifier.filter.copyWith(
+                    clientId: notifier.filter.clientId == widget.currentUserId
+                        ? null
+                        : widget.currentUserId,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLoadingState(
-    BuildContext context,
-    AppLocalizations localizations,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            color: colorScheme.primary,
+  Widget _buildFilterChip(String label, bool selected, VoidCallback onTap) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => onTap(),
+        backgroundColor: selected
+            ? FinancialUIManager.infoColor.withOpacity(0.1)
+            : Colors.grey.withOpacity(0.1),
+        selectedColor: FinancialUIManager.infoColor.withOpacity(0.2),
+        checkmarkColor: FinancialUIManager.infoColor,
+        labelStyle: TextStyle(
+          color: selected ? FinancialUIManager.infoColor : Colors.grey,
+          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: selected ? FinancialUIManager.infoColor : Colors.transparent,
           ),
-          const SizedBox(height: 16),
-          Text(
-            localizations.loadingInvoices,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _formatPaymentMethod(String method, AppLocalizations localizations) {
-    switch (method.toLowerCase()) {
-      case 'card':
-        return localizations.card;
-      case 'cash':
-        return localizations.cash;
-      case 'bank':
-        return localizations.bankTransfer;
-      case 'mobile':
-        return localizations.mobilePayment;
-      default:
-        return method;
+  Widget _buildContent(BuildContext context, FinanceChangeNotifier notifier) {
+    if (notifier.isLoading && notifier.filteredDocuments.isEmpty) {
+      return FinancialUIManager.buildLoadingState(
+        context: context,
+        message: 'Loading financial documents...',
+      );
     }
+
+    if (notifier.filteredDocuments.isEmpty && !notifier.isLoading) {
+      return _buildEmptyState(context, notifier);
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => notifier.fetchDocuments(reset: true),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: notifier.filteredDocuments.length +
+            (notifier.hasMoreDocuments ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= notifier.filteredDocuments.length) {
+            return _buildLoadMoreIndicator(notifier);
+          }
+
+          final document = notifier.filteredDocuments[index];
+          return _buildDocumentCard(context, document, notifier);
+        },
+      ),
+    );
   }
-}
 
-class InvoiceDetailsSheet extends StatelessWidget {
-  final Order order;
-  final AppLocalizations localizations;
-
-  const InvoiceDetailsSheet({
-    super.key,
-    required this.order,
-    required this.localizations,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildEmptyState(
+      BuildContext context, FinanceChangeNotifier notifier) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // FIXED: Added null-aware operator for localizations
+    final localizations = AppLocalizations.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+    // Check if it's a filtered empty state or truly empty
+    // FIXED: Use the correct method name (isEmpty vs isEmpty())
+    final isFiltered = !notifier.filter.isEmpty;
+    final hasSearchQuery = notifier.currentSearchQuery != null &&
+        notifier.currentSearchQuery!.isNotEmpty;
+
+    return RefreshIndicator(
+      onRefresh: () => notifier.fetchDocuments(reset: true),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.8,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Animated illustration
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                ),
+                child: Icon(
+                  isFiltered
+                      ? Icons.filter_alt_outlined
+                      : Icons.receipt_long_outlined,
+                  size: 72,
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  isFiltered
+                      ? 'No matching documents'
+                      : hasSearchQuery
+                          ? 'No results found'
+                          : 'No documents yet',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Description
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 48),
+                child: Text(
+                  isFiltered
+                      ? 'Try adjusting your filters to see more results'
+                      : hasSearchQuery
+                          ? 'No documents match "${notifier.currentSearchQuery}"'
+                          : 'Start by creating your first financial document',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Action buttons
+              if (isFiltered)
+                FilledButton.icon(
+                  onPressed: () => notifier.clearFilter(),
+                  icon: const Icon(Icons.filter_alt_off),
+                  label: const Text('Clear Filters'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                  ),
+                )
+              else if (hasSearchQuery)
+                FilledButton.icon(
+                  onPressed: () {
+                    notifier.clearFilter();
+                    _searchController.clear();
+                  },
+                  icon: const Icon(Icons.clear),
+                  label: const Text('Clear Search'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                  ),
+                )
+              else if (widget.onCreateDocument != null)
+                FilledButton.icon(
+                  onPressed: widget.onCreateDocument,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Create First Document'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                  ),
+                ),
+
+              const SizedBox(height: 16),
+
+              // Additional help text
+              if (!isFiltered && !hasSearchQuery)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 48),
+                  child: Text(
+                    'Documents will appear here once they are created',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+              // Stats or suggestions
+              if (notifier.documents.isNotEmpty && isFiltered)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          '💡 Tip',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'You have ${notifier.documents.length} total documents. '
+                          'Try different filters or search terms.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '${localizations.invoiceDetails} #${order.idOrder}',
-            style: theme.textTheme.titleLarge,
+    );
+  }
+
+  Widget _buildDocumentCard(BuildContext context, FinancialDocument document,
+      FinanceChangeNotifier notifier) {
+    final theme = Theme.of(context);
+    // FIXED: Added null safety check for document.isPaid
+    final isOverdue = document.isOverdue && (document.isPaid == false);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        elevation: isOverdue ? 4 : 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isOverdue
+                ? FinancialUIManager.unpaidColor.withOpacity(0.3)
+                : theme.colorScheme.outline.withOpacity(0.1),
+            width: isOverdue ? 2 : 1,
           ),
-          const SizedBox(height: 16),
-          // TODO: Add detailed invoice view
-        ],
+        ),
+        child: InkWell(
+          onTap: () =>
+              widget.onDocumentTap?.call(document) ??
+              _showDocumentDetails(context, document),
+          onLongPress: () => widget.onDocumentLongPress?.call(document),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: FinancialUIManager.getDocumentColor(
+                                      document.documentType, theme)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              FinancialUIManager.getDocumentIcon(
+                                  document.documentType),
+                              color: FinancialUIManager.getDocumentColor(
+                                  document.documentType, theme),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  document.documentNumber,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                FinancialUIManager.buildCustomerInfo(
+                                  context: context,
+                                  customerType: document.customerType,
+                                  customerId: document.customerId,
+                                  personId: document.customerPersonId > 0
+                                      ? document.customerPersonId
+                                      : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FinancialUIManager.buildStatusBadge(
+                      context: context,
+                      status: document.paymentStatus,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Amount and payment progress
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Amount',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          FinancialUIManager.formatCurrency(
+                              document.documentAmount, context),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Balance',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          FinancialUIManager.formatCurrency(
+                              document.outstandingBalance, context),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: document.outstandingBalance > 0
+                                ? FinancialUIManager.unpaidColor
+                                : FinancialUIManager.paidColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Payment progress bar
+                FinancialUIManager.buildPaymentProgress(
+                  context: context,
+                  amount: document.documentAmount,
+                  paid: document.totalPaid,
+                  deposited: document.totalDeposited,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Footer information
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: theme.colorScheme.secondary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          FinancialUIManager.formatDate(document.issueDate),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (isOverdue)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color:
+                              FinancialUIManager.unpaidColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.warning,
+                              size: 12,
+                              color: FinancialUIManager.unpaidColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${document.daysOverdue}d overdue',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: FinancialUIManager.unpaidColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _downloadDocument(document),
+                        icon: Icon(
+                          Icons.download,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
+                        label: Text(
+                          'Download',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // FIXED: Added null safety check for document.isPaid
+                    if (document.isPaid == false)
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () => _recordPayment(document),
+                          icon: Icon(
+                            Icons.payment,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          label: const Text(
+                            'Pay Now',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            backgroundColor: FinancialUIManager.infoColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadMoreIndicator(FinanceChangeNotifier notifier) {
+    if (notifier.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (notifier.hasMoreDocuments) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: ElevatedButton(
+          onPressed: () => notifier.fetchDocuments(reset: false),
+          child: const Text('Load More'),
+        ),
+      );
+    }
+
+    return const Padding(
+      padding: EdgeInsets.all(16),
+      child: Center(
+        child: Text(
+          'No more documents',
+          style: TextStyle(
+            color: Colors.grey,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionButton(
+      BuildContext context, FinanceChangeNotifier notifier) {
+    final theme = Theme.of(context);
+
+    if (notifier.isLoading) return const SizedBox();
+
+    return FloatingActionButton.extended(
+      onPressed: widget.onCreateDocument ?? () => _createNewDocument(context),
+      backgroundColor: theme.colorScheme.primary,
+      foregroundColor: theme.colorScheme.onPrimary,
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      icon: const Icon(Icons.add),
+      label: const Text('New Document'),
+    );
+  }
+
+  void _showDocumentDetails(BuildContext context, FinancialDocument document) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => DocumentDetailsSheet(document: document),
+    );
+  }
+
+  void _downloadDocument(FinancialDocument document) {
+    // Implement download logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Downloading ${document.documentNumber}...'),
+        backgroundColor: FinancialUIManager.infoColor,
+      ),
+    );
+  }
+
+  void _recordPayment(FinancialDocument document) {
+    // Implement payment recording logic
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => PaymentRecordingSheet(document: document),
+    );
+  }
+
+  void _createNewDocument(BuildContext context) {
+    // Implement document creation logic
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => NewDocumentSheet(
+        onCreate: (type) {
+          // Handle document creation
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => PaymentFormScreen()),
+          );
+        },
       ),
     );
   }

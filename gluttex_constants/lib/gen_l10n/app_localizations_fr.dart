@@ -360,7 +360,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get updateSuccess => 'Élément mis à jour avec succès';
 
   @override
-  String get serverError => 'Échec de la connexion au serveur';
+  String get serverError => 'Erreur serveur. Veuillez réessayer plus tard.';
 
   @override
   String get notFoundError => 'Objet introuvable';
@@ -457,7 +457,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productCategoryTextList => 'Produits de boulangerie,Tartinables,Céréales,Pâtes,Snacks,Boissons,Desserts,Produits surgelés,Ingrédients de pâtisserie,Produits emballés';
 
   @override
-  String get allText => 'Tout';
+  String get allText => 'Tous';
 
   @override
   String get providerCategoryTextList => 'Restaurant, Boulangerie, Usine, Supermarché,Alimentation,Fournisseur';
@@ -1973,37 +1973,37 @@ class AppLocalizationsFr extends AppLocalizations {
   String get inventory_view_title => 'Voir l\'Inventaire';
 
   @override
-  String get inventory_view_description => 'Peut visualiser les niveaux de stock actuels et l\'inventaire';
+  String get inventory_view_description => 'Voir les niveaux de stock et informations produits';
 
   @override
   String get inventory_manage_title => 'Gérer l\'Inventaire';
 
   @override
-  String get inventory_manage_description => 'Peut mettre à jour les niveaux de stock et gérer les produits';
+  String get inventory_manage_description => 'Ajouter, modifier et supprimer des articles d\'inventaire';
 
   @override
   String get orders_view_title => 'Voir les Commandes';
 
   @override
-  String get orders_view_description => 'Peut visualiser les commandes clients et fournisseurs';
+  String get orders_view_description => 'Voir les commandes clients et historique';
 
   @override
   String get orders_manage_title => 'Gérer les Commandes';
 
   @override
-  String get orders_manage_description => 'Peut créer, modifier et traiter les commandes';
+  String get orders_manage_description => 'Créer, modifier et traiter les commandes';
 
   @override
-  String get personnel_view_title => 'Voir l\'Équipe';
+  String get personnel_view_title => 'Voir le Personnel';
 
   @override
-  String get personnel_view_description => 'Peut visualiser les autres membres de l\'équipe';
+  String get personnel_view_description => 'Voir les informations et profils des employés';
 
   @override
-  String get personnel_manage_title => 'Gérer l\'Équipe';
+  String get personnel_manage_title => 'Gérer le Personnel';
 
   @override
-  String get personnel_manage_description => 'Peut ajouter/supprimer des membres d\'équipe et définir les permissions';
+  String get personnel_manage_description => 'Ajouter, modifier et supprimer des employés';
 
   @override
   String get manage_permissions => 'Gérer les permissions';
@@ -2018,31 +2018,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get no_username => 'Aucun nom d’utilisateur';
 
   @override
-  String get category_inventory => 'Gestion des stocks';
+  String get category_inventory => 'Gestion de l\'Inventaire';
 
   @override
-  String get category_orders => 'Gestion des commandes';
+  String get category_orders => 'Gestion des Commandes';
 
   @override
-  String get category_personnel => 'Gestion du personnel';
+  String get category_personnel => 'Gestion du Personnel';
 
   @override
-  String get roleStaff => 'Employé';
+  String get roleStaff => 'Personnel';
 
   @override
   String get roleAdmin => 'Administrateur';
 
   @override
-  String get roleManager => 'Gestionnaire';
+  String get roleManager => 'Manager';
 
   @override
   String get roleSupervisor => 'Superviseur';
 
   @override
-  String get roleViewer => 'Lecteur';
+  String get roleViewer => 'Observateur';
 
   @override
-  String get roleNoPrivileges => 'Aucun privilège';
+  String get roleNoPrivileges => 'Aucun Privilège';
 
   @override
   String get actionManagePermissions => 'Permissions';
@@ -2232,7 +2232,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get orderManagement => 'Gestion des Commandes';
 
   @override
-  String get processing => 'En Traitement';
+  String get processing => 'Traitement...';
 
   @override
   String get completed => 'Terminées';
@@ -2265,10 +2265,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financeAndPricing => 'Finance & Tarification';
 
   @override
-  String get manageInvoicesAndConfigurePricing => 'Gérez les factures et configurez les prix';
+  String get manageInvoicesAndConfigurePricing => 'Gérez les factures et configurez les tarifs';
 
   @override
-  String get exportData => 'Exporter les données';
+  String get exportData => 'Exporter les Données';
 
   @override
   String get exportingData => 'Exportation des données...';
@@ -2289,7 +2289,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get thisYear => 'Cette Année';
 
   @override
-  String get allTime => 'Toujours';
+  String get allTime => 'Tout le Temps';
 
   @override
   String get invoices => 'Factures';
@@ -2415,10 +2415,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noRoleAssigned => 'Aucun rôle attribué';
 
   @override
-  String get noAnalyticsData => 'Pas de Données d\'Analyse';
+  String get noAnalyticsData => 'Aucune donnée analytique';
 
   @override
-  String get generateInvoicesToSeeAnalytics => 'Générez des factures pour voir les données analytiques';
+  String get generateInvoicesToSeeAnalytics => 'Générez des factures pour voir les analyses financières';
 
   @override
   String get financialOverview => 'Aperçu Financier';
@@ -2433,19 +2433,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get growthRate => 'Taux de Croissance';
 
   @override
-  String get totalOrders => 'Commandes Totales';
+  String get totalOrders => 'Total Commandes';
 
   @override
-  String get averageOrder => 'Commande Moyenne';
+  String get averageOrder => 'Moy. Commande';
 
   @override
-  String get taxCollected => 'Taxe Collectée';
+  String get taxCollected => 'Taxes Collectées';
 
   @override
   String get recentTransactions => 'Transactions Récentes';
 
   @override
-  String get last5Transactions => '5 dernières transactions';
+  String get last5Transactions => '5 Dernières Transactions';
 
   @override
   String get viewAllTransactions => 'Voir Toutes les Transactions';
@@ -2463,7 +2463,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tax => 'Taxe';
 
   @override
-  String get discount => 'Remise';
+  String get discount => 'Réduction';
 
   @override
   String get refund => 'Remboursement';
@@ -2472,7 +2472,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paid => 'Payé';
 
   @override
-  String get pending => 'En Attente';
+  String get pending => 'En attente';
 
   @override
   String get cancelled => 'Annulé';
@@ -2484,7 +2484,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invoice => 'Facture';
 
   @override
-  String get items => 'Articles';
+  String items(num cartItemCount, num itemCount, num serviceCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cartItemCount,
+      locale: localeName,
+      other: '$cartItemCount articles',
+      one: '$cartItemCount article',
+      zero: 'Aucun article',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      itemCount,
+      locale: localeName,
+      other: '$itemCount produits',
+      one: '$itemCount produit',
+      zero: 'aucun produit',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      serviceCount,
+      locale: localeName,
+      other: '$serviceCount services',
+      one: '$serviceCount service',
+      zero: 'aucun service',
+    );
+    return '$_temp0 ($_temp1, $_temp2)';
+  }
 
   @override
   String get share => 'Partager';
@@ -2499,7 +2522,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noInvoicesDescription => 'Vos factures apparaîtront ici une fois les ventes terminées';
 
   @override
-  String get createFirstInvoice => 'Créer la Première Facture';
+  String get createFirstInvoice => 'Créer la première facture';
 
   @override
   String get loadingInvoices => 'Chargement des factures...';
@@ -2511,10 +2534,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cash => 'Espèces';
 
   @override
-  String get bankTransfer => 'Virement bancaire';
+  String get bankTransfer => 'Virement Bancaire';
 
   @override
-  String get mobilePayment => 'Paiement mobile';
+  String get mobilePayment => 'Paiement Mobile';
 
   @override
   String get sharingInvoice => 'Partage de la facture';
@@ -2588,7 +2611,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profitMargin => 'Marge Bénéficiaire';
 
   @override
-  String get serviceDetails => 'Détails du Service';
+  String get serviceDetails => 'Détails du service';
 
   @override
   String get serviceDescription => 'Description';
@@ -2648,7 +2671,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get businessOperations => 'Opérations Commerciales';
 
   @override
-  String get overdue => 'En Retard';
+  String get overdue => 'En retard';
 
   @override
   String get unpaid => 'Impayé';
@@ -2687,7 +2710,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clearFilters => 'Effacer les Filtres';
 
   @override
-  String get totalAmount => 'Montant Total';
+  String get totalAmount => 'Montant total';
 
   @override
   String get totalPaid => 'Total Payé';
@@ -2792,7 +2815,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fullyPaid => 'Entièrement Payé';
 
   @override
-  String get partiallyPaid => 'Partiellement Payé';
+  String get partiallyPaid => 'Partiellement payé';
 
   @override
   String get cart => 'Panier';
@@ -2804,7 +2827,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noSuppliersAvailable => 'Aucun fournisseur disponible';
 
   @override
-  String get selectAll => 'Tout sélectionner';
+  String get selectAll => 'Tout Sélectionner';
 
   @override
   String get products => 'Produits';
@@ -2834,7 +2857,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transaction => 'Transaction';
 
   @override
-  String get documentType => 'Type de document';
+  String get documentType => 'Type de Document';
 
   @override
   String get operationType => 'Type d’opération';
@@ -2844,4 +2867,1133 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deposited => 'Déposé';
+
+  @override
+  String get productsAndServices => 'Produits & Services';
+
+  @override
+  String get eShopping => 'Achat en ligne';
+
+  @override
+  String get inStorePurchase => 'En magasin';
+
+  @override
+  String get serviceRepair => 'Réparation';
+
+  @override
+  String get serviceMaintenance => 'Maintenance';
+
+  @override
+  String get serviceFix => 'Réparation';
+
+  @override
+  String get serviceConsultation => 'Consultation';
+
+  @override
+  String get serviceAdvice => 'Conseil';
+
+  @override
+  String get serviceInstallation => 'Installation';
+
+  @override
+  String get serviceSetup => 'Configuration';
+
+  @override
+  String get serviceDelivery => 'Livraison';
+
+  @override
+  String get serviceShipping => 'Expédition';
+
+  @override
+  String get serviceCleaning => 'Nettoyage';
+
+  @override
+  String get serviceHousekeeping => 'Ménage';
+
+  @override
+  String get serviceDesign => 'Design';
+
+  @override
+  String get serviceCreative => 'Créatif';
+
+  @override
+  String get serviceTraining => 'Formation';
+
+  @override
+  String get serviceEducation => 'Éducation';
+
+  @override
+  String get serviceMedical => 'Médical';
+
+  @override
+  String get serviceHealth => 'Santé';
+
+  @override
+  String get serviceTech => 'Technologie';
+
+  @override
+  String get serviceIT => 'Informatique';
+
+  @override
+  String get serviceGeneral => 'Services généraux';
+
+  @override
+  String get serviceBloodTesting => 'Analyse de sang';
+
+  @override
+  String get serviceDiagnosticImaging => 'Imagerie diagnostique';
+
+  @override
+  String get servicePathologyTests => 'Tests de pathologie';
+
+  @override
+  String get serviceUrineAnalysis => 'Analyse d\'urine';
+
+  @override
+  String get serviceAllergyTesting => 'Test d\'allergie';
+
+  @override
+  String get serviceGeneticTesting => 'Test génétique';
+
+  @override
+  String get serviceVaccination => 'Vaccination';
+
+  @override
+  String get serviceHealthCheckup => 'Bilan de santé';
+
+  @override
+  String get serviceDentalCare => 'Soins dentaires';
+
+  @override
+  String get serviceMinorSurgery => 'Chirurgie mineure';
+
+  @override
+  String get serviceWoundCare => 'Soins des plaies';
+
+  @override
+  String get serviceIVTherapy => 'Thérapie intraveineuse';
+
+  @override
+  String get servicePhysiotherapy => 'Physiothérapie';
+
+  @override
+  String get serviceAcupuncture => 'Acupuncture';
+
+  @override
+  String get serviceNutritionCounseling => 'Conseil en nutrition';
+
+  @override
+  String get serviceMentalHealthCounseling => 'Conseil en santé mentale';
+
+  @override
+  String get serviceFirstAidTraining => 'Formation premiers secours';
+
+  @override
+  String get servicePrenatalCare => 'Soins prénatals';
+
+  @override
+  String get servicePediatricCare => 'Soins pédiatriques';
+
+  @override
+  String get serviceGeriatricCare => 'Soins gériatriques';
+
+  @override
+  String get serviceSportsMedicine => 'Médecine du sport';
+
+  @override
+  String get serviceGeneralMedical => 'Service médical général';
+
+  @override
+  String get serviceDescBloodTesting => 'Complete blood count, cholesterol, glucose, and other blood tests';
+
+  @override
+  String get serviceDescDiagnosticImaging => 'X-rays, MRIs, CT scans, and ultrasound services';
+
+  @override
+  String get supplierCategoryRestaurant => 'Restaurant';
+
+  @override
+  String get supplierCategoryBakery => 'Boulangerie';
+
+  @override
+  String get supplierCategoryFactory => 'Usine';
+
+  @override
+  String get supplierCategorySupermarket => 'Supermarché';
+
+  @override
+  String get supplierCategoryGroceryStore => 'Épicerie';
+
+  @override
+  String get supplierCategoryDistributor => 'Distributeur';
+
+  @override
+  String get supplierCategoryCafe => 'Café';
+
+  @override
+  String get supplierCategoryButcher => 'Boucherie';
+
+  @override
+  String get supplierCategoryDairy => 'Produits Laitiers';
+
+  @override
+  String get supplierCategoryBeverage => 'Boissons';
+
+  @override
+  String get suppliers => 'Fournisseurs';
+
+  @override
+  String get noSuppliersFound => 'Aucun fournisseur trouvé';
+
+  @override
+  String get filterByCategory => 'Filtrer par Catégorie';
+
+  @override
+  String get supplierType => 'Type';
+
+  @override
+  String get supplierContact => 'Contact';
+
+  @override
+  String get supplierAddress => 'Adresse';
+
+  @override
+  String get supplierRating => 'Évaluation';
+
+  @override
+  String get supplierProducts => 'Produits';
+
+  @override
+  String get viewSupplierDetails => 'Voir les détails';
+
+  @override
+  String get noInvoicesFound => 'Aucune facture trouvée';
+
+  @override
+  String get noResultsForFilter => 'Aucun résultat pour le filtre actuel';
+
+  @override
+  String get createYourFirstInvoice => 'Créez votre première facture pour commencer';
+
+  @override
+  String get tryDifferentFilter => 'Essayez un autre filtre ou terme de recherche';
+
+  @override
+  String get createInvoice => 'Créer une facture';
+
+  @override
+  String get searchInvoices => 'Rechercher des factures...';
+
+  @override
+  String get advancedFilter => 'Filtre avancé';
+
+  @override
+  String get dateRange => 'Période';
+
+  @override
+  String get fromDate => 'Du';
+
+  @override
+  String get toDate => 'Au';
+
+  @override
+  String get amountRange => 'Plage de montants';
+
+  @override
+  String get minAmount => 'Montant minimum';
+
+  @override
+  String get maxAmount => 'Montant maximum';
+
+  @override
+  String get clearAll => 'Tout Effacer';
+
+  @override
+  String get apply => 'Appliquer';
+
+  @override
+  String get receipt => 'Reçu';
+
+  @override
+  String get quote => 'Devis';
+
+  @override
+  String get allDocuments => 'Tous les documents';
+
+  @override
+  String get editDocument => 'Modifier le document';
+
+  @override
+  String get downloadPdf => 'Télécharger PDF';
+
+  @override
+  String get shareDocument => 'Partager le document';
+
+  @override
+  String get markAsPaid => 'Marquer comme payé';
+
+  @override
+  String get deleteDocument => 'Supprimer le document';
+
+  @override
+  String get createNewDocument => 'Créer un nouveau document';
+
+  @override
+  String get createInvoiceDescription => 'Créer une nouvelle facture';
+
+  @override
+  String get createReceiptDescription => 'Créer un reçu de paiement';
+
+  @override
+  String get createQuoteDescription => 'Créer un devis';
+
+  @override
+  String get documentMarkedAsPaid => 'Document marqué comme payé';
+
+  @override
+  String get failedToUpdate => 'Échec de la mise à jour du document';
+
+  @override
+  String get confirmDelete => 'Confirmer la suppression';
+
+  @override
+  String get deleteDocumentConfirmation => 'Êtes-vous sûr de vouloir supprimer ce document ?';
+
+  @override
+  String get documentDeleted => 'Document supprimé';
+
+  @override
+  String get failedToDelete => 'Échec de la suppression du document';
+
+  @override
+  String get totalInvoices => 'Total des factures';
+
+  @override
+  String get averageInvoice => 'Facture moyenne';
+
+  @override
+  String get pendingInvoices => 'Factures en attente';
+
+  @override
+  String get paidInvoices => 'Factures payées';
+
+  @override
+  String get overdueInvoices => 'Factures en retard';
+
+  @override
+  String get revenueThisMonth => 'Revenus ce mois-ci';
+
+  @override
+  String get revenueLastMonth => 'Revenus le mois dernier';
+
+  @override
+  String get topClients => 'Meilleurs clients';
+
+  @override
+  String get recentActivity => 'Activité récente';
+
+  @override
+  String get draft => 'Brouillon';
+
+  @override
+  String get yesterday => 'Hier';
+
+  @override
+  String get lastMonth => 'Le Mois Dernier';
+
+  @override
+  String get customRange => 'Période personnalisée';
+
+  @override
+  String get exportAsCsv => 'Exporter en CSV';
+
+  @override
+  String get exportAsExcel => 'Exporter en Excel';
+
+  @override
+  String get exportAsPdf => 'Exporter en PDF';
+
+  @override
+  String get exportAll => 'Tout exporter';
+
+  @override
+  String get exportSelected => 'Exporter la sélection';
+
+  @override
+  String get exportSuccessful => 'Exportation réussie';
+
+  @override
+  String get filterApplied => 'Filtre appliqué';
+
+  @override
+  String get filterCleared => 'Filtre effacé';
+
+  @override
+  String get documentSaved => 'Document enregistré avec succès';
+
+  @override
+  String get paymentRecorded => 'Paiement enregistré avec succès';
+
+  @override
+  String get noDocumentsToExport => 'Aucun document à exporter';
+
+  @override
+  String get exportFailed => 'Échec de l\'exportation. Veuillez réessayer.';
+
+  @override
+  String get loadFailed => 'Échec du chargement des documents';
+
+  @override
+  String get connectionError => 'Erreur de connexion. Vérifiez votre internet.';
+
+  @override
+  String get loadingMore => 'Chargement supplémentaire...';
+
+  @override
+  String get refreshing => 'Actualisation...';
+
+  @override
+  String get documentNumber => 'N° document';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get amount => 'Montant';
+
+  @override
+  String get dueDate => 'Date d\'échéance';
+
+  @override
+  String get issueDate => 'Date d\'émission';
+
+  @override
+  String get paymentDate => 'Date de paiement';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get terms => 'Conditions';
+
+  @override
+  String get addItem => 'Ajouter un article';
+
+  @override
+  String get removeItem => 'Supprimer l\'article';
+
+  @override
+  String get calculateTotal => 'Calculer le total';
+
+  @override
+  String get sendEmail => 'Envoyer un email';
+
+  @override
+  String get saveDraft => 'Enregistrer le brouillon';
+
+  @override
+  String get submit => 'Soumettre';
+
+  @override
+  String get approve => 'Approuver';
+
+  @override
+  String get reject => 'Rejeter';
+
+  @override
+  String get duplicate => 'Dupliquer';
+
+  @override
+  String get archive => 'Archiver';
+
+  @override
+  String get filterByDate => 'Filtrer par Date';
+
+  @override
+  String get filterByAmount => 'Filtrer par montant';
+
+  @override
+  String get filterByStatus => 'Filtrer par Statut';
+
+  @override
+  String get filterByType => 'Filtrer par type';
+
+  @override
+  String get filterByClient => 'Filtrer par client';
+
+  @override
+  String get filterBySupplier => 'Filtrer par Fournisseur';
+
+  @override
+  String get january => 'Janvier';
+
+  @override
+  String get february => 'Février';
+
+  @override
+  String get march => 'Mars';
+
+  @override
+  String get april => 'Avril';
+
+  @override
+  String get may => 'Mai';
+
+  @override
+  String get june => 'Juin';
+
+  @override
+  String get july => 'Juillet';
+
+  @override
+  String get august => 'Août';
+
+  @override
+  String get september => 'Septembre';
+
+  @override
+  String get october => 'Octobre';
+
+  @override
+  String get november => 'Novembre';
+
+  @override
+  String get december => 'Décembre';
+
+  @override
+  String get monday => 'Lundi';
+
+  @override
+  String get tuesday => 'Mardi';
+
+  @override
+  String get wednesday => 'Mercredi';
+
+  @override
+  String get thursday => 'Jeudi';
+
+  @override
+  String get friday => 'Vendredi';
+
+  @override
+  String get saturday => 'Samedi';
+
+  @override
+  String get sunday => 'Dimanche';
+
+  @override
+  String get daysAgo => 'jours';
+
+  @override
+  String daysFromNow(num count) {
+    return 'dans $count jours';
+  }
+
+  @override
+  String get deposit => 'Dépôt';
+
+  @override
+  String get pendingCart => 'Panier en attente';
+
+  @override
+  String get depositReceived => 'Dépôt reçu';
+
+  @override
+  String get depositCoversFull => 'Dépôt couvre total';
+
+  @override
+  String get depositPartial => 'Dépôt partiel';
+
+  @override
+  String get depositFullyCovered => 'Dépôt entièrement couvert';
+
+  @override
+  String get user => 'Utilisateur';
+
+  @override
+  String get person => 'Personne';
+
+  @override
+  String get guest => 'Invité';
+
+  @override
+  String get directInvoice => 'Facture directe';
+
+  @override
+  String get serviceBased => 'Basé sur service';
+
+  @override
+  String get directDeposit => 'Dépôt direct';
+
+  @override
+  String get financialDocuments => 'Documents financiers';
+
+  @override
+  String get financialSummary => 'Résumé financier';
+
+  @override
+  String get due => 'Dû';
+
+  @override
+  String get count => 'Nombre';
+
+  @override
+  String get paymentProgress => 'Progression du paiement';
+
+  @override
+  String get noDocumentsFound => 'Aucun document trouvé';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get loadingDocuments => 'Chargement des documents...';
+
+  @override
+  String get errorLoadingDocuments => 'Erreur de chargement des documents';
+
+  @override
+  String get again => 'Encore';
+
+  @override
+  String nServicesSelected(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count services sélectionnés',
+      one: '1 service sélectionné',
+      zero: 'Aucun service sélectionné',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configureService => 'Configurer le service';
+
+  @override
+  String get scheduleService => 'Planifier le service';
+
+  @override
+  String get serviceWillBeScheduled => 'Le service sera planifié';
+
+  @override
+  String get addSchedulingInfo => 'Ajouter des informations de planification';
+
+  @override
+  String get scheduledDate => 'Date planifiée';
+
+  @override
+  String get scheduledTime => 'Heure planifiée';
+
+  @override
+  String get specialInstructions => 'Instructions spéciales';
+
+  @override
+  String get addNotesHere => 'Ajouter des notes ici...';
+
+  @override
+  String get serviceParameters => 'Paramètres du service';
+
+  @override
+  String get customizeServiceParameters => 'Personnaliser les paramètres du service';
+
+  @override
+  String get saveConfiguration => 'Enregistrer la configuration';
+
+  @override
+  String get services_view_title => 'Voir les Services';
+
+  @override
+  String get services_view_description => 'Voir les services disponibles et tarifs';
+
+  @override
+  String get services_manage_title => 'Gérer les Services';
+
+  @override
+  String get services_manage_description => 'Ajouter, modifier et supprimer des services';
+
+  @override
+  String get pos_view_title => 'Voir la Caisse';
+
+  @override
+  String get pos_view_description => 'Voir les transactions de point de vente';
+
+  @override
+  String get pos_manage_title => 'Gérer la Caisse';
+
+  @override
+  String get pos_manage_description => 'Traiter les ventes et gérer les opérations de caisse';
+
+  @override
+  String get operations_view_title => 'Voir les Opérations';
+
+  @override
+  String get operations_view_description => 'Voir les rapports et métriques opérationnels';
+
+  @override
+  String get operations_manage_title => 'Gérer les Opérations';
+
+  @override
+  String get operations_manage_description => 'Configurer les opérations et paramètres système';
+
+  @override
+  String get finance_view_title => 'Voir les Finances';
+
+  @override
+  String get finance_view_description => 'Voir les rapports et transactions financières';
+
+  @override
+  String get finance_manage_title => 'Gérer les Finances';
+
+  @override
+  String get finance_manage_description => 'Gérer les opérations et comptabilité financières';
+
+  @override
+  String get category_services => 'Gestion des Services';
+
+  @override
+  String get category_pos => 'Gestion de la Caisse';
+
+  @override
+  String get category_operations => 'Gestion des Opérations';
+
+  @override
+  String get category_finance => 'Gestion Financière';
+
+  @override
+  String get permissionScore => 'Score de Permission';
+
+  @override
+  String get privileges => 'Privilèges';
+
+  @override
+  String get savePrivileges => 'Enregistrer Privilèges';
+
+  @override
+  String get privilegesUpdated => 'Privilèges mis à jour avec succès';
+
+  @override
+  String get confirmPrivilegeChange => 'Êtes-vous sûr de vouloir modifier les privilèges ?';
+
+  @override
+  String get noPrivilegesSelected => 'Aucun privilège sélectionné';
+
+  @override
+  String get fullAccess => 'Accès Complet';
+
+  @override
+  String get limitedAccess => 'Accès Limit';
+
+  @override
+  String get viewOnly => 'Visualisation Seulement';
+
+  @override
+  String get manageAccess => 'Accès Gestion';
+
+  @override
+  String get togglePrivilegeTooltip => 'Basculer privilège';
+
+  @override
+  String get categoryToggleTooltip => 'Basculer tous les privilèges de catégorie';
+
+  @override
+  String get active => 'Actif';
+
+  @override
+  String get inactive => 'Inactif';
+
+  @override
+  String get enabled => 'Activé';
+
+  @override
+  String get disabled => 'Désactivé';
+
+  @override
+  String get last => 'Dernières';
+
+  @override
+  String get transactions => 'Transactions';
+
+  @override
+  String get activeSuppliers => 'Fournisseurs Actifs';
+
+  @override
+  String get payment => 'Paiement';
+
+  @override
+  String get expense => 'Dépense';
+
+  @override
+  String get income => 'Revenu';
+
+  @override
+  String get currencyCode => 'EUR';
+
+  @override
+  String get lastWeek => 'La Semaine Dernière';
+
+  @override
+  String get lastYear => 'L\'Année Dernière';
+
+  @override
+  String get accountsReceivable => 'Comptes Clients';
+
+  @override
+  String get accountsPayable => 'Comptes Fournisseurs';
+
+  @override
+  String get cashFlow => 'Flux de Trésorerie';
+
+  @override
+  String get roi => 'Retour sur Investissement';
+
+  @override
+  String get breakEven => 'Seuil de Rentabilité';
+
+  @override
+  String get revenueGrowth => 'Croissance du Revenu';
+
+  @override
+  String get customerLifetimeValue => 'Valeur Client à Vie';
+
+  @override
+  String get dailyRevenue => 'Revenu Quotidien';
+
+  @override
+  String get weeklyRevenue => 'Revenu Hebdomadaire';
+
+  @override
+  String get monthlyRevenue => 'Revenu Mensuel';
+
+  @override
+  String get yearlyRevenue => 'Revenu Annuel';
+
+  @override
+  String get revenueTrend => 'Tendance des Revenus';
+
+  @override
+  String get profitTrend => 'Tendance des Bénéfices';
+
+  @override
+  String get expenseBreakdown => 'Répartition des Dépenses';
+
+  @override
+  String get categoryBreakdown => 'Répartition par Catégorie';
+
+  @override
+  String get filterByCustomer => 'Filtrer par Client';
+
+  @override
+  String get applyFilters => 'Appliquer les Filtres';
+
+  @override
+  String get exportAsCSV => 'Exporter en CSV';
+
+  @override
+  String get exportAsPDF => 'Exporter en PDF';
+
+  @override
+  String get generateReport => 'Générer un Rapport';
+
+  @override
+  String get downloadReport => 'Télécharger le Rapport';
+
+  @override
+  String get printReport => 'Imprimer le Rapport';
+
+  @override
+  String get shareReport => 'Partager le Rapport';
+
+  @override
+  String get saveReport => 'Sauvegarder le Rapport';
+
+  @override
+  String get refreshData => 'Actualiser les Données';
+
+  @override
+  String get dataExportedSuccessfully => 'Données exportées avec succès';
+
+  @override
+  String get reportGeneratedSuccessfully => 'Rapport généré avec succès';
+
+  @override
+  String get noDataToExport => 'Aucune donnée à exporter';
+
+  @override
+  String get loadingFinancialData => 'Chargement des données financières...';
+
+  @override
+  String get calculatingStatistics => 'Calcul des statistiques...';
+
+  @override
+  String get hoverForDetails => 'Survoler pour les détails';
+
+  @override
+  String get clickToViewDetails => 'Cliquer pour voir les détails';
+
+  @override
+  String get doubleClickToEdit => 'Double-cliquer pour modifier';
+
+  @override
+  String get dragToResize => 'Glisser pour redimensionner';
+
+  @override
+  String get noTransactionsFound => 'Aucune transaction trouvée';
+
+  @override
+  String get noRevenueData => 'Aucune donnée de revenu disponible';
+
+  @override
+  String get noExpenseData => 'Aucune donnée de dépense disponible';
+
+  @override
+  String get noProfitData => 'Aucune donnée de bénéfice disponible';
+
+  @override
+  String get summary => 'Résumé';
+
+  @override
+  String get overview => 'Aperçu';
+
+  @override
+  String get detailedView => 'Vue Détaillée';
+
+  @override
+  String get quickView => 'Vue Rapide';
+
+  @override
+  String get dashboard => 'Tableau de Bord';
+
+  @override
+  String get reports => 'Rapports';
+
+  @override
+  String get insights => 'Insights';
+
+  @override
+  String get trends => 'Tendances';
+
+  @override
+  String get comparison => 'Comparaison';
+
+  @override
+  String get performance => 'Performance';
+
+  @override
+  String get target => 'Cible';
+
+  @override
+  String get actual => 'Réel';
+
+  @override
+  String get variance => 'Écart';
+
+  @override
+  String get achievement => 'Réalisation';
+
+  @override
+  String get forecast => 'Prévision';
+
+  @override
+  String get projection => 'Projection';
+
+  @override
+  String get estimate => 'Estimation';
+
+  @override
+  String get vsLastPeriod => 'vs Période Précédente';
+
+  @override
+  String get vsLastYear => 'vs L\'Année Dernière';
+
+  @override
+  String get vsTarget => 'vs Cible';
+
+  @override
+  String get vsBudget => 'vs Budget';
+
+  @override
+  String get vsAverage => 'vs Moyenne';
+
+  @override
+  String get quickStats => 'Statistiques Rapides';
+
+  @override
+  String get todayRevenue => 'Revenu du Jour';
+
+  @override
+  String get weekRevenue => 'Revenu de la Semaine';
+
+  @override
+  String get monthRevenue => 'Revenu du Mois';
+
+  @override
+  String get yearRevenue => 'Revenu de l\'Année';
+
+  @override
+  String get revenuePerCustomer => 'Revenu par Client';
+
+  @override
+  String get averageTransaction => 'Transaction Moyenne';
+
+  @override
+  String get justNow => 'À l\'instant';
+
+  @override
+  String get minutesAgo => 'minutes';
+
+  @override
+  String get hoursAgo => 'heures';
+
+  @override
+  String get weeksAgo => 'semaines';
+
+  @override
+  String get monthsAgo => 'mois';
+
+  @override
+  String get yearsAgo => 'ans';
+
+  @override
+  String get documentsCount => 'Nombre de documents';
+
+  @override
+  String get totalDocuments => 'Total des documents';
+
+  @override
+  String get averageDocument => 'Moyenne par document';
+
+  @override
+  String stock(Object stock) {
+    return 'En stock: $stock';
+  }
+
+  @override
+  String get itemsText => 'Articles';
+
+  @override
+  String get checkout => 'Paiement';
+
+  @override
+  String get orderConfirmed => 'Commande Confirmée';
+
+  @override
+  String get orderPlacedSuccessfully => 'Votre commande a été passée avec succès';
+
+  @override
+  String get backToHome => 'Retour à l\'Accueil';
+
+  @override
+  String get guestCustomer => 'Client Invité';
+
+  @override
+  String get orderItems => 'Articles de Commande';
+
+  @override
+  String get paymentMethod => 'Méthode de Paiement';
+
+  @override
+  String get deliveryType => 'Type de Livraison';
+
+  @override
+  String get pickup => 'Retrait';
+
+  @override
+  String get pickupDesc => 'Retrait en magasin';
+
+  @override
+  String get delivery => 'Livraison';
+
+  @override
+  String get deliveryDesc => 'Livraison le jour même disponible';
+
+  @override
+  String get shipping => 'Expédition';
+
+  @override
+  String get shippingDesc => 'Expédition standard (3-5 jours ouvrables)';
+
+  @override
+  String get orderNotes => 'Notes de Commande';
+
+  @override
+  String get notesHint => 'Instructions spéciales, notes de livraison, etc.';
+
+  @override
+  String get orderSummary => 'Résumé de Commande';
+
+  @override
+  String get placeOrder => 'Passer Commande';
+
+  @override
+  String get printDocument => 'Imprimer';
+
+  @override
+  String get done => 'Terminé';
+
+  @override
+  String get customer => 'Client';
+
+  @override
+  String get searchCustomers => 'Rechercher des clients...';
+
+  @override
+  String get invoiceReceipt => 'Facture + Reçu';
+
+  @override
+  String get receiptOnly => 'Reçu Seulement';
+
+  @override
+  String get none => 'Aucun';
+
+  @override
+  String get paymentType => 'Type de Paiement';
+
+  @override
+  String get fullPayment => 'Paiement Complet';
+
+  @override
+  String get depositOnly => 'Acompte Seulement';
+
+  @override
+  String get check => 'Chèque';
+
+  @override
+  String get cardDetails => 'Détails de la Carte';
+
+  @override
+  String get cardType => 'Type de Carte';
+
+  @override
+  String get cardNumber => 'Numéro de Carte';
+
+  @override
+  String get expiryDate => 'Date d\'Expiration';
+
+  @override
+  String get bankTransferDetails => 'Détails du Virement Bancaire';
+
+  @override
+  String get bankName => 'Nom de la Banque';
+
+  @override
+  String get accountNumber => 'Numéro de Compte';
+
+  @override
+  String get reference => 'Référence';
+
+  @override
+  String get mobilePaymentDetails => 'Détails du Paiement Mobile';
+
+  @override
+  String get serviceProvider => 'Fournisseur de Service';
+
+  @override
+  String get phoneNumber => 'Numéro de Téléphone';
+
+  @override
+  String get checkDetails => 'Détails du Chèque';
+
+  @override
+  String get checkPaymentNote => 'Le paiement par chèque sera traité une fois reçu et compensé.';
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/service_change_notifier.dart';
 import 'package:gluttex_store/components/selling_point/selling_items/item_card_with_controls.dart';
-import 'package:gluttex_store/components/selling_point/selling_items/product_grid.dart';
+import 'package:gluttex_store/components/selling_point/selling_items/products/product_grid.dart';
 import 'package:gluttex_store/components/selling_point/selling_items/services/service_grid.dart';
 import 'package:gluttex_store/components/selling_point/selling_items/services/service_grid_screen.dart';
 import 'package:gluttex_store/components/selling_point/selling_items/tab_selector.dart';
@@ -10,18 +10,18 @@ import 'package:provider/provider.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 
-class SellingItemGrid extends StatefulWidget {
+class SellingItemTabs extends StatefulWidget {
   final CartChangeNotifier cartNotifier;
 
-  const SellingItemGrid({
+  const SellingItemTabs({
     required this.cartNotifier,
   });
 
   @override
-  State<SellingItemGrid> createState() => _SellingItemGridState();
+  State<SellingItemTabs> createState() => _SellingItemTabsState();
 }
 
-class _SellingItemGridState extends State<SellingItemGrid> {
+class _SellingItemTabsState extends State<SellingItemTabs> {
   int _selectedTab = 0;
 
   @override
@@ -70,16 +70,16 @@ class _SellingItemGridState extends State<SellingItemGrid> {
           shrinkWrap: true, // 在 ListView 中需要 shrinkWrap
           physics: const NeverScrollableScrollPhysics(), // 禁用 GridView 自身滚动
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
+            crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
             childAspectRatio: 0.75,
           ),
           itemCount: products.length,
           itemBuilder: (context, index) {
-            return ItemCardWithControls(
+            return ItemCardWithConfiguration(
               item: products[index],
-              cartNotifier: widget.cartNotifier,
+              // cartNotifier: widget.cartNotifier,
               isProduct: true,
             );
           },
@@ -90,25 +90,27 @@ class _SellingItemGridState extends State<SellingItemGrid> {
 
   Widget _buildServiceGrid() {
     final serviceNotifier = context.watch<ServiceNotifier>();
-    final cartNotifier = context.watch<CartChangeNotifier>();
     final services = serviceNotifier.services;
 
     if (serviceNotifier.isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (services.isEmpty) {
-      return Center(child: Text('No services'));
+      return const Center(child: Text('No services'));
     }
 
-    return ListView(
-      children: [
-        ServicesHeader(),
-        const SizedBox(height: 16),
-        ServiceGridSliver(
-            // services: services,
-            // cartNotifier: cartNotifier,
-            ),
+    // 直接使用 CustomScrollView，避免嵌套
+    return CustomScrollView(
+      slivers: [
+        // 头部
+        // SliverToBoxAdapter(
+        //   child: ServicesHeader(),
+        // ),
+        // 服务网格（现在只返回 _ServicesGrid）
+        SliverToBoxAdapter(
+          child: ServiceGridSliver(),
+        ),
       ],
     );
   }

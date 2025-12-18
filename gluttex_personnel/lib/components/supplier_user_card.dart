@@ -514,8 +514,8 @@ class SupplierUserCard extends StatelessWidget {
   List<String> _getOptimizedPrivilegeIds() {
     try {
       if (ruleCode > 0) {
-        final privilegeIds = RoleBitMapper.numberToPrivilegeIds(ruleCode);
-        return PrivilegeUIManager.getOptimizedPrivilegeIds(privilegeIds);
+        // final privilegeIds = RoleBitMapper.numberToPrivilegeIds(ruleCode);
+        return PrivilegeUIManager.getOptimizedPrivilegeIds(ruleCode);
       }
     } catch (e) {
       log('Error getting privilege IDs: $e');

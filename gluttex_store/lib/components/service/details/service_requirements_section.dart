@@ -11,7 +11,7 @@ class ServiceRequirementsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final localizations = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
@@ -57,7 +57,8 @@ class ServiceRequirementsSection extends StatelessWidget {
                             ),
                       ),
                       Text(
-                        '\$${service.totalResourceCost.toStringAsFixed(2)}',
+                        localizations.price(
+                            service.totalResourceCost.toStringAsFixed(2)),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
@@ -111,7 +112,8 @@ class ServiceRequirementsSection extends StatelessWidget {
                             ),
                       ),
                       Text(
-                        '\$${service.totalStaffCost.toStringAsFixed(2)}',
+                        localizations
+                            .price(service.totalStaffCost.toStringAsFixed(2)),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
@@ -221,6 +223,8 @@ class ServiceRequirementsSection extends StatelessWidget {
     Color color, {
     bool isBold = false,
   }) {
+    AppLocalizations loc = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -232,7 +236,7 @@ class ServiceRequirementsSection extends StatelessWidget {
               ),
         ),
         Text(
-          '\$${value.toStringAsFixed(2)}',
+          loc.price(value.toStringAsFixed(2)),
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: color,
                 fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,

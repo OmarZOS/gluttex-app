@@ -80,7 +80,7 @@ class OrderedService {
 
   @override
   String toString() {
-    return 'OrderedService(id: $id, serviceId: $serviceId, qty: $quantity, total: \$$totalPrice)';
+    return 'OrderedService(id: $id, serviceId: $serviceId, qty: $quantity, total: DZD$totalPrice)';
   }
 }
 

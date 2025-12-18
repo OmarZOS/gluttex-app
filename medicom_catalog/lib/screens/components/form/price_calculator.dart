@@ -32,9 +32,9 @@ class PriceCalculator {
   static String getPriceDifferenceText(double price1, double price2) {
     final difference = getPriceDifference(price1, price2);
     if (difference > 0) {
-      return 'Higher by \$${difference.toStringAsFixed(2)}';
+      return 'Higher by DZD${difference.toStringAsFixed(2)}';
     } else if (difference < 0) {
-      return 'Lower by \$${(-difference).toStringAsFixed(2)}';
+      return 'Lower by DZD${(-difference).toStringAsFixed(2)}';
     } else {
       return 'Same price';
     }

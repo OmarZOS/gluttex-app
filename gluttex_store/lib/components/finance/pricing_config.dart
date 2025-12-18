@@ -169,7 +169,7 @@ class PricingConfigScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Current: \$${product.product_price?.toStringAsFixed(2)}',
+              'Current: DZD${product.product_price?.toStringAsFixed(2)}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -177,7 +177,7 @@ class PricingConfigScreen extends StatelessWidget {
             const SizedBox(height: 4),
             if (isSelected)
               Text(
-                'New: \$${viewModel.finalPrice.toStringAsFixed(2)}',
+                'New: DZD${viewModel.finalPrice.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w600,
@@ -238,7 +238,7 @@ class PricingConfigScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Final Price: \$${viewModel.finalPrice.toStringAsFixed(2)} per product',
+            'Final Price: DZD${viewModel.finalPrice.toStringAsFixed(2)} per product',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),

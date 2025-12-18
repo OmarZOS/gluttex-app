@@ -110,6 +110,7 @@ class _TopSuppliers extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final topSuppliers = suppliers.take(3).toList();
+    AppLocalizations loc = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +162,7 @@ class _TopSuppliers extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '\$${supplier.totalRevenue.toStringAsFixed(0)}',
+                      loc.price(supplier.totalRevenue.toStringAsFixed(0)),
                       style: TextStyle(
                         color: colorScheme.onSurface,
                         fontSize: 12,

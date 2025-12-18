@@ -38,7 +38,9 @@ class TabSelector extends StatelessWidget {
             child: _TabButton(
               label: localizations.services,
               isSelected: selectedTab == 1,
-              onTap: () => onTabChanged(1),
+              onTap: () {
+                onTabChanged(1);
+              },
               icon: Icons.handyman,
             ),
           ),

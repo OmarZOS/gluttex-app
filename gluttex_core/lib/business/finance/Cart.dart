@@ -5,21 +5,98 @@ import 'package:gluttex_core/business/finance/ProvidedService.dart';
 
 // Original CartItem class remains exactly the same
 class CartItem {
-  final Product product;
+  final Product? product;
+  final ProvidedService? service;
+  final String? scheduledDate; // For services that need scheduling
+  final String? scheduledTime; // For services that need scheduling
   int quantity;
 
   CartItem({
-    required this.product,
+    this.product,
+    this.service,
+    this.scheduledDate,
+    this.scheduledTime,
     this.quantity = 1,
-  });
+  }) : assert(
+          product != null || service != null,
+          'CartItem must have either a product or a service',
+        );
 
-  double get totalPrice => (product.product_price ?? 0) * quantity;
+  // Get item ID (product ID or service ID)
+  int get itemId => product?.id_product ?? service?.id ?? 0;
 
-  CartItem copyWith({int? quantity}) {
+  // Get item name
+  String get itemName => product?.product_name ?? service?.name ?? '';
+
+  // Get price - handle both product and service
+  double? get unitPrice {
+    if (product != null) {
+      return product!.product_price;
+    } else if (service != null) {
+      return service!.finalPrice;
+    }
+    return 0.0;
+  }
+
+  // Get total price for this item
+  double get totalPrice => (unitPrice ?? 0) * quantity;
+
+  // Check if this is a service item
+  bool get isService => service != null;
+
+  // Check if this is a product item
+  bool get isProduct => product != null;
+
+  // Get duration for service items
+  String? get durationFormatted => service?.durationFormatted;
+
+  // Get description
+  String get description =>
+      product?.product_description ?? service?.description ?? '';
+
+  // Copy with method updated for service
+  CartItem copyWith({
+    Product? product,
+    ProvidedService? service,
+    String? scheduledDate,
+    String? scheduledTime,
+    int? quantity,
+  }) {
     return CartItem(
-      product: product,
+      product: product ?? this.product,
+      service: service ?? this.service,
+      scheduledDate: scheduledDate ?? this.scheduledDate,
+      scheduledTime: scheduledTime ?? this.scheduledTime,
       quantity: quantity ?? this.quantity,
     );
+  }
+
+  // Convert to JSON for API
+  Map<String, dynamic> toJson() {
+    final json = {
+      'quantity': quantity,
+    };
+
+    if (product != null) {
+      json['product_id'] = product!.id_product!;
+    } else if (service != null) {
+      json['provided_service_id'] = service!.id;
+    }
+
+    if (scheduledDate != null) {
+      json['ordered_service_scheduled_at'] = scheduledDate as int;
+    }
+
+    if (scheduledTime != null) {
+      json['scheduled_time'] = scheduledTime as int;
+    }
+
+    return json;
+  }
+
+  @override
+  String toString() {
+    return 'CartItem(${isProduct ? 'Product' : 'Service'}: $itemName, Quantity: $quantity, Total: DZD$totalPrice)';
   }
 }
 
@@ -28,7 +105,7 @@ class CartItem {
 // Enhanced Cart class that can work with both local and API data
 class Cart {
   // Original fields for local cart functionality
-  final Map<int, CartItem> _items = {};
+  final Map<String, CartItem> _items = {};
 
   // New fields for API cart data
   final int? cartId;
@@ -121,6 +198,15 @@ class Cart {
     );
   }
 
+  String _generateItemKey({int? productId, int? serviceId}) {
+    if (productId != null) {
+      return 'product_$productId';
+    } else if (serviceId != null) {
+      return 'service_$serviceId';
+    }
+    throw ArgumentError('Either productId or serviceId must be provided');
+  }
+
   // Named constructor for local shopping cart
   Cart.local()
       : cartId = null,
@@ -141,33 +227,188 @@ class Cart {
         personData = null,
         userData = null;
 
-  // ============ ORIGINAL METHODS (unchanged) ============
+  // Add a product to cart
   void addProduct(Product product, [int quantity = 1]) {
     if (quantity <= 0) throw ArgumentError('Quantity must be positive');
-    if (product.id_product == null)
+    if (product.id_product == null) {
       throw ArgumentError('Product ID cannot be null');
+    }
 
-    final productId = product.id_product!;
+    final key = _generateItemKey(productId: product.id_product);
     _items.update(
-      productId,
+      key,
       (existing) => existing.copyWith(quantity: existing.quantity + quantity),
       ifAbsent: () => CartItem(product: product, quantity: quantity),
     );
   }
 
-  bool removeProduct(int productId) {
-    return _items.remove(productId) != null;
+  // Add a service to cart
+  void addService(
+    ProvidedService service, {
+    int quantity = 1,
+    String? scheduledDate,
+    String? scheduledTime,
+  }) {
+    if (quantity <= 0) throw ArgumentError('Quantity must be positive');
+
+    final key = _generateItemKey(serviceId: service.id);
+    _items.update(
+      key,
+      (existing) => existing.copyWith(quantity: existing.quantity + quantity),
+      ifAbsent: () => CartItem(
+        service: service,
+        quantity: quantity,
+        scheduledDate: scheduledDate,
+        scheduledTime: scheduledTime,
+      ),
+    );
   }
 
-  void updateQuantity(int productId, int quantity) {
+  // Remove item by ID (product or service)
+  bool removeItem({int? productId, int? serviceId}) {
+    final key = _generateItemKey(productId: productId, serviceId: serviceId);
+    return _items.remove(key) != null;
+  }
+
+// Update quantity of an item
+  void updateQuantity({
+    int? productId,
+    int? serviceId,
+    required int quantity,
+  }) {
+    final key = _generateItemKey(productId: productId, serviceId: serviceId);
+
     if (quantity <= 0) {
-      removeProduct(productId);
-    } else if (_items.containsKey(productId)) {
-      _items[productId] = _items[productId]!.copyWith(quantity: quantity);
+      removeItem(productId: productId, serviceId: serviceId);
+    } else if (_items.containsKey(key)) {
+      _items[key] = _items[key]!.copyWith(quantity: quantity);
     }
   }
 
+  // Update service scheduling information
+  void updateServiceScheduling({
+    required int serviceId,
+    String? scheduledDate,
+    String? scheduledTime,
+  }) {
+    final key = _generateItemKey(serviceId: serviceId);
+    if (_items.containsKey(key) && _items[key]!.isService) {
+      _items[key] = _items[key]!.copyWith(
+        scheduledDate: scheduledDate,
+        scheduledTime: scheduledTime,
+      );
+    }
+  }
+
+  // Get all items (products and services)
+  List<CartItem> get items => _items.values.toList();
+
+  // Get only product items
+  List<CartItem> get productItems =>
+      items.where((item) => item.isProduct).toList();
+
+  // Get only service items
+  List<CartItem> get serviceItems =>
+      items.where((item) => item.isService).toList();
+
+  // Get item by product ID
+  CartItem? getProductItem(int productId) {
+    final key = _generateItemKey(productId: productId);
+    final item = _items[key];
+    return item?.isProduct == true ? item : null;
+  }
+
+  // Get item by service ID
+  CartItem? getServiceItem(int serviceId) {
+    final key = _generateItemKey(serviceId: serviceId);
+    final item = _items[key];
+    return item?.isService == true ? item : null;
+  }
+
+  // Check if product is in cart
+  bool hasProduct(int productId) {
+    final key = _generateItemKey(productId: productId);
+    return _items.containsKey(key) && _items[key]!.isProduct;
+  }
+
+  // Check if service is in cart
+  bool hasService(int serviceId) {
+    final key = _generateItemKey(serviceId: serviceId);
+    return _items.containsKey(key) && _items[key]!.isService;
+  }
+
+  // Calculate total quantity of all items
+  int get totalQuantity => items.fold(0, (sum, item) => sum + item.quantity);
+
+  // Calculate subtotal for all items
+  double get subtotal => items.fold(
+        0.0,
+        (sum, item) => sum + item.totalPrice,
+      );
+
+  // Calculate total with tax, shipping, etc. (you can customize this)
+  double get totalAmount {
+    // Add your tax, shipping, or other calculations here
+    return subtotal;
+  }
+
+  // Clear all items
   void clear() => _items.clear();
+
+  // Get cart item count
+  int get itemCount => _items.length;
+
+  // Check if cart is empty
+  bool get isEmpty => _items.isEmpty;
+
+  // Check if cart is not empty
+  bool get isNotEmpty => _items.isNotEmpty;
+
+  // Convert local cart items to JSON for API submission
+  Map<String, dynamic> toJsonForApi() {
+    return {
+      'items': items.map((item) => item.toJson()).toList(),
+      'subtotal': subtotal,
+      'total': totalAmount,
+      'item_count': itemCount,
+    };
+  }
+
+  // Merge API cart data with local cart
+  // void mergeWithApiCart(Cart apiCart) {
+  //   // Clear existing items if needed (or merge based on your logic)
+  //   _items.clear();
+
+  //   // Add ordered items from API
+  //   for (final orderedItem in apiCart.orderedItems) {
+  //     if (orderedItem.product != null) {
+  //       final key =
+  //           _generateItemKey(productId: orderedItem.product!.id_product);
+  //       _items[key] = CartItem(
+  //         product: orderedItem.product,
+  //         quantity: orderedItem.orderedItemQuantity,
+  //       );
+  //     }
+  //   }
+
+  //   // Add ordered services from API
+  //   for (final orderedService in apiCart.orderedServices) {
+  //     if (orderedService.service != null) {
+  //       final key = _generateItemKey(serviceId: orderedService.service!.id);
+  //       _items[key] = CartItem(
+  //         service: orderedService.service,
+  //         quantity: orderedService.orderedServiceQuantity,
+  //         scheduledDate: orderedService.orderedServiceScheduledDate,
+  //         scheduledTime: orderedService.orderedServiceScheduledTime,
+  //       );
+  //     }
+  //   }
+  // }
+
+  @override
+  String toString() {
+    return 'Cart(items: ${items.length}, products: ${productItems.length}, services: ${serviceItems.length}, total: DZD$totalAmount)';
+  }
 
   // ============ NEW METHODS FOR API DATA ============
 
@@ -219,12 +460,7 @@ class Cart {
   // ============ ORIGINAL GETTERS (unchanged) ============
   double get totalPrice =>
       _items.values.fold(0.0, (sum, item) => sum + item.totalPrice);
-  List<CartItem> get items => List.unmodifiable(_items.values);
   int get productCount => _items.length;
-  int get totalQuantity =>
-      _items.values.fold(0, (sum, item) => sum + item.quantity);
-  bool get isEmpty => _items.isEmpty;
-  bool get isNotEmpty => _items.isNotEmpty;
   bool containsProduct(int productId) => _items.containsKey(productId);
   int getProductQuantity(int productId) => _items[productId]?.quantity ?? 0;
 
@@ -237,12 +473,12 @@ class Cart {
   bool get hasReceipt => receipts.isNotEmpty;
   bool get hasDeposit => deposits.isNotEmpty;
 
-  String get formattedAmount {
-    if (cartTotalAmount != null) {
-      return '\$${cartTotalAmount!.toStringAsFixed(2)}';
-    }
-    return '\$${combinedTotal.toStringAsFixed(2)}';
-  }
+  // String get formattedAmount {
+  //   if (cartTotalAmount != null) {
+  //     return 'DZD${cartTotalAmount!.toStringAsFixed(2)}';
+  //   }
+  //   return 'DZD${combinedTotal.toStringAsFixed(2)}';
+  // }
 
   String get formattedDate {
     if (cartCreatedAt != null) {
@@ -273,8 +509,10 @@ class Cart {
     json['deposit'] = deposits.map((e) => e.toJson()).toList();
 
     // NEW: Add API ordered items and services
-    json['ordered_item'] = orderedItems.map((e) => e.toJson()).toList();
-    json['ordered_service'] = orderedServices.map((e) => e.toJson()).toList();
+    json['ordered_item'] =
+        _items.values.where((t) => t.isProduct).map((e) => e.toJson()).toList();
+    json['ordered_service'] =
+        _items.values.where((t) => t.isService).map((e) => e.toJson()).toList();
 
     if (personData != null) json['person'] = personData;
     if (userData != null) json['app_user_'] = userData;
@@ -324,16 +562,16 @@ class Cart {
 
     final orderedItems = cartItems.map((item) {
       final product = item.product;
-      if (product.id_product == null)
-        throw ArgumentError('Product ID cannot be null for order');
+      // if (product.id_product == null)
+      //   throw ArgumentError('Product ID cannot be null for order');
 
       return {
         "id_ordered_item": 0,
-        "ordered_product_id": product.id_product!,
+        // "ordered_product_id": product.id_product!,
         "order_ref": 0,
         "product_discount": 0.0,
         "ordered_quantity": item.quantity,
-        "unit_price": product.product_price ?? 0.0,
+        // "unit_price": product.product_price ?? 0.0,
         "applied_vat": 0.0,
       };
     }).toList();

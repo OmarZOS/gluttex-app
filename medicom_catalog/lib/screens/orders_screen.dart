@@ -8,7 +8,8 @@ import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:intl/intl.dart';
 
 class OrdersScreen extends StatefulWidget {
-  const OrdersScreen({Key? key}) : super(key: key);
+  final CartChangeNotifier? cartChangeNotifier;
+  OrdersScreen({Key? key, required this.cartChangeNotifier}) : super(key: key);
 
   @override
   State<OrdersScreen> createState() => _OrdersScreenState();
@@ -16,20 +17,48 @@ class OrdersScreen extends StatefulWidget {
 
 class _OrdersScreenState extends State<OrdersScreen> {
   final ScrollController _scrollController = ScrollController();
-  // bool _isRefreshing = false;
+  bool _isInitialLoad = true;
 
-  Future<void> _refreshOrders() async {
-    // _isRefreshing = true;
+  @override
+  void initState() {
+    super.initState();
+    // Load orders once when the screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadOrders();
+    });
+  }
+
+  Future<void> _loadOrders() async {
+    if (!mounted) return;
+
     final userId = Provider.of<AppUserNotifier>(context, listen: false)
         .appUser!
         .id_app_user!;
 
-    Provider.of<CartChangeNotifier>(context, listen: false)
-        .fetchOrders(appUserId: userId);
+    // Use the provided cartChangeNotifier or get from context
+    if (widget.cartChangeNotifier != null) {
+      await widget.cartChangeNotifier!.fetchOrders(appUserId: userId);
+    } else {
+      await Provider.of<CartChangeNotifier>(context, listen: false)
+          .fetchOrders(appUserId: userId);
+    }
 
-    // if (mounted) {
-    //   setState(() => _isRefreshing = false);
-    // }
+    if (mounted) {
+      setState(() => _isInitialLoad = false);
+    }
+  }
+
+  Future<void> _refreshOrders() async {
+    final userId = Provider.of<AppUserNotifier>(context, listen: false)
+        .appUser!
+        .id_app_user!;
+
+    if (widget.cartChangeNotifier != null) {
+      await widget.cartChangeNotifier!.fetchOrders(appUserId: userId);
+    } else {
+      await Provider.of<CartChangeNotifier>(context, listen: false)
+          .fetchOrders(appUserId: userId);
+    }
   }
 
   @override
@@ -42,9 +71,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalizations.of(context)!;
-    final userId = Provider.of<AppUserNotifier>(context, listen: false)
-        .appUser!
-        .id_app_user!;
 
     return Scaffold(
       appBar: AppBar(
@@ -54,78 +80,73 @@ class _OrdersScreenState extends State<OrdersScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: FutureBuilder(
-        future: Provider.of<CartChangeNotifier>(context, listen: false)
-            .fetchOrders(appUserId: userId),
-        builder: (context, snapshot) {
-          return Consumer<CartChangeNotifier>(
-            builder: (context, cartNotifier, child) {
-              if (cartNotifier.isLoading) {
-                return _buildLoadingState(theme, loc);
-              }
+      body: Consumer<CartChangeNotifier>(
+        builder: (context, cartNotifier, child) {
+          // Handle initial loading
+          if (_isInitialLoad && cartNotifier.orders.isEmpty) {
+            return _buildLoadingState(theme);
+          }
 
-              final orders = cartNotifier.orders;
+          final orders = cartNotifier.orders;
 
-              if (orders.isEmpty) {
-                return _buildEmptyState(loc, theme);
-              }
+          if (orders.isEmpty) {
+            return _buildEmptyState(loc, theme);
+          }
 
-              return RefreshIndicator(
-                onRefresh: _refreshOrders,
-                color: theme.colorScheme.primary,
-                backgroundColor: theme.colorScheme.surface,
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    // Header with order count
-                    SliverToBoxAdapter(
-                      child: _buildHeader(orders.length, loc, theme, orders),
-                    ),
-
-                    // Orders list
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final order = orders[index];
-                          return _buildOrderCard(order, loc, theme, context);
-                        },
-                        childCount: orders.length,
-                      ),
-                    ),
-
-                    // Bottom padding
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 20),
-                    ),
-                  ],
+          return RefreshIndicator(
+            onRefresh: _refreshOrders,
+            color: theme.colorScheme.primary,
+            backgroundColor: theme.colorScheme.surface,
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // Header with order count
+                SliverToBoxAdapter(
+                  child: _buildHeader(orders.length, loc, theme, orders),
                 ),
-              );
-            },
+
+                // Orders list
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final order = orders[index];
+                      return _buildOrderCard(order, loc, theme, context);
+                    },
+                    childCount: orders.length,
+                  ),
+                ),
+
+                // Bottom padding
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 20),
+                ),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  // Widget _buildLoadingState(ThemeData theme) {
-  //   return Center(
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         CircularProgressIndicator(
-  //           color: theme.colorScheme.primary,
-  //         ),
-  //         const SizedBox(height: 16),
-  //         Text(
-  //           'Loading your orders...',
-  //           style: theme.textTheme.bodyMedium?.copyWith(
-  //             color: theme.colorScheme.onSurface.withOpacity(0.6),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  Widget _buildLoadingState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Loading your orders...',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildEmptyState(AppLocalizations loc, ThemeData theme) {
     return RefreshIndicator(
@@ -531,10 +552,57 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   void _showOrderDetails(dynamic order, AppLocalizations loc, ThemeData theme,
-      BuildContext context) {
-    // Fetch details first
-    Provider.of<CartChangeNotifier>(context, listen: false)
-        .fetchOrderDetails(orderId: order.idOrder);
+      BuildContext context) async {
+    // Show loading bottom sheet first
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: theme.colorScheme.primary),
+              const SizedBox(height: 16),
+              Text(
+                'Loading order details...',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      // Fetch details asynchronously
+      await widget.cartChangeNotifier!
+          .fetchOrderDetails(orderId: order.idOrder);
+
+      // Close the loading sheet
+      Navigator.pop(context);
+
+      // Now show the actual details sheet
+      _showOrderDetailsSheet(order, loc, theme, context);
+    } catch (e) {
+      // Close loading sheet on error
+      Navigator.pop(context);
+
+      // Show error sheet
+      _showErrorSheet(e.toString(), loc, theme, context);
+    }
+  }
+
+  void _showOrderDetailsSheet(dynamic order, AppLocalizations loc,
+      ThemeData theme, BuildContext context) {
+    final detailedOrder =
+        widget.cartChangeNotifier!.getOrderWithDetails(order.idOrder);
 
     showModalBottomSheet(
       context: context,
@@ -546,28 +614,63 @@ class _OrdersScreenState extends State<OrdersScreen> {
           color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: Consumer<CartChangeNotifier>(
-          builder: (context, cartNotifier, child) {
-            final detailedOrder =
-                cartNotifier.getOrderWithDetails(order.idOrder);
+        child: detailedOrder == null || !detailedOrder.hasItems()
+            ? _buildErrorState(loc.failedToLoadDetails, theme, loc)
+            : _buildOrderDetailsContent(detailedOrder, loc, theme, context),
+      ),
+    );
+  }
 
-            if (cartNotifier.isLoading) {
-              return _buildLoadingState(theme, loc);
-            }
-
-            if (detailedOrder == null || !detailedOrder.hasItems()) {
-              return _buildErrorState(loc.failedToLoadDetails, theme, loc);
-            }
-
-            return _buildOrderDetailsContent(
-                detailedOrder, loc, theme, context);
-          },
+  void _showErrorSheet(String error, AppLocalizations loc, ThemeData theme,
+      BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: theme.colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                loc.failedToLoadDetails,
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  error,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(loc.close),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildOrderDetailsContent(Order order, AppLocalizations loc,
+  Widget _buildOrderDetailsContent(Order? order, AppLocalizations loc,
       ThemeData theme, BuildContext context) {
     return Column(
       children: [
@@ -587,14 +690,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: [
               Text(
-                loc.order_number(order.idOrder),
+                loc.order_number(order?.idOrder ?? 0),
                 // "${loc.orderFor} #${}",
                 style: theme.textTheme.headlineSmall
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
-                "${loc.totalTxt}: ${loc.price(order.totalPrice.toStringAsFixed(2))}",
+                "${loc.totalTxt}: ${loc.price((order?.totalPrice ?? 0.0).toStringAsFixed(2))}",
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
@@ -610,7 +713,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    _getStatusText(order.status, loc),
+                    _getStatusText(order?.status ?? "", loc),
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -624,8 +727,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...order.items!
-                  .map((item) => _buildOrderItemCard(item, theme, loc)),
+              if (order != null)
+                ...order.items!
+                    .map((item) => _buildOrderItemCard(item, theme, loc)),
 
               const SizedBox(height: 24),
               Center(
@@ -682,24 +786,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
             color: theme.colorScheme.primary,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLoadingState(ThemeData theme, AppLocalizations loc) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: theme.colorScheme.primary),
-          const SizedBox(height: 16),
-          Text(
-            loc.loadingOrders,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
-            ),
-          ),
-        ],
       ),
     );
   }

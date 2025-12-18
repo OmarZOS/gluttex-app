@@ -360,7 +360,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get updateSuccess => 'تم تحديث العنصر بنجاح';
 
   @override
-  String get serverError => 'فشل في الاتصال بالخادم';
+  String get serverError => 'خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.';
 
   @override
   String get notFoundError => 'لم يتم العثور على العنصر';
@@ -1575,7 +1575,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noImageSelected => 'لم يتم اختيار أي صورة';
 
   @override
-  String get searchSuppliersText => 'ابحث عن الموردين...';
+  String get searchSuppliersText => 'البحث عن موردين...';
 
   @override
   String get confirm => 'تأكيد';
@@ -1970,40 +1970,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get status_active => 'نشط';
 
   @override
-  String get inventory_view_title => 'رؤية المخزون';
+  String get inventory_view_title => 'عرض المخزون';
 
   @override
-  String get inventory_view_description => 'القدرة على رؤية مستويات المخزون الحالية والموجودات';
+  String get inventory_view_description => 'عرض مستويات المخزون ومعلومات المنتجات';
 
   @override
   String get inventory_manage_title => 'إدارة المخزون';
 
   @override
-  String get inventory_manage_description => 'القدرة على تحديث مستويات المخزون وإدارة المنتجات';
+  String get inventory_manage_description => 'إضافة وتعديل وإزالة عناصر المخزون';
 
   @override
-  String get orders_view_title => 'رؤية الطلبات';
+  String get orders_view_title => 'عرض الطلبات';
 
   @override
-  String get orders_view_description => 'القدرة على رؤية طلبات العملاء والموردين';
+  String get orders_view_description => 'عرض طلبات العملاء والتاريخ';
 
   @override
   String get orders_manage_title => 'إدارة الطلبات';
 
   @override
-  String get orders_manage_description => 'القدرة على إنشاء وتعديل ومعالجة الطلبات';
+  String get orders_manage_description => 'إنشاء وتعديل ومعالجة الطلبات';
 
   @override
-  String get personnel_view_title => 'رؤية الفريق';
+  String get personnel_view_title => 'عرض الموظفين';
 
   @override
-  String get personnel_view_description => 'القدرة على رؤية أعضاء الفريق الآخرين';
+  String get personnel_view_description => 'عرض معلومات الموظفين والملفات الشخصية';
 
   @override
-  String get personnel_manage_title => 'إدارة الفريق';
+  String get personnel_manage_title => 'إدارة الموظفين';
 
   @override
-  String get personnel_manage_description => 'القدرة على إضافة/إزالة أعضاء الفريق وتعيين الصلاحيات';
+  String get personnel_manage_description => 'إضافة وتعديل وإزالة الموظفين';
 
   @override
   String get manage_permissions => 'إدارة الصلاحيات';
@@ -2018,7 +2018,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get no_username => 'لا يوجد اسم مستخدم';
 
   @override
-  String get category_inventory => 'إدارة الجرد';
+  String get category_inventory => 'إدارة المخزون';
 
   @override
   String get category_orders => 'إدارة الطلبات';
@@ -2030,7 +2030,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleStaff => 'موظف';
 
   @override
-  String get roleAdmin => 'مسؤول';
+  String get roleAdmin => 'مدير النظام';
 
   @override
   String get roleManager => 'مدير';
@@ -2042,7 +2042,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleViewer => 'مشاهد';
 
   @override
-  String get roleNoPrivileges => 'بدون صلاحيات';
+  String get roleNoPrivileges => 'لا توجد صلاحيات';
 
   @override
   String get actionManagePermissions => 'الصلاحيات';
@@ -2085,7 +2085,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get categories => 'الفئات';
 
   @override
-  String get filteredTxt => 'تم التصفية';
+  String get filteredTxt => 'مصفى';
 
   @override
   String get noBusinessesFound => 'لم يتم العثور على أعمال';
@@ -2232,7 +2232,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderManagement => 'إدارة الطلبات';
 
   @override
-  String get processing => 'قيد المعالجة';
+  String get processing => 'جارٍ المعالجة...';
 
   @override
   String get completed => 'مكتمل';
@@ -2295,7 +2295,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invoices => 'الفواتير';
 
   @override
-  String get analytics => 'التحليلات';
+  String get analytics => 'تحليلات';
 
   @override
   String get pricing => 'التسعير والتكاليف';
@@ -2352,7 +2352,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pointOfSale => 'البائع';
 
   @override
-  String get loading => 'جاري التحميل...';
+  String get loading => 'جارٍ التحميل...';
 
   @override
   String get addProduct => 'إضافة منتج';
@@ -2418,7 +2418,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noAnalyticsData => 'لا توجد بيانات تحليلية';
 
   @override
-  String get generateInvoicesToSeeAnalytics => 'قم بإنشاء فواتير لرؤية بيانات التحليل';
+  String get generateInvoicesToSeeAnalytics => 'قم بإنشاء الفواتير لرؤية التحليلات المالية';
 
   @override
   String get financialOverview => 'نظرة عامة مالية';
@@ -2439,10 +2439,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get averageOrder => 'متوسط الطلب';
 
   @override
-  String get taxCollected => 'الضريبة المحصلة';
+  String get taxCollected => 'الضرائب المحصلة';
 
   @override
-  String get recentTransactions => 'المعاملات الحديثة';
+  String get recentTransactions => 'المعاملات الأخيرة';
 
   @override
   String get last5Transactions => 'آخر 5 معاملات';
@@ -2451,22 +2451,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewAllTransactions => 'عرض كل المعاملات';
 
   @override
-  String get revenue => 'الإيرادات';
+  String get revenue => 'إيرادات';
 
   @override
-  String get profit => 'الربح';
+  String get profit => 'ربح';
 
   @override
-  String get expenses => 'المصروفات';
+  String get expenses => 'مصروفات';
 
   @override
   String get tax => 'الضريبة';
 
   @override
-  String get discount => 'الخصم';
+  String get discount => 'خصم';
 
   @override
-  String get refund => 'الاسترداد';
+  String get refund => 'استرداد';
 
   @override
   String get paid => 'مدفوع';
@@ -2475,7 +2475,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pending => 'قيد الانتظار';
 
   @override
-  String get cancelled => 'ملغى';
+  String get cancelled => 'ملغي';
 
   @override
   String get refunded => 'تم الاسترداد';
@@ -2484,7 +2484,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invoice => 'فاتورة';
 
   @override
-  String get items => 'العناصر';
+  String items(num cartItemCount, num itemCount, num serviceCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cartItemCount,
+      locale: localeName,
+      other: '$cartItemCount عنصر',
+      many: '$cartItemCount عنصر',
+      few: '$serviceCount عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      itemCount,
+      locale: localeName,
+      other: '$itemCount منتج',
+      many: '$itemCount منتج',
+      few: '# منتجات',
+      two: 'منتجان',
+      one: 'منتج واحد',
+      zero: 'لا منتجات',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      serviceCount,
+      locale: localeName,
+      other: '$serviceCount خدمة',
+      many: '$serviceCount خدمة',
+      few: '# خدمات',
+      two: 'خدمتان',
+      one: 'خدمة واحدة',
+      zero: 'لا خدمات',
+    );
+    return '$_temp0 ($_temp1، $_temp2)';
+  }
 
   @override
   String get share => 'مشاركة';
@@ -2499,7 +2531,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noInvoicesDescription => 'ستظهر فواتيرك هنا بمجرد اكتمال المبيعات';
 
   @override
-  String get createFirstInvoice => 'أنشئ أول فاتورة';
+  String get createFirstInvoice => 'إنشاء أول فاتورة';
 
   @override
   String get loadingInvoices => 'جاري تحميل الفواتير...';
@@ -2508,13 +2540,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get card => 'بطاقة';
 
   @override
-  String get cash => 'نقدي';
+  String get cash => 'نقداً';
 
   @override
   String get bankTransfer => 'تحويل بنكي';
 
   @override
-  String get mobilePayment => 'دفع عبر الهاتف';
+  String get mobilePayment => 'دفع جوال';
 
   @override
   String get sharingInvoice => 'مشاركة الفاتورة';
@@ -2696,7 +2728,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get outstanding => 'المستحقات';
 
   @override
-  String get balance => 'الرصيد';
+  String get balance => 'رصيد';
 
   @override
   String get byStatus => 'حسب الحالة';
@@ -2723,10 +2755,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get operationId => 'معرف العملية';
 
   @override
-  String get client => 'زبون';
+  String get client => 'العميل';
 
   @override
-  String get supplier => 'مورد';
+  String get supplier => 'المورد';
 
   @override
   String get seller => 'بائع';
@@ -2783,7 +2815,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get subtotal => 'المجموع الفرعي';
 
   @override
-  String get total => 'الإجمالي';
+  String get total => 'المجموع';
 
   @override
   String get quantity => 'الكمية';
@@ -2804,7 +2836,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noSuppliersAvailable => 'لا يوجد موردون متاحون';
 
   @override
-  String get selectAll => 'اختر الكل';
+  String get selectAll => 'تحديد الكل';
 
   @override
   String get products => 'المنتجات';
@@ -2834,7 +2866,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transaction => 'معاملة';
 
   @override
-  String get documentType => 'نوع الوثيقة';
+  String get documentType => 'نوع المستند';
 
   @override
   String get operationType => 'نوع العملية';
@@ -2844,4 +2876,1143 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deposited => 'مودَع';
+
+  @override
+  String get productsAndServices => 'منتجات وخدمات';
+
+  @override
+  String get eShopping => 'تسوق إلكتروني';
+
+  @override
+  String get inStorePurchase => 'شراء من المتجر';
+
+  @override
+  String get serviceRepair => 'إصلاح';
+
+  @override
+  String get serviceMaintenance => 'صيانة';
+
+  @override
+  String get serviceFix => 'إصلاح';
+
+  @override
+  String get serviceConsultation => 'استشارة';
+
+  @override
+  String get serviceAdvice => 'نصيحة';
+
+  @override
+  String get serviceInstallation => 'تركيب';
+
+  @override
+  String get serviceSetup => 'إعداد';
+
+  @override
+  String get serviceDelivery => 'توصيل';
+
+  @override
+  String get serviceShipping => 'شحن';
+
+  @override
+  String get serviceCleaning => 'تنظيف';
+
+  @override
+  String get serviceHousekeeping => 'خدمات منزلية';
+
+  @override
+  String get serviceDesign => 'تصميم';
+
+  @override
+  String get serviceCreative => 'إبداعي';
+
+  @override
+  String get serviceTraining => 'تدريب';
+
+  @override
+  String get serviceEducation => 'تعليم';
+
+  @override
+  String get serviceMedical => 'طبي';
+
+  @override
+  String get serviceHealth => 'صحة';
+
+  @override
+  String get serviceTech => 'تقنية';
+
+  @override
+  String get serviceIT => 'تقنية معلومات';
+
+  @override
+  String get serviceGeneral => 'خدمات عامة';
+
+  @override
+  String get serviceBloodTesting => 'فحص الدم';
+
+  @override
+  String get serviceDiagnosticImaging => 'التصوير التشخيصي';
+
+  @override
+  String get servicePathologyTests => 'فحوصات الباثولوجيا';
+
+  @override
+  String get serviceUrineAnalysis => 'تحليل البول';
+
+  @override
+  String get serviceAllergyTesting => 'فحص الحساسية';
+
+  @override
+  String get serviceGeneticTesting => 'فحص الجينات';
+
+  @override
+  String get serviceVaccination => 'التطعيم';
+
+  @override
+  String get serviceHealthCheckup => 'فحص صحي';
+
+  @override
+  String get serviceDentalCare => 'العناية بالأسنان';
+
+  @override
+  String get serviceMinorSurgery => 'جراحة بسيطة';
+
+  @override
+  String get serviceWoundCare => 'العناية بالجروح';
+
+  @override
+  String get serviceIVTherapy => 'العلاج الوريدي';
+
+  @override
+  String get servicePhysiotherapy => 'العلاج الطبيعي';
+
+  @override
+  String get serviceAcupuncture => 'الوخز بالإبر';
+
+  @override
+  String get serviceNutritionCounseling => 'استشارة التغذية';
+
+  @override
+  String get serviceMentalHealthCounseling => 'استشارة الصحة النفسية';
+
+  @override
+  String get serviceFirstAidTraining => 'تدريب الإسعافات الأولية';
+
+  @override
+  String get servicePrenatalCare => 'رعاية ما قبل الولادة';
+
+  @override
+  String get servicePediatricCare => 'رعاية الأطفال';
+
+  @override
+  String get serviceGeriatricCare => 'رعاية المسنين';
+
+  @override
+  String get serviceSportsMedicine => 'الطب الرياضي';
+
+  @override
+  String get serviceGeneralMedical => 'خدمة طبية عامة';
+
+  @override
+  String get serviceDescBloodTesting => 'Complete blood count, cholesterol, glucose, and other blood tests';
+
+  @override
+  String get serviceDescDiagnosticImaging => 'X-rays, MRIs, CT scans, and ultrasound services';
+
+  @override
+  String get supplierCategoryRestaurant => 'مطعم';
+
+  @override
+  String get supplierCategoryBakery => 'مخبز';
+
+  @override
+  String get supplierCategoryFactory => 'مصنع';
+
+  @override
+  String get supplierCategorySupermarket => 'سوبرماركت';
+
+  @override
+  String get supplierCategoryGroceryStore => 'بقالة';
+
+  @override
+  String get supplierCategoryDistributor => 'موزع';
+
+  @override
+  String get supplierCategoryCafe => 'مقهى';
+
+  @override
+  String get supplierCategoryButcher => 'جزار';
+
+  @override
+  String get supplierCategoryDairy => 'ألبان';
+
+  @override
+  String get supplierCategoryBeverage => 'مشروبات';
+
+  @override
+  String get suppliers => 'الموردون';
+
+  @override
+  String get noSuppliersFound => 'لم يتم العثور على موردين';
+
+  @override
+  String get filterByCategory => 'تصفية حسب الفئة';
+
+  @override
+  String get supplierType => 'النوع';
+
+  @override
+  String get supplierContact => 'الاتصال';
+
+  @override
+  String get supplierAddress => 'العنوان';
+
+  @override
+  String get supplierRating => 'التقييم';
+
+  @override
+  String get supplierProducts => 'المنتجات';
+
+  @override
+  String get viewSupplierDetails => 'عرض التفاصيل';
+
+  @override
+  String get noInvoicesFound => 'لم يتم العثور على فواتير';
+
+  @override
+  String get noResultsForFilter => 'لا توجد نتائج للفلتر الحالي';
+
+  @override
+  String get createYourFirstInvoice => 'أنشئ فاتورتك الأولى للبدء';
+
+  @override
+  String get tryDifferentFilter => 'جرب فلتراً مختلفاً أو مصطلح بحث آخر';
+
+  @override
+  String get createInvoice => 'إنشاء فاتورة';
+
+  @override
+  String get searchInvoices => 'بحث في الفواتير...';
+
+  @override
+  String get advancedFilter => 'فلتر متقدم';
+
+  @override
+  String get dateRange => 'نطاق التاريخ';
+
+  @override
+  String get fromDate => 'من';
+
+  @override
+  String get toDate => 'إلى';
+
+  @override
+  String get amountRange => 'نطاق المبلغ';
+
+  @override
+  String get minAmount => 'الحد الأدنى للمبلغ';
+
+  @override
+  String get maxAmount => 'الحد الأقصى للمبلغ';
+
+  @override
+  String get clearAll => 'مسح الكل';
+
+  @override
+  String get apply => 'تطبيق';
+
+  @override
+  String get receipt => 'إيصال';
+
+  @override
+  String get quote => 'عرض سعر';
+
+  @override
+  String get allDocuments => 'كل المستندات';
+
+  @override
+  String get editDocument => 'تعديل المستند';
+
+  @override
+  String get downloadPdf => 'تحميل PDF';
+
+  @override
+  String get shareDocument => 'مشاركة المستند';
+
+  @override
+  String get markAsPaid => 'وضع علامة مدفوعة';
+
+  @override
+  String get deleteDocument => 'حذف المستند';
+
+  @override
+  String get createNewDocument => 'إنشاء مستند جديد';
+
+  @override
+  String get createInvoiceDescription => 'إنشاء فاتورة جديدة';
+
+  @override
+  String get createReceiptDescription => 'إنشاء إيصال دفع';
+
+  @override
+  String get createQuoteDescription => 'إنشاء عرض سعر';
+
+  @override
+  String get documentMarkedAsPaid => 'تم وضع علامة مدفوعة على المستند';
+
+  @override
+  String get failedToUpdate => 'فشل تحديث المستند';
+
+  @override
+  String get confirmDelete => 'تأكيد الحذف';
+
+  @override
+  String get deleteDocumentConfirmation => 'هل أنت متأكد من رغبتك في حذف هذا المستند؟';
+
+  @override
+  String get documentDeleted => 'تم حذف المستند';
+
+  @override
+  String get failedToDelete => 'فشل حذف المستند';
+
+  @override
+  String get totalInvoices => 'إجمالي الفواتير';
+
+  @override
+  String get averageInvoice => 'متوسط الفاتورة';
+
+  @override
+  String get pendingInvoices => 'الفواتير المعلقة';
+
+  @override
+  String get paidInvoices => 'الفواتير المدفوعة';
+
+  @override
+  String get overdueInvoices => 'الفواتير المتأخرة';
+
+  @override
+  String get revenueThisMonth => 'الإيرادات هذا الشهر';
+
+  @override
+  String get revenueLastMonth => 'الإيرادات الشهر الماضي';
+
+  @override
+  String get topClients => 'أفضل العملاء';
+
+  @override
+  String get recentActivity => 'النشاط الأخير';
+
+  @override
+  String get draft => 'مسودة';
+
+  @override
+  String get yesterday => 'الأمس';
+
+  @override
+  String get lastMonth => 'الشهر الماضي';
+
+  @override
+  String get customRange => 'نطاق مخصص';
+
+  @override
+  String get exportAsCsv => 'تصدير كـ CSV';
+
+  @override
+  String get exportAsExcel => 'تصدير كملف Excel';
+
+  @override
+  String get exportAsPdf => 'تصدير كـ PDF';
+
+  @override
+  String get exportAll => 'تصدير الكل';
+
+  @override
+  String get exportSelected => 'تصدير المحدد';
+
+  @override
+  String get exportSuccessful => 'تم التصدير بنجاح';
+
+  @override
+  String get filterApplied => 'تم تطبيق الفلتر';
+
+  @override
+  String get filterCleared => 'تم مسح الفلتر';
+
+  @override
+  String get documentSaved => 'تم حفظ المستند بنجاح';
+
+  @override
+  String get paymentRecorded => 'تم تسجيل الدفع بنجاح';
+
+  @override
+  String get noDocumentsToExport => 'لا توجد مستندات للتصدير';
+
+  @override
+  String get exportFailed => 'فشل التصدير. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get loadFailed => 'فشل تحميل المستندات';
+
+  @override
+  String get connectionError => 'خطأ في الاتصال. يرجى التحقق من الإنترنت.';
+
+  @override
+  String get loadingMore => 'جارٍ تحميل المزيد...';
+
+  @override
+  String get refreshing => 'جارٍ التحديث...';
+
+  @override
+  String get documentNumber => 'رقم المستند';
+
+  @override
+  String get date => 'التاريخ';
+
+  @override
+  String get amount => 'المبلغ';
+
+  @override
+  String get dueDate => 'تاريخ الاستحقاق';
+
+  @override
+  String get issueDate => 'تاريخ الإصدار';
+
+  @override
+  String get paymentDate => 'تاريخ الدفع';
+
+  @override
+  String get notes => 'ملاحظات';
+
+  @override
+  String get terms => 'الشروط';
+
+  @override
+  String get addItem => 'إضافة عنصر';
+
+  @override
+  String get removeItem => 'إزالة العنصر';
+
+  @override
+  String get calculateTotal => 'حساب الإجمالي';
+
+  @override
+  String get sendEmail => 'إرسال بريد إلكتروني';
+
+  @override
+  String get saveDraft => 'حفظ المسودة';
+
+  @override
+  String get submit => 'إرسال';
+
+  @override
+  String get approve => 'موافقة';
+
+  @override
+  String get reject => 'رفض';
+
+  @override
+  String get duplicate => 'نسخ';
+
+  @override
+  String get archive => 'أرشفة';
+
+  @override
+  String get filterByDate => 'تصفية حسب التاريخ';
+
+  @override
+  String get filterByAmount => 'تصفية حسب المبلغ';
+
+  @override
+  String get filterByStatus => 'تصفية حسب الحالة';
+
+  @override
+  String get filterByType => 'تصفية حسب النوع';
+
+  @override
+  String get filterByClient => 'تصفية حسب العميل';
+
+  @override
+  String get filterBySupplier => 'تصفية حسب المورد';
+
+  @override
+  String get january => 'يناير';
+
+  @override
+  String get february => 'فبراير';
+
+  @override
+  String get march => 'مارس';
+
+  @override
+  String get april => 'أبريل';
+
+  @override
+  String get may => 'مايو';
+
+  @override
+  String get june => 'يونيو';
+
+  @override
+  String get july => 'يوليو';
+
+  @override
+  String get august => 'أغسطس';
+
+  @override
+  String get september => 'سبتمبر';
+
+  @override
+  String get october => 'أكتوبر';
+
+  @override
+  String get november => 'نوفمبر';
+
+  @override
+  String get december => 'ديسمبر';
+
+  @override
+  String get monday => 'الاثنين';
+
+  @override
+  String get tuesday => 'الثلاثاء';
+
+  @override
+  String get wednesday => 'الأربعاء';
+
+  @override
+  String get thursday => 'الخميس';
+
+  @override
+  String get friday => 'الجمعة';
+
+  @override
+  String get saturday => 'السبت';
+
+  @override
+  String get sunday => 'الأحد';
+
+  @override
+  String get daysAgo => 'أيام مضت';
+
+  @override
+  String daysFromNow(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'خلال $count يوم',
+      many: 'خلال $count يوماً',
+      few: 'خلال $count أيام',
+      two: 'بعد يومين',
+      one: 'غداً',
+      zero: 'اليوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deposit => 'وديعة';
+
+  @override
+  String get pendingCart => 'سلة معلقة';
+
+  @override
+  String get depositReceived => 'تم استلام الوديعة';
+
+  @override
+  String get depositCoversFull => 'الوديعة تغطي المبلغ بالكامل';
+
+  @override
+  String get depositPartial => 'وديعة جزئية';
+
+  @override
+  String get depositFullyCovered => 'وديعة مغطاة بالكامل';
+
+  @override
+  String get user => 'مستخدم';
+
+  @override
+  String get person => 'شخص';
+
+  @override
+  String get guest => 'ضيف';
+
+  @override
+  String get directInvoice => 'فاتورة مباشرة';
+
+  @override
+  String get serviceBased => 'قائم على الخدمة';
+
+  @override
+  String get directDeposit => 'إيداع مباشر';
+
+  @override
+  String get financialDocuments => 'المستندات المالية';
+
+  @override
+  String get financialSummary => 'ملخص مالي';
+
+  @override
+  String get due => 'مستحق';
+
+  @override
+  String get count => 'عدد';
+
+  @override
+  String get paymentProgress => 'تقدم الدفع';
+
+  @override
+  String get noDocumentsFound => 'لم يتم العثور على مستندات';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get loadingDocuments => 'جارٍ تحميل المستندات...';
+
+  @override
+  String get errorLoadingDocuments => 'خطأ في تحميل المستندات';
+
+  @override
+  String get again => 'مرة أخرى';
+
+  @override
+  String nServicesSelected(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count خدمات محددة',
+      one: 'خدمة واحدة محددة',
+      zero: 'لم يتم اختيار أي خدمات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configureService => 'تكوين الخدمة';
+
+  @override
+  String get scheduleService => 'جدولة الخدمة';
+
+  @override
+  String get serviceWillBeScheduled => 'سيتم جدولة الخدمة';
+
+  @override
+  String get addSchedulingInfo => 'أضف معلومات الجدولة';
+
+  @override
+  String get scheduledDate => 'التاريخ المجدول';
+
+  @override
+  String get scheduledTime => 'الوقت المجدول';
+
+  @override
+  String get specialInstructions => 'تعليمات خاصة';
+
+  @override
+  String get addNotesHere => 'أضف ملاحظات هنا...';
+
+  @override
+  String get serviceParameters => 'معلمات الخدمة';
+
+  @override
+  String get customizeServiceParameters => 'تخصيص معلمات الخدمة';
+
+  @override
+  String get saveConfiguration => 'حفظ التكوين';
+
+  @override
+  String get services_view_title => 'عرض الخدمات';
+
+  @override
+  String get services_view_description => 'عرض الخدمات المتاحة والأسعار';
+
+  @override
+  String get services_manage_title => 'إدارة الخدمات';
+
+  @override
+  String get services_manage_description => 'إضافة وتعديل وإزالة الخدمات';
+
+  @override
+  String get pos_view_title => 'عرض نقطة البيع';
+
+  @override
+  String get pos_view_description => 'عرض معاملات نقطة البيع';
+
+  @override
+  String get pos_manage_title => 'إدارة نقطة البيع';
+
+  @override
+  String get pos_manage_description => 'معالجة المبيعات وإدارة عمليات نقطة البيع';
+
+  @override
+  String get operations_view_title => 'عرض العمليات';
+
+  @override
+  String get operations_view_description => 'عرض التقارير والمقاييس التشغيلية';
+
+  @override
+  String get operations_manage_title => 'إدارة العمليات';
+
+  @override
+  String get operations_manage_description => 'تكوين عمليات وإعدادات النظام';
+
+  @override
+  String get finance_view_title => 'عرض المالية';
+
+  @override
+  String get finance_view_description => 'عرض التقارير والمعاملات المالية';
+
+  @override
+  String get finance_manage_title => 'إدارة المالية';
+
+  @override
+  String get finance_manage_description => 'إدارة العمليات والمحاسبة المالية';
+
+  @override
+  String get category_services => 'إدارة الخدمات';
+
+  @override
+  String get category_pos => 'إدارة نقطة البيع';
+
+  @override
+  String get category_operations => 'إدارة العمليات';
+
+  @override
+  String get category_finance => 'إدارة المالية';
+
+  @override
+  String get permissionScore => 'نتيجة الصلاحيات';
+
+  @override
+  String get privileges => 'الصلاحيات';
+
+  @override
+  String get savePrivileges => 'حفظ الصلاحيات';
+
+  @override
+  String get privilegesUpdated => 'تم تحديث الصلاحيات بنجاح';
+
+  @override
+  String get confirmPrivilegeChange => 'هل أنت متأكد من تغيير الصلاحيات؟';
+
+  @override
+  String get noPrivilegesSelected => 'لم يتم تحديد أي صلاحيات';
+
+  @override
+  String get fullAccess => 'وصول كامل';
+
+  @override
+  String get limitedAccess => 'وصول محدود';
+
+  @override
+  String get viewOnly => 'عرض فقط';
+
+  @override
+  String get manageAccess => 'وصول للإدارة';
+
+  @override
+  String get togglePrivilegeTooltip => 'تبديل الصلاحية';
+
+  @override
+  String get categoryToggleTooltip => 'تبديل جميع صلاحيات الفئة';
+
+  @override
+  String get active => 'نشط';
+
+  @override
+  String get inactive => 'غير نشط';
+
+  @override
+  String get enabled => 'مفعل';
+
+  @override
+  String get disabled => 'معطل';
+
+  @override
+  String get last => 'آخر';
+
+  @override
+  String get transactions => 'معاملات';
+
+  @override
+  String get activeSuppliers => 'الموردون النشطون';
+
+  @override
+  String get payment => 'دفع';
+
+  @override
+  String get expense => 'مصروف';
+
+  @override
+  String get income => 'دخل';
+
+  @override
+  String get currencyCode => 'SAR';
+
+  @override
+  String get lastWeek => 'الأسبوع الماضي';
+
+  @override
+  String get lastYear => 'السنة الماضية';
+
+  @override
+  String get accountsReceivable => 'الحسابات المدينة';
+
+  @override
+  String get accountsPayable => 'الحسابات الدائنة';
+
+  @override
+  String get cashFlow => 'التدفق النقدي';
+
+  @override
+  String get roi => 'عائد الاستثمار';
+
+  @override
+  String get breakEven => 'نقطة التعادل';
+
+  @override
+  String get revenueGrowth => 'نمو الإيرادات';
+
+  @override
+  String get customerLifetimeValue => 'قيمة العميل مدى الحياة';
+
+  @override
+  String get dailyRevenue => 'الإيرادات اليومية';
+
+  @override
+  String get weeklyRevenue => 'الإيرادات الأسبوعية';
+
+  @override
+  String get monthlyRevenue => 'الإيرادات الشهرية';
+
+  @override
+  String get yearlyRevenue => 'الإيرادات السنوية';
+
+  @override
+  String get revenueTrend => 'اتجاه الإيرادات';
+
+  @override
+  String get profitTrend => 'اتجاه الربح';
+
+  @override
+  String get expenseBreakdown => 'تفصيل المصروفات';
+
+  @override
+  String get categoryBreakdown => 'تفصيل الفئات';
+
+  @override
+  String get filterByCustomer => 'تصفية حسب العميل';
+
+  @override
+  String get applyFilters => 'تطبيق الفلاتر';
+
+  @override
+  String get exportAsCSV => 'تصدير كملف CSV';
+
+  @override
+  String get exportAsPDF => 'تصدير كملف PDF';
+
+  @override
+  String get generateReport => 'إنشاء تقرير';
+
+  @override
+  String get downloadReport => 'تحميل التقرير';
+
+  @override
+  String get printReport => 'طباعة التقرير';
+
+  @override
+  String get shareReport => 'مشاركة التقرير';
+
+  @override
+  String get saveReport => 'حفظ التقرير';
+
+  @override
+  String get refreshData => 'تحديث البيانات';
+
+  @override
+  String get dataExportedSuccessfully => 'تم تصدير البيانات بنجاح';
+
+  @override
+  String get reportGeneratedSuccessfully => 'تم إنشاء التقرير بنجاح';
+
+  @override
+  String get noDataToExport => 'لا توجد بيانات للتصدير';
+
+  @override
+  String get loadingFinancialData => 'جاري تحميل البيانات المالية...';
+
+  @override
+  String get calculatingStatistics => 'جاري حساب الإحصائيات...';
+
+  @override
+  String get hoverForDetails => 'مرر للتفاصيل';
+
+  @override
+  String get clickToViewDetails => 'انقر لعرض التفاصيل';
+
+  @override
+  String get doubleClickToEdit => 'انقر مرتين للتعديل';
+
+  @override
+  String get dragToResize => 'اسحب لتغيير الحجم';
+
+  @override
+  String get noTransactionsFound => 'لم يتم العثور على معاملات';
+
+  @override
+  String get noRevenueData => 'لا توجد بيانات إيرادات';
+
+  @override
+  String get noExpenseData => 'لا توجد بيانات مصروفات';
+
+  @override
+  String get noProfitData => 'لا توجد بيانات أرباح';
+
+  @override
+  String get summary => 'ملخص';
+
+  @override
+  String get overview => 'نظرة عامة';
+
+  @override
+  String get detailedView => 'عرض مفصل';
+
+  @override
+  String get quickView => 'عرض سريع';
+
+  @override
+  String get dashboard => 'لوحة التحكم';
+
+  @override
+  String get reports => 'تقارير';
+
+  @override
+  String get insights => 'رؤى';
+
+  @override
+  String get trends => 'اتجاهات';
+
+  @override
+  String get comparison => 'مقارنة';
+
+  @override
+  String get performance => 'أداء';
+
+  @override
+  String get target => 'هدف';
+
+  @override
+  String get actual => 'فعلي';
+
+  @override
+  String get variance => 'تباين';
+
+  @override
+  String get achievement => 'تحقيق';
+
+  @override
+  String get forecast => 'تنبؤ';
+
+  @override
+  String get projection => 'إسقاط';
+
+  @override
+  String get estimate => 'تقدير';
+
+  @override
+  String get vsLastPeriod => 'مقارنة بالفترة الماضية';
+
+  @override
+  String get vsLastYear => 'مقارنة بالسنة الماضية';
+
+  @override
+  String get vsTarget => 'مقارنة بالهدف';
+
+  @override
+  String get vsBudget => 'مقارنة بالميزانية';
+
+  @override
+  String get vsAverage => 'مقارنة بالمتوسط';
+
+  @override
+  String get quickStats => 'إحصائيات سريعة';
+
+  @override
+  String get todayRevenue => 'إيرادات اليوم';
+
+  @override
+  String get weekRevenue => 'إيرادات الأسبوع';
+
+  @override
+  String get monthRevenue => 'إيرادات الشهر';
+
+  @override
+  String get yearRevenue => 'إيرادات السنة';
+
+  @override
+  String get revenuePerCustomer => 'الإيراد لكل عميل';
+
+  @override
+  String get averageTransaction => 'متوسط المعاملة';
+
+  @override
+  String get justNow => 'الآن';
+
+  @override
+  String get minutesAgo => 'دقائق مضت';
+
+  @override
+  String get hoursAgo => 'ساعات مضت';
+
+  @override
+  String get weeksAgo => 'أسابيع مضت';
+
+  @override
+  String get monthsAgo => 'أشهر مضت';
+
+  @override
+  String get yearsAgo => 'سنوات مضت';
+
+  @override
+  String get documentsCount => 'عدد المستندات';
+
+  @override
+  String get totalDocuments => 'إجمالي المستندات';
+
+  @override
+  String get averageDocument => 'المتوسط لكل مستند';
+
+  @override
+  String stock(Object stock) {
+    return '$stockالكمية: ';
+  }
+
+  @override
+  String get itemsText => 'العناصر';
+
+  @override
+  String get checkout => 'الدفع';
+
+  @override
+  String get orderConfirmed => 'تم تأكيد الطلب';
+
+  @override
+  String get orderPlacedSuccessfully => 'تم تقديم طلبك بنجاح';
+
+  @override
+  String get backToHome => 'العودة للرئيسية';
+
+  @override
+  String get guestCustomer => 'عميل زائر';
+
+  @override
+  String get orderItems => 'عناصر الطلب';
+
+  @override
+  String get paymentMethod => 'طريقة الدفع';
+
+  @override
+  String get deliveryType => 'نوع التوصيل';
+
+  @override
+  String get pickup => 'استلام';
+
+  @override
+  String get pickupDesc => 'استلام من موقع المتجر';
+
+  @override
+  String get delivery => 'توصيل';
+
+  @override
+  String get deliveryDesc => 'توصيل في نفس اليوم متاح';
+
+  @override
+  String get shipping => 'شحن';
+
+  @override
+  String get shippingDesc => 'شحن عادي (3-5 أيام عمل)';
+
+  @override
+  String get orderNotes => 'ملاحظات الطلب';
+
+  @override
+  String get notesHint => 'تعليمات خاصة، ملاحظات التوصيل، إلخ.';
+
+  @override
+  String get orderSummary => 'ملخص الطلب';
+
+  @override
+  String get placeOrder => 'تقديم الطلب';
+
+  @override
+  String get printDocument => 'طباعة';
+
+  @override
+  String get done => 'تم';
+
+  @override
+  String get customer => 'العميل';
+
+  @override
+  String get searchCustomers => 'ابحث عن العملاء...';
+
+  @override
+  String get invoiceReceipt => 'فاتورة + إيصال';
+
+  @override
+  String get receiptOnly => 'إيصال فقط';
+
+  @override
+  String get none => 'لا شيء';
+
+  @override
+  String get paymentType => 'نوع الدفع';
+
+  @override
+  String get fullPayment => 'دفع كامل';
+
+  @override
+  String get depositOnly => 'عربون فقط';
+
+  @override
+  String get check => 'شيك';
+
+  @override
+  String get cardDetails => 'تفاصيل البطاقة';
+
+  @override
+  String get cardType => 'نوع البطاقة';
+
+  @override
+  String get cardNumber => 'رقم البطاقة';
+
+  @override
+  String get expiryDate => 'تاريخ الانتهاء';
+
+  @override
+  String get bankTransferDetails => 'تفاصيل التحويل البنكي';
+
+  @override
+  String get bankName => 'اسم البنك';
+
+  @override
+  String get accountNumber => 'رقم الحساب';
+
+  @override
+  String get reference => 'المرجع';
+
+  @override
+  String get mobilePaymentDetails => 'تفاصيل الدفع الجوال';
+
+  @override
+  String get serviceProvider => 'مزود الخدمة';
+
+  @override
+  String get phoneNumber => 'رقم الهاتف';
+
+  @override
+  String get checkDetails => 'تفاصيل الشيك';
+
+  @override
+  String get checkPaymentNote => 'سيتم معالجة الدفع بالشيك عند استلامه وتسويته.';
 }

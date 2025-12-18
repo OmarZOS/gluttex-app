@@ -4,6 +4,7 @@ import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_event/finance_change_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/service_change_notifier.dart';
@@ -14,6 +15,8 @@ import 'package:gluttex_store/screens/finance_screen.dart';
 import 'package:gluttex_store/screens/inventory_screen.dart';
 import 'package:gluttex_store/screens/selling_screen.dart';
 import 'package:gluttex_store/screens/services_screen.dart';
+import 'package:medicom_catalog/screens/orders_screen.dart';
+// import 'package:medicom_catalog/screens/orders_screen.dart';
 import 'package:provider/provider.dart';
 import 'dashboard_item.dart';
 
@@ -68,7 +71,11 @@ class DashboardBody extends StatelessWidget {
                   onRefresh: () => {},
                   onAddProduct: () => {},
                 ));
-
+      case DashboardScreenType.orders:
+        return Consumer<CartChangeNotifier>(
+            builder: (context, cartNotifier, child) => OrdersScreen(
+                  cartChangeNotifier: cartNotifier,
+                ));
       case DashboardScreenType.operations:
         return Consumer<PersonnelNotifier>(
             builder: (context, personnelNotifier, child) =>
@@ -90,11 +97,15 @@ class DashboardBody extends StatelessWidget {
           ),
         );
       case DashboardScreenType.finance:
-        return Consumer2<ProductNotifier, CartChangeNotifier>(
-          builder: (context, productNotifier, cartNotifier, child) =>
-              FinanceScreen(),
+        return Consumer3<ProductNotifier, CartChangeNotifier,
+            FinanceChangeNotifier>(
+          builder: (context, productNotifier, cartNotifier,
+                  financeChangeNotifier, child) =>
+              FinanceScreen(
+            financeNotifier: financeChangeNotifier,
+          ),
         );
-      case DashboardScreenType.suppliers:
+      case DashboardScreenType.suppliersPersonnel:
         return const SupplierEntitiesScreen();
       case DashboardScreenType.services:
         return Consumer2<PersonnelNotifier, ServiceNotifier>(

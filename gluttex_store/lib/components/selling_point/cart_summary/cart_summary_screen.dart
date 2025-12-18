@@ -36,11 +36,11 @@ class CartSummarySheet extends StatelessWidget {
             const Divider(height: 1),
             Expanded(
               child: CartItemsList(
-                cart: cart,
+                // cartNotifier: cart,
                 scrollController: scrollController,
               ),
             ),
-            CartFooter(cart: cart),
+            CartFooter(),
           ],
         ),
       ),

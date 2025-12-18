@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 
 class RequirementCard extends StatelessWidget {
   final String title;
@@ -59,6 +60,7 @@ class RequirementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    AppLocalizations loc = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -112,7 +114,7 @@ class RequirementCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            '\$${cost.toStringAsFixed(2)}',
+            loc.price(cost.toStringAsFixed(2)),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: color,

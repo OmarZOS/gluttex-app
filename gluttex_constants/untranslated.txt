@@ -1,1 +1,11 @@
-{}
+{
+  "ar": [
+    "serviceDescBloodTesting",
+    "serviceDescDiagnosticImaging"
+  ],
+
+  "fr": [
+    "serviceDescBloodTesting",
+    "serviceDescDiagnosticImaging"
+  ]
+}

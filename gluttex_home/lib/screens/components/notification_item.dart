@@ -648,16 +648,16 @@ class NotificationItem extends StatelessWidget {
           final invitation = notification.content as RoleInvitation;
 
           // Get privilege IDs from the role bitmask
-          final privilegeIds =
-              RoleBitMapper.numberToPrivilegeIds(invitation.role);
+          // final privilegeIds =
+          //     RoleBitMapper.numberToPrivilegeIds(invitation.role);
 
           // Optimize the privilege list (remove redundancies - e.g., remove inventory_view if inventory_manage exists)
-          final optimizedPrivilegeIds =
-              PrivilegeUIManager.getOptimizedPrivilegeIds(privilegeIds);
+          // final optimizedPrivilegeIds =
+          //     PrivilegeUIManager.getOptimizedPrivilegeIds(privilegeIds);
 
           // Get the highest/most significant role from the optimized privileges
           final highestRole = PrivilegeUIManager.getHighestRole(
-            optimizedPrivilegeIds,
+            invitation.role,
             context: context,
           );
 
@@ -674,7 +674,7 @@ class NotificationItem extends StatelessWidget {
 
           // Fallback to access level summary if no specific role found
           final accessSummary = PrivilegeUIManager.getAccessLevelSummary(
-            optimizedPrivilegeIds,
+            invitation.role,
             context: context,
           );
 

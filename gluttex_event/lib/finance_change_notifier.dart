@@ -3,147 +3,269 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:gluttex_core/business/finance/FinancialDocument.dart';
+import 'package:gluttex_core/business/finance/services/InvoiceService.dart';
 import 'package:locator/locator.dart';
-
 import 'package:gluttex_core/app/GluttexException.dart';
-import 'package:gluttex_core/business/Organisation.dart';
-import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_core/business/services/SupplierService.dart';
 
-class SupplierChangeNotifier extends ChangeNotifier {
-  final SupplierService _supplierService =
-      GluttexLocator.get<SupplierService>();
-
+class FinanceChangeNotifier extends ChangeNotifier {
+// Get the invoice service instance
+  final InvoiceService _invoiceService = GluttexLocator.get<InvoiceService>();
   // State management
-  final List<Supplier> _suppliers = [];
-  final List<Supplier> _detailedCache = [];
-  final Map<int, Organisation> _organisations = {};
+  final List<FinancialDocument> _documents = [];
+  final List<FinancialDocument> _detailedCache = [];
 
-  Position? _currentLocation;
-  SupplierFilter _filter = const SupplierFilter();
+  // Filter state
+  FinanceDocumentFilter _filter = const FinanceDocumentFilter();
   bool _isLoading = false;
 
   // Pagination
-  int _suppliersPage = 0;
-  int _organisationsPage = 0;
+  int _documentsPage = 0;
   static const int _itemsPerPage = 50;
-  static const int _organisationsPerPage = 30;
-  bool _hasMoreSuppliers = true;
-  bool _hasMoreOrganisations = true;
+  bool _hasMoreDocuments = true;
+
+  // Search results
+  final List<FinancialDocument> _searchResults = [];
+  bool _isSearching = false;
+  String? _currentSearchQuery;
+
+  // Filter cache for quick access
+  final Map<String, List<FinancialDocument>> _filterCache = {};
 
   // ============ PUBLIC GETTERS ============
 
-  List<Supplier> get suppliers => List.unmodifiable(_suppliers);
-  List<Supplier> get filteredSuppliers => _applyFilters();
-  List<Supplier> get detailedSuppliers => List.unmodifiable(_detailedCache);
-  List<Organisation> get organisations =>
-      List.unmodifiable(_organisations.values);
+  List<FinancialDocument> get documents => List.unmodifiable(_documents);
+  List<FinancialDocument> get filteredDocuments => _applyFilters();
+  List<FinancialDocument> get detailedDocuments =>
+      List.unmodifiable(_detailedCache);
+  List<FinancialDocument> get searchResults =>
+      List.unmodifiable(_searchResults);
 
   bool get isLoading => _isLoading;
-  bool get hasMoreSuppliers => _hasMoreSuppliers;
-  bool get hasMoreOrganisations => _hasMoreOrganisations;
-  Position? get currentLocation => _currentLocation;
-  SupplierFilter get filter => _filter;
+  bool get isSearching => _isSearching;
+  bool get hasMoreDocuments => _hasMoreDocuments;
+  FinanceDocumentFilter get filter => _filter;
+  String? get currentSearchQuery => _currentSearchQuery;
 
   // ============ FILTER MANAGEMENT ============
 
-  void setFilter(SupplierFilter newFilter) {
+  void setFilter(FinanceDocumentFilter newFilter) {
     _filter = newFilter;
+    _clearFilterCache();
     notifyListeners();
   }
 
   void clearFilter() {
-    _filter = const SupplierFilter();
+    _filter = const FinanceDocumentFilter();
+    _clearFilterCache();
     notifyListeners();
   }
 
-  List<Supplier> _applyFilters() {
-    return _suppliers.where((supplier) {
-      if (_filter.name != null && !_matchesName(supplier, _filter.name!)) {
+  void updateFilterWithId({
+    int? supplierId,
+    int? personId,
+    int? clientId,
+    int? sellerId,
+    int? cartId,
+    int? orderId,
+    int? depositId,
+    int? invoiceId,
+  }) {
+    _filter = _filter.copyWith(
+      supplierId: supplierId,
+      personId: personId,
+      clientId: clientId,
+      sellerId: sellerId,
+      cartId: cartId,
+      orderId: orderId,
+      depositId: depositId,
+      invoiceId: invoiceId,
+    );
+    _clearFilterCache();
+    notifyListeners();
+  }
+
+  void _clearFilterCache() {
+    _filterCache.clear();
+  }
+
+  List<FinancialDocument> _applyFilters() {
+    final cacheKey = _filter.toCacheKey();
+    if (_filterCache.containsKey(cacheKey)) {
+      return _filterCache[cacheKey]!;
+    }
+
+    final filtered = _documents.where((doc) {
+      // Filter by document type
+      if (_filter.documentType != null &&
+          _filter.documentType!.isNotEmpty &&
+          doc.documentType != _filter.documentType) {
         return false;
       }
-      if (_filter.organisationId != null &&
-          supplier.id_provider_organisation != _filter.organisationId) {
-        return false;
+
+      // Filter by status - FIXED: Handle multiple status types
+      if (_filter.status != null && _filter.status!.isNotEmpty) {
+        switch (_filter.status!.toLowerCase()) {
+          case 'paid':
+            if (!doc.isPaid) return false;
+            break;
+          case 'unpaid':
+            if (doc.isPaid || !doc.isUnpaid) return false;
+            break;
+          case 'overdue':
+            if (!doc.isOverdue) return false;
+            break;
+          case 'partially_paid':
+            final isPartiallyPaid = doc.paymentStatus
+                        ?.toLowerCase()
+                        .contains('partially_paid') ==
+                    true ||
+                doc.paymentStatus?.toLowerCase().contains('partial') == true;
+            if (!isPartiallyPaid) return false;
+            break;
+          default:
+            // Check exact match
+            if (doc.paymentStatus != _filter.status) return false;
+        }
       }
-      if (_filter.ownerId != null &&
-          supplier.productProviderOwnerId != _filter.ownerId) {
-        return false;
-      }
-      // if (_filter.minRating != null &&
-      //     (supplier.averageRating ?? 0) < _filter.minRating!) {
-      //   return false;
-      // }
-      if (_filter.types != null && _filter.types!.isNotEmpty) {
-        final supplierType = supplier.productProviderTypeId;
-        if (supplierType == null || !_filter.types!.contains(supplierType)) {
+
+      // Filter by date range - FIXED: Use issueDate instead of createdAt
+      if (_filter.startDate != null) {
+        if (doc.issueDate.isBefore(_filter.startDate!)) {
           return false;
         }
       }
-      // if (_filter.status != null &&
-      //     supplier.productProviderStatus != _filter.status) {
-      //   return false;
-      // }
+
+      if (_filter.endDate != null) {
+        if (doc.issueDate.isAfter(_filter.endDate!)) {
+          return false;
+        }
+      }
+
+      // Filter by amount range
+      if (_filter.minAmount != null &&
+          doc.documentAmount < _filter.minAmount!) {
+        return false;
+      }
+
+      if (_filter.maxAmount != null &&
+          doc.documentAmount > _filter.maxAmount!) {
+        return false;
+      }
+
+      // Filter by entity IDs - FIXED: Handle int comparisons properly
+      if (_filter.supplierId != null && doc.supplierId != _filter.supplierId) {
+        return false;
+      }
+
+      if (_filter.clientId != null && doc.customerId != _filter.clientId) {
+        return false;
+      }
+
+      if (_filter.personId != null &&
+          doc.customerPersonId != _filter.personId) {
+        return false;
+      }
+
+      if (_filter.sellerId != null && doc.sellerId != _filter.sellerId) {
+        return false;
+      }
+
+      // Filter by search query
+      if (_filter.searchQuery != null && _filter.searchQuery!.isNotEmpty) {
+        final query = _filter.searchQuery!.toLowerCase();
+        final matches =
+            doc.documentNumber?.toLowerCase().contains(query) == true ||
+                (doc.documentNumber != null &&
+                    doc.documentNumber!.toLowerCase().contains(query)) ||
+                (doc.customerType != null &&
+                    doc.customerType!.toLowerCase().contains(query));
+
+        if (!matches) {
+          return false;
+        }
+      }
+
+      // Filter by payment status (isPaid)
+      if (_filter.isPaid != null) {
+        if (_filter.isPaid! != doc.isPaid) {
+          return false;
+        }
+      }
+
       return true;
     }).toList();
+
+    _filterCache[cacheKey] = filtered;
+    return filtered;
   }
 
-  bool _matchesName(Supplier supplier, String query) {
-    final name = supplier.providerName.toLowerCase();
-    final lowerQuery = query.toLowerCase();
+  // ============ DOCUMENT MANAGEMENT ============
 
-    return name.contains(lowerQuery) ||
-        (supplier.providerName?.toLowerCase() ?? '').contains(lowerQuery);
-  }
-
-  // ============ SUPPLIER MANAGEMENT ============
-
-  Future<void> fetchSuppliers({
+  Future<void> fetchDocuments({
     bool reset = false,
-    int? ownerId,
-    int? organisationId,
+    int supplierId = 0,
+    int personId = 0,
+    int clientId = 0,
+    int sellerId = 0,
+    int cartId = 0,
+    int orderId = 0,
+    int depositId = 0,
+    int invoiceId = 0,
   }) async {
-    if (_isLoading || (!reset && !_hasMoreSuppliers)) return;
+    if (_isLoading || (!reset && !_hasMoreDocuments)) return;
 
     if (reset) {
-      _suppliers.clear();
-      _suppliersPage = 0;
-      _hasMoreSuppliers = true;
+      _documents.clear();
+      _documentsPage = 0;
+      _hasMoreDocuments = true;
+      _clearFilterCache();
     }
 
     _setLoading(true);
 
     try {
-      final fetched = await _supplierService.getAllSuppliers(
-        ownerId ?? 0,
-        organisationId ?? 0,
-        _suppliersPage * _itemsPerPage,
+      final fetched = await _invoiceService.getAllFinanceDocs(
+        _documentsPage * _itemsPerPage,
         _itemsPerPage,
+        supplierId: supplierId,
+        personId: personId,
+        clientId: clientId,
+        sellerId: sellerId,
+        cartId: cartId,
+        orderId: orderId,
+        depositId: depositId,
+        invoiceId: invoiceId,
       );
 
-      _addSuppliers(fetched);
+      if (fetched != null && fetched.isNotEmpty) {
+        _addDocuments(fetched);
 
-      if (fetched.length < _itemsPerPage) {
-        _hasMoreSuppliers = false;
+        if (fetched.length < _itemsPerPage) {
+          _hasMoreDocuments = false;
+        } else {
+          _documentsPage++;
+        }
       } else {
-        _suppliersPage++;
+        _hasMoreDocuments = false;
       }
     } catch (e, stackTrace) {
-      _handleError('Failed to fetch suppliers', e, stackTrace);
+      _handleError('Failed to fetch financial documents', e, stackTrace);
     } finally {
       _setLoading(false);
     }
   }
 
-  Future<Supplier?> getSupplierById(int id, {bool forceRefresh = false}) async {
+  Future<FinancialDocument?> getDocumentById(String id,
+      {bool forceRefresh = false}) async {
     // Check cache first
     if (!forceRefresh) {
       final cached = _detailedCache.firstWhere(
-        (s) => s.idProductProvider == id,
-        orElse: () => Supplier.empty(),
+        (d) => d.documentId == id,
+        // orElse: () => FinancialDocument.empty(),
       );
 
-      if (cached.idProductProvider != 0) {
+      if (cached.documentId != null) {
         return cached;
       }
     }
@@ -151,71 +273,69 @@ class SupplierChangeNotifier extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      final supplier = await _supplierService.getSupplier(id.toString());
-      if (supplier != null) {
-        _cacheSupplier(supplier);
-        _updateSupplierInList(supplier);
+      final document = await _invoiceService.getFinancialDocument(id);
+      if (document != null) {
+        _cacheDocument(document);
+        _updateDocumentInList(document);
       }
-      return supplier;
+      return document;
     } catch (e, stackTrace) {
-      _handleError('Failed to fetch supplier $id', e, stackTrace);
+      _handleError('Failed to fetch document $id', e, stackTrace);
       return null;
     } finally {
       _setLoading(false);
     }
   }
 
-  Future<Supplier> createOrUpdateSupplier(Supplier supplier) async {
+  Future<FinancialDocument> createOrUpdateDocument(
+      FinancialDocument document) async {
     _setLoading(true);
 
     try {
-      // Handle image upload if present
-      if (supplier.supplier_image != null) {
-        String? imageUrl = await supplier.supplier_image?.uploadImage();
-        supplier.supplier_image_url = imageUrl;
-      }
-
-      final result = supplier.idProductProvider == 0
-          ? await _supplierService.addSupplier(supplier)
-          : await _supplierService.updateSupplier(supplier);
+      final result = document.documentId == null
+          ? await _invoiceService.addFinancialDocument(document)
+          : await _invoiceService.updateFinancialDocument(document);
 
       if (result == null) {
-        throw GluttexException('Failed to save supplier');
+        throw GluttexException('Failed to save financial document');
       }
 
-      _cacheSupplier(result);
-      _updateSupplierInList(result);
+      _cacheDocument(result);
+      _updateDocumentInList(result);
+      _clearFilterCache();
 
-      // Refresh list if needed
-      if (supplier.idProductProvider == 0) {
-        await fetchSuppliers(reset: true);
+      // Refresh list if new document
+      if (document.documentId == null) {
+        await fetchDocuments(reset: true);
       }
 
       return result;
     } catch (e, stackTrace) {
-      _handleError('Failed to save supplier', e, stackTrace);
+      _handleError('Failed to save financial document', e, stackTrace);
       rethrow;
     } finally {
       _setLoading(false);
     }
   }
 
-  Future<bool> deleteSupplier(int id) async {
+  Future<bool> deleteDocument(String id) async {
     _setLoading(true);
 
     try {
-      final status = await _supplierService.deleteSupplier(id.toString());
-      final success = status != null;
+      final status = await _invoiceService.deleteFinancialDocument(id);
+      final success = status != null && status > 0;
 
       if (success) {
-        _suppliers.removeWhere((s) => s.idProductProvider == id);
-        _detailedCache.removeWhere((s) => s.idProductProvider == id);
+        _documents.removeWhere((d) => d.documentId == id);
+        _detailedCache.removeWhere((d) => d.documentId == id);
+        _searchResults.removeWhere((d) => d.documentId == id);
+        _clearFilterCache();
         notifyListeners();
       }
 
       return success;
     } catch (e, stackTrace) {
-      _handleError('Failed to delete supplier', e, stackTrace);
+      _handleError('Failed to delete document $id', e, stackTrace);
       return false;
     } finally {
       _setLoading(false);
@@ -224,183 +344,174 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
   // ============ SEARCH FUNCTIONALITY ============
 
-  Future<void> searchSuppliers(String query) async {
+  Future<void> searchDocuments(String query, {bool reset = false}) async {
     if (query.isEmpty) {
-      clearFilter();
+      _clearSearch();
       return;
     }
 
-    _setFilter(SupplierFilter(name: query));
-
-    // Local search first
-    final localResults = _applyFilters();
-    if (localResults.isNotEmpty) {
-      notifyListeners();
-    }
-
-    // Remote search for additional results
-    _setLoading(true);
-
-    try {
-      final remoteResults = await _supplierService.searchSuppliersByToken(
-        query,
-        0, // organisationPage
-        _suppliersPage * _itemsPerPage,
-      );
-
-      _addSuppliers(remoteResults);
-    } catch (e, stackTrace) {
-      _handleError('Failed to search suppliers', e, stackTrace);
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> searchSuppliersByGeo({
-    required double longitude,
-    required double latitude,
-    required double radiusKm,
-    bool reset = false,
-  }) async {
     if (reset) {
-      _suppliers.clear();
-      _suppliersPage = 0;
+      _searchResults.clear();
+      _documentsPage = 0;
+      _hasMoreDocuments = true;
     }
 
+    _currentSearchQuery = query;
+    _setSearching(true);
     _setLoading(true);
 
     try {
-      final results = await _supplierService.searchSuppliersByGeo(
-        longitude,
-        latitude,
-        _suppliersPage * _itemsPerPage,
-        _itemsPerPage,
-        radiusKm,
-      );
+      // First search in cached documents
+      final localResults = _documents.where((doc) {
+        return doc.documentNumber
+                    ?.toLowerCase()
+                    .contains(query.toLowerCase()) ==
+                true ||
+            doc.documentNumber?.toLowerCase().contains(query.toLowerCase()) ==
+                true;
+        //     ||
+        // doc.notes?.toLowerCase().contains(query.toLowerCase()) == true ||
+        // doc.idSupplierName?.toLowerCase().contains(query.toLowerCase()) ==
+        //     true ||
+        // doc.idClientName?.toLowerCase().contains(query.toLowerCase()) ==
+        //     true;
+      }).toList();
 
-      _addSuppliers(results);
-
-      if (results.length < _itemsPerPage) {
-        _hasMoreSuppliers = false;
-      } else {
-        _suppliersPage++;
-      }
-    } catch (e, stackTrace) {
-      _handleError('Failed to search suppliers by location', e, stackTrace);
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  // ============ LOCATION MANAGEMENT ============
-
-  Future<void> getCurrentLocation() async {
-    if (_isLoading) return;
-
-    _setLoading(true);
-
-    try {
-      final permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        final requested = await Geolocator.requestPermission();
-        if (requested == LocationPermission.denied ||
-            requested == LocationPermission.deniedForever) {
-          return;
-        }
-      }
-
-      _currentLocation = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
+      _searchResults.addAll(localResults);
       notifyListeners();
-    } catch (e, stackTrace) {
-      _handleError('Failed to get location', e, stackTrace);
-    } finally {
-      _setLoading(false);
-    }
-  }
 
-  // ============ ORGANISATION MANAGEMENT ============
-
-  Future<void> fetchOrganisations({
-    bool reset = false,
-    int? ownerId,
-    int? organisationId,
-  }) async {
-    if (_isLoading || (!reset && !_hasMoreOrganisations)) return;
-
-    if (reset) {
-      _organisations.clear();
-      _organisationsPage = 0;
-      _hasMoreOrganisations = true;
-    }
-
-    _setLoading(true);
-
-    try {
-      final results = await _supplierService.getAllOrganisations(
-        ownerId ?? 0,
-        organisationId ?? 0,
-        _organisationsPage * _organisationsPerPage,
-        _organisationsPerPage,
-      );
-
-      if (results != null && results.isNotEmpty) {
-        for (final org in results) {
-          _organisations[org.id_provider_organisation] = org;
-        }
-        _organisationsPage++;
-      } else {
-        _hasMoreOrganisations = false;
+      // If we need more results, fetch from server
+      if (_searchResults.length < _itemsPerPage) {
+        // Note: This assumes your service has search capability
+        // If not, you might need to implement a search endpoint
+        await _performServerSearch(query);
       }
     } catch (e, stackTrace) {
-      _handleError('Failed to fetch organisations', e, stackTrace);
+      _handleError('Failed to search documents', e, stackTrace);
     } finally {
       _setLoading(false);
     }
   }
 
-  Organisation? getOrganisationById(int id) {
-    return _organisations[id];
+  Future<void> _performServerSearch(String query) async {
+    try {
+      // This is a placeholder - you might need to implement
+      // a search method in your InvoiceService
+      final results = await fetchDocuments(reset: true);
+      // Filter results by query
+      final filtered = _documents.where((doc) {
+        return doc.documentNumber
+                    ?.toLowerCase()
+                    .contains(query.toLowerCase()) ==
+                true ||
+            doc.documentNumber?.toLowerCase().contains(query.toLowerCase()) ==
+                true;
+      }).toList();
+
+      _searchResults.addAll(filtered);
+      notifyListeners();
+    } catch (e) {
+      _handleError('Server search failed', e, StackTrace.current);
+    }
+  }
+
+  void _clearSearch() {
+    _searchResults.clear();
+    _currentSearchQuery = null;
+    _isSearching = false;
+    notifyListeners();
+  }
+
+  // ============ STATISTICS & ANALYTICS ============
+
+  double get totalAmount {
+    return filteredDocuments.fold(0.0, (sum, doc) => sum + doc.documentAmount);
+  }
+
+  Map<String, double> getAmountByType() {
+    final Map<String, double> amounts = {};
+
+    for (final doc in filteredDocuments) {
+      final type = doc.documentType ?? 'Unknown';
+      amounts[type] = (amounts[type] ?? 0.0) + doc.documentAmount;
+    }
+
+    return amounts;
+  }
+
+  Map<String, int> getCountByStatus() {
+    final Map<String, int> counts = {};
+
+    for (final doc in filteredDocuments) {
+      final status = doc.documentStatus ?? 'Unknown';
+      counts[status] = (counts[status] ?? 0) + 1;
+    }
+
+    return counts;
+  }
+
+  List<FinancialDocument> getRecentDocuments({int count = 10}) {
+    return filteredDocuments
+        .where((doc) => doc.createdAt != null)
+        .toList()
+        .sortedBy((doc) => doc.createdAt!)
+        .reversed
+        .take(count)
+        .toList();
+  }
+
+  List<FinancialDocument> getHighValueDocuments({double threshold = 1000}) {
+    return filteredDocuments
+        .where((doc) => doc.documentAmount >= threshold)
+        .toList()
+        .sortedBy((doc) => doc.documentAmount)
+        .reversed
+        .toList();
   }
 
   // ============ HELPER METHODS ============
 
-  void _addSuppliers(List<Supplier> newSuppliers) {
-    final existingIds = _suppliers.map((s) => s.idProductProvider).toSet();
+  void _addDocuments(List<FinancialDocument> newDocuments) {
+    final existingIds =
+        _documents.map((d) => d.documentId).whereType<String>().toSet();
 
-    for (final supplier in newSuppliers) {
-      if (!existingIds.contains(supplier.idProductProvider)) {
-        _suppliers.add(supplier);
+    for (final document in newDocuments) {
+      if (document.documentId != null &&
+          !existingIds.contains(document.documentId)) {
+        _documents.add(document);
       }
     }
 
+    _clearFilterCache();
     notifyListeners();
   }
 
-  void _cacheSupplier(Supplier supplier) {
+  void _cacheDocument(FinancialDocument document) {
+    if (document.documentId == null) return;
+
     final index = _detailedCache.indexWhere(
-      (s) => s.idProductProvider == supplier.idProductProvider,
+      (d) => d.documentId == document.documentId,
     );
 
     if (index != -1) {
-      _detailedCache[index] = supplier;
+      _detailedCache[index] = document;
     } else {
-      _detailedCache.add(supplier);
+      _detailedCache.add(document);
     }
   }
 
-  void _updateSupplierInList(Supplier supplier) {
-    final index = _suppliers.indexWhere(
-      (s) => s.idProductProvider == supplier.idProductProvider,
+  void _updateDocumentInList(FinancialDocument document) {
+    if (document.documentId == null) return;
+
+    final index = _documents.indexWhere(
+      (d) => d.documentId == document.documentId,
     );
 
     if (index != -1) {
-      _suppliers[index] = supplier;
+      _documents[index] = document;
     }
 
+    _clearFilterCache();
     notifyListeners();
   }
 
@@ -409,118 +520,243 @@ class SupplierChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setFilter(SupplierFilter filter) {
-    _filter = filter;
+  void _setSearching(bool searching) {
+    _isSearching = searching;
     notifyListeners();
   }
 
   void _handleError(String message, Object error, StackTrace stackTrace) {
     log('$message: $error', error: error, stackTrace: stackTrace);
-    // You could also set an error state here
+    // You could add error state handling here
   }
 
   // ============ BATCH OPERATIONS ============
 
-  Future<void> refreshAll() async {
-    await Future.wait([
-      fetchSuppliers(reset: true),
-      fetchOrganisations(reset: true),
-    ]);
+  Future<void> refreshAll({FinanceDocumentFilter? filter}) async {
+    if (filter != null) {
+      setFilter(filter);
+    }
+
+    await fetchDocuments(reset: true);
   }
 
-  Future<void> prefetchSupplierDetails(List<int> supplierIds) async {
-    final missingIds = supplierIds
+  Future<void> prefetchDocumentDetails(List<String> documentIds) async {
+    final missingIds = documentIds
         .where(
-          (id) => !_detailedCache.any((s) => s.idProductProvider == id),
+          (id) => !_detailedCache.any((d) => d.documentId == id),
         )
         .toList();
 
     if (missingIds.isEmpty) return;
 
     await Future.wait(
-      missingIds.map((id) => getSupplierById(id)),
+      missingIds.map((id) => getDocumentById(id)),
     );
+  }
+
+  Future<void> exportFilteredDocuments() async {
+    final filtered = filteredDocuments;
+    // Implement export logic here
+    // Could generate CSV, PDF, or send to printer
+  }
+
+  // ============ CACHE MANAGEMENT ============
+
+  void clearCache() {
+    _documents.clear();
+    _detailedCache.clear();
+    _searchResults.clear();
+    _filterCache.clear();
+    _documentsPage = 0;
+    _hasMoreDocuments = true;
+    _currentSearchQuery = null;
+    _isSearching = false;
+    notifyListeners();
   }
 }
 
 // ============ DATA CLASSES ============
 
 @immutable
-class SupplierFilter {
-  final String? name;
-  final int? organisationId;
-  final int? ownerId;
-  final double? minRating;
-  final List<int>? types;
+class FinanceDocumentFilter {
+  final String? documentType;
   final String? status;
-  final bool? hasLocation;
-  final bool? isActive;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final double? minAmount;
+  final double? maxAmount;
+  final int? supplierId;
+  final int? personId;
+  final int? clientId;
+  final int? sellerId;
+  final int? cartId;
+  final int? orderId;
+  final int? depositId;
+  final int? invoiceId;
+  final String? searchQuery;
+  final bool? hasAttachments;
+  final bool? isPaid;
 
-  const SupplierFilter({
-    this.name,
-    this.organisationId,
-    this.ownerId,
-    this.minRating,
-    this.types,
+  const FinanceDocumentFilter({
+    this.documentType,
     this.status,
-    this.hasLocation,
-    this.isActive,
+    this.startDate,
+    this.endDate,
+    this.minAmount,
+    this.maxAmount,
+    this.supplierId,
+    this.personId,
+    this.clientId,
+    this.sellerId,
+    this.cartId,
+    this.orderId,
+    this.depositId,
+    this.invoiceId,
+    this.searchQuery,
+    this.hasAttachments,
+    this.isPaid,
   });
 
-  SupplierFilter copyWith({
-    String? name,
-    int? organisationId,
-    int? ownerId,
-    double? minRating,
-    List<int>? types,
+  FinanceDocumentFilter copyWith({
+    String? documentType,
     String? status,
-    bool? hasLocation,
-    bool? isActive,
+    DateTime? startDate,
+    DateTime? endDate,
+    double? minAmount,
+    double? maxAmount,
+    int? supplierId,
+    int? personId,
+    int? clientId,
+    int? sellerId,
+    int? cartId,
+    int? orderId,
+    int? depositId,
+    int? invoiceId,
+    String? searchQuery,
+    bool? hasAttachments,
+    bool? isPaid,
   }) {
-    return SupplierFilter(
-      name: name ?? this.name,
-      organisationId: organisationId ?? this.organisationId,
-      ownerId: ownerId ?? this.ownerId,
-      minRating: minRating ?? this.minRating,
-      types: types ?? this.types,
+    return FinanceDocumentFilter(
+      documentType: documentType ?? this.documentType,
       status: status ?? this.status,
-      hasLocation: hasLocation ?? this.hasLocation,
-      isActive: isActive ?? this.isActive,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      minAmount: minAmount ?? this.minAmount,
+      maxAmount: maxAmount ?? this.maxAmount,
+      supplierId: supplierId ?? this.supplierId,
+      personId: personId ?? this.personId,
+      clientId: clientId ?? this.clientId,
+      sellerId: sellerId ?? this.sellerId,
+      cartId: cartId ?? this.cartId,
+      orderId: orderId ?? this.orderId,
+      depositId: depositId ?? this.depositId,
+      invoiceId: invoiceId ?? this.invoiceId,
+      searchQuery: searchQuery ?? this.searchQuery,
+      hasAttachments: hasAttachments ?? this.hasAttachments,
+      isPaid: isPaid ?? this.isPaid,
     );
   }
 
+  String toCacheKey() {
+    return [
+      documentType,
+      status,
+      startDate?.toIso8601String(),
+      endDate?.toIso8601String(),
+      minAmount,
+      maxAmount,
+      supplierId,
+      personId,
+      clientId,
+      sellerId,
+      cartId,
+      orderId,
+      depositId,
+      invoiceId,
+      searchQuery,
+      hasAttachments,
+      isPaid,
+    ].map((v) => v?.toString() ?? '').join('|');
+  }
+
   bool get isEmpty =>
-      name == null &&
-      organisationId == null &&
-      ownerId == null &&
-      minRating == null &&
-      (types == null || types!.isEmpty) &&
+      documentType == null &&
       status == null &&
-      hasLocation == null &&
-      isActive == null;
+      startDate == null &&
+      endDate == null &&
+      minAmount == null &&
+      maxAmount == null &&
+      supplierId == null &&
+      personId == null &&
+      clientId == null &&
+      sellerId == null &&
+      cartId == null &&
+      orderId == null &&
+      depositId == null &&
+      invoiceId == null &&
+      searchQuery == null &&
+      hasAttachments == null &&
+      isPaid == null;
 }
 
-// Extension for Supplier model (add to Supplier class)
-// extension SupplierExtensions on Supplier {
-//   Supplier copyWith({
-//     int? idProductProvider,
-//     // Add all other fields...
-//   }) {
-//     return Supplier(
-//       idProductProvider: idProductProvider ?? this.idProductProvider,
-//       // Copy all other fields...
-//     );
-//   }
+// Extension for sorting
+extension ListExtensions<T> on List<T> {
+  List<T> sortedBy(Comparable Function(T) selector) {
+    return [...this]..sort((a, b) => selector(a).compareTo(selector(b)));
+  }
+}
 
-//   static Supplier empty() => Supplier(idProductProvider: 0);
+// Extension for FinancialDocument model
+// In your finance_change_notifier.dart or a separate extensions file
+extension FinancialDocumentExtensions on FinancialDocument {
+  bool get isPaid {
+    final status = paymentStatus?.toLowerCase() ?? '';
+    return status.contains('paid') ||
+        status.contains('fully_paid') ||
+        status.contains('deposit_fully_covered');
+  }
 
-//   double? get averageRating {
-//     // Implement based on your rating system
-//     return null;
-//   }
+  bool get isUnpaid {
+    return !isPaid && paymentStatus?.toLowerCase().contains('unpaid') == true;
+  }
 
-//   String? get productProviderStatus {
-//     // Implement based on your status system
-//     return 'active';
-//   }
-// }
+  bool get isOverdue {
+    if (dueDate == null) return false;
+    if (isPaid) return false;
+    return dueDate!.isBefore(DateTime.now());
+  }
+
+  int get daysOverdue {
+    if (!isOverdue || dueDate == null) return 0;
+    return DateTime.now().difference(dueDate!).inDays;
+  }
+
+  double get remainingAmount {
+    return documentAmount - (totalPaid + totalDeposited);
+  }
+
+  double get paymentPercentage {
+    if (documentAmount == 0) return 0;
+    return ((totalPaid + totalDeposited) / documentAmount * 100).clamp(0, 100);
+  }
+}
+
+class FinanceChangeNotifierProvider extends InheritedWidget {
+  final FinanceChangeNotifier financeChangeNotifier;
+
+  const FinanceChangeNotifierProvider({
+    super.key,
+    required super.child,
+    required this.financeChangeNotifier,
+  });
+
+  static FinanceChangeNotifierProvider? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<FinanceChangeNotifierProvider>();
+  }
+
+  @override
+  bool updateShouldNotify(FinanceChangeNotifierProvider oldWidget) {
+    return financeChangeNotifier != oldWidget.financeChangeNotifier;
+  }
+}

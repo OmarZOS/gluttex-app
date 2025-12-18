@@ -472,7 +472,7 @@ class CustomLocalizations {
   /// Format currency with proper localization
   String formatCurrency(double amount, {String? symbol}) {
     final locale = Localizations.localeOf(context);
-    final currencySymbol = symbol ?? '\$';
+    final currencySymbol = symbol ?? 'DZD';
 
     return '$currencySymbol${amount.toStringAsFixed(2)}';
   }

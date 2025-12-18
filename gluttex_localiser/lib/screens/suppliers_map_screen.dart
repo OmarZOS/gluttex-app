@@ -57,6 +57,9 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
   }
 
   Future<void> _fetchLocation() async {
+    Provider.of<SupplierChangeNotifier>(context, listen: false)
+        .fetchSuppliers();
+
     await Provider.of<SupplierChangeNotifier>(context, listen: false)
         .getCurrentLocation();
   }

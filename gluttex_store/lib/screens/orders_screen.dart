@@ -380,6 +380,7 @@ class _OrderCard extends StatelessWidget {
     final theme = Theme.of(context);
     final statusColor = _getStatusColor(order.status, theme);
     final statusIcon = _getStatusIcon(order.status);
+    AppLocalizations loc = AppLocalizations.of(context)!;
 
     return Card(
       elevation: 2,
@@ -430,7 +431,7 @@ class _OrderCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '\$${order.totalPrice.toStringAsFixed(2)}',
+                          loc.price(order.totalPrice.toStringAsFixed(2)),
                           style: theme.textTheme.bodyMedium,
                         ),
                         const SizedBox(width: 12),

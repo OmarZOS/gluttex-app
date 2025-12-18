@@ -10,7 +10,7 @@ import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/service_change_notifier.dart';
 import 'package:gluttex_store/components/selling_point/selling_point_app_bar.dart';
 import 'package:gluttex_store/components/selling_point/selling_point_cart.dart';
-import 'package:gluttex_store/components/selling_point/selling_point_items.dart';
+import 'package:gluttex_store/components/selling_point/selling_point_tabs.dart';
 import 'package:gluttex_store/components/selling_point/selling_point_supplier.dart';
 
 class SellingPointScreen extends StatefulWidget {
@@ -50,6 +50,8 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     _searchController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeSupplier();
+      widget.serviceNotifier
+          .fetchServices(providerId: _selectedSupplierId ?? 0);
     });
   }
 
@@ -84,10 +86,18 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     });
   }
 
+  void _loadSupplierServices(int supplierId) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.serviceNotifier.fetchServices(providerId: supplierId);
+    });
+  }
+
   void _selectSupplier(int? supplierId) {
     if (supplierId != null) {
       setState(() => _selectedSupplierId = supplierId);
       _loadSupplierProducts(supplierId);
+      _loadSupplierServices(supplierId);
+      widget.cartNotifier.clearCart();
     }
   }
 
@@ -158,7 +168,7 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
               onSearchChanged: _updateSearchQuery,
             ),
             Expanded(
-              child: SellingItemGrid(
+              child: SellingItemTabs(
                 // serviceNotifier: widget.serviceNotifier,
                 // products: _filteredProducts,
                 // isLoading: widget.productNotifier.isLoading,
@@ -168,11 +178,11 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
           ],
         ),
       ),
-      floatingActionButton: CartFAB(
-        cartNotifier: widget.cartNotifier,
-        productNotifier: widget.productNotifier,
-        userId: widget.userId,
-      ),
+      // floatingActionButton: CartFAB(
+      //   cartNotifier: widget.cartNotifier,
+      //   productNotifier: widget.productNotifier,
+      //   userId: widget.userId,
+      // ),
     );
   }
 }

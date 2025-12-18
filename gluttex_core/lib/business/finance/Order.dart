@@ -157,7 +157,7 @@ class Order {
 
   @override
   String toString() {
-    return 'Order(id: $idOrder, total: \$$totalPrice, status: $status, items: ${items?.length ?? 0})';
+    return 'Order(id: $idOrder, total: DZD$totalPrice, status: $status, items: ${items?.length ?? 0})';
   }
 
   @override
@@ -279,7 +279,7 @@ class OrderedItem {
 
   @override
   String toString() {
-    return 'OrderedItem(idOrderedItem: $idOrderedItem, orderedProduct: ${orderedProduct?.productName}, quantity: $orderedQuantity, total: \$${totalPrice.toStringAsFixed(2)})';
+    return 'OrderedItem(idOrderedItem: $idOrderedItem, orderedProduct: ${orderedProduct?.productName}, quantity: $orderedQuantity, total: DZD${totalPrice.toStringAsFixed(2)})';
   }
 
   @override
@@ -398,7 +398,7 @@ class OrderedProduct {
 
   @override
   String toString() {
-    return 'OrderedProduct(idProduct: $idProduct, productName: $productName, price: \$$productPrice)';
+    return 'OrderedProduct(idProduct: $idProduct, productName: $productName, price: DZD$productPrice)';
   }
 
   @override

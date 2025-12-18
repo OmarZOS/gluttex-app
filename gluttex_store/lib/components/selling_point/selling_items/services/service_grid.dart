@@ -26,9 +26,9 @@ class ServiceGrid extends StatelessWidget {
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            return ItemCardWithControls(
+            return ItemCardWithConfiguration(
               item: services[index],
-              cartNotifier: cartNotifier,
+              // cartNotifier: cartNotifier, isProduct: false,
               isProduct: false,
             );
           },

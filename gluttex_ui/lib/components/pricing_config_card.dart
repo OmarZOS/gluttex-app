@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_event/views/pricing_config_view_model.dart';
 
@@ -146,7 +147,7 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
                 final price = double.tryParse(value) ?? 0.0;
                 widget.onFinalPriceChanged(price);
               },
-              suffix: '\$',
+              suffix: 'DZD',
             ),
 
           const SizedBox(height: 12),
@@ -160,7 +161,7 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
               final price = double.tryParse(value) ?? 0.0;
               widget.onBasePriceChanged(price);
             },
-            suffix: '\$',
+            suffix: 'DZD',
           ),
           const SizedBox(height: 20),
 
@@ -273,7 +274,7 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final taxPercentage = widget.taxPercentage;
-
+    final AppLocalizations loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -291,7 +292,7 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
-                '\$${widget.basePrice.toStringAsFixed(2)}',
+                loc.price(widget.basePrice.toStringAsFixed(2)),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -305,7 +306,7 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
-                '\$${taxAmount.toStringAsFixed(2)}',
+                loc.price(taxAmount.toStringAsFixed(2)),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -321,7 +322,7 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
-                '\$${profitAmount.toStringAsFixed(2)}',
+                loc.price(profitAmount.toStringAsFixed(2)),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: profitAmount >= 0 ? Colors.green : Colors.red,
                     ),
@@ -337,7 +338,7 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
-                '\$${priceAfterTax.toStringAsFixed(2)}',
+                loc.price(priceAfterTax.toStringAsFixed(2)),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -353,7 +354,7 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
                     ),
               ),
               Text(
-                '\$${finalPrice.toStringAsFixed(2)}',
+                loc.price(finalPrice.toStringAsFixed(2)),
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w700,

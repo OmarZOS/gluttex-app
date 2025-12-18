@@ -1,32 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/finance/Cart.dart';
+import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:provider/provider.dart';
 
 class CartItemsList extends StatelessWidget {
-  final CartChangeNotifier cart;
   final ScrollController? scrollController;
 
   const CartItemsList({
-    required this.cart,
+    super.key,
     this.scrollController,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (cart.cartItems.isEmpty) {
-      return const _EmptyCartState();
-    }
+    return Consumer<CartChangeNotifier>(
+      builder: (context, cartNotifier, child) {
+        final cartItems = cartNotifier.cartItems;
 
-    return ListView.builder(
-      controller: scrollController,
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
-      itemCount: cart.cartItems.length,
-      itemBuilder: (context, index) {
-        return _CartItemRow(
-          cartItem: cart.cartItems[index],
-          cart: cart,
-          isLast: index == cart.cartItems.length - 1,
+        if (cartItems.isEmpty) {
+          return const _EmptyCartState();
+        }
+
+        return ListView.builder(
+          controller: scrollController,
+          padding: const EdgeInsets.only(top: 8, bottom: 8),
+          itemCount: cartItems.length,
+          itemBuilder: (context, index) {
+            return _CartItemRow(
+              cartItem: cartItems[index],
+              isLast: index == cartItems.length - 1,
+            );
+          },
         );
       },
     );
@@ -73,57 +80,68 @@ class _EmptyCartState extends StatelessWidget {
   }
 }
 
-class _CartItemRow extends StatefulWidget {
+class _CartItemRow extends StatelessWidget {
   final CartItem cartItem;
-  final CartChangeNotifier cart;
   final bool isLast;
 
   const _CartItemRow({
     required this.cartItem,
-    required this.cart,
     required this.isLast,
   });
 
-  @override
-  State<_CartItemRow> createState() => _CartItemRowState();
-}
+  void _updateQuantity(BuildContext context, int delta) {
+    final cartNotifier = context.read<CartChangeNotifier>();
+    final newQuantity = cartItem.quantity + delta;
 
-class _CartItemRowState extends State<_CartItemRow> {
-  bool _isProcessing = false;
-  final _debounceDuration = const Duration(milliseconds: 150);
-
-  Future<void> _updateQuantity(int delta) async {
-    if (_isProcessing) return;
-
-    setState(() => _isProcessing = true);
-
-    final newQuantity = widget.cartItem.quantity + delta;
-    if (newQuantity > 0) {
-      widget.cart.updateQuantity(widget.cartItem.product, newQuantity);
-    } else {
-      widget.cart.removeItem(widget.cartItem.product);
+    if (cartItem.product != null) {
+      // Update product quantity
+      if (newQuantity > 0) {
+        cartNotifier.updateQuantity(
+          product: cartItem.product!,
+          newQuantity: newQuantity,
+        );
+      } else {
+        cartNotifier.removeItem(product: cartItem.product!);
+      }
+    } else if (cartItem.service != null) {
+      // Update service quantity
+      if (newQuantity > 0) {
+        cartNotifier.updateQuantity(
+          service: cartItem.service!,
+          newQuantity: newQuantity,
+        );
+      } else {
+        cartNotifier.removeItem(service: cartItem.service!);
+      }
     }
-
-    await Future.delayed(_debounceDuration);
-    setState(() => _isProcessing = false);
   }
 
-  void _removeItem() {
-    widget.cart.removeItem(widget.cartItem.product);
+  void _removeItem(BuildContext context) {
+    final cartNotifier = context.read<CartChangeNotifier>();
+    if (cartItem.product != null) {
+      cartNotifier.removeItem(product: cartItem.product!);
+    } else if (cartItem.service != null) {
+      cartNotifier.removeItem(service: cartItem.service!);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final product = widget.cartItem.product;
-    final subtotal = product.product_price! * widget.cartItem.quantity;
+    final product = cartItem.product;
+    final service = cartItem.service;
+    final itemName = product?.product_name ?? service?.name ?? "";
+    final itemPrice =
+        (product?.product_price ?? service?.finalPrice ?? 0.0) * 0.81;
+    final subtotal = itemPrice * cartItem.quantity;
+    final loc = AppLocalizations.of(context)!;
 
     return Container(
       margin: EdgeInsets.only(
         left: 16,
         right: 16,
-        bottom: widget.isLast ? 8 : 8,
+        bottom: isLast ? 8 : 8,
       ),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -144,17 +162,34 @@ class _CartItemRowState extends State<_CartItemRow> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product Image/Icon
-          _ProductIcon(product: product, colorScheme: colorScheme),
+          // Product/Service Icon
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  colorScheme.primary.withOpacity(0.1),
+                  colorScheme.primaryContainer.withOpacity(0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              product != null ? Icons.inventory : Icons.medical_services,
+              color: colorScheme.primary,
+              size: 24,
+            ),
+          ),
           const SizedBox(width: 12),
 
-          // Product Details
+          // Product/Service Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product.product_name ?? 'Product',
+                  itemName,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -163,18 +198,29 @@ class _CartItemRowState extends State<_CartItemRow> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '\$${product.product_price?.toStringAsFixed(2)} each',
+                  loc.price(itemPrice.toStringAsFixed(2)),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
+                if (cartItem.scheduledDate != null ||
+                    cartItem.scheduledTime != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '${cartItem.scheduledDate ?? ''} ${cartItem.scheduledTime ?? ''}'
+                          .trim(),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.secondary,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 8),
                 _QuantityControls(
-                  quantity: widget.cartItem.quantity,
-                  onDecrease: () => _updateQuantity(-1),
-                  onIncrease: () => _updateQuantity(1),
-                  onRemove: _removeItem,
-                  isProcessing: _isProcessing,
+                  quantity: cartItem.quantity,
+                  onDecrease: () => _updateQuantity(context, -1),
+                  onIncrease: () => _updateQuantity(context, 1),
+                  onRemove: () => _removeItem(context),
                   colorScheme: colorScheme,
                 ),
               ],
@@ -186,7 +232,7 @@ class _CartItemRowState extends State<_CartItemRow> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${subtotal.toStringAsFixed(2)}',
+                loc.price(subtotal.toStringAsFixed(2)),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: colorScheme.primary,
@@ -194,7 +240,7 @@ class _CartItemRowState extends State<_CartItemRow> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${widget.cartItem.quantity} × \$${product.product_price?.toStringAsFixed(2)}',
+                '${cartItem.quantity} × ${loc.price(itemPrice.toStringAsFixed(2))}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -207,44 +253,11 @@ class _CartItemRowState extends State<_CartItemRow> {
   }
 }
 
-class _ProductIcon extends StatelessWidget {
-  final Product product;
-  final ColorScheme colorScheme;
-
-  const _ProductIcon({
-    required this.product,
-    required this.colorScheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.primary.withOpacity(0.1),
-            colorScheme.primaryContainer.withOpacity(0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        Icons.inventory,
-        color: colorScheme.primary,
-        size: 24,
-      ),
-    );
-  }
-}
-
 class _QuantityControls extends StatelessWidget {
   final int quantity;
   final VoidCallback onDecrease;
   final VoidCallback onIncrease;
   final VoidCallback onRemove;
-  final bool isProcessing;
   final ColorScheme colorScheme;
 
   const _QuantityControls({
@@ -252,7 +265,6 @@ class _QuantityControls extends StatelessWidget {
     required this.onDecrease,
     required this.onIncrease,
     required this.onRemove,
-    required this.isProcessing,
     required this.colorScheme,
   });
 
@@ -271,8 +283,7 @@ class _QuantityControls extends StatelessWidget {
           _QuantityButton(
             icon: Icons.remove,
             onTap: onDecrease,
-            isActive: quantity > 1 && !isProcessing,
-            isProcessing: isProcessing,
+            isActive: quantity > 1,
             colorScheme: colorScheme,
           ),
 
@@ -293,8 +304,7 @@ class _QuantityControls extends StatelessWidget {
           _QuantityButton(
             icon: Icons.add,
             onTap: onIncrease,
-            isActive: !isProcessing,
-            isProcessing: isProcessing,
+            isActive: true,
             colorScheme: colorScheme,
           ),
 
@@ -316,14 +326,12 @@ class _QuantityButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool isActive;
-  final bool isProcessing;
   final ColorScheme colorScheme;
 
   const _QuantityButton({
     required this.icon,
     required this.onTap,
     required this.isActive,
-    required this.isProcessing,
     required this.colorScheme,
   });
 
@@ -332,34 +340,25 @@ class _QuantityButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isActive && !isProcessing ? onTap : null,
+        onTap: isActive ? onTap : null,
         borderRadius: BorderRadius.circular(50),
         child: Container(
           width: 32,
           height: 32,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive && !isProcessing
+            color: isActive
                 ? colorScheme.primary.withOpacity(0.1)
                 : Colors.transparent,
           ),
           child: Center(
-            child: isProcessing
-                ? SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colorScheme.primary,
-                    ),
-                  )
-                : Icon(
-                    icon,
-                    size: 16,
-                    color: isActive
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant.withOpacity(0.4),
-                  ),
+            child: Icon(
+              icon,
+              size: 16,
+              color: isActive
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant.withOpacity(0.4),
+            ),
           ),
         ),
       ),

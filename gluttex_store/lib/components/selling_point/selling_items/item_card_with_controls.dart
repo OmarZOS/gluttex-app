@@ -1,97 +1,558 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
-import 'package:gluttex_store/components/selling_point/selling_product_card.dart';
-import 'services/service_card.dart';
+import 'package:gluttex_store/components/selling_point/config_sheet/product_configuration_sheet.dart';
+import 'package:gluttex_store/components/selling_point/config_sheet/service_configuration_sheet.dart';
+import 'package:provider/provider.dart';
 
-class ItemCardWithControls extends StatefulWidget {
-  final dynamic item; // Product or Service
-  final CartChangeNotifier cartNotifier;
+class ItemCardWithConfiguration extends StatelessWidget {
+  final dynamic item; // Product or ProvidedService
   final bool isProduct;
 
-  const ItemCardWithControls({
+  const ItemCardWithConfiguration({
     super.key,
     required this.item,
-    required this.cartNotifier,
     required this.isProduct,
   });
 
   @override
-  State<ItemCardWithControls> createState() => _ItemCardWithControlsState();
-}
+  Widget build(BuildContext context) {
+    return Consumer<CartChangeNotifier>(
+      builder: (context, cartNotifier, child) {
+        int currentQuantity = 0;
 
-class _ItemCardWithControlsState extends State<ItemCardWithControls> {
-  int _currentQuantity = 0;
+        if (isProduct) {
+          final product = item as Product;
+          final cartItem = cartNotifier.getProductCartItem(product);
+          currentQuantity = cartItem?.quantity ?? 0;
+        } else {
+          final service = item as ProvidedService;
+          final cartItem = cartNotifier.getServiceCartItem(service);
+          currentQuantity = cartItem?.quantity ?? 0;
+        }
 
-  @override
-  void initState() {
-    super.initState();
-    _updateCurrentQuantity();
+        final colorScheme = Theme.of(context).colorScheme;
+        final color = colorScheme.primary;
+
+        return AspectRatio(
+          aspectRatio: 0.75,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Main content - Clickable
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _addToCartDirectly(context, cartNotifier),
+                    borderRadius: BorderRadius.circular(16),
+                    child: _ItemContent(
+                      item: item,
+                      isProduct: isProduct,
+                      hasQuantityInCart: currentQuantity > 0,
+                    ),
+                  ),
+                ),
+
+                // Configuration button - Positioned top right
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => _showConfigurationSheet(context, cartNotifier),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: color.withOpacity(0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.settings_rounded,
+                        size: 16,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Quantity badge - Positioned top left
+                if (currentQuantity > 0)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.shadow.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          currentQuantity.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            height: 1.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Quantity controls overlay (when quantity > 0)
+                if (currentQuantity > 0)
+                  Positioned(
+                    bottom: 8,
+                    left: 8,
+                    right: 8,
+                    child: _QuantityControls(
+                      currentQuantity: currentQuantity,
+                      onAdd: () => _addToCartDirectly(context, cartNotifier),
+                      onRemove: () => _removeFromCart(context, cartNotifier),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
-  void _updateCurrentQuantity() {
-    final id = widget.isProduct
-        ? (widget.item as Product).id_product
-        : (widget.item as ProvidedService).id;
-    final quantity = widget.cartNotifier.cart.getProductQuantity(id ?? 0);
-    setState(() => _currentQuantity = quantity);
-  }
+  void _addToCartDirectly(
+      BuildContext context, CartChangeNotifier cartNotifier) {
+    if (isProduct) {
+      final product = item as Product;
+      final cartItem = cartNotifier.getProductCartItem(product);
 
-  void _addToCart() {
-    widget.cartNotifier.addItem(widget.item, 1);
-    _updateCurrentQuantity();
-  }
+      if (cartItem != null) {
+        // Increment quantity by 1
+        cartNotifier.updateQuantity(
+          product: product,
+          newQuantity: cartItem.quantity + 1,
+        );
+      } else {
+        // Add with default config (quantity = 1)
+        cartNotifier.addItem(product, 1);
+      }
+    } else {
+      final service = item as ProvidedService;
+      final cartItem = cartNotifier.getServiceCartItem(service);
 
-  void _removeFromCart() {
-    if (_currentQuantity > 0) {
-      widget.cartNotifier.updateQuantity(widget.item, _currentQuantity - 1);
-      _updateCurrentQuantity();
+      if (cartItem != null) {
+        // Increment quantity by 1
+        cartNotifier.updateQuantity(
+          service: service,
+          newQuantity: cartItem.quantity + 1,
+        );
+      } else {
+        // Add with default config (quantity = 1, no scheduling)
+        cartNotifier.addService(
+          service,
+          quantity: 1,
+          scheduledDate: null,
+          scheduledTime: null,
+        );
+      }
     }
   }
 
+  void _removeFromCart(BuildContext context, CartChangeNotifier cartNotifier) {
+    if (isProduct) {
+      final product = item as Product;
+      final cartItem = cartNotifier.getProductCartItem(product);
+      if (cartItem != null && cartItem.quantity > 1) {
+        cartNotifier.updateQuantity(
+          product: product,
+          newQuantity: cartItem.quantity - 1,
+        );
+      } else if (cartItem != null) {
+        cartNotifier.removeItem(product: product);
+      }
+    } else {
+      final service = item as ProvidedService;
+      final cartItem = cartNotifier.getServiceCartItem(service);
+      if (cartItem != null && cartItem.quantity > 1) {
+        cartNotifier.updateQuantity(
+          service: service,
+          newQuantity: cartItem.quantity - 1,
+        );
+      } else if (cartItem != null) {
+        cartNotifier.removeItem(service: service);
+      }
+    }
+  }
+
+  void _showConfigurationSheet(
+      BuildContext context, CartChangeNotifier cartNotifier) {
+    if (isProduct) {
+      final product = item as Product;
+      final cartItem = cartNotifier.getProductCartItem(product);
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => ProductConfigurationSheet(
+          product: product,
+          cartNotifier: cartNotifier,
+          currentQuantity: cartItem?.quantity,
+        ),
+      );
+    } else {
+      final service = item as ProvidedService;
+      final cartItem = cartNotifier.getServiceCartItem(service);
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => ServiceConfigurationSheet(
+          service: service,
+          initialQuantity: cartItem?.quantity ?? 1,
+          onSave: (
+              {required quantity,
+              scheduledDate,
+              scheduledTime,
+              notes,
+              parameters}) {
+            if (cartItem != null) {
+              // Update existing service in cart
+              cartNotifier.updateQuantity(
+                service: service,
+                newQuantity: quantity,
+              );
+              cartNotifier.updateServiceScheduling(
+                service: service,
+                scheduledDate: scheduledDate,
+                scheduledTime: scheduledTime,
+              );
+            } else {
+              // Add new service to cart
+              cartNotifier.addService(
+                service,
+                quantity: quantity,
+                scheduledDate: scheduledDate,
+                scheduledTime: scheduledTime,
+              );
+            }
+          },
+        ),
+      );
+    }
+  }
+}
+
+class _ItemContent extends StatelessWidget {
+  final dynamic item;
+  final bool isProduct;
+  final bool hasQuantityInCart;
+
+  const _ItemContent({
+    required this.item,
+    required this.isProduct,
+    required this.hasQuantityInCart,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 0.75, // This maintains consistent card proportions
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Stack(
-          fit: StackFit.expand, // Use this instead of Positioned.fill
-          children: [
-            // Main content
-            _ItemCard(
-              item: widget.item,
-              isProduct: widget.isProduct,
-              onTap: _addToCart,
-            ),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final hasControls = hasQuantityInCart;
+    final loc = AppLocalizations.of(context)!;
 
-            // Quantity controls overlay
-            if (_currentQuantity > 0)
-              Positioned(
-                bottom: 8,
-                left: 8,
-                right: 8,
-                child: _QuantityControls(
-                  currentQuantity: _currentQuantity,
-                  onAdd: _addToCart,
-                  onRemove: _removeFromCart,
+    if (isProduct) {
+      final product = item as Product;
+      final id = product.id_product ?? 0;
+      final price = product.product_price ?? 0;
+      final stock = product.product_quantity ?? 0;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Product image
+          AspectRatio(
+            aspectRatio: 5 / 3,
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withOpacity(0.1),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
                 ),
               ),
-          ],
-        ),
-      ),
-    );
+              child: Center(
+                child: Icon(
+                  Icons.inventory_2_rounded,
+                  size: 48,
+                  color: colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+
+          // Product info
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  12,
+                  12,
+                  12,
+                  hasControls
+                      ? 48
+                      : 12), // Extra bottom padding when controls are visible
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.product_name ?? 'Unnamed Product',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  if (product.product_brand != null)
+                    Text(
+                      product.product_brand!,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            loc.price(price.toStringAsFixed(2)),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            loc.stock(stock),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: stock > 0 ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: hasQuantityInCart
+                              ? colorScheme.tertiary
+                              : colorScheme.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: hasQuantityInCart
+                            ? IconButton(
+                                icon: Icon(Icons.delete),
+                                color: hasQuantityInCart
+                                    ? colorScheme.onTertiary
+                                    : colorScheme.onPrimary,
+                                iconSize: 18,
+                                onPressed: () {
+                                  context
+                                      .read<CartChangeNotifier>()
+                                      .removeItem(product: item as Product);
+                                  // .cart
+                                  // .removeItem(productId: id);
+                                },
+                              )
+                            : Icon(
+                                Icons.add,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      final service = item as ProvidedService;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Service icon
+          AspectRatio(
+            aspectRatio: 5 / 3,
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withOpacity(0.1),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.handyman,
+                  size: 48,
+                  color: colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+
+          // Service info
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  12,
+                  12,
+                  12,
+                  hasControls
+                      ? 48
+                      : 12), // Extra bottom padding when controls are visible
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service.name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  if (service.description.isNotEmpty)
+                    Text(
+                      service.description,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            loc.price(service.finalPrice.toStringAsFixed(2)),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.schedule_rounded,
+                                size: 12,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                service.durationFormatted,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      // if (!hasQuantityInCart)
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: hasQuantityInCart
+                              ? colorScheme.tertiary
+                              : colorScheme.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: hasQuantityInCart
+                            ? IconButton(
+                                icon: Icon(Icons.delete),
+                                color: hasQuantityInCart
+                                    ? colorScheme.onTertiary
+                                    : colorScheme.onPrimary,
+                                iconSize: 18,
+                                onPressed: () {
+                                  context.read<CartChangeNotifier>().removeItem(
+                                      service: item as ProvidedService);
+                                },
+                              )
+                            : Icon(
+                                Icons.add,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
   }
 }
 
@@ -115,13 +576,20 @@ class _QuantityControls extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.primary.withOpacity(0.95),
         borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           _QuantityButton(
             icon: Icons.remove,
             onTap: onRemove,
-            isActive: currentQuantity > 1,
+            isActive: true,
             colorScheme: colorScheme,
           ),
           Expanded(
@@ -148,33 +616,6 @@ class _QuantityControls extends StatelessWidget {
   }
 }
 
-class _ItemCard extends StatelessWidget {
-  final dynamic item;
-  final bool isProduct;
-  final VoidCallback onTap;
-
-  const _ItemCard({
-    required this.item,
-    required this.isProduct,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (isProduct) {
-      return SellingProductCard(
-        product: item as Product,
-        onTap: onTap,
-      );
-    } else {
-      return ServiceCard(
-        service: item as ProvidedService,
-        onTap: onTap,
-      );
-    }
-  }
-}
-
 class _QuantityButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -193,7 +634,7 @@ class _QuantityButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isActive ? onTap : null,
+        onTap: onTap,
         borderRadius: BorderRadius.circular(50),
         child: Container(
           width: 32,

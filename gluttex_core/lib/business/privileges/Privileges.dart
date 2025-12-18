@@ -17,12 +17,13 @@ class Privileges {
 }
 
 enum DashboardScreenType {
-  suppliers,
+  suppliersPersonnel,
   inventory,
-  operations,
-  pos,
-  finance,
   services,
+  pos,
+  orders,
+  operations,
+  finance,
 }
 
 enum PrivilegeLevel {

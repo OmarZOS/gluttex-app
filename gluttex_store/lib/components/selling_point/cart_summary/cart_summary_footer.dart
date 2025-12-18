@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_core/business/finance/Cart.dart';
+import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_store/screens/checkout_screen.dart';
+import 'package:provider/provider.dart';
 
 class CartFooter extends StatelessWidget {
-  final CartChangeNotifier cart;
-
-  const CartFooter({
-    required this.cart,
-  });
+  const CartFooter({super.key});
 
   void _checkout(BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CheckoutScreen(),
+      ),
+    );
     // TODO: Implement checkout logic
-    Navigator.pop(context);
+    // Navigator.pop(context);
     // Show checkout dialog or navigate to checkout screen
   }
 
   void _saveAsQuote(BuildContext context) {
+    debugPrint(context.read<CartChangeNotifier>().cart.toJson().toString());
     // TODO: Implement save as quote
-    Navigator.pop(context);
+    // Navigator.pop(context);
   }
 
-  void _clearCart(BuildContext context) {
+  void _clearCart(BuildContext context, CartChangeNotifier cart) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -47,64 +52,68 @@ class CartFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    return Consumer<CartChangeNotifier>(
+      builder: (context, cart, child) {
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
 
-    if (cart.cartItems.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        child: SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Continue Shopping'),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Totals
-          _CartTotals(cart: cart),
-          const SizedBox(height: 16),
-
-          // Quick Actions
-          _QuickActions(
-            onCheckout: () => _checkout(context),
-            onSaveQuote: () => _saveAsQuote(context),
-            onClearCart: () => _clearCart(context),
-          ),
-
-          // Continue shopping
-          const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: () => Navigator.pop(context),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        if (cart.cartItems.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Continue Shopping'),
               ),
             ),
-            child: const Text('Continue Shopping'),
+          );
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border(
+              top: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.shadow.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
           ),
-        ],
-      ),
+          child: Column(
+            children: [
+              // Totals
+              _CartTotals(cart: cart),
+              const SizedBox(height: 16),
+
+              // Quick Actions
+              _QuickActions(
+                onCheckout: () => _checkout(context),
+                onSaveQuote: () => _saveAsQuote(context),
+                onClearCart: () => _clearCart(context, cart),
+              ),
+
+              // Continue shopping
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Continue Shopping'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -120,7 +129,10 @@ class _CartTotals extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final total = cart.cartTotal;
+    final total = cart.cartSubtotal;
+    final taxAmount = total * 0.19; // 10% tax
+    final subtotal = total - taxAmount;
+    final loc = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -134,13 +146,13 @@ class _CartTotals extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Subtotal',
+                loc.subtotal,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
-                '\$${total.toStringAsFixed(2)}',
+                loc.price(subtotal.toStringAsFixed(2)),
                 style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -152,13 +164,13 @@ class _CartTotals extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Tax (10%)',
+                loc.tax,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
-                '\$${(total * 0.1).toStringAsFixed(2)}',
+                loc.price(taxAmount.toStringAsFixed(2)),
                 style: theme.textTheme.bodyMedium,
               ),
             ],
@@ -168,13 +180,13 @@ class _CartTotals extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total',
+                loc.total,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
-                '\$${(total * 1.1).toStringAsFixed(2)}',
+                loc.price(total.toStringAsFixed(2)),
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: colorScheme.primary,
@@ -182,6 +194,28 @@ class _CartTotals extends StatelessWidget {
               ),
             ],
           ),
+          if (cart.productItemCount > 0 || cart.serviceItemCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    loc.itemsText,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    loc.items(cart.productItemCount + cart.serviceItemCount,
+                        cart.productItemCount, cart.serviceItemCount),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

@@ -15,54 +15,74 @@ class PrivilegeItem {
 class PrivilegeManager {
   static final List<PrivilegeItem> allPrivileges = [
     const PrivilegeItem(
-      id: 'inventory_view',
-      category: 'inventory_management',
-      bitPosition: 0,
-    ),
-    const PrivilegeItem(
-      id: 'inventory_manage',
-      category: 'inventory_management',
-      bitPosition: 1,
-    ),
-    const PrivilegeItem(
-      id: 'orders_view',
-      category: 'order_management',
-      bitPosition: 2,
-    ),
-    const PrivilegeItem(
-      id: 'orders_manage',
-      category: 'order_management',
-      bitPosition: 3,
-    ),
-    const PrivilegeItem(
       id: 'personnel_view',
       category: 'personnel_management',
-      bitPosition: 4,
+      bitPosition: 0,
     ),
     const PrivilegeItem(
       id: 'personnel_manage',
       category: 'personnel_management',
-      bitPosition: 5,
+      bitPosition: 1,
     ),
     const PrivilegeItem(
-      id: 'finance_view',
-      category: 'finance_management',
-      bitPosition: 6,
+      id: 'inventory_view',
+      category: 'inventory_management',
+      bitPosition: 2,
     ),
     const PrivilegeItem(
-      id: 'finance_manage',
-      category: 'finance_management',
-      bitPosition: 7,
+      id: 'inventory_manage',
+      category: 'inventory_management',
+      bitPosition: 3,
     ),
     const PrivilegeItem(
       id: 'services_view',
       category: 'services_management',
-      bitPosition: 8,
+      bitPosition: 4,
     ),
     const PrivilegeItem(
       id: 'services_manage',
       category: 'services_management',
+      bitPosition: 5,
+    ),
+    const PrivilegeItem(
+      id: 'pos_view',
+      category: 'pos_management',
+      bitPosition: 6,
+    ),
+    const PrivilegeItem(
+      id: 'pos_manage',
+      category: 'pos_management',
+      bitPosition: 7,
+    ),
+    const PrivilegeItem(
+      id: 'orders_view',
+      category: 'order_management',
+      bitPosition: 8,
+    ),
+    const PrivilegeItem(
+      id: 'orders_manage',
+      category: 'order_management',
       bitPosition: 9,
+    ),
+    const PrivilegeItem(
+      id: 'operations_view',
+      category: 'operation_management',
+      bitPosition: 10,
+    ),
+    const PrivilegeItem(
+      id: 'operations_manage',
+      category: 'operation_management',
+      bitPosition: 11,
+    ),
+    const PrivilegeItem(
+      id: 'finance_view',
+      category: 'finance_management',
+      bitPosition: 12,
+    ),
+    const PrivilegeItem(
+      id: 'finance_manage',
+      category: 'finance_management',
+      bitPosition: 13,
     ),
   ];
 

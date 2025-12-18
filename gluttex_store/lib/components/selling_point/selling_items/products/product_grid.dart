@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_store/components/selling_point/selling_items/item_card_with_controls.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
-import 'package:gluttex_store/components/selling_point/selling_product_card.dart';
+import 'package:gluttex_store/components/selling_point/selling_items/products/product_card.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'item_card_with_controls.dart';
 
 class ProductGrid extends StatelessWidget {
   final CartChangeNotifier cartNotifier;
@@ -32,16 +32,16 @@ class ProductGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+        crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
         childAspectRatio: 0.75,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
-        return ItemCardWithControls(
+        return ItemCardWithConfiguration(
           item: products[index],
-          cartNotifier: cartNotifier,
+          // cartNotifier: cartNotifier,
           isProduct: true,
         );
       },

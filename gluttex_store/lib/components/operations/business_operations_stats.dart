@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 
@@ -22,23 +23,25 @@ class BusinessOperationsStats extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Distribution Charts
-          _DistributionCharts(operations: operations),
+          _DistributionCharts(
+              operations: operations, localizations: localizations),
         ],
       ),
     );
   }
 
-  // Helper Functions
-
   Map<String, dynamic> _calculateStats() {
     final totalAmount = operations.fold(0.0, (sum, op) => sum + op.totalAmount);
     final totalPaid = operations.fold(0.0, (sum, op) => sum + op.totalPaid);
     final balanceDue = operations.fold(0.0, (sum, op) => sum + op.balanceDue);
+    final paidPercentage =
+        totalAmount > 0 ? (totalPaid / totalAmount * 100) : 0;
 
     return {
       'totalAmount': totalAmount,
       'totalPaid': totalPaid,
       'balanceDue': balanceDue,
+      'paidPercentage': paidPercentage,
     };
   }
 }
@@ -55,33 +58,63 @@ class _QuickStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
+    final paidPercentage = stats['paidPercentage'] as double;
+    AppLocalizations loc = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.1)),
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primary.withOpacity(0.08),
+            colorScheme.surfaceVariant.withOpacity(0.4),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          _StatItem(
-            label: localizations.totalAmount,
-            value: _formatCurrency(stats['totalAmount']),
+          // 饼图进度指示器
+          _CircularProgress(
+            value: paidPercentage / 100,
+            label: '${paidPercentage.toStringAsFixed(1)}%',
             color: colorScheme.primary,
           ),
           const SizedBox(width: 16),
-          _StatItem(
-            label: localizations.totalPaid,
-            value: _formatCurrency(stats['totalPaid']),
-            color: Colors.green,
-          ),
-          const SizedBox(width: 16),
-          _StatItem(
-            label: localizations.outstanding,
-            value: _formatCurrency(stats['balanceDue']),
-            color: colorScheme.inverseSurface,
+
+          // 统计数据
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _StatRow(
+                  label: localizations.totalAmount,
+                  value: _formatCurrency(stats['totalAmount'], loc),
+                  color: colorScheme.onSurface,
+                ),
+                const SizedBox(height: 8),
+                _StatRow(
+                  label: localizations.totalPaid,
+                  value: _formatCurrency(stats['totalPaid'], loc),
+                  color: Colors.green,
+                ),
+                const SizedBox(height: 8),
+                _StatRow(
+                  label: localizations.outstanding,
+                  value: _formatCurrency(stats['balanceDue'], loc),
+                  color: stats['balanceDue'] > 0 ? Colors.orange : Colors.green,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -89,12 +122,52 @@ class _QuickStats extends StatelessWidget {
   }
 }
 
-class _StatItem extends StatelessWidget {
+class _CircularProgress extends StatelessWidget {
+  final double value;
+  final String label;
+  final Color color;
+
+  const _CircularProgress({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: 70,
+          height: 70,
+          child: CircularProgressIndicator(
+            value: value,
+            strokeWidth: 8,
+            backgroundColor: color.withOpacity(0.1),
+            color: color,
+            strokeCap: StrokeCap.round,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatRow extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
 
-  const _StatItem({
+  const _StatRow({
     required this.label,
     required this.value,
     required this.color,
@@ -102,11 +175,10 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
             label,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -114,71 +186,79 @@ class _StatItem extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
 class _DistributionCharts extends StatelessWidget {
   final List<BusinessOperation> operations;
+  final AppLocalizations localizations;
 
-  const _DistributionCharts({required this.operations});
+  const _DistributionCharts({
+    required this.operations,
+    required this.localizations,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    final statusDistribution = _calculateStatusDistribution();
     final sourceDistribution = _calculateSourceDistribution();
 
-    return Row(
-      children: [
-        // Status Distribution
-        Expanded(
-          child: _DistributionChart(
-            title: localizations.byStatus,
-            distribution: statusDistribution,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 标题
+          Row(
+            children: [
+              Icon(
+                Icons.pie_chart_outline,
+                size: 18,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                localizations.sourceDistribution,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(width: 12),
+          const SizedBox(height: 16),
 
-        // Source Distribution
-        Expanded(
-          child: _DistributionChart(
-            title: localizations.bySource,
+          // 饼图和图例
+          _PieChartWithLegend(
             distribution: sourceDistribution,
+            localizations: localizations,
           ),
-        ),
-      ],
+        ],
+      ),
     );
-  }
-
-  Map<String, double> _calculateStatusDistribution() {
-    final distribution = <String, double>{};
-    for (final operation in operations) {
-      distribution.update(
-        operation.paymentStatus,
-        (value) => value + operation.totalAmount,
-        ifAbsent: () => operation.totalAmount,
-      );
-    }
-    return distribution;
   }
 
   Map<String, double> _calculateSourceDistribution() {
     final distribution = <String, double>{};
     for (final operation in operations) {
-      final source = operation.sourceTable == 'cart_based' ? 'Cart' : 'Order';
+      final source = _getSourceDisplayName(operation);
       distribution.update(
         source,
         (value) => value + operation.totalAmount,
@@ -187,15 +267,30 @@ class _DistributionCharts extends StatelessWidget {
     }
     return distribution;
   }
+
+  String _getSourceDisplayName(BusinessOperation operation) {
+    switch (operation.sourceTable.toLowerCase()) {
+      case 'cart_based':
+        return 'cart';
+      case 'order_based':
+        return 'order';
+      case 'invoice_based':
+        return 'invoice';
+      case 'receipt_based':
+        return 'receipt';
+      default:
+        return operation.sourceTable;
+    }
+  }
 }
 
-class _DistributionChart extends StatelessWidget {
-  final String title;
+class _PieChartWithLegend extends StatelessWidget {
   final Map<String, double> distribution;
+  final AppLocalizations localizations;
 
-  const _DistributionChart({
-    required this.title,
+  const _PieChartWithLegend({
     required this.distribution,
+    required this.localizations,
   });
 
   @override
@@ -203,87 +298,204 @@ class _DistributionChart extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final total = distribution.values.fold(0.0, (sum, value) => sum + value);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+    if (distribution.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            children: [
+              Icon(
+                Icons.pie_chart,
+                size: 48,
+                color: colorScheme.onSurface.withOpacity(0.3),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                localizations.noDataAvailable,
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 准备饼图数据
+    final pieSections = <PieChartSectionData>[];
+    final legendItems = <_LegendItemData>[];
+
+    final colors = [
+      colorScheme.primary,
+      colorScheme.secondary,
+      colorScheme.tertiary,
+      Colors.amber,
+      Colors.teal,
+      Colors.purple,
+    ];
+
+    int colorIndex = 0;
+    distribution.forEach((key, value) {
+      final percentage = total > 0 ? (value / total * 100) : 0;
+      final color = colors[colorIndex % colors.length];
+
+      // 饼图区块
+      pieSections.add(
+        PieChartSectionData(
+          value: value,
+          color: color,
+          radius: 60,
+          title: '${percentage.toStringAsFixed(1)}%',
+          titleStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+          titlePositionPercentageOffset: 0.6,
+          borderSide: BorderSide(
+            color: Colors.white,
+            width: 2,
+          ),
+        ),
+      );
+
+      // 图例项
+      legendItems.add(_LegendItemData(
+        label: _getLocalizedSourceName(key, localizations),
+        value: value,
+        percentage: percentage.toDouble(),
+        color: color,
+      ));
+
+      colorIndex++;
+    });
+
+    return Row(
+      children: [
+        // 饼图
+        Expanded(
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: PieChart(
+              PieChartData(
+                sections: pieSections,
+                centerSpaceRadius: 40,
+                startDegreeOffset: -90, // 从顶部开始
+                sectionsSpace: 2, // 区块间距
+                pieTouchData: PieTouchData(
+                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                    // 可添加点击交互
+                  },
+                ),
+              ),
+              swapAnimationDuration: const Duration(milliseconds: 300),
+              swapAnimationCurve: Curves.easeInOut,
             ),
           ),
-          const SizedBox(height: 8),
-          ...distribution.entries.map((entry) {
-            final percentage = total > 0 ? (entry.value / total * 100) : 0;
-            return _DistributionItem(
-              label: entry.key,
-              percentage: percentage.toDouble(),
-              amount: entry.value,
-            );
-          }),
-        ],
-      ),
+        ),
+        const SizedBox(width: 20),
+
+        // 图例
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...legendItems.map((item) => _LegendItem(
+                    data: item,
+                    showValue: true,
+                  )),
+            ],
+          ),
+        ),
+      ],
     );
+  }
+
+  String _getLocalizedSourceName(String source, AppLocalizations loc) {
+    switch (source.toLowerCase()) {
+      case 'cart':
+        return loc.cart;
+      case 'order':
+        return loc.order;
+      case 'invoice':
+        return loc.invoice;
+      case 'receipt':
+        return loc.receipt;
+      default:
+        return source;
+    }
   }
 }
 
-class _DistributionItem extends StatelessWidget {
+class _LegendItemData {
   final String label;
+  final double value;
   final double percentage;
-  final double amount;
+  final Color color;
 
-  const _DistributionItem({
+  _LegendItemData({
     required this.label,
+    required this.value,
     required this.percentage,
-    required this.amount,
+    required this.color,
+  });
+}
+
+class _LegendItem extends StatelessWidget {
+  final _LegendItemData data;
+  final bool showValue;
+
+  const _LegendItem({
+    required this.data,
+    this.showValue = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    AppLocalizations loc = AppLocalizations.of(context)!;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  _formatLabel(label),
+          // 颜色标记
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: data.color,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 标签
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  data.label,
                   style: TextStyle(
                     color: colorScheme.onSurface,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Text(
-                '${percentage.toStringAsFixed(1)}%',
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: percentage / 100,
-            backgroundColor: colorScheme.outline.withOpacity(0.1),
-            color: _getStatusColor(label, colorScheme),
-            borderRadius: BorderRadius.circular(4),
-            minHeight: 4,
+                if (showValue)
+                  Text(
+                    '${_formatCurrency(data.value, loc)} • ${data.percentage.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 10,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -291,29 +503,15 @@ class _DistributionItem extends StatelessWidget {
   }
 }
 
-String _formatLabel(String label) {
-  return label[0].toUpperCase() + label.substring(1);
+// 添加需要的本地化键到ARB文件
+extension LocalizationKeys on AppLocalizations {
+  String get sourceDistribution => 'Source Distribution';
+  String get noDataAvailable => 'No data available';
+  String get invoice => 'Invoice';
+  String get receipt => 'Receipt';
+  String get outstanding => 'Outstanding';
 }
 
-Color _getStatusColor(String status, ColorScheme colorScheme) {
-  switch (status.toLowerCase()) {
-    case 'paid':
-    case 'fully_paid':
-      return colorScheme.primary;
-    case 'partial':
-    case 'partially_paid':
-      return colorScheme.tertiary;
-    case 'unpaid':
-      return colorScheme.onSurface;
-    case 'cart':
-      return colorScheme.primary;
-    case 'order':
-      return colorScheme.secondary;
-    default:
-      return colorScheme.primary;
-  }
-}
-
-String _formatCurrency(double amount) {
-  return '\$${amount.toStringAsFixed(2)}';
+String _formatCurrency(double amount, AppLocalizations loc) {
+  return loc.price(amount.toStringAsFixed(2));
 }

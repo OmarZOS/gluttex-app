@@ -25,7 +25,7 @@ class CartFAB extends StatelessWidget {
     if (cartItemCount == 0) return const SizedBox();
 
     return FloatingActionButton.extended(
-      onPressed: () => _showCartSummary(context),
+      onPressed: () => showCartSummary(context),
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 6,
@@ -48,13 +48,13 @@ class CartFAB extends StatelessWidget {
         ),
       ),
       label: Text(
-        '\$${cartTotal.toStringAsFixed(2)}',
+        'DZD${cartTotal.toStringAsFixed(2)}',
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
     );
   }
 
-  void _showCartSummary(BuildContext context) {
+  void showCartSummary(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
