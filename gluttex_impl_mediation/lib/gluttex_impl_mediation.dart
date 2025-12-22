@@ -70,15 +70,17 @@ class StorageServiceImpl implements StorageService<FormData> {
   }
 
   @override
-  Future<dynamic> insert(String destination, Map<String, dynamic> data) async {
+  Future<dynamic> insert(String destination, Map<String, dynamic> data,
+      {params}) async {
     try {
       // Log the request data
       // log('Request data: ${json.encode(data)}');
       log('Sending data to $destination');
       log(data.toString());
-      // Make the PUT request
+      // Make the POST request
       final response = await _dio.post(
         destination,
+        queryParameters: params,
         data: data,
         options: Options(headers: {'Content-Type': 'application/json'}),
       );

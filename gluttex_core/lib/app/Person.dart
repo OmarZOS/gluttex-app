@@ -1,49 +1,50 @@
 class Person {
-  final int id;
-  final int? personDetailsId;
-  final int? bloodTypeId;
-  final int? locationId;
-  final PersonDetails? details;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final int id_person;
+  final int person_details_id;
+  final int person_blood_type_id;
+  final int? person_location_id;
+  final PersonDetails person_details;
+  final DateTime? created_at;
+  final DateTime? updated_at;
 
   const Person({
-    required this.id,
-    this.personDetailsId,
-    this.bloodTypeId,
-    this.locationId,
-    this.details,
-    this.createdAt,
-    this.updatedAt,
+    required this.id_person,
+    required this.person_details_id,
+    required this.person_blood_type_id,
+    this.person_location_id,
+    required this.person_details,
+    this.created_at,
+    this.updated_at,
   });
 
   // Get full name
   String get fullName =>
-      '${details?.firstName ?? ''} ${details?.lastName ?? ''}'.trim();
+      '${person_details.person_first_name ?? ''} ${person_details.person_last_name ?? ''}'
+          .trim();
 
   // Get first name
-  String? get firstName => details?.firstName;
+  String? get firstName => person_details.person_first_name;
 
   // Get last name
-  String? get lastName => details?.lastName;
+  String? get lastName => person_details.person_last_name;
 
   // Get gender
-  String? get gender => details?.gender;
+  String? get gender => person_details.person_gender;
 
   // Get nationality
-  String? get nationality => details?.nationality;
+  String? get nationality => person_details.person_nationality;
 
   // Get birth date
-  DateTime? get birthDate => details?.birthDate;
+  DateTime? get birthDate => person_details.person_birth_date;
 
   // Get age (if birth date is available)
   int? get age {
-    if (details?.birthDate == null) return null;
+    if (person_details.person_birth_date == null) return null;
     final now = DateTime.now();
-    int age = now.year - details!.birthDate!.year;
-    if (now.month < details!.birthDate!.month ||
-        (now.month == details!.birthDate!.month &&
-            now.day < details!.birthDate!.day)) {
+    int age = now.year - person_details.person_birth_date!.year;
+    if (now.month < person_details.person_birth_date!.month ||
+        (now.month == person_details.person_birth_date!.month &&
+            now.day < person_details.person_birth_date!.day)) {
       age--;
     }
     return age;
@@ -55,20 +56,19 @@ class Person {
     return currentAge != null && currentAge >= 18;
   }
 
-  // Factory constructor from JSON
   factory Person.fromJson(Map<String, dynamic> json) {
     return Person(
-      id: json['id_person'] as int,
-      personDetailsId: json['person_details_id'] as int?,
-      bloodTypeId: json['person_blood_type_id'] as int?,
-      locationId: json['person_location_id'] as int?,
-      details: json['person_details'] != null
-          ? PersonDetails.fromJson(json['person_details'])
-          : null,
-      createdAt: json['created_at'] != null
+      id_person: (json['id_person'] as num?)?.toInt() ?? 0,
+      person_details_id: (json['person_details_id'] as num?)?.toInt() ?? 0,
+      person_blood_type_id:
+          (json['person_blood_type_id'] as num?)?.toInt() ?? 0,
+      person_location_id: (json['person_location_id'] as num?)?.toInt(),
+      person_details: PersonDetails.fromJson(
+          (json['person_details'] ?? {}) as Map<String, dynamic>),
+      created_at: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
-      updatedAt: json['updated_at'] != null
+      updated_at: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'] as String)
           : null,
     );
@@ -77,75 +77,77 @@ class Person {
   // Convert to JSON
   Map<String, dynamic> toJson() {
     return {
-      'id_person': id,
-      'person_details_id': personDetailsId,
-      'person_blood_type_id': bloodTypeId,
-      'person_location_id': locationId,
-      'person_details': details?.toJson(),
-      if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
-      if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
+      'id_person': id_person,
+      'person_details_id': person_details_id,
+      'person_blood_type_id': person_blood_type_id,
+      'person_location_id': person_location_id,
+      'person_details': person_details.toJson(),
+      if (created_at != null) 'created_at': created_at!.toIso8601String(),
+      if (updated_at != null) 'updated_at': updated_at!.toIso8601String(),
     };
   }
 
   // Copy with method
   Person copyWith({
-    int? id,
-    int? personDetailsId,
-    int? bloodTypeId,
-    int? locationId,
-    PersonDetails? details,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    int? id_person,
+    int? person_details_id,
+    int? person_blood_type_id,
+    int? person_location_id,
+    PersonDetails? person_details,
+    DateTime? created_at,
+    DateTime? updated_at,
   }) {
     return Person(
-      id: id ?? this.id,
-      personDetailsId: personDetailsId ?? this.personDetailsId,
-      bloodTypeId: bloodTypeId ?? this.bloodTypeId,
-      locationId: locationId ?? this.locationId,
-      details: details ?? this.details,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      id_person: id_person ?? this.id_person,
+      person_details_id: person_details_id ?? this.person_details_id,
+      person_blood_type_id: person_blood_type_id ?? this.person_blood_type_id,
+      person_location_id: person_location_id ?? this.person_location_id,
+      person_details: person_details ?? this.person_details,
+      created_at: created_at ?? this.created_at,
+      updated_at: updated_at ?? this.updated_at,
     );
   }
 
   // Empty person factory
   factory Person.empty() {
     return Person(
-      id: 0,
-      personDetailsId: null,
-      bloodTypeId: null,
-      locationId: null,
-      details: null,
-      createdAt: null,
-      updatedAt: null,
+      id_person: 0,
+      person_details_id: 0,
+      person_blood_type_id: 1,
+      person_location_id: null,
+      person_details: PersonDetails.empty(),
+      created_at: null,
+      updated_at: null,
     );
   }
 
   // Check if person is empty (has only ID 0)
-  bool get isEmpty => id == 0;
+  bool get isEmpty => id_person == 0;
 
   // Check if person has basic information
-  bool get hasBasicInfo => details != null && details!.hasName;
+  bool get hasBasicInfo => person_details.hasName;
 
   // Get display name (full name or "Unknown Person")
   String get displayName {
     if (hasBasicInfo) return fullName;
-    return 'Unknown Person #$id';
+    return 'Unknown Person #$id_person';
   }
 
   // Get initials for avatar
   String get initials {
     if (!hasBasicInfo) return '?';
-    final firstInitial =
-        details!.firstName?.isNotEmpty == true ? details!.firstName![0] : '';
-    final lastInitial =
-        details!.lastName?.isNotEmpty == true ? details!.lastName![0] : '';
+    final firstInitial = person_details.person_first_name?.isNotEmpty == true
+        ? person_details.person_first_name![0]
+        : '';
+    final lastInitial = person_details.person_last_name?.isNotEmpty == true
+        ? person_details.person_last_name![0]
+        : '';
     return (firstInitial + lastInitial).toUpperCase();
   }
 
   // Get gender icon
   String get genderIcon {
-    switch (details?.gender?.toLowerCase()) {
+    switch (person_details.person_gender?.toLowerCase()) {
       case 'male':
         return '♂';
       case 'female':
@@ -157,85 +159,86 @@ class Person {
 
   // Get formatted birth date
   String? get formattedBirthDate {
-    if (details?.birthDate == null) return null;
-    return '${details!.birthDate!.day}/${details!.birthDate!.month}/${details!.birthDate!.year}';
+    if (person_details.person_birth_date == null) return null;
+    return '${person_details.person_birth_date!.day}/${person_details.person_birth_date!.month}/${person_details.person_birth_date!.year}';
   }
 
   @override
   String toString() {
-    return 'Person(id: $id, name: "$fullName", gender: $gender, nationality: $nationality)';
+    return 'Person(id_person: $id_person, name: "$fullName", gender: $gender, nationality: $nationality)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Person && other.id == id;
+    return other is Person && other.id_person == id_person;
   }
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => id_person.hashCode;
 }
 
 class PersonDetails {
-  final int id;
-  final String? firstName;
-  final String? lastName;
-  final DateTime? birthDate;
-  final String? gender;
-  final String? nationality;
-  final String? email;
-  final String? phone;
-  final String? address;
-  final String? city;
-  final String? postalCode;
-  final String? country;
-  final String? notes;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final int id_person_details;
+  final String person_last_name;
+  final String person_first_name;
+  final DateTime? person_birth_date;
+  final String person_gender;
+  final String person_nationality;
+  final String? person_email;
+  final String? person_phone;
+  final String? person_address;
+  final String? person_city;
+  final String? person_postal_code;
+  final String? person_country;
+  final String? person_notes;
+  final DateTime? created_at;
+  final DateTime? updated_at;
 
   const PersonDetails({
-    required this.id,
-    this.firstName,
-    this.lastName,
-    this.birthDate,
-    this.gender,
-    this.nationality,
-    this.email,
-    this.phone,
-    this.address,
-    this.city,
-    this.postalCode,
-    this.country,
-    this.notes,
-    this.createdAt,
-    this.updatedAt,
+    required this.id_person_details,
+    required this.person_last_name,
+    required this.person_first_name,
+    this.person_birth_date,
+    required this.person_gender,
+    required this.person_nationality,
+    this.person_email,
+    this.person_phone,
+    this.person_address,
+    this.person_city,
+    this.person_postal_code,
+    this.person_country,
+    this.person_notes,
+    this.created_at,
+    this.updated_at,
   });
 
   // Check if has name
   bool get hasName =>
-      (firstName?.isNotEmpty == true) || (lastName?.isNotEmpty == true);
+      person_first_name.isNotEmpty || person_last_name.isNotEmpty;
 
   // Get full name
-  String get fullName => '$firstName $lastName'.trim();
+  String get fullName => '$person_first_name $person_last_name'.trim();
 
   // Get formatted phone number
   String? get formattedPhone {
-    if (phone == null || phone!.isEmpty) return null;
+    if (person_phone == null || person_phone!.isEmpty) return null;
     // Simple formatting - you can customize this
-    if (phone!.length == 10) {
-      return '${phone!.substring(0, 4)}-${phone!.substring(4, 7)}-${phone!.substring(7)}';
+    if (person_phone!.length == 10) {
+      return '${person_phone!.substring(0, 4)}-${person_phone!.substring(4, 7)}-${person_phone!.substring(7)}';
     }
-    return phone;
+    return person_phone;
   }
 
   // Get address line
   String? get addressLine {
-    if (address == null && city == null && country == null) return null;
+    if (person_address == null && person_city == null && person_country == null)
+      return null;
 
     final parts = <String>[];
-    if (address != null) parts.add(address!);
-    if (city != null) parts.add(city!);
-    if (country != null) parts.add(country!);
+    if (person_address != null) parts.add(person_address!);
+    if (person_city != null) parts.add(person_city!);
+    if (person_country != null) parts.add(person_country!);
 
     return parts.join(', ');
   }
@@ -243,25 +246,25 @@ class PersonDetails {
   // Factory constructor from JSON
   factory PersonDetails.fromJson(Map<String, dynamic> json) {
     return PersonDetails(
-      id: json['id_person_details'] as int,
-      firstName: json['person_first_name'] as String?,
-      lastName: json['person_last_name'] as String?,
-      birthDate: json['person_birth_date'] != null
+      id_person_details: (json['id_person_details'] as num?)?.toInt() ?? 0,
+      person_last_name: json['person_last_name'] as String? ?? '',
+      person_first_name: json['person_first_name'] as String? ?? '',
+      person_birth_date: json['person_birth_date'] != null
           ? DateTime.tryParse(json['person_birth_date'] as String)
           : null,
-      gender: json['person_gender'] as String?,
-      nationality: json['person_nationality'] as String?,
-      email: json['person_email'] as String?,
-      phone: json['person_phone'] as String?,
-      address: json['person_address'] as String?,
-      city: json['person_city'] as String?,
-      postalCode: json['person_postal_code'] as String?,
-      country: json['person_country'] as String?,
-      notes: json['person_notes'] as String?,
-      createdAt: json['created_at'] != null
+      person_gender: json['person_gender'] as String? ?? '',
+      person_nationality: json['person_nationality'] as String? ?? '',
+      person_email: json['person_email'] as String?,
+      person_phone: json['person_phone'] as String?,
+      person_address: json['person_address'] as String?,
+      person_city: json['person_city'] as String?,
+      person_postal_code: json['person_postal_code'] as String?,
+      person_country: json['person_country'] as String?,
+      person_notes: json['person_notes'] as String?,
+      created_at: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
-      updatedAt: json['updated_at'] != null
+      updated_at: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'] as String)
           : null,
     );
@@ -270,85 +273,85 @@ class PersonDetails {
   // Convert to JSON
   Map<String, dynamic> toJson() {
     return {
-      'id_person_details': id,
-      'person_first_name': firstName,
-      'person_last_name': lastName,
-      'person_birth_date': birthDate?.toIso8601String(),
-      'person_gender': gender,
-      'person_nationality': nationality,
-      'person_email': email,
-      'person_phone': phone,
-      'person_address': address,
-      'person_city': city,
-      'person_postal_code': postalCode,
-      'person_country': country,
-      'person_notes': notes,
-      if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
-      if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
+      'id_person_details': id_person_details,
+      'person_last_name': person_last_name,
+      'person_first_name': person_first_name,
+      'person_birth_date': person_birth_date?.toIso8601String(),
+      'person_gender': person_gender,
+      'person_nationality': person_nationality,
+      'person_email': person_email,
+      'person_phone': person_phone,
+      'person_address': person_address,
+      'person_city': person_city,
+      'person_postal_code': person_postal_code,
+      'person_country': person_country,
+      'person_notes': person_notes,
+      if (created_at != null) 'created_at': created_at!.toIso8601String(),
+      if (updated_at != null) 'updated_at': updated_at!.toIso8601String(),
     };
   }
 
   // Copy with method
   PersonDetails copyWith({
-    int? id,
-    String? firstName,
-    String? lastName,
-    DateTime? birthDate,
-    String? gender,
-    String? nationality,
-    String? email,
-    String? phone,
-    String? address,
-    String? city,
-    String? postalCode,
-    String? country,
-    String? notes,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    int? id_person_details,
+    String? person_last_name,
+    String? person_first_name,
+    DateTime? person_birth_date,
+    String? person_gender,
+    String? person_nationality,
+    String? person_email,
+    String? person_phone,
+    String? person_address,
+    String? person_city,
+    String? person_postal_code,
+    String? person_country,
+    String? person_notes,
+    DateTime? created_at,
+    DateTime? updated_at,
   }) {
     return PersonDetails(
-      id: id ?? this.id,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      birthDate: birthDate ?? this.birthDate,
-      gender: gender ?? this.gender,
-      nationality: nationality ?? this.nationality,
-      email: email ?? this.email,
-      phone: phone ?? this.phone,
-      address: address ?? this.address,
-      city: city ?? this.city,
-      postalCode: postalCode ?? this.postalCode,
-      country: country ?? this.country,
-      notes: notes ?? this.notes,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      id_person_details: id_person_details ?? this.id_person_details,
+      person_last_name: person_last_name ?? this.person_last_name,
+      person_first_name: person_first_name ?? this.person_first_name,
+      person_birth_date: person_birth_date ?? this.person_birth_date,
+      person_gender: person_gender ?? this.person_gender,
+      person_nationality: person_nationality ?? this.person_nationality,
+      person_email: person_email ?? this.person_email,
+      person_phone: person_phone ?? this.person_phone,
+      person_address: person_address ?? this.person_address,
+      person_city: person_city ?? this.person_city,
+      person_postal_code: person_postal_code ?? this.person_postal_code,
+      person_country: person_country ?? this.person_country,
+      person_notes: person_notes ?? this.person_notes,
+      created_at: created_at ?? this.created_at,
+      updated_at: updated_at ?? this.updated_at,
     );
   }
 
   // Empty details factory
   factory PersonDetails.empty() {
     return PersonDetails(
-      id: 0,
-      firstName: null,
-      lastName: null,
-      birthDate: null,
-      gender: null,
-      nationality: null,
-      email: null,
-      phone: null,
-      address: null,
-      city: null,
-      postalCode: null,
-      country: null,
-      notes: null,
-      createdAt: null,
-      updatedAt: null,
+      id_person_details: 0,
+      person_last_name: '',
+      person_first_name: '',
+      person_birth_date: null,
+      person_gender: '',
+      person_nationality: '',
+      person_email: null,
+      person_phone: null,
+      person_address: null,
+      person_city: null,
+      person_postal_code: null,
+      person_country: null,
+      person_notes: null,
+      created_at: null,
+      updated_at: null,
     );
   }
 
   @override
   String toString() {
-    return 'PersonDetails(id: $id, name: "$fullName", email: $email, phone: $phone)';
+    return 'PersonDetails(id_person_details: $id_person_details, name: "$fullName", email: $person_email, phone: $person_phone)';
   }
 }
 
@@ -360,9 +363,10 @@ extension PersonExtensions on Person {
 
     final searchQuery = query.toLowerCase();
     return fullName.toLowerCase().contains(searchQuery) ||
-        details?.email?.toLowerCase().contains(searchQuery) == true ||
-        details?.phone?.contains(query) == true ||
-        details?.nationality?.toLowerCase().contains(searchQuery) == true;
+        person_details.person_email?.toLowerCase().contains(searchQuery) ==
+            true ||
+        person_details.person_phone?.contains(query) == true ||
+        person_details.person_nationality.toLowerCase().contains(searchQuery);
   }
 }
 

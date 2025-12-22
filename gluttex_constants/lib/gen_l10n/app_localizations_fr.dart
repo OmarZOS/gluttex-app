@@ -2484,32 +2484,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invoice => 'Facture';
 
   @override
-  String items(num cartItemCount, num itemCount, num serviceCount) {
-    String _temp0 = intl.Intl.pluralLogic(
-      cartItemCount,
-      locale: localeName,
-      other: '$cartItemCount articles',
-      one: '$cartItemCount article',
-      zero: 'Aucun article',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      itemCount,
-      locale: localeName,
-      other: '$itemCount produits',
-      one: '$itemCount produit',
-      zero: 'aucun produit',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      serviceCount,
-      locale: localeName,
-      other: '$serviceCount services',
-      one: '$serviceCount service',
-      zero: 'aucun service',
-    );
-    return '$_temp0 ($_temp1, $_temp2)';
-  }
-
-  @override
   String get share => 'Partager';
 
   @override
@@ -2534,7 +2508,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cash => 'Espèces';
 
   @override
-  String get bankTransfer => 'Virement Bancaire';
+  String get bankTransfer => 'Virement bancaire';
 
   @override
   String get mobilePayment => 'Paiement Mobile';
@@ -2549,7 +2523,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invoiceDetails => 'Détails de la facture';
 
   @override
-  String get currencySymbol => '€';
+  String get currencySymbol => 'DA';
 
   @override
   String get accessRefreshed => 'Accès rafraichi';
@@ -2857,7 +2831,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transaction => 'Transaction';
 
   @override
-  String get documentType => 'Type de Document';
+  String get documentType => 'Type de document';
 
   @override
   String get operationType => 'Type d’opération';
@@ -3489,7 +3463,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get specialInstructions => 'Instructions spéciales';
 
   @override
-  String get addNotesHere => 'Ajouter des notes ici...';
+  String get addNotesHere => 'Ajoutez des notes ici...';
 
   @override
   String get serviceParameters => 'Paramètres du service';
@@ -3627,7 +3601,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get income => 'Revenu';
 
   @override
-  String get currencyCode => 'EUR';
+  String get currencyCode => 'DA';
 
   @override
   String get lastWeek => 'La Semaine Dernière';
@@ -3869,6 +3843,37 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String itemsCount(Object count) {
+    return 'Articles: $count';
+  }
+
+  @override
+  String items(num cartItemCount, num itemCount, num serviceCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cartItemCount,
+      locale: localeName,
+      other: '$cartItemCount articles',
+      one: '$cartItemCount article',
+      zero: 'Aucun article',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      itemCount,
+      locale: localeName,
+      other: '$itemCount produits',
+      one: '$itemCount produit',
+      zero: 'aucun produit',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      serviceCount,
+      locale: localeName,
+      other: '$serviceCount services',
+      one: '$serviceCount service',
+      zero: 'aucun service',
+    );
+    return '$_temp0 ($_temp1, $_temp2)';
+  }
+
+  @override
   String get itemsText => 'Articles';
 
   @override
@@ -3878,7 +3883,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get orderConfirmed => 'Commande Confirmée';
 
   @override
-  String get orderPlacedSuccessfully => 'Votre commande a été passée avec succès';
+  String get orderPlacedSuccessfully => 'Commande passée avec succès !';
 
   @override
   String get backToHome => 'Retour à l\'Accueil';
@@ -3890,43 +3895,43 @@ class AppLocalizationsFr extends AppLocalizations {
   String get orderItems => 'Articles de Commande';
 
   @override
-  String get paymentMethod => 'Méthode de Paiement';
+  String get paymentMethod => 'Méthode de paiement';
 
   @override
   String get deliveryType => 'Type de Livraison';
 
   @override
-  String get pickup => 'Retrait';
+  String get pickup => 'Ramassage';
 
   @override
-  String get pickupDesc => 'Retrait en magasin';
+  String get pickupDesc => 'Le client retirera la commande';
 
   @override
   String get delivery => 'Livraison';
 
   @override
-  String get deliveryDesc => 'Livraison le jour même disponible';
+  String get deliveryDesc => 'Nous livrerons à votre adresse';
 
   @override
   String get shipping => 'Expédition';
 
   @override
-  String get shippingDesc => 'Expédition standard (3-5 jours ouvrables)';
+  String get shippingDesc => 'Expédié via service de messagerie';
 
   @override
   String get orderNotes => 'Notes de Commande';
 
   @override
-  String get notesHint => 'Instructions spéciales, notes de livraison, etc.';
+  String get notesHint => 'Ajoutez des instructions spéciales ou des notes...';
 
   @override
   String get orderSummary => 'Résumé de Commande';
 
   @override
-  String get placeOrder => 'Passer Commande';
+  String get placeOrder => 'Passer la Commande';
 
   @override
-  String get printDocument => 'Imprimer';
+  String get printDocument => 'Imprimer le Document';
 
   @override
   String get done => 'Terminé';
@@ -3938,7 +3943,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchCustomers => 'Rechercher des clients...';
 
   @override
-  String get invoiceReceipt => 'Facture + Reçu';
+  String get invoiceReceipt => 'Facture/Reçu';
 
   @override
   String get receiptOnly => 'Reçu Seulement';
@@ -3959,7 +3964,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get check => 'Chèque';
 
   @override
-  String get cardDetails => 'Détails de la Carte';
+  String get cardDetails => 'Détails de Carte';
 
   @override
   String get cardType => 'Type de Carte';
@@ -3971,7 +3976,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get expiryDate => 'Date d\'Expiration';
 
   @override
-  String get bankTransferDetails => 'Détails du Virement Bancaire';
+  String get bankTransferDetails => 'Détails de Virement';
 
   @override
   String get bankName => 'Nom de la Banque';
@@ -3983,7 +3988,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reference => 'Référence';
 
   @override
-  String get mobilePaymentDetails => 'Détails du Paiement Mobile';
+  String get mobilePaymentDetails => 'Détails de Paiement Mobile';
 
   @override
   String get serviceProvider => 'Fournisseur de Service';
@@ -3995,5 +4000,332 @@ class AppLocalizationsFr extends AppLocalizations {
   String get checkDetails => 'Détails du Chèque';
 
   @override
-  String get checkPaymentNote => 'Le paiement par chèque sera traité une fois reçu et compensé.';
+  String get checkPaymentNote => 'Le paiement par chèque sera traité à réception';
+
+  @override
+  String get selectCustomer => 'Sélectionner un Client';
+
+  @override
+  String get searchForCustomer => 'Rechercher un client';
+
+  @override
+  String get searchCustomersHint => 'Rechercher par nom, email, ou téléphone...';
+
+  @override
+  String get searchCustomerInstructions => 'Entrez le nom du client, l\'email ou le numéro de téléphone pour rechercher';
+
+  @override
+  String get addNewCustomer => 'Ajouter un Nouveau Client';
+
+  @override
+  String get searching => 'Recherche en cours...';
+
+  @override
+  String get noCustomersFound => 'Aucun client trouvé';
+
+  @override
+  String get adjustSearchTerms => 'Essayez d\'ajuster vos termes de recherche';
+
+  @override
+  String get clearSearch => 'Effacer la recherche';
+
+  @override
+  String get searchResults => 'Résultats de recherche';
+
+  @override
+  String get addNewCustomerInstruction => 'Créez un nouveau profil client pour l\'ajouter au système';
+
+  @override
+  String get create => 'Créer';
+
+  @override
+  String get customerDetails => 'Détails du Client';
+
+  @override
+  String get fullName => 'Nom Complet';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get address => 'Adresse';
+
+  @override
+  String get city => 'Ville';
+
+  @override
+  String get country => 'Pays';
+
+  @override
+  String get editCustomer => 'Modifier le Client';
+
+  @override
+  String get removeCustomer => 'Supprimer le Client';
+
+  @override
+  String get checkoutHelp => 'Aide au paiement';
+
+  @override
+  String get customerHelpDescription => 'Sélectionnez ou ajoutez un client pour cette commande. Vous pouvez rechercher par nom, email ou scanner un code QR.';
+
+  @override
+  String get documentTypeHelpDescription => 'Choisissez entre facture ou reçu. Une facture est pour les ventes à crédit, un reçu est pour les ventes au comptant.';
+
+  @override
+  String get paymentMethodHelpDescription => 'Sélectionnez comment le client paiera : espèces, carte, virement bancaire ou mobile money.';
+
+  @override
+  String get notesParametersHelpDescription => 'Ajoutez des notes ou des paramètres personnalisés à cette commande pour référence.';
+
+  @override
+  String get gotIt => 'Compris';
+
+  @override
+  String get notesParameters => 'Notes & Paramètres';
+
+  @override
+  String get parameters => 'Paramètres';
+
+  @override
+  String get addParameter => 'Ajouter un Paramètre';
+
+  @override
+  String get editParameter => 'Modifier le Paramètre';
+
+  @override
+  String get noParametersAdded => 'Aucun paramètre ajouté';
+
+  @override
+  String get addParametersToCustomizeOrder => 'Ajoutez des paramètres pour personnaliser cette commande';
+
+  @override
+  String get changeCustomer => 'Changer de Client';
+
+  @override
+  String get installment => 'Paiement Échelonné';
+
+  @override
+  String get help => 'Aide';
+
+  @override
+  String get addParameterDescription => 'Ajoutez un paramètre personnalisé à cette commande';
+
+  @override
+  String get parameterKey => 'Clé du Paramètre';
+
+  @override
+  String get parameterKeyHint => 'ex: Priorité, Instructions Spéciales';
+
+  @override
+  String get parameterKeyRequired => 'Veuillez saisir une clé';
+
+  @override
+  String get parameterKeyTooLong => 'La clé est trop longue (max 50 caractères)';
+
+  @override
+  String get parameterValue => 'Valeur du Paramètre';
+
+  @override
+  String get parameterValueHint => 'ex: Élevée, Manipuler avec soin';
+
+  @override
+  String get parameterValueRequired => 'Veuillez saisir une valeur';
+
+  @override
+  String get parameterValueTooLong => 'La valeur est trop longue (max 200 caractères)';
+
+  @override
+  String get suggestedParameters => 'Paramètres Suggérés';
+
+  @override
+  String get pleaseSelectCustomer => 'Veuillez sélectionner un client';
+
+  @override
+  String get cartEmpty => 'Votre panier est vide';
+
+  @override
+  String get pleaseEnterCardDetails => 'Veuillez saisir les détails de la carte';
+
+  @override
+  String get pleaseEnterBankDetails => 'Veuillez saisir les détails bancaires';
+
+  @override
+  String get pleaseEnterMobilePaymentDetails => 'Veuillez sélectionner le fournisseur de paiement mobile';
+
+  @override
+  String get visa => 'VISA';
+
+  @override
+  String get mastercard => 'MasterCard';
+
+  @override
+  String get amex => 'American Express';
+
+  @override
+  String get orangeMoney => 'Orange Money';
+
+  @override
+  String get ooredooMoney => 'Ooredoo Money';
+
+  @override
+  String get nedjmaPay => 'Nedjma Pay';
+
+  @override
+  String get paypal => 'PayPal';
+
+  @override
+  String get stcPay => 'STC Pay';
+
+  @override
+  String get saveToPreferences => 'Enregistrer dans les préférences pour une utilisation future';
+
+  @override
+  String get savedParameters => 'Paramètres Enregistrés';
+
+  @override
+  String get currentParameters => 'Paramètres Actuels';
+
+  @override
+  String get noSavedParameters => 'Aucun paramètre enregistré pour le moment';
+
+  @override
+  String get manageSavedParameters => 'Gérer les Paramètres Enregistrés';
+
+  @override
+  String get selectCustomerForOrder => 'Sélectionnez un client pour cette commande';
+
+  @override
+  String get searchForCustomers => 'Rechercher des clients';
+
+  @override
+  String get enterNameOrEmailToFindCustomers => 'Entrez un nom, nom d\'utilisateur ou e-mail pour trouver des clients';
+
+  @override
+  String get allCustomers => 'Tous les clients';
+
+  @override
+  String get clearSelection => 'Effacer la sélection';
+
+  @override
+  String get newCustomerComingSoon => 'Création de nouveau client à venir';
+
+  @override
+  String get selectPaymentType => 'Sélectionnez comment vous souhaitez payer';
+
+  @override
+  String get fullPaymentDesc => 'Payer le montant total maintenant';
+
+  @override
+  String get fullPaymentApplied => 'Paiement Complet Appliqué';
+
+  @override
+  String get fullPaymentDescDetail => 'Le montant total sera facturé immédiatement';
+
+  @override
+  String get depositOnlyDesc => 'Payer un acompte maintenant, le solde plus tard';
+
+  @override
+  String get enterDepositAmount => 'Entrez le montant de l\'acompte';
+
+  @override
+  String get enterAmount => 'Entrez le montant';
+
+  @override
+  String get remainingAmount => 'Montant restant';
+
+  @override
+  String get installmentDesc => 'Planifier le paiement pour plus tard';
+
+  @override
+  String get selectInstallmentDate => 'Sélectionnez la date de paiement';
+
+  @override
+  String get installmentDate => 'Date de Paiement';
+
+  @override
+  String get selectDate => 'Sélectionnez une date';
+
+  @override
+  String get installmentNote => 'Le montant total sera facturé à la date sélectionnée';
+
+  @override
+  String get persons => 'Personnes';
+
+  @override
+  String get users => 'Utilisateurs';
+
+  @override
+  String get searchForPersons => 'Rechercher des personnes';
+
+  @override
+  String get enterNameToFindPersons => 'Entrez un nom pour trouver des personnes';
+
+  @override
+  String get noPersonsFound => 'Aucune personne trouvée';
+
+  @override
+  String get tryDifferentName => 'Essayez un nom différent';
+
+  @override
+  String get recentCustomers => 'Clients récents';
+
+  @override
+  String get noCustomersYet => 'Aucun client pour le moment';
+
+  @override
+  String get startByAddingCustomers => 'Commencez par ajouter des clients ci-dessous';
+
+  @override
+  String get personAccounts => 'Comptes Personnes';
+
+  @override
+  String get userAccounts => 'Comptes Utilisateurs';
+
+  @override
+  String get confirmCheckout => 'Confirmer le paiement';
+
+  @override
+  String get checkoutSummary => 'Résumé du paiement';
+
+  @override
+  String get mobileMoney => 'Mobile Money';
+
+  @override
+  String get orderId => 'Numéro de commande';
+
+  @override
+  String get orderSuccessful => 'Commande réussie';
+
+  @override
+  String get continueShopping => 'Continuer les achats';
+
+  @override
+  String get viewOrders => 'Voir les commandes';
+
+  @override
+  String get confirmAndPay => 'Confirmer et payer';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get processingOrder => 'Traitement de votre commande...';
+
+  @override
+  String get cartEmptyError => 'Votre panier est vide';
+
+  @override
+  String get customerRequiredError => 'Veuillez sélectionner un client';
+
+  @override
+  String get loginRequiredError => 'Veuillez vous connecter pour payer';
+
+  @override
+  String get checkoutError => 'Erreur de paiement';
+
+  @override
+  String get itemsHelpDescription => 'Vérifiez les articles dans votre panier avant le paiement. Vous pouvez modifier les quantités si nécessaire.';
+
+  @override
+  String get deliveryHelpDescription => 'Choisissez si le client viendra chercher la commande ou si elle doit être livrée.';
 }

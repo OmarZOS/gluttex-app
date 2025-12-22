@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_event/product_change_notifier.dart';
+import 'package:gluttex_event/views/checkout_view_model.dart';
 import 'package:gluttex_store/screens/checkout_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -11,9 +13,15 @@ class CartFooter extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const CheckoutScreen(),
+        builder: (context) => CheckoutScreen(
+          supplierId: context.read<ProductNotifier>().currentProviderId,
+        ),
       ),
     );
+    // _clearCart(context, context.read<CartChangeNotifier>());
+    // final checkoutViewModel = context.read<CheckoutViewModel>();
+    // final cartNotifier = context.read<CartChangeNotifier>();
+
     // TODO: Implement checkout logic
     // Navigator.pop(context);
     // Show checkout dialog or navigate to checkout screen

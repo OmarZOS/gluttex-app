@@ -12,6 +12,7 @@ import 'package:gluttex_event/notification_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/service_change_notifier.dart';
 import 'package:gluttex_event/supplier_dashboard_provider.dart';
+import 'package:gluttex_event/views/checkout_view_model.dart';
 import 'package:gluttex_event/views/finance_view_model.dart';
 import 'package:gluttex_impl_app/gluttex_impl_notification.dart';
 import 'package:gluttex_impl_business/finance/gluttex_impl_business_operation.dart';
@@ -114,6 +115,8 @@ class GluttexApp extends StatelessWidget {
             create: (_) => ServiceNotifier()),
         ChangeNotifierProvider<FinanceChangeNotifier>(
             create: (_) => FinanceChangeNotifier()),
+        ChangeNotifierProvider<CheckoutViewModel>(
+            create: (_) => CheckoutViewModel()),
         ChangeNotifierProvider<FinanceViewModel>(
             create: (_) => FinanceViewModel(
                 businessOperationService:

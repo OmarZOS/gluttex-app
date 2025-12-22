@@ -1,6 +1,7 @@
 // UserService.dart
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
+import 'package:gluttex_core/app/Person.dart';
 
 import '../AppUser.dart';
 
@@ -25,6 +26,14 @@ abstract class AppUserService {
   }
 
   Future<List<AppUser>?> searchAppUsers(
+    String query,
+    int offset,
+    int limit,
+  ) async {
+    return null;
+  }
+
+  Future<List<Person>?> searchPeople(
     String query,
     int offset,
     int limit,

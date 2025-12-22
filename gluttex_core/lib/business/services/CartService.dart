@@ -24,7 +24,7 @@ abstract class CartService {
     return null;
   }
 
-  Future<Cart?> addCart(dynamic Cart) async {
+  Future<Cart?> addCart(dynamic Cart, {params}) async {
     return null;
   }
 

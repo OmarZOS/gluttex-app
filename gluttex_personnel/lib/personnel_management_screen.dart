@@ -15,9 +15,9 @@ import 'package:gluttex_personnel/components/dashboard/add_options_sheet.dart';
 import 'package:gluttex_personnel/components/dashboard/confirmation_dialogs.dart';
 import 'package:gluttex_personnel/components/dashboard/personnel_header_widget.dart';
 import 'package:gluttex_personnel/components/dashboard/privilege_dialog_manager.dart';
-import 'package:gluttex_personnel/components/dashboard/qr_utils.dart';
+import 'package:gluttex_ui/utils/qr_utils.dart';
 import 'package:gluttex_personnel/components/dashboard/quick_stats_widget.dart';
-import 'package:gluttex_personnel/components/dashboard/search_bar_widget.dart';
+import 'package:gluttex_ui/components/search/search_bar_widget.dart';
 import 'package:provider/provider.dart';
 
 class PersonnelManagementScreen extends StatefulWidget {

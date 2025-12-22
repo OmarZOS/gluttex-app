@@ -5,7 +5,8 @@ abstract class StorageService<T> {
     return null;
   }
 
-  Future<dynamic> insert(String destination, Map<String, dynamic> data) async {
+  Future<dynamic> insert(String destination, Map<String, dynamic> data,
+      {params}) async {
     return null;
   }
 

@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
+import 'package:gluttex_core/app/Person.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
@@ -116,6 +117,32 @@ class AppUserServiceImpl implements AppUserService {
       if (data is! List) return null;
 
       return AppUser.fromJsonList(data);
+    } catch (e, stacktrace) {
+      log("ERROR (searchAppUsers): $e");
+      log(stacktrace.toString());
+      return null;
+    }
+  }
+
+  @override
+  Future<List<Person>?> searchPeople(
+    String query,
+    int offset,
+    int limit,
+  ) async {
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final route =
+          "${GluttexConstants.apiBaseUrl}${GluttexConstants.searchPeopleEndpoint}/$query/$offset/$limit";
+
+      final data = await storageService.getAll(route);
+
+      if (data is! List) return null;
+
+      return data
+          .map((json) => Person.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e, stacktrace) {
       log("ERROR (searchAppUsers): $e");
       log(stacktrace.toString());

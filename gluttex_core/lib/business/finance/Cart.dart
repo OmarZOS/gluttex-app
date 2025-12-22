@@ -1,3 +1,4 @@
+import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_core/business/finance/OrderedService.dart';
@@ -152,6 +153,76 @@ class Cart {
     this.personData,
     this.userData,
   });
+
+  factory Cart.fromResponseJson(List<dynamic> jsonResponse) {
+    if (jsonResponse.isEmpty) {
+      throw FormatException('Empty response from API');
+    }
+
+    // The response contains two objects in an array
+    Map<String, dynamic>? depositReceiptData;
+    Map<String, dynamic>? cartData;
+
+    for (final item in jsonResponse) {
+      if (item is Map<String, dynamic>) {
+        // Check if this item contains deposit/receipt data
+        if (item.containsKey('deposit') || item.containsKey('receipt')) {
+          depositReceiptData = item;
+        }
+        // Check if this item contains cart data
+        else if (item.containsKey('cart_id') ||
+            item.containsKey('cart_status') ||
+            item.containsKey('cart_total_amount')) {
+          cartData = item;
+        }
+      }
+    }
+
+    // Parse deposit if available
+    final List<Deposit> deposits = [];
+    if (depositReceiptData != null && depositReceiptData['deposit'] != null) {
+      final depositJson = depositReceiptData['deposit'] as Map<String, dynamic>;
+      try {
+        deposits.add(Deposit.fromJson(depositJson));
+      } catch (e) {
+        // debugPrint('Error parsing deposit: $e');
+      }
+    }
+
+    // Parse receipt if available
+    final List<Receipt> receipts = [];
+    if (depositReceiptData != null && depositReceiptData['receipt'] != null) {
+      final receiptJson = depositReceiptData['receipt'] as Map<String, dynamic>;
+      try {
+        receipts.add(Receipt.fromJson(receiptJson));
+      } catch (e) {
+        // debugPrint('Error parsing receipt: $e');
+      }
+    }
+
+    // Parse cart data
+    if (cartData == null) {
+      throw FormatException('No cart data found in response');
+    }
+
+    return Cart(
+      cartId: cartData['cart_id'] as int?,
+      cartStatus: cartData['cart_status'] as String?,
+      cartProductProviderId: cartData['cart_product_provider_id'] as int?,
+      cartPersonRef: cartData['cart_person_ref'] as int?,
+      cartSellingUser: cartData['cart_selling_user'] as int?,
+      cartClientUser: cartData['cart_client_user'] as int?,
+      cartNotes: cartData['cart_notes'] as String?,
+      cartCreatedAt: cartData['cart_created_at'] as String?,
+      cartUpdatedAt: cartData['cart_updated_at'] as String?,
+      cartTotalAmount: (cartData['cart_total_amount'] as num?)?.toDouble(),
+      invoices: const [], // Not in this response format
+      receipts: receipts,
+      deposits: deposits,
+      orderedItems: const [], // Not in this response format
+      orderedServices: const [], // Not in this response format
+    );
+  }
 
   // Factory constructor from API JSON (for detailed cart data)
   factory Cart.fromJson(Map<String, dynamic> json) {
@@ -748,4 +819,121 @@ class Deposit {
         'deposit_updated_at': depositUpdatedAt,
         'deposit_receipt_id': depositReceiptId,
       };
+}
+
+class CheckoutData {
+  final Cart cart;
+  final AppUser? selectedCustomer;
+  final double totalAmount;
+  final String notes;
+  final bool invoice;
+  final bool receipt;
+  final bool deposit;
+  final bool payment;
+  final double paidMoney;
+  final String paymentMethod;
+
+  CheckoutData({
+    required this.cart,
+    required this.selectedCustomer,
+    required this.totalAmount,
+    this.notes = '',
+    this.invoice = false,
+    this.receipt = false,
+    this.deposit = false,
+    this.payment = false,
+    this.paidMoney = 0.0,
+    this.paymentMethod = 'cash',
+  });
+
+  Map<String, dynamic> toJson() {
+    // Build ordered items from cart (products)
+    final List<Map<String, dynamic>> orderedItems = [];
+
+    for (final cartItem in cart.items.where((item) => item.isProduct)) {
+      orderedItems.add({
+        "id_ordered_item": 0,
+        "ordered_product_id": cartItem.product?.id_product ?? 0,
+        "order_ref": 0,
+        "product_discount": 0.0,
+        "ordered_quantity": cartItem.quantity,
+        "unit_price": cartItem.unitPrice ?? 0.0,
+        "applied_vat": 0.0,
+      });
+    }
+
+    // Build provided services from cart (services)
+    final List<Map<String, dynamic>> providedServices = [];
+
+    for (final cartItem in cart.items.where((item) => item.isService)) {
+      providedServices.add({
+        "ordered_service_service_id": cartItem.service?.id ?? 0,
+        "ordered_service_quantity": cartItem.quantity,
+        "ordered_service_unit_price": cartItem.unitPrice ?? 0.0,
+        "ordered_service_total_price": cartItem.totalPrice,
+        "ordered_service_scheduled_at": cartItem.scheduledDate ?? "",
+        "ordered_service_notes": cartItem.scheduledTime ?? "",
+        "resource_requirement_id":
+            cartItem.service?.resourceRequirements.first.id ?? 0,
+      });
+    }
+
+    // Build cart data
+    final Map<String, dynamic> apiCart = {
+      "cart_id": cart.cartId ?? 0,
+      "cart_product_provider_id": cart.cartProductProviderId ?? 0,
+      "cart_selling_user": cart.cartSellingUser ?? 0,
+      "cart_person_ref": cart.cartPersonRef ?? 0,
+      "cart_client_user":
+          cart.cartClientUser ?? selectedCustomer?.id_app_user ?? 0,
+      "cart_status": "PENDING",
+      "cart_total_amount": totalAmount,
+      "cart_notes": notes,
+      "cart_invoice": invoice,
+      "cart_receipt": receipt,
+      "cart_deposit": deposit,
+      "cart_payment": payment,
+      "cart_paid_money": paidMoney,
+    };
+
+    // Build client data from selected customer
+    final Map<String, dynamic> client = {
+      "id_person": selectedCustomer?.id_app_user ?? selectedCustomer?.idPerson,
+      "person_details_id": 0,
+      "id_person_details": 0,
+      "person_first_name": selectedCustomer?.personFirstName ?? "string",
+      "person_last_name": selectedCustomer?.personLastName ?? "string",
+      "person_birth_date": selectedCustomer?.personBirthDate ?? "string",
+      "person_gender": selectedCustomer?.personGender ?? "string",
+      "person_nationality": selectedCustomer?.personNationality ?? "string",
+      "id_blood_type": 0,
+    };
+
+    return {
+      "api_ordered_items": orderedItems,
+      "api_provided_services": providedServices,
+      "api_cart": apiCart,
+      "client": client,
+      "payment_method": paymentMethod,
+    };
+  }
+
+  // factory CheckoutData.fromViewModel({
+  //   required CheckoutViewModel viewModel,
+  //   required Cart cart,
+  //   required double totalAmount,
+  // }) {
+  //   return CheckoutData(
+  //     cart: cart,
+  //     selectedCustomer: viewModel.selectedCustomer,
+  //     totalAmount: totalAmount,
+  //     notes: viewModel.notes,
+  //     invoice: viewModel.documentType == 'invoice',
+  //     receipt: viewModel.documentType == 'receipt',
+  //     deposit: viewModel.paymentType == 'deposit',
+  //     payment: viewModel.paymentType == 'payment',
+  //     paidMoney: 0.0, // You'll need to calculate this based on your logic
+  //     paymentMethod: viewModel.paymentMethod,
+  //   );
+  // }
 }

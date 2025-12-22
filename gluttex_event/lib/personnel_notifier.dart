@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
+import 'package:gluttex_core/app/Person.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
@@ -25,6 +26,7 @@ class PersonnelNotifier with ChangeNotifier {
   // Search state - make fields private
   List<AppUser> _filteredPersonnel = [];
   List<AppUser> _searchResults = [];
+  List<Person> _personSearchResults = [];
   bool _isLoading = false;
   String _searchQuery = '';
   String? _error;
@@ -37,6 +39,7 @@ class PersonnelNotifier with ChangeNotifier {
   // Public getters - use getter syntax for consistency
   List<AppUser> get personnel => _filteredPersonnel;
   List<AppUser> get searchResults => _searchResults;
+  List<Person> get personSearchResults => _personSearchResults;
   bool get isLoading => _isLoading;
   String get searchQuery => _searchQuery;
   String? get error => _error;
@@ -624,8 +627,9 @@ class PersonnelNotifier with ChangeNotifier {
 
   void clearSearch({int supplierId = 0}) {
     _searchQuery = '';
-    _searchResults = const [];
+    _searchResults = [];
     _filteredPersonnel = _getActiveUsersForSupplier(supplierId);
+    _personSearchResults = [];
     _error = null;
     notifyListeners();
   }
@@ -644,15 +648,35 @@ class PersonnelNotifier with ChangeNotifier {
     }
 
     // Debounce search to avoid excessive API calls
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
-      _performSearch(trimmedQuery, supplierId);
-    });
+    _performSearch(trimmedQuery, supplierId);
+    // _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
+    // });
   }
 
   Future<void> _performSearch(String query, int supplierId) async {
     _isLoading = true;
+    _searchResults.clear(); // Clear existing AppUser results
+    _personSearchResults.clear(); // Clear existing Person results
     notifyListeners();
 
+    try {
+      // Perform both searches in parallel
+      await Future.wait([
+        _searchAppUsers(query, supplierId),
+        _searchPeople(query, supplierId),
+      ]);
+
+      _error = null;
+    } catch (e) {
+      _error = 'Search failed: ${e.toString()}';
+      debugPrint('Error searching: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _searchAppUsers(String query, int supplierId) async {
     try {
       final searchResults = await _userService.searchAppUsers(
         query,
@@ -660,14 +684,29 @@ class PersonnelNotifier with ChangeNotifier {
         _itemsPerPage,
       );
 
-      _searchResults = searchResults ?? const [];
-      _error = null;
+      if (searchResults != null) {
+        _searchResults = searchResults;
+      }
     } catch (e) {
-      _error = 'Search failed: ${e.toString()}';
-      debugPrint('Error searching personnel: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      debugPrint('Error searching app users: $e');
+      // Don't set error here, continue with people search
+    }
+  }
+
+  Future<void> _searchPeople(String query, int supplierId) async {
+    try {
+      final peopleResults = await _userService.searchPeople(
+        query,
+        0,
+        _itemsPerPage,
+      );
+
+      if (peopleResults != null) {
+        _personSearchResults = peopleResults;
+      }
+    } catch (e) {
+      debugPrint('Error searching people: $e');
+      // Don't set error here, continue with app user search
     }
   }
 
@@ -735,8 +774,8 @@ class PersonnelNotifier with ChangeNotifier {
     _activeRules.clear();
     _userSupplierMappings.clear();
     _supplierPersonnelMappings.clear();
-    _filteredPersonnel = const [];
-    _searchResults = const [];
+    _filteredPersonnel = [];
+    _searchResults = [];
     _currentPage = 0;
     _hasMore = true;
     notifyListeners();

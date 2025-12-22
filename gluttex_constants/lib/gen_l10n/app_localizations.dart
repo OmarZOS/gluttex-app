@@ -4879,12 +4879,6 @@ abstract class AppLocalizations {
   /// **'Invoice'**
   String get invoice;
 
-  /// Item count label
-  ///
-  /// In en, this message translates to:
-  /// **'{cartItemCount, plural,  =0 {No items}  one {# item}  other {# items}} ({itemCount, plural,  =0 {no products}  one {one product}  other {{itemCount} products}}, {serviceCount, plural,  =0 {no services}  one {one service}  other {{serviceCount} services}})'**
-  String items(num cartItemCount, num itemCount, num serviceCount);
-
   /// Share button label
   ///
   /// In en, this message translates to:
@@ -7573,6 +7567,18 @@ abstract class AppLocalizations {
   /// **'Stock: {stock}'**
   String stock(Object stock);
 
+  /// No description provided for @itemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Items: {count}'**
+  String itemsCount(Object count);
+
+  /// Item count label
+  ///
+  /// In en, this message translates to:
+  /// **'{cartItemCount, plural,  =0 {No items}  one {# item}  other {# items}} ({itemCount, plural,  =0 {no products}  one {one product}  other {{itemCount} products}}, {serviceCount, plural,  =0 {no services}  one {one service}  other {{serviceCount} services}})'**
+  String items(num cartItemCount, num itemCount, num serviceCount);
+
   /// No description provided for @itemsText.
   ///
   /// In en, this message translates to:
@@ -7594,7 +7600,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderPlacedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'Your order has been placed successfully'**
+  /// **'Order placed successfully!'**
   String get orderPlacedSuccessfully;
 
   /// No description provided for @backToHome.
@@ -7636,7 +7642,7 @@ abstract class AppLocalizations {
   /// No description provided for @pickupDesc.
   ///
   /// In en, this message translates to:
-  /// **'Pick up from store location'**
+  /// **'Customer will pick up the order'**
   String get pickupDesc;
 
   /// No description provided for @delivery.
@@ -7648,7 +7654,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryDesc.
   ///
   /// In en, this message translates to:
-  /// **'Same day delivery available'**
+  /// **'We will deliver to your address'**
   String get deliveryDesc;
 
   /// No description provided for @shipping.
@@ -7660,7 +7666,7 @@ abstract class AppLocalizations {
   /// No description provided for @shippingDesc.
   ///
   /// In en, this message translates to:
-  /// **'Standard shipping (3-5 business days)'**
+  /// **'Ship via courier service'**
   String get shippingDesc;
 
   /// No description provided for @orderNotes.
@@ -7672,7 +7678,7 @@ abstract class AppLocalizations {
   /// No description provided for @notesHint.
   ///
   /// In en, this message translates to:
-  /// **'Special instructions, delivery notes, etc.'**
+  /// **'Add any special instructions or notes...'**
   String get notesHint;
 
   /// No description provided for @orderSummary.
@@ -7690,7 +7696,7 @@ abstract class AppLocalizations {
   /// No description provided for @printDocument.
   ///
   /// In en, this message translates to:
-  /// **'Print'**
+  /// **'Print Document'**
   String get printDocument;
 
   /// No description provided for @done.
@@ -7714,7 +7720,7 @@ abstract class AppLocalizations {
   /// No description provided for @invoiceReceipt.
   ///
   /// In en, this message translates to:
-  /// **'Invoice + Receipt'**
+  /// **'Invoice/Receipt'**
   String get invoiceReceipt;
 
   /// No description provided for @receiptOnly.
@@ -7828,8 +7834,662 @@ abstract class AppLocalizations {
   /// No description provided for @checkPaymentNote.
   ///
   /// In en, this message translates to:
-  /// **'Payment by check will be processed once received and cleared.'**
+  /// **'Payment by check will be processed upon receipt'**
   String get checkPaymentNote;
+
+  /// No description provided for @selectCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Customer'**
+  String get selectCustomer;
+
+  /// No description provided for @searchForCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for customer'**
+  String get searchForCustomer;
+
+  /// No description provided for @searchCustomersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, email, or phone...'**
+  String get searchCustomersHint;
+
+  /// No description provided for @searchCustomerInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter customer name, email, or phone number to search'**
+  String get searchCustomerInstructions;
+
+  /// No description provided for @addNewCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Customer'**
+  String get addNewCustomer;
+
+  /// No description provided for @searching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching...'**
+  String get searching;
+
+  /// No description provided for @noCustomersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No customers found'**
+  String get noCustomersFound;
+
+  /// No description provided for @adjustSearchTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search terms'**
+  String get adjustSearchTerms;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Search'**
+  String get clearSearch;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search results'**
+  String get searchResults;
+
+  /// No description provided for @addNewCustomerInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new customer profile to add them to the system'**
+  String get addNewCustomerInstruction;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @customerDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Details'**
+  String get customerDetails;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// No description provided for @editCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Customer'**
+  String get editCustomer;
+
+  /// No description provided for @removeCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Customer'**
+  String get removeCustomer;
+
+  /// No description provided for @checkoutHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout Help'**
+  String get checkoutHelp;
+
+  /// No description provided for @customerHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select or add a customer for this order. You can search by name, email, or scan a QR code.'**
+  String get customerHelpDescription;
+
+  /// No description provided for @documentTypeHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose between invoice or receipt. An invoice is for credit sales, a receipt is for cash sales.'**
+  String get documentTypeHelpDescription;
+
+  /// No description provided for @paymentMethodHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select how the customer will pay: cash, card, bank transfer, or mobile money.'**
+  String get paymentMethodHelpDescription;
+
+  /// No description provided for @notesParametersHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add notes or custom parameters to this order for reference.'**
+  String get notesParametersHelpDescription;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get gotIt;
+
+  /// No description provided for @notesParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes & Parameters'**
+  String get notesParameters;
+
+  /// No description provided for @parameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters'**
+  String get parameters;
+
+  /// No description provided for @addParameter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Parameter'**
+  String get addParameter;
+
+  /// No description provided for @editParameter.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Parameter'**
+  String get editParameter;
+
+  /// No description provided for @noParametersAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'No parameters added'**
+  String get noParametersAdded;
+
+  /// No description provided for @addParametersToCustomizeOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add parameters to customize this order'**
+  String get addParametersToCustomizeOrder;
+
+  /// No description provided for @changeCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Customer'**
+  String get changeCustomer;
+
+  /// No description provided for @installment.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment'**
+  String get installment;
+
+  /// No description provided for @help.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help;
+
+  /// No description provided for @addParameterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a custom parameter to this order'**
+  String get addParameterDescription;
+
+  /// No description provided for @parameterKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameter Key'**
+  String get parameterKey;
+
+  /// No description provided for @parameterKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Priority, Special Instructions'**
+  String get parameterKeyHint;
+
+  /// No description provided for @parameterKeyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a key'**
+  String get parameterKeyRequired;
+
+  /// No description provided for @parameterKeyTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Key is too long (max 50 characters)'**
+  String get parameterKeyTooLong;
+
+  /// No description provided for @parameterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameter Value'**
+  String get parameterValue;
+
+  /// No description provided for @parameterValueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., High, Handle with care'**
+  String get parameterValueHint;
+
+  /// No description provided for @parameterValueRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a value'**
+  String get parameterValueRequired;
+
+  /// No description provided for @parameterValueTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Value is too long (max 200 characters)'**
+  String get parameterValueTooLong;
+
+  /// No description provided for @suggestedParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested Parameters'**
+  String get suggestedParameters;
+
+  /// No description provided for @pleaseSelectCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a customer'**
+  String get pleaseSelectCustomer;
+
+  /// No description provided for @cartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart is empty'**
+  String get cartEmpty;
+
+  /// No description provided for @pleaseEnterCardDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter card details'**
+  String get pleaseEnterCardDetails;
+
+  /// No description provided for @pleaseEnterBankDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter bank details'**
+  String get pleaseEnterBankDetails;
+
+  /// No description provided for @pleaseEnterMobilePaymentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select mobile payment provider'**
+  String get pleaseEnterMobilePaymentDetails;
+
+  /// No description provided for @visa.
+  ///
+  /// In en, this message translates to:
+  /// **'VISA'**
+  String get visa;
+
+  /// No description provided for @mastercard.
+  ///
+  /// In en, this message translates to:
+  /// **'MasterCard'**
+  String get mastercard;
+
+  /// No description provided for @amex.
+  ///
+  /// In en, this message translates to:
+  /// **'American Express'**
+  String get amex;
+
+  /// No description provided for @orangeMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange Money'**
+  String get orangeMoney;
+
+  /// No description provided for @ooredooMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Ooredoo Money'**
+  String get ooredooMoney;
+
+  /// No description provided for @nedjmaPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nedjma Pay'**
+  String get nedjmaPay;
+
+  /// No description provided for @paypal.
+  ///
+  /// In en, this message translates to:
+  /// **'PayPal'**
+  String get paypal;
+
+  /// No description provided for @stcPay.
+  ///
+  /// In en, this message translates to:
+  /// **'STC Pay'**
+  String get stcPay;
+
+  /// No description provided for @saveToPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to preferences for future use'**
+  String get saveToPreferences;
+
+  /// No description provided for @savedParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Parameters'**
+  String get savedParameters;
+
+  /// No description provided for @currentParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Parameters'**
+  String get currentParameters;
+
+  /// No description provided for @noSavedParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved parameters yet'**
+  String get noSavedParameters;
+
+  /// No description provided for @manageSavedParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Saved Parameters'**
+  String get manageSavedParameters;
+
+  /// No description provided for @selectCustomerForOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a customer for this order'**
+  String get selectCustomerForOrder;
+
+  /// No description provided for @searchForCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for customers'**
+  String get searchForCustomers;
+
+  /// No description provided for @enterNameOrEmailToFindCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name, username or email to find customers'**
+  String get enterNameOrEmailToFindCustomers;
+
+  /// No description provided for @allCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'All customers'**
+  String get allCustomers;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Selection'**
+  String get clearSelection;
+
+  /// No description provided for @newCustomerComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'New customer creation coming soon'**
+  String get newCustomerComingSoon;
+
+  /// No description provided for @selectPaymentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select how you want to pay'**
+  String get selectPaymentType;
+
+  /// No description provided for @fullPaymentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the full amount now'**
+  String get fullPaymentDesc;
+
+  /// No description provided for @fullPaymentApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Payment Applied'**
+  String get fullPaymentApplied;
+
+  /// No description provided for @fullPaymentDescDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be charged the full amount immediately'**
+  String get fullPaymentDescDetail;
+
+  /// No description provided for @depositOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay a deposit now, balance later'**
+  String get depositOnlyDesc;
+
+  /// No description provided for @enterDepositAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter deposit amount'**
+  String get enterDepositAmount;
+
+  /// No description provided for @enterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter amount'**
+  String get enterAmount;
+
+  /// No description provided for @remainingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining amount'**
+  String get remainingAmount;
+
+  /// No description provided for @installmentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule payment for later'**
+  String get installmentDesc;
+
+  /// No description provided for @selectInstallmentDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select installment date'**
+  String get selectInstallmentDate;
+
+  /// No description provided for @installmentDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment Date'**
+  String get installmentDate;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a date'**
+  String get selectDate;
+
+  /// No description provided for @installmentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The full amount will be charged on the selected date'**
+  String get installmentNote;
+
+  /// No description provided for @persons.
+  ///
+  /// In en, this message translates to:
+  /// **'Persons'**
+  String get persons;
+
+  /// No description provided for @users.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users;
+
+  /// No description provided for @searchForPersons.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for persons'**
+  String get searchForPersons;
+
+  /// No description provided for @enterNameToFindPersons.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name to find persons'**
+  String get enterNameToFindPersons;
+
+  /// No description provided for @noPersonsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No persons found'**
+  String get noPersonsFound;
+
+  /// No description provided for @tryDifferentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different name'**
+  String get tryDifferentName;
+
+  /// No description provided for @recentCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent customers'**
+  String get recentCustomers;
+
+  /// No description provided for @noCustomersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No customers yet'**
+  String get noCustomersYet;
+
+  /// No description provided for @startByAddingCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by adding customers from below'**
+  String get startByAddingCustomers;
+
+  /// No description provided for @personAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Person Accounts'**
+  String get personAccounts;
+
+  /// No description provided for @userAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'User Accounts'**
+  String get userAccounts;
+
+  /// No description provided for @confirmCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Checkout'**
+  String get confirmCheckout;
+
+  /// No description provided for @checkoutSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout Summary'**
+  String get checkoutSummary;
+
+  /// No description provided for @mobileMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Money'**
+  String get mobileMoney;
+
+  /// No description provided for @orderId.
+  ///
+  /// In en, this message translates to:
+  /// **'Order ID'**
+  String get orderId;
+
+  /// No description provided for @orderSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Successful'**
+  String get orderSuccessful;
+
+  /// No description provided for @continueShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Shopping'**
+  String get continueShopping;
+
+  /// No description provided for @viewOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'View Orders'**
+  String get viewOrders;
+
+  /// No description provided for @confirmAndPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & Pay'**
+  String get confirmAndPay;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @processingOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing your order...'**
+  String get processingOrder;
+
+  /// No description provided for @cartEmptyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart is empty'**
+  String get cartEmptyError;
+
+  /// No description provided for @customerRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a customer'**
+  String get customerRequiredError;
+
+  /// No description provided for @loginRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to checkout'**
+  String get loginRequiredError;
+
+  /// No description provided for @checkoutError.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout Error'**
+  String get checkoutError;
+
+  /// No description provided for @itemsHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the items in your cart before checkout. You can modify quantities if needed.'**
+  String get itemsHelpDescription;
+
+  /// No description provided for @deliveryHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose whether the customer will pick up the order or if it needs to be delivered.'**
+  String get deliveryHelpDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

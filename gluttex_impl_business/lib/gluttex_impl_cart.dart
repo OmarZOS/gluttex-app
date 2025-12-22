@@ -55,14 +55,14 @@ class CartServiceImpl implements CartService {
   }
 
   @override
-  Future<Cart?> addCart(dynamic cartData) async {
+  Future<Cart?> addCart(dynamic cartData, {params}) async {
     try {
       final result = await _storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.cartEndpoint}',
-        cartData,
-      );
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.postCartEndpoint}',
+          cartData,
+          params: params);
 
-      return Cart.fromJson(result);
+      return Cart.fromResponseJson(result);
     } catch (e) {
       developer.log('Failed to add cart: $e');
       return null;

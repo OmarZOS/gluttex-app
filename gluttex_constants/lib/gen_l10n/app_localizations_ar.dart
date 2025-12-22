@@ -2484,41 +2484,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invoice => 'فاتورة';
 
   @override
-  String items(num cartItemCount, num itemCount, num serviceCount) {
-    String _temp0 = intl.Intl.pluralLogic(
-      cartItemCount,
-      locale: localeName,
-      other: '$cartItemCount عنصر',
-      many: '$cartItemCount عنصر',
-      few: '$serviceCount عناصر',
-      two: 'عنصران',
-      one: 'عنصر واحد',
-      zero: 'لا عناصر',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      itemCount,
-      locale: localeName,
-      other: '$itemCount منتج',
-      many: '$itemCount منتج',
-      few: '# منتجات',
-      two: 'منتجان',
-      one: 'منتج واحد',
-      zero: 'لا منتجات',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      serviceCount,
-      locale: localeName,
-      other: '$serviceCount خدمة',
-      many: '$serviceCount خدمة',
-      few: '# خدمات',
-      two: 'خدمتان',
-      one: 'خدمة واحدة',
-      zero: 'لا خدمات',
-    );
-    return '$_temp0 ($_temp1، $_temp2)';
-  }
-
-  @override
   String get share => 'مشاركة';
 
   @override
@@ -2540,13 +2505,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get card => 'بطاقة';
 
   @override
-  String get cash => 'نقداً';
+  String get cash => 'نقدي';
 
   @override
   String get bankTransfer => 'تحويل بنكي';
 
   @override
-  String get mobilePayment => 'دفع جوال';
+  String get mobilePayment => 'دفع عبر الهاتف';
 
   @override
   String get sharingInvoice => 'مشاركة الفاتورة';
@@ -2558,7 +2523,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invoiceDetails => 'تفاصيل الفاتورة';
 
   @override
-  String get currencySymbol => 'ر.س';
+  String get currencySymbol => 'د.ج';
 
   @override
   String get accessRefreshed => 'تم تديد الصلاحيات';
@@ -2815,7 +2780,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get subtotal => 'المجموع الفرعي';
 
   @override
-  String get total => 'المجموع';
+  String get total => 'الإجمالي';
 
   @override
   String get quantity => 'الكمية';
@@ -3646,7 +3611,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get income => 'دخل';
 
   @override
-  String get currencyCode => 'SAR';
+  String get currencyCode => 'USD';
 
   @override
   String get lastWeek => 'الأسبوع الماضي';
@@ -3888,6 +3853,46 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String itemsCount(Object count) {
+    return 'العناصر: $count';
+  }
+
+  @override
+  String items(num cartItemCount, num itemCount, num serviceCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cartItemCount,
+      locale: localeName,
+      other: '$cartItemCount عنصر',
+      many: '$cartItemCount عنصر',
+      few: '$serviceCount عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      itemCount,
+      locale: localeName,
+      other: '$itemCount منتج',
+      many: '$itemCount منتج',
+      few: '# منتجات',
+      two: 'منتجان',
+      one: 'منتج واحد',
+      zero: 'لا منتجات',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      serviceCount,
+      locale: localeName,
+      other: '$serviceCount خدمة',
+      many: '$serviceCount خدمة',
+      few: '# خدمات',
+      two: 'خدمتان',
+      one: 'خدمة واحدة',
+      zero: 'لا خدمات',
+    );
+    return '$_temp0 ($_temp1، $_temp2)';
+  }
+
+  @override
   String get itemsText => 'العناصر';
 
   @override
@@ -3897,7 +3902,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderConfirmed => 'تم تأكيد الطلب';
 
   @override
-  String get orderPlacedSuccessfully => 'تم تقديم طلبك بنجاح';
+  String get orderPlacedSuccessfully => 'تم تقديم الطلب بنجاح!';
 
   @override
   String get backToHome => 'العودة للرئيسية';
@@ -3915,37 +3920,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deliveryType => 'نوع التوصيل';
 
   @override
-  String get pickup => 'استلام';
+  String get pickup => 'استلام شخصي';
 
   @override
-  String get pickupDesc => 'استلام من موقع المتجر';
+  String get pickupDesc => 'العميل سيقوم باستلام الطلب';
 
   @override
   String get delivery => 'توصيل';
 
   @override
-  String get deliveryDesc => 'توصيل في نفس اليوم متاح';
+  String get deliveryDesc => 'سنقوم بالتوصيل إلى عنوانك';
 
   @override
-  String get shipping => 'شحن';
+  String get shipping => 'الشحن';
 
   @override
-  String get shippingDesc => 'شحن عادي (3-5 أيام عمل)';
+  String get shippingDesc => 'الشحن عبر خدمة البريد السريع';
 
   @override
   String get orderNotes => 'ملاحظات الطلب';
 
   @override
-  String get notesHint => 'تعليمات خاصة، ملاحظات التوصيل، إلخ.';
+  String get notesHint => 'أضف أي تعليمات خاصة أو ملاحظات...';
 
   @override
   String get orderSummary => 'ملخص الطلب';
 
   @override
-  String get placeOrder => 'تقديم الطلب';
+  String get placeOrder => 'تأكيد الطلب';
 
   @override
-  String get printDocument => 'طباعة';
+  String get printDocument => 'طباعة المستند';
 
   @override
   String get done => 'تم';
@@ -3954,10 +3959,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get customer => 'العميل';
 
   @override
-  String get searchCustomers => 'ابحث عن العملاء...';
+  String get searchCustomers => 'ابحث عن عملاء...';
 
   @override
-  String get invoiceReceipt => 'فاتورة + إيصال';
+  String get invoiceReceipt => 'فاتورة/إيصال';
 
   @override
   String get receiptOnly => 'إيصال فقط';
@@ -3969,10 +3974,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paymentType => 'نوع الدفع';
 
   @override
-  String get fullPayment => 'دفع كامل';
+  String get fullPayment => 'الدفع الكامل';
 
   @override
-  String get depositOnly => 'عربون فقط';
+  String get depositOnly => 'دفعة أولى فقط';
 
   @override
   String get check => 'شيك';
@@ -4002,7 +4007,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reference => 'المرجع';
 
   @override
-  String get mobilePaymentDetails => 'تفاصيل الدفع الجوال';
+  String get mobilePaymentDetails => 'تفاصيل الدفع عبر الهاتف';
 
   @override
   String get serviceProvider => 'مزود الخدمة';
@@ -4014,5 +4019,332 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkDetails => 'تفاصيل الشيك';
 
   @override
-  String get checkPaymentNote => 'سيتم معالجة الدفع بالشيك عند استلامه وتسويته.';
+  String get checkPaymentNote => 'سيتم معالجة الدفع بالشيك عند الاستلام';
+
+  @override
+  String get selectCustomer => 'اختر العميل';
+
+  @override
+  String get searchForCustomer => 'ابحث عن عميل';
+
+  @override
+  String get searchCustomersHint => 'ابحث بالاسم، البريد الإلكتروني، أو الهاتف...';
+
+  @override
+  String get searchCustomerInstructions => 'أدخل اسم العميل، البريد الإلكتروني، أو رقم الهاتف للبحث';
+
+  @override
+  String get addNewCustomer => 'إضافة عميل جديد';
+
+  @override
+  String get searching => 'جاري البحث...';
+
+  @override
+  String get noCustomersFound => 'لم يتم العثور على عملاء';
+
+  @override
+  String get adjustSearchTerms => 'حاول تعديل مصطلحات البحث';
+
+  @override
+  String get clearSearch => 'مسح البحث';
+
+  @override
+  String get searchResults => 'نتائج البحث';
+
+  @override
+  String get addNewCustomerInstruction => 'أنشئ ملف عميل جديد لإضافته إلى النظام';
+
+  @override
+  String get create => 'إنشاء';
+
+  @override
+  String get customerDetails => 'تفاصيل العميل';
+
+  @override
+  String get fullName => 'الاسم الكامل';
+
+  @override
+  String get email => 'البريد الإلكتروني';
+
+  @override
+  String get address => 'العنوان';
+
+  @override
+  String get city => 'المدينة';
+
+  @override
+  String get country => 'الدولة';
+
+  @override
+  String get editCustomer => 'تعديل العميل';
+
+  @override
+  String get removeCustomer => 'إزالة العميل';
+
+  @override
+  String get checkoutHelp => 'مساعدة في الدفع';
+
+  @override
+  String get customerHelpDescription => 'حدد أو أضف عميلاً لهذا الطلب. يمكنك البحث بالاسم أو البريد الإلكتروني أو مسح رمز QR.';
+
+  @override
+  String get documentTypeHelpDescription => 'اختر بين فاتورة أو إيصال. الفاتورة للمبيعات الآجلة، الإيصال للمبيعات النقدية.';
+
+  @override
+  String get paymentMethodHelpDescription => 'حدد كيفية دفع العميل: نقدي، بطاقة، تحويل بنكي، أو نقال هاتفي.';
+
+  @override
+  String get notesParametersHelpDescription => 'أضف ملاحظات أو معلمات مخصصة لهذا الطلب للرجوع إليها لاحقاً.';
+
+  @override
+  String get gotIt => 'فهمت';
+
+  @override
+  String get notesParameters => 'الملاحظات والمعلمات';
+
+  @override
+  String get parameters => 'المعلمات';
+
+  @override
+  String get addParameter => 'إضافة معلمة';
+
+  @override
+  String get editParameter => 'تعديل المعلمة';
+
+  @override
+  String get noParametersAdded => 'لا توجد معلمات مضافة';
+
+  @override
+  String get addParametersToCustomizeOrder => 'أضف معلمات لتخصيص هذا الطلب';
+
+  @override
+  String get changeCustomer => 'تغيير العميل';
+
+  @override
+  String get installment => 'تقسيط';
+
+  @override
+  String get help => 'مساعدة';
+
+  @override
+  String get addParameterDescription => 'أضف معلمة مخصصة لهذا الطلب';
+
+  @override
+  String get parameterKey => 'مفتاح المعلمة';
+
+  @override
+  String get parameterKeyHint => 'مثال: الأولوية، تعليمات خاصة';
+
+  @override
+  String get parameterKeyRequired => 'يرجى إدخال مفتاح';
+
+  @override
+  String get parameterKeyTooLong => 'المفتاح طويل جداً (الحد الأقصى 50 حرفاً)';
+
+  @override
+  String get parameterValue => 'قيمة المعلمة';
+
+  @override
+  String get parameterValueHint => 'مثال: عالية، التعامل بحذر';
+
+  @override
+  String get parameterValueRequired => 'يرجى إدخال قيمة';
+
+  @override
+  String get parameterValueTooLong => 'القيمة طويلة جداً (الحد الأقصى 200 حرف)';
+
+  @override
+  String get suggestedParameters => 'المعلمات المقترحة';
+
+  @override
+  String get pleaseSelectCustomer => 'يرجى تحديد عميل';
+
+  @override
+  String get cartEmpty => 'سلة التسوق فارغة';
+
+  @override
+  String get pleaseEnterCardDetails => 'يرجى إدخال تفاصيل البطاقة';
+
+  @override
+  String get pleaseEnterBankDetails => 'يرجى إدخال التفاصيل البنكية';
+
+  @override
+  String get pleaseEnterMobilePaymentDetails => 'يرجى تحديد مزود الدفع عبر الهاتف';
+
+  @override
+  String get visa => 'فيزا';
+
+  @override
+  String get mastercard => 'ماستركارد';
+
+  @override
+  String get amex => 'أمريكان إكسبريس';
+
+  @override
+  String get orangeMoney => 'أورانج موني';
+
+  @override
+  String get ooredooMoney => 'أوريدو موني';
+
+  @override
+  String get nedjmaPay => 'نجمة باي';
+
+  @override
+  String get paypal => 'باي بال';
+
+  @override
+  String get stcPay => 'STC باي';
+
+  @override
+  String get saveToPreferences => 'حفظ في التفضيلات للاستخدام المستقبلي';
+
+  @override
+  String get savedParameters => 'المعلمات المحفوظة';
+
+  @override
+  String get currentParameters => 'المعلمات الحالية';
+
+  @override
+  String get noSavedParameters => 'لا توجد معلمات محفوظة بعد';
+
+  @override
+  String get manageSavedParameters => 'إدارة المعلمات المحفوظة';
+
+  @override
+  String get selectCustomerForOrder => 'حدد عميلاً لهذا الطلب';
+
+  @override
+  String get searchForCustomers => 'ابحث عن العملاء';
+
+  @override
+  String get enterNameOrEmailToFindCustomers => 'أدخل الاسم أو اسم المستخدم أو البريد الإلكتروني للعثور على العملاء';
+
+  @override
+  String get allCustomers => 'جميع العملاء';
+
+  @override
+  String get clearSelection => 'مسح التحديد';
+
+  @override
+  String get newCustomerComingSoon => 'إنشاء عميل جديد قريباً';
+
+  @override
+  String get selectPaymentType => 'اختر طريقة الدفع التي تريدها';
+
+  @override
+  String get fullPaymentDesc => 'دفع المبلغ الكامل الآن';
+
+  @override
+  String get fullPaymentApplied => 'تم تطبيق الدفع الكامل';
+
+  @override
+  String get fullPaymentDescDetail => 'سيتم خصم المبلغ الكامل على الفور';
+
+  @override
+  String get depositOnlyDesc => 'ادفع دفعة أولى الآن، والباقي لاحقاً';
+
+  @override
+  String get enterDepositAmount => 'أدخل مبلغ الدفعة الأولى';
+
+  @override
+  String get enterAmount => 'أدخل المبلغ';
+
+  @override
+  String get remainingAmount => 'المبلغ المتبقي';
+
+  @override
+  String get installmentDesc => 'جدولة الدفع لوقت لاحق';
+
+  @override
+  String get selectInstallmentDate => 'اختر تاريخ الدفع';
+
+  @override
+  String get installmentDate => 'تاريخ الدفع';
+
+  @override
+  String get selectDate => 'اختر تاريخاً';
+
+  @override
+  String get installmentNote => 'سيتم خصم المبلغ الكامل في التاريخ المحدد';
+
+  @override
+  String get persons => 'أشخاص';
+
+  @override
+  String get users => 'مستخدمين';
+
+  @override
+  String get searchForPersons => 'ابحث عن أشخاص';
+
+  @override
+  String get enterNameToFindPersons => 'أدخل اسمًا للعثور على أشخاص';
+
+  @override
+  String get noPersonsFound => 'لم يتم العثور على أشخاص';
+
+  @override
+  String get tryDifferentName => 'جرب اسمًا مختلفًا';
+
+  @override
+  String get recentCustomers => 'العملاء الحديثين';
+
+  @override
+  String get noCustomersYet => 'لا يوجد عملاء بعد';
+
+  @override
+  String get startByAddingCustomers => 'ابدأ بإضافة عملاء من الأسفل';
+
+  @override
+  String get personAccounts => 'حسابات الأشخاص';
+
+  @override
+  String get userAccounts => 'حسابات المستخدمين';
+
+  @override
+  String get confirmCheckout => 'تأكيد الدفع';
+
+  @override
+  String get checkoutSummary => 'ملخص الدفع';
+
+  @override
+  String get mobileMoney => 'نقال هاتفي';
+
+  @override
+  String get orderId => 'رقم الطلب';
+
+  @override
+  String get orderSuccessful => 'نجاح الطلب';
+
+  @override
+  String get continueShopping => 'متابعة التسوق';
+
+  @override
+  String get viewOrders => 'عرض الطلبات';
+
+  @override
+  String get confirmAndPay => 'تأكيد والدفع';
+
+  @override
+  String get ok => 'موافق';
+
+  @override
+  String get processingOrder => 'جاري معالجة طلبك...';
+
+  @override
+  String get cartEmptyError => 'سلة التسوق فارغة';
+
+  @override
+  String get customerRequiredError => 'الرجاء تحديد عميل';
+
+  @override
+  String get loginRequiredError => 'الرجاء تسجيل الدخول للدفع';
+
+  @override
+  String get checkoutError => 'خطأ في الدفع';
+
+  @override
+  String get itemsHelpDescription => 'راجع العناصر في سلة التسوق قبل الدفع. يمكنك تعديل الكميات إذا لزم الأمر.';
+
+  @override
+  String get deliveryHelpDescription => 'اختر ما إذا كان العميل سيستلم الطلب شخصياً أو إذا كان يحتاج إلى توصيل.';
 }
