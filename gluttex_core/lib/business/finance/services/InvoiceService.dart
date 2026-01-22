@@ -22,7 +22,7 @@ abstract class InvoiceService {
   }
 
   Future<FinancialDocument?> addFinancialDocument(
-      FinancialDocument financialDocument) async {
+      dynamic financialDocument) async {
     return null;
   }
 

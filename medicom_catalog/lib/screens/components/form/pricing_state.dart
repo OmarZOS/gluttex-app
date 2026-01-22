@@ -4,8 +4,8 @@ import 'package:gluttex_ui/components/pricing_config_card.dart';
 
 class PricingState with ChangeNotifier {
   double _basePrice = 0.0;
-  double _taxPercentage = 10.0; // Default tax
-  double _profitMargin = 30.0; // Default profit margin
+  double _taxPercentage = 19.0; // Default tax
+  double _profitMargin = 20.0; // Default profit margin
   double _finalPrice = 0.0;
   PricingMode _mode = PricingMode.byProfit;
 

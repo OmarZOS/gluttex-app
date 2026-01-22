@@ -79,7 +79,7 @@ class _PaymentListScreenState extends State<PaymentListScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => PaymentFormScreen(
-          initialData: payment,
+          // initialData: payment,
           isEditing: true,
         ),
       ),

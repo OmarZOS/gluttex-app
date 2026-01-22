@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/Cart.dart';
+import 'package:gluttex_core/business/finance/Order.dart';
+import 'package:gluttex_event/order_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:provider/provider.dart';
@@ -14,13 +16,13 @@ class CartScreen extends StatelessWidget {
     final localizations = AppLocalizations.of(context)!;
     final cartNotifier = Provider.of<CartChangeNotifier>(context);
     final userNotifier = Provider.of<AppUserNotifier>(context);
-
+    final orderNotifier = Provider.of<OrderChangeNotifier>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.cartText),
       ),
-      floatingActionButton:
-          _buildCheckoutButton(context, cartNotifier, userNotifier),
+      floatingActionButton: _buildCheckoutButton(
+          context, cartNotifier, orderNotifier, userNotifier),
       body: _buildCartContent(context, cartNotifier),
     );
   }
@@ -28,38 +30,41 @@ class CartScreen extends StatelessWidget {
   Widget _buildCheckoutButton(
     BuildContext context,
     CartChangeNotifier cartNotifier,
+    OrderChangeNotifier orderNotifier,
     AppUserNotifier userNotifier,
   ) {
     return FloatingActionButton(
       onPressed: cartNotifier.cart.items.isEmpty
           ? null
-          : () => _processOrder(context, cartNotifier, userNotifier),
+          : () =>
+              _processOrder(context, cartNotifier, orderNotifier, userNotifier),
       backgroundColor: cartNotifier.cart.items.isEmpty
           ? Colors.grey
           : Theme.of(context).colorScheme.primary,
+      elevation: 4,
       child: Icon(
         Icons.done,
         color: cartNotifier.cart.items.isEmpty
             ? Colors.grey[400]
             : Theme.of(context).colorScheme.onPrimary,
       ),
-      elevation: 4,
     );
   }
 
   Future<void> _processOrder(
     BuildContext context,
     CartChangeNotifier cartNotifier,
+    OrderChangeNotifier orderNotifier,
     AppUserNotifier userNotifier,
   ) async {
     final localizations = AppLocalizations.of(context)!;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
-      final orderData = Cart.buildOrderData(
+      final orderData = Order.buildOrderData(
           cartNotifier.cart.items, userNotifier.appUser!.id_app_user!);
 
-      final response = await cartNotifier.submitOrder(orderData);
+      final response = await orderNotifier.submitOrder(orderData);
 
       scaffoldMessenger.showSnackBar(
         SnackBar(

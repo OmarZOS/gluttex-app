@@ -246,7 +246,7 @@ class _PanelContentState extends State<PanelContent> {
         radius: 40,
         backgroundColor: theme.colorScheme.primaryContainer,
         child: Image.network(
-          (supplier.supplier_image_url ?? ""),
+          (supplier.supplierImageUrl ?? ""),
           width: 40,
           height: 40,
           alignment: Alignment.center,
@@ -270,7 +270,7 @@ class _PanelContentState extends State<PanelContent> {
               color: Theme.of(context).colorScheme.onSurface,
             );
           },
-          key: ValueKey(supplier.supplier_image_url),
+          key: ValueKey(supplier.supplierImageUrl),
         ));
   }
 
@@ -305,7 +305,7 @@ class _PanelContentState extends State<PanelContent> {
   Widget _buildSupplierSubtitle(Supplier supplier, ThemeData theme) {
     return Text(
       AppLocalizations.of(context)!
-          .by_organisation(supplier.provider_organisation_name),
+          .by_organisation(supplier.providerOrganisationName),
       style: theme.textTheme.bodyMedium?.copyWith(
         color: theme.colorScheme.onSurface.withOpacity(0.6),
       ),

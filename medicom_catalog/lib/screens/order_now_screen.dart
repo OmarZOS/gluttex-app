@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/Cart.dart';
 import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_event/order_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -60,7 +62,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     final userNotifier = context.read<AppUserNotifier>();
 
     try {
-      final orderData = Cart.buildSingleOrderData(
+      final orderData = Order.buildSingleOrderData(
         product: widget.product,
         quantity: quantity,
         orderingUserId: userNotifier.appUser?.id_app_user ?? 0,
@@ -68,8 +70,8 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
         taxRate: taxRate,
       );
 
-      final cartNotifier = context.read<CartChangeNotifier>();
-      final OrderResult result = await cartNotifier.submitOrder(orderData);
+      final orderNotifier = context.read<OrderChangeNotifier>();
+      final OrderResult result = await orderNotifier.submitOrder(orderData);
 
       if (result.isSuccess) {
         messenger.showSnackBar(

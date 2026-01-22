@@ -23,6 +23,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
   Position? _currentLocation;
   SupplierFilter _filter = const SupplierFilter();
   bool _isLoading = false;
+  bool _isDisposed = false;
 
   // Pagination
   int _suppliersPage = 0;
@@ -31,6 +32,37 @@ class SupplierChangeNotifier extends ChangeNotifier {
   static const int _organisationsPerPage = 30;
   bool _hasMoreSuppliers = true;
   bool _hasMoreOrganisations = true;
+
+  // Debouncing for search
+  Timer? _searchTimer;
+
+  // ============ LIFECYCLE ============
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _searchTimer?.cancel();
+    super.dispose();
+  }
+
+  // ============ SAFE NOTIFICATION ============
+
+  void _safeNotifyListeners() {
+    if (!_isDisposed && hasListeners) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isDisposed && hasListeners) {
+          notifyListeners();
+        }
+      });
+    }
+  }
+
+  void _setLoading(bool loading) {
+    if (_isLoading != loading) {
+      _isLoading = loading;
+      _safeNotifyListeners();
+    }
+  }
 
   // ============ PUBLIC GETTERS ============
 
@@ -50,12 +82,12 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
   void setFilter(SupplierFilter newFilter) {
     _filter = newFilter;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void clearFilter() {
     _filter = const SupplierFilter();
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   List<Supplier> _applyFilters() {
@@ -64,7 +96,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
         return false;
       }
       if (_filter.organisationId != null &&
-          supplier.id_provider_organisation != _filter.organisationId) {
+          supplier.idProviderOrganisation != _filter.organisationId) {
         return false;
       }
       if (_filter.ownerId != null &&
@@ -81,10 +113,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
           return false;
         }
       }
-      // if (_filter.status != null &&
-      //     supplier.productProviderStatus != _filter.status) {
-      //   return false;
-      // }
       return true;
     }).toList();
   }
@@ -92,9 +120,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
   bool _matchesName(Supplier supplier, String query) {
     final name = supplier.providerName.toLowerCase();
     final lowerQuery = query.toLowerCase();
-
-    return name.contains(lowerQuery) ||
-        (supplier.providerName?.toLowerCase() ?? '').contains(lowerQuery);
+    return name.contains(lowerQuery);
   }
 
   // ============ SUPPLIER MANAGEMENT ============
@@ -103,6 +129,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
     bool reset = false,
     int? ownerId,
     int? organisationId,
+    bool notify = true,
   }) async {
     if (_isLoading || (!reset && !_hasMoreSuppliers)) return;
 
@@ -122,7 +149,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
         _itemsPerPage,
       );
 
-      _addSuppliers(fetched);
+      _addSuppliers(fetched, notify: false);
 
       if (fetched.length < _itemsPerPage) {
         _hasMoreSuppliers = false;
@@ -133,10 +160,14 @@ class SupplierChangeNotifier extends ChangeNotifier {
       _handleError('Failed to fetch suppliers', e, stackTrace);
     } finally {
       _setLoading(false);
+      if (notify) {
+        _safeNotifyListeners();
+      }
     }
   }
 
-  Future<Supplier?> getSupplierById(int id, {bool forceRefresh = false}) async {
+  Future<Supplier?> getSupplierById(int id,
+      {bool forceRefresh = false, bool notify = true}) async {
     // Check cache first
     if (!forceRefresh) {
       final cached = _detailedCache.firstWhere(
@@ -155,7 +186,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
       final supplier = await _supplierService.getSupplier(id.toString());
       if (supplier != null) {
         _cacheSupplier(supplier);
-        _updateSupplierInList(supplier);
+        _updateSupplierInList(supplier, notify: false);
       }
       return supplier;
     } catch (e, stackTrace) {
@@ -163,6 +194,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
       return null;
     } finally {
       _setLoading(false);
+      if (notify) {
+        _safeNotifyListeners();
+      }
     }
   }
 
@@ -171,9 +205,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
     try {
       // Handle image upload if present
-      if (supplier.supplier_image != null) {
-        String? imageUrl = await supplier.supplier_image?.uploadImage();
-        supplier.supplier_image_url = imageUrl;
+      if (supplier.supplierImage != null) {
+        String? imageUrl = await supplier.supplierImage?.uploadImage();
+        supplier = supplier.copyWith(supplierImageUrl: imageUrl);
       }
 
       final result = supplier.idProductProvider == 0
@@ -185,11 +219,11 @@ class SupplierChangeNotifier extends ChangeNotifier {
       }
 
       _cacheSupplier(result);
-      _updateSupplierInList(result);
+      _updateSupplierInList(result, notify: false);
 
       // Refresh list if needed
       if (supplier.idProductProvider == 0) {
-        await fetchSuppliers(reset: true);
+        await fetchSuppliers(reset: true, notify: false);
       }
 
       return result;
@@ -198,6 +232,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
       rethrow;
     } finally {
       _setLoading(false);
+      _safeNotifyListeners();
     }
   }
 
@@ -211,7 +246,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
       if (success) {
         _suppliers.removeWhere((s) => s.idProductProvider == id);
         _detailedCache.removeWhere((s) => s.idProductProvider == id);
-        notifyListeners();
       }
 
       return success;
@@ -220,41 +254,51 @@ class SupplierChangeNotifier extends ChangeNotifier {
       return false;
     } finally {
       _setLoading(false);
+      _safeNotifyListeners();
     }
   }
 
   // ============ SEARCH FUNCTIONALITY ============
 
-  Future<void> searchSuppliers(String query) async {
+  Future<void> searchSuppliers(String query,
+      {Duration delay = const Duration(milliseconds: 500)}) async {
+    // Cancel previous timer
+    _searchTimer?.cancel();
+
     if (query.isEmpty) {
       clearFilter();
       return;
     }
 
-    _setFilter(SupplierFilter(name: query));
+    // Debounce search
+    _searchTimer = Timer(delay, () async {
+      if (_isDisposed) return;
 
-    // Local search first
-    final localResults = _applyFilters();
-    if (localResults.isNotEmpty) {
-      notifyListeners();
-    }
+      setFilter(SupplierFilter(name: query));
 
-    // Remote search for additional results
-    _setLoading(true);
+      // Local search first
+      final localResults = _applyFilters();
+      if (localResults.isNotEmpty) {
+        _safeNotifyListeners();
+      }
 
-    try {
-      final remoteResults = await _supplierService.searchSuppliersByToken(
-        query,
-        0, // organisationPage
-        _suppliersPage * _itemsPerPage,
-      );
+      _setLoading(true);
 
-      _addSuppliers(remoteResults);
-    } catch (e, stackTrace) {
-      _handleError('Failed to search suppliers', e, stackTrace);
-    } finally {
-      _setLoading(false);
-    }
+      try {
+        final remoteResults = await _supplierService.searchSuppliersByToken(
+          query,
+          0,
+          _suppliersPage * _itemsPerPage,
+        );
+
+        _addSuppliers(remoteResults, notify: false);
+      } catch (e, stackTrace) {
+        _handleError('Failed to search suppliers', e, stackTrace);
+      } finally {
+        _setLoading(false);
+        _safeNotifyListeners();
+      }
+    });
   }
 
   Future<void> searchSuppliersByGeo({
@@ -262,6 +306,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
     required double latitude,
     required double radiusKm,
     bool reset = false,
+    bool notify = true,
   }) async {
     if (reset) {
       _suppliers.clear();
@@ -279,7 +324,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
         radiusKm,
       );
 
-      _addSuppliers(results);
+      _addSuppliers(results, notify: false);
 
       if (results.length < _itemsPerPage) {
         _hasMoreSuppliers = false;
@@ -290,17 +335,19 @@ class SupplierChangeNotifier extends ChangeNotifier {
       _handleError('Failed to search suppliers by location', e, stackTrace);
     } finally {
       _setLoading(false);
+      if (notify) {
+        _safeNotifyListeners();
+      }
     }
   }
 
   // ============ LOCATION MANAGEMENT ============
 
-  Future<void> getCurrentLocation() async {
+  Future<void> getCurrentLocation({bool notify = true}) async {
     if (_isLoading) return;
 
     // Only allow on mobile platforms
     if (!Platform.isAndroid && !Platform.isIOS) {
-      // notifyListeners();
       return;
     }
 
@@ -310,7 +357,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
       // Check if location services are enabled
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        notifyListeners();
         return;
       }
 
@@ -323,7 +369,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
         if (permission == LocationPermission.denied ||
             permission == LocationPermission.deniedForever) {
-          notifyListeners();
           return;
         }
       }
@@ -331,7 +376,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
       // Verify we have proper permission
       if (permission != LocationPermission.whileInUse &&
           permission != LocationPermission.always) {
-        notifyListeners();
         return;
       }
 
@@ -339,14 +383,15 @@ class SupplierChangeNotifier extends ChangeNotifier {
       _currentLocation = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       ).timeout(const Duration(seconds: 15));
-
-      notifyListeners();
-    } on TimeoutException catch (_) {
-      notifyListeners();
+    } on TimeoutException {
+      // Silent fail on timeout
     } catch (e) {
-      notifyListeners();
+      debugPrint('Location error: $e');
     } finally {
       _setLoading(false);
+      if (notify) {
+        _safeNotifyListeners();
+      }
     }
   }
 
@@ -356,6 +401,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
     bool reset = false,
     int? ownerId,
     int? organisationId,
+    bool notify = true,
   }) async {
     if (_isLoading || (!reset && !_hasMoreOrganisations)) return;
 
@@ -387,6 +433,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
       _handleError('Failed to fetch organisations', e, stackTrace);
     } finally {
       _setLoading(false);
+      if (notify) {
+        _safeNotifyListeners();
+      }
     }
   }
 
@@ -396,7 +445,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
   // ============ HELPER METHODS ============
 
-  void _addSuppliers(List<Supplier> newSuppliers) {
+  void _addSuppliers(List<Supplier> newSuppliers, {bool notify = true}) {
     final existingIds = _suppliers.map((s) => s.idProductProvider).toSet();
 
     for (final supplier in newSuppliers) {
@@ -405,7 +454,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
       }
     }
 
-    notifyListeners();
+    if (notify) {
+      _safeNotifyListeners();
+    }
   }
 
   void _cacheSupplier(Supplier supplier) {
@@ -420,7 +471,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
     }
   }
 
-  void _updateSupplierInList(Supplier supplier) {
+  void _updateSupplierInList(Supplier supplier, {bool notify = true}) {
     final index = _suppliers.indexWhere(
       (s) => s.idProductProvider == supplier.idProductProvider,
     );
@@ -429,31 +480,26 @@ class SupplierChangeNotifier extends ChangeNotifier {
       _suppliers[index] = supplier;
     }
 
-    notifyListeners();
-  }
-
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
-
-  void _setFilter(SupplierFilter filter) {
-    _filter = filter;
-    notifyListeners();
+    if (notify) {
+      _safeNotifyListeners();
+    }
   }
 
   void _handleError(String message, Object error, StackTrace stackTrace) {
-    log('$message: $error', error: error, stackTrace: stackTrace);
-    // You could also set an error state here
+    debugPrint('$message: $error');
   }
 
   // ============ BATCH OPERATIONS ============
 
-  Future<void> refreshAll() async {
+  Future<void> refreshAll({bool notify = true}) async {
     await Future.wait([
-      fetchSuppliers(reset: true),
-      fetchOrganisations(reset: true),
+      fetchSuppliers(reset: true, notify: false),
+      fetchOrganisations(reset: true, notify: false),
     ]);
+
+    if (notify) {
+      _safeNotifyListeners();
+    }
   }
 
   Future<void> prefetchSupplierDetails(List<int> supplierIds) async {
@@ -466,8 +512,27 @@ class SupplierChangeNotifier extends ChangeNotifier {
     if (missingIds.isEmpty) return;
 
     await Future.wait(
-      missingIds.map((id) => getSupplierById(id)),
+      missingIds.map((id) => getSupplierById(id, notify: false)),
     );
+  }
+
+  // ============ STATE RESET ============
+
+  void reset() {
+    _suppliers.clear();
+    _detailedCache.clear();
+    _organisations.clear();
+    _currentLocation = null;
+    _filter = const SupplierFilter();
+    _suppliersPage = 0;
+    _organisationsPage = 0;
+    _hasMoreSuppliers = true;
+    _hasMoreOrganisations = true;
+    _isLoading = false;
+    _searchTimer?.cancel();
+    _searchTimer = null;
+
+    // Don't notify here - let the caller decide when to notify
   }
 }
 
@@ -527,28 +592,3 @@ class SupplierFilter {
       hasLocation == null &&
       isActive == null;
 }
-
-// Extension for Supplier model (add to Supplier class)
-// extension SupplierExtensions on Supplier {
-//   Supplier copyWith({
-//     int? idProductProvider,
-//     // Add all other fields...
-//   }) {
-//     return Supplier(
-//       idProductProvider: idProductProvider ?? this.idProductProvider,
-//       // Copy all other fields...
-//     );
-//   }
-
-//   static Supplier empty() => Supplier(idProductProvider: 0);
-
-//   double? get averageRating {
-//     // Implement based on your rating system
-//     return null;
-//   }
-
-//   String? get productProviderStatus {
-//     // Implement based on your status system
-//     return 'active';
-//   }
-// }

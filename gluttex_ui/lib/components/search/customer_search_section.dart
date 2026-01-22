@@ -44,22 +44,22 @@ class CustomerSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.person_outline,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                loc.customer,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     Icon(
+          //       Icons.person_outline,
+          //       color: theme.colorScheme.primary,
+          //       size: 20,
+          //     ),
+          //     const SizedBox(width: 8),
+          //     Text(
+          //       loc.customer,
+          //       style: theme.textTheme.titleMedium?.copyWith(
+          //         fontWeight: FontWeight.w600,
+          //       ),
+          //     ),
+          //   ],
+          // ),
           const SizedBox(height: 12),
 
           // Customer Selection Area with QR button

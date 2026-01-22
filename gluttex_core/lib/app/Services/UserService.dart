@@ -15,6 +15,10 @@ abstract class AppUserService {
     return null;
   }
 
+  Future<Person?> getPerson(String idPerson) async {
+    return null;
+  }
+
   Future<List<ManagementRule>?>? getManagementRules(
     int orgId,
     int supplierId,

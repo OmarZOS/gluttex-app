@@ -209,9 +209,9 @@ class BusinessOperationsUIManager {
   }
 
   /// 格式化货币
-  static String formatCurrency(double amount) {
-    return 'DZD${amount.toStringAsFixed(2)}';
-  }
+  // static String formatCurrency(double amount) {
+  //   return '${amount.toStringAsFixed(2)}';
+  // }
 
   /// 获取源标签颜色
   static Color getSourceBadgeColor(

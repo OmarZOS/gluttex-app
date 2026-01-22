@@ -10,9 +10,12 @@ import 'package:locator/locator.dart';
 class InvoiceServiceImpl implements InvoiceService {
   @override
   Future<FinancialDocument?> addFinancialDocument(
-      FinancialDocument financialDocument) {
-    // TODO: implement addFinancialDocument
-    throw UnimplementedError();
+      dynamic financialDocument) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+
+    return FinancialDocument.fromJson(await storageService.insert(
+        GluttexConstants.apiBaseUrl + GluttexConstants.postPaymentEndpoint,
+        financialDocument));
   }
 
   @override

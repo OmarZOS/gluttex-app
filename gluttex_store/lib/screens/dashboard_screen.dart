@@ -30,9 +30,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<AppUserNotifier, PersonnelNotifier,
-        SupplierChangeNotifier>(
-      builder: (context, userNotifier, personnelNotifier, supplierNotifier, _) {
+    return Consumer2<AppUserNotifier, PersonnelNotifier>(
+      builder: (context, userNotifier, personnelNotifier, _) {
         final currentUser = userNotifier.appUser;
 
         if (currentUser == null) {

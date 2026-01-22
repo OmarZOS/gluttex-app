@@ -5,7 +5,6 @@ import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/service_change_notifier.dart';
-import 'package:gluttex_store/components/inventory/supplier_selector.dart';
 import 'package:gluttex_store/components/selling_point/selling_point_supplier.dart';
 import 'package:gluttex_store/components/service/details/service_details_header.dart';
 import 'package:gluttex_store/components/service/service_card.dart';

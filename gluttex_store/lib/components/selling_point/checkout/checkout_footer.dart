@@ -37,7 +37,7 @@ class CheckoutFooter extends StatelessWidget {
         children: [
           Consumer<CartChangeNotifier>(
             builder: (context, cart, child) => OrderSummarySection(
-              subtotal: cart.cartTotal,
+              subtotal: cart.cartTotal * 0.81,
               tax: cart.cartTotal * 0.19,
             ),
           ),

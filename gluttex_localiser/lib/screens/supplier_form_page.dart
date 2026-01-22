@@ -92,9 +92,9 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         updatePage = true;
         _idprovider_details_id = supplier.idProviderDetails;
         _id_product_provider = supplier.idProductProvider;
-        _id_provider_organisation = supplier.id_provider_organisation;
-        _provider_organisation_desc = supplier.provider_organisation_desc;
-        _provider_organisation_name = supplier.provider_organisation_name;
+        _id_provider_organisation = supplier.idProviderOrganisation;
+        _provider_organisation_desc = supplier.providerOrganisationDesc;
+        _provider_organisation_name = supplier.providerOrganisationName;
         _product_provider_details_id = supplier.idProviderDetails;
         _provider_name = supplier.providerName;
         _provider_contact_info = supplier.providerContactInfo;
@@ -102,17 +102,17 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         _location_latitude = supplier.locationLatitude;
         _location_longitude = supplier.locationLongitude;
         _location_name = supplier.locationName;
-        _supplierImageUrl = supplier.supplier_image_url;
-        _supplierImageId = supplier.supplier_image_id;
-        _id_location = supplier.id_location;
+        _supplierImageUrl = supplier.supplierImageUrl;
+        _supplierImageId = supplier.supplierImageId;
+        _id_location = supplier.idLocation;
         _position =
             LatLng(supplier.locationLatitude, supplier.locationLongitude);
 
-        _location_address_id = supplier.location_address_id;
-        _address_street = supplier.address_street;
-        _address_city = supplier.address_city;
-        _address_postal_code = supplier.address_postal_code;
-        _address_country = supplier.address_country;
+        _location_address_id = supplier.locationAddressId;
+        _address_street = supplier.addressStreet;
+        _address_city = supplier.addressCity;
+        _address_postal_code = supplier.addressPostalCode;
+        _address_country = supplier.addressCountry;
       }
 
       if (_provider_contact_info != null &&
@@ -233,12 +233,12 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
       // log("${_provider_contact_info}");
 
       Supplier supplier = Supplier(
-        id_location: _id_location ?? 0,
+        idLocation: _id_location ?? 0,
         idProviderDetails: _idprovider_details_id ?? 0,
         idProductProvider: _id_product_provider ?? 0,
-        id_provider_organisation: _id_provider_organisation ?? 0,
-        provider_organisation_name: _provider_organisation_name ?? "",
-        provider_organisation_desc: _provider_organisation_desc ?? "",
+        idProviderOrganisation: _id_provider_organisation ?? 0,
+        providerOrganisationName: _provider_organisation_name ?? "",
+        providerOrganisationDesc: _provider_organisation_desc ?? "",
         productProviderDetailsId: _product_provider_details_id ?? 0,
         productProviderTypeId: _product_provider_type_id ?? 1,
         providerName: _provider_name ?? "",
@@ -251,22 +251,22 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                     .appUser!
                     .id_app_user ??
                 0,
-        supplier_image_url: _supplierImageUrl,
-        supplier_image_id: _supplierImageId,
-        location_address_id: _location_address_id,
-        address_street: _address_street,
-        address_city: _address_city,
-        address_postal_code: _address_postal_code,
-        address_country: _address_country,
+        supplierImageUrl: _supplierImageUrl,
+        supplierImageId: _supplierImageId,
+        locationAddressId: _location_address_id,
+        addressStreet: _address_street,
+        addressCity: _address_city,
+        addressPostalCode: _address_postal_code,
+        addressCountry: _address_country,
       );
 
       try {
         if (supplier_image != null)
           // ignore: curly_braces_in_flow_control_structures
-          supplier.supplier_image = supplier_image!;
+          supplier = supplier.copyWith(supplierImage: supplier_image);
 
         if (supplier.idProductProvider == 0) {
-          supplier.supplier_image_url = await Navigator.pushNamed(
+          final image_url = await Navigator.pushNamed(
             context,
             AppRoutes.imageUpload,
             arguments: {
@@ -274,6 +274,8 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               "id": supplier.idProductProvider,
             },
           ) as String?;
+          if (image_url != null)
+            supplier = supplier.copyWith(supplierImageUrl: image_url);
         }
 
         await Provider.of<SupplierChangeNotifier>(

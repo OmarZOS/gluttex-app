@@ -63,6 +63,8 @@ class FinancialUIManager {
         return localizations?.deposit ?? 'Deposit';
       case 'pending_cart':
         return localizations?.pendingCart ?? 'Pending Cart';
+      case 'cart_with_payments':
+        return localizations?.paidCart ?? 'Paid Cart';
       case 'receipt':
         return localizations?.receipt ?? 'Receipt';
       case 'quote':
@@ -81,6 +83,7 @@ class FinancialUIManager {
       case 'deposit':
         return depositIcon;
       case 'pending_cart':
+      case 'cart_with_payments':
         return cartIcon;
       case 'receipt':
         return receiptIcon;
@@ -115,34 +118,55 @@ class FinancialUIManager {
   // Payment Status Methods
   static String getPaymentStatusDisplay(String paymentStatus,
       [AppLocalizations? localizations]) {
-    switch (paymentStatus.toLowerCase()) {
-      case 'fully_paid':
+    final status = paymentStatus.toLowerCase();
+
+    switch (status) {
+      // 3-STATE MODEL
       case 'paid':
         return localizations?.paid ?? 'Paid';
-      case 'partially_paid':
-      case 'partially_paid':
-        return localizations?.partiallyPaid ?? 'Partially Paid';
+      case 'deposited':
+        return localizations?.depositReceived ?? 'Deposit Received';
       case 'unpaid':
         return localizations?.unpaid ?? 'Unpaid';
+
+      // Special states (outside the 3-state flow)
       case 'canceled':
       case 'cancelled':
         return localizations?.cancelled ?? 'Cancelled';
-      case 'deposit_received':
-        return localizations?.depositReceived ?? 'Deposit Received';
-      case 'deposit_covers_full':
-        return localizations?.depositCoversFull ?? 'Deposit Covers Full';
-      case 'deposit_partial':
-        return localizations?.depositPartial ?? 'Partial Deposit';
-      case 'deposit_fully_covered':
-        return localizations?.depositFullyCovered ?? 'Deposit Fully Covered';
-      case 'pending_payment':
+      case 'overdue':
+        return localizations?.overdue ?? 'Overdue';
       case 'pending':
         return localizations?.pending ?? 'Pending';
       case 'draft':
         return localizations?.draft ?? 'Draft';
-      case 'overdue':
-        return localizations?.overdue ?? 'Overdue';
+
+      // Legacy statuses for backward compatibility (map to 3-state)
+      case 'fully_paid':
+      case 'deposit_covers_full':
+      case 'deposit_fully_covered':
+      case 'fully_paid_invoice':
+      case 'fully_paid_deposit_only':
+      case 'fully_paid_receipt':
+        return localizations?.paid ?? 'Paid';
+
+      case 'partially_paid':
+      case 'deposit_partial':
+      case 'deposit_received':
+      case 'cart_deposit':
+      case 'partially_paid_invoice':
+      case 'partially_paid_deposit_only':
+        return localizations?.depositReceived ?? 'Deposit Received';
+
+      case 'no_deposit':
+      case 'pending_payment':
+      case 'unpaid_invoice':
+        return localizations?.unpaid ?? 'Unpaid';
+
       default:
+        // Try to map unknown statuses to our 3-state model
+        if (status.contains('paid')) return localizations?.paid ?? 'Paid';
+        if (status.contains('deposit'))
+          return localizations?.depositReceived ?? 'Deposit Received';
         return paymentStatus.replaceAll('_', ' ').capitalize();
     }
   }
@@ -150,31 +174,75 @@ class FinancialUIManager {
   static Color getPaymentStatusColor(String paymentStatus, ThemeData theme) {
     final status = paymentStatus.toLowerCase();
 
+    // Canceled state (special)
     if (status.contains('cancel')) return canceledColor;
-    if (status.contains('fully_paid') || status.contains('paid'))
-      return paidColor;
-    if (status.contains('deposit_covers') || status.contains('deposit_fully'))
-      return depositColor;
-    if (status.contains('partially') || status.contains('partial'))
-      return partialColor;
-    if (status.contains('unpaid')) return unpaidColor;
-    if (status.contains('deposit')) return depositColor;
-    if (status.contains('pending')) return pendingColor;
+
+    // Overdue state (special)
     if (status.contains('overdue')) return theme.colorScheme.error;
+
+    // Draft state (special)
     if (status.contains('draft')) return theme.colorScheme.secondary;
+
+    // Pending state (special)
+    if (status.contains('pending')) return pendingColor;
+
+    // Map to 3-state model
+    if (status == 'paid' ||
+        status.contains('fully_paid') ||
+        status.contains('covers_full') ||
+        status.contains('fully_covered')) {
+      return paidColor;
+    }
+
+    if (status == 'deposited' ||
+        status.contains('partial') ||
+        status.contains('deposit_') ||
+        status.contains('received')) {
+      // Gradient between deposit and partial colors
+      return Color.lerp(depositColor, partialColor, 0.5)!;
+    }
+
+    if (status == 'unpaid' ||
+        status.contains('no_deposit') ||
+        status.contains('pending_payment')) {
+      return unpaidColor;
+    }
+
+    // Default for unmapped statuses
     return infoColor;
   }
 
   static IconData getPaymentStatusIcon(String paymentStatus) {
     final status = paymentStatus.toLowerCase();
 
-    if (status.contains('paid')) return Icons.check_circle;
-    if (status.contains('partial')) return Icons.pending;
-    if (status.contains('unpaid')) return Icons.pending_actions;
-    if (status.contains('deposit')) return depositIcon;
-    if (status.contains('pending')) return Icons.schedule;
+    // Special states
+    if (status.contains('cancel')) return Icons.cancel;
     if (status.contains('overdue')) return Icons.warning;
     if (status.contains('draft')) return Icons.edit_note;
+    if (status.contains('pending')) return Icons.schedule;
+
+    // Map to 3-state model
+    if (status.contains('paid') ||
+        status.contains('fully_paid') ||
+        status.contains('covers_full') ||
+        status.contains('fully_covered')) {
+      return Icons.check_circle;
+    }
+
+    if (status == 'deposited' ||
+        status.contains('partial') ||
+        status.contains('deposit_') ||
+        status.contains('received')) {
+      return Icons.account_balance_wallet;
+    }
+
+    if (status == 'unpaid' ||
+        status.contains('no_deposit') ||
+        status.contains('pending_payment')) {
+      return Icons.pending_actions;
+    }
+
+    // Default
     return Icons.circle;
   }
 
@@ -226,6 +294,8 @@ class FinancialUIManager {
         return localizations?.order ?? 'Order';
       case 'invoice_based':
         return localizations?.invoice ?? 'Invoice';
+      case 'carts_with_payments':
+        return localizations?.cart ?? 'Invoice';
       case 'direct_invoice':
         return localizations?.directInvoice ?? 'Direct Invoice';
       case 'service_based':
@@ -539,146 +609,49 @@ class FinancialUIManager {
     double height = 8,
   }) {
     final loc = localizations ?? AppLocalizations.of(context);
-    final totalReceived = paid + deposited;
+    final totalReceived = deposited + paid;
     final percentage = amount > 0 ? (totalReceived / amount) : 0;
-    final paidPercentage = amount > 0 ? (paid / amount) : 0;
-    final depositPercentage = amount > 0 ? (deposited / amount) : 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '${loc?.paymentProgress ?? 'Payment Progress'}: ${(percentage * 100).toStringAsFixed(1)}%',
-          style: subtitleStyle(context),
-        ),
-        const SizedBox(height: 4),
-
-        // Using LinearProgressIndicator for the main progress
-        ClipRRect(
-          borderRadius: BorderRadius.circular(height / 2),
-          child: LinearProgressIndicator(
-            value: percentage.toDouble(),
-            minHeight: height,
-            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-            color: Colors.transparent, // We'll use custom colors in valueColor
-            valueColor: AlwaysStoppedAnimation<Color>(
-              percentage >= 1 ? paidColor : depositColor,
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 4),
-
-        // Custom bar showing paid vs deposit breakdown
-        if (amount > 0)
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: height,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    borderRadius: BorderRadius.circular(height / 2),
-                  ),
-                  child: Row(
-                    children: [
-                      // Paid portion
-                      if (paidPercentage > 0)
-                        Expanded(
-                          flex: (paidPercentage * 100).round(),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: paidColor,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(height / 2),
-                                bottomLeft: Radius.circular(height / 2),
-                                topRight: depositPercentage > 0
-                                    ? Radius.zero
-                                    : Radius.circular(height / 2),
-                                bottomRight: depositPercentage > 0
-                                    ? Radius.zero
-                                    : Radius.circular(height / 2),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                      // Deposit portion
-                      if (depositPercentage > 0)
-                        Expanded(
-                          flex: (depositPercentage * 100).round(),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: depositColor,
-                              borderRadius: BorderRadius.only(
-                                topLeft: paidPercentage > 0
-                                    ? Radius.zero
-                                    : Radius.circular(height / 2),
-                                bottomLeft: paidPercentage > 0
-                                    ? Radius.zero
-                                    : Radius.circular(height / 2),
-                                topRight: Radius.circular(height / 2),
-                                bottomRight: Radius.circular(height / 2),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-        const SizedBox(height: 4),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (paid > 0)
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: paidColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${loc?.paid ?? 'Paid'}: ${formatCurrency(paid, context)}',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: paidColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            if (deposited > 0)
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: depositColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${loc?.deposit ?? 'Deposit'}: ${formatCurrency(deposited, context)}',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: depositColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+            Text(
+              loc?.paymentProgress ?? 'Payment Progress',
+              style: subtitleStyle(context),
+            ),
+            Text(
+              '${formatCurrency(totalReceived, context)} / ${formatCurrency(amount, context)}',
+              style: subtitleStyle(context),
+            ),
           ],
+        ),
+        const SizedBox(height: 4),
+
+        // Single progress bar
+        LinearProgressIndicator(
+          value: percentage.toDouble(),
+          minHeight: height,
+          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            percentage >= 1 ? paidColor : depositColor,
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        // Simple percentage text
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            '${(percentage * 100).toStringAsFixed(1)}%',
+            style: TextStyle(
+              fontSize: 10,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
         ),
       ],
     );

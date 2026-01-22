@@ -128,10 +128,10 @@ Widget _buildNoLocationInfo(BuildContext context) {
 // Responsive grid version
 Widget _buildResponsiveLocationDetails(
     BuildContext context, Supplier supplier) {
-  final hasLocationData = (supplier.address_street.isNotEmpty) ||
-      (supplier.address_city.isNotEmpty) ||
-      (supplier.address_postal_code.isNotEmpty) ||
-      (supplier.address_country.isNotEmpty);
+  final hasLocationData = (supplier.addressStreet.isNotEmpty) ||
+      (supplier.addressCity.isNotEmpty) ||
+      (supplier.addressPostalCode.isNotEmpty) ||
+      (supplier.addressCountry.isNotEmpty);
 
   if (!hasLocationData) {
     return _buildNoLocationInfo(context);
@@ -154,45 +154,45 @@ Widget _buildResponsiveLocationDetails(
               spacing: 8,
               runSpacing: 8,
               children: [
-                if (supplier.address_street.isNotEmpty)
+                if (supplier.addressStreet.isNotEmpty)
                   SizedBox(
                     width: itemWidth,
                     child: _buildGridLocationItem(
                       context,
-                      supplier.address_street,
+                      supplier.addressStreet,
                       AppLocalizations.of(context)!.streetText,
                       FontAwesomeIcons.road,
                       Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                if (supplier.address_city.isNotEmpty)
+                if (supplier.addressCity.isNotEmpty)
                   SizedBox(
                     width: itemWidth,
                     child: _buildGridLocationItem(
                       context,
-                      supplier.address_city,
+                      supplier.addressCity,
                       AppLocalizations.of(context)!.cityText,
                       Icons.location_city_outlined,
                       Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                if (supplier.address_postal_code.isNotEmpty)
+                if (supplier.addressPostalCode.isNotEmpty)
                   SizedBox(
                     width: itemWidth,
                     child: _buildGridLocationItem(
                       context,
-                      supplier.address_postal_code,
+                      supplier.addressPostalCode,
                       AppLocalizations.of(context)!.postalCodeText,
                       Icons.local_post_office_outlined,
                       Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                if (supplier.address_country.isNotEmpty)
+                if (supplier.addressCountry.isNotEmpty)
                   SizedBox(
                     width: itemWidth,
                     child: _buildGridLocationItem(
                       context,
-                      supplier.address_country,
+                      supplier.addressCountry,
                       AppLocalizations.of(context)!.countryText,
                       Icons.public_outlined,
                       Theme.of(context).colorScheme.onSurface,

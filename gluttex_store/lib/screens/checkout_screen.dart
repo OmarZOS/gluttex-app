@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/Person.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/views/checkout_view_model.dart';
-import 'package:gluttex_store/components/checkout_service.dart';
 import 'package:gluttex_store/components/selling_point/checkout/checkout_footer.dart';
 import 'package:gluttex_store/components/selling_point/checkout/delivery_section.dart';
 import 'package:gluttex_store/components/selling_point/checkout/document_type_section.dart';
 import 'package:gluttex_store/components/selling_point/checkout/notes_parameters_section.dart';
 import 'package:gluttex_store/components/selling_point/checkout/order_items_section.dart';
 import 'package:gluttex_store/components/selling_point/checkout/payment_section.dart';
+import 'package:gluttex_ui/components/document/Delivery_Type_UI_Manager.dart';
+import 'package:gluttex_ui/components/document/DocumentTypeManager.dart';
+import 'package:gluttex_ui/components/finance/Payment_Type_UI_Manager.dart';
 import 'package:gluttex_ui/components/search/customer_search_section.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
@@ -29,7 +32,14 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   late CheckoutViewModel _viewModel;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final CheckoutService _checkoutService = CheckoutService();
+
+  // Track collapsed/expanded state for each section
+  bool _customerExpanded = true;
+  bool _itemsExpanded = true;
+  bool _documentExpanded = false;
+  bool _paymentExpanded = false;
+  bool _deliveryExpanded = false;
+  bool _notesExpanded = false;
 
   @override
   void initState() {
@@ -71,28 +81,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final confirmed = await _showConfirmationDialog(context);
     if (!confirmed) return;
 
-    // Show processing dialog
-    final processingDialog = _showProcessingDialog(context);
-
     try {
       // Get current user info
       final currentUser = userNotifier.appUser;
       if (currentUser == null) {
-        Navigator.pop(context); // Close processing dialog
         _showErrorDialog(
             context, AppLocalizations.of(context)!.loginRequiredError);
         return;
       }
 
       // Process checkout
-      final result = await _checkoutService.processCheckout(
+      final result = await _viewModel.processCartCheckout(
         cart: cartNotifier.cart,
-        viewModel: _viewModel,
         sellingUserId: currentUser.id_app_user ?? 0,
         providerId: widget.supplierId,
       );
-
-      Navigator.pop(context); // Close processing dialog
 
       if (result.isSuccess) {
         // Success - show success screen
@@ -105,13 +108,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _viewModel.resetAfterCheckout();
 
         // Optional: Navigate back or to orders
-        // Navigator.pop(context);
+        Navigator.pop(context);
       } else {
         // Failure - show error
         _showErrorDialog(context, result.message);
       }
     } catch (e) {
-      Navigator.pop(context); // Close processing dialog
       _showErrorDialog(
           context, '${AppLocalizations.of(context)!.checkoutError}: $e');
     }
@@ -272,45 +274,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  void _showProcessingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                AppLocalizations.of(context)!.processingOrder,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<void> _showSuccessScreen(
     BuildContext context,
     CheckoutResult result,
     double totalAmount,
   ) async {
     final loc = AppLocalizations.of(context)!;
+
+    context.read<ProductNotifier>().fetchProducts(
+        providerId: context.read<ProductNotifier>().currentProviderId);
 
     await showDialog(
       context: context,
@@ -417,6 +389,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         return loc.invoice;
       case 'receipt':
         return loc.receipt;
+      case 'invoice_receipt':
+        return loc.invoiceReceipt;
+      case 'none':
+        return loc.none;
       default:
         return loc.invoiceReceipt;
     }
@@ -497,107 +473,273 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildContent(BuildContext context) {
+    final cartNotifier = context.read<CartChangeNotifier>();
+    final hasItems = cartNotifier.cart.isNotEmpty;
+    final loc = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 100),
       child: Column(
         children: [
           const SizedBox(height: 16),
 
-          // Customer Section
+          // Customer Section (Collapsible)
           Consumer<CheckoutViewModel>(
             builder: (context, viewModel, child) {
-              return CustomerSection(
-                selectedCustomer: viewModel.selectedCustomer,
-                selectedPerson: viewModel.selectedPerson,
-                onCustomerChanged: (customer) {
-                  viewModel.setSelectedCustomer(customer, null);
-                },
-                onPersonChanged: (person) {
-                  viewModel.setSelectedCustomer(null, person);
-                },
+              return _buildCollapsibleSection(
+                title: loc.customer,
+                icon: Icons.person,
+                badge: (viewModel.selectedPerson != null ||
+                        viewModel.selectedCustomer != null)
+                    ? viewModel.getCustomerName()
+                    : null,
+                isExpanded: _customerExpanded,
+                onToggle: () =>
+                    setState(() => _customerExpanded = !_customerExpanded),
+                child: CustomerSection(
+                  selectedCustomer: viewModel.selectedCustomer,
+                  selectedPerson: viewModel.selectedPerson,
+                  onCustomerChanged: (customer) {
+                    viewModel.setSelectedCustomer(customer, null);
+                  },
+                  onPersonChanged: (person) {
+                    viewModel.setSelectedCustomer(null, person);
+                  },
+                ),
               );
             },
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
 
-          // Order Items
-          const OrderItemsSection(),
+          // Order Items (Collapsible)
+          _buildCollapsibleSection(
+            title: loc.itemsText,
+            icon: Icons.shopping_cart,
+            isExpanded: _itemsExpanded,
+            onToggle: () => setState(() => _itemsExpanded = !_itemsExpanded),
+            badge: hasItems
+                ? loc.items(
+                    cartNotifier.cartItemCount,
+                    cartNotifier.productItemCount,
+                    cartNotifier.serviceItemCount)
+                : null,
+            child: const OrderItemsSection(),
+          ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
 
-          // Document Type
+          // Document Type (Collapsible)
+
           Consumer<CheckoutViewModel>(
             builder: (context, viewModel, child) {
-              return DocumentTypeSection(
-                selectedType: viewModel.documentType,
-                onChanged: viewModel.setDocumentType,
+              return _buildCollapsibleSection(
+                title: loc.documentType,
+                icon: Icons.description,
+                isExpanded: _documentExpanded,
+                badge: DocumentTypeManager.getDocumentTypeOptions(context)
+                    .where((t) => t.id == viewModel.documentType)
+                    .first
+                    .label,
+                onToggle: () =>
+                    setState(() => _documentExpanded = !_documentExpanded),
+                child: DocumentTypeSection(
+                  selectedType: viewModel.documentType,
+                  onChanged: viewModel.setDocumentType,
+                ),
               );
             },
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
 
-          // Payment Sections
+          // Payment Sections (Collapsible)
           Consumer<CheckoutViewModel>(
             builder: (context, viewModel, child) {
-              return PaymentSection(
-                paymentType: viewModel.paymentType,
-                paymentMethod: viewModel.paymentMethod,
-                onPaymentTypeChanged: viewModel.setPaymentType,
-                onPaymentMethodChanged: viewModel.setPaymentMethod,
-                onCardDetailsChanged: viewModel.setCardDetails,
-                onBankDetailsChanged: viewModel.setBankDetails,
-                onMobileProviderChanged: viewModel.setMobileProvider,
-                onCardTypeChanged: viewModel.setCardType,
+              return _buildCollapsibleSection(
+                title: loc.payment,
+                icon: Icons.payment,
+                isExpanded: _paymentExpanded,
+                badge: PaymentTypeUIManager.getPaymentTypeById(
+                        viewModel.paymentType, loc)!
+                    .label,
+                onToggle: () =>
+                    setState(() => _paymentExpanded = !_paymentExpanded),
+                child: PaymentSection(
+                  paymentType: viewModel.paymentType,
+                  paymentMethod: viewModel.paymentMethod,
+                  onPaymentTypeChanged: viewModel.setPaymentType,
+                  onPaymentMethodChanged: viewModel.setPaymentMethod,
+                  onInstallmentDateChanged: viewModel.setInstallmentDate,
+                  onDepositChanged: viewModel.setDepositAmount,
+                  onCardDetailsChanged: viewModel.setCardDetails,
+                  onBankDetailsChanged: viewModel.setBankDetails,
+                  onMobileProviderChanged: viewModel.setMobileProvider,
+                  onCardTypeChanged: viewModel.setCardType,
+                ),
               );
             },
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
 
-          // Delivery Section
+          // Delivery Section (Collapsible)
           Consumer<CheckoutViewModel>(
             builder: (context, viewModel, child) {
-              return DeliverySection(
-                selectedType: viewModel.deliveryType,
-                onChanged: viewModel.setDeliveryType,
-              );
+              return _buildCollapsibleSection(
+                  title: loc.delivery,
+                  icon: Icons.local_shipping,
+                  isExpanded: _deliveryExpanded,
+                  badge: DeliveryUIManager.getDeliveryTypeById(
+                          viewModel.deliveryType, loc)!
+                      .label,
+                  onToggle: () =>
+                      setState(() => _deliveryExpanded = !_deliveryExpanded),
+                  child: DeliverySection(
+                    selectedType: viewModel.deliveryType,
+                    onChanged: viewModel.setDeliveryType,
+                    onDeliveryDataChanged: viewModel.setDeliveryData,
+                    customer: viewModel.selectedPerson,
+                  ));
             },
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
 
-          // Notes & Parameters
-          Consumer<CheckoutViewModel>(
-            builder: (context, viewModel, child) {
-              return NotesParametersSection(
-                notes: viewModel.notes,
-                parameters: viewModel.parameters,
-                savedParameters: viewModel.savedParameters,
-                isLoadingParameters: viewModel.isLoadingParameters,
-                onNotesChanged: viewModel.setNotes,
-                onParametersChanged: viewModel.setParameters,
-                onSaveParameter: viewModel.saveParameter,
-                onUpdateParameter: viewModel.updateParameter,
-                onDeleteParameter: viewModel.deleteParameter,
-                onUseSavedParameter: viewModel.useSavedParameter,
-              );
-            },
+          // Notes & Parameters (Collapsible)
+          _buildCollapsibleSection(
+            title: loc.notesParameters,
+            icon: Icons.note_add,
+            isExpanded: _notesExpanded,
+            onToggle: () => setState(() => _notesExpanded = !_notesExpanded),
+            badge: _viewModel.parameters.isNotEmpty
+                ? _viewModel.parameters.length.toString()
+                : null,
+            child: Consumer<CheckoutViewModel>(
+              builder: (context, viewModel, child) {
+                return NotesParametersSection(
+                  notes: viewModel.notes,
+                  parameters: viewModel.parameters,
+                  savedParameters: viewModel.savedParameters,
+                  isLoadingParameters: viewModel.isLoadingParameters,
+                  onNotesChanged: viewModel.setNotes,
+                  onParametersChanged: viewModel.setParameters,
+                  onSaveParameter: viewModel.saveParameter,
+                  onUpdateParameter: viewModel.updateParameter,
+                  onDeleteParameter: viewModel.deleteParameter,
+                  onUseSavedParameter: viewModel.useSavedParameter,
+                );
+              },
+            ),
           ),
           const SizedBox(height: 32),
 
           // Checkout Footer
-          Consumer2<CheckoutViewModel, CartChangeNotifier>(
-            builder: (context, viewModel, cartNotifier, child) {
+          Consumer<CheckoutViewModel>(
+            builder: (context, viewModel, child) {
               return CheckoutFooter(
-                // totalAmount: cartNotifier.cartTotal,
-                // isProcessing: viewModel.isProcessing,
                 onCheckoutPressed: () => _processCheckout(context),
-                // onCancelPressed: () => Navigator.pop(context),
               );
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCollapsibleSection({
+    required String title,
+    required IconData icon,
+    required bool isExpanded,
+    required VoidCallback onToggle,
+    required Widget child,
+    String? badge,
+  }) {
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
+        ),
+        child: Column(
+          children: [
+            // Header
+            ListTile(
+              leading: Icon(
+                icon,
+                color: isExpanded
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isExpanded
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  if (badge != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        badge,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ],
+              ),
+              trailing: Icon(
+                isExpanded ? Icons.expand_less : Icons.expand_more,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              onTap: onToggle,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
+            ),
+
+            // Content
+            AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Padding(
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                ),
+                child: child,
+              ),
+              crossFadeState: isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 300),
+            ),
+          ],
+        ),
       ),
     );
   }

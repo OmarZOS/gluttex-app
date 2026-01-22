@@ -2232,7 +2232,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderManagement => 'إدارة الطلبات';
 
   @override
-  String get processing => 'جارٍ المعالجة...';
+  String get processing => 'جاري المعالجة...';
 
   @override
   String get completed => 'مكتمل';
@@ -2352,7 +2352,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pointOfSale => 'البائع';
 
   @override
-  String get loading => 'جارٍ التحميل...';
+  String get loading => 'جاري التحميل...';
 
   @override
   String get addProduct => 'إضافة منتج';
@@ -2487,7 +2487,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get share => 'مشاركة';
 
   @override
-  String get download => 'تنزيل';
+  String get download => 'تحميل';
 
   @override
   String get noInvoicesYet => 'لا توجد فواتير بعد';
@@ -2609,7 +2609,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get finalPrice => 'السعر النهائي';
 
   @override
-  String get totalCost => 'التكلفة الإجمالية';
+  String get totalCost => 'التكلفة الإجمالية للتوصيل';
 
   @override
   String get discountApplied => 'تم تطبيق الخصم من السعر الأساسي';
@@ -2684,16 +2684,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get clearFilters => 'مسح الفلاتر';
 
   @override
-  String get totalAmount => 'المبلغ الإجمالي';
+  String get totalAmount => 'الإجمالي';
 
   @override
-  String get totalPaid => 'إجمالي المدفوع';
+  String get totalPaid => 'المدفوع';
 
   @override
   String get outstanding => 'المستحقات';
 
   @override
-  String get balance => 'رصيد';
+  String get balance => 'الرصيد';
 
   @override
   String get byStatus => 'حسب الحالة';
@@ -2726,7 +2726,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supplier => 'المورد';
 
   @override
-  String get seller => 'بائع';
+  String get seller => 'البائع';
 
   @override
   String get cartBased => 'مبني على السلة';
@@ -2840,7 +2840,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invoiceStatus => 'حالة الفاتورة';
 
   @override
-  String get deposited => 'مودَع';
+  String get deposited => 'مودع';
 
   @override
   String get productsAndServices => 'منتجات وخدمات';
@@ -3374,7 +3374,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get deposit => 'وديعة';
+  String get deposit => 'إيداع';
 
   @override
   String get pendingCart => 'سلة معلقة';
@@ -3419,7 +3419,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get due => 'مستحق';
 
   @override
-  String get count => 'عدد';
+  String get count => 'العدد';
 
   @override
   String get paymentProgress => 'تقدم الدفع';
@@ -3920,22 +3920,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deliveryType => 'نوع التوصيل';
 
   @override
-  String get pickup => 'استلام شخصي';
+  String get pickup => 'استلام من المتجر';
 
   @override
-  String get pickupDesc => 'العميل سيقوم باستلام الطلب';
+  String get pickupDesc => 'العميل يستلم من المتجر';
 
   @override
   String get delivery => 'توصيل';
 
   @override
-  String get deliveryDesc => 'سنقوم بالتوصيل إلى عنوانك';
+  String get deliveryDesc => 'نقوم بالتوصيل إلى عنوانك';
 
   @override
-  String get shipping => 'الشحن';
+  String get shipping => 'شحن';
 
   @override
-  String get shippingDesc => 'الشحن عبر خدمة البريد السريع';
+  String get shippingDesc => 'شحن إلى أي موقع';
 
   @override
   String get orderNotes => 'ملاحظات الطلب';
@@ -3974,10 +3974,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paymentType => 'نوع الدفع';
 
   @override
-  String get fullPayment => 'الدفع الكامل';
+  String get fullPayment => 'دفع كامل';
 
   @override
-  String get depositOnly => 'دفعة أولى فقط';
+  String get depositOnly => 'إيداع فقط';
 
   @override
   String get check => 'شيك';
@@ -4121,7 +4121,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get changeCustomer => 'تغيير العميل';
 
   @override
-  String get installment => 'تقسيط';
+  String get installment => 'قسط';
 
   @override
   String get help => 'مساعدة';
@@ -4229,43 +4229,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get newCustomerComingSoon => 'إنشاء عميل جديد قريباً';
 
   @override
-  String get selectPaymentType => 'اختر طريقة الدفع التي تريدها';
+  String get selectPaymentType => 'اختر طريقة الدفع';
 
   @override
-  String get fullPaymentDesc => 'دفع المبلغ الكامل الآن';
+  String get fullPaymentDesc => 'ادفع المبلغ الكامل الآن';
 
   @override
   String get fullPaymentApplied => 'تم تطبيق الدفع الكامل';
 
   @override
-  String get fullPaymentDescDetail => 'سيتم خصم المبلغ الكامل على الفور';
+  String get fullPaymentDescDetail => 'سيدفع العميل المبلغ الكامل فورًا';
 
   @override
-  String get depositOnlyDesc => 'ادفع دفعة أولى الآن، والباقي لاحقاً';
+  String get depositOnlyDesc => 'ادفع عربون الآن والباقي لاحقًا';
 
   @override
-  String get enterDepositAmount => 'أدخل مبلغ الدفعة الأولى';
+  String get enterDepositAmount => 'أدخل مبلغ العربون';
 
   @override
   String get enterAmount => 'أدخل المبلغ';
 
   @override
-  String get remainingAmount => 'المبلغ المتبقي';
+  String get remainingAmount => 'المتبقي';
 
   @override
-  String get installmentDesc => 'جدولة الدفع لوقت لاحق';
+  String get installmentDesc => 'جدولة الدفع لتاريخ لاحق';
 
   @override
-  String get selectInstallmentDate => 'اختر تاريخ الدفع';
+  String get selectInstallmentDate => 'اختر تاريخ القسط';
 
   @override
-  String get installmentDate => 'تاريخ الدفع';
+  String get installmentDate => 'تاريخ القسط';
 
   @override
-  String get selectDate => 'اختر تاريخاً';
+  String get selectDate => 'اختر التاريخ';
 
   @override
-  String get installmentNote => 'سيتم خصم المبلغ الكامل في التاريخ المحدد';
+  String get installmentNote => 'سيكون الدفع مستحقًا في التاريخ المحدد';
 
   @override
   String get persons => 'أشخاص';
@@ -4347,4 +4347,812 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deliveryHelpDescription => 'اختر ما إذا كان العميل سيستلم الطلب شخصياً أو إذا كان يحتاج إلى توصيل.';
+
+  @override
+  String get deliveryDetails => 'تفاصيل التوصيل';
+
+  @override
+  String get packageDetails => 'تفاصيل الطرد';
+
+  @override
+  String get packageCount => 'عدد الطرود';
+
+  @override
+  String get totalWeight => 'الوزن الإجمالي (كجم)';
+
+  @override
+  String get dimensions => 'الأبعاد (ط×ع×ا)';
+
+  @override
+  String get goodsDescription => 'وصف البضائع';
+
+  @override
+  String get deliveryAddress => 'عنوان التوصيل';
+
+  @override
+  String get shippingMethod => 'طريقة الشحن';
+
+  @override
+  String get estimatedDeliveryFee => 'رسوم التوصيل المقدرة';
+
+  @override
+  String get priceMayChange => 'قد يتغير السعر بناءً على التفاصيل النهائية';
+
+  @override
+  String get useCustomerAddress => 'استخدام عنوان العميل';
+
+  @override
+  String get changeAddress => 'تغيير العنوان';
+
+  @override
+  String get selectAddress => 'اختر عنوان التوصيل';
+
+  @override
+  String get addressSelected => 'تم تحديد العنوان';
+
+  @override
+  String get addressFilled => 'تم ملء العنوان من معلومات العميل';
+
+  @override
+  String get calculatePrice => 'حساب السعر';
+
+  @override
+  String get standard => 'عادي';
+
+  @override
+  String get express => 'سريع';
+
+  @override
+  String get overnight => 'ليلي';
+
+  @override
+  String get freight => 'شحن بضائع';
+
+  @override
+  String get enterAddress => 'أدخل عنوان التوصيل';
+
+  @override
+  String get deliveryFee => 'رسوم التوصيل';
+
+  @override
+  String get estimatedPrice => 'السعر المقدر';
+
+  @override
+  String get weightRequired => 'الوزن مطلوب';
+
+  @override
+  String get addressRequired => 'عنوان التوصيل مطلوب';
+
+  @override
+  String get invalidWeight => 'قيمة الوزن غير صالحة';
+
+  @override
+  String get loadingPrice => 'جاري حساب السعر...';
+
+  @override
+  String get deliveryOptions => 'خيارات التوصيل';
+
+  @override
+  String get freeDelivery => 'توصيل مجاني';
+
+  @override
+  String get paidDelivery => 'توصيل مدفوع';
+
+  @override
+  String get scheduleDelivery => 'جدولة التوصيل';
+
+  @override
+  String get deliveryDate => 'تاريخ التوصيل';
+
+  @override
+  String get deliveryTime => 'وقت التوصيل';
+
+  @override
+  String get trackingNumber => 'رقم التتبع';
+
+  @override
+  String get carrier => 'الناقل';
+
+  @override
+  String get insurance => 'تأمين';
+
+  @override
+  String get signatureRequired => 'التوقيع مطلوب';
+
+  @override
+  String get fragile => 'هش';
+
+  @override
+  String get perishable => 'قابل للتلف';
+
+  @override
+  String get hazardous => 'خطير';
+
+  @override
+  String get bulk => 'كميات كبيرة';
+
+  @override
+  String get confirmDelivery => 'تأكيد التوصيل';
+
+  @override
+  String get deliveryConfirmed => 'تم تأكيد التوصيل';
+
+  @override
+  String get deliveryPending => 'التوصيل معلق';
+
+  @override
+  String get deliveryInTransit => 'قيد النقل';
+
+  @override
+  String get deliveryOutForDelivery => 'خارج للتوصيل';
+
+  @override
+  String get deliveryDelivered => 'تم التوصيل';
+
+  @override
+  String get deliveryFailed => 'فشل التوصيل';
+
+  @override
+  String get deliveryCancelled => 'تم إلغاء التوصيل';
+
+  @override
+  String get deliveryReturned => 'تم الإرجاع';
+
+  @override
+  String get trackDelivery => 'تتبع التوصيل';
+
+  @override
+  String get viewDeliveryDetails => 'عرض تفاصيل التوصيل';
+
+  @override
+  String get editDelivery => 'تعديل التوصيل';
+
+  @override
+  String get cancelDelivery => 'إلغاء التوصيل';
+
+  @override
+  String get rescheduleDelivery => 'إعادة جدولة التوصيل';
+
+  @override
+  String get deliveryHistory => 'سجل التوصيل';
+
+  @override
+  String get upcomingDeliveries => 'عمليات التوصيل القادمة';
+
+  @override
+  String get pastDeliveries => 'عمليات التوصيل السابقة';
+
+  @override
+  String get deliveryStatus => 'حالة التوصيل';
+
+  @override
+  String get recipient => 'المستلم';
+
+  @override
+  String get sender => 'المرسل';
+
+  @override
+  String get pickupLocation => 'موقع الاستلام';
+
+  @override
+  String get deliveryLocation => 'موقع التوصيل';
+
+  @override
+  String get expectedDelivery => 'التوصيل المتوقع';
+
+  @override
+  String get actualDelivery => 'التوصيل الفعلي';
+
+  @override
+  String get deliveryNotes => 'ملاحظات التوصيل';
+
+  @override
+  String get proofOfDelivery => 'إثبات التوصيل';
+
+  @override
+  String get signature => 'التوقيع';
+
+  @override
+  String get photos => 'صور';
+
+  @override
+  String get damageReport => 'تقرير التلف';
+
+  @override
+  String get feedback => 'تقييم';
+
+  @override
+  String get rateDelivery => 'تقييم التوصيل';
+
+  @override
+  String get deliveryRating => 'تقييم التوصيل';
+
+  @override
+  String get driverName => 'اسم السائق';
+
+  @override
+  String get vehicleNumber => 'رقم المركبة';
+
+  @override
+  String get contactDriver => 'الاتصال بالسائق';
+
+  @override
+  String get shareLocation => 'مشاركة الموقع';
+
+  @override
+  String get liveTracking => 'تتبع مباشر';
+
+  @override
+  String get eTA => 'الوقت المقدر للوصول';
+
+  @override
+  String get distance => 'المسافة';
+
+  @override
+  String get route => 'الطريق/الشارع';
+
+  @override
+  String get deliveryProof => 'إثبات التوصيل';
+
+  @override
+  String get confirmReceipt => 'تأكيد الاستلام';
+
+  @override
+  String get reportIssue => 'الإبلاغ عن مشكلة';
+
+  @override
+  String get needHelp => 'هل تحتاج مساعدة؟';
+
+  @override
+  String get streetAddress => 'عنوان الشارع';
+
+  @override
+  String get enterStreetAddress => 'أدخل عنوان الشارع';
+
+  @override
+  String get streetAddressRequired => 'عنوان الشارع مطلوب';
+
+  @override
+  String get enterCity => 'أدخل المدينة';
+
+  @override
+  String get cityRequired => 'المدينة مطلوبة';
+
+  @override
+  String get postalCode => 'الرمز البريدي';
+
+  @override
+  String get enterPostalCode => 'أدخل الرمز البريدي';
+
+  @override
+  String get stateProvince => 'الولاية/المحافظة';
+
+  @override
+  String get enterState => 'أدخل الولاية/المحافظة';
+
+  @override
+  String get enterCountry => 'أدخل الدولة';
+
+  @override
+  String get countryRequired => 'الدولة مطلوبة';
+
+  @override
+  String get addressType => 'نوع العنوان';
+
+  @override
+  String get additionalDetails => 'تفاصيل إضافية';
+
+  @override
+  String get building => 'المبنى';
+
+  @override
+  String get enterBuilding => 'اسم/رقم المبنى';
+
+  @override
+  String get apartment => 'الشقة';
+
+  @override
+  String get enterApartment => 'رقم الشقة/الوحدة';
+
+  @override
+  String get floor => 'الطابق';
+
+  @override
+  String get enterFloor => 'رقم الطابق';
+
+  @override
+  String get landmark => 'معلم بارز';
+
+  @override
+  String get enterLandmark => 'معلم بارز قريب';
+
+  @override
+  String get quickFill => 'ملء سريع';
+
+  @override
+  String get addressComplete => 'العنوان مكتمل';
+
+  @override
+  String get addressIncomplete => 'يرجى ملء جميع الحقول المطلوبة';
+
+  @override
+  String get selectCountry => 'اختر دولة';
+
+  @override
+  String get homeAddress => 'المنزل';
+
+  @override
+  String get workAddress => 'العمل';
+
+  @override
+  String get businessAddress => 'العمل التجاري';
+
+  @override
+  String get shippingAddress => 'عنوان الشحن';
+
+  @override
+  String get billingAddress => 'عنوان الفاتورة';
+
+  @override
+  String get otherAddress => 'أخرى';
+
+  @override
+  String get requiredField => 'هذا الحقل مطلوب';
+
+  @override
+  String get invalidFormat => 'تنسيق غير صالح';
+
+  @override
+  String get addressSaved => 'تم حفظ العنوان بنجاح';
+
+  @override
+  String get addressUpdated => 'تم تحديث العنوان بنجاح';
+
+  @override
+  String get addressDeleted => 'تم حذف العنوان';
+
+  @override
+  String get saveAddress => 'حفظ العنوان';
+
+  @override
+  String get updateAddress => 'تحديث العنوان';
+
+  @override
+  String get deleteAddress => 'حذف العنوان';
+
+  @override
+  String get clear => 'مسح';
+
+  @override
+  String get reset => 'إعادة تعيين';
+
+  @override
+  String get myAddresses => 'عناويني';
+
+  @override
+  String get addNewAddress => 'إضافة عنوان جديد';
+
+  @override
+  String get editAddress => 'تعديل العنوان';
+
+  @override
+  String get defaultAddress => 'العنوان الافتراضي';
+
+  @override
+  String get setAsDefault => 'تعيين كافتراضي';
+
+  @override
+  String get removeDefault => 'إزالة الافتراضي';
+
+  @override
+  String get noAddresses => 'لا توجد عناوين محفوظة';
+
+  @override
+  String get addYourFirstAddress => 'أضف عنوانك الأول';
+
+  @override
+  String get addressBook => 'دفتر العناوين';
+
+  @override
+  String get useCurrentLocation => 'استخدام الموقع الحالي';
+
+  @override
+  String get locating => 'جاري تحديد الموقع...';
+
+  @override
+  String get locationPermission => 'إذن الموقع';
+
+  @override
+  String get locationPermissionMessage => 'يرجى تمكين خدمات الموقع لاستخدام موقعك الحالي';
+
+  @override
+  String get enableLocation => 'تمكين الموقع';
+
+  @override
+  String get locationServicesDisabled => 'خدمات الموقع معطلة';
+
+  @override
+  String get locationNotFound => 'الموقع غير موجود';
+
+  @override
+  String get searchLocation => 'البحث عن موقع';
+
+  @override
+  String get selectOnMap => 'تحديد على الخريطة';
+
+  @override
+  String get verifyAddress => 'التحقق من العنوان';
+
+  @override
+  String get addressVerified => 'تم التحقق من العنوان';
+
+  @override
+  String get addressNotVerified => 'تعذر التحقق من العنوان';
+
+  @override
+  String get suggestedAddress => 'عنوان مقترح';
+
+  @override
+  String get useSuggested => 'استخدام العنوان المقترح';
+
+  @override
+  String get keepOriginal => 'الاحتفاظ بالأصل';
+
+  @override
+  String get streetNumber => 'رقم الشارع';
+
+  @override
+  String get neighborhood => 'الحي';
+
+  @override
+  String get sublocality => 'منطقة فرعية';
+
+  @override
+  String get administrativeArea => 'المنطقة الإدارية';
+
+  @override
+  String get subAdministrativeArea => 'منطقة إدارية فرعية';
+
+  @override
+  String get postalTown => 'البلدة البريدية';
+
+  @override
+  String get premise => 'المكان';
+
+  @override
+  String get subpremise => 'مكان فرعي';
+
+  @override
+  String get plusCode => 'الكود الزائد';
+
+  @override
+  String get showOnMap => 'عرض على الخريطة';
+
+  @override
+  String get getDirections => 'الحصول على الاتجاهات';
+
+  @override
+  String get copyAddress => 'نسخ العنوان';
+
+  @override
+  String get shareAddress => 'مشاركة العنوان';
+
+  @override
+  String get qrCode => 'رمز QR';
+
+  @override
+  String get labelHome => '🏠 المنزل';
+
+  @override
+  String get labelWork => '💼 العمل';
+
+  @override
+  String get labelFamily => '👪 العائلة';
+
+  @override
+  String get labelFriend => '👤 صديق';
+
+  @override
+  String get labelOther => '📍 أخرى';
+
+  @override
+  String get customLabel => 'تسمية مخصصة';
+
+  @override
+  String get enterLabel => 'أدخل التسمية';
+
+  @override
+  String get deliveryInstructions => 'تعليمات التوصيل';
+
+  @override
+  String get enterInstructions => 'أدخل تعليمات التوصيل';
+
+  @override
+  String get gateCode => 'رمز البوابة';
+
+  @override
+  String get enterGateCode => 'أدخل رمز البوابة/المبنى';
+
+  @override
+  String get leaveAtDoor => 'ترك عند الباب';
+
+  @override
+  String get requireSignature => 'التوقيع مطلوب';
+
+  @override
+  String get callOnArrival => 'الاتصال عند الوصول';
+
+  @override
+  String get formatAsSingleLine => 'تنسيق سطر واحد';
+
+  @override
+  String get formatAsMultiLine => 'تنسيق متعدد الأسطر';
+
+  @override
+  String get copyFormatted => 'نسخ منسق';
+
+  @override
+  String get standardFormat => 'التنسيق القياسي';
+
+  @override
+  String get localFormat => 'التنسيق المحلي';
+
+  @override
+  String get internationalFormat => 'التنسيق الدولي';
+
+  @override
+  String get lengthHint => 'الطول';
+
+  @override
+  String get widthHint => 'العرض';
+
+  @override
+  String get heightHint => 'الارتفاع';
+
+  @override
+  String get goodsDescriptionHint => 'صف ما يتم توصيله';
+
+  @override
+  String get hsCode => 'رمز النظام المنسق';
+
+  @override
+  String get hsCodeHint => 'رمز النظام المنسق للبضائع';
+
+  @override
+  String get standardShipping => 'الشحن العادي';
+
+  @override
+  String get expressShipping => 'الشحن السريع';
+
+  @override
+  String get overnightShipping => 'الشحن خلال الليل';
+
+  @override
+  String get freightShipping => 'شحن البضائع';
+
+  @override
+  String get selectDeliveryType => 'اختر كيف ترغب في استلام طلبك';
+
+  @override
+  String get fillAddressAutomatically => 'ملء العنوان تلقائيًا من ملف العميل';
+
+  @override
+  String get weightUnit => 'كجم';
+
+  @override
+  String get dimensionUnitCm => 'سم';
+
+  @override
+  String get enterPackageDimensions => 'أدخل أبعاد الطرد لشحن دقيق';
+
+  @override
+  String get dimensionUnitM => 'م';
+
+  @override
+  String get paidCart => 'سلة مدفوعة';
+
+  @override
+  String get remaining => 'المتبقي';
+
+  @override
+  String get deposits => 'الودائع';
+
+  @override
+  String get customerType => 'نوع العميل';
+
+  @override
+  String get customerId => 'معرف العميل';
+
+  @override
+  String get personId => 'معرف الشخص';
+
+  @override
+  String get notAssigned => 'غير معين';
+
+  @override
+  String get documentDetails => 'تفاصيل المستند';
+
+  @override
+  String get daysIssued => 'الأيام المنقضية';
+
+  @override
+  String get days => 'أيام';
+
+  @override
+  String get sourceType => 'نوع المصدر';
+
+  @override
+  String makePayment(Object amount) {
+    return 'دفع $amount';
+  }
+
+  @override
+  String get copyLink => 'نسخ الرابط';
+
+  @override
+  String get shareViaEmail => 'مشاركة عبر البريد الإلكتروني';
+
+  @override
+  String get shareViaMessage => 'مشاركة عبر الرسالة';
+
+  @override
+  String get downloadingDocument => 'جاري تحميل المستند...';
+
+  @override
+  String get downloadComplete => 'اكتمل التحميل';
+
+  @override
+  String get cart_with_payments => 'عربة مع مدفوعات';
+
+  @override
+  String get pending_cart => 'عربة معلقة';
+
+  @override
+  String get pending_cart_lower => 'عربة معلقة';
+
+  @override
+  String get partially_paid => 'مدفوع جزئيًا';
+
+  @override
+  String get unknown => 'غير معروف';
+
+  @override
+  String get cart_based => 'مبني على العربة';
+
+  @override
+  String get invoice_based => 'مبني على الفاتورة';
+
+  @override
+  String get direct_invoice => 'فاتورة مباشرة';
+
+  @override
+  String get order_based => 'مبني على الطلب';
+
+  @override
+  String get direct_deposit => 'إيداع مباشر';
+
+  @override
+  String get direct_receipt => 'إيصال مباشر';
+
+  @override
+  String get mixed_payments => 'مدفوعات مختلطة';
+
+  @override
+  String get payment_only => 'دفع فقط';
+
+  @override
+  String get deposit_only => 'إيداع فقط';
+
+  @override
+  String get no_payments => 'لا توجد مدفوعات';
+
+  @override
+  String get addDeposit => 'إضافة إيداع';
+
+  @override
+  String get submitDeposit => 'إرسال الإيداع';
+
+  @override
+  String get submitPayment => 'إرسال الدفع';
+
+  @override
+  String get depositDetails => 'تفاصيل الإيداع';
+
+  @override
+  String get installmentDetails => 'تفاصيل التقسيط';
+
+  @override
+  String get installmentScheduled => 'تم جدولة التقسيط للتاريخ المحدد';
+
+  @override
+  String get depositAmount => 'مبلغ الإيداع';
+
+  @override
+  String get notesOptional => 'ملاحظات اختيارية...';
+
+  @override
+  String get enterValidAmount => 'الرجاء إدخال مبلغ صالح';
+
+  @override
+  String get selectDateForInstallment => 'الرجاء تحديد تاريخ للتقسيط';
+
+  @override
+  String get success => 'نجاح';
+
+  @override
+  String get additionalDepositSubmitted => 'تم إرسال الإيداع الإضافي بنجاح';
+
+  @override
+  String get depositSubmitted => 'تم إرسال الإيداع بنجاح';
+
+  @override
+  String get paymentSubmitted => 'تم إرسال الدفع بنجاح';
+
+  @override
+  String get customerName => 'اسم العميل';
+
+  @override
+  String get notAvailable => 'غير متاح';
+
+  @override
+  String get hasAccount => 'لديه حساب';
+
+  @override
+  String get myDocuments => 'مستنداتي';
+
+  @override
+  String get loadingFinancialDocuments => 'جاري تحميل المستندات المالية...';
+
+  @override
+  String get noMatchingDocuments => 'لا توجد مستندات مطابقة';
+
+  @override
+  String get noResultsFound => 'لم يتم العثور على نتائج';
+
+  @override
+  String get noDocumentsYet => 'لا توجد مستندات بعد';
+
+  @override
+  String get tryAdjustingFilters => 'حاول تعديل الفلاتر لرؤية المزيد من النتائج';
+
+  @override
+  String get noDocumentsMatch => 'لا توجد مستندات تطابق';
+
+  @override
+  String get startCreatingFirstDocument => 'ابدأ بإنشاء أول مستند مالي لك';
+
+  @override
+  String get createFirstDocument => 'إنشاء أول مستند';
+
+  @override
+  String get documentsWillAppearHere => 'ستظهر المستندات هنا بمجرد إنشائها';
+
+  @override
+  String get tip => '💡 نصيحة';
+
+  @override
+  String youHaveTotalDocuments(Object count) {
+    return 'لديك $count مستندات إجمالاً.';
+  }
+
+  @override
+  String get tryDifferentFilters => 'جرب فلاتر مختلفة أو مصطلحات بحث.';
+
+  @override
+  String get payNow => 'ادفع الآن';
+
+  @override
+  String get canceled => 'ملغي';
+
+  @override
+  String get dueSoon => 'قريب الاستحقاق';
+
+  @override
+  String get onTrack => 'ضمن الجدول';
+
+  @override
+  String get loadMore => 'تحميل المزيد';
+
+  @override
+  String get noMoreDocuments => 'لا توجد مستندات إضافية';
 }

@@ -623,7 +623,7 @@ class NotificationItem extends StatelessWidget {
           .read<SupplierChangeNotifier>()
           .getSupplierById(invitation.providerId);
 
-      return '${supplier?.provider_organisation_name} • ${supplier?.providerName}';
+      return '${supplier?.providerOrganisationName} • ${supplier?.providerName}';
     }
 
     switch (notification.content?.type) {

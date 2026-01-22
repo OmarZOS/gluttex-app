@@ -6,6 +6,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Person.dart';
+import 'package:gluttex_core/business/finance/Customer.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
@@ -57,6 +58,35 @@ class PersonnelNotifier with ChangeNotifier {
   // ------------------------------------------------------------------
   // OPTIMIZED HELPER METHODS
   // ------------------------------------------------------------------
+
+// In your FinanceChangeNotifier class
+  Future<Customer?> getCustomerDisplayInfo({
+    required int customerId,
+    required String customerType,
+    int? personId,
+  }) async {
+    try {
+      if (customerType == 'user') {
+        // Fetch user info from PersonnelNotifier
+        final user = await _userService.getAppUser(customerId.toString());
+        return Customer.fromUser(user!);
+      } else if (customerType == 'person' && personId != null) {
+        // Fetch person info
+        final person = await _userService.getPerson(personId.toString());
+        return Customer.fromPerson(person!);
+      } else {
+        return Customer.fromJson({
+          'name': 'Customer #$customerId',
+          'type': customerType,
+          'email': '',
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching customer info: $e');
+      // return ;
+    }
+    return null;
+  }
 
   List<AppUser> _getActiveUsersForSupplier(int supplierId) {
     if (supplierId == 0) {

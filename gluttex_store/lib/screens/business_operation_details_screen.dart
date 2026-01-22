@@ -4,6 +4,7 @@ import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_store/components/operations/business_operations_list.dart';
 import 'package:gluttex_store/components/operations/details/operation_body.dart';
+import 'package:gluttex_ui/components/finance/financial_ui_manager.dart';
 
 class OperationDetailsScreen extends StatelessWidget {
   final BusinessOperation operation;
@@ -166,8 +167,8 @@ class _HeaderDetails extends StatelessWidget {
 
   const _HeaderDetails({required this.operation});
 
-  String _formatCurrency(double amount, AppLocalizations loc) {
-    return loc.price(amount.toStringAsFixed(2));
+  String _formatCurrency(double amount, BuildContext context) {
+    return FinancialUIManager.formatCurrency(amount, context);
   }
 
   @override
@@ -180,7 +181,7 @@ class _HeaderDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _formatCurrency(operation.totalAmount, localizations),
+          _formatCurrency(operation.totalAmount, context),
           style: theme.textTheme.headlineLarge?.copyWith(
             color: colorScheme.onPrimary,
             fontWeight: FontWeight.w800,

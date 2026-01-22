@@ -66,22 +66,22 @@ class _NotesParametersSectionState extends State<NotesParametersSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.note_add_outlined,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                loc.notesParameters,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     Icon(
+          //       Icons.note_add_outlined,
+          //       color: theme.colorScheme.primary,
+          //       size: 20,
+          //     ),
+          //     const SizedBox(width: 8),
+          //     Text(
+          //       loc.notesParameters,
+          //       style: theme.textTheme.titleMedium?.copyWith(
+          //         fontWeight: FontWeight.w600,
+          //       ),
+          //     ),
+          //   ],
+          // ),
           const SizedBox(height: 12),
 
           // Notes Field
@@ -231,11 +231,11 @@ class _NotesParametersSectionState extends State<NotesParametersSection> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  if (widget.parameters.isEmpty)
-                    _buildEmptyParametersState(context, loc, theme)
-                  else
+                  if (!widget.parameters.isEmpty) const SizedBox(height: 8),
+                  if (!widget.parameters.isEmpty)
                     _buildParametersList(context, loc, theme),
+                  //   _buildEmptyParametersState(context, loc, theme)
+                  // else
                 ],
               ),
             ),

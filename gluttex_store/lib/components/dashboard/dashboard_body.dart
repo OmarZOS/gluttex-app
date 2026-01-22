@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:gluttex_event/finance_change_notifier.dart';
+import 'package:gluttex_event/order_change_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/service_change_notifier.dart';
@@ -13,6 +15,7 @@ import 'package:gluttex_personnel/supplier_entities_screen.dart';
 import 'package:gluttex_store/screens/business_operations_screen.dart';
 import 'package:gluttex_store/screens/finance_screen.dart';
 import 'package:gluttex_store/screens/inventory_screen.dart';
+import 'package:gluttex_store/screens/orders_screen.dart';
 import 'package:gluttex_store/screens/selling_screen.dart';
 import 'package:gluttex_store/screens/services_screen.dart';
 import 'package:medicom_catalog/screens/orders_screen.dart';
@@ -69,28 +72,32 @@ class DashboardBody extends StatelessWidget {
                   onSearchChanged: productNotifier.searchProducts,
                   onProductTap: (productId) {},
                   onRefresh: () => {},
-                  onAddProduct: () => {},
+                  onAddProduct: () =>
+                      {Navigator.pushNamed(context, AppRoutes.productCreate)},
                 ));
       case DashboardScreenType.orders:
-        return Consumer<CartChangeNotifier>(
-            builder: (context, cartNotifier, child) => OrdersScreen(
-                  cartChangeNotifier: cartNotifier,
+        return Consumer<OrderChangeNotifier>(
+            builder: (context, cartNotifier, child) => SupplierOrdersScreen(
+                  privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
+                  userId: userId,
+                  accessibleSuppliers: accessibleSuppliers,
+                  personnelNotifier: _personnelNotifier,
                 ));
       case DashboardScreenType.operations:
         return Consumer<PersonnelNotifier>(
             builder: (context, personnelNotifier, child) =>
                 BusinessOperationsScreen());
       case DashboardScreenType.pos:
-        return Consumer4<ServiceNotifier, PersonnelNotifier, ProductNotifier,
+        return Consumer3<ServiceNotifier, PersonnelNotifier,
             CartChangeNotifier>(
-          builder: (context, serviceNotifier, personnelNotifier,
-                  productNotifier, cartNotifier, child) =>
+          builder: (context, serviceNotifier, personnelNotifier, cartNotifier,
+                  child) =>
               SellingPointScreen(
             serviceNotifier: serviceNotifier,
             userId: userId,
             accessibleSuppliers: accessibleSuppliers,
             personnelNotifier: personnelNotifier,
-            productNotifier: productNotifier,
+            productNotifier: context.read<ProductNotifier>(),
             cartNotifier: cartNotifier,
             onScanBarcode: () {},
             onSearchChanged: () {},

@@ -66,12 +66,12 @@ class FinanceStats extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            if (viewModel.isCalculatingAnalytics)
+            if (viewModel.isLoading)
               const CircularProgressIndicator()
             else
               FilledButton.icon(
                 onPressed: () {
-                  viewModel.refreshAnalytics();
+                  viewModel.refreshAllData();
                 },
                 icon: Icon(
                   Icons.refresh,

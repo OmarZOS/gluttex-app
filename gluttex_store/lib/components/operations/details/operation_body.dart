@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
+import 'package:gluttex_ui/components/finance/financial_ui_manager.dart';
 import 'operation_items_list.dart';
 import 'operation_summary.dart';
 
@@ -91,17 +92,17 @@ class _PaymentDetails extends StatelessWidget {
           const SizedBox(height: 16),
           _PaymentRow(
             label: localizations.totalAmount,
-            value: _formatCurrency(operation.totalAmount, loc),
+            value: _formatCurrency(operation.totalAmount, context),
             color: colorScheme.onSurface,
           ),
           _PaymentRow(
             label: localizations.totalPaid,
-            value: _formatCurrency(operation.totalPaid, loc),
+            value: _formatCurrency(operation.totalPaid, context),
             color: colorScheme.primary,
           ),
           _PaymentRow(
             label: localizations.totalDeposited,
-            value: _formatCurrency(operation.totalDeposited, loc),
+            value: _formatCurrency(operation.totalDeposited, context),
             color: colorScheme.secondary,
           ),
           Divider(
@@ -110,7 +111,7 @@ class _PaymentDetails extends StatelessWidget {
           ),
           _PaymentRow(
             label: localizations.balanceDue,
-            value: _formatCurrency(operation.balanceDue, loc),
+            value: _formatCurrency(operation.balanceDue, context),
             color: operation.balanceDue > 0
                 ? colorScheme.error
                 : colorScheme.onSurface,
@@ -227,8 +228,8 @@ class _FooterActions extends StatelessWidget {
 // HELPERS
 // -----------------------------------------------------------------------------
 
-String _formatCurrency(double amount, AppLocalizations loc) {
-  return loc.price(amount.toStringAsFixed(2));
+String _formatCurrency(double amount, BuildContext context) {
+  return FinancialUIManager.formatCurrency(amount, context);
 }
 
 String _formatStatus(String status, BuildContext context) {

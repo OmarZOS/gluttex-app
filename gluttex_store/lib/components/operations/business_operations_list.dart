@@ -22,21 +22,22 @@ class BusinessOperationsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverList.builder(
-      itemCount: operations.length + (hasMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == operations.length) {
-          onLoadMore();
-          return const _LoadingMoreIndicator();
-        }
+    return SliverPadding(
+        padding: const EdgeInsets.only(bottom: 50), // Add bottom padding
+        sliver: SliverList.builder(
+            itemCount: operations.length + (hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == operations.length) {
+                onLoadMore();
+                return const _LoadingMoreIndicator();
+              }
 
-        return BusinessOperationCard(
-          operation: operations[index],
-          isLast: index == operations.length - 1,
-          onTap: () => onTapOperation(operations[index]),
-        );
-      },
-    );
+              return BusinessOperationCard(
+                operation: operations[index],
+                isLast: index == operations.length - 1,
+                onTap: () => onTapOperation(operations[index]),
+              );
+            }));
   }
 }
 

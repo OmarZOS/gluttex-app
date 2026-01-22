@@ -253,8 +253,8 @@ class _SupplierEntitiesContentState extends State<SupplierEntitiesContent>
   ProductProvider _createProductProvider(Supplier supplier) {
     return ProductProvider(
       product_provider_type_id: supplier.productProviderTypeId,
-      product_provider_location_id: supplier.id_location ?? 0,
-      product_provider_org_id: supplier.id_provider_organisation,
+      product_provider_location_id: supplier.idLocation ?? 0,
+      product_provider_org_id: supplier.idProviderOrganisation,
       id_product_provider: supplier.idProductProvider,
       product_provider_details_id: supplier.idProductProvider,
       product_provider_owner: supplier.productProviderOwnerId,

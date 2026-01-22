@@ -2232,7 +2232,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get orderManagement => 'Gestion des Commandes';
 
   @override
-  String get processing => 'Traitement...';
+  String get processing => 'Traitement en cours...';
 
   @override
   String get completed => 'Terminées';
@@ -2472,7 +2472,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paid => 'Payé';
 
   @override
-  String get pending => 'En attente';
+  String get pending => 'En Attente';
 
   @override
   String get cancelled => 'Annulé';
@@ -2609,7 +2609,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get finalPrice => 'Prix Final';
 
   @override
-  String get totalCost => 'Coût Total';
+  String get totalCost => 'Coût total de livraison';
 
   @override
   String get discountApplied => 'Remise appliquée au prix de base';
@@ -2681,13 +2681,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get carts => 'Paniers';
 
   @override
-  String get clearFilters => 'Effacer les Filtres';
+  String get clearFilters => 'Effacer les filtres';
 
   @override
-  String get totalAmount => 'Montant total';
+  String get totalAmount => 'Total';
 
   @override
-  String get totalPaid => 'Total Payé';
+  String get totalPaid => 'Payé';
 
   @override
   String get outstanding => 'En Suspens';
@@ -3101,7 +3101,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get downloadPdf => 'Télécharger PDF';
 
   @override
-  String get shareDocument => 'Partager le document';
+  String get shareDocument => 'Partager le Document';
 
   @override
   String get markAsPaid => 'Marquer comme payé';
@@ -3236,10 +3236,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get amount => 'Montant';
 
   @override
-  String get dueDate => 'Date d\'échéance';
+  String get dueDate => 'Date d\'Échéance';
 
   @override
-  String get issueDate => 'Date d\'émission';
+  String get issueDate => 'Date d\'Émission';
 
   @override
   String get paymentDate => 'Date de paiement';
@@ -3412,7 +3412,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get count => 'Nombre';
 
   @override
-  String get paymentProgress => 'Progression du paiement';
+  String get paymentProgress => 'Progression du Paiement';
 
   @override
   String get noDocumentsFound => 'Aucun document trouvé';
@@ -3460,7 +3460,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scheduledTime => 'Heure planifiée';
 
   @override
-  String get specialInstructions => 'Instructions spéciales';
+  String get specialInstructions => 'Instructions Spéciales';
 
   @override
   String get addNotesHere => 'Ajoutez des notes ici...';
@@ -3901,22 +3901,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deliveryType => 'Type de Livraison';
 
   @override
-  String get pickup => 'Ramassage';
+  String get pickup => 'Retrait';
 
   @override
-  String get pickupDesc => 'Le client retirera la commande';
+  String get pickupDesc => 'Le client récupère en magasin';
 
   @override
   String get delivery => 'Livraison';
 
   @override
-  String get deliveryDesc => 'Nous livrerons à votre adresse';
+  String get deliveryDesc => 'Nous livrons à votre adresse';
 
   @override
   String get shipping => 'Expédition';
 
   @override
-  String get shippingDesc => 'Expédié via service de messagerie';
+  String get shippingDesc => 'Expédier à n\'importe quel endroit';
 
   @override
   String get orderNotes => 'Notes de Commande';
@@ -3958,7 +3958,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fullPayment => 'Paiement Complet';
 
   @override
-  String get depositOnly => 'Acompte Seulement';
+  String get depositOnly => 'Dépôt Uniquement';
 
   @override
   String get check => 'Chèque';
@@ -4102,7 +4102,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get changeCustomer => 'Changer de Client';
 
   @override
-  String get installment => 'Paiement Échelonné';
+  String get installment => 'Échéance';
 
   @override
   String get help => 'Aide';
@@ -4210,7 +4210,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get newCustomerComingSoon => 'Création de nouveau client à venir';
 
   @override
-  String get selectPaymentType => 'Sélectionnez comment vous souhaitez payer';
+  String get selectPaymentType => 'Sélectionnez votre méthode de paiement';
 
   @override
   String get fullPaymentDesc => 'Payer le montant total maintenant';
@@ -4219,34 +4219,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fullPaymentApplied => 'Paiement Complet Appliqué';
 
   @override
-  String get fullPaymentDescDetail => 'Le montant total sera facturé immédiatement';
+  String get fullPaymentDescDetail => 'Le client paiera le montant total immédiatement';
 
   @override
-  String get depositOnlyDesc => 'Payer un acompte maintenant, le solde plus tard';
+  String get depositOnlyDesc => 'Payer un acompte maintenant, le reste plus tard';
 
   @override
-  String get enterDepositAmount => 'Entrez le montant de l\'acompte';
+  String get enterDepositAmount => 'Entrer le Montant de l\'Arrhes';
 
   @override
-  String get enterAmount => 'Entrez le montant';
+  String get enterAmount => 'Entrer le montant';
 
   @override
-  String get remainingAmount => 'Montant restant';
+  String get remainingAmount => 'Restant';
 
   @override
-  String get installmentDesc => 'Planifier le paiement pour plus tard';
+  String get installmentDesc => 'Planifier le paiement pour une date future';
 
   @override
-  String get selectInstallmentDate => 'Sélectionnez la date de paiement';
+  String get selectInstallmentDate => 'Sélectionner la Date de l\'Échéance';
 
   @override
-  String get installmentDate => 'Date de Paiement';
+  String get installmentDate => 'Date de l\'Échéance';
 
   @override
-  String get selectDate => 'Sélectionnez une date';
+  String get selectDate => 'Sélectionner la Date';
 
   @override
-  String get installmentNote => 'Le montant total sera facturé à la date sélectionnée';
+  String get installmentNote => 'Le paiement sera dû à la date sélectionnée';
 
   @override
   String get persons => 'Personnes';
@@ -4328,4 +4328,812 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deliveryHelpDescription => 'Choisissez si le client viendra chercher la commande ou si elle doit être livrée.';
+
+  @override
+  String get deliveryDetails => 'Détails de Livraison';
+
+  @override
+  String get packageDetails => 'Détails du Colis';
+
+  @override
+  String get packageCount => 'Nombre de Colis';
+
+  @override
+  String get totalWeight => 'Poids Total (kg)';
+
+  @override
+  String get dimensions => 'Dimensions (L×l×H)';
+
+  @override
+  String get goodsDescription => 'Description des Marchandises';
+
+  @override
+  String get deliveryAddress => 'Adresse de Livraison';
+
+  @override
+  String get shippingMethod => 'Méthode d\'Expédition';
+
+  @override
+  String get estimatedDeliveryFee => 'Frais de Livraison Estimés';
+
+  @override
+  String get priceMayChange => 'Le prix peut changer selon les détails finaux';
+
+  @override
+  String get useCustomerAddress => 'Utiliser l\'Adresse du Client';
+
+  @override
+  String get changeAddress => 'Changer d\'Adresse';
+
+  @override
+  String get selectAddress => 'Sélectionner l\'Adresse de Livraison';
+
+  @override
+  String get addressSelected => 'Adresse sélectionnée';
+
+  @override
+  String get addressFilled => 'Adresse remplie à partir des informations client';
+
+  @override
+  String get calculatePrice => 'Calculer le Prix';
+
+  @override
+  String get standard => 'Standard';
+
+  @override
+  String get express => 'Express';
+
+  @override
+  String get overnight => 'Livraison de Nuit';
+
+  @override
+  String get freight => 'Fret';
+
+  @override
+  String get enterAddress => 'Entrer l\'adresse de livraison';
+
+  @override
+  String get deliveryFee => 'Frais de Livraison';
+
+  @override
+  String get estimatedPrice => 'Prix Estimé';
+
+  @override
+  String get weightRequired => 'Le poids est requis';
+
+  @override
+  String get addressRequired => 'L\'adresse de livraison est requise';
+
+  @override
+  String get invalidWeight => 'Valeur de poids invalide';
+
+  @override
+  String get loadingPrice => 'Calcul du prix...';
+
+  @override
+  String get deliveryOptions => 'Options de Livraison';
+
+  @override
+  String get freeDelivery => 'Livraison Gratuite';
+
+  @override
+  String get paidDelivery => 'Livraison Payante';
+
+  @override
+  String get scheduleDelivery => 'Planifier la Livraison';
+
+  @override
+  String get deliveryDate => 'Date de Livraison';
+
+  @override
+  String get deliveryTime => 'Heure de Livraison Préférée';
+
+  @override
+  String get trackingNumber => 'Numéro de Suivi';
+
+  @override
+  String get carrier => 'Transporteur';
+
+  @override
+  String get insurance => 'Assurance';
+
+  @override
+  String get signatureRequired => 'Signature Requise';
+
+  @override
+  String get fragile => 'Fragile';
+
+  @override
+  String get perishable => 'Périssable';
+
+  @override
+  String get hazardous => 'Dangereux';
+
+  @override
+  String get bulk => 'Vrac';
+
+  @override
+  String get confirmDelivery => 'Confirmer la Livraison';
+
+  @override
+  String get deliveryConfirmed => 'Livraison Confirmée';
+
+  @override
+  String get deliveryPending => 'Livraison en Attente';
+
+  @override
+  String get deliveryInTransit => 'En Transit';
+
+  @override
+  String get deliveryOutForDelivery => 'En Livraison';
+
+  @override
+  String get deliveryDelivered => 'Livré';
+
+  @override
+  String get deliveryFailed => 'Livraison Échouée';
+
+  @override
+  String get deliveryCancelled => 'Livraison Annulée';
+
+  @override
+  String get deliveryReturned => 'Retourné';
+
+  @override
+  String get trackDelivery => 'Suivre la Livraison';
+
+  @override
+  String get viewDeliveryDetails => 'Voir les Détails de Livraison';
+
+  @override
+  String get editDelivery => 'Modifier la Livraison';
+
+  @override
+  String get cancelDelivery => 'Annuler la Livraison';
+
+  @override
+  String get rescheduleDelivery => 'Reprogrammer la Livraison';
+
+  @override
+  String get deliveryHistory => 'Historique des Livraisons';
+
+  @override
+  String get upcomingDeliveries => 'Livraisons à Venir';
+
+  @override
+  String get pastDeliveries => 'Livraisons Passées';
+
+  @override
+  String get deliveryStatus => 'Statut de Livraison';
+
+  @override
+  String get recipient => 'Destinataire';
+
+  @override
+  String get sender => 'Expéditeur';
+
+  @override
+  String get pickupLocation => 'Lieu de Retrait';
+
+  @override
+  String get deliveryLocation => 'Lieu de Livraison';
+
+  @override
+  String get expectedDelivery => 'Livraison Prévue';
+
+  @override
+  String get actualDelivery => 'Livraison Réelle';
+
+  @override
+  String get deliveryNotes => 'Notes de Livraison';
+
+  @override
+  String get proofOfDelivery => 'Preuve de Livraison';
+
+  @override
+  String get signature => 'Signature';
+
+  @override
+  String get photos => 'Photos';
+
+  @override
+  String get damageReport => 'Rapport de Dommage';
+
+  @override
+  String get feedback => 'Retour';
+
+  @override
+  String get rateDelivery => 'Évaluer la Livraison';
+
+  @override
+  String get deliveryRating => 'Évaluation de Livraison';
+
+  @override
+  String get driverName => 'Nom du Livreur';
+
+  @override
+  String get vehicleNumber => 'Numéro du Véhicule';
+
+  @override
+  String get contactDriver => 'Contacter le Livreur';
+
+  @override
+  String get shareLocation => 'Partager la Localisation';
+
+  @override
+  String get liveTracking => 'Suivi en Direct';
+
+  @override
+  String get eTA => 'Heure d\'Arrivée Estimée';
+
+  @override
+  String get distance => 'Distance';
+
+  @override
+  String get route => 'Route/Rue';
+
+  @override
+  String get deliveryProof => 'Preuve de Livraison';
+
+  @override
+  String get confirmReceipt => 'Confirmer Réception';
+
+  @override
+  String get reportIssue => 'Signaler un Problème';
+
+  @override
+  String get needHelp => 'Besoin d\'Aide ?';
+
+  @override
+  String get streetAddress => 'Adresse';
+
+  @override
+  String get enterStreetAddress => 'Entrez l\'adresse';
+
+  @override
+  String get streetAddressRequired => 'L\'adresse est requise';
+
+  @override
+  String get enterCity => 'Entrez la ville';
+
+  @override
+  String get cityRequired => 'La ville est requise';
+
+  @override
+  String get postalCode => 'Code Postal';
+
+  @override
+  String get enterPostalCode => 'Entrez le code postal';
+
+  @override
+  String get stateProvince => 'État/Province';
+
+  @override
+  String get enterState => 'Entrez l\'état/province';
+
+  @override
+  String get enterCountry => 'Entrez le pays';
+
+  @override
+  String get countryRequired => 'Le pays est requis';
+
+  @override
+  String get addressType => 'Type d\'Adresse';
+
+  @override
+  String get additionalDetails => 'Détails Supplémentaires';
+
+  @override
+  String get building => 'Bâtiment';
+
+  @override
+  String get enterBuilding => 'Nom/Numéro du bâtiment';
+
+  @override
+  String get apartment => 'Appartement';
+
+  @override
+  String get enterApartment => 'Numéro d\'appartement/unité';
+
+  @override
+  String get floor => 'Étage';
+
+  @override
+  String get enterFloor => 'Numéro d\'étage';
+
+  @override
+  String get landmark => 'Point de Repère';
+
+  @override
+  String get enterLandmark => 'Point de repère à proximité';
+
+  @override
+  String get quickFill => 'Remplir Rapidement';
+
+  @override
+  String get addressComplete => 'Adresse Complète';
+
+  @override
+  String get addressIncomplete => 'Veuillez remplir tous les champs obligatoires';
+
+  @override
+  String get selectCountry => 'Sélectionnez un pays';
+
+  @override
+  String get homeAddress => 'Domicile';
+
+  @override
+  String get workAddress => 'Travail';
+
+  @override
+  String get businessAddress => 'Entreprise';
+
+  @override
+  String get shippingAddress => 'Adresse de Livraison';
+
+  @override
+  String get billingAddress => 'Adresse de Facturation';
+
+  @override
+  String get otherAddress => 'Autre';
+
+  @override
+  String get requiredField => 'Ce champ est obligatoire';
+
+  @override
+  String get invalidFormat => 'Format invalide';
+
+  @override
+  String get addressSaved => 'Adresse enregistrée avec succès';
+
+  @override
+  String get addressUpdated => 'Adresse mise à jour avec succès';
+
+  @override
+  String get addressDeleted => 'Adresse supprimée';
+
+  @override
+  String get saveAddress => 'Enregistrer l\'Adresse';
+
+  @override
+  String get updateAddress => 'Mettre à jour l\'Adresse';
+
+  @override
+  String get deleteAddress => 'Supprimer l\'Adresse';
+
+  @override
+  String get clear => 'Effacer';
+
+  @override
+  String get reset => 'Réinitialiser';
+
+  @override
+  String get myAddresses => 'Mes Adresses';
+
+  @override
+  String get addNewAddress => 'Ajouter une Nouvelle Adresse';
+
+  @override
+  String get editAddress => 'Modifier l\'Adresse';
+
+  @override
+  String get defaultAddress => 'Adresse par Défaut';
+
+  @override
+  String get setAsDefault => 'Définir par Défaut';
+
+  @override
+  String get removeDefault => 'Supprimer par Défaut';
+
+  @override
+  String get noAddresses => 'Aucune adresse enregistrée';
+
+  @override
+  String get addYourFirstAddress => 'Ajoutez votre première adresse';
+
+  @override
+  String get addressBook => 'Carnet d\'Adresses';
+
+  @override
+  String get useCurrentLocation => 'Utiliser la Localisation Actuelle';
+
+  @override
+  String get locating => 'Localisation en cours...';
+
+  @override
+  String get locationPermission => 'Autorisation de Localisation';
+
+  @override
+  String get locationPermissionMessage => 'Veuillez activer les services de localisation';
+
+  @override
+  String get enableLocation => 'Activer la Localisation';
+
+  @override
+  String get locationServicesDisabled => 'Services de localisation désactivés';
+
+  @override
+  String get locationNotFound => 'Localisation non trouvée';
+
+  @override
+  String get searchLocation => 'Rechercher un lieu';
+
+  @override
+  String get selectOnMap => 'Sélectionner sur la Carte';
+
+  @override
+  String get verifyAddress => 'Vérifier l\'Adresse';
+
+  @override
+  String get addressVerified => 'Adresse vérifiée';
+
+  @override
+  String get addressNotVerified => 'L\'adresse n\'a pas pu être vérifiée';
+
+  @override
+  String get suggestedAddress => 'Adresse Suggerée';
+
+  @override
+  String get useSuggested => 'Utiliser l\'Adresse Suggerée';
+
+  @override
+  String get keepOriginal => 'Garder l\'Originale';
+
+  @override
+  String get streetNumber => 'Numéro de Rue';
+
+  @override
+  String get neighborhood => 'Quartier';
+
+  @override
+  String get sublocality => 'Sous-localité';
+
+  @override
+  String get administrativeArea => 'Région Administrative';
+
+  @override
+  String get subAdministrativeArea => 'Sous-région Administrative';
+
+  @override
+  String get postalTown => 'Ville Postale';
+
+  @override
+  String get premise => 'Lieu';
+
+  @override
+  String get subpremise => 'Sous-lieu';
+
+  @override
+  String get plusCode => 'Code Plus';
+
+  @override
+  String get showOnMap => 'Afficher sur la Carte';
+
+  @override
+  String get getDirections => 'Obtenir l\'Itinéraire';
+
+  @override
+  String get copyAddress => 'Copier l\'Adresse';
+
+  @override
+  String get shareAddress => 'Partager l\'Adresse';
+
+  @override
+  String get qrCode => 'Code QR';
+
+  @override
+  String get labelHome => '🏠 Domicile';
+
+  @override
+  String get labelWork => '💼 Travail';
+
+  @override
+  String get labelFamily => '👪 Famille';
+
+  @override
+  String get labelFriend => '👤 Ami';
+
+  @override
+  String get labelOther => '📍 Autre';
+
+  @override
+  String get customLabel => 'Étiquette Personnalisée';
+
+  @override
+  String get enterLabel => 'Entrez l\'étiquette';
+
+  @override
+  String get deliveryInstructions => 'Instructions de Livraison';
+
+  @override
+  String get enterInstructions => 'Entrez les instructions de livraison';
+
+  @override
+  String get gateCode => 'Code d\'Accès';
+
+  @override
+  String get enterGateCode => 'Entrez le code d\'accès';
+
+  @override
+  String get leaveAtDoor => 'Laisser à la porte';
+
+  @override
+  String get requireSignature => 'Signature requise';
+
+  @override
+  String get callOnArrival => 'Appeler à l\'arrivée';
+
+  @override
+  String get formatAsSingleLine => 'Format sur une Ligne';
+
+  @override
+  String get formatAsMultiLine => 'Format sur Plusieurs Lignes';
+
+  @override
+  String get copyFormatted => 'Copier Formaté';
+
+  @override
+  String get standardFormat => 'Format Standard';
+
+  @override
+  String get localFormat => 'Format Local';
+
+  @override
+  String get internationalFormat => 'Format International';
+
+  @override
+  String get lengthHint => 'Longueur';
+
+  @override
+  String get widthHint => 'Largeur';
+
+  @override
+  String get heightHint => 'Hauteur';
+
+  @override
+  String get goodsDescriptionHint => 'Décrivez ce qui est livré';
+
+  @override
+  String get hsCode => 'Code SH';
+
+  @override
+  String get hsCodeHint => 'Code du Système Harmonisé';
+
+  @override
+  String get standardShipping => 'Expédition Standard';
+
+  @override
+  String get expressShipping => 'Expédition Express';
+
+  @override
+  String get overnightShipping => 'Livraison de Nuit';
+
+  @override
+  String get freightShipping => 'Transport de Fret';
+
+  @override
+  String get selectDeliveryType => 'Choisissez comment vous souhaitez recevoir votre commande';
+
+  @override
+  String get fillAddressAutomatically => 'Remplir l\'adresse automatiquement depuis le profil client';
+
+  @override
+  String get weightUnit => 'kg';
+
+  @override
+  String get dimensionUnitCm => 'cm';
+
+  @override
+  String get enterPackageDimensions => 'Entrez les dimensions du colis pour un expédition précise';
+
+  @override
+  String get dimensionUnitM => 'm';
+
+  @override
+  String get paidCart => 'Achat payé';
+
+  @override
+  String get remaining => 'Reste à Payer';
+
+  @override
+  String get deposits => 'Dépôts';
+
+  @override
+  String get customerType => 'Type de Client';
+
+  @override
+  String get customerId => 'ID Client';
+
+  @override
+  String get personId => 'ID Personne';
+
+  @override
+  String get notAssigned => 'Non Assigné';
+
+  @override
+  String get documentDetails => 'Détails du Document';
+
+  @override
+  String get daysIssued => 'Jours Écoulés';
+
+  @override
+  String get days => 'jours';
+
+  @override
+  String get sourceType => 'Type de Source';
+
+  @override
+  String makePayment(Object amount) {
+    return 'Payer $amount';
+  }
+
+  @override
+  String get copyLink => 'Copier le Lien';
+
+  @override
+  String get shareViaEmail => 'Partager par Email';
+
+  @override
+  String get shareViaMessage => 'Partager par Message';
+
+  @override
+  String get downloadingDocument => 'Téléchargement du document...';
+
+  @override
+  String get downloadComplete => 'Téléchargement terminé';
+
+  @override
+  String get cart_with_payments => 'Panier avec Paiements';
+
+  @override
+  String get pending_cart => 'Panier en Attente';
+
+  @override
+  String get pending_cart_lower => 'panier en attente';
+
+  @override
+  String get partially_paid => 'Partiellement Payé';
+
+  @override
+  String get unknown => 'Inconnu';
+
+  @override
+  String get cart_based => 'Basé sur Panier';
+
+  @override
+  String get invoice_based => 'Basé sur Facture';
+
+  @override
+  String get direct_invoice => 'Facture Directe';
+
+  @override
+  String get order_based => 'Basé sur Commande';
+
+  @override
+  String get direct_deposit => 'Dépôt Direct';
+
+  @override
+  String get direct_receipt => 'Reçu Direct';
+
+  @override
+  String get mixed_payments => 'Paiements Mixtes';
+
+  @override
+  String get payment_only => 'Paiement Seulement';
+
+  @override
+  String get deposit_only => 'Dépôt Seulement';
+
+  @override
+  String get no_payments => 'Aucun Paiement';
+
+  @override
+  String get addDeposit => 'Ajouter un Dépôt';
+
+  @override
+  String get submitDeposit => 'Soumettre le Dépôt';
+
+  @override
+  String get submitPayment => 'Soumettre le Paiement';
+
+  @override
+  String get depositDetails => 'Détails du Dépôt';
+
+  @override
+  String get installmentDetails => 'Détails de l\'Accompte';
+
+  @override
+  String get installmentScheduled => 'Accompte programmé pour la date sélectionnée';
+
+  @override
+  String get depositAmount => 'Montant du Dépôt';
+
+  @override
+  String get notesOptional => 'Notes optionnelles...';
+
+  @override
+  String get enterValidAmount => 'Veuillez entrer un montant valide';
+
+  @override
+  String get selectDateForInstallment => 'Veuillez sélectionner une date pour l\'acompte';
+
+  @override
+  String get success => 'Succès';
+
+  @override
+  String get additionalDepositSubmitted => 'Dépôt supplémentaire soumis avec succès';
+
+  @override
+  String get depositSubmitted => 'Dépôt soumis avec succès';
+
+  @override
+  String get paymentSubmitted => 'Paiement soumis avec succès';
+
+  @override
+  String get customerName => 'Nom du Client';
+
+  @override
+  String get notAvailable => 'Non Disponible';
+
+  @override
+  String get hasAccount => 'A un Compte';
+
+  @override
+  String get myDocuments => 'Mes Documents';
+
+  @override
+  String get loadingFinancialDocuments => 'Chargement des documents financiers...';
+
+  @override
+  String get noMatchingDocuments => 'Aucun document correspondant';
+
+  @override
+  String get noResultsFound => 'Aucun résultat trouvé';
+
+  @override
+  String get noDocumentsYet => 'Aucun document pour l\'instant';
+
+  @override
+  String get tryAdjustingFilters => 'Essayez d\'ajuster vos filtres pour voir plus de résultats';
+
+  @override
+  String get noDocumentsMatch => 'Aucun document ne correspond';
+
+  @override
+  String get startCreatingFirstDocument => 'Commencez par créer votre premier document financier';
+
+  @override
+  String get createFirstDocument => 'Créer le premier document';
+
+  @override
+  String get documentsWillAppearHere => 'Les documents apparaîtront ici une fois créés';
+
+  @override
+  String get tip => '💡 Astuce';
+
+  @override
+  String youHaveTotalDocuments(Object count) {
+    return 'Vous avez $count documents au total.';
+  }
+
+  @override
+  String get tryDifferentFilters => 'Essayez différents filtres ou termes de recherche.';
+
+  @override
+  String get payNow => 'Payer maintenant';
+
+  @override
+  String get canceled => 'Annulé';
+
+  @override
+  String get dueSoon => 'À échéance proche';
+
+  @override
+  String get onTrack => 'Dans les délais';
+
+  @override
+  String get loadMore => 'Charger plus';
+
+  @override
+  String get noMoreDocuments => 'Plus de documents';
 }

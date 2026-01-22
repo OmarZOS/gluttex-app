@@ -17,31 +17,31 @@ class OrderItemsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.shopping_cart,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                loc.orderItems,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
-              Consumer<CartChangeNotifier>(
-                builder: (context, cart, child) => Text(
-                  '${cart.cartItems.length} ${cart.cartItems.length == 1 ? 'item' : 'items'}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     Icon(
+          //       Icons.shopping_cart,
+          //       color: theme.colorScheme.primary,
+          //       size: 20,
+          //     ),
+          //     const SizedBox(width: 8),
+          //     Text(
+          //       loc.orderItems,
+          //       style: theme.textTheme.titleMedium?.copyWith(
+          //         fontWeight: FontWeight.w600,
+          //       ),
+          //     ),
+          //     const Spacer(),
+          //     Consumer<CartChangeNotifier>(
+          //       builder: (context, cart, child) => Text(
+          //         '${cart.cartItems.length} ${cart.cartItems.length == 1 ? 'item' : 'items'}',
+          //         style: theme.textTheme.bodySmall?.copyWith(
+          //           color: theme.colorScheme.onSurfaceVariant,
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
           const SizedBox(height: 12),
           Consumer<CartChangeNotifier>(
             builder: (context, cart, child) {

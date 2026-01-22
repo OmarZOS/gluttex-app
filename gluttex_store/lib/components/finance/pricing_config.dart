@@ -5,7 +5,7 @@ import 'package:gluttex_ui/components/pricing_config_card.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 
-class PricingConfigScreen extends StatelessWidget {
+class PricingConfigScreen extends StatefulWidget {
   final PricingConfigViewModel viewModel;
   final bool isLoading;
   final VoidCallback onSave;
@@ -36,6 +36,60 @@ class PricingConfigScreen extends StatelessWidget {
   });
 
   @override
+  State<PricingConfigScreen> createState() => _PricingConfigScreenState();
+}
+
+class _PricingConfigScreenState extends State<PricingConfigScreen> {
+  late double _localBasePrice;
+  late double _localTaxPercentage;
+  late double _localProfitMargin;
+  late double _localFinalPrice;
+  late PricingMode _localMode;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with viewModel values
+    _localBasePrice = widget.viewModel.basePrice;
+    _localTaxPercentage = widget.viewModel.taxPercentage;
+    _localProfitMargin = widget.viewModel.profitMargin;
+    _localFinalPrice = widget.viewModel.finalPrice;
+    _localMode = widget.viewModel.mode;
+  }
+
+  @override
+  void didUpdateWidget(covariant PricingConfigScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Only update local state when viewModel changes significantly
+    // This prevents frequent updates that reset text fields
+    if (widget.viewModel.basePrice != oldWidget.viewModel.basePrice &&
+        !_isEditingBasePrice) {
+      _localBasePrice = widget.viewModel.basePrice;
+    }
+    if (widget.viewModel.taxPercentage != oldWidget.viewModel.taxPercentage &&
+        !_isEditingTax) {
+      _localTaxPercentage = widget.viewModel.taxPercentage;
+    }
+    if (widget.viewModel.profitMargin != oldWidget.viewModel.profitMargin &&
+        !_isEditingProfit) {
+      _localProfitMargin = widget.viewModel.profitMargin;
+    }
+    if (widget.viewModel.finalPrice != oldWidget.viewModel.finalPrice &&
+        !_isEditingFinalPrice) {
+      _localFinalPrice = widget.viewModel.finalPrice;
+    }
+    if (widget.viewModel.mode != oldWidget.viewModel.mode) {
+      _localMode = widget.viewModel.mode;
+    }
+  }
+
+  bool _isEditingBasePrice = false;
+  bool _isEditingTax = false;
+  bool _isEditingProfit = false;
+  bool _isEditingFinalPrice = false;
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -44,24 +98,40 @@ class PricingConfigScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             PricingConfigCard(
-              basePrice: viewModel.basePrice,
-              taxPercentage: viewModel.taxPercentage,
-              profitMargin: viewModel.profitMargin,
-              finalPrice: viewModel.finalPrice,
-              mode: viewModel.mode,
-              onBasePriceChanged: onBasePriceChanged,
-              onTaxPercentageChanged: onTaxPercentageChanged,
-              onProfitMarginChanged: onProfitMarginChanged,
-              onFinalPriceChanged: onFinalPriceChanged,
-              onModeChanged: onModeChanged,
+              basePrice: _localBasePrice,
+              taxPercentage: _localTaxPercentage,
+              profitMargin: _localProfitMargin,
+              finalPrice: _localFinalPrice,
+              mode: _localMode,
+              onBasePriceChanged: (value) {
+                setState(() => _localBasePrice = value);
+                widget.onBasePriceChanged(value);
+              },
+              onTaxPercentageChanged: (value) {
+                setState(() => _localTaxPercentage = value);
+                widget.onTaxPercentageChanged(value);
+              },
+              onProfitMarginChanged: (value) {
+                setState(() => _localProfitMargin = value);
+                widget.onProfitMarginChanged(value);
+              },
+              onFinalPriceChanged: (value) {
+                setState(() => _localFinalPrice = value);
+                widget.onFinalPriceChanged(value);
+              },
+              onModeChanged: (value) {
+                setState(() => _localMode = value);
+                widget.onModeChanged(value);
+              },
             ),
+            // ... rest of your code remains the same
             const SizedBox(height: 20),
             _buildProductSelector(context),
-            if (viewModel.selectedProducts.isNotEmpty) ...[
+            if (widget.viewModel.selectedProducts.isNotEmpty) ...[
               const SizedBox(height: 20),
               _buildBatchActions(context),
             ],
-            if (isLoading) ...[
+            if (widget.isLoading) ...[
               const SizedBox(height: 20),
               _buildLoadingIndicator(context),
             ],
@@ -93,9 +163,9 @@ class PricingConfigScreen extends StatelessWidget {
                 ),
                 const Spacer(),
                 TextButton(
-                  onPressed: () => onToggleSelectAll(),
+                  onPressed: () => widget.onToggleSelectAll(),
                   child: Text(
-                    viewModel.selectedProducts.length == products.length
+                    widget.viewModel.selectedProducts.length == products.length
                         ? 'Deselect All'
                         : 'Select All',
                   ),
@@ -124,11 +194,11 @@ class PricingConfigScreen extends StatelessWidget {
   }
 
   Widget _buildProductSelectionCard(BuildContext context, Product product) {
-    final isSelected = viewModel.selectedProducts.contains(product);
+    final isSelected = widget.viewModel.selectedProducts.contains(product);
     final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
-      onTap: () => onToggleProductSelection(product),
+      onTap: () => widget.onToggleProductSelection(product),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -177,7 +247,7 @@ class PricingConfigScreen extends StatelessWidget {
             const SizedBox(height: 4),
             if (isSelected)
               Text(
-                'New: DZD${viewModel.finalPrice.toStringAsFixed(2)}',
+                'New: DZD${widget.viewModel.finalPrice.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w600,
@@ -186,9 +256,9 @@ class PricingConfigScreen extends StatelessWidget {
             const SizedBox(height: 2),
             if (isSelected)
               Text(
-                'Profit: ${viewModel.profitMargin.toStringAsFixed(2)}%',
+                'Profit: ${widget.viewModel.profitMargin.toStringAsFixed(2)}%',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: viewModel.profitMargin >= 0
+                      color: widget.viewModel.profitMargin >= 0
                           ? Colors.green
                           : Colors.red,
                     ),
@@ -212,7 +282,7 @@ class PricingConfigScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Update ${viewModel.selectedProducts.length} Products',
+                'Update ${widget.viewModel.selectedProducts.length} Products',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -220,16 +290,17 @@ class PricingConfigScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: viewModel.profitMargin >= 0
+                  color: widget.viewModel.profitMargin >= 0
                       ? Colors.green.withOpacity(0.1)
                       : Colors.red.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '${viewModel.profitMargin.toStringAsFixed(2)}% Profit',
+                  '${widget.viewModel.profitMargin.toStringAsFixed(2)}% Profit',
                   style: TextStyle(
-                    color:
-                        viewModel.profitMargin >= 0 ? Colors.green : Colors.red,
+                    color: widget.viewModel.profitMargin >= 0
+                        ? Colors.green
+                        : Colors.red,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -238,7 +309,7 @@ class PricingConfigScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Final Price: DZD${viewModel.finalPrice.toStringAsFixed(2)} per product',
+            'Final Price: DZD${widget.viewModel.finalPrice.toStringAsFixed(2)} per product',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
@@ -246,7 +317,7 @@ class PricingConfigScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: onClearSelection,
+                  onPressed: widget.onClearSelection,
                   icon: const Icon(Icons.clear),
                   label: const Text('Clear Selection'),
                   style: OutlinedButton.styleFrom(
@@ -257,15 +328,17 @@ class PricingConfigScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: isLoading ? null : onUpdateSelectedProducts,
-                  icon: isLoading
+                  onPressed:
+                      widget.isLoading ? null : widget.onUpdateSelectedProducts,
+                  icon: widget.isLoading
                       ? const SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.update),
-                  label: Text(isLoading ? 'Updating...' : 'Update Prices'),
+                  label:
+                      Text(widget.isLoading ? 'Updating...' : 'Update Prices'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),

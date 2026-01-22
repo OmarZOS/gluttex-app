@@ -1,5 +1,6 @@
 library gluttex_impl_cart;
 
+import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:gluttex_constants/gluttex_constants.dart';
@@ -57,14 +58,74 @@ class CartServiceImpl implements CartService {
   @override
   Future<Cart?> addCart(dynamic cartData, {params}) async {
     try {
-      final result = await _storageService.insert(
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.postCartEndpoint}',
-          cartData,
-          params: params);
+      developer.log('=== addCart START ===', name: 'CartService');
+      developer.log('CartData type: ${cartData.runtimeType}',
+          name: 'CartService');
+      developer.log('Params: $params', name: 'CartService');
 
-      return Cart.fromResponseJson(result);
-    } catch (e) {
-      developer.log('Failed to add cart: $e');
+      // Validate the structure
+      if (cartData is Map<String, dynamic>) {
+        developer.log('Checking cart data structure:', name: 'CartService');
+        developer.log(
+            'Has api_ordered_items: ${cartData.containsKey("api_ordered_items")}',
+            name: 'CartService');
+        developer.log(
+            'Has api_provided_services: ${cartData.containsKey("api_provided_services")}',
+            name: 'CartService');
+        developer.log('Has api_cart: ${cartData.containsKey("api_cart")}',
+            name: 'CartService');
+        developer.log('Has client: ${cartData.containsKey("client")}',
+            name: 'CartService');
+        developer.log('Has client: ${cartData.containsKey("client")}',
+            name: 'CartService');
+
+        // Log sizes
+        if (cartData["api_ordered_items"] is List) {
+          developer.log(
+              'Ordered items count: ${cartData["api_ordered_items"].length}',
+              name: 'CartService');
+        }
+        if (cartData["api_provided_services"] is List) {
+          developer.log(
+              'Provided services count: ${cartData["api_provided_services"].length}',
+              name: 'CartService');
+        }
+      }
+
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.postCartEndpoint}';
+      developer.log('Calling StorageService.insert with URL: $url',
+          name: 'CartService');
+
+      final result = await _storageService.insert(
+        url,
+        cartData,
+        params: params,
+      );
+
+      developer.log('=== addCart RESULT ===', name: 'CartService');
+      developer.log('Result type: ${result.runtimeType}', name: 'CartService');
+      developer.log('Result: $result', name: 'CartService');
+
+      if (result != null) {
+        try {
+          final cart = Cart.fromResponseJson(result);
+          developer.log('Successfully created cart with ID: ${cart.cartId}',
+              name: 'CartService');
+          return cart;
+        } catch (e) {
+          developer.log('Error parsing cart from result: $e',
+              name: 'CartService');
+          developer.log('Raw result: $result', name: 'CartService');
+          return null;
+        }
+      } else {
+        developer.log('Result is null or not a Map', name: 'CartService');
+        return null;
+      }
+    } catch (e, stackTrace) {
+      developer.log('❌ addCart FAILED: $e', name: 'CartService');
+      developer.log('Stack trace: $stackTrace', name: 'CartService');
       return null;
     }
   }

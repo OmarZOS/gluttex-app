@@ -110,115 +110,113 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      floatingActionButton: CustomSpeedDial(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        horizontalButtons: [
-          SpeedDialButton(
-            icon: Icon(Icons.add_business,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.addSupplierTxt,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.providerCreate,
-              );
-            },
-          ),
-        ],
-        verticalButtons: [
-          SpeedDialButton(
-            icon: Icon(FontAwesomeIcons.peopleGroup,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.personnel_manage_title,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(context, AppRoutes.supplierEntitiesPage);
-            },
-          ),
+        floatingActionButton: CustomSpeedDial(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          horizontalButtons: [
+            SpeedDialButton(
+              icon: Icon(Icons.add_business,
+                  color: Theme.of(context).colorScheme.onPrimary),
+              label: AppLocalizations.of(context)?.addSupplierTxt,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.providerCreate,
+                );
+              },
+            ),
+          ],
+          verticalButtons: [
+            // SpeedDialButton(
+            //   icon: Icon(FontAwesomeIcons.peopleGroup,
+            //       color: Theme.of(context).colorScheme.onPrimary),
+            //   label: AppLocalizations.of(context)?.personnel_manage_title,
+            //   backgroundColor: Theme.of(context).colorScheme.primary,
+            //   onTap: () {
+            //     Navigator.pushNamed(context, AppRoutes.supplierEntitiesPage);
+            //   },
+            // ),
 
-          SpeedDialButton(
-            icon: Icon(FontAwesomeIcons.fileInvoice,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.inventory_view_title,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(context, AppRoutes.storeManage);
-            },
-          ),
-          // SpeedDialButton(
-          //   icon: Icon(Icons.dashboard,
-          //       color: Theme.of(context).colorScheme.onPrimary),
-          //   label: AppLocalizations.of(context)?.cartText,
-          //   backgroundColor: Theme.of(context).colorScheme.primary,
-          //   onTap: () {
-          //     Navigator.pushNamed(
-          //       context,
-          //       AppRoutes.dashboardPage,
-          //     );
-          //   },
-          // ),
-        ],
-      ),
-      appBar: AppBar(
-        title: Container(
-          height: 40,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).dividerColor,
-              width: 1,
+            SpeedDialButton(
+              icon: Icon(FontAwesomeIcons.moneyBill1Wave,
+                  color: Theme.of(context).colorScheme.onPrimary),
+              label: AppLocalizations.of(context)?.businesses,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.storeManage);
+              },
             ),
-          ),
-          child: TextField(
-            controller: _searchController,
-            textInputAction: TextInputAction.search,
-            onChanged: _handleSearch,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)?.searchTxt,
-              prefixIcon: Icon(Icons.search_outlined,
-                  color: Theme.of(context).colorScheme.onSurface),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+            // SpeedDialButton(
+            //   icon: Icon(Icons.dashboard,
+            //       color: Theme.of(context).colorScheme.onPrimary),
+            //   label: AppLocalizations.of(context)?.cartText,
+            //   backgroundColor: Theme.of(context).colorScheme.primary,
+            //   onTap: () {
+            //     Navigator.pushNamed(
+            //       context,
+            //       AppRoutes.dashboardPage,
+            //     );
+            //   },
+            // ),
+          ],
+        ),
+        appBar: AppBar(
+          title: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
             ),
-            style: Theme.of(context).textTheme.bodyMedium,
+            child: TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onChanged: _handleSearch,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)?.searchTxt,
+                prefixIcon: Icon(Icons.search_outlined,
+                    color: Theme.of(context).colorScheme.onSurface),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
         ),
-      ),
-      body: Consumer<SupplierChangeNotifier>(
-        builder: (context, supplierNotifier, child) {
-          return Stack(
-            children: [
-              if (kIsWeb || defaultTargetPlatform == TargetPlatform.linux)
-                Container(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.map_outlined,
-                        size: 48,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        loc.mapNotAvailableText,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                )
-              else
-                MapScreen(
+        body: Stack(
+          children: [
+            if (kIsWeb || defaultTargetPlatform == TargetPlatform.linux)
+              Container(
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.map_outlined,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      loc.mapNotAvailableText,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              )
+            else
+              Consumer<SupplierChangeNotifier>(
+                  builder: (context, supplierNotifier, child) {
+                return MapScreen(
                   onMapCreated: (controller) => _mapController = controller,
                   userLocation: supplierNotifier.currentLocation,
                   suppliers: supplierNotifier.suppliers,
@@ -231,42 +229,40 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                       showSupplierDetails(context, supplier);
                     });
                   },
-                ),
+                );
+              }),
 
-              // Sliding Panel with optimized rebuilds
-              SlidingUpPanel(
-                controller: _panelController,
-                minHeight: 80,
-                maxHeight: MediaQuery.of(context).size.height * 0.6,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
-                backdropEnabled: true,
-                backdropOpacity: 0.2,
-                backdropColor: Theme.of(context).colorScheme.onSurface,
-                panelBuilder: (scrollController) {
-                  // Use a separate consumer to prevent entire panel rebuilds
-                  return Consumer<SupplierChangeNotifier>(
-                    builder: (context, supplierNotifier, child) {
-                      return PanelContent(
-                        suppliers: supplierNotifier.suppliers,
-                        isLoading: supplierNotifier.isLoading,
-                        scrollController: scrollController,
-                        focusOnLocation: _focusOnLocation,
-                        selectedLocation: _selectedLocation,
-                        onDeleteLocationFilter: onDeleteLocationFilter,
-                        applyLocationFilter: _applyLocationFilter,
-                      );
-                    },
-                  );
-                },
-                color: Theme.of(context).colorScheme.surface,
-                collapsed: _buildCollapsedPanel(context),
-              ),
-            ],
-          );
-        },
-      ),
-    );
+            // Sliding Panel with optimized rebuilds
+            SlidingUpPanel(
+              controller: _panelController,
+              minHeight: 80,
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              backdropEnabled: true,
+              backdropOpacity: 0.2,
+              backdropColor: Theme.of(context).colorScheme.onSurface,
+              panelBuilder: (scrollController) {
+                // Use a separate consumer to prevent entire panel rebuilds
+                return Consumer<SupplierChangeNotifier>(
+                  builder: (context, supplierNotifier, child) {
+                    return PanelContent(
+                      suppliers: supplierNotifier.suppliers,
+                      isLoading: supplierNotifier.isLoading,
+                      scrollController: scrollController,
+                      focusOnLocation: _focusOnLocation,
+                      selectedLocation: _selectedLocation,
+                      onDeleteLocationFilter: onDeleteLocationFilter,
+                      applyLocationFilter: _applyLocationFilter,
+                    );
+                  },
+                );
+              },
+              color: Theme.of(context).colorScheme.surface,
+              collapsed: _buildCollapsedPanel(context),
+            ),
+          ],
+        ));
   }
 
   Widget _buildCollapsedPanel(BuildContext context) {

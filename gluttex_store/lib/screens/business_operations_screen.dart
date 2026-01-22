@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_event/order_change_notifier.dart';
 import 'package:gluttex_store/components/operations/business_operations_filters.dart';
 import 'package:gluttex_store/components/operations/business_operations_header.dart';
 import 'package:gluttex_store/components/operations/business_operations_list.dart';
@@ -10,66 +11,180 @@ import 'package:gluttex_store/screens/business_operation_details_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_event/views/finance_view_model.dart';
 
-class BusinessOperationsScreen extends StatelessWidget {
+class BusinessOperationsScreen extends StatefulWidget {
   const BusinessOperationsScreen({super.key});
 
   @override
+  State<BusinessOperationsScreen> createState() =>
+      _BusinessOperationsScreenState();
+}
+
+class _BusinessOperationsScreenState extends State<BusinessOperationsScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _isInitialLoad = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load initial data when screen is created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
+
+    // Setup scroll listener for pagination
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadInitialData() async {
+    final viewModel = context.read<FinanceViewModel>();
+
+    // Only load if we haven't loaded before or if data is empty
+    if (_isInitialLoad && viewModel.businessOperations.isEmpty) {
+      _isInitialLoad = false;
+      await viewModel.loadBusinessOperations();
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreData();
+    }
+  }
+
+  Future<void> _loadMoreData() async {
+    final viewModel = context.read<FinanceViewModel>();
+    if (!viewModel.isLoading && !viewModel.isLoadingMore && viewModel.hasMore) {
+      await viewModel.loadMoreBusinessOperations();
+    }
+  }
+
+  Future<void> _refreshData() async {
+    final viewModel = context.read<FinanceViewModel>();
+    await viewModel.refreshBusinessOperations();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<FinanceViewModel>();
-    final operations = viewModel.businessOperations;
+    return Consumer<FinanceViewModel>(
+      builder: (context, viewModel, child) {
+        final operations = viewModel.businessOperations;
+        final isLoading = viewModel.isLoading;
+        final isLoadingMore = viewModel.isLoadingMore;
+        final hasMore = viewModel.hasMore;
 
-    return Consumer<FinanceViewModel>(builder: (context, viewModel, child) {
-      return RefreshIndicator(
-        onRefresh: () => viewModel.refreshBusinessOperations(),
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // Header Section
-            const SliverToBoxAdapter(child: BusinessOperationsHeader()),
+        return Scaffold(
+          body: RefreshIndicator(
+            onRefresh: _refreshData,
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // Header Section
+                const SliverToBoxAdapter(child: BusinessOperationsHeader()),
 
-            // Filters Section
-            const SliverToBoxAdapter(child: BusinessOperationsFilters()),
+                // Filters Section
+                const SliverToBoxAdapter(child: BusinessOperationsFilters()),
 
-            // Stats Summary
-            if (operations.isNotEmpty)
-              SliverToBoxAdapter(
-                child: BusinessOperationsStats(operations: operations),
-              ),
-
-            // Operations List
-            if (operations.isNotEmpty)
-              BusinessOperationsList(
-                operations: viewModel.businessOperations,
-                isLoadingMore: viewModel.isLoadingMore,
-                hasMore: viewModel.hasMore,
-                onLoadMore: () => viewModel.loadMoreBusinessOperations(),
-                onTapOperation: (operation) {
-                  // Navigate to loader screen first
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OperationDetailsLoaderScreen(
-                        operation: operation,
-                        financeViewModel: viewModel,
+                // Initial Loading Indicator
+                if (isLoading && operations.isEmpty)
+                  const SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: CircularProgressIndicator(),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
 
-            // Empty State or Loading
-            if (operations.isEmpty && !viewModel.isLoading)
-              SliverFillRemaining(
-                child: _EmptyState(),
-              )
-            else if (operations.isEmpty && viewModel.isLoading)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              ),
+                // Stats Summary
+                if (operations.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: BusinessOperationsStats(operations: operations),
+                  ),
+
+                // Operations List
+                if (operations.isNotEmpty)
+                  BusinessOperationsList(
+                    operations: operations,
+                    isLoadingMore: isLoadingMore,
+                    hasMore: hasMore,
+                    onLoadMore: _loadMoreData,
+                    onTapOperation: (operation) {
+                      _navigateToDetails(context, operation, viewModel);
+                    },
+                  ),
+
+                // Load More Indicator
+                if (hasMore && operations.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: _buildLoadMoreIndicator(isLoadingMore),
+                  ),
+
+                // Empty State
+                if (operations.isEmpty && !isLoading)
+                  SliverFillRemaining(
+                    child: _EmptyState(
+                      onRetry: () => viewModel.refreshBusinessOperations(),
+                    ),
+                  ),
+
+                // Bottom Padding
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 32),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateToDetails(BuildContext context, BusinessOperation operation,
+      FinanceViewModel viewModel) {
+    // Navigate to loader screen first
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OperationDetailsLoaderScreen(
+          operation: operation,
+          financeViewModel: viewModel,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadMoreIndicator(bool isLoadingMore) {
+    if (!isLoadingMore) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Column(
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Loading more...',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
           ],
         ),
-      );
-    });
+      ),
+    );
   }
 }
 
@@ -155,16 +270,15 @@ class _OperationDetailsLoaderScreenState
     final orderId = widget.operation.orderId!;
 
     // Check if order exists in cart notifier
-    final cartNotifier = Provider.of<CartChangeNotifier>(
+    final orderNotifier = Provider.of<OrderChangeNotifier>(
       context,
       listen: false,
     );
-
     // If order not in cache, fetch it
     final orderExists =
-        cartNotifier.orders.any((order) => order.idOrder == orderId);
+        orderNotifier.orders.any((order) => order.idPlacedOrder == orderId);
     if (!orderExists) {
-      await cartNotifier.fetchOrderDetails(orderId: orderId);
+      await orderNotifier.fetchOrderDetails(orderId: orderId);
     }
   }
 
@@ -208,9 +322,6 @@ class _OperationDetailsLoaderScreenState
         // Show operation details screen
         return OperationDetailsScreen(
           operation: widget.operation,
-          // onRefresh: () async {
-          //   await _loadOperationDetails();
-          // },
         );
       },
     );
@@ -457,6 +568,10 @@ class _OperationDetailsLoaderScreenState
 }
 
 class _EmptyState extends StatelessWidget {
+  final VoidCallback? onRetry;
+
+  const _EmptyState({this.onRetry});
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -495,6 +610,19 @@ class _EmptyState extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
+            const SizedBox(height: 24),
+            if (onRetry != null)
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: Text(localizations.retry),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

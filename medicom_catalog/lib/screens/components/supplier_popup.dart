@@ -122,7 +122,8 @@ class SupplierInfoPopup {
             Container(
               height: 60,
               decoration: BoxDecoration(
-                image: product.product_image_url != null
+                image: product.product_image_url != null &&
+                        product.product_image_url != ""
                     ? DecorationImage(
                         image: NetworkImage(product.product_image_url!),
                         fit: BoxFit.cover,

@@ -9,6 +9,7 @@ import 'package:gluttex_core/business/services/ProvidedServiceManagementService.
 import 'package:gluttex_event/assistant_change_notifier.dart';
 import 'package:gluttex_event/finance_change_notifier.dart';
 import 'package:gluttex_event/notification_notifier.dart';
+import 'package:gluttex_event/order_change_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/service_change_notifier.dart';
 import 'package:gluttex_event/supplier_dashboard_provider.dart';
@@ -109,6 +110,8 @@ class GluttexApp extends StatelessWidget {
             create: (_) => SupplierDashboardProvider()),
         ChangeNotifierProvider<NotificationNotifier>(
             create: (_) => NotificationNotifier()),
+        ChangeNotifierProvider<OrderChangeNotifier>(
+            create: (_) => OrderChangeNotifier()),
         ChangeNotifierProvider<PersonnelNotifier>(
             create: (_) => PersonnelNotifier()),
         ChangeNotifierProvider<ServiceNotifier>(

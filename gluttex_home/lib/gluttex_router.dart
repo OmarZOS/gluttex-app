@@ -3,6 +3,7 @@ import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_chef/screens/recipe_form_screen.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_event/order_change_notifier.dart';
 import 'package:gluttex_home/screens/app_user_update_form_screen.dart';
 import 'package:gluttex_home/screens/home_screen.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
@@ -128,7 +129,7 @@ class AppRouter {
                   isAuthenticated,
                   OrdersScreen(
                     cartChangeNotifier:
-                        Provider.of<CartChangeNotifier>(context),
+                        Provider.of<OrderChangeNotifier>(context),
                   ),
                   const LoginScreen(),
                 );

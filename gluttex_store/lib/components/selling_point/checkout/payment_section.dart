@@ -10,6 +10,8 @@ class PaymentSection extends StatelessWidget {
   final String paymentType;
   final String paymentMethod;
   final ValueChanged<String> onPaymentTypeChanged;
+  final ValueChanged<double> onDepositChanged;
+  final ValueChanged<DateTime> onInstallmentDateChanged;
   final ValueChanged<String> onPaymentMethodChanged;
   final ValueChanged<String?> onCardDetailsChanged;
   final ValueChanged<String?> onBankDetailsChanged;
@@ -21,6 +23,8 @@ class PaymentSection extends StatelessWidget {
     required this.paymentType,
     required this.paymentMethod,
     required this.onPaymentTypeChanged,
+    required this.onDepositChanged,
+    required this.onInstallmentDateChanged,
     required this.onPaymentMethodChanged,
     required this.onCardDetailsChanged,
     required this.onBankDetailsChanged,
@@ -35,22 +39,22 @@ class PaymentSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.payment,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                AppLocalizations.of(context)!.payment,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     Icon(
+          //       Icons.payment,
+          //       color: Theme.of(context).colorScheme.primary,
+          //       size: 20,
+          //     ),
+          //     const SizedBox(width: 8),
+          //     Text(
+          //       AppLocalizations.of(context)!.payment,
+          //       style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          //             fontWeight: FontWeight.w600,
+          //           ),
+          //     ),
+          //   ],
+          // ),
           const SizedBox(height: 12),
 
           // Payment Type
@@ -59,8 +63,13 @@ class PaymentSection extends StatelessWidget {
             // onChanged: onPaymentTypeChanged,
             totalAmount: context.read<CartChangeNotifier>().cartTotal,
             onTypeChanged: onPaymentTypeChanged,
-            onDepositChanged: (double? value) {},
-            onInstallmentDateChanged: (DateTime? value) {},
+            onDepositChanged: (d) {
+              onDepositChanged.call(d ?? 0.0);
+            },
+            onInstallmentDateChanged: (DateTime? value) {
+              onInstallmentDateChanged
+                  .call(value ?? DateTime.now().add(Duration(days: 7)));
+            },
           ),
 
           const SizedBox(height: 16),

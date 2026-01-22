@@ -27,19 +27,18 @@ class FinanceViewModel extends ChangeNotifier {
   BusinessFilter _businessFilter = const BusinessFilter();
 
   // Pagination state
-  int _currentPage = 1;
-  int _pageSize = 20;
+  int _currentPage = 0; // Changed from 1 to 0 (0-based indexing)
+  static const int _pageSize = 20;
   bool _hasMore = true;
 
   // Data
-  List<BusinessOperation> _businessOperations = [];
+  final List<BusinessOperation> _businessOperations = [];
   final List<Order> _orders = [];
-  List<BusinessSummary> _businessSummaries = [];
+  final List<BusinessSummary> _businessSummaries = [];
 
-  // Loading states
+  // Loading states (simplified)
   bool _isLoading = false;
   bool _isLoadingMore = false;
-  bool _isCalculatingAnalytics = false;
 
   // View Models
   final PricingConfigViewModel _pricingConfigViewModel =
@@ -47,6 +46,22 @@ class FinanceViewModel extends ChangeNotifier {
 
   // Analytics cache
   AnalyticsCache? _analyticsCache;
+
+  // Navigation state
+  String _dateFilter = 'today';
+  DateTimeRange? _dateRangeFilter;
+
+  // Analytics state
+  double _totalRevenue = 0.0;
+  double _totalCollected = 0.0;
+  double _totalOutstanding = 0.0;
+  int _totalTransactions = 0;
+  Map<String, double> _revenueBySource = {};
+  Map<String, double> _collectionsByStatus = {};
+  Map<String, double> _collectionsByMonth = {};
+
+  // Cache for filtered operations
+  List<BusinessOperation> _filteredOperations = [];
 
   // Getters
   FinanceTab get selectedTab => _selectedTab;
@@ -56,37 +71,77 @@ class FinanceViewModel extends ChangeNotifier {
   List<BusinessSummary> get businessSummaries => _businessSummaries;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
-  bool get isCalculatingAnalytics => _isCalculatingAnalytics;
   bool get hasMore => _hasMore;
   PricingConfigViewModel get pricingConfigViewModel => _pricingConfigViewModel;
-
   AnalyticsCache? get analyticsCache => _analyticsCache;
+  String get dateFilter => _dateFilter;
+  DateTimeRange? get dateRangeFilter => _dateRangeFilter;
+  List<BusinessOperation> get filteredOperations => _filteredOperations;
+
+  // Computed properties
+  double get collectionRate =>
+      _totalRevenue > 0 ? (_totalCollected / _totalRevenue) * 100 : 0.0;
+  bool get canCreateInvoice => _orders.isNotEmpty;
+  List<Order> get invoices => _orders;
+  bool get hasBusinessOperations => _businessOperations.isNotEmpty;
+  bool get hasBusinessSummaries => _businessSummaries.isNotEmpty;
+  List<BusinessSummary> get topSuppliers => _businessSummaries.take(5).toList();
+  List<BusinessOperation> get recentOperations =>
+      _businessOperations.take(10).toList();
 
   // Navigation
   void selectTab(FinanceTab tab) {
     if (_selectedTab != tab) {
       _selectedTab = tab;
+      notifyListeners();
 
       // Load initial data for tab
-      if (tab == FinanceTab.businessOperations && _businessOperations.isEmpty) {
-        loadBusinessOperations();
+      if (tab == FinanceTab.businessOperations) {
+        if (_businessOperations.isEmpty) {
+          loadBusinessOperations();
+        } else {
+          // Apply current filters to existing data
+          _applyFilters();
+        }
       }
-
-      notifyListeners();
     }
   }
 
   void setBusinessFilter(BusinessFilter filter) {
     _businessFilter = filter;
-    _currentPage = 1;
-    _hasMore = true;
-    _businessOperations.clear();
-    loadBusinessOperations();
+    _resetPagination();
+    _applyFilters();
+  }
+
+  void setDateRangeFilter(DateTimeRange? range) {
+    _dateRangeFilter = range;
+    _applyFilters();
+    notifyListeners();
+  }
+
+  void selectDateFilter(String filterType) {
+    _dateFilter = filterType;
+    _applyDateFilter(filterType);
+    notifyListeners();
+  }
+
+  void clearBusinessFilter() {
+    _businessFilter = const BusinessFilter();
+    _dateRangeFilter = null;
+    _dateFilter = 'today';
+    _filteredOperations = List.from(_businessOperations);
+    _calculateBusinessSummaries();
+    _calculateAnalytics();
+    notifyListeners();
   }
 
   // Business Operations with Pagination
-  Future<void> loadBusinessOperations() async {
+  Future<void> loadBusinessOperations({bool forceRefresh = false}) async {
     if (_isLoading) return;
+
+    if (forceRefresh) {
+      _resetPagination();
+    }
 
     _isLoading = true;
     notifyListeners();
@@ -100,24 +155,21 @@ class FinanceViewModel extends ChangeNotifier {
       );
 
       if (operations != null && operations.isNotEmpty) {
+        if (_currentPage == 0) {
+          _businessOperations.clear();
+        }
+
         _businessOperations.addAll(operations);
         _hasMore = operations.length >= _pageSize;
         _currentPage++;
 
-        // Calculate summaries
         _calculateBusinessSummaries();
-        // Pre-calculate analytics if on analytics tab
-        // if (_selectedTab == FinanceTab.analytics) {
-        //   log("calculateAnalytics");
-        //   await calculateAnalytics();
-        //   log("Done");
-        // }
+        _applyFilters(); // Apply current filters to newly loaded data
       } else {
         _hasMore = false;
       }
     } catch (e) {
-      // Handle error appropriately
-      debugPrint('Error loading business operations: $e');
+      log('Error loading business operations: $e', name: 'FinanceViewModel');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -143,13 +195,14 @@ class FinanceViewModel extends ChangeNotifier {
         _hasMore = operations.length >= _pageSize;
         _currentPage++;
 
-        // Update summaries with new data
         _calculateBusinessSummaries();
+        _applyFilters(); // Apply current filters to newly loaded data
       } else {
         _hasMore = false;
       }
     } catch (e) {
-      debugPrint('Error loading more business operations: $e');
+      log('Error loading more business operations: $e',
+          name: 'FinanceViewModel');
     } finally {
       _isLoadingMore = false;
       notifyListeners();
@@ -157,36 +210,23 @@ class FinanceViewModel extends ChangeNotifier {
   }
 
   Future<void> refreshBusinessOperations() async {
-    _currentPage = 1;
-    _hasMore = true;
-    _businessOperations.clear();
-    await loadBusinessOperations();
+    await loadBusinessOperations(forceRefresh: true);
   }
 
   // Analytics
-  Future<void> calculateAnalytics() async {
-    if (_businessOperations.isEmpty || _isCalculatingAnalytics) return;
-
-    _isCalculatingAnalytics = true;
-    notifyListeners();
-
-    try {
-      _analyticsCache = _calculateAnalyticsFromOperations(_businessOperations);
-    } finally {
-      _isCalculatingAnalytics = false;
-      notifyListeners();
+  void _calculateAnalytics() {
+    if (_filteredOperations.isEmpty) {
+      _resetAnalytics();
+      return;
     }
-  }
 
-  AnalyticsCache _calculateAnalyticsFromOperations(
-      List<BusinessOperation> operations) {
     double totalRevenue = 0.0;
     double totalCollected = 0.0;
     double totalOutstanding = 0.0;
     final revenueBySource = <String, double>{};
     final collectionsByStatus = <String, double>{};
 
-    for (final operation in operations) {
+    for (final operation in _filteredOperations) {
       totalRevenue += operation.totalAmount;
       totalCollected += operation.totalPaid;
       totalOutstanding += operation.balanceDue;
@@ -204,16 +244,35 @@ class FinanceViewModel extends ChangeNotifier {
       );
     }
 
-    return AnalyticsCache(
+    _analyticsCache = AnalyticsCache(
       totalRevenue: totalRevenue,
       totalCollected: totalCollected,
       totalOutstanding: totalOutstanding,
-      transactionCount: operations.length,
+      transactionCount: _filteredOperations.length,
       revenueBySource: revenueBySource,
       collectionsByStatus: collectionsByStatus,
       collectionRate:
           totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0.0,
     );
+
+    // Update UI state for backwards compatibility
+    _totalRevenue = totalRevenue;
+    _totalCollected = totalCollected;
+    _totalOutstanding = totalOutstanding;
+    _totalTransactions = _filteredOperations.length;
+    _revenueBySource = revenueBySource;
+    _collectionsByStatus = collectionsByStatus;
+  }
+
+  void _resetAnalytics() {
+    _totalRevenue = 0.0;
+    _totalCollected = 0.0;
+    _totalOutstanding = 0.0;
+    _totalTransactions = 0;
+    _revenueBySource.clear();
+    _collectionsByStatus.clear();
+    _collectionsByMonth.clear();
+    _analyticsCache = null;
   }
 
   // Summaries
@@ -227,26 +286,154 @@ class FinanceViewModel extends ChangeNotifier {
       }
     }
 
-    _businessSummaries = supplierGroups.entries.map((entry) {
+    _businessSummaries.clear();
+    _businessSummaries.addAll(supplierGroups.entries.map((entry) {
       return BusinessSummary.fromOperations(
         entry.key,
-        'Supplier ${entry.key}', // Replace with actual supplier name from your data
+        'Supplier ${entry.key}', // TODO: Fetch actual supplier name
         entry.value,
       );
-    }).toList();
+    }));
 
     _businessSummaries.sort((a, b) => b.totalRevenue.compareTo(a.totalRevenue));
   }
 
-  // Invoices (simplified)
-  Future<void> loadInvoices() async {
-    // TODO: Implement invoice loading
+  // Filtering
+  void _applyFilters() {
+    if (_businessOperations.isEmpty) return;
+
+    List<BusinessOperation> filtered = _businessOperations;
+
+    // Apply business filter
+    filtered = _businessFilter.applyFilter(filtered);
+
+    // Apply date range filter
+    if (_dateRangeFilter != null) {
+      filtered = filtered.where((op) {
+        if (op.operationDate == null) return false;
+        return op.operationDate!.isAfter(_dateRangeFilter!.start) &&
+            op.operationDate!.isBefore(_dateRangeFilter!.end);
+      }).toList();
+    }
+
+    _filteredOperations = filtered;
+    _calculateAnalytics();
+    notifyListeners();
   }
 
-  Future<void> createInvoice(
-      {required int clientId, List<Product>? products}) async {
+  void _applyDateFilter(String filterType) {
+    final now = DateTime.now();
+    DateTime startDate;
+    DateTime endDate = now;
+
+    switch (filterType) {
+      case 'today':
+        startDate = DateTime(now.year, now.month, now.day);
+        break;
+      case 'week':
+        startDate = now.subtract(const Duration(days: 7));
+        break;
+      case 'month':
+        startDate = DateTime(now.year, now.month, 1);
+        break;
+      case 'quarter':
+        final month = now.month;
+        final quarterStartMonth = ((month - 1) ~/ 3) * 3 + 1;
+        startDate = DateTime(now.year, quarterStartMonth, 1);
+        break;
+      case 'year':
+        startDate = DateTime(now.year, 1, 1);
+        break;
+      case 'all':
+      default:
+        _dateRangeFilter = null;
+        _applyFilters();
+        return;
+    }
+
+    _dateRangeFilter = DateTimeRange(start: startDate, end: endDate);
+    _applyFilters();
+  }
+
+  // Helper Methods
+  void _resetPagination() {
+    _currentPage = 0;
+    _hasMore = true;
+    _businessOperations.clear();
+    _businessSummaries.clear();
+    _filteredOperations.clear();
+    _resetAnalytics();
+  }
+
+  // Business Operations actions
+  List<BusinessOperation> getOperationsBySupplier(int supplierId) {
+    return _businessOperations
+        .where((op) => op.supplierId == supplierId)
+        .toList();
+  }
+
+  BusinessSummary? getSummaryBySupplier(int supplierId) {
+    try {
+      return _businessSummaries
+          .firstWhere((summary) => summary.supplierId == supplierId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Invoices (placeholder methods)
+  Future<void> loadInvoices() async {
+    // TODO: Implement invoice loading
+    log('loadInvoices called - implement me', name: 'FinanceViewModel');
+  }
+
+  Future<void> createInvoice({
+    required int clientId,
+    List<Product>? products,
+  }) async {
     // TODO: Implement invoice creation
+    log('createInvoice called - implement me', name: 'FinanceViewModel');
     notifyListeners();
+  }
+
+  void viewInvoiceDetails(Order order) {
+    log('View invoice details: ${order.idPlacedOrder}',
+        name: 'FinanceViewModel');
+    // TODO: Navigate to invoice details
+  }
+
+  Future<void> shareInvoice(Order order) async {
+    log('Share invoice: ${order.idPlacedOrder}', name: 'FinanceViewModel');
+    // TODO: Implement share functionality
+  }
+
+  Future<void> downloadInvoice(Order order) async {
+    log('Download invoice: ${order.idPlacedOrder}', name: 'FinanceViewModel');
+    // TODO: Implement download functionality
+  }
+
+  void createNewInvoice() {
+    log('Create new invoice', name: 'FinanceViewModel');
+    // TODO: Navigate to create invoice screen
+  }
+
+  // Analytics actions
+  Future<void> exportAnalyticsData({String format = 'csv'}) async {
+    log('Exporting analytics data in $format format', name: 'FinanceViewModel');
+
+    final exportData = {
+      'export_date': DateTime.now().toIso8601String(),
+      'total_revenue': _totalRevenue,
+      'total_collected': _totalCollected,
+      'total_outstanding': _totalOutstanding,
+      'collection_rate': collectionRate,
+      'total_transactions': _totalTransactions,
+      'revenue_by_source': _revenueBySource,
+      'collections_by_status': _collectionsByStatus,
+    };
+
+    log('Export data: $exportData', name: 'FinanceViewModel');
+    // TODO: Implement actual export logic
   }
 
   // Pricing delegation
@@ -270,373 +457,6 @@ class FinanceViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> savePricingConfig() async {
-    // TODO: Save pricing configuration
-    notifyListeners();
-  }
-
-  // Initialization
-  Future<void> initialize() async {
-    // Load initial data based on selected tab
-    switch (_selectedTab) {
-      case FinanceTab.businessOperations:
-        await loadBusinessOperations();
-        break;
-      // case FinanceTab.analytics:
-      //   await loadBusinessOperations(); // Need operations for analytics
-      //   await calculateAnalytics();
-      //   break;
-      case FinanceTab.invoices:
-        await loadInvoices();
-        break;
-      case FinanceTab.pricingConfig:
-        // Pricing config loads products on demand
-        break;
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void selectDateFilter(String filterType) {
-    _businessFilter = _businessFilter.copyWith(dateRangeType: filterType);
-    // Apply any date range logic based on filterType
-    _applyDateFilter(filterType);
-    notifyListeners();
-  }
-
-  void _applyDateFilter(String filterType) {
-    final now = DateTime.now();
-    switch (filterType) {
-      case 'today':
-        // Set startDate and endDate for today
-        break;
-      case 'week':
-        // Set startDate and endDate for this week
-        break;
-      case 'month':
-        // Set startDate and endDate for this month
-        break;
-      case 'quarter':
-        // Set startDate and endDate for this quarter
-        break;
-      case 'year':
-        // Set startDate and endDate for this year
-        break;
-      case 'all':
-        // Clear date filters
-        break;
-    }
-  }
-
-  // Navigation state
-  String _dateFilter = 'today';
-  DateTimeRange? _dateRangeFilter;
-
-  // Data state
-
-  // Loading states
-  bool _isLoadingInvoices = false;
-  bool _isLoadingAnalytics = false;
-  bool _isLoadingBusinessOperations = false;
-  bool _isLoadingPricing = false;
-
-  // View Models
-  int? _currentUserId;
-
-  // Analytics state
-  double _totalRevenue = 0.0;
-  double _totalCollected = 0.0;
-  double _totalOutstanding = 0.0;
-  int _totalTransactions = 0;
-  Map<String, double> _revenueBySource = {};
-  Map<String, double> _collectionsByStatus = {};
-  Map<String, double> _collectionsByMonth = {};
-
-  // Cache for filtered operations
-  List<BusinessOperation> _filteredOperations = [];
-
-  String get dateFilter => _dateFilter;
-  DateTimeRange? get dateRangeFilter => _dateRangeFilter;
-  List<BusinessOperation> get filteredOperations => _filteredOperations;
-
-  bool get isLoadingInvoices => _isLoadingInvoices;
-  bool get isLoadingAnalytics => _isLoadingAnalytics;
-  bool get isLoadingBusinessOperations => _isLoadingBusinessOperations;
-  bool get isLoadingPricing => _isLoadingPricing;
-
-  int? get currentUserId => _currentUserId;
-
-  // Analytics getters
-  double get totalRevenue => _totalRevenue;
-  double get totalCollected => _totalCollected;
-  double get totalOutstanding => _totalOutstanding;
-  int get totalTransactions => _totalTransactions;
-  Map<String, double> get revenueBySource => _revenueBySource;
-  Map<String, double> get collectionsByStatus => _collectionsByStatus;
-  Map<String, double> get collectionsByMonth => _collectionsByMonth;
-
-  double get collectionRate =>
-      _totalRevenue > 0 ? (_totalCollected / _totalRevenue) * 100 : 0.0;
-
-  // Computed properties
-  bool get canCreateInvoice => _orders.isNotEmpty;
-  List<Order> get invoices => _orders;
-  bool get hasBusinessOperations => _businessOperations.isNotEmpty;
-  bool get hasBusinessSummaries => _businessSummaries.isNotEmpty;
-
-  // Top suppliers (top 5 by revenue)
-  List<BusinessSummary> get topSuppliers => _businessSummaries.take(5).toList();
-
-  // Recent operations (last 10)
-  List<BusinessOperation> get recentOperations =>
-      _businessOperations.take(10).toList();
-
-  // Navigation methods
-
-  void setDateRangeFilter(DateTimeRange? range) {
-    _dateRangeFilter = range;
-    _applyFilters();
-    notifyListeners();
-  }
-
-  void clearBusinessFilter() {
-    _businessFilter = const BusinessFilter();
-    _filteredOperations = List.from(_businessOperations);
-    _calculateSummariesFromOperations(_filteredOperations);
-    _calculateAnalyticsFromOperations(_filteredOperations);
-    notifyListeners();
-  }
-
-  // Data loading methods
-  Future<void> refreshAllData() async {
-    await Future.wait([
-      refreshInvoices(),
-      refreshBusinessOperations(),
-      refreshAnalytics(),
-    ]);
-  }
-
-  Future<void> refreshInvoices() async {
-    _isLoadingInvoices = true;
-    notifyListeners();
-
-    try {
-      await _loadInvoices();
-    } finally {
-      _isLoadingInvoices = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> _loadInvoices() async {
-    // TODO: Implement API call to fetch orders
-    await Future.delayed(const Duration(seconds: 1));
-    // Mock data for orders
-    // _orders = await _fetchMockOrders();
-  }
-
-  Future<void> _loadBusinessOperations() async {
-    _isLoadingBusinessOperations = true;
-    notifyListeners();
-
-    try {
-      // TODO: Implement API call to fetch business operations from all sources
-      // await Future.delayed(const Duration(seconds: 1));
-
-      // Mock data for business operations
-      _businessOperations =
-          (await businessOperationService.getAllBusinessOperations(0, 30))!;
-      log("_calculateBusinessSummaries");
-      _filteredOperations = List.from(_businessOperations);
-      _calculateBusinessSummaries();
-      log("_calculateAnalytics");
-      _calculateAnalytics();
-    } finally {
-      _isLoadingBusinessOperations = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> refreshAnalytics() async {
-    _isLoadingAnalytics = true;
-    notifyListeners();
-
-    try {
-      if (_businessOperations.isEmpty) {
-        await _loadBusinessOperations();
-      } else {
-        _calculateAnalytics();
-      }
-    } finally {
-      _isLoadingAnalytics = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> _loadPricingProducts() async {
-    _isLoadingPricing = true;
-    notifyListeners();
-
-    try {
-      // TODO: Load products for pricing configuration
-      await Future.delayed(const Duration(seconds: 1));
-      // final products = await _fetchMockProducts();
-      // _pricingConfigViewModel.products = products;
-    } finally {
-      _isLoadingPricing = false;
-      notifyListeners();
-    }
-  }
-
-  // Filtering and calculation methods
-  void _applyFilters() {
-    if (_businessOperations.isEmpty) return;
-
-    List<BusinessOperation> filtered = _businessOperations;
-
-    // Apply supplier filter
-    if (_businessFilter.supplierId != null) {
-      filtered = filtered
-          .where((op) => op.supplierId == _businessFilter.supplierId)
-          .toList();
-    }
-
-    // Apply payment status filter
-    if (_businessFilter.paymentStatus != null) {
-      filtered = filtered
-          .where((op) => op.paymentStatus == _businessFilter.paymentStatus)
-          .toList();
-    }
-
-    // Apply invoice status filter
-    if (_businessFilter.invoiceStatus != null) {
-      filtered = filtered
-          .where((op) => op.invoiceStatus == _businessFilter.invoiceStatus)
-          .toList();
-    }
-
-    // Apply source table filter
-    if (_businessFilter.sourceTable != null) {
-      filtered = filtered
-          .where((op) => op.sourceTable == _businessFilter.sourceTable)
-          .toList();
-    }
-
-    // Apply date range filter if available
-    if (_dateRangeFilter != null) {
-      // Note: BusinessOperation doesn't have a date field
-      // You'll need to add one or fetch date from related tables
-    }
-
-    _filteredOperations = filtered;
-    _calculateSummariesFromOperations(filtered);
-    _calculateAnalyticsFromOperations(filtered);
-  }
-
-  void _calculateSummariesFromOperations(List<BusinessOperation> operations) {
-    final supplierGroups = <int, List<BusinessOperation>>{};
-
-    for (final operation in operations) {
-      if (operation.supplierId != null) {
-        supplierGroups.putIfAbsent(operation.supplierId!, () => []);
-        supplierGroups[operation.supplierId]!.add(operation);
-      }
-    }
-
-    _businessSummaries = supplierGroups.entries.map((entry) {
-      final supplierId = entry.key;
-      final supplierOps = entry.value;
-      final supplierName = 'Supplier $supplierId';
-
-      return BusinessSummary.fromOperations(
-        supplierId,
-        supplierName,
-        supplierOps,
-      );
-    }).toList();
-
-    _businessSummaries.sort((a, b) => b.totalRevenue.compareTo(a.totalRevenue));
-  }
-
-  void _calculateAnalytics() {
-    if (_businessOperations.isEmpty) return;
-    _calculateAnalyticsFromOperations(_businessOperations);
-  }
-
-  // Business Operations actions
-  Future<void> syncBusinessOperations() async {
-    _isLoadingBusinessOperations = true;
-    notifyListeners();
-
-    try {
-      // TODO: Implement sync with all data sources
-      await Future.delayed(const Duration(seconds: 2));
-      await refreshBusinessOperations();
-    } finally {
-      _isLoadingBusinessOperations = false;
-      notifyListeners();
-    }
-  }
-
-  List<BusinessOperation> getOperationsBySupplier(int supplierId) {
-    return _businessOperations
-        .where((op) => op.supplierId == supplierId)
-        .toList();
-  }
-
-  BusinessSummary? getSummaryBySupplier(int supplierId) {
-    try {
-      return _businessSummaries
-          .firstWhere((summary) => summary.supplierId == supplierId);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  void viewInvoiceDetails(Order order) {
-    // TODO: Navigate to invoice details
-    debugPrint('View invoice details: ${order.idOrder}');
-  }
-
-  Future<void> shareInvoice(Order order) async {
-    // TODO: Implement share functionality
-    debugPrint('Share invoice: ${order.idOrder}');
-  }
-
-  Future<void> downloadInvoice(Order order) async {
-    // TODO: Implement download functionality
-    debugPrint('Download invoice: ${order.idOrder}');
-  }
-
-  void createNewInvoice() {
-    // TODO: Navigate to create invoice screen
-    debugPrint('Create new invoice');
-  }
-
-  // Analytics actions
-  Future<void> exportAnalyticsData({String format = 'csv'}) async {
-    debugPrint('Exporting analytics data in $format format');
-
-    final exportData = {
-      'export_date': DateTime.now().toIso8601String(),
-      'total_revenue': _totalRevenue,
-      'total_collected': _totalCollected,
-      'total_outstanding': _totalOutstanding,
-      'collection_rate': collectionRate,
-      'total_transactions': _totalTransactions,
-      // 'supplier_summaries': _businessSummaries.map((s) => s.toJson()).toList(),
-      'revenue_by_source': _revenueBySource,
-      'collections_by_status': _collectionsByStatus,
-      'collections_by_month': _collectionsByMonth,
-    };
-
-    // TODO: Implement actual export logic
-    debugPrint('Export data: $exportData');
-  }
-
   void handleFinalPriceChanged(double price) {
     _pricingConfigViewModel.finalPrice = price;
     notifyListeners();
@@ -652,36 +472,36 @@ class FinanceViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void handleUpdateSelectedProducts() async {
-    await savePricingConfig();
-  }
-
   void handleClearSelection() {
     _pricingConfigViewModel.clearSelection();
     notifyListeners();
   }
 
-  // Initialization
-
-  // Helper methods for mock data
-
-  Future<void> _updateProductsPricing(List<Product> products) async {
-    // TODO: Update product pricing in database
-    debugPrint('Updating pricing for ${products.length} products');
-
-    // Update each product with new pricing based on current config
-    for (final product in products) {
-      // Calculate new price based on current pricing configuration
-      final newPrice = _pricingConfigViewModel.finalPrice;
-      debugPrint(
-          'Updating product ${product.product_name} to price: $newPrice');
-    }
-
-    // Refresh products list
-    await _loadPricingProducts();
+  Future<void> savePricingConfig() async {
+    log('savePricingConfig called - implement me', name: 'FinanceViewModel');
+    // TODO: Save pricing configuration
+    notifyListeners();
   }
 
-  // Dispose method to clean up resources
+  Future<void> handleUpdateSelectedProducts() async {
+    await savePricingConfig();
+  }
+
+  // Initialization
+  Future<void> initialize() async {
+    await loadBusinessOperations();
+  }
+
+  // Refresh all data
+  Future<void> refreshAllData() async {
+    await loadBusinessOperations(forceRefresh: true);
+    // Add other refresh calls as needed
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }
 
 // Analytics Cache Model

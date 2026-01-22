@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
@@ -252,6 +253,12 @@ class DashboardContentState extends State<DashboardContent> {
           ),
         ),
       );
+
+      return;
+    }
+
+    if (type == DashboardScreenType.inventory) {
+      Navigator.pushNamed(context, AppRoutes.productCreate);
 
       return;
     }

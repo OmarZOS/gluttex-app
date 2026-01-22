@@ -152,7 +152,7 @@ class _PricingConfigView extends StatelessWidget {
       builder: (context, viewModel, child) {
         return PricingConfigScreen(
           viewModel: viewModel.pricingConfigViewModel,
-          isLoading: viewModel.isLoadingPricing,
+          isLoading: viewModel.isLoading,
           onSave: () => viewModel.savePricingConfig(),
           onBasePriceChanged: viewModel.handleBasePriceChanged,
           onTaxPercentageChanged: viewModel.handleTaxPercentageChanged,

@@ -12,6 +12,7 @@ import 'package:gluttex_store/components/selling_point/selling_point_app_bar.dar
 import 'package:gluttex_store/components/selling_point/selling_point_cart.dart';
 import 'package:gluttex_store/components/selling_point/selling_point_tabs.dart';
 import 'package:gluttex_store/components/selling_point/selling_point_supplier.dart';
+import 'package:provider/provider.dart';
 
 class SellingPointScreen extends StatefulWidget {
   final int userId;

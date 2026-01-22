@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:gluttex_ui/components/business_operations/BusinessOperationsUIManager.dart';
+import 'package:gluttex_ui/components/finance/financial_ui_manager.dart';
 
 /// 状态徽章组件
 class PaymentStatusBadge extends StatelessWidget {
@@ -229,7 +230,7 @@ class AmountDisplay extends StatelessWidget {
         Text(label, style: theme.textTheme.labelSmall),
         const SizedBox(height: 4),
         Text(
-          '${currencySymbol ?? ''}${value.toStringAsFixed(2)}',
+          FinancialUIManager.formatCurrency(value, context),
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w800,
             color: displayColor,

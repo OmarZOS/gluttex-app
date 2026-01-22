@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/business/Supplier.dart';
+import 'package:gluttex_core/business/finance/Customer.dart';
 import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_event/finance_change_notifier.dart';
+import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:gluttex_event/product_change_notifier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_store/components/finance/document/document_details_sheet.dart';
-// REMOVED: import 'package:gluttex_store/components/finance/document/filter_dialog.dart'; // Not used
 import 'package:gluttex_store/components/finance/document/new_document_sheet.dart';
 import 'package:gluttex_store/components/finance/document/payment_recording_sheet.dart';
 import 'package:gluttex_ui/components/finance/financial_ui_manager.dart';
@@ -106,7 +110,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                 ],
               ),
             ),
-            floatingActionButton: _buildFloatingActionButton(context, notifier),
+            // floatingActionButton: _buildFloatingActionButton(context, notifier),
           );
         },
       ),
@@ -115,13 +119,16 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
 
   Widget _buildSummarySection(
       BuildContext context, FinanceChangeNotifier notifier) {
+    final localizations = AppLocalizations.of(context);
     final totalAmount = notifier.totalAmount;
     final paidAmount = notifier.filteredDocuments
-        .where((doc) => doc.isPaid)
-        .fold(0.0, (sum, doc) => sum + doc.documentAmount);
+        .fold(0.0, (sum, doc) => sum + doc.totalReceived);
     final overdueAmount = notifier.filteredDocuments
-        .where((doc) => doc.isOverdue && !doc.isPaid)
-        .fold(0.0, (sum, doc) => sum + doc.documentAmount);
+            .where((doc) => doc.isOverdue && !doc.isPaid)
+            .fold(0.0, (sum, doc) => sum + doc.documentAmount) +
+        notifier.filteredDocuments
+            .where((doc) => doc.isOverdue && doc.isPartiallyPaid)
+            .fold(0.0, (sum, doc) => sum + doc.remainingAmount);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -138,24 +145,28 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildSummaryItem(
-                    'Total',
+                    localizations?.total ?? 'Total',
                     FinancialUIManager.formatCurrency(totalAmount, context),
                     FinancialUIManager.infoColor,
+                    context,
                   ),
                   _buildSummaryItem(
-                    'Paid',
+                    localizations?.paid ?? 'Paid',
                     FinancialUIManager.formatCurrency(paidAmount, context),
                     FinancialUIManager.paidColor,
+                    context,
                   ),
                   _buildSummaryItem(
-                    'Overdue',
+                    localizations?.overdue ?? 'Overdue',
                     FinancialUIManager.formatCurrency(overdueAmount, context),
                     FinancialUIManager.unpaidColor,
+                    context,
                   ),
                   _buildSummaryItem(
-                    'Count',
+                    localizations?.count ?? 'Count',
                     '${notifier.filteredDocuments.length}',
                     FinancialUIManager.pendingColor,
+                    context,
                   ),
                 ],
               ),
@@ -176,7 +187,9 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
     );
   }
 
-  Widget _buildSummaryItem(String label, String value, Color color) {
+  Widget _buildSummaryItem(
+      String label, String value, Color color, BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Text(
@@ -190,9 +203,9 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
-            color: Colors.grey,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -201,6 +214,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
 
   Widget _buildFilterSection(
       BuildContext context, FinanceChangeNotifier notifier) {
+    final localizations = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SingleChildScrollView(
@@ -208,13 +222,14 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
         child: Row(
           children: [
             _buildFilterChip(
-              'All',
+              localizations?.all ?? 'All',
               notifier.filter.documentType == null &&
                   notifier.filter.status == null,
               () => notifier.setFilter(FinanceDocumentFilter()),
+              context,
             ),
             _buildFilterChip(
-              'Invoices',
+              localizations?.invoices ?? 'Invoices',
               notifier.filter.documentType == 'invoice',
               () => notifier.setFilter(
                 notifier.filter.copyWith(
@@ -223,9 +238,10 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                       : 'invoice',
                 ),
               ),
+              context,
             ),
             _buildFilterChip(
-              'Deposits',
+              localizations?.deposits ?? 'Deposits',
               notifier.filter.documentType == 'deposit',
               () => notifier.setFilter(
                 notifier.filter.copyWith(
@@ -234,18 +250,20 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                       : 'deposit',
                 ),
               ),
+              context,
             ),
             _buildFilterChip(
-              'Unpaid',
+              localizations?.unpaid ?? 'Unpaid',
               notifier.filter.status == 'unpaid',
               () => notifier.setFilter(
                 notifier.filter.copyWith(
                   status: notifier.filter.status == 'unpaid' ? null : 'unpaid',
                 ),
               ),
+              context,
             ),
             _buildFilterChip(
-              'Overdue',
+              localizations?.overdue ?? 'Overdue',
               notifier.filter.status == 'overdue',
               () => notifier.setFilter(
                 notifier.filter.copyWith(
@@ -253,10 +271,11 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                       notifier.filter.status == 'overdue' ? null : 'overdue',
                 ),
               ),
+              context,
             ),
             if (widget.currentUserId != null)
               _buildFilterChip(
-                'My Documents',
+                localizations?.myDocuments ?? 'My Documents',
                 notifier.filter.clientId == widget.currentUserId,
                 () => notifier.setFilter(
                   notifier.filter.copyWith(
@@ -265,6 +284,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                         : widget.currentUserId,
                   ),
                 ),
+                context,
               ),
           ],
         ),
@@ -272,7 +292,9 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
     );
   }
 
-  Widget _buildFilterChip(String label, bool selected, VoidCallback onTap) {
+  Widget _buildFilterChip(
+      String label, bool selected, VoidCallback onTap, BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(right: 8),
       child: FilterChip(
@@ -281,11 +303,13 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
         onSelected: (_) => onTap(),
         backgroundColor: selected
             ? FinancialUIManager.infoColor.withOpacity(0.1)
-            : Colors.grey.withOpacity(0.1),
+            : theme.colorScheme.surfaceVariant.withOpacity(0.1),
         selectedColor: FinancialUIManager.infoColor.withOpacity(0.2),
         checkmarkColor: FinancialUIManager.infoColor,
         labelStyle: TextStyle(
-          color: selected ? FinancialUIManager.infoColor : Colors.grey,
+          color: selected
+              ? FinancialUIManager.infoColor
+              : theme.colorScheme.onSurfaceVariant,
           fontWeight: selected ? FontWeight.bold : FontWeight.normal,
         ),
         shape: RoundedRectangleBorder(
@@ -299,10 +323,13 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
   }
 
   Widget _buildContent(BuildContext context, FinanceChangeNotifier notifier) {
+    final localizations = AppLocalizations.of(context);
+
     if (notifier.isLoading && notifier.filteredDocuments.isEmpty) {
       return FinancialUIManager.buildLoadingState(
         context: context,
-        message: 'Loading financial documents...',
+        message: localizations?.loadingFinancialDocuments ??
+            'Loading financial documents...',
       );
     }
 
@@ -319,7 +346,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
             (notifier.hasMoreDocuments ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= notifier.filteredDocuments.length) {
-            return _buildLoadMoreIndicator(notifier);
+            return _buildLoadMoreIndicator(notifier, context);
           }
 
           final document = notifier.filteredDocuments[index];
@@ -332,11 +359,8 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
   Widget _buildEmptyState(
       BuildContext context, FinanceChangeNotifier notifier) {
     final theme = Theme.of(context);
-    // FIXED: Added null-aware operator for localizations
     final localizations = AppLocalizations.of(context);
 
-    // Check if it's a filtered empty state or truly empty
-    // FIXED: Use the correct method name (isEmpty vs isEmpty())
     final isFiltered = !notifier.filter.isEmpty;
     final hasSearchQuery = notifier.currentSearchQuery != null &&
         notifier.currentSearchQuery!.isNotEmpty;
@@ -350,7 +374,6 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Animated illustration
               AnimatedContainer(
                 duration: const Duration(milliseconds: 500),
                 padding: const EdgeInsets.all(32),
@@ -366,18 +389,16 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                   color: theme.colorScheme.primary.withOpacity(0.5),
                 ),
               ),
-
               const SizedBox(height: 32),
-
-              // Title
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
                   isFiltered
-                      ? 'No matching documents'
+                      ? localizations?.noMatchingDocuments ??
+                          'No matching documents'
                       : hasSearchQuery
-                          ? 'No results found'
-                          : 'No documents yet',
+                          ? localizations?.noResultsFound ?? 'No results found'
+                          : localizations?.noDocumentsYet ?? 'No documents yet',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: theme.colorScheme.onSurface,
@@ -385,33 +406,29 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                   textAlign: TextAlign.center,
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // Description
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 48),
                 child: Text(
                   isFiltered
-                      ? 'Try adjusting your filters to see more results'
+                      ? localizations?.tryAdjustingFilters ??
+                          'Try adjusting your filters to see more results'
                       : hasSearchQuery
-                          ? 'No documents match "${notifier.currentSearchQuery}"'
-                          : 'Start by creating your first financial document',
+                          ? '${localizations?.noDocumentsMatch ?? 'No documents match'} "${notifier.currentSearchQuery}"'
+                          : localizations?.startCreatingFirstDocument ??
+                              'Start by creating your first financial document',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-
               const SizedBox(height: 32),
-
-              // Action buttons
               if (isFiltered)
                 FilledButton.icon(
                   onPressed: () => notifier.clearFilter(),
                   icon: const Icon(Icons.filter_alt_off),
-                  label: const Text('Clear Filters'),
+                  label: Text(localizations?.clearFilters ?? 'Clear Filters'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32, vertical: 16),
@@ -424,7 +441,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                     _searchController.clear();
                   },
                   icon: const Icon(Icons.clear),
-                  label: const Text('Clear Search'),
+                  label: Text(localizations?.clearSearch ?? 'Clear Search'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32, vertical: 16),
@@ -434,21 +451,20 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                 FilledButton.icon(
                   onPressed: widget.onCreateDocument,
                   icon: const Icon(Icons.add),
-                  label: const Text('Create First Document'),
+                  label: Text(localizations?.createFirstDocument ??
+                      'Create First Document'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32, vertical: 16),
                   ),
                 ),
-
               const SizedBox(height: 16),
-
-              // Additional help text
               if (!isFiltered && !hasSearchQuery)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 48),
                   child: Text(
-                    'Documents will appear here once they are created',
+                    localizations?.documentsWillAppearHere ??
+                        'Documents will appear here once they are created',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.outline,
                       fontStyle: FontStyle.italic,
@@ -456,8 +472,6 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-
-              // Stats or suggestions
               if (notifier.documents.isNotEmpty && isFiltered)
                 Padding(
                   padding:
@@ -471,7 +485,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                     child: Column(
                       children: [
                         Text(
-                          '💡 Tip',
+                          localizations?.tip ?? '💡 Tip',
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.primary,
@@ -479,8 +493,9 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'You have ${notifier.documents.length} total documents. '
-                          'Try different filters or search terms.',
+                          localizations?.youHaveTotalDocuments(
+                                  notifier.documents.length) ??
+                              '',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -500,7 +515,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
   Widget _buildDocumentCard(BuildContext context, FinancialDocument document,
       FinanceChangeNotifier notifier) {
     final theme = Theme.of(context);
-    // FIXED: Added null safety check for document.isPaid
+    final localizations = AppLocalizations.of(context);
     final isOverdue = document.isOverdue && (document.isPaid == false);
 
     return Container(
@@ -527,7 +542,6 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -555,22 +569,9 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  document.documentNumber,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                _buildCustomerRow(context, document, notifier),
                                 const SizedBox(height: 4),
-                                FinancialUIManager.buildCustomerInfo(
-                                  context: context,
-                                  customerType: document.customerType,
-                                  customerId: document.customerId,
-                                  personId: document.customerPersonId > 0
-                                      ? document.customerPersonId
-                                      : null,
-                                ),
+                                _buildDocumentTypeRow(document, theme),
                               ],
                             ),
                           ),
@@ -583,10 +584,9 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 16),
-
-                // Amount and payment progress
+                const SizedBox(height: 12),
+                if (document.dueDate != null)
+                  _buildDueDateIndicator(document, theme, localizations),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -594,7 +594,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Amount',
+                          localizations?.amount ?? 'Amount',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.secondary,
                           ),
@@ -614,7 +614,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          'Balance',
+                          localizations?.balance ?? 'Balance',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.secondary,
                           ),
@@ -622,11 +622,11 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                         const SizedBox(height: 4),
                         Text(
                           FinancialUIManager.formatCurrency(
-                              document.outstandingBalance, context),
+                              document.remainingAmount, context),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: document.outstandingBalance > 0
+                            color: document.remainingAmount > 0
                                 ? FinancialUIManager.unpaidColor
                                 : FinancialUIManager.paidColor,
                           ),
@@ -635,20 +635,14 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 12),
-
-                // Payment progress bar
                 FinancialUIManager.buildPaymentProgress(
                   context: context,
                   amount: document.documentAmount,
                   paid: document.totalPaid,
                   deposited: document.totalDeposited,
                 ),
-
                 const SizedBox(height: 16),
-
-                // Footer information
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -666,6 +660,37 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                             color: theme.colorScheme.secondary,
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        if (document.supplierId > 0)
+                          FutureBuilder<Supplier?>(
+                            future: context
+                                .read<SupplierChangeNotifier>()
+                                .getSupplierById(context
+                                    .read<ProductNotifier>()
+                                    .currentProviderId),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData && snapshot.data != null) {
+                                return Row(
+                                  children: [
+                                    Icon(
+                                      Icons.business,
+                                      size: 14,
+                                      color: theme.colorScheme.tertiary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      snapshot!.data!.displayName,
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.tertiary,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
                       ],
                     ),
                     if (isOverdue)
@@ -686,7 +711,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '${document.daysOverdue}d overdue',
+                              '${document.daysOverdue}d ${localizations?.overdue?.toLowerCase() ?? 'overdue'}',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -698,22 +723,19 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                       ),
                   ],
                 ),
-
-                const SizedBox(height: 12),
-
-                // Action buttons
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () => _downloadDocument(document),
+                        onPressed: () => _downloadDocument(context, document),
                         icon: Icon(
                           Icons.download,
                           size: 16,
                           color: theme.colorScheme.primary,
                         ),
                         label: Text(
-                          'Download',
+                          localizations?.download ?? 'Download',
                           style: TextStyle(
                             color: theme.colorScheme.primary,
                           ),
@@ -727,20 +749,28 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // FIXED: Added null safety check for document.isPaid
                     if (document.isPaid == false)
                       Expanded(
                         child: FilledButton.icon(
-                          onPressed: () => _recordPayment(document),
+                          onPressed: () => {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PaymentFormScreen(
+                                  sourceDocument: document,
+                                ),
+                              ),
+                            ),
+                          },
                           icon: Icon(
                             Icons.payment,
                             size: 16,
-                            color: Colors.white,
+                            color: theme.colorScheme.onPrimary,
                           ),
-                          label: const Text(
-                            'Pay Now',
+                          label: Text(
+                            localizations?.payNow ?? 'Pay Now',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: theme.colorScheme.onPrimary,
                             ),
                           ),
                           style: FilledButton.styleFrom(
@@ -762,7 +792,275 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
     );
   }
 
-  Widget _buildLoadMoreIndicator(FinanceChangeNotifier notifier) {
+  void _downloadDocument(BuildContext context, FinancialDocument document) {
+    // Simple download
+    context.read<FinanceChangeNotifier>().downloadDocumentWithProgress(
+          document: document,
+          context: context,
+        );
+
+    // OR with format selection:
+    // context.read<FinanceChangeNotifier>().downloadWithFormatSelection(
+    //   document,
+    //   context,
+    // );
+  }
+
+  Widget _buildCustomerRow(BuildContext context, FinancialDocument document,
+      FinanceChangeNotifier notifier) {
+    final theme = Theme.of(context);
+    final localizations = AppLocalizations.of(context);
+
+    return FutureBuilder<Customer?>(
+      future: context.read<PersonnelNotifier>().getCustomerDisplayInfo(
+            customerId: document.customerId,
+            customerType: document.customerType,
+            personId: document.customerPersonId > 0
+                ? document.customerPersonId
+                : null,
+          ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Row(
+            children: [
+              Icon(
+                Icons.person_outline,
+                size: 16,
+                color: theme.colorScheme.secondary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                localizations?.loading ?? 'Loading...',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          );
+        }
+
+        if (snapshot.hasError || snapshot.data == null) {
+          return Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 16,
+                color: theme.colorScheme.error,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${localizations?.customer ?? 'Customer'} ${document.customerId}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
+          );
+        }
+
+        final info = snapshot.data;
+        final customerName = info?.displayName ??
+            '${localizations?.unknown ?? 'Unknown'} ${localizations?.customer?.toLowerCase() ?? 'customer'}';
+
+        final customerIcon = _getCustomerTypeIcon(document.customerType);
+
+        return Row(
+          children: [
+            Icon(
+              customerIcon,
+              size: 16,
+              color: _getCustomerTypeColor(document.customerType, theme),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                customerName,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDocumentTypeRow(FinancialDocument document, ThemeData theme) {
+    final documentTypeName =
+        FinancialUIManager.getDocumentTypeDisplay(document.documentType);
+    final sourceTypeIcon = _getSourceTypeIcon(document.sourceType);
+    final sourceTypeColor = _getSourceTypeColor(document.sourceType, theme);
+
+    return Row(
+      children: [
+        Text(
+          documentTypeName,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.secondary,
+          ),
+        ),
+        if (sourceTypeIcon != null) ...[
+          const SizedBox(width: 6),
+          Icon(
+            sourceTypeIcon,
+            size: 14,
+            color: sourceTypeColor,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDueDateIndicator(FinancialDocument document, ThemeData theme,
+      AppLocalizations? localizations) {
+    if (document.dueDate == null) return const SizedBox.shrink();
+
+    final dueDate = document.dueDate!;
+    final now = DateTime.now();
+    final isPastDue = dueDate.isBefore(now);
+    final daysUntilDue = dueDate.difference(now).inDays;
+
+    final paymentStatus = document.paymentStatus?.toLowerCase() ?? '';
+    final isPaid = paymentStatus == 'paid' ||
+        paymentStatus.contains('fully_paid') ||
+        paymentStatus.contains('covers_full') ||
+        paymentStatus.contains('fully_covered');
+
+    if (isPaid) {
+      return const SizedBox.shrink();
+    }
+
+    final isCanceled = paymentStatus.contains('cancel');
+    if (isCanceled) {
+      return Row(
+        children: [
+          Icon(
+            Icons.cancel,
+            size: 14,
+            color: FinancialUIManager.canceledColor,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            localizations?.canceled ?? 'Canceled',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: FinancialUIManager.canceledColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      );
+    }
+
+    Color color;
+    String label;
+    IconData icon = Icons.schedule;
+
+    if (isPastDue) {
+      color = FinancialUIManager.unpaidColor;
+      label = localizations?.overdue ?? 'Overdue';
+      icon = Icons.warning;
+    } else if (daysUntilDue <= 7) {
+      color = Colors.orange;
+      label = localizations?.dueSoon ?? 'Due soon';
+      icon = Icons.notification_important;
+    } else {
+      color = Colors.green;
+      label = localizations?.onTrack ?? 'On track';
+      icon = Icons.schedule;
+    }
+
+    final hasPartialPayment =
+        paymentStatus.contains('partial') || paymentStatus.contains('deposit');
+    if (hasPartialPayment && isPastDue) {
+      color = Colors.orange.shade700;
+      label =
+          '${localizations?.partial ?? 'Partial'} - ${localizations?.overdue?.toLowerCase() ?? 'overdue'}';
+    } else if (hasPartialPayment && !isPastDue) {
+      color = Colors.teal;
+      label = localizations?.partiallyPaid ?? 'Partially Paid';
+    }
+
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: color,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData _getCustomerTypeIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'user':
+        return Icons.person;
+      case 'person':
+        return Icons.person_outline;
+      case 'business':
+      case 'company':
+        return Icons.business;
+      case 'organization':
+        return Icons.groups;
+      default:
+        return Icons.person;
+    }
+  }
+
+  IconData? _getSourceTypeIcon(String sourceType) {
+    switch (sourceType) {
+      case 'cart_based':
+        return Icons.shopping_cart;
+      case 'order_based':
+        return Icons.receipt;
+      case 'invoice_based':
+        return Icons.description;
+      case 'direct_invoice':
+        return Icons.request_quote;
+      default:
+        return null;
+    }
+  }
+
+  Color _getCustomerTypeColor(String type, ThemeData theme) {
+    switch (type.toLowerCase()) {
+      case 'user':
+        return Colors.blue;
+      case 'person':
+        return Colors.green;
+      default:
+        return theme.colorScheme.surfaceVariant;
+    }
+  }
+
+  Color _getSourceTypeColor(String sourceType, ThemeData theme) {
+    switch (sourceType) {
+      case 'cart_based':
+        return Colors.purple;
+      case 'order_based':
+        return Colors.teal;
+      case 'invoice_based':
+        return Colors.indigo;
+      case 'direct_invoice':
+        return Colors.deepOrange;
+      default:
+        return theme.colorScheme.secondary;
+    }
+  }
+
+  Widget _buildLoadMoreIndicator(
+      FinanceChangeNotifier notifier, BuildContext context) {
+    final theme = Theme.of(context);
+    final localizations = AppLocalizations.of(context);
+
     if (notifier.isLoading) {
       return const Padding(
         padding: EdgeInsets.all(16),
@@ -777,41 +1075,22 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: () => notifier.fetchDocuments(reset: false),
-          child: const Text('Load More'),
+          child: Text(localizations?.loadMore ?? 'Load More'),
         ),
       );
     }
 
-    return const Padding(
-      padding: EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Center(
         child: Text(
-          'No more documents',
+          localizations?.noMoreDocuments ?? 'No more documents',
           style: TextStyle(
-            color: Colors.grey,
+            color: theme.colorScheme.onSurfaceVariant,
             fontStyle: FontStyle.italic,
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildFloatingActionButton(
-      BuildContext context, FinanceChangeNotifier notifier) {
-    final theme = Theme.of(context);
-
-    if (notifier.isLoading) return const SizedBox();
-
-    return FloatingActionButton.extended(
-      onPressed: widget.onCreateDocument ?? () => _createNewDocument(context),
-      backgroundColor: theme.colorScheme.primary,
-      foregroundColor: theme.colorScheme.onPrimary,
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      icon: const Icon(Icons.add),
-      label: const Text('New Document'),
     );
   }
 
@@ -826,33 +1105,12 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
     );
   }
 
-  void _downloadDocument(FinancialDocument document) {
-    // Implement download logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Downloading ${document.documentNumber}...'),
-        backgroundColor: FinancialUIManager.infoColor,
-      ),
-    );
-  }
-
-  void _recordPayment(FinancialDocument document) {
-    // Implement payment recording logic
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => PaymentRecordingSheet(document: document),
-    );
-  }
-
   void _createNewDocument(BuildContext context) {
-    // Implement document creation logic
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) => NewDocumentSheet(
         onCreate: (type) {
-          // Handle document creation
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => PaymentFormScreen()),

@@ -46,28 +46,43 @@ class BusinessOperation {
     this.operationDate,
   });
 
+  // Add this method to your BusinessOperation class
   factory BusinessOperation.fromJson(Map<String, dynamic> json) {
-    return BusinessOperation(
-      supplierId: json['supplier_id'] as int? ?? 0,
-      orderId: json['order_id'] as int?,
-      cartId: json['cart_id'] as int?,
-      clientId: json['client_id'] as int?, // Updated field name
-      sellerId: json['seller_id'] as int? ?? 0,
-      invoiceId: json['invoice_id'] as int?,
-      receiptId: json['receipt_id'] as int?,
-      totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
-      balanceDue: (json['balance_due'] as num?)?.toDouble() ?? 0.0,
-      totalPaid: (json['total_paid'] as num?)?.toDouble() ?? 0.0,
-      totalDeposited: (json['total_deposited'] as num?)?.toDouble() ?? 0.0,
-      paymentStatus: json['payment_status'] as String? ?? 'unknown',
-      invoiceStatus: json['invoice_status'] as String? ?? 'unknown',
-      documentType: json['document_type'] as String? ?? 'unknown',
-      operationType: json['operation_type'] as String? ?? 'unknown',
-      sourceTable: json['source_table'] as String? ?? 'unknown',
-      operationDate: json['operation_date'] != null
-          ? DateTime.parse(json['operation_date'] as String)
-          : null,
-    );
+    print('🔍 Parsing BusinessOperation JSON:');
+    print('  Raw JSON: $json');
+
+    // Log each field to see what's coming in
+    json.forEach((key, value) {
+      print('  $key: $value (type: ${value.runtimeType})');
+    });
+
+    try {
+      return BusinessOperation(
+        supplierId: json['supplier_id'] as int? ?? 0,
+        orderId: json['order_id'] as int?,
+        cartId: json['cart_id'] as int?,
+        clientId: json['client_id'] as int?, // Updated field name
+        sellerId: json['seller_id'] as int? ?? 0,
+        invoiceId: json['invoice_id'] as int?,
+        receiptId: json['receipt_id'] as int?,
+        totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
+        balanceDue: (json['balance_due'] as num?)?.toDouble() ?? 0.0,
+        totalPaid: (json['total_paid'] as num?)?.toDouble() ?? 0.0,
+        totalDeposited: (json['total_deposited'] as num?)?.toDouble() ?? 0.0,
+        paymentStatus: json['payment_status'] as String? ?? 'unknown',
+        invoiceStatus: json['invoice_status'] as String? ?? 'unknown',
+        documentType: json['document_type'] as String? ?? 'unknown',
+        operationType: json['operation_type'] as String? ?? 'unknown',
+        sourceTable: json['source_table'] as String? ?? 'unknown',
+        operationDate: json['operation_date'] != null
+            ? DateTime.parse(json['operation_date'] as String)
+            : null,
+      );
+    } catch (e, stackTrace) {
+      print('❌ Error parsing BusinessOperation: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {

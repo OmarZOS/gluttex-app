@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
+import 'package:gluttex_ui/components/finance/financial_ui_manager.dart';
 
 class BusinessOperationsStats extends StatelessWidget {
   final List<BusinessOperation> operations;
@@ -98,19 +99,19 @@ class _QuickStats extends StatelessWidget {
               children: [
                 _StatRow(
                   label: localizations.totalAmount,
-                  value: _formatCurrency(stats['totalAmount'], loc),
+                  value: _formatCurrency(stats['totalAmount'], context),
                   color: colorScheme.onSurface,
                 ),
                 const SizedBox(height: 8),
                 _StatRow(
                   label: localizations.totalPaid,
-                  value: _formatCurrency(stats['totalPaid'], loc),
+                  value: _formatCurrency(stats['totalPaid'], context),
                   color: Colors.green,
                 ),
                 const SizedBox(height: 8),
                 _StatRow(
                   label: localizations.outstanding,
-                  value: _formatCurrency(stats['balanceDue'], loc),
+                  value: _formatCurrency(stats['balanceDue'], context),
                   color: stats['balanceDue'] > 0 ? Colors.orange : Colors.green,
                 ),
               ],
@@ -488,7 +489,7 @@ class _LegendItem extends StatelessWidget {
                 ),
                 if (showValue)
                   Text(
-                    '${_formatCurrency(data.value, loc)} • ${data.percentage.toStringAsFixed(1)}%',
+                    '${_formatCurrency(data.value, context)} • ${data.percentage.toStringAsFixed(1)}%',
                     style: TextStyle(
                       color: colorScheme.onSurfaceVariant,
                       fontSize: 10,
@@ -512,6 +513,6 @@ extension LocalizationKeys on AppLocalizations {
   String get outstanding => 'Outstanding';
 }
 
-String _formatCurrency(double amount, AppLocalizations loc) {
-  return loc.price(amount.toStringAsFixed(2));
+String _formatCurrency(double amount, BuildContext context) {
+  return FinancialUIManager.formatCurrency(amount, context);
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class Person {
   final int id_person;
   final int person_details_id;
@@ -63,11 +65,10 @@ class Person {
       person_blood_type_id:
           (json['person_blood_type_id'] as num?)?.toInt() ?? 0,
       person_location_id: (json['person_location_id'] as num?)?.toInt(),
-      person_details: PersonDetails.fromJson(
-          (json['person_details'] ?? {}) as Map<String, dynamic>),
-      created_at: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'] as String)
-          : null,
+      person_details: PersonDetails.fromJson((json['person_details'] ?? {})),
+      // created_at: json['created_at'] != null
+      //     ? DateTime.tryParse(json['created_at'] as String)
+      //     : null,
       updated_at: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'] as String)
           : null,

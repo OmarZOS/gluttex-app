@@ -1,8 +1,17 @@
 import 'dart:convert';
+// import 'dart:deve' as developer;
+import 'dart:developer' as developer;
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/Person.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/business/Delivery.dart';
+import 'package:gluttex_core/business/finance/Cart.dart';
+import 'package:gluttex_core/business/services/CartService.dart';
+import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:locator/locator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckoutParameter {
   final String key;
@@ -26,10 +35,14 @@ class CheckoutParameter {
 }
 
 class CheckoutViewModel extends ChangeNotifier {
+  // Services
+  final CartService _cartService = GluttexLocator.get<CartService>();
+
+  // State
   AppUser? _selectedCustomer;
   Person? _selectedPerson;
   String _documentType = 'receipt';
-  String _paymentType = 'payment';
+  String _paymentType = 'payment'; // 'payment' or 'deposit'
   String _paymentMethod = 'cash';
   String _deliveryType = 'pickup';
   String _notes = '';
@@ -41,9 +54,17 @@ class CheckoutViewModel extends ChangeNotifier {
   String _cardType = 'visa';
   final List<CheckoutParameter> _savedParameters = [];
   bool _isLoadingParameters = false;
+  CheckoutResult? _lastCheckoutResult;
+  double _depositAmount = 0.0; // User-specified deposit amount
+  bool _applyVAT = false; // Whether to apply VAT (for invoices)
+  DeliveryData? _deliveryData;
+
+  String? _dueDate;
 
   static const String _prefsKey = 'checkout_parameters';
+  static const double vatRate = 0.19; // 19% VAT
 
+  // Getters
   AppUser? get selectedCustomer => _selectedCustomer;
   Person? get selectedPerson => _selectedPerson;
   String get documentType => _documentType;
@@ -59,34 +80,298 @@ class CheckoutViewModel extends ChangeNotifier {
   String? get mobileProvider => _mobileProvider;
   String get cardType => _cardType;
   bool get isLoadingParameters => _isLoadingParameters;
+  CheckoutResult? get lastCheckoutResult => _lastCheckoutResult;
+  double get depositAmount => _depositAmount;
+  bool get applyVAT => _applyVAT;
+  DeliveryData? get deliveryData => _deliveryData;
+
+  CheckoutViewModel() {
+    _loadSavedParameters();
+    // Apply VAT by default if creating an invoice
+    _updateVATSetting();
+  }
+
+  // ===================== CHECKOUT CORE FUNCTIONALITY =====================
+
+  /// Process checkout using the local cart from CartChangeNotifier
+  Future<CheckoutResult> processCheckout({
+    required CartChangeNotifier cartNotifier,
+    required int sellingUserId,
+    required int providerId,
+  }) async {
+    try {
+      _isProcessing = true;
+      _lastCheckoutResult = null;
+      notifyListeners();
+
+      // Validate cart has items
+      if (cartNotifier.cart.isEmpty) {
+        return _setCheckoutResult(CheckoutResult.failure('Cart is empty'));
+      }
+
+      // Prepare and submit checkout data
+      final checkoutData = await _prepareCheckoutData(
+        cart: cartNotifier.cart,
+        sellingUserId: sellingUserId,
+        providerId: providerId,
+      );
+
+      final result = await _submitOrder(checkoutData);
+
+      if (result.isSuccess) {
+        // Clear the local cart on success
+        cartNotifier.clearCart();
+        // Reset checkout state
+        resetAfterCheckout();
+      }
+
+      return _setCheckoutResult(result);
+    } catch (e) {
+      developer.log('Checkout failed: $e', name: 'CheckoutViewModel');
+      return _setCheckoutResult(CheckoutResult.failure('Checkout failed: $e'));
+    } finally {
+      _isProcessing = false;
+      notifyListeners();
+    }
+  }
+
+  /// Process checkout with a specific cart (for API carts)
+  Future<CheckoutResult> processCartCheckout({
+    required Cart cart,
+    required int sellingUserId,
+    required int providerId,
+  }) async {
+    try {
+      _isProcessing = true;
+      _lastCheckoutResult = null;
+      notifyListeners();
+
+      // Validate cart has items
+      if (cart.isEmpty) {
+        return _setCheckoutResult(CheckoutResult.failure('Cart is empty'));
+      }
+
+      // Prepare and submit checkout data
+      final checkoutData = await _prepareCheckoutData(
+        cart: cart,
+        sellingUserId: sellingUserId,
+        providerId: providerId,
+      );
+
+      final result = await _submitOrder(checkoutData);
+
+      return _setCheckoutResult(result);
+    } catch (e) {
+      developer.log('Cart checkout failed: $e', name: 'CheckoutViewModel');
+      return _setCheckoutResult(CheckoutResult.failure('Checkout failed: $e'));
+    } finally {
+      _isProcessing = false;
+      notifyListeners();
+    }
+  }
+
+  CheckoutResult _setCheckoutResult(CheckoutResult result) {
+    _lastCheckoutResult = result;
+    notifyListeners();
+    return result;
+  }
+
+  Future<Map<String, dynamic>> _prepareCheckoutData({
+    required Cart cart,
+    required int sellingUserId,
+    required int providerId,
+  }) async {
+    // Determine customer reference
+    int? customerRef;
+    int? clientUserId;
+    if (_selectedCustomer != null) {
+      customerRef = _selectedCustomer!.idPerson;
+      clientUserId = _selectedCustomer!.id_app_user;
+    } else if (_selectedPerson != null) {
+      customerRef = _selectedPerson!.id_person;
+    }
+
+    // Calculate totals with VAT if applicable
+    final subtotal =
+        _applyVAT ? cart.totalAmount * (1 - vatRate) : cart.totalAmount;
+    final vatAmount = _applyVAT ? subtotal * vatRate : 0.0;
+    final totalAmount = subtotal + vatAmount;
+
+    double paidMoney = 0.0;
+
+    // Determine paid amount based on payment type
+    if (_paymentType == 'payment') {
+      paidMoney = totalAmount; // Full payment
+    } else if (_paymentType == 'deposit') {
+      // Use user-specified deposit amount, but ensure it doesn't exceed total
+      paidMoney = _depositAmount.clamp(0.0, totalAmount);
+    }
+
+    // Build ordered items from cart (products)
+    final List<Map<String, dynamic>> orderedItems = [];
+
+    for (final cartItem in cart.items.where((item) => item.isProduct)) {
+      orderedItems.add({
+        "id_ordered_item": 0,
+        "ordered_product_id": cartItem.product?.id_product ?? 0,
+        "order_ref": 0,
+        "product_discount": 0.0,
+        "ordered_quantity": cartItem.quantity,
+        "unit_price": _applyVAT
+            ? ((cartItem.unitPrice ?? 0) * (1 - vatRate))
+            : (cartItem.unitPrice ?? 0.0),
+        // Apply VAT to product items if invoice
+        "applied_vat": _applyVAT ? vatRate * 100 : 0.0, // Convert to percentage
+      });
+    }
+
+    // Build provided services from cart (services)
+    final List<Map<String, dynamic>> providedServices = [];
+
+    for (final cartItem in cart.items.where((item) => item.isService)) {
+      providedServices.add({
+        "ordered_service_service_id": cartItem.service?.id ?? 0,
+        "ordered_service_quantity": cartItem.quantity,
+        "ordered_service_unit_price": _applyVAT
+            ? ((cartItem.unitPrice ?? 0) * (1 - vatRate))
+            : cartItem.unitPrice ?? 0.0,
+        "ordered_service_total_price": _applyVAT
+            ? (cartItem.totalPrice * (1 - vatRate))
+            : cartItem.totalPrice,
+        // VAT for services would depend on your business logic
+      });
+    }
+
+    // Build cart data
+    final Map<String, dynamic> apiCart = {
+      "cart_id": 0,
+      "cart_product_provider_id": providerId,
+      "cart_selling_user": sellingUserId,
+      "cart_person_ref": customerRef,
+      "cart_client_user": clientUserId,
+      "cart_status": "PENDING",
+      "cart_total_amount": totalAmount,
+      "cart_vat_amount": vatAmount,
+      "cart_subtotal": subtotal,
+      "cart_vat_rate": _applyVAT ? vatRate : 0.0,
+      "cart_notes": _notes,
+      "cart_due_date": _dueDate ?? "",
+      "cart_invoice": _documentType.contains('invoice'),
+      "cart_receipt": _documentType.contains('receipt'),
+      "cart_deposit": _paymentType == 'deposit',
+      "cart_payment": _paymentType == 'payment',
+      "cart_paid_money": paidMoney,
+      "cart_payment_method": _paymentMethod,
+      "cart_card_type": _cardType,
+      "cart_card_details": _cardDetails,
+      "cart_bank_details": _bankDetails,
+      "cart_mobile_provider": _mobileProvider,
+      "cart_delivery_type": _deliveryType,
+      "cart_deposit_amount": _depositAmount,
+      "cart_apply_vat": _applyVAT,
+    };
+
+    // Add checkout parameters
+    final Map<String, dynamic> parameters = {};
+    for (final param in _parameters) {
+      parameters[param.key] = param.value;
+    }
+    apiCart["cart_parameters"] = parameters;
+
+    // Build client data from selected customer
+    final Map<String, dynamic> client = {};
+
+    if (_selectedCustomer != null) {
+      final customer = _selectedCustomer!;
+      client.addAll({
+        "id_person": customer.idPerson,
+        "person_details_id": customer.personDetailsId,
+        "id_person_details": customer.personDetailsId,
+        "person_first_name": customer.personFirstName ?? "",
+        "person_last_name": customer.personLastName ?? "",
+        "person_birth_date": customer.personBirthDate ?? "",
+        "person_gender": customer.personGender ?? "",
+        "person_nationality": customer.personNationality ?? "",
+        "id_blood_type": 0,
+      });
+    } else if (_selectedPerson != null) {
+      final person = _selectedPerson!;
+      final details = person.person_details;
+      client.addAll({
+        "id_person": person.id_person,
+        "person_details_id": person.person_details_id,
+        "id_person_details": details.id_person_details,
+        "person_first_name": details.person_first_name,
+        "person_last_name": details.person_last_name,
+        "person_birth_date": details.person_birth_date?.toIso8601String() ?? "",
+        "person_gender": details.person_gender,
+        "person_nationality": details.person_nationality,
+        "person_email": details.person_email ?? "",
+        "person_phone": details.person_phone ?? "",
+        "id_blood_type": person.person_blood_type_id,
+      });
+    }
+
+    Map<String, dynamic> data = {
+      "api_ordered_items": orderedItems,
+      "api_provided_services": providedServices,
+      "api_cart": apiCart,
+      "client": client,
+    };
+
+    if (deliveryType != "pickup") data["delivery"] = deliveryData?.toJson();
+    return data;
+  }
+
+  Future<CheckoutResult> _submitOrder(Map<String, dynamic> checkoutData) async {
+    try {
+      developer.log('Submitting order data...', name: 'CheckoutViewModel');
+
+      // Get parameters from cart data
+      final apiCart = checkoutData["api_cart"] as Map<String, dynamic>;
+
+      final result = await _cartService.addCart(checkoutData, params: {
+        "provider_id": apiCart["cart_product_provider_id"],
+        "seller_user_id": apiCart["cart_selling_user"],
+        "buyer_user_id": apiCart["cart_client_user"] ?? 0,
+      });
+
+      if (result != null && result.cartId != null) {
+        developer.log('Order submitted successfully! Cart ID: ${result.cartId}',
+            name: 'CheckoutViewModel');
+        return CheckoutResult.success(
+          'Order placed successfully. Order ID: ${result.cartId}',
+          orderId: result.cartId!,
+        );
+      }
+
+      developer.log('Order submission returned null result',
+          name: 'CheckoutViewModel');
+      return CheckoutResult.failure('Failed to place order');
+    } catch (e) {
+      developer.log('Error in order submission: $e', name: 'CheckoutViewModel');
+      return CheckoutResult.failure('Order submission error: $e');
+    }
+  }
+
+  // ===================== CUSTOMER MANAGEMENT =====================
 
   Future<Person?> createNewCustomer(Person person) async {
     try {
       _isProcessing = true;
       notifyListeners();
 
+      developer.log('Creating new customer: ${person.fullName}',
+          name: 'CheckoutViewModel');
+
       // Here you would call your API to save the person to the database
-      // For example:
-      // final createdPerson = await _personService.createPerson(person);
-
-      // For now, let's assume we have a method to create a person
-      // Since this is just the UI implementation, you'll need to implement
-      // the actual API call based on your backend
-
-      print('Creating new customer: ${person.fullName}');
-
-      // Convert Person to AppUser if needed for your existing system
-      // final appUser = _convertPersonToAppUser(person);
-
-      // Set as selected customer
+      // For now, we just set it as selected
       _selectedPerson = person;
 
       notifyListeners();
-
-      // Return the created person (or null if you want to return AppUser)
       return person;
     } catch (e) {
-      print('Error creating customer: $e');
+      developer.log('Error creating customer: $e', name: 'CheckoutViewModel');
       rethrow;
     } finally {
       _isProcessing = false;
@@ -94,9 +379,7 @@ class CheckoutViewModel extends ChangeNotifier {
     }
   }
 
-  CheckoutViewModel() {
-    _loadSavedParameters();
-  }
+  // ===================== PARAMETERS MANAGEMENT =====================
 
   Future<void> _loadSavedParameters() async {
     _isLoadingParameters = true;
@@ -112,11 +395,12 @@ class CheckoutViewModel extends ChangeNotifier {
           final map = json.decode(jsonString) as Map<String, dynamic>;
           _savedParameters.add(CheckoutParameter.fromMap(map));
         } catch (e) {
-          print('Error parsing parameter: $e');
+          developer.log('Error parsing parameter: $e',
+              name: 'CheckoutViewModel');
         }
       }
     } catch (e) {
-      print('Error loading parameters: $e');
+      developer.log('Error loading parameters: $e', name: 'CheckoutViewModel');
     } finally {
       _isLoadingParameters = false;
       notifyListeners();
@@ -127,11 +411,9 @@ class CheckoutViewModel extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      // Add to saved parameters if not already present
       if (!_savedParameters.any((p) => p.key == parameter.key)) {
         _savedParameters.add(parameter);
 
-        // Save to SharedPreferences
         final parametersJson =
             _savedParameters.map((p) => json.encode(p.toMap())).toList();
 
@@ -140,7 +422,7 @@ class CheckoutViewModel extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error saving parameter: $e');
+      developer.log('Error saving parameter: $e', name: 'CheckoutViewModel');
       rethrow;
     }
   }
@@ -159,7 +441,7 @@ class CheckoutViewModel extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error updating parameter: $e');
+      developer.log('Error updating parameter: $e', name: 'CheckoutViewModel');
       rethrow;
     }
   }
@@ -178,7 +460,7 @@ class CheckoutViewModel extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error deleting parameter: $e');
+      developer.log('Error deleting parameter: $e', name: 'CheckoutViewModel');
       rethrow;
     }
   }
@@ -191,6 +473,8 @@ class CheckoutViewModel extends ChangeNotifier {
     }
   }
 
+  // ===================== STATE SETTERS =====================
+
   void setSelectedCustomer(AppUser? customer, Person? person) {
     _selectedCustomer = customer;
     _selectedPerson = person;
@@ -199,11 +483,35 @@ class CheckoutViewModel extends ChangeNotifier {
 
   void setDocumentType(String type) {
     _documentType = type;
+    _updateVATSetting();
     notifyListeners();
+  }
+
+  void _updateVATSetting() {
+    // Apply VAT only for invoices
+    _applyVAT = _documentType.contains('invoice');
   }
 
   void setPaymentType(String type) {
     _paymentType = type;
+    // Reset deposit amount when switching from deposit to payment
+    if (type != 'deposit') {
+      _depositAmount = 0.0;
+    } else if (type != 'installment') {
+      _dueDate = "";
+    }
+    notifyListeners();
+  }
+
+  void setPaymentAmount(double amount) {
+    if (_paymentType == 'deposit') {
+      _depositAmount = amount;
+    }
+    notifyListeners();
+  }
+
+  void setInstallmentDate(DateTime dueDate) {
+    _dueDate = dueDate.toIso8601String();
     notifyListeners();
   }
 
@@ -214,6 +522,11 @@ class CheckoutViewModel extends ChangeNotifier {
 
   void setDeliveryType(String type) {
     _deliveryType = type;
+    notifyListeners();
+  }
+
+  void setDeliveryData(DeliveryData data) {
+    _deliveryData = data;
     notifyListeners();
   }
 
@@ -252,6 +565,16 @@ class CheckoutViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setDepositAmount(double amount) {
+    _depositAmount = amount;
+    notifyListeners();
+  }
+
+  void setApplyVAT(bool apply) {
+    _applyVAT = apply;
+    notifyListeners();
+  }
+
   void addParameter(String key, String value) {
     _parameters.add(CheckoutParameter(key: key, value: value));
     notifyListeners();
@@ -266,27 +589,28 @@ class CheckoutViewModel extends ChangeNotifier {
 
   void clearAll() {
     _selectedCustomer = null;
+    _selectedPerson = null;
     _documentType = 'receipt';
     _paymentType = 'payment';
     _paymentMethod = 'cash';
     _deliveryType = 'pickup';
     _notes = '';
+    _dueDate = null;
     _parameters.clear();
     _cardDetails = null;
     _bankDetails = null;
     _mobileProvider = null;
     _cardType = 'visa';
+    _depositAmount = 0.0;
+    _applyVAT = false;
+    _lastCheckoutResult = null;
+    _updateVATSetting();
     notifyListeners();
   }
 
   void clearCurrentParameters() {
     _parameters.clear();
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   void resetAfterCheckout() {
@@ -297,6 +621,110 @@ class CheckoutViewModel extends ChangeNotifier {
     _cardDetails = null;
     _bankDetails = null;
     _mobileProvider = null;
+    _depositAmount = 0.0;
+    _lastCheckoutResult = null;
+    _updateVATSetting();
     notifyListeners();
+  }
+
+  // Helper method to get customer name for display
+  String getCustomerName() {
+    if (_selectedCustomer != null) {
+      final customer = _selectedCustomer!;
+      return '${customer.personFirstName} ${customer.personLastName}'.trim();
+    } else if (_selectedPerson != null) {
+      return _selectedPerson!.fullName;
+    }
+    return 'Guest';
+  }
+
+  // Helper method to calculate totals
+  Map<String, double> calculateTotals(CartChangeNotifier cartNotifier) {
+    final subtotal = cartNotifier.cart.totalAmount;
+    final vatAmount = _applyVAT ? subtotal * vatRate : 0.0;
+    final total = subtotal + vatAmount;
+    final paidMoney =
+        _paymentType == 'deposit' ? _depositAmount.clamp(0.0, total) : total;
+    final balanceDue = total - paidMoney;
+
+    return {
+      'subtotal': subtotal,
+      'vatAmount': vatAmount,
+      'total': total,
+      'paidMoney': paidMoney,
+      'balanceDue': balanceDue,
+      'vatRate': _applyVAT ? vatRate : 0.0,
+    };
+  }
+
+  // Helper method to check if checkout can proceed
+  bool canCheckout(CartChangeNotifier cartNotifier) {
+    // For deposit, ensure deposit amount is valid
+    if (_paymentType == 'deposit') {
+      final totals = calculateTotals(cartNotifier);
+      if (_depositAmount <= 0 || _depositAmount > totals['total']!) {
+        return false;
+      }
+    }
+
+    return cartNotifier.cart.isNotEmpty &&
+        (_selectedCustomer != null || _selectedPerson != null);
+  }
+
+  // Helper to get checkout summary
+  Map<String, dynamic> getCheckoutSummary(CartChangeNotifier cartNotifier) {
+    final totals = calculateTotals(cartNotifier);
+
+    return {
+      'customer': getCustomerName(),
+      'subtotal': totals['subtotal'],
+      'vatAmount': totals['vatAmount'],
+      'vatRate': totals['vatRate'],
+      'total': totals['total'],
+      'paidMoney': totals['paidMoney'],
+      'balanceDue': totals['balanceDue'],
+      'itemCount': cartNotifier.cart.itemCount,
+      'productCount': cartNotifier.productItemCount,
+      'serviceCount': cartNotifier.serviceItemCount,
+      'documentType': _documentType,
+      'paymentType': _paymentType,
+      'paymentMethod': _paymentMethod,
+      'depositAmount': _depositAmount,
+      'applyVAT': _applyVAT,
+    };
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+}
+
+// ===================== SUPPORTING CLASSES =====================
+
+class CheckoutResult {
+  final bool isSuccess;
+  final String message;
+  final int? orderId;
+
+  const CheckoutResult._({
+    required this.isSuccess,
+    required this.message,
+    this.orderId,
+  });
+
+  factory CheckoutResult.success(String message, {int? orderId}) {
+    return CheckoutResult._(
+      isSuccess: true,
+      message: message,
+      orderId: orderId,
+    );
+  }
+
+  factory CheckoutResult.failure(String message) {
+    return CheckoutResult._(
+      isSuccess: false,
+      message: message,
+    );
   }
 }

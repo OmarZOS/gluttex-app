@@ -151,6 +151,24 @@ class AppUserServiceImpl implements AppUserService {
   }
 
   @override
+  Future<Person?> getPerson(String id) async {
+    StorageService storageService = GluttexLocator.get<StorageService>();
+    try {
+      // log('${await storageService.get(GluttexConstants.apiBaseUrl + GluttexConstants.appUserEndpoint, id)}');
+      var data = await storageService.getAll(
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.personEndpoint}/$id');
+
+      var person = Person.fromJson(data[0] as Map<String, dynamic>);
+      return person;
+    } catch (e, stacktrace) {
+      log('$e');
+      log('$stacktrace');
+
+      return Person.empty();
+    }
+  }
+
+  @override
   Future<List<AppUserCategory>>? getCategories() async {
     if (categories.isNotEmpty) return categories;
     try {

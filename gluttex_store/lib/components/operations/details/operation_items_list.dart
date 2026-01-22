@@ -3,6 +3,7 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:gluttex_core/business/finance/Cart.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
+import 'package:gluttex_event/order_change_notifier.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 
@@ -44,13 +45,15 @@ class _OperationItemsListState extends State<OperationItemsList> {
     });
 
     try {
+      final orderNotifier =
+          Provider.of<OrderChangeNotifier>(context, listen: false);
       final cartNotifier =
           Provider.of<CartChangeNotifier>(context, listen: false);
 
       if (widget.operation.cartId != null) {
         await _loadCartItems(cartNotifier);
       } else if (widget.operation.orderId != null) {
-        await _loadOrderItems(cartNotifier);
+        await _loadOrderItems(orderNotifier);
       } else {
         _items = [];
       }
@@ -91,12 +94,12 @@ class _OperationItemsListState extends State<OperationItemsList> {
     }
   }
 
-  Future<void> _loadOrderItems(CartChangeNotifier cartNotifier) async {
+  Future<void> _loadOrderItems(OrderChangeNotifier cartNotifier) async {
     final orderId = widget.operation.orderId!;
 
     // Check if order already exists in cache
     bool orderExists =
-        cartNotifier.orders.any((order) => order.idOrder == orderId);
+        cartNotifier.orders.any((order) => order.idPlacedOrder == orderId);
 
     if (!orderExists) {
       await cartNotifier.fetchOrderDetails(orderId: orderId);

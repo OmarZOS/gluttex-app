@@ -8,7 +8,6 @@ import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_store/components/inventory/inventory_app_bar.dart';
 import 'package:gluttex_store/components/inventory/product_list.dart';
 import 'package:gluttex_store/components/inventory/search_bar.dart';
-import 'package:gluttex_store/components/inventory/supplier_selector.dart';
 import 'package:gluttex_store/components/selling_point/selling_point_supplier.dart';
 
 class InventoryScreen extends StatefulWidget {

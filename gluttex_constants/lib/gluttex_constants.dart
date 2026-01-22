@@ -207,6 +207,8 @@ class GluttexConstants {
   static const String updateAppUserImageEndpoint = '/app_user/update_image_url';
   static const String updateAppUserEndpoint = '/app_user/update';
 
+  static const String personEndpoint = '/person';
+
   static const String getNotificationsEndpoint = '/notifications';
   static const String putNotificationsEndpoint = '/notification';
 
@@ -276,6 +278,8 @@ class GluttexConstants {
   static const String getAllRecipesEndpoint = '/recipe';
   static const String recipeEndpoint = '/recipe';
   static const String getRecipeCategoriesEndpoint = '/recipe/category/all';
+
+  static const String postPaymentEndpoint = '/business/payment/add';
 
   static const String loginEndpoint = '/authentication/token';
   static const String signUpEndpoint = '/app_user/add';

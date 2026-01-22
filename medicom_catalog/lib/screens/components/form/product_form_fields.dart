@@ -7,6 +7,7 @@ import 'package:gluttex_core/business/iProduct.dart';
 import 'package:gluttex_core/business/product_form_data.dart';
 import 'package:gluttex_event/assistant_change_notifier.dart';
 import 'package:gluttex_event/components/lib.dart';
+import 'package:gluttex_event/personnel_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
@@ -130,113 +131,78 @@ class ProductFormFields extends StatelessWidget {
 
     return Consumer<PricingState>(
       builder: (context, pricingState, child) {
-        // Initialize pricing state with AI price if available
-        if (hasAIPrice && aiPrice != null && pricingState.basePrice == 0.0) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            pricingState.updateBasePrice(aiPrice);
-            controllers.price.text = aiPrice.toStringAsFixed(2);
-          });
-        }
-
-        final currentPrice = double.tryParse(controllers.price.text) ?? 0.0;
-        final priceDifference =
-            aiPrice != null ? (currentPrice - aiPrice).abs() : 0.0;
-        final isPriceDifferent =
-            priceDifference > 0.01; // More than 1 cent difference
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Smart Price Field
-            _buildSmartField(
-              context: context,
-              fieldId: ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA,
-              controller: controllers.price,
-              label: localizations.productPriceTxt,
-              keyboardType: TextInputType.number,
-              validator: _validatePrice,
-              suffixIcon: hasAIPrice
-                  ? Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      child: Icon(
-                        Icons.auto_awesome,
-                        size: 16,
-                        color: colorScheme.primary,
-                      ),
-                    )
-                  : null,
-              onChanged: (value) {
-                final price = double.tryParse(value) ?? 0.0;
-                pricingState.updateBasePrice(price);
-
-                // Update form data
-                formData.price = price;
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            // AI Price Suggestion Header (only when AI price is available)
-            if (hasAIPrice && aiPrice != null)
-              Column(
-                children: [
-                  _buildAIPriceSuggestionHeader(
-                      context, aiPrice!, pricingState, localizations),
-                  const SizedBox(height: 12),
-                ],
+        // ✅ Create a local controller that only updates on significant changes
+        return _PricingCardWrapper(
+          pricingState: pricingState,
+          aiPrice: aiPrice,
+          hasAIPrice: hasAIPrice,
+          childBuilder: (localValues) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Smart Price Field
+              _buildSmartField(
+                context: context,
+                fieldId: ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA,
+                controller: controllers.price,
+                label: localizations.productPriceTxt,
+                keyboardType: TextInputType.number,
+                validator: _validatePrice,
+                suffixIcon: hasAIPrice
+                    ? Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        child: Icon(
+                          Icons.auto_awesome,
+                          size: 16,
+                          color: colorScheme.primary,
+                        ),
+                      )
+                    : null,
+                onChanged: (value) {
+                  final price = double.tryParse(value) ?? 0.0;
+                  pricingState.updateBasePrice(price);
+                  formData.price = price;
+                },
               ),
 
-            // Pricing Configuration Card (always visible)
-            PricingConfigCard(
-              basePrice: pricingState.basePrice,
-              taxPercentage: pricingState.taxPercentage,
-              profitMargin: pricingState.profitMargin,
-              finalPrice: pricingState.finalPrice,
-              mode: pricingState.mode,
-              onBasePriceChanged: (price) {
-                // Update both pricing state and controller
-                pricingState.updateBasePrice(price);
-                controllers.price.text = price.toStringAsFixed(2);
-                formData.price = price;
-              },
-              onTaxPercentageChanged: (tax) {
-                pricingState.updateTaxPercentage(tax);
-                // Update final price in controller if in profit mode
-                if (pricingState.mode == PricingMode.byProfit) {
-                  controllers.price.text =
-                      pricingState.finalPrice.toStringAsFixed(2);
-                  formData.price = pricingState.finalPrice;
-                }
-              },
-              onProfitMarginChanged: (margin) {
-                pricingState.updateProfitMargin(margin);
-                // Update final price in controller if in profit mode
-                if (pricingState.mode == PricingMode.byProfit) {
-                  controllers.price.text =
-                      pricingState.finalPrice.toStringAsFixed(2);
-                  formData.price = pricingState.finalPrice;
-                }
-              },
-              onFinalPriceChanged: (price) {
-                pricingState.updateFinalPrice(price);
-                controllers.price.text = price.toStringAsFixed(2);
-                formData.price = price;
-              },
-              onModeChanged: (mode) {
-                pricingState.updateMode(mode);
-                // Update controller with appropriate price
-                if (mode == PricingMode.byProfit) {
-                  controllers.price.text =
-                      pricingState.finalPrice.toStringAsFixed(2);
-                  formData.price = pricingState.finalPrice;
-                } else {
-                  controllers.price.text =
-                      pricingState.basePrice.toStringAsFixed(2);
-                  formData.price = pricingState.basePrice;
-                }
-              },
-            ),
-          ],
+              const SizedBox(height: 16),
+
+              // AI Price Suggestion Header
+              if (hasAIPrice && aiPrice != null)
+                Column(
+                  children: [
+                    _buildAIPriceSuggestionHeader(
+                        context, aiPrice!, pricingState, localizations),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+
+              // Pricing Configuration Card with local values
+              PricingConfigCard(
+                basePrice: localValues.basePrice,
+                taxPercentage: localValues.taxPercentage,
+                profitMargin: localValues.profitMargin,
+                finalPrice: localValues.finalPrice,
+                mode: localValues.mode,
+                onBasePriceChanged: (price) {
+                  pricingState.updateBasePrice(price);
+                  formData.price = price;
+                },
+                onTaxPercentageChanged: (tax) {
+                  pricingState.updateTaxPercentage(tax);
+                },
+                onProfitMarginChanged: (margin) {
+                  pricingState.updateProfitMargin(margin);
+                },
+                onFinalPriceChanged: (price) {
+                  pricingState.updateFinalPrice(price);
+                  formData.price = price;
+                },
+                onModeChanged: (mode) {
+                  pricingState.updateMode(mode);
+                },
+              ),
+            ],
+          ),
         );
       },
     );
@@ -538,9 +504,14 @@ class ProductFormFields extends StatelessWidget {
     final userNotifier = context.read<AppUserNotifier>();
     final supplierNotifier = context.read<SupplierChangeNotifier>();
 
+    final managedSuppliers = context
+        .read<PersonnelNotifier>()
+        .getAccessibleSupplierIds(userNotifier.appUser!.id_app_user!);
+
     final suppliers = supplierNotifier.suppliers
         .where((s) =>
-            s?.productProviderOwnerId == userNotifier.appUser?.id_app_user)
+            s?.productProviderOwnerId == userNotifier.appUser?.id_app_user ||
+            managedSuppliers.contains(s?.idProductProvider))
         .whereType<Supplier>()
         .toList();
 
@@ -647,5 +618,93 @@ class ProductFormFields extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+// Helper widget to manage local state
+class _PricingCardWrapper extends StatefulWidget {
+  final PricingState pricingState;
+  final double? aiPrice;
+  final bool hasAIPrice;
+  final Widget Function(PricingValues localValues) childBuilder;
+
+  const _PricingCardWrapper({
+    required this.pricingState,
+    required this.aiPrice,
+    required this.hasAIPrice,
+    required this.childBuilder,
+  });
+
+  @override
+  State<_PricingCardWrapper> createState() => __PricingCardWrapperState();
+}
+
+class __PricingCardWrapperState extends State<_PricingCardWrapper> {
+  late PricingValues _localValues;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _localValues = PricingValues.fromPricingState(widget.pricingState);
+
+    // Initialize with AI price if available
+    if (widget.hasAIPrice && widget.aiPrice != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.pricingState.updateBasePrice(widget.aiPrice!);
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _PricingCardWrapper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Only update local values if the user isn't actively using the card
+    // This prevents resetting while typing
+    if (_shouldUpdateLocalValues()) {
+      _localValues = PricingValues.fromPricingState(widget.pricingState);
+    }
+  }
+
+  bool _shouldUpdateLocalValues() {
+    // Add logic here if you want to track when user is editing
+    // For now, update on significant changes only
+    final currentState = widget.pricingState;
+    return _localValues.basePrice != currentState.basePrice ||
+        _localValues.taxPercentage != currentState.taxPercentage ||
+        _localValues.mode != currentState.mode;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.childBuilder(_localValues);
+  }
+}
+
+// Simple data class for local values
+class PricingValues {
+  final double basePrice;
+  final double taxPercentage;
+  final double profitMargin;
+  final double finalPrice;
+  final PricingMode mode;
+
+  PricingValues({
+    required this.basePrice,
+    required this.taxPercentage,
+    required this.profitMargin,
+    required this.finalPrice,
+    required this.mode,
+  });
+
+  factory PricingValues.fromPricingState(PricingState state) {
+    return PricingValues(
+      basePrice: state.basePrice,
+      taxPercentage: state.taxPercentage,
+      profitMargin: state.profitMargin,
+      finalPrice: state.finalPrice,
+      mode: state.mode,
+    );
   }
 }

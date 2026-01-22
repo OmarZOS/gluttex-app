@@ -97,10 +97,10 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                                   backgroundColor:
                                       theme.colorScheme.primaryContainer,
                                   child: Image.network(
-                                    (supplier.supplier_image_url ?? ""),
+                                    (supplier.supplierImageUrl ?? ""),
                                     fit: BoxFit.cover,
                                     alignment: Alignment.center,
-                                    key: ValueKey(supplier.supplier_image_url),
+                                    key: ValueKey(supplier.supplierImageUrl),
                                     loadingBuilder:
                                         (context, child, loadingProgress) {
                                       if (loadingProgress == null) return child;
@@ -150,7 +150,7 @@ void showSupplierDetails(BuildContext context, Supplier supplier) {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
-                                        supplier.provider_organisation_name,
+                                        supplier.providerOrganisationName,
                                         style: theme.textTheme.titleMedium
                                             ?.copyWith(
                                           fontWeight: FontWeight.bold,

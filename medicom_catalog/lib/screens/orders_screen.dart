@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
+import 'package:gluttex_event/order_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:intl/intl.dart';
 
 class OrdersScreen extends StatefulWidget {
-  final CartChangeNotifier? cartChangeNotifier;
+  final OrderChangeNotifier? cartChangeNotifier;
   OrdersScreen({Key? key, required this.cartChangeNotifier}) : super(key: key);
 
   @override
@@ -39,7 +40,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     if (widget.cartChangeNotifier != null) {
       await widget.cartChangeNotifier!.fetchOrders(appUserId: userId);
     } else {
-      await Provider.of<CartChangeNotifier>(context, listen: false)
+      await Provider.of<OrderChangeNotifier>(context, listen: false)
           .fetchOrders(appUserId: userId);
     }
 
@@ -56,7 +57,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     if (widget.cartChangeNotifier != null) {
       await widget.cartChangeNotifier!.fetchOrders(appUserId: userId);
     } else {
-      await Provider.of<CartChangeNotifier>(context, listen: false)
+      await Provider.of<OrderChangeNotifier>(context, listen: false)
           .fetchOrders(appUserId: userId);
     }
   }
@@ -80,7 +81,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Consumer<CartChangeNotifier>(
+      body: Consumer<OrderChangeNotifier>(
         builder: (context, cartNotifier, child) {
           // Handle initial loading
           if (_isInitialLoad && cartNotifier.orders.isEmpty) {
@@ -337,12 +338,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 
-  Widget _buildOrderCard(dynamic order, AppLocalizations loc, ThemeData theme,
+  Widget _buildOrderCard(Order order, AppLocalizations loc, ThemeData theme,
       BuildContext context) {
     final dateFormat =
         DateFormat('HH:mm dd-MM-yyyy'); // Example: 05 Oct 2025, 19:02
 
-    final orderDate = DateTime.parse(order.orderedTimestamp.toString());
+    final orderDate = order.placedOrderLastMod;
     // (order.orderedTimestamp != null &&
     //         order.orderedTimestamp != "")
     //     ? dateFormat.format(DateTime.parse(order.orderedTimestamp.toString()))
@@ -372,7 +373,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        loc.orderIdentifierTxt(order.idOrder.toString()),
+                        loc.orderIdentifierTxt(order.idPlacedOrder.toString()),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.onSurface,
@@ -551,7 +552,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 
-  void _showOrderDetails(dynamic order, AppLocalizations loc, ThemeData theme,
+  void _showOrderDetails(Order order, AppLocalizations loc, ThemeData theme,
       BuildContext context) async {
     // Show loading bottom sheet first
     showModalBottomSheet(
@@ -583,7 +584,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     try {
       // Fetch details asynchronously
       await widget.cartChangeNotifier!
-          .fetchOrderDetails(orderId: order.idOrder);
+          .fetchOrderDetails(orderId: order.idPlacedOrder);
 
       // Close the loading sheet
       Navigator.pop(context);
@@ -599,10 +600,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 
-  void _showOrderDetailsSheet(dynamic order, AppLocalizations loc,
+  void _showOrderDetailsSheet(Order order, AppLocalizations loc,
       ThemeData theme, BuildContext context) {
     final detailedOrder =
-        widget.cartChangeNotifier!.getOrderWithDetails(order.idOrder);
+        widget.cartChangeNotifier!.getOrderWithDetails(order.idPlacedOrder);
 
     showModalBottomSheet(
       context: context,
@@ -690,7 +691,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: [
               Text(
-                loc.order_number(order?.idOrder ?? 0),
+                loc.order_number(order?.idPlacedOrder ?? 0),
                 // "${loc.orderFor} #${}",
                 style: theme.textTheme.headlineSmall
                     ?.copyWith(fontWeight: FontWeight.bold),
@@ -818,7 +819,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 
-  void _showDeleteDialog(dynamic order, AppLocalizations loc, ThemeData theme,
+  void _showDeleteDialog(Order order, AppLocalizations loc, ThemeData theme,
       BuildContext context) {
     showDialog(
       context: context,
@@ -830,7 +831,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ),
         ),
         content: Text(
-          'Are you sure you want to delete order #${order.idOrder}? This action cannot be undone.',
+          'Are you sure you want to delete order #${order.idPlacedOrder}? This action cannot be undone.',
           style: theme.textTheme.bodyMedium,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -850,7 +851,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               // Implement delete functionality
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Order #${order.idOrder} deleted'),
+                  content: Text('Order #${order.idPlacedOrder} deleted'),
                   backgroundColor: Colors.green,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
