@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
+import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
+import 'package:gluttex_ui/components/supplier/SupplierUIProvider.dart';
 
 /// 业务操作UI管理器 - 集中管理所有UI元素和配置
 class BusinessOperationsUIManager {
@@ -191,16 +194,82 @@ class BusinessOperationsUIManager {
   }
 
   /// 获取操作副标题
-  static String getOperationSubtitle(
-      BusinessOperation operation, AppLocalizations l10n) {
+
+  static Future<String> getOperationSubtitle(
+      BusinessOperation operation,
+      AppLocalizations l10n,
+      PersonnelNotifier? personnelNotifier,
+      SupplierChangeNotifier supplierNotifier) async {
     final parts = <String>[];
-    if (operation.clientId != null)
-      parts.add('${l10n.client} #${operation.clientId}');
-    if (operation.supplierId != 0)
-      parts.add('${l10n.supplier} #${operation.supplierId}');
-    if (operation.sellerId != 0)
-      parts.add('${l10n.seller} #${operation.sellerId}');
-    return parts.join(' • ');
+
+    // Client
+    if (operation.clientId != null && personnelNotifier != null) {
+      final clientText = await _getClientText(operation.clientId!,
+          operation.operationType ?? 'user', l10n.client, personnelNotifier);
+      if (clientText.isNotEmpty) parts.add(clientText);
+    }
+
+    // Supplier
+    if (operation.supplierId != 0) {
+      final supplierText = await SupplierUIProvider.getSupplierText(
+        operation.supplierId,
+        l10n.supplier,
+        supplierNotifier,
+      );
+      if (supplierText.isNotEmpty) parts.add(supplierText);
+    }
+
+    // Seller
+    if (operation.sellerId != 0 && personnelNotifier != null) {
+      final sellerText = await _getSellerText(
+          operation.sellerId, l10n.seller, personnelNotifier);
+      if (sellerText.isNotEmpty) parts.add(sellerText);
+    }
+
+    return parts.isNotEmpty ? parts.join(' • ') : '';
+  }
+
+  static Future<String> _getClientText(
+    int clientId,
+    String clientType,
+    String clientLabel,
+    PersonnelNotifier personnelNotifier,
+  ) async {
+    try {
+      final client = await personnelNotifier.getCustomerDisplayInfo(
+        customerId: clientId,
+        customerType: clientType,
+        personId: clientId,
+      );
+
+      final clientName = client?.displayName?.trim() ?? '';
+
+      return clientName.isNotEmpty ? '$clientLabel: $clientName' : clientLabel;
+    } catch (e) {
+      debugPrint('Error getting client name: $e');
+      return clientLabel;
+    }
+  }
+
+  static Future<String> _getSellerText(
+    int sellerId,
+    String sellerLabel,
+    PersonnelNotifier personnelNotifier,
+  ) async {
+    try {
+      final customer = await personnelNotifier.getCustomerDisplayInfo(
+        customerId: sellerId,
+        customerType: 'user',
+        personId: null,
+      );
+
+      final sellerName = customer?.displayName?.trim() ?? '';
+
+      return sellerName.isNotEmpty ? '$sellerLabel: $sellerName' : sellerLabel;
+    } catch (e) {
+      debugPrint('Error getting seller name: $e');
+      return sellerLabel;
+    }
   }
 
   /// 格式化日期

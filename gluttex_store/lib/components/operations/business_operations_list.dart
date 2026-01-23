@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
+import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_ui/components/business_operations/BusinessOperationUIElements.dart';
 import 'package:gluttex_ui/components/business_operations/BusinessOperationsUIManager.dart';
+import 'package:provider/provider.dart';
 
 class BusinessOperationsList extends StatelessWidget {
   const BusinessOperationsList({
@@ -135,12 +138,48 @@ class _Header extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                BusinessOperationsUIManager.getOperationSubtitle(
-                    operation, l10n),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+              FutureBuilder<String>(
+                future: BusinessOperationsUIManager.getOperationSubtitle(
+                    operation,
+                    l10n,
+                    context.read<PersonnelNotifier>(),
+                    context.read<SupplierChangeNotifier>()
+                    // Get the notifier from context
+                    ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    // Show loading placeholder
+                    return Text(
+                      '${l10n.loading}...',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    // Fallback to original format on error
+                    // final fallbackText =
+                    //     BusinessOperationsUIManager.getOperationSubtitle(
+                    //   operation, l10n,
+                    //   null, // Pass null to use fallback
+                    // );
+                    return Text(
+                      "",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    );
+                  }
+
+                  // Show the fetched subtitle
+                  return Text(
+                    snapshot.data ?? '',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  );
+                },
               ),
               if (operation.operationDate != null)
                 Padding(

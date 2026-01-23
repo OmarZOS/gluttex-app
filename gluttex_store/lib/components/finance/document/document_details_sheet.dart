@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/business/finance/Customer.dart';
 import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_event/finance_change_notifier.dart';
 import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_ui/components/finance/financial_ui_manager.dart';
+import 'package:gluttex_ui/components/supplier/SupplierUIProvider.dart';
 import 'package:gluttex_ui/screens/payment_form_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -640,10 +644,12 @@ class DocumentDetailsSheet extends StatelessWidget {
                 ),
 
                 // Seller Information
+
                 _buildSellerInfoCard(
                   theme: theme,
                   loc: loc,
-                  isLoading: false, // This is from document, not async
+                  document: document,
+                  context: context, // This is from document, not async
                 ),
               ],
             ),
@@ -659,85 +665,85 @@ class DocumentDetailsSheet extends StatelessWidget {
             ],
 
             // Show customer ID badge
-            if (hasCustomerInfo) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: customer.isUser
-                          ? Colors.blue.withOpacity(0.1)
-                          : Colors.purple.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: customer.isUser
-                            ? Colors.blue.withOpacity(0.3)
-                            : Colors.purple.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          customer.isUser
-                              ? Icons.person_outline_rounded
-                              : Icons.person_pin_rounded,
-                          size: 14,
-                          color: customer.isUser ? Colors.blue : Colors.purple,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          customer.isUser
-                              ? '#${customer.customerId}'
-                              : '#${customer.personId}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color:
-                                customer.isUser ? Colors.blue : Colors.purple,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (customer.isUser && customer.email != null) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.green.withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.email_rounded,
-                            size: 14,
-                            color: Colors.green,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Has Account',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
+            // if (hasCustomerInfo) ...[
+            //   const SizedBox(height: 12),
+            //   Row(
+            //     children: [
+            //       Container(
+            //         padding:
+            //             const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            //         decoration: BoxDecoration(
+            //           color: customer.isUser
+            //               ? Colors.blue.withOpacity(0.1)
+            //               : Colors.purple.withOpacity(0.1),
+            //           borderRadius: BorderRadius.circular(12),
+            //           border: Border.all(
+            //             color: customer.isUser
+            //                 ? Colors.blue.withOpacity(0.3)
+            //                 : Colors.purple.withOpacity(0.3),
+            //             width: 1,
+            //           ),
+            //         ),
+            //         child: Row(
+            //           mainAxisSize: MainAxisSize.min,
+            //           children: [
+            //             Icon(
+            //               customer.isUser
+            //                   ? Icons.person_outline_rounded
+            //                   : Icons.person_pin_rounded,
+            //               size: 14,
+            //               color: customer.isUser ? Colors.blue : Colors.purple,
+            //             ),
+            //             const SizedBox(width: 6),
+            //             Text(
+            //               customer.isUser
+            //                   ? '#${customer.customerId}'
+            //                   : '#${customer.personId}',
+            //               style: theme.textTheme.labelSmall?.copyWith(
+            //                 color:
+            //                     customer.isUser ? Colors.blue : Colors.purple,
+            //                 fontWeight: FontWeight.w600,
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //       if (customer.isUser && customer.email != null) ...[
+            //         const SizedBox(width: 8),
+            //         Container(
+            //           padding: const EdgeInsets.symmetric(
+            //               horizontal: 12, vertical: 6),
+            //           decoration: BoxDecoration(
+            //             color: Colors.green.withOpacity(0.1),
+            //             borderRadius: BorderRadius.circular(12),
+            //             border: Border.all(
+            //               color: Colors.green.withOpacity(0.3),
+            //               width: 1,
+            //             ),
+            //           ),
+            //           child: Row(
+            //             mainAxisSize: MainAxisSize.min,
+            //             children: [
+            //               Icon(
+            //                 Icons.email_rounded,
+            //                 size: 14,
+            //                 color: Colors.green,
+            //               ),
+            //               const SizedBox(width: 6),
+            //               Text(
+            //                 'Has Account',
+            //                 style: theme.textTheme.labelSmall?.copyWith(
+            //                   color: Colors.green,
+            //                   fontWeight: FontWeight.w600,
+            //                 ),
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       ],
+            //     ],
+            //   ),
+            // ],
 
             // Error state
             if (snapshot.hasError) ...[
@@ -1118,14 +1124,119 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildSellerInfoCard({
-    required ThemeData theme,
-    required AppLocalizations loc,
-    required bool isLoading,
-  }) {
+  Widget _buildSellerInfoCard(
+      {required ThemeData theme,
+      required AppLocalizations loc,
+      required FinancialDocument document,
+      required BuildContext context}) {
     final hasSeller = document.sellerId != null && document.sellerId! > 0;
     final color = hasSeller ? Colors.blue : Colors.grey;
 
+    if (!hasSeller) {
+      return _buildNoSellerCard(theme, loc, color);
+    }
+
+    return FutureBuilder<AppUser?>(
+      future: context
+          .read<AppUserNotifier>()
+          .fetchUserPassively(document.sellerId.toString()),
+      builder: (context, snapshot) {
+        final isLoading = snapshot.connectionState == ConnectionState.waiting;
+
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                color.withOpacity(0.12),
+                color.withOpacity(0.04),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: color.withOpacity(0.2),
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.assignment_ind_rounded,
+                      size: 18,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      loc.seller.toUpperCase(),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.8,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (isLoading)
+                Container(
+                  width: double.infinity,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                )
+              else if (snapshot.hasData && snapshot.data != null)
+                Text(
+                  _getUserDisplayName(snapshot.data!),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                )
+              else
+                Text(
+                  loc.notAssigned,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNoSellerCard(
+      ThemeData theme, AppLocalizations loc, Color color) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1174,36 +1285,36 @@ class DocumentDetailsSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          if (isLoading)
-            Container(
-              width: double.infinity,
-              height: 24,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Center(
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: color,
-                  ),
-                ),
-              ),
-            )
-          else
-            Text(
-              hasSeller ? '#${document.sellerId}' : loc.notAssigned,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
+          Text(
+            loc.notAssigned,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
             ),
+          ),
         ],
       ),
     );
+  }
+
+  String _getUserDisplayName(AppUser user) {
+    // Get the best display name
+    final firstName = user.personFirstName?.trim();
+    final lastName = user.personLastName?.trim();
+    final userName = user.app_user_name?.trim();
+
+    if (firstName != null && firstName.isNotEmpty) {
+      if (lastName != null && lastName.isNotEmpty) {
+        return '$firstName $lastName';
+      }
+      return firstName;
+    }
+
+    if (userName != null && userName.isNotEmpty) {
+      return userName;
+    }
+
+    return user.app_user_name?.trim() ?? 'User #${user.id_app_user}';
   }
 
   Widget _buildAddressCard({
@@ -1340,33 +1451,43 @@ class DocumentDetailsSheet extends StatelessWidget {
             ),
 
             // Source Type
-            if (document.sourceType != null)
-              _buildGridItem(
-                theme: theme,
-                icon: Icons.source_rounded,
-                label: loc.sourceType,
-                value: FinancialUIManager.getSourceTypeDisplay(
-                    document.sourceType, loc),
-                color: Colors.pink,
-              )
-            else
-              _buildGridItem(
-                theme: theme,
-                icon: Icons.source_rounded,
-                label: loc.sourceType,
-                value: loc.unknown,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            // if (document.sourceType != null)
+            //   _buildGridItem(
+            //     theme: theme,
+            //     icon: Icons.source_rounded,
+            //     label: loc.sourceType,
+            //     value: FinancialUIManager.getSourceTypeDisplay(
+            //         document.sourceType, loc),
+            //     color: Colors.pink,
+            //   )
+            // else
+            //   _buildGridItem(
+            //     theme: theme,
+            //     icon: Icons.source_rounded,
+            //     label: loc.sourceType,
+            //     value: loc.unknown,
+            //     color: theme.colorScheme.onSurfaceVariant,
+            //   ),
 
             // Supplier (if exists, takes full width)
             if (document.supplierId != null && document.supplierId! > 0)
-              _buildGridItem(
-                theme: theme,
-                icon: Icons.business_rounded,
-                label: loc.supplier,
-                value: '#${document.supplierId}',
-                color: Colors.deepOrange,
-                isFullWidth: true,
+              FutureBuilder<String>(
+                future: SupplierUIProvider.getSupplierText(
+                  document.supplierId,
+                  loc.supplier,
+                  context.read<SupplierChangeNotifier>(),
+                ),
+                builder: (context, snapshot) {
+                  return _buildGridItem(
+                    theme: theme,
+                    icon: Icons.business_rounded,
+                    label: loc.supplier,
+                    value:
+                        snapshot.hasData ? snapshot.data! : loc.loading + '...',
+                    color: Colors.deepOrange,
+                    isFullWidth: true,
+                  );
+                },
               ),
           ],
         ),

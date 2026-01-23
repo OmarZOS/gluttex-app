@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 
 /// 供应商UI提供者 - 基于实际供应商分类，仅使用ColorScheme颜色
 class SupplierUIProvider {
@@ -432,6 +433,24 @@ class SupplierUIProvider {
         ],
       ),
     );
+  }
+
+  static Future<String> getSupplierText(int supplierId, String supplierLabel,
+      SupplierChangeNotifier supplierNotifier) async {
+    try {
+      final supplier = await supplierNotifier.getSupplierById(
+        supplierId,
+        forceRefresh: false,
+        notify: false,
+      );
+
+      final supplierName = supplier?.providerName.trim() ?? '';
+
+      return supplierName.isNotEmpty ? '$supplierName' : supplierLabel;
+    } catch (e) {
+      debugPrint('Error getting supplier name: $e');
+      return supplierLabel;
+    }
   }
 
   // ==================== 私有辅助方法 ====================
