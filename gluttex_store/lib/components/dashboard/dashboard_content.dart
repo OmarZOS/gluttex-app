@@ -263,6 +263,15 @@ class DashboardContentState extends State<DashboardContent> {
       return;
     }
 
+    if (type == DashboardScreenType.services) {
+      Navigator.pushNamed(
+        context,
+        AppRoutes.serviceForm,
+      );
+
+      return;
+    }
+
     final localizations = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final messages = {

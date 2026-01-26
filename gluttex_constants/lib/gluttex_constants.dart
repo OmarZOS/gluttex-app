@@ -377,6 +377,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String supplierManage = '/manage';
   static const String storeManage = '/store';
+  static const String serviceForm = '/service/form';
 }
 
 class RuleStates {

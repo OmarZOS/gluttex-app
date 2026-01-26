@@ -2609,10 +2609,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get finalPrice => 'السعر النهائي';
 
   @override
-  String get totalCost => 'التكلفة الإجمالية للتوصيل';
+  String get totalCost => 'التكلفة الإجمالية';
 
   @override
-  String get discountApplied => 'تم تطبيق الخصم من السعر الأساسي';
+  String get discountApplied => 'خصم مطبق';
 
   @override
   String get resourceRequirements => 'متطلبات الموارد';
@@ -3908,7 +3908,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get backToHome => 'العودة للرئيسية';
 
   @override
-  String get guestCustomer => 'عميل زائر';
+  String get guestCustomer => 'زبون ضيف';
 
   @override
   String get orderItems => 'عناصر الطلب';
@@ -5155,4 +5155,166 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noMoreDocuments => 'لا توجد مستندات إضافية';
+
+  @override
+  String get editService => 'تعديل الخدمة';
+
+  @override
+  String get createService => 'إنشاء الخدمة';
+
+  @override
+  String get serviceName => 'اسم الخدمة';
+
+  @override
+  String get enterServiceName => 'أدخل اسم الخدمة';
+
+  @override
+  String get serviceNameRequired => 'اسم الخدمة مطلوب';
+
+  @override
+  String get description => 'الوصف';
+
+  @override
+  String get enterDescription => 'أدخل وصف الخدمة';
+
+  @override
+  String get categoryId => 'معرف الفئة';
+
+  @override
+  String get enterCategoryId => 'أدخل معرف الفئة';
+
+  @override
+  String get providerId => 'معرف المزود';
+
+  @override
+  String get enterProviderId => 'أدخل معرف المزود';
+
+  @override
+  String get durationMinutes => 'المدة (دقائق)';
+
+  @override
+  String get enterDuration => 'أدخل المدة بالدقائق';
+
+  @override
+  String get durationRequired => 'المدة مطلوبة';
+
+  @override
+  String get durationPositive => 'يجب أن تكون المدة موجبة';
+
+  @override
+  String get enterBasePrice => 'أدخل السعر الأساسي';
+
+  @override
+  String get basePriceRequired => 'السعر الأساسي مطلوب';
+
+  @override
+  String get pricePositive => 'يجب أن يكون السعر موجباً';
+
+  @override
+  String get enterFinalPrice => 'أدخل السعر النهائي';
+
+  @override
+  String get finalPriceRequired => 'السعر النهائي مطلوب';
+
+  @override
+  String get pricingConfiguration => 'تكوين التسعير';
+
+  @override
+  String get ageGroup => 'الفئة العمرية';
+
+  @override
+  String get enterAgeGroup => 'مثال: بالغ، طفل';
+
+  @override
+  String get sampleType => 'نوع العينة';
+
+  @override
+  String get enterSampleType => 'مثال: دم، بول';
+
+  @override
+  String get specialistConsultation => 'استشارة متخصص';
+
+  @override
+  String get governmentFunded => 'ممول من الحكومة';
+
+  @override
+  String get consultationIncluded => 'الاستشارة مشمولة';
+
+  @override
+  String get digitalImaging => 'التصوير الرقمي';
+
+  @override
+  String get materialOptions => 'خيارات المواد';
+
+  @override
+  String get addMaterial => 'إضافة مادة';
+
+  @override
+  String get enterMaterial => 'مثال: ذهب، فضة';
+
+  @override
+  String get includes => 'يشمل';
+
+  @override
+  String get addInclude => 'إضافة شامل';
+
+  @override
+  String get enterInclude => 'مثال: استشارة مجانية';
+
+  @override
+  String get addResource => 'إضافة مورد';
+
+  @override
+  String get noResourcesAdded => 'لم تتم إضافة أي موارد بعد';
+
+  @override
+  String get addStaff => 'إضافة موظف';
+
+  @override
+  String get noStaffAdded => 'لم تتم إضافة أي موظفين بعد';
+
+  @override
+  String get serviceUpdated => 'تم تحديث الخدمة بنجاح';
+
+  @override
+  String get serviceCreated => 'تم إنشاء الخدمة بنجاح';
+
+  @override
+  String get updateService => 'تحديث الخدمة';
+
+  @override
+  String get noDiscount => 'لا يوجد خصم';
+
+  @override
+  String get minutes => 'دقيقة';
+
+  @override
+  String get scrollToTop => 'التمرير إلى الأعلى';
+
+  @override
+  String get enterPrice => 'أدخل السعر';
+
+  @override
+  String get priceRequired => 'السعر مطلوب';
+
+  @override
+  String get invalidPrice => 'يرجى إدخال سعر صالح';
+
+  @override
+  String get typeAndPressEnter => 'اكتب واضغط على Enter...';
+
+  @override
+  String get finalPriceLabel => 'السعر النهائي';
+
+  @override
+  String get walkInCustomer => 'زبون عابر';
+
+  @override
+  String get emptyCustomer => 'اختر زبون';
+
+  @override
+  String get guestEmail => 'ضيف@مثال.com';
+
+  @override
+  String get guestLocation => 'موقع المتجر';
 }

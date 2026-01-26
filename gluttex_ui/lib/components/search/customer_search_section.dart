@@ -9,7 +9,7 @@ import 'package:gluttex_ui/components/search/CustomerSearchDialog.dart';
 import 'package:gluttex_ui/utils/qr_utils.dart';
 import 'package:provider/provider.dart';
 
-class CustomerSection extends StatelessWidget {
+class CustomerSection extends StatefulWidget {
   final AppUser? selectedCustomer;
   final Person? selectedPerson;
   final ValueChanged<AppUser?> onCustomerChanged;
@@ -17,6 +17,8 @@ class CustomerSection extends StatelessWidget {
   final String? supplierId;
   final bool showPersonsAsUsers;
   final VoidCallback? onQRScanned;
+  final AppUser? defaultCustomer; // Default customer to show initially
+  final bool clearable; // Whether the default can be cleared
 
   const CustomerSection({
     super.key,
@@ -27,7 +29,33 @@ class CustomerSection extends StatelessWidget {
     this.supplierId,
     this.showPersonsAsUsers = true,
     this.onQRScanned,
+    this.defaultCustomer, // Provide a default customer
+    this.clearable = true, // Default can be changed/cleared
   });
+
+  @override
+  State<CustomerSection> createState() => _CustomerSectionState();
+}
+
+class _CustomerSectionState extends State<CustomerSection> {
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      // Initialize with default customer if none is selected
+      if (widget.selectedCustomer == null &&
+          widget.selectedPerson == null &&
+          widget.defaultCustomer != null) {
+        // Use a post-frame callback to ensure UI is ready
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          widget.onCustomerChanged(widget.defaultCustomer);
+        });
+      }
+      _initialized = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,31 +63,19 @@ class CustomerSection extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
 
     // Determine which type of customer is selected
-    final hasCustomer = selectedCustomer != null;
-    final hasPerson = selectedPerson != null;
+    final hasCustomer = widget.selectedCustomer != null;
+    final hasPerson = widget.selectedPerson != null;
     final hasAnySelection = hasCustomer || hasPerson;
+
+    // Check if this is the default customer
+    final isDefaultCustomer = widget.selectedCustomer?.id_app_user ==
+        widget.defaultCustomer?.id_app_user;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row(
-          //   children: [
-          //     Icon(
-          //       Icons.person_outline,
-          //       color: theme.colorScheme.primary,
-          //       size: 20,
-          //     ),
-          //     const SizedBox(width: 8),
-          //     Text(
-          //       loc.customer,
-          //       style: theme.textTheme.titleMedium?.copyWith(
-          //         fontWeight: FontWeight.w600,
-          //       ),
-          //     ),
-          //   ],
-          // ),
           const SizedBox(height: 12),
 
           // Customer Selection Area with QR button
@@ -102,7 +118,7 @@ class CustomerSection extends StatelessWidget {
                       child: Row(
                         children: [
                           Icon(
-                            Icons.search,
+                            hasAnySelection ? Icons.person : Icons.search,
                             color: theme.colorScheme.onSurfaceVariant,
                             size: 20,
                           ),
@@ -169,7 +185,7 @@ class CustomerSection extends StatelessWidget {
           // Selected Customer/Person Card
           if (hasAnySelection) ...[
             const SizedBox(height: 12),
-            _buildCustomerInfoCard(context, theme, loc),
+            _buildCustomerInfoCard(context, theme, loc, isDefaultCustomer),
           ],
         ],
       ),
@@ -195,14 +211,6 @@ class CustomerSection extends StatelessWidget {
                 color: theme.colorScheme.primary,
                 size: 24,
               ),
-              // const SizedBox(height: 4),
-              // Text(
-              //   'QR',
-              //   style: theme.textTheme.labelSmall?.copyWith(
-              //     color: theme.colorScheme.primary,
-              //     fontWeight: FontWeight.w600,
-              //   ),
-              // ),
             ],
           ),
         ),
@@ -211,10 +219,10 @@ class CustomerSection extends StatelessWidget {
   }
 
   String _getSelectedCustomerName() {
-    if (selectedCustomer != null) {
-      return '${selectedCustomer!.personFirstName} ${selectedCustomer!.personLastName}';
-    } else if (selectedPerson != null) {
-      return selectedPerson!.fullName;
+    if (widget.selectedCustomer != null) {
+      return '${widget.selectedCustomer!.personFirstName} ${widget.selectedCustomer!.personLastName}';
+    } else if (widget.selectedPerson != null) {
+      return widget.selectedPerson!.fullName;
     }
     return '';
   }
@@ -223,11 +231,12 @@ class CustomerSection extends StatelessWidget {
     BuildContext context,
     ThemeData theme,
     AppLocalizations loc,
+    bool isDefaultCustomer,
   ) {
-    final isPerson = selectedPerson != null;
+    final isPerson = widget.selectedPerson != null;
     final name = isPerson
-        ? selectedPerson!.fullName
-        : '${selectedCustomer!.personFirstName} ${selectedCustomer!.personLastName}';
+        ? widget.selectedPerson!.fullName
+        : '${widget.selectedCustomer!.personFirstName} ${widget.selectedCustomer!.personLastName}';
 
     return Card(
       elevation: 0,
@@ -236,32 +245,66 @@ class CustomerSection extends StatelessWidget {
         side: BorderSide(
           color: isPerson
               ? Colors.orange.withOpacity(0.2)
-              : theme.colorScheme.outline.withOpacity(0.1),
+              : isDefaultCustomer
+                  ? Colors.green.withOpacity(0.2) // Different color for default
+                  : theme.colorScheme.outline.withOpacity(0.1),
         ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: isPerson
-                      ? [Colors.orange, Colors.deepOrange]
-                      : [
-                          theme.colorScheme.primary,
-                          theme.colorScheme.secondary,
-                        ],
+            // Avatar with default indicator
+            Stack(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: isPerson
+                          ? [Colors.orange, Colors.deepOrange]
+                          : isDefaultCustomer
+                              ? [
+                                  Colors.green,
+                                  Colors.greenAccent
+                                ] // Different for default
+                              : [
+                                  theme.colorScheme.primary,
+                                  theme.colorScheme.secondary,
+                                ],
+                    ),
+                  ),
+                  child: Icon(
+                    isPerson ? Icons.person_outline : Icons.person,
+                    color: theme.colorScheme.onPrimary,
+                    size: 20,
+                  ),
                 ),
-              ),
-              child: Icon(
-                isPerson ? Icons.person_outline : Icons.person,
-                color: theme.colorScheme.onPrimary,
-                size: 20,
-              ),
+                if (isDefaultCustomer)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: theme.colorScheme.surface,
+                          width: 2,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        size: 8,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -271,11 +314,39 @@ class CustomerSection extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          name,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Row(
+                          children: [
+                            Text(
+                              name,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (isDefaultCustomer)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 6),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.green.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Default',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       if (isPerson)
@@ -301,9 +372,9 @@ class CustomerSection extends StatelessWidget {
                         ),
                     ],
                   ),
-                  if (isPerson && selectedPerson!.age != null)
+                  if (isPerson && widget.selectedPerson!.age != null)
                     Text(
-                      '${selectedPerson!.age} years',
+                      '${widget.selectedPerson!.age} years',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -311,19 +382,21 @@ class CustomerSection extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton(
-              icon: Icon(
-                Icons.edit,
-                color: isPerson ? Colors.orange : theme.colorScheme.primary,
-                size: 20,
+            // Only show clear button if customer is clearable
+            if (widget.clearable || !isDefaultCustomer)
+              IconButton(
+                icon: Icon(
+                  Icons.edit,
+                  color: isPerson ? Colors.orange : theme.colorScheme.primary,
+                  size: 20,
+                ),
+                onPressed: () {
+                  // Clear both selections
+                  widget.onCustomerChanged(null);
+                  widget.onPersonChanged(null);
+                },
+                tooltip: loc.changeCustomer,
               ),
-              onPressed: () {
-                // Clear both selections
-                onCustomerChanged(null);
-                onPersonChanged(null);
-              },
-              tooltip: loc.changeCustomer,
-            ),
           ],
         ),
       ),
@@ -331,9 +404,9 @@ class CustomerSection extends StatelessWidget {
   }
 
   Future<void> _handleQRCodeOption(BuildContext context) async {
-    if (onQRScanned != null) {
+    if (widget.onQRScanned != null) {
       // If callback is provided, use it
-      onQRScanned!();
+      widget.onQRScanned!();
       return;
     }
 
@@ -368,8 +441,8 @@ class CustomerSection extends StatelessWidget {
       }
 
       // Select the user
-      onCustomerChanged(user);
-      onPersonChanged(null);
+      widget.onCustomerChanged(user);
+      widget.onPersonChanged(null);
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -398,14 +471,14 @@ class CustomerSection extends StatelessWidget {
       context: context,
       builder: (context) => CustomerSearchDialog(
         onCustomerSelected: (customer) {
-          onCustomerChanged(customer);
+          widget.onCustomerChanged(customer);
         },
         onPersonSelected: (person) {
-          onPersonChanged(person);
+          widget.onPersonChanged(person);
         },
-        supplierId: int.tryParse(supplierId ?? "0"),
-        currentSelectedCustomer: selectedCustomer,
-        showPersonsAsUsers: showPersonsAsUsers,
+        supplierId: int.tryParse(widget.supplierId ?? "0"),
+        currentSelectedCustomer: widget.selectedCustomer,
+        showPersonsAsUsers: widget.showPersonsAsUsers,
       ),
     );
   }

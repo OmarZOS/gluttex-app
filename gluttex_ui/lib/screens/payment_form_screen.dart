@@ -139,8 +139,17 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
                                 _buildPaymentTypeSection(
                                     context, theme, loc, displayTypes, doc),
 
-                                const SizedBox(height: 32),
-                                _buildDepositDetails(context, theme, loc, doc),
+                                // const SizedBox(height: 32),
+
+                                // // Only show deposit details immediately if there's already a deposit
+                                if (!hasExistingDeposit &&
+                                    displayTypes.length != 1)
+                                  _buildDetailsSection(
+                                      context, theme, loc, doc),
+                                // if (_selectedPaymentType.isNotEmpty)
+                                //   _buildDetailsSection(
+                                //       context, theme, loc, doc),
+
                                 const SizedBox(height: 32),
 
                                 // Notes field
@@ -256,8 +265,8 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
 
   Widget _buildDocumentSummary(BuildContext context, ThemeData theme,
       AppLocalizations loc, FinancialDocument doc, bool hasExistingDeposit) {
-    final documentColor =
-        FinancialUIManager.getDocumentColor(doc.documentType, theme);
+    // final documentColor =
+    //     FinancialUIManager.getDocumentColor(doc.documentType, theme);
     final paymentStatusColor =
         FinancialUIManager.getPaymentStatusColor(doc.paymentStatus, theme);
 
@@ -595,7 +604,8 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
               );
             }).toList(),
           ),
-        ] else if (displayTypes.length == 1) ...[
+        ] else if (displayTypes.length == 1 ||
+            _selectedPaymentType == "deposit") ...[
           _buildDetailsWidget(displayTypes.first.id, context, theme, loc, doc),
         ],
       ],
@@ -1396,7 +1406,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
                   borderRadius: BorderRadius.circular(20),
                   child: InkWell(
                     onTap: () {
-                      Navigator.pop(context);
+                      // Navigator.pop(context);
                       Navigator.pop(context, true);
                     },
                     borderRadius: BorderRadius.circular(20),

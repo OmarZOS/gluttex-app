@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
@@ -63,7 +64,7 @@ class ServicesScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return FloatingActionButton.extended(
-      onPressed: _handleAddService,
+      onPressed: () => _handleAddService(context),
       icon: const Icon(Icons.add),
       label: Text(localizations?.addService ?? 'Add Service'),
       backgroundColor: colorScheme.primary,
@@ -75,8 +76,8 @@ class ServicesScreen extends StatelessWidget {
     );
   }
 
-  void _handleAddService() {
-    // TODO: Implement add service logic
+  void _handleAddService(BuildContext context) {
+    Navigator.pushNamed(context, AppRoutes.serviceForm);
   }
 
   SliverAppBar _buildAppBar(BuildContext context, AppLocalizations? loc) {

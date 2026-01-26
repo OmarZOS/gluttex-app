@@ -19,6 +19,7 @@ class AppUser {
   final int personDetailsId;
   final String personFirstName;
   final String personLastName;
+  final String app_user_email;
   final String personBirthDate;
   final String personGender;
   final String personNationality;
@@ -52,6 +53,7 @@ class AppUser {
     required this.personFirstName,
     required this.personLastName,
     required this.personBirthDate,
+    required this.app_user_email,
     required this.personGender,
     required this.personNationality,
     required this.idBloodType,
@@ -82,6 +84,7 @@ class AppUser {
       int? personDetailsId,
       String? personLastName,
       String? personBirthDate,
+      String? app_user_email,
       String? personGender,
       String? personNationality,
       int? idBloodType,
@@ -104,6 +107,7 @@ class AppUser {
         app_user_image_url: app_user_image_url ?? this.app_user_image_url,
         personFirstName: personFirstName ?? this.personFirstName,
         id_app_user: id_app_user ?? this.id_app_user,
+        app_user_email: app_user_email ?? this.app_user_email,
         app_user_person_id: app_user_person_id ?? this.app_user_person_id,
         app_user_type_id: app_user_type_id ?? this.app_user_type_id,
         app_user_name: app_user_name ?? this.app_user_name,
@@ -220,7 +224,8 @@ class AppUser {
         addressPostalCode: addressPostalCode ?? "",
         addressCountry: addressCountry ?? "",
         bloodTypeDesc: bloodTypeDesc ?? "",
-        privileges: null);
+        privileges: null,
+        app_user_email: json['app_user_email'] ?? '');
   }
 
   // Parse multiple users from JSON list
@@ -256,38 +261,39 @@ class AppUser {
           personJson['person_details'] as Map<String, dynamic>? ?? {};
 
       return AppUser(
-        id_app_user: _parseInt(firstUserData['id_app_user']),
-        app_user_person_id: _parseInt(firstUserData['app_user_person_id']),
-        app_user_type_id: _parseInt(firstUserData['app_user_type_id']),
-        app_user_name: userName,
-        app_user_password:
-            _parseStringNullable(firstUserData['app_user_password']),
-        app_user_preferences:
-            _parseString(firstUserData['app_user_preferences']),
-        app_user_type_desc:
-            _getRoleFromTypeId(_parseInt(firstUserData['app_user_type_id'])),
-        app_user_image_url: _parseString(firstUserData['app_user_image_url']),
-        idPerson: _parseInt(personJson['id_person']),
-        personDetailsId: _parseInt(personJson['person_details_id']),
-        personFirstName: _parseString(personDetailsJson['person_first_name']),
-        personLastName: _parseString(personDetailsJson['person_last_name']),
-        personBirthDate: _parseString(personDetailsJson['person_birth_date']),
-        personGender: _parseString(personDetailsJson['person_gender']),
-        personNationality:
-            _parseString(personDetailsJson['person_nationality']),
-        idBloodType: _parseIntNullable(personJson['person_blood_type_id']) ?? 0,
-        bloodTypeDesc: '',
-        idLocation: _parseInt(personJson['person_location_id']),
-        locationLatitude: 0.0,
-        locationLongitude: 0.0,
-        locationName: '',
-        locationAddressId: 0,
-        addressStreet: '',
-        addressCity: '',
-        addressPostalCode: '',
-        addressCountry: '',
-        privileges: null,
-      );
+          id_app_user: _parseInt(firstUserData['id_app_user']),
+          app_user_person_id: _parseInt(firstUserData['app_user_person_id']),
+          app_user_type_id: _parseInt(firstUserData['app_user_type_id']),
+          app_user_name: userName,
+          app_user_password:
+              _parseStringNullable(firstUserData['app_user_password']),
+          app_user_preferences:
+              _parseString(firstUserData['app_user_preferences']),
+          app_user_type_desc:
+              _getRoleFromTypeId(_parseInt(firstUserData['app_user_type_id'])),
+          app_user_image_url: _parseString(firstUserData['app_user_image_url']),
+          idPerson: _parseInt(personJson['id_person']),
+          personDetailsId: _parseInt(personJson['person_details_id']),
+          personFirstName: _parseString(personDetailsJson['person_first_name']),
+          personLastName: _parseString(personDetailsJson['person_last_name']),
+          personBirthDate: _parseString(personDetailsJson['person_birth_date']),
+          personGender: _parseString(personDetailsJson['person_gender']),
+          personNationality:
+              _parseString(personDetailsJson['person_nationality']),
+          idBloodType:
+              _parseIntNullable(personJson['person_blood_type_id']) ?? 0,
+          bloodTypeDesc: '',
+          idLocation: _parseInt(personJson['person_location_id']),
+          locationLatitude: 0.0,
+          locationLongitude: 0.0,
+          locationName: '',
+          locationAddressId: 0,
+          addressStreet: '',
+          addressCity: '',
+          addressPostalCode: '',
+          addressCountry: '',
+          privileges: null,
+          app_user_email: firstUserData['app_user_email']);
     }).toList();
   }
 
@@ -411,7 +417,8 @@ class AppUser {
         addressPostalCode: "",
         addressCountry: "",
         bloodTypeDesc: "",
-        privileges: null);
+        privileges: null,
+        app_user_email: email);
   }
 
   factory AppUser.empty() {
@@ -443,7 +450,8 @@ class AppUser {
         addressPostalCode: "",
         addressCountry: "",
         bloodTypeDesc: '',
-        privileges: null);
+        privileges: null,
+        app_user_email: '');
   }
 
   Map<String, dynamic> toJson() {
@@ -462,7 +470,8 @@ class AppUser {
         "app_user_person_id": personDetailsId,
         "app_user_preferences": app_user_preferences,
         "app_user_image_url": app_user_image_url,
-        "app_user_type_id": app_user_type_id
+        "app_user_type_id": app_user_type_id,
+        "app_user_email": app_user_email,
       },
       "person_record": {
         "id_person": app_user_person_id,

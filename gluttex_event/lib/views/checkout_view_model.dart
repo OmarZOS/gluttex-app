@@ -184,10 +184,21 @@ class CheckoutViewModel extends ChangeNotifier {
     // Determine customer reference
     int? customerRef;
     int? clientUserId;
+
+    // IMPORTANT: Only set customerRef if we have a valid user (id != 0)
     if (_selectedCustomer != null) {
-      customerRef = _selectedCustomer!.idPerson;
-      clientUserId = _selectedCustomer!.id_app_user;
+      // Check if this is a real user (id != 0) or guest (id == 0)
+      if (_selectedCustomer!.id_app_user != 0) {
+        // Real user - include their data
+        customerRef = _selectedCustomer!.idPerson;
+        clientUserId = _selectedCustomer!.id_app_user;
+      } else {
+        // Guest user (id == 0) - don't send customer reference
+        // Still send clientUserId as 0 to indicate guest
+        clientUserId = 0;
+      }
     } else if (_selectedPerson != null) {
+      // Person is always a real record (not a guest)
       customerRef = _selectedPerson!.id_person;
     }
 
@@ -220,7 +231,6 @@ class CheckoutViewModel extends ChangeNotifier {
         "unit_price": _applyVAT
             ? ((cartItem.unitPrice ?? 0) * (1 - vatRate))
             : (cartItem.unitPrice ?? 0.0),
-        // Apply VAT to product items if invoice
         "applied_vat": _applyVAT ? vatRate * 100 : 0.0, // Convert to percentage
       });
     }
@@ -247,8 +257,8 @@ class CheckoutViewModel extends ChangeNotifier {
       "cart_id": 0,
       "cart_product_provider_id": providerId,
       "cart_selling_user": sellingUserId,
-      "cart_person_ref": customerRef,
-      "cart_client_user": clientUserId,
+      "cart_person_ref": customerRef, // Will be null for guests
+      "cart_client_user": clientUserId ?? 0, // 0 for guests
       "cart_status": "PENDING",
       "cart_total_amount": totalAmount,
       "cart_vat_amount": vatAmount,
@@ -278,10 +288,11 @@ class CheckoutViewModel extends ChangeNotifier {
     }
     apiCart["cart_parameters"] = parameters;
 
-    // Build client data from selected customer
+    // Build client data - ONLY for real users (id != 0)
     final Map<String, dynamic> client = {};
 
-    if (_selectedCustomer != null) {
+    if (_selectedCustomer != null && _selectedCustomer!.id_app_user != 0) {
+      // Only send client data for real users, not guests
       final customer = _selectedCustomer!;
       client.addAll({
         "id_person": customer.idPerson,
@@ -295,6 +306,7 @@ class CheckoutViewModel extends ChangeNotifier {
         "id_blood_type": 0,
       });
     } else if (_selectedPerson != null) {
+      // Person is always a real record
       final person = _selectedPerson!;
       final details = person.person_details;
       client.addAll({
@@ -312,14 +324,24 @@ class CheckoutViewModel extends ChangeNotifier {
       });
     }
 
+    // If client is empty (guest or no customer), send empty object or omit it
+    // depending on your API requirements
     Map<String, dynamic> data = {
       "api_ordered_items": orderedItems,
       "api_provided_services": providedServices,
       "api_cart": apiCart,
-      "client": client,
     };
 
-    if (deliveryType != "pickup") data["delivery"] = deliveryData?.toJson();
+    // Only add client data if we have a real customer
+    if (client.isNotEmpty) {
+      data["client"] = client;
+    }
+
+    // Add delivery data if needed
+    if (deliveryType != "pickup") {
+      data["delivery"] = deliveryData?.toJson();
+    }
+
     return data;
   }
 
@@ -628,14 +650,35 @@ class CheckoutViewModel extends ChangeNotifier {
   }
 
   // Helper method to get customer name for display
+  // Helper method to get customer name for display
   String getCustomerName() {
     if (_selectedCustomer != null) {
       final customer = _selectedCustomer!;
+      if (customer.id_app_user == 0) {
+        // Guest user
+        return 'Guest';
+      }
       return '${customer.personFirstName} ${customer.personLastName}'.trim();
     } else if (_selectedPerson != null) {
       return _selectedPerson!.fullName;
     }
-    return 'Guest';
+    return 'No customer selected';
+  }
+
+// Helper method to check if current customer is a guest
+  bool get isGuestCustomer {
+    if (_selectedCustomer != null) {
+      return _selectedCustomer!.id_app_user == 0;
+    }
+    return false; // Person is never a guest
+  }
+
+// Helper method to check if we have a real customer
+  bool get hasRealCustomer {
+    if (_selectedCustomer != null) {
+      return _selectedCustomer!.id_app_user != 0;
+    }
+    return _selectedPerson != null; // Person is always real
   }
 
   // Helper method to calculate totals
@@ -658,6 +701,7 @@ class CheckoutViewModel extends ChangeNotifier {
   }
 
   // Helper method to check if checkout can proceed
+  // Helper method to check if checkout can proceed
   bool canCheckout(CartChangeNotifier cartNotifier) {
     // For deposit, ensure deposit amount is valid
     if (_paymentType == 'deposit') {
@@ -667,11 +711,20 @@ class CheckoutViewModel extends ChangeNotifier {
       }
     }
 
-    return cartNotifier.cart.isNotEmpty &&
-        (_selectedCustomer != null || _selectedPerson != null);
-  }
+    // Allow checkout even with guest users (id == 0)
+    // The cart must have items
+    return cartNotifier.cart.isNotEmpty;
 
-  // Helper to get checkout summary
+    // If you want to require SOME customer (even guest), use:
+    // return cartNotifier.cart.isNotEmpty &&
+    //        (_selectedCustomer != null || _selectedPerson != null);
+
+    // If you want to require REAL customer (not guest), use:
+    // return cartNotifier.cart.isNotEmpty &&
+    //        ((_selectedCustomer != null && _selectedCustomer!.id_app_user != 0) ||
+    //         _selectedPerson != null);
+  } // Helper to get checkout summary
+
   Map<String, dynamic> getCheckoutSummary(CartChangeNotifier cartNotifier) {
     final totals = calculateTotals(cartNotifier);
 

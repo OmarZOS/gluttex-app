@@ -1,65 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_event/views/finance_view_model.dart';
-import 'package:provider/provider.dart';
 
-class DateFilterSelector extends StatelessWidget {
-  const DateFilterSelector({super.key});
+class DateFilterSelector extends StatefulWidget {
+  final String selectedFilter;
+  final ValueChanged<String> onFilterChanged;
+
+  const DateFilterSelector({
+    super.key,
+    required this.selectedFilter,
+    required this.onFilterChanged,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final viewModel = context.watch<FinanceViewModel>();
-
-    // Get the current date filter from the business filter or use default
-    final currentDateFilter = viewModel.businessFilter.dateRangeType ?? 'today';
-
-    return _DateFilterList(
-      filters: [
-        DateFilter('today', localizations.today),
-        DateFilter('week', localizations.thisWeek),
-        DateFilter('month', localizations.thisMonth),
-        DateFilter('quarter', localizations.thisQuarter),
-        DateFilter('year', localizations.thisYear),
-        DateFilter('all', localizations.allTime),
-      ],
-      selectedFilter: currentDateFilter,
-      onFilterSelected: (filter) => viewModel.selectDateFilter(filter),
-    );
-  }
+  State<DateFilterSelector> createState() => _DateFilterSelectorState();
 }
 
-class _DateFilterList extends StatelessWidget {
-  final List<DateFilter> filters;
-  final String selectedFilter;
-  final ValueChanged<String> onFilterSelected;
-
-  const _DateFilterList({
-    required this.filters,
-    required this.selectedFilter,
-    required this.onFilterSelected,
-  });
+class _DateFilterSelectorState extends State<DateFilterSelector> {
+  final List<Map<String, dynamic>> _filters = [
+    {'value': 'today', 'label': 'Today'},
+    {'value': 'week', 'label': 'This Week'},
+    {'value': 'month', 'label': 'This Month'},
+    {'value': 'quarter', 'label': 'This Quarter'},
+    {'value': 'year', 'label': 'This Year'},
+    {'value': 'all', 'label': 'All Time'},
+  ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
+        ),
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: filters.map((filter) {
-            final isSelected = selectedFilter == filter.id;
-
+          children: _filters.map((filter) {
+            final isSelected = widget.selectedFilter == filter['value'];
             return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: _DateFilterChip(
-                label: filter.label,
-                isSelected: isSelected,
-                onSelected: () => onFilterSelected(filter.id),
-                selectedColor: colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: FilterChip(
+                label: Text(
+                  _getLocalizedLabel(filter['label'] as String, loc),
+                  style: TextStyle(
+                    color: isSelected
+                        ? theme.colorScheme.onPrimary
+                        : theme.colorScheme.onSurface,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    widget.onFilterChanged(filter['value'] as String);
+                  }
+                },
+                backgroundColor: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.surfaceVariant,
+                selectedColor: theme.colorScheme.primary,
+                checkmarkColor: theme.colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline.withOpacity(0.3),
+                  ),
+                ),
               ),
             );
           }).toList(),
@@ -67,57 +79,23 @@ class _DateFilterList extends StatelessWidget {
       ),
     );
   }
-}
 
-class _DateFilterChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onSelected;
-  final Color selectedColor;
-
-  const _DateFilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.onSelected,
-    required this.selectedColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return FilterChip(
-      label: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? selectedColor : colorScheme.onSurfaceVariant,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      selected: isSelected,
-      onSelected: (_) => onSelected(),
-      backgroundColor: isSelected
-          ? selectedColor.withOpacity(0.1)
-          : colorScheme.surfaceVariant,
-      selectedColor: selectedColor.withOpacity(0.2),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color:
-              isSelected ? selectedColor : colorScheme.outline.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      showCheckmark: false,
-    );
+  String _getLocalizedLabel(String label, AppLocalizations loc) {
+    switch (label) {
+      case 'Today':
+        return loc.today;
+      case 'This Week':
+        return loc.thisWeek;
+      case 'This Month':
+        return loc.thisMonth;
+      case 'This Quarter':
+        return loc.thisQuarter;
+      case 'This Year':
+        return loc.thisYear;
+      case 'All Time':
+        return loc.allTime;
+      default:
+        return label;
+    }
   }
-}
-
-class DateFilter {
-  final String id;
-  final String label;
-
-  const DateFilter(this.id, this.label);
 }

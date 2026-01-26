@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/Person.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
@@ -53,71 +54,75 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.dispose();
   }
 
-  Future<void> _processCheckout(BuildContext context) async {
-    // Validate form
-    if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
-      return;
-    }
+  // Future<void> _processCheckout(BuildContext context) async {
+  //   // Validate form
+  //   if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
+  //     return;
+  //   }
 
-    final cartNotifier = context.read<CartChangeNotifier>();
-    final userNotifier = context.read<AppUserNotifier>();
+  //   final cartNotifier = context.read<CartChangeNotifier>();
+  //   final userNotifier = context.read<AppUserNotifier>();
+  //   final productNotifier = context.read<ProductNotifier>();
 
-    // Validate cart
-    if (cartNotifier.cart.isEmpty) {
-      _showErrorDialog(context, AppLocalizations.of(context)!.cartEmptyError);
-      return;
-    }
+  //   // Validate cart
+  //   if (cartNotifier.cart.isEmpty) {
+  //     _showErrorDialog(context, AppLocalizations.of(context)!.cartEmptyError);
+  //     return;
+  //   }
 
-    // Validate customer if required (optional)
-    final requiresCustomer = true; // Set this based on your business logic
-    if (requiresCustomer &&
-        _viewModel.selectedCustomer == null &&
-        _viewModel.selectedPerson == null) {
-      _showErrorDialog(
-          context, AppLocalizations.of(context)!.customerRequiredError);
-      return;
-    }
-    // Show confirmation dialog
-    final confirmed = await _showConfirmationDialog(context);
-    if (!confirmed) return;
+  //   // Validate customer if required (optional)
+  //   final requiresCustomer = true; // Set this based on your business logic
+  //   if (requiresCustomer &&
+  //       _viewModel.selectedCustomer == null &&
+  //       _viewModel.selectedPerson == null) {
+  //     _showErrorDialog(
+  //         context, AppLocalizations.of(context)!.customerRequiredError);
+  //     return;
+  //   }
+  //   // Show confirmation dialog
+  //   final confirmed = await _showConfirmationDialog(context);
+  //   if (!confirmed) return;
 
-    try {
-      // Get current user info
-      final currentUser = userNotifier.appUser;
-      if (currentUser == null) {
-        _showErrorDialog(
-            context, AppLocalizations.of(context)!.loginRequiredError);
-        return;
-      }
+  //   try {
+  //     // Get current user info
+  //     final currentUser = userNotifier.appUser;
+  //     if (currentUser == null) {
+  //       _showErrorDialog(
+  //           context, AppLocalizations.of(context)!.loginRequiredError);
+  //       return;
+  //     }
 
-      // Process checkout
-      final result = await _viewModel.processCartCheckout(
-        cart: cartNotifier.cart,
-        sellingUserId: currentUser.id_app_user ?? 0,
-        providerId: widget.supplierId,
-      );
+  //     // Process checkout
+  //     final result = await _viewModel.processCartCheckout(
+  //       cart: cartNotifier.cart,
+  //       sellingUserId: currentUser.id_app_user ?? 0,
+  //       providerId: widget.supplierId,
+  //     );
 
-      if (result.isSuccess) {
-        // Success - show success screen
-        await _showSuccessScreen(context, result, cartNotifier.cart.subtotal);
+  //     if (result.isSuccess) {
+  //       // Success - show success screen
+  //       await _showSuccessScreen(context, result, cartNotifier.cart.subtotal);
 
-        // Clear the cart
-        cartNotifier.clearCart();
+  //       productNotifier.fetchProducts(
+  //           providerId: productNotifier.currentProviderId);
 
-        // Reset checkout view model
-        _viewModel.resetAfterCheckout();
+  //       // Clear the cart
+  //       cartNotifier.clearCart();
 
-        // Optional: Navigate back or to orders
-        Navigator.pop(context);
-      } else {
-        // Failure - show error
-        _showErrorDialog(context, result.message);
-      }
-    } catch (e) {
-      _showErrorDialog(
-          context, '${AppLocalizations.of(context)!.checkoutError}: $e');
-    }
-  }
+  //       // Reset checkout view model
+  //       _viewModel.resetAfterCheckout();
+
+  //       // Optional: Navigate back or to orders
+  //       Navigator.pop(context);
+  //     } else {
+  //       // Failure - show error
+  //       _showErrorDialog(context, result.message);
+  //     }
+  //   } catch (e) {
+  //     _showErrorDialog(
+  //         context, '${AppLocalizations.of(context)!.checkoutError}: $e');
+  //   }
+  // }
 
   Future<bool> _showConfirmationDialog(BuildContext context) async {
     final cartNotifier = context.read<CartChangeNotifier>();
@@ -280,9 +285,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     double totalAmount,
   ) async {
     final loc = AppLocalizations.of(context)!;
-
-    context.read<ProductNotifier>().fetchProducts(
-        providerId: context.read<ProductNotifier>().currentProviderId);
+    final productNotifier = context.read<ProductNotifier>();
 
     await showDialog(
       context: context,
@@ -329,6 +332,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
+            // Add a loading indicator for product refresh
+            const SizedBox(height: 16),
+            FutureBuilder(
+              future: _refreshProductsAfterOrder(context, result),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Column(
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 8),
+                      Text(
+                        loc.loading,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ],
         ),
         actions: [
@@ -336,25 +362,112 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             onPressed: () {
               Navigator.pop(context); // Close success dialog
               Navigator.pop(context); // Close checkout screen
+              Navigator.pop(context);
             },
             child: Text(loc.continueShopping),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context); // Close success dialog
-              Navigator.pop(context); // Close success dialog
-              // Navigate to orders screen
-              // Navigator.pushNamedAndRemoveUntil(
-              //   context,
-              //   '/orders',
-              //   (route) => false,
-              // );
+              // Navigate to orders screen or pop
+              Navigator.pop(context);
             },
             child: Text(loc.viewOrders),
           ),
         ],
       ),
     );
+  }
+
+// Add this helper method to refresh products after order
+  Future<void> _refreshProductsAfterOrder(
+    BuildContext context,
+    CheckoutResult result,
+  ) async {
+    final productNotifier = context.read<ProductNotifier>();
+    final cartNotifier = context.read<CartChangeNotifier>();
+
+    // Get list of product IDs from cart for targeted refresh
+    final orderedProductIds = cartNotifier.cart.items
+        .map((item) => item.product?.id_product)
+        .where((id) => id != null && id > 0)
+        .cast<int>()
+        .toList();
+
+    // Refresh products - use specialized method if available
+    await productNotifier.fetchProducts(
+      providerId: productNotifier.currentProviderId,
+      reset: true, // Force reset to get fresh data
+    );
+  }
+
+// Update your _processCheckout method to ensure proper refresh
+  Future<void> _processCheckout(BuildContext context) async {
+    // Validate form
+    if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final cartNotifier = context.read<CartChangeNotifier>();
+    final userNotifier = context.read<AppUserNotifier>();
+    final productNotifier = context.read<ProductNotifier>();
+
+    // Validate cart
+    if (cartNotifier.cart.isEmpty) {
+      _showErrorDialog(context, AppLocalizations.of(context)!.cartEmptyError);
+      return;
+    }
+
+    // Validate customer if required
+    final requiresCustomer = true;
+    if (requiresCustomer &&
+        _viewModel.selectedCustomer == null &&
+        _viewModel.selectedPerson == null) {
+      _showErrorDialog(
+          context, AppLocalizations.of(context)!.customerRequiredError);
+      return;
+    }
+
+    // Show confirmation dialog
+    final confirmed = await _showConfirmationDialog(context);
+    if (!confirmed) return;
+
+    try {
+      // Get current user info
+      final currentUser = userNotifier.appUser;
+      if (currentUser == null) {
+        _showErrorDialog(
+            context, AppLocalizations.of(context)!.loginRequiredError);
+        return;
+      }
+
+      // Process checkout
+      final result = await _viewModel.processCartCheckout(
+        cart: cartNotifier.cart,
+        sellingUserId: currentUser.id_app_user ?? 0,
+        providerId: widget.supplierId,
+      );
+
+      if (result.isSuccess) {
+        // Success - show success screen
+        await _showSuccessScreen(context, result, cartNotifier.cart.subtotal);
+
+        // Clear the cart
+        cartNotifier.clearCart();
+
+        // Reset checkout view model
+        _viewModel.resetAfterCheckout();
+
+        // Optional: Navigate back
+        // Navigator.pop(context);
+      } else {
+        // Failure - show error
+        _showErrorDialog(context, result.message);
+      }
+    } catch (e) {
+      _showErrorDialog(
+          context, '${AppLocalizations.of(context)!.checkoutError}: $e');
+    }
   }
 
   void _showErrorDialog(BuildContext context, String message) {
@@ -497,6 +610,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 onToggle: () =>
                     setState(() => _customerExpanded = !_customerExpanded),
                 child: CustomerSection(
+                  defaultCustomer: AppUser(
+                    id_app_user: 0, // ID 0 indicates guest/anonymous
+                    app_user_person_id: 0,
+                    app_user_type_id:
+                        3, // Guest type ID (you may have a specific ID for guests)
+                    app_user_name: 'guest',
+                    app_user_password: '',
+                    app_user_preferences: '',
+                    app_user_type_desc: loc.guestCustomer ?? 'Guest',
+                    app_user_image_url: '',
+                    idPerson: 0,
+                    personDetailsId: 0,
+                    personFirstName: loc.guestCustomer ?? 'Guest',
+                    personLastName: '',
+                    personBirthDate: '',
+                    app_user_email: loc.guestEmail ?? 'guest@example.com',
+                    personGender: '',
+                    personNationality: '',
+                    idBloodType: 0,
+                    bloodTypeDesc: '',
+                    idLocation: 0,
+                    locationLatitude: 0.0,
+                    locationLongitude: 0.0,
+                    locationName: loc.guestLocation ?? 'Store',
+                    locationAddressId: 0,
+                    addressStreet: '',
+                    addressCity: '',
+                    addressPostalCode: '',
+                    addressCountry: '',
+                    privileges: [],
+                  ),
                   selectedCustomer: viewModel.selectedCustomer,
                   selectedPerson: viewModel.selectedPerson,
                   onCustomerChanged: (customer) {

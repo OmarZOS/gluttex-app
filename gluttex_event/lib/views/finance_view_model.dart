@@ -107,6 +107,69 @@ class FinanceViewModel extends ChangeNotifier {
     }
   }
 
+  // In FinanceViewModel class, update the _applyDateFilter method:
+  void _applyDateFilter(String filterType) {
+    final now = DateTime.now();
+    DateTime startDate;
+    DateTime endDate =
+        DateTime(now.year, now.month, now.day, 23, 59, 59); // End of day
+
+    switch (filterType) {
+      case 'today':
+        startDate = DateTime(now.year, now.month, now.day);
+        break;
+      case 'week':
+        startDate = now.subtract(const Duration(days: 7));
+        startDate = DateTime(startDate.year, startDate.month, startDate.day);
+        break;
+      case 'month':
+        startDate = DateTime(now.year, now.month, 1);
+        break;
+      case 'quarter':
+        final month = now.month;
+        final quarterStartMonth = ((month - 1) ~/ 3) * 3 + 1;
+        startDate = DateTime(now.year, quarterStartMonth, 1);
+        break;
+      case 'year':
+        startDate = DateTime(now.year, 1, 1);
+        break;
+      case 'all':
+      default:
+        _dateRangeFilter = null;
+        _applyFilters();
+        return;
+    }
+
+    _dateRangeFilter = DateTimeRange(start: startDate, end: endDate);
+    _applyFilters();
+  }
+
+// Also update the _applyFilters method to properly handle date ranges:
+  void _applyFilters() {
+    if (_businessOperations.isEmpty) return;
+
+    List<BusinessOperation> filtered = _businessOperations;
+
+    // Apply business filter
+    filtered = _businessFilter.applyFilter(filtered);
+
+    // Apply date range filter
+    if (_dateRangeFilter != null) {
+      filtered = filtered.where((op) {
+        if (op.operationDate == null) return false;
+        final operationDate = op.operationDate!;
+
+        // Important: Include operations on the start date (>= start) and before or on end date (<= end)
+        return !operationDate.isBefore(_dateRangeFilter!.start) &&
+            !operationDate.isAfter(_dateRangeFilter!.end);
+      }).toList();
+    }
+
+    _filteredOperations = filtered;
+    _calculateAnalytics();
+    notifyListeners();
+  }
+
   void setBusinessFilter(BusinessFilter filter) {
     _businessFilter = filter;
     _resetPagination();
@@ -299,61 +362,6 @@ class FinanceViewModel extends ChangeNotifier {
   }
 
   // Filtering
-  void _applyFilters() {
-    if (_businessOperations.isEmpty) return;
-
-    List<BusinessOperation> filtered = _businessOperations;
-
-    // Apply business filter
-    filtered = _businessFilter.applyFilter(filtered);
-
-    // Apply date range filter
-    if (_dateRangeFilter != null) {
-      filtered = filtered.where((op) {
-        if (op.operationDate == null) return false;
-        return op.operationDate!.isAfter(_dateRangeFilter!.start) &&
-            op.operationDate!.isBefore(_dateRangeFilter!.end);
-      }).toList();
-    }
-
-    _filteredOperations = filtered;
-    _calculateAnalytics();
-    notifyListeners();
-  }
-
-  void _applyDateFilter(String filterType) {
-    final now = DateTime.now();
-    DateTime startDate;
-    DateTime endDate = now;
-
-    switch (filterType) {
-      case 'today':
-        startDate = DateTime(now.year, now.month, now.day);
-        break;
-      case 'week':
-        startDate = now.subtract(const Duration(days: 7));
-        break;
-      case 'month':
-        startDate = DateTime(now.year, now.month, 1);
-        break;
-      case 'quarter':
-        final month = now.month;
-        final quarterStartMonth = ((month - 1) ~/ 3) * 3 + 1;
-        startDate = DateTime(now.year, quarterStartMonth, 1);
-        break;
-      case 'year':
-        startDate = DateTime(now.year, 1, 1);
-        break;
-      case 'all':
-      default:
-        _dateRangeFilter = null;
-        _applyFilters();
-        return;
-    }
-
-    _dateRangeFilter = DateTimeRange(start: startDate, end: endDate);
-    _applyFilters();
-  }
 
   // Helper Methods
   void _resetPagination() {

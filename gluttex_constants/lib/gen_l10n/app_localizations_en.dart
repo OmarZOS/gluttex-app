@@ -2609,10 +2609,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get finalPrice => 'Final Price';
 
   @override
-  String get totalCost => 'Total Delivery Cost';
+  String get totalCost => 'Total Cost';
 
   @override
-  String get discountApplied => 'Discount applied from base price';
+  String get discountApplied => 'discount applied';
 
   @override
   String get resourceRequirements => 'Resource Requirements';
@@ -5136,4 +5136,166 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noMoreDocuments => 'No more documents';
+
+  @override
+  String get editService => 'Edit Service';
+
+  @override
+  String get createService => 'Create Service';
+
+  @override
+  String get serviceName => 'Service Name';
+
+  @override
+  String get enterServiceName => 'Enter service name';
+
+  @override
+  String get serviceNameRequired => 'Service name is required';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get enterDescription => 'Enter service description';
+
+  @override
+  String get categoryId => 'Category ID';
+
+  @override
+  String get enterCategoryId => 'Enter category ID';
+
+  @override
+  String get providerId => 'Provider ID';
+
+  @override
+  String get enterProviderId => 'Enter provider ID';
+
+  @override
+  String get durationMinutes => 'Duration (minutes)';
+
+  @override
+  String get enterDuration => 'Enter duration in minutes';
+
+  @override
+  String get durationRequired => 'Duration is required';
+
+  @override
+  String get durationPositive => 'Duration must be positive';
+
+  @override
+  String get enterBasePrice => 'Enter base price';
+
+  @override
+  String get basePriceRequired => 'Base price is required';
+
+  @override
+  String get pricePositive => 'Price must be positive';
+
+  @override
+  String get enterFinalPrice => 'Enter final price';
+
+  @override
+  String get finalPriceRequired => 'Final price is required';
+
+  @override
+  String get pricingConfiguration => 'Pricing Configuration';
+
+  @override
+  String get ageGroup => 'Age Group';
+
+  @override
+  String get enterAgeGroup => 'e.g., Adult, Child';
+
+  @override
+  String get sampleType => 'Sample Type';
+
+  @override
+  String get enterSampleType => 'e.g., Blood, Urine';
+
+  @override
+  String get specialistConsultation => 'Specialist Consultation';
+
+  @override
+  String get governmentFunded => 'Government Funded';
+
+  @override
+  String get consultationIncluded => 'Consultation Included';
+
+  @override
+  String get digitalImaging => 'Digital Imaging';
+
+  @override
+  String get materialOptions => 'Material Options';
+
+  @override
+  String get addMaterial => 'Add Material';
+
+  @override
+  String get enterMaterial => 'e.g., Gold, Silver';
+
+  @override
+  String get includes => 'Includes';
+
+  @override
+  String get addInclude => 'Add Include';
+
+  @override
+  String get enterInclude => 'e.g., Free consultation';
+
+  @override
+  String get addResource => 'Add Resource';
+
+  @override
+  String get noResourcesAdded => 'No resources added yet';
+
+  @override
+  String get addStaff => 'Add Staff';
+
+  @override
+  String get noStaffAdded => 'No staff added yet';
+
+  @override
+  String get serviceUpdated => 'Service updated successfully';
+
+  @override
+  String get serviceCreated => 'Service created successfully';
+
+  @override
+  String get updateService => 'Update Service';
+
+  @override
+  String get noDiscount => 'No discount';
+
+  @override
+  String get minutes => 'min';
+
+  @override
+  String get scrollToTop => 'Scroll to top';
+
+  @override
+  String get enterPrice => 'Enter price';
+
+  @override
+  String get priceRequired => 'Price is required';
+
+  @override
+  String get invalidPrice => 'Please enter a valid price';
+
+  @override
+  String get typeAndPressEnter => 'Type and press enter...';
+
+  @override
+  String get finalPriceLabel => 'Final Price';
+
+  @override
+  String get walkInCustomer => 'Walk-in Customer';
+
+  @override
+  String get emptyCustomer => 'Select Customer';
+
+  @override
+  String get guestEmail => 'guest@example.com';
+
+  @override
+  String get guestLocation => 'Store Location';
 }

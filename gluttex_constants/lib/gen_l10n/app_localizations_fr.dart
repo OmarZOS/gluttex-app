@@ -2582,7 +2582,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchServices => 'Rechercher des services...';
 
   @override
-  String get profitMargin => 'Marge Bénéficiaire';
+  String get profitMargin => 'Marge bénéficiaire';
 
   @override
   String get serviceDetails => 'Détails du service';
@@ -2609,10 +2609,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get finalPrice => 'Prix Final';
 
   @override
-  String get totalCost => 'Coût total de livraison';
+  String get totalCost => 'Coût total';
 
   @override
-  String get discountApplied => 'Remise appliquée au prix de base';
+  String get discountApplied => 'remise appliquée';
 
   @override
   String get resourceRequirements => 'Exigences en Ressources';
@@ -2630,10 +2630,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get costSummary => 'Résumé des Coûts';
 
   @override
-  String get resourceCost => 'Coût des Ressources';
+  String get resourceCost => 'Coût des ressources';
 
   @override
-  String get staffCost => 'Coût du Personnel';
+  String get staffCost => 'Coût du personnel';
 
   @override
   String get totalServiceCost => 'Coût Total du Service';
@@ -5136,4 +5136,166 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noMoreDocuments => 'Plus de documents';
+
+  @override
+  String get editService => 'Modifier le Service';
+
+  @override
+  String get createService => 'Créer le Service';
+
+  @override
+  String get serviceName => 'Nom du Service';
+
+  @override
+  String get enterServiceName => 'Entrez le nom du service';
+
+  @override
+  String get serviceNameRequired => 'Le nom du service est requis';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get enterDescription => 'Entrez la description du service';
+
+  @override
+  String get categoryId => 'ID de Catégorie';
+
+  @override
+  String get enterCategoryId => 'Entrez l\'ID de catégorie';
+
+  @override
+  String get providerId => 'ID du Fournisseur';
+
+  @override
+  String get enterProviderId => 'Entrez l\'ID du fournisseur';
+
+  @override
+  String get durationMinutes => 'Durée (minutes)';
+
+  @override
+  String get enterDuration => 'Entrez la durée en minutes';
+
+  @override
+  String get durationRequired => 'La durée est requise';
+
+  @override
+  String get durationPositive => 'La durée doit être positive';
+
+  @override
+  String get enterBasePrice => 'Entrez le prix de base';
+
+  @override
+  String get basePriceRequired => 'Le prix de base est requis';
+
+  @override
+  String get pricePositive => 'Le prix doit être positif';
+
+  @override
+  String get enterFinalPrice => 'Entrez le prix final';
+
+  @override
+  String get finalPriceRequired => 'Le prix final est requis';
+
+  @override
+  String get pricingConfiguration => 'Configuration des Prix';
+
+  @override
+  String get ageGroup => 'Groupe d\'Âge';
+
+  @override
+  String get enterAgeGroup => 'ex. Adulte, Enfant';
+
+  @override
+  String get sampleType => 'Type d\'Échantillon';
+
+  @override
+  String get enterSampleType => 'ex. Sang, Urine';
+
+  @override
+  String get specialistConsultation => 'Consultation Spécialisée';
+
+  @override
+  String get governmentFunded => 'Subventionné par le Gouvernement';
+
+  @override
+  String get consultationIncluded => 'Consultation Incluse';
+
+  @override
+  String get digitalImaging => 'Imagerie Numérique';
+
+  @override
+  String get materialOptions => 'Options de Matériaux';
+
+  @override
+  String get addMaterial => 'Ajouter un Matériau';
+
+  @override
+  String get enterMaterial => 'ex. Or, Argent';
+
+  @override
+  String get includes => 'Inclus';
+
+  @override
+  String get addInclude => 'Ajouter un Inclus';
+
+  @override
+  String get enterInclude => 'ex. Consultation gratuite';
+
+  @override
+  String get addResource => 'Ajouter une Ressource';
+
+  @override
+  String get noResourcesAdded => 'Aucune ressource ajoutée';
+
+  @override
+  String get addStaff => 'Ajouter du Personnel';
+
+  @override
+  String get noStaffAdded => 'Aucun personnel ajouté';
+
+  @override
+  String get serviceUpdated => 'Service mis à jour avec succès';
+
+  @override
+  String get serviceCreated => 'Service créé avec succès';
+
+  @override
+  String get updateService => 'Mettre à Jour le Service';
+
+  @override
+  String get noDiscount => 'Pas de remise';
+
+  @override
+  String get minutes => 'min';
+
+  @override
+  String get scrollToTop => 'Défiler vers le haut';
+
+  @override
+  String get enterPrice => 'Saisir le prix';
+
+  @override
+  String get priceRequired => 'Le prix est requis';
+
+  @override
+  String get invalidPrice => 'Veuillez saisir un prix valide';
+
+  @override
+  String get typeAndPressEnter => 'Tapez et appuyez sur Entrée...';
+
+  @override
+  String get finalPriceLabel => 'Prix final';
+
+  @override
+  String get walkInCustomer => 'Client de Passage';
+
+  @override
+  String get emptyCustomer => 'Sélectionner un Client';
+
+  @override
+  String get guestEmail => 'invite@exemple.com';
+
+  @override
+  String get guestLocation => 'Emplacement du Magasin';
 }

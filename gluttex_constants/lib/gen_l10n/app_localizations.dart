@@ -5128,13 +5128,13 @@ abstract class AppLocalizations {
   /// No description provided for @totalCost.
   ///
   /// In en, this message translates to:
-  /// **'Total Delivery Cost'**
+  /// **'Total Cost'**
   String get totalCost;
 
   /// No description provided for @discountApplied.
   ///
   /// In en, this message translates to:
-  /// **'Discount applied from base price'**
+  /// **'discount applied'**
   String get discountApplied;
 
   /// No description provided for @resourceRequirements.
@@ -10098,6 +10098,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No more documents'**
   String get noMoreDocuments;
+
+  /// No description provided for @editService.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Service'**
+  String get editService;
+
+  /// No description provided for @createService.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Service'**
+  String get createService;
+
+  /// No description provided for @serviceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Name'**
+  String get serviceName;
+
+  /// No description provided for @enterServiceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter service name'**
+  String get enterServiceName;
+
+  /// No description provided for @serviceNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Service name is required'**
+  String get serviceNameRequired;
+
+  /// No description provided for @description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
+  /// No description provided for @enterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter service description'**
+  String get enterDescription;
+
+  /// No description provided for @categoryId.
+  ///
+  /// In en, this message translates to:
+  /// **'Category ID'**
+  String get categoryId;
+
+  /// No description provided for @enterCategoryId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter category ID'**
+  String get enterCategoryId;
+
+  /// No description provided for @providerId.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider ID'**
+  String get providerId;
+
+  /// No description provided for @enterProviderId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter provider ID'**
+  String get enterProviderId;
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (minutes)'**
+  String get durationMinutes;
+
+  /// No description provided for @enterDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter duration in minutes'**
+  String get enterDuration;
+
+  /// No description provided for @durationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration is required'**
+  String get durationRequired;
+
+  /// No description provided for @durationPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration must be positive'**
+  String get durationPositive;
+
+  /// No description provided for @enterBasePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter base price'**
+  String get enterBasePrice;
+
+  /// No description provided for @basePriceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Base price is required'**
+  String get basePriceRequired;
+
+  /// No description provided for @pricePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Price must be positive'**
+  String get pricePositive;
+
+  /// No description provided for @enterFinalPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter final price'**
+  String get enterFinalPrice;
+
+  /// No description provided for @finalPriceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Final price is required'**
+  String get finalPriceRequired;
+
+  /// No description provided for @pricingConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing Configuration'**
+  String get pricingConfiguration;
+
+  /// No description provided for @ageGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Age Group'**
+  String get ageGroup;
+
+  /// No description provided for @enterAgeGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Adult, Child'**
+  String get enterAgeGroup;
+
+  /// No description provided for @sampleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Type'**
+  String get sampleType;
+
+  /// No description provided for @enterSampleType.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Blood, Urine'**
+  String get enterSampleType;
+
+  /// No description provided for @specialistConsultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialist Consultation'**
+  String get specialistConsultation;
+
+  /// No description provided for @governmentFunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Government Funded'**
+  String get governmentFunded;
+
+  /// No description provided for @consultationIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Consultation Included'**
+  String get consultationIncluded;
+
+  /// No description provided for @digitalImaging.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Imaging'**
+  String get digitalImaging;
+
+  /// No description provided for @materialOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Material Options'**
+  String get materialOptions;
+
+  /// No description provided for @addMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Material'**
+  String get addMaterial;
+
+  /// No description provided for @enterMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Gold, Silver'**
+  String get enterMaterial;
+
+  /// No description provided for @includes.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes'**
+  String get includes;
+
+  /// No description provided for @addInclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Include'**
+  String get addInclude;
+
+  /// No description provided for @enterInclude.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Free consultation'**
+  String get enterInclude;
+
+  /// No description provided for @addResource.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Resource'**
+  String get addResource;
+
+  /// No description provided for @noResourcesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'No resources added yet'**
+  String get noResourcesAdded;
+
+  /// No description provided for @addStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Staff'**
+  String get addStaff;
+
+  /// No description provided for @noStaffAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff added yet'**
+  String get noStaffAdded;
+
+  /// No description provided for @serviceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Service updated successfully'**
+  String get serviceUpdated;
+
+  /// No description provided for @serviceCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Service created successfully'**
+  String get serviceCreated;
+
+  /// No description provided for @updateService.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Service'**
+  String get updateService;
+
+  /// No description provided for @noDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'No discount'**
+  String get noDiscount;
+
+  /// No description provided for @minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutes;
+
+  /// No description provided for @scrollToTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to top'**
+  String get scrollToTop;
+
+  /// No description provided for @enterPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter price'**
+  String get enterPrice;
+
+  /// No description provided for @priceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Price is required'**
+  String get priceRequired;
+
+  /// No description provided for @invalidPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid price'**
+  String get invalidPrice;
+
+  /// No description provided for @typeAndPressEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Type and press enter...'**
+  String get typeAndPressEnter;
+
+  /// No description provided for @finalPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Final Price'**
+  String get finalPriceLabel;
+
+  /// No description provided for @walkInCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk-in Customer'**
+  String get walkInCustomer;
+
+  /// No description provided for @emptyCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Customer'**
+  String get emptyCustomer;
+
+  /// No description provided for @guestEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'guest@example.com'**
+  String get guestEmail;
+
+  /// No description provided for @guestLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Location'**
+  String get guestLocation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

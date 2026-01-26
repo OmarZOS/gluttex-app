@@ -17,6 +17,7 @@ import 'package:gluttex_personnel/supplier_entities_screen.dart';
 import 'package:gluttex_scanner/screens/qr_scanner.dart';
 import 'package:gluttex_scanner/screens/barcode_scanner.dart';
 import 'package:gluttex_scanner/screens/product_scanner.dart';
+import 'package:gluttex_store/components/service/form/provided_service_form_screen.dart';
 import 'package:gluttex_store/screens/dashboard_screen.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
 import 'package:medicom_catalog/screens/orders_screen.dart';
@@ -98,6 +99,8 @@ class AppRouter {
                   ),
                   const SuppliersMapScreen(),
                 );
+              case AppRoutes.serviceForm:
+                return const ProvidedServiceFormScreen();
               case AppRoutes.storeManage:
                 return const DashboardScreen();
               case AppRoutes.login:

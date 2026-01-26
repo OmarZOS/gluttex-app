@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:provider/provider.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
+import 'package:gluttex_event/personnel_notifier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 
 class OperationSummary extends StatelessWidget {
   final BusinessOperation operation;
@@ -31,8 +36,8 @@ class OperationSummary extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _SummaryGrid(operation: operation),
-          const SizedBox(height: 16),
-          _AdditionalInfo(operation: operation),
+          // const SizedBox(height: 16),
+          // _AdditionalInfo(operation: operation),
         ],
       ),
     );
@@ -59,27 +64,23 @@ class _SummaryGrid extends StatelessWidget {
       children: [
         _SummaryItem(
           label: localizations.operationId,
-          value: _getOperationId(),
+          valueFuture: Future.value(_getOperationId()),
           icon: Icons.numbers,
           color: colorScheme.primary,
         ),
-        _SummaryItem(
-          label: localizations.client,
-          value: operation.clientId != null ? '#${operation.clientId}' : 'N/A',
-          icon: Icons.person,
+        _ClientSummaryItem(
+          operation: operation,
+          localizations: localizations,
           color: colorScheme.secondary,
         ),
-        _SummaryItem(
-          label: localizations.supplier,
-          value:
-              operation.supplierId != null ? '#${operation.supplierId}' : 'N/A',
-          icon: Icons.business,
+        _SupplierSummaryItem(
+          operation: operation,
+          localizations: localizations,
           color: Colors.orange,
         ),
-        _SummaryItem(
-          label: localizations.seller,
-          value: operation.sellerId != null ? '#${operation.sellerId}' : 'N/A',
-          icon: Icons.person_outline,
+        _SellerSummaryItem(
+          operation: operation,
+          localizations: localizations,
           color: Colors.purple,
         ),
       ],
@@ -95,13 +96,13 @@ class _SummaryGrid extends StatelessWidget {
 
 class _SummaryItem extends StatelessWidget {
   final String label;
-  final String value;
+  final Future<String> valueFuture;
   final IconData icon;
   final Color color;
 
   const _SummaryItem({
     required this.label,
-    required this.value,
+    required this.valueFuture,
     required this.icon,
     required this.color,
   });
@@ -141,15 +142,35 @@ class _SummaryItem extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  maxLines: 1,
+                FutureBuilder<String>(
+                  future: valueFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return _buildLoadingSkeleton(colorScheme);
+                    }
+
+                    if (snapshot.hasError) {
+                      return Text(
+                        'N/A',
+                        style: TextStyle(
+                          color: colorScheme.error,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    }
+
+                    return Text(
+                      snapshot.data ?? 'N/A',
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      maxLines: 1,
+                    );
+                  },
                 ),
               ],
             ),
@@ -157,6 +178,261 @@ class _SummaryItem extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildLoadingSkeleton(ColorScheme colorScheme) {
+    return SizedBox(
+      height: 16,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    );
+  }
+}
+
+class _ClientSummaryItem extends StatelessWidget {
+  final BusinessOperation operation;
+  final AppLocalizations localizations;
+  final Color color;
+
+  const _ClientSummaryItem({
+    required this.operation,
+    required this.localizations,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final hasClient = operation.clientId != null && operation.clientId! > 0;
+
+    if (!hasClient) {
+      return _SummaryItem(
+        label: localizations.client,
+        valueFuture: Future.value('N/A'),
+        icon: Icons.person,
+        color: color,
+      );
+    }
+
+    return FutureBuilder<String>(
+      future: _getClientName(context),
+      builder: (context, snapshot) {
+        final value = snapshot.connectionState == ConnectionState.waiting
+            ? '${localizations.loading}...'
+            : snapshot.hasError
+                ? '#${operation.clientId}'
+                : snapshot.data ?? '#${operation.clientId}';
+
+        return _SummaryItem(
+          label: localizations.client,
+          valueFuture: Future.value(value),
+          icon: Icons.person,
+          color: color,
+        );
+      },
+    );
+  }
+
+  Future<String> _getClientName(BuildContext context) async {
+    try {
+      final personnelNotifier = context.read<PersonnelNotifier>();
+
+      // Determine client type
+      final clientType = 'user';
+
+      final customer = await personnelNotifier.getCustomerDisplayInfo(
+        customerId: operation.clientId!,
+        customerType: clientType,
+        personId: operation.clientId,
+      );
+
+      if (customer != null && customer.displayName?.isNotEmpty == true) {
+        return customer.displayName!;
+      }
+
+      // Fallback to user name if customer info not found
+      final appUserNotifier = context.read<AppUserNotifier>();
+      final user = await appUserNotifier
+          .fetchUserPassively(operation.clientId.toString());
+
+      if (user != null) {
+        return _getUserDisplayName(user);
+      }
+
+      return '#${operation.clientId}';
+    } catch (e) {
+      debugPrint('Error fetching client name: $e');
+      return '#${operation.clientId}';
+    }
+  }
+
+  String _getUserDisplayName(AppUser user) {
+    final firstName = user.personFirstName?.trim();
+    final lastName = user.personLastName?.trim();
+    final userName = user.app_user_name?.trim();
+
+    if (firstName != null && firstName.isNotEmpty) {
+      if (lastName != null && lastName.isNotEmpty) {
+        return '$firstName $lastName';
+      }
+      return firstName;
+    }
+
+    if (userName != null && userName.isNotEmpty) {
+      return userName;
+    }
+
+    return 'User #${user.id_app_user}';
+  }
+}
+
+class _SupplierSummaryItem extends StatelessWidget {
+  final BusinessOperation operation;
+  final AppLocalizations localizations;
+  final Color color;
+
+  const _SupplierSummaryItem({
+    required this.operation,
+    required this.localizations,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasSupplier =
+        operation.supplierId != null && operation.supplierId! > 0;
+
+    if (!hasSupplier) {
+      return _SummaryItem(
+        label: localizations.supplier,
+        valueFuture: Future.value('N/A'),
+        icon: Icons.business,
+        color: color,
+      );
+    }
+
+    return FutureBuilder<String>(
+      future: _getSupplierName(context),
+      builder: (context, snapshot) {
+        final value = snapshot.connectionState == ConnectionState.waiting
+            ? '${localizations.loading}...'
+            : snapshot.hasError
+                ? '#${operation.supplierId}'
+                : snapshot.data ?? '#${operation.supplierId}';
+
+        return _SummaryItem(
+          label: localizations.supplier,
+          valueFuture: Future.value(value),
+          icon: Icons.business,
+          color: color,
+        );
+      },
+    );
+  }
+
+  Future<String> _getSupplierName(BuildContext context) async {
+    try {
+      final supplierNotifier = context.read<SupplierChangeNotifier>();
+      final supplier = await supplierNotifier.getSupplierById(
+        operation.supplierId!,
+        forceRefresh: false,
+        notify: false,
+      );
+
+      if (supplier != null && supplier.providerName?.isNotEmpty == true) {
+        return supplier.providerName!;
+      }
+
+      return '#${operation.supplierId}';
+    } catch (e) {
+      debugPrint('Error fetching supplier name: $e');
+      return '#${operation.supplierId}';
+    }
+  }
+}
+
+class _SellerSummaryItem extends StatelessWidget {
+  final BusinessOperation operation;
+  final AppLocalizations localizations;
+  final Color color;
+
+  const _SellerSummaryItem({
+    required this.operation,
+    required this.localizations,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasSeller = operation.sellerId != null && operation.sellerId! > 0;
+
+    if (!hasSeller) {
+      return _SummaryItem(
+        label: localizations.seller,
+        valueFuture: Future.value('N/A'),
+        icon: Icons.person_outline,
+        color: color,
+      );
+    }
+
+    return FutureBuilder<String>(
+      future: _getSellerName(context),
+      builder: (context, snapshot) {
+        final value = snapshot.connectionState == ConnectionState.waiting
+            ? '${localizations.loading}...'
+            : snapshot.hasError
+                ? '#${operation.sellerId}'
+                : snapshot.data ?? '#${operation.sellerId}';
+
+        return _SummaryItem(
+          label: localizations.seller,
+          valueFuture: Future.value(value),
+          icon: Icons.person_outline,
+          color: color,
+        );
+      },
+    );
+  }
+
+  Future<String> _getSellerName(BuildContext context) async {
+    try {
+      final appUserNotifier = context.read<AppUserNotifier>();
+      final user = await appUserNotifier
+          .fetchUserPassively(operation.sellerId.toString());
+
+      if (user != null) {
+        return _getUserDisplayName(user);
+      }
+
+      return '#${operation.sellerId}';
+    } catch (e) {
+      debugPrint('Error fetching seller name: $e');
+      return '#${operation.sellerId}';
+    }
+  }
+
+  String _getUserDisplayName(AppUser user) {
+    final firstName = user.personFirstName?.trim();
+    final lastName = user.personLastName?.trim();
+    final userName = user.app_user_name?.trim();
+
+    if (firstName != null && firstName.isNotEmpty) {
+      if (lastName != null && lastName.isNotEmpty) {
+        return '$firstName $lastName';
+      }
+      return firstName;
+    }
+
+    if (userName != null && userName.isNotEmpty) {
+      return userName;
+    }
+
+    return 'User #${user.id_app_user}';
   }
 }
 

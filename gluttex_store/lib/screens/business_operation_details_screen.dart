@@ -69,44 +69,37 @@ class _OperationHeader extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
 
-    return FlexibleSpaceBar(
-      title: Text(
-        _getOperationTitle(context),
-        style: theme.textTheme.titleMedium?.copyWith(
-          color: colorScheme.onPrimary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      background: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              _getHeaderColor(colorScheme),
-              colorScheme.primaryContainer
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCollapsed = constraints.biggest.height <= kToolbarHeight + 20;
+
+        return FlexibleSpaceBar(
+          collapseMode: CollapseMode.pin,
+          titlePadding: const EdgeInsetsDirectional.only(
+            start: 56,
+            bottom: 16,
+            end: 16,
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  _HeaderIcon(operation: operation, colorScheme: colorScheme),
-                  const SizedBox(width: 16),
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child: _HeaderDetails(operation: operation),
+
+          // ✅ Title only when collapsed
+          title: isCollapsed
+              ? Text(
+                  _getOperationTitle(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+                )
+              : null,
+
+          background: _HeaderBackground(
+            operation: operation,
+            colorScheme: colorScheme,
+          ),
+        );
+      },
     );
   }
 
@@ -182,10 +175,12 @@ class _HeaderDetails extends StatelessWidget {
       children: [
         Text(
           _formatCurrency(operation.totalAmount, context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: theme.textTheme.headlineLarge?.copyWith(
             color: colorScheme.onPrimary,
             fontWeight: FontWeight.w800,
-            fontSize: 36,
+            fontSize: 34, // ⬅️ reduce slightly
           ),
         ),
         const SizedBox(height: 4),
@@ -280,5 +275,69 @@ class _PaymentStatusBadge extends StatelessWidget {
     return status.replaceAll('_', ' ').split(' ').map((word) {
       return word[0].toUpperCase() + word.substring(1);
     }).join(' ');
+  }
+}
+
+class _HeaderBackground extends StatelessWidget {
+  final BusinessOperation operation;
+  final ColorScheme colorScheme;
+
+  const _HeaderBackground({
+    required this.operation,
+    required this.colorScheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            _getHeaderColor(colorScheme, operation),
+            colorScheme.primaryContainer,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, kToolbarHeight + 12, 20, 16),
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _HeaderIcon(
+                  operation: operation,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _HeaderDetails(operation: operation),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Color _getHeaderColor(
+      ColorScheme colorScheme, BusinessOperation operation) {
+    switch (operation.paymentStatus) {
+      case 'paid':
+      case 'fully_paid':
+        return colorScheme.primary;
+      case 'partial':
+      case 'partially_paid':
+        return colorScheme.secondary;
+      case 'unpaid':
+        return colorScheme.tertiary;
+      default:
+        return colorScheme.onSurface;
+    }
   }
 }

@@ -25,36 +25,36 @@ class FinanceScreen extends StatefulWidget {
 }
 
 class _FinanceScreenState extends State<FinanceScreen> {
-  // REMOVED: late final PageController _pageController; // Moved to child widget
-  // late final FinanceViewModel _viewModel;
+  late FinanceViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    // REMOVED: _pageController = PageController();
-    // _viewModel = FinanceViewModel(
-    //     businessOperationService:
-    //         GluttexLocator.get<BusinessOperationService>());
-    // _viewModel.loadBusinessOperations();
+    _viewModel = FinanceViewModel(
+      businessOperationService: GluttexLocator.get<BusinessOperationService>(),
+    );
+    // Initialize data
+    _viewModel.loadBusinessOperations();
   }
 
   @override
   void dispose() {
-    // REMOVED: _pageController.dispose();
-    // _viewModel.dispose();
+    _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _FinanceLayout(model: widget.financeNotifier);
+    return ChangeNotifierProvider.value(
+      value: _viewModel,
+      child: _FinanceLayout(model: widget.financeNotifier),
+    );
   }
 }
 
-// CHANGED: Fixed class name from __FinanceLayoutState to _FinanceLayoutState
 class _FinanceLayout extends StatefulWidget {
   final FinanceChangeNotifier model;
-  _FinanceLayout({required this.model});
+  const _FinanceLayout({required this.model});
 
   @override
   State<_FinanceLayout> createState() => _FinanceLayoutState();
@@ -62,7 +62,6 @@ class _FinanceLayout extends StatefulWidget {
 
 class _FinanceLayoutState extends State<_FinanceLayout> {
   late PageController _pageController;
-  // final FinanceChangeNotifier financeNotifier;
 
   @override
   void initState() {
@@ -78,52 +77,64 @@ class _FinanceLayoutState extends State<_FinanceLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = Provider.of<FinanceViewModel>(context);
+    return Consumer<FinanceViewModel>(
+      builder: (context, viewModel, child) {
+        // Sync PageController with ViewModel
+        if (_pageController.hasClients &&
+            _pageController.page?.round() != viewModel.selectedTab.index) {
+          _pageController.jumpToPage(viewModel.selectedTab.index);
+        }
 
-    // Sync PageController with ViewModel
-    if (_pageController.hasClients &&
-        _pageController.page?.round() != viewModel.selectedTab.index) {
-      _pageController.jumpToPage(viewModel.selectedTab.index);
-    }
-
-    return SafeArea(
-      child: Column(
-        children: [
-          const _AppBar(),
-          const DateFilterSelector(), // Make sure this widget exists
-          TabNavigation(
-            currentTab: viewModel.selectedTab.index,
-            onTabSelected: (index) {
-              final tab = FinanceTab.values[index];
-              viewModel.selectTab(tab);
-              _pageController.animateToPage(
-                index,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            },
-          ),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                final tab = FinanceTab.values[index];
-                if (viewModel.selectedTab != tab) {
+        return SafeArea(
+          child: Column(
+            children: [
+              const _AppBar(),
+              // DateFilterSelector should be connected to viewModel
+              Consumer<FinanceViewModel>(
+                builder: (context, viewModel, child) {
+                  return DateFilterSelector(
+                    selectedFilter: viewModel.dateFilter,
+                    onFilterChanged: (filter) {
+                      viewModel.selectDateFilter(filter);
+                    },
+                  );
+                },
+              ),
+              TabNavigation(
+                currentTab: viewModel.selectedTab.index,
+                onTabSelected: (index) {
+                  final tab = FinanceTab.values[index];
                   viewModel.selectTab(tab);
-                }
-              },
-              children: [
-                // Invoices Tab
-                _InvoiceListView(),
-                // Analytics Tab - Make sure AnalyticsView exists
-                // FinanceStats(),
-                // Pricing Tab - Make sure PricingConfigScreen exists
-                _PricingConfigView(),
-              ],
-            ),
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    final tab = FinanceTab.values[index];
+                    if (viewModel.selectedTab != tab) {
+                      viewModel.selectTab(tab);
+                    }
+                  },
+                  children: [
+                    // Invoices Tab
+                    const _InvoiceListView(),
+                    // Business Operations Tab
+                    // const _BusinessOperationsView(),
+                    // Pricing Tab
+                    const _PricingConfigView(),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
