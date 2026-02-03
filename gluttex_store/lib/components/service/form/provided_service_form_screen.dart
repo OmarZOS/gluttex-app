@@ -6,6 +6,662 @@ import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:provider/provider.dart';
 
+// ====================== DESIGN SYSTEM CONSTANTS ======================
+class AppDesignSystem {
+  static const double cardBorderRadius = 16.0;
+  static const double inputBorderRadius = 12.0;
+  static const double chipBorderRadius = 20.0;
+  static const double sectionSpacing = 24.0;
+  static const double elementSpacing = 12.0;
+  static const double smallSpacing = 8.0;
+
+  static const EdgeInsets cardPadding = EdgeInsets.all(16.0);
+  static const EdgeInsets inputPadding = EdgeInsets.symmetric(
+    horizontal: 16.0,
+    vertical: 14.0,
+  );
+  static const EdgeInsets sectionPadding = EdgeInsets.all(16.0);
+
+  static const Duration expandDuration = Duration(milliseconds: 300);
+  static const Curve expandCurve = Curves.easeInOut;
+}
+
+// ====================== REUSABLE COMPONENTS ======================
+class FormSectionHeader extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final bool isExpanded;
+  final bool isCompleted;
+  final bool isOptional;
+  final VoidCallback onTap;
+  final ColorScheme colors;
+
+  const FormSectionHeader({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.isExpanded,
+    required this.isCompleted,
+    required this.isOptional,
+    required this.onTap,
+    required this.colors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Color backgroundColor;
+    Color iconColor;
+    Color textColor;
+    IconData headerIcon;
+
+    if (isCompleted) {
+      backgroundColor = colors.primaryContainer.withOpacity(0.15);
+      iconColor = colors.primary;
+      textColor = colors.primary;
+      headerIcon = Icons.check_circle;
+    } else if (isExpanded) {
+      backgroundColor = colors.surfaceVariant;
+      iconColor = colors.secondary;
+      textColor = colors.onSurface;
+      headerIcon = icon;
+    } else {
+      backgroundColor = colors.surfaceVariant.withOpacity(0.5);
+      iconColor = colors.onSurfaceVariant;
+      textColor = colors.onSurfaceVariant;
+      headerIcon = icon;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppDesignSystem.smallSpacing),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(AppDesignSystem.cardBorderRadius),
+        border: Border.all(
+          color: isCompleted
+              ? colors.primary.withOpacity(0.2)
+              : colors.outline.withOpacity(0.1),
+          width: isCompleted ? 2 : 1,
+        ),
+        boxShadow: [
+          if (isExpanded)
+            BoxShadow(
+              color: colors.shadow.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppDesignSystem.cardBorderRadius),
+          child: Padding(
+            padding: AppDesignSystem.sectionPadding,
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isCompleted
+                        ? colors.primary.withOpacity(0.1)
+                        : colors.surfaceVariant,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: iconColor.withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    headerIcon,
+                    size: 20,
+                    color: iconColor,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          if (isOptional)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Optional',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      if (isCompleted)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            'Completed',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.primary.withOpacity(0.8),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                AnimatedRotation(
+                  turns: isExpanded ? 0 : -0.25,
+                  duration: AppDesignSystem.expandDuration,
+                  curve: AppDesignSystem.expandCurve,
+                  child: Icon(
+                    Icons.arrow_right,
+                    size: 24,
+                    color:
+                        isCompleted ? colors.primary : colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FormInputField extends StatelessWidget {
+  final String label;
+  final String? initialValue;
+  final String? hintText;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? suffixText;
+  final int? maxLines;
+  final bool isRequired;
+  final String? Function(String?)? validator;
+  final Function(String?)? onSaved;
+  final Function(String)? onChanged;
+
+  const FormInputField({
+    super.key,
+    required this.label,
+    this.initialValue,
+    this.hintText,
+    this.keyboardType,
+    this.inputFormatters,
+    this.suffixText,
+    this.maxLines = 1,
+    this.isRequired = false,
+    this.validator,
+    this.onSaved,
+    this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8, left: 4),
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: colors.onSurface,
+                ),
+              ),
+              if (isRequired)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(
+                    '*',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.error,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: colors.surfaceVariant,
+            borderRadius:
+                BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+            border: Border.all(
+              color: colors.outline.withOpacity(0.2),
+              width: 1,
+            ),
+          ),
+          child: TextFormField(
+            initialValue: initialValue,
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant.withOpacity(0.6),
+              ),
+              border: InputBorder.none,
+              contentPadding: AppDesignSystem.inputPadding,
+              suffixText: suffixText,
+              suffixStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+              floatingLabelBehavior: FloatingLabelBehavior.never,
+            ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurface,
+            ),
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            maxLines: maxLines,
+            validator: validator,
+            onSaved: onSaved,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class FormPriceField extends StatelessWidget {
+  final String label;
+  final double? value;
+  final bool isRequired;
+  final Function(double) onSaved;
+
+  const FormPriceField({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.isRequired,
+    required this.onSaved,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
+
+    return FormInputField(
+      label: label,
+      initialValue:
+          value != null && value! > 0 ? value!.toStringAsFixed(2) : '',
+      hintText: '0.00',
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
+      isRequired: isRequired,
+      suffixText: 'DZD',
+      validator: (val) {
+        if (isRequired && (val == null || val.isEmpty)) {
+          return 'This field is required';
+        }
+        if (val != null && val.isNotEmpty) {
+          final parsed = double.tryParse(val);
+          if (parsed == null || parsed < 0) {
+            return 'Please enter a valid price';
+          }
+        }
+        return null;
+      },
+      onSaved: (val) => onSaved(double.tryParse(val ?? '') ?? 0.0),
+    );
+  }
+}
+
+class FormCheckboxOption extends StatelessWidget {
+  final String label;
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+
+  const FormCheckboxOption({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+        border: Border.all(
+          color: value
+              ? colors.primary.withOpacity(0.3)
+              : colors.outline.withOpacity(0.2),
+          width: value ? 1.5 : 1,
+        ),
+      ),
+      child: CheckboxListTile(
+        title: Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colors.onSurface,
+            fontWeight: value ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+        value: value,
+        onChanged: onChanged,
+        controlAffinity: ListTileControlAffinity.leading,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+        dense: true,
+        activeColor: colors.primary,
+        checkColor: colors.onPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+        ),
+      ),
+    );
+  }
+}
+
+class FormChipInput extends StatefulWidget {
+  final String label;
+  final List<String> items;
+  final Function(String) onAdd;
+  final Function(int) onRemove;
+
+  const FormChipInput({
+    super.key,
+    required this.label,
+    required this.items,
+    required this.onAdd,
+    required this.onRemove,
+  });
+
+  @override
+  State<FormChipInput> createState() => _FormChipInputState();
+}
+
+class _FormChipInputState extends State<FormChipInput> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: colors.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colors.surfaceVariant,
+                  borderRadius:
+                      BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+                  border: Border.all(
+                    color: colors.outline.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: 'Type and press enter...',
+                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant.withOpacity(0.6),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.onSurface,
+                  ),
+                  onSubmitted: (value) {
+                    if (value.trim().isNotEmpty) {
+                      widget.onAdd(value.trim());
+                      _controller.clear();
+                    }
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: colors.primary,
+                borderRadius:
+                    BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+              ),
+              child: IconButton(
+                onPressed: () {
+                  final value = _controller.text.trim();
+                  if (value.isNotEmpty) {
+                    widget.onAdd(value);
+                    _controller.clear();
+                  }
+                },
+                icon: Icon(Icons.add, color: colors.onPrimary),
+                splashRadius: 20,
+              ),
+            ),
+          ],
+        ),
+        if (widget.items.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: widget.items.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return Container(
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer,
+                  borderRadius:
+                      BorderRadius.circular(AppDesignSystem.chipBorderRadius),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        item,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.onPrimaryContainer,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      GestureDetector(
+                        onTap: () => widget.onRemove(index),
+                        child: Icon(
+                          Icons.close,
+                          size: 16,
+                          color: colors.onPrimaryContainer.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class RequirementCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const RequirementCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppDesignSystem.smallSpacing),
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        borderRadius: BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+        border: Border.all(
+          color: colors.outline.withOpacity(0.1),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          title: Text(
+            title,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: colors.onSurface,
+            ),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: onEdit,
+                icon: Icon(Icons.edit, size: 20, color: colors.primary),
+                splashRadius: 20,
+              ),
+              IconButton(
+                onPressed: onDelete,
+                icon: Icon(Icons.delete, size: 20, color: colors.error),
+                splashRadius: 20,
+              ),
+            ],
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class EmptyState extends StatelessWidget {
+  final String message;
+  final IconData icon;
+
+  const EmptyState({
+    super.key,
+    required this.message,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Container(
+      padding: AppDesignSystem.cardPadding,
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(AppDesignSystem.cardBorderRadius),
+        border: Border.all(
+          color: colors.outline.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 48,
+            color: colors.onSurfaceVariant.withOpacity(0.4),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ====================== MAIN FORM SCREEN ======================
 class ProvidedServiceFormScreen extends StatefulWidget {
   const ProvidedServiceFormScreen({super.key});
 
@@ -18,22 +674,18 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
 
-  // Basic Information
+  // Form data
   String _serviceName = '';
   String _serviceDescription = '';
   int _categoryId = 0;
   int _providerId = 0;
-
-  // Pricing
   double _basePrice = 0.0;
   double _finalPrice = 0.0;
-  int _actualDuration = 0; // in minutes
+  int _actualDuration = 0;
 
-  // Requirements
   final List<ServiceResourceRequirement> _resourceRequirements = [];
   final List<ServiceStaffRequirement> _staffRequirements = [];
 
-  // Pricing Config
   String _recommendedAge = '';
   String _recommendedFrequency = '';
   String _ageGroup = '';
@@ -53,32 +705,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
   DateTime? _updatedAt;
   bool _initialized = false;
 
-  // Controllers
-  final TextEditingController _staffRoleController = TextEditingController();
-  final TextEditingController _staffMinCountController =
-      TextEditingController(text: '1');
-  final TextEditingController _staffMaxCountController =
-      TextEditingController(text: '1');
-  final TextEditingController _staffHoursController =
-      TextEditingController(text: '1.0');
-  final TextEditingController _staffRateController =
-      TextEditingController(text: '0.0');
-  final TextEditingController _staffNotesController = TextEditingController();
-  final TextEditingController _resourceNameController = TextEditingController();
-  final TextEditingController _resourceTypeController = TextEditingController();
-  final TextEditingController _resourceQuantityController =
-      TextEditingController(text: '1.0');
-  final TextEditingController _resourceCostController =
-      TextEditingController(text: '0.0');
-  final TextEditingController _resourceNotesController =
-      TextEditingController();
-  final TextEditingController _materialController = TextEditingController();
-  final TextEditingController _includesController = TextEditingController();
-
-  bool _resourceIsConsumable = true;
-  int? _resourceProductRef;
-
-  // Section expansion states
+  // Section states
   bool _basicInfoExpanded = true;
   bool _pricingExpanded = true;
   bool _pricingConfigExpanded = false;
@@ -86,77 +713,80 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
   bool _staffExpanded = false;
   bool _costSummaryExpanded = false;
 
+  // Completion states
+  bool _basicInfoCompleted = false;
+  bool _pricingCompleted = false;
+  bool _pricingConfigCompleted = false;
+  bool _resourcesCompleted = false;
+  bool _staffCompleted = false;
+  bool _costSummaryCompleted = false;
+
   @override
   void initState() {
     super.initState();
-    _log('initState called');
+    _log('Form initialized');
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      try {
-        final args =
-            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-        final ProvidedService? service = args?["service"];
+      _initializeForm();
+      _initialized = true;
+    }
+  }
 
-        if (service != null) {
-          _updatePage = true;
-          _id = service.id;
-          _serviceName = service.name;
-          _serviceDescription = service.description;
-          _categoryId = service.categoryId;
-          _providerId = service.productProviderId;
-          _basePrice = service.basePrice;
-          _finalPrice = service.finalPrice;
-          _actualDuration = service.actualDuration;
-          _isActive = service.isActive;
-          _createdAt = service.createdAt;
-          _updatedAt = service.updatedAt;
+  void _initializeForm() {
+    try {
+      final route = ModalRoute.of(context);
+      final args = route?.settings.arguments;
+      ProvidedService? service;
 
-          final config = service.pricingConfig;
-          _recommendedAge = config.recommendedAge ?? '';
-          _recommendedFrequency = config.recommendedFrequency ?? '';
-          _ageGroup = config.ageGroup ?? '';
-          _sampleType = config.sampleType ?? '';
-          _specialistConsultation = config.specialistConsultation ?? false;
-          _governmentFunded = config.governmentFunded ?? false;
-          _consultationIncluded = config.consultationIncluded ?? false;
-          _digitalImaging = config.digitalImaging ?? false;
-          _materialOptions = config.materialOptions ?? [];
-          _includes = config.includes ?? [];
-
-          _resourceRequirements.addAll(service.resourceRequirements);
-          _staffRequirements.addAll(service.staffRequirements);
-        } else {
-          _providerId = 0;
-        }
-
-        _initialized = true;
-        _log('Form initialized successfully');
-      } catch (e, stackTrace) {
-        _logError('Error in didChangeDependencies', e, stackTrace);
+      if (args is Map<String, dynamic>) {
+        service = args["service"] as ProvidedService?;
       }
+      if (service != null) {
+        _updatePage = true;
+        _id = service.id;
+        _serviceName = service.name;
+        _serviceDescription = service.description;
+        _categoryId = service.categoryId;
+        _providerId = service.productProviderId;
+        _basePrice = service.basePrice;
+        _finalPrice = service.finalPrice;
+        _actualDuration = service.actualDuration;
+        _isActive = service.isActive;
+        _createdAt = service.createdAt;
+        _updatedAt = service.updatedAt;
+
+        final config = service.pricingConfig;
+        _recommendedAge = config.recommendedAge ?? '';
+        _recommendedFrequency = config.recommendedFrequency ?? '';
+        _ageGroup = config.ageGroup ?? '';
+        _sampleType = config.sampleType ?? '';
+        _specialistConsultation = config.specialistConsultation ?? false;
+        _governmentFunded = config.governmentFunded ?? false;
+        _consultationIncluded = config.consultationIncluded ?? false;
+        _digitalImaging = config.digitalImaging ?? false;
+        _materialOptions = config.materialOptions ?? [];
+        _includes = config.includes ?? [];
+
+        _resourceRequirements.addAll(service.resourceRequirements);
+        _staffRequirements.addAll(service.staffRequirements);
+      } else {
+        _providerId = 0;
+      }
+
+      _updateCompletionStates();
+      _log('Form data loaded successfully');
+    } catch (e, stackTrace) {
+      _logError('Error loading form data', e, stackTrace);
     }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _staffRoleController.dispose();
-    _staffMinCountController.dispose();
-    _staffMaxCountController.dispose();
-    _staffHoursController.dispose();
-    _staffRateController.dispose();
-    _staffNotesController.dispose();
-    _resourceNameController.dispose();
-    _resourceTypeController.dispose();
-    _resourceQuantityController.dispose();
-    _resourceCostController.dispose();
-    _resourceNotesController.dispose();
-    _materialController.dispose();
-    _includesController.dispose();
     super.dispose();
   }
 
@@ -165,639 +795,34 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
   }
 
   void _logError(String message, Object error, StackTrace stackTrace) {
-    developer.log('ProvidedServiceForm ERROR: $message - $error',
+    developer.log('ERROR: $message - $error',
         name: 'ProvidedServiceForm', error: error, stackTrace: stackTrace);
   }
 
-  // UI Helper Methods
-  Widget _buildSectionHeader({
-    required AppLocalizations loc,
-    required String titleKey,
-    required IconData icon,
-    required bool isExpanded,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+  // Completion checking
+  void _updateCompletionStates() {
+    _basicInfoCompleted = _serviceName.isNotEmpty &&
+        _categoryId > 0 &&
+        _providerId > 0 &&
+        _actualDuration > 0;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isExpanded ? colors.primaryContainer : colors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isExpanded ? colors.primary : colors.onSurfaceVariant,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon,
-              size: 20,
-              color: isExpanded ? colors.onPrimary : colors.onSurfaceVariant),
-        ),
-        title: Text(
-          _getLocalizedText(loc, titleKey, titleKey),
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: isExpanded ? colors.primary : colors.onSurfaceVariant,
-          ),
-        ),
-        trailing: Icon(
-          isExpanded ? Icons.expand_less : Icons.expand_more,
-          color: isExpanded ? colors.primary : colors.onSurfaceVariant,
-        ),
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
+    _pricingCompleted = _basePrice > 0 && _finalPrice > 0;
+
+    _pricingConfigCompleted = _ageGroup.isNotEmpty ||
+        _sampleType.isNotEmpty ||
+        _specialistConsultation ||
+        _governmentFunded ||
+        _consultationIncluded ||
+        _digitalImaging ||
+        _materialOptions.isNotEmpty ||
+        _includes.isNotEmpty;
+
+    _resourcesCompleted = _resourceRequirements.isNotEmpty;
+    _staffCompleted = _staffRequirements.isNotEmpty;
+    _costSummaryCompleted = _finalPrice > 0 && _totalCost > 0;
   }
 
-  Widget _buildInputField({
-    required AppLocalizations loc,
-    required String labelKey,
-    required String? initialValue,
-    required Function(String?) onSaved,
-    String? hintTextKey,
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
-    String? suffixText,
-    int? maxLines,
-    String? Function(String?)? validator,
-    bool isRequired = false,
-  }) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (labelKey.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8, left: 4),
-            child: Row(
-              children: [
-                Text(
-                  _getLocalizedText(loc, labelKey, labelKey),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-                if (isRequired)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Text(
-                      '*',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colors.error,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        Container(
-          decoration: BoxDecoration(
-            color: colors.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colors.outline.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: TextFormField(
-            initialValue: initialValue,
-            decoration: InputDecoration(
-              hintText: hintTextKey != null
-                  ? _getLocalizedText(loc, hintTextKey, hintTextKey)
-                  : null,
-              hintStyle:
-                  TextStyle(color: colors.onSurfaceVariant.withOpacity(0.6)),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-              suffixText: suffixText,
-              suffixStyle: TextStyle(
-                color: colors.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurface,
-            ),
-            keyboardType: keyboardType,
-            inputFormatters: inputFormatters,
-            maxLines: maxLines,
-            onSaved: onSaved,
-            validator: validator,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceField({
-    required AppLocalizations loc,
-    required String labelKey,
-    required double? value,
-    required Function(double) onSaved,
-    bool isRequired = false,
-  }) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8, left: 4),
-          child: Row(
-            children: [
-              Text(
-                _getLocalizedText(loc, labelKey, labelKey),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-              if (isRequired)
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Text(
-                    '*',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.error,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: colors.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colors.outline.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: TextFormField(
-            initialValue:
-                value != null && value > 0 ? value.toStringAsFixed(2) : '',
-            decoration: InputDecoration(
-              hintText: _getLocalizedText(loc, 'enterPriceHint', '0.00'),
-              hintStyle:
-                  TextStyle(color: colors.onSurfaceVariant.withOpacity(0.6)),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-              suffixText: 'DZD',
-              suffixStyle: TextStyle(
-                color: colors.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurface,
-            ),
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            validator: (val) {
-              if (isRequired && (val == null || val.isEmpty)) {
-                return _getLocalizedText(
-                    loc, 'priceRequired', 'This field is required');
-              }
-              if (val != null && val.isNotEmpty) {
-                final parsed = double.tryParse(val);
-                if (parsed == null || parsed < 0) {
-                  return _getLocalizedText(
-                      loc, 'invalidPrice', 'Please enter a valid price');
-                }
-              }
-              return null;
-            },
-            onSaved: (val) {
-              onSaved(double.tryParse(val ?? '') ?? 0.0);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCheckboxOption({
-    required AppLocalizations loc,
-    required String labelKey,
-    required bool value,
-    required ValueChanged<bool?> onChanged,
-  }) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: CheckboxListTile(
-        title: Text(
-          _getLocalizedText(loc, labelKey, labelKey),
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colors.onSurface,
-          ),
-        ),
-        value: value,
-        onChanged: onChanged,
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-        dense: true,
-        activeColor: colors.primary,
-        checkColor: colors.onPrimary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChipInput({
-    required AppLocalizations loc,
-    required String labelKey,
-    required TextEditingController controller,
-    required VoidCallback onAdd,
-    required List<String> items,
-    required Function(int) onRemove,
-  }) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          _getLocalizedText(loc, labelKey, labelKey),
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colors.outline.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: TextField(
-                  controller: controller,
-                  decoration: InputDecoration(
-                    hintText: _getLocalizedText(
-                        loc, 'typeAndPressEnter', 'Type and press enter...'),
-                    hintStyle: TextStyle(
-                        color: colors.onSurfaceVariant.withOpacity(0.6)),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.onSurface,
-                  ),
-                  onSubmitted: (_) => onAdd(),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: colors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: onAdd,
-                icon: Icon(Icons.add, color: colors.onPrimary),
-                splashRadius: 20,
-              ),
-            ),
-          ],
-        ),
-        if (items.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: items.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              return InputChip(
-                label: Text(item),
-                onDeleted: () => onRemove(index),
-                deleteIconColor: colors.error,
-                backgroundColor: colors.primaryContainer,
-                labelStyle: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.onPrimaryContainer,
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildRequirementCard({
-    required AppLocalizations loc,
-    required String title,
-    required String subtitle,
-    required VoidCallback onEdit,
-    required VoidCallback onDelete,
-  }) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colors.outline.withOpacity(0.2),
-        ),
-      ),
-      child: ListTile(
-        title: Text(
-          title,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.onSurface,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              onPressed: onEdit,
-              icon: Icon(Icons.edit, size: 20, color: colors.primary),
-              splashRadius: 20,
-            ),
-            IconButton(
-              onPressed: onDelete,
-              icon: Icon(Icons.delete, size: 20, color: colors.error),
-              splashRadius: 20,
-            ),
-          ],
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState({
-    required AppLocalizations loc,
-    required String messageKey,
-    required IconData icon,
-  }) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colors.outline.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 48, color: colors.onSurfaceVariant.withOpacity(0.5)),
-          const SizedBox(height: 12),
-          Text(
-            _getLocalizedText(loc, messageKey, messageKey),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFloatingActionButton({
-    required AppLocalizations loc,
-    required String tooltipKey,
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    final colors = Theme.of(context).colorScheme;
-
-    return FloatingActionButton.small(
-      onPressed: onPressed,
-      backgroundColor: colors.primary,
-      foregroundColor: colors.onPrimary,
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(icon, size: 20),
-      tooltip: _getLocalizedText(loc, tooltipKey, tooltipKey),
-    );
-  }
-
-  Widget _buildSaveButton({required AppLocalizations loc}) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        border: Border(
-          top: BorderSide(color: colors.outline.withOpacity(0.1)),
-        ),
-      ),
-      child: ElevatedButton(
-        onPressed: _submitForm,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colors.primary,
-          foregroundColor: colors.onPrimary,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 0,
-          shadowColor: Colors.transparent,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.save, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              _updatePage
-                  ? _getLocalizedText(loc, 'updateService', 'Update Service')
-                  : _getLocalizedText(loc, 'createService', 'Create Service'),
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Helper method to get localized text with fallback
-  String _getLocalizedText(AppLocalizations loc, String key, String fallback) {
-    try {
-      switch (key) {
-        case 'basicInformation':
-          return loc.basicInformation ?? fallback;
-        case 'serviceName':
-          return loc.serviceName ?? fallback;
-        case 'enterServiceName':
-          return loc.enterServiceName ?? fallback;
-        case 'serviceNameRequired':
-          return loc.serviceNameRequired ?? fallback;
-        case 'description':
-          return loc.description ?? fallback;
-        case 'enterDescription':
-          return loc.enterDescription ?? fallback;
-        case 'categoryId':
-          return loc.categoryId ?? fallback;
-        case 'enterCategoryId':
-          return loc.enterCategoryId ?? fallback;
-        case 'providerId':
-          return loc.providerId ?? fallback;
-        case 'enterProviderId':
-          return loc.enterProviderId ?? fallback;
-        case 'durationMinutes':
-          return loc.durationMinutes ?? fallback;
-        case 'enterDuration':
-          return loc.enterDuration ?? fallback;
-        case 'pricing':
-          return loc.pricing ?? fallback;
-        case 'basePrice':
-          return loc.basePrice ?? fallback;
-        case 'finalPrice':
-          return loc.finalPrice ?? fallback;
-        case 'enterPriceHint':
-          return loc.enterPrice ?? fallback;
-        case 'priceRequired':
-          return loc.priceRequired ?? fallback;
-        case 'invalidPrice':
-          return loc.invalidPrice ?? fallback;
-        case 'pricingConfiguration':
-          return loc.pricingConfiguration ?? fallback;
-        case 'ageGroup':
-          return loc.ageGroup ?? fallback;
-        case 'enterAgeGroup':
-          return loc.enterAgeGroup ?? fallback;
-        case 'sampleType':
-          return loc.sampleType ?? fallback;
-        case 'enterSampleType':
-          return loc.enterSampleType ?? fallback;
-        case 'specialistConsultation':
-          return loc.specialistConsultation ?? fallback;
-        case 'governmentFunded':
-          return loc.governmentFunded ?? fallback;
-        case 'consultationIncluded':
-          return loc.consultationIncluded ?? fallback;
-        case 'digitalImaging':
-          return loc.digitalImaging ?? fallback;
-        case 'materialOptions':
-          return loc.materialOptions ?? fallback;
-        case 'includes':
-          return loc.includes ?? fallback;
-        case 'typeAndPressEnter':
-          return loc.typeAndPressEnter ?? fallback;
-        case 'resourceRequirements':
-          return loc.resourceRequirements ?? fallback;
-        case 'noResourcesAdded':
-          return loc.noResourcesAdded ?? fallback;
-        case 'addResource':
-          return loc.addResource ?? fallback;
-        case 'staffRequirements':
-          return loc.staffRequirements ?? fallback;
-        case 'noStaffAdded':
-          return loc.noStaffAdded ?? fallback;
-        case 'addStaff':
-          return loc.addStaff ?? fallback;
-        case 'costSummary':
-          return loc.costSummary ?? fallback;
-        case 'updateService':
-          return loc.updateService ?? fallback;
-        case 'createService':
-          return loc.createService ?? fallback;
-        case 'editService':
-          return loc.editService ?? fallback;
-        case 'resourceCost':
-          return loc.resourceCost ?? fallback;
-        case 'staffCost':
-          return loc.staffCost ?? fallback;
-        case 'totalCost':
-          return loc.totalCost ?? fallback;
-        case 'finalPriceLabel':
-          return loc.finalPriceLabel ?? fallback;
-        case 'profitMargin':
-          return loc.profitMargin ?? fallback;
-        default:
-          return fallback;
-      }
-    } catch (e) {
-      return fallback;
-    }
-  }
-
-  // Dialog Methods (simplified for brevity)
-  void _showStaffRequirementDialog({
-    required AppLocalizations loc,
-    ServiceStaffRequirement? existing,
-    int? index,
-  }) {
-    // Implementation for staff requirement dialog
-    // Would use localization keys: 'addStaffRequirement', 'editStaffRequirement', etc.
-  }
-
-  void _showResourceRequirementDialog({
-    required AppLocalizations loc,
-    ServiceResourceRequirement? existing,
-    int? index,
-  }) {
-    // Implementation for resource requirement dialog
-    // Would use localization keys: 'addResourceRequirement', 'editResourceRequirement', etc.
-  }
-
-  // Calculation Methods
+  // Calculations
   double get _totalResourceCost {
     return _resourceRequirements.fold(
       0.0,
@@ -819,8 +844,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
   double get _totalCost => _totalResourceCost + _totalStaffCost;
 
   double get _profitMargin {
-    if (_finalPrice == 0) return 0;
-    return ((_finalPrice - _totalCost) / _finalPrice * 100);
+    if (_finalPrice <= 0) return 0;
+    return ((_finalPrice - _totalCost) / _finalPrice * 100)
+        .clamp(-100.0, 100.0);
   }
 
   double get _discountPercentage {
@@ -828,7 +854,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
     return ((_basePrice - _finalPrice) / _basePrice * 100);
   }
 
-  // Form Submission
+  // Form submission
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -848,7 +874,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
       );
 
       final service = ProvidedService(
-        id: _id, // 0 for new services, existing ID for updates
+        id: _id,
         name: _serviceName,
         description: _serviceDescription,
         categoryId: _categoryId,
@@ -870,516 +896,185 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
+  Widget _buildProgressSection() {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _updatePage
-              ? _getLocalizedText(loc, 'editService', 'Edit Service')
-              : _getLocalizedText(loc, 'createService', 'Create Service'),
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+    final totalSections = 6;
+    final completedSections = [
+      _basicInfoCompleted,
+      _pricingCompleted,
+      _pricingConfigCompleted,
+      _resourcesCompleted,
+      _staffCompleted,
+      _costSummaryCompleted,
+    ].where((completed) => completed).length;
+    final progress = completedSections / totalSections;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(
+          top: BorderSide(color: colors.outline.withOpacity(0.1)),
         ),
-        centerTitle: false,
-        elevation: 0,
-        backgroundColor: colors.surface,
-        foregroundColor: colors.onSurface,
-        actions: [
-          IconButton(
-            onPressed: () => _scrollController.animateTo(
-              0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            ),
-            icon: Icon(Icons.arrow_upward, color: colors.primary),
-            tooltip: _getLocalizedText(loc, 'scrollToTop', 'Scroll to top'),
-          ),
-        ],
       ),
-      body: Column(
+      child: Column(
         children: [
-          Expanded(
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Basic Information Section
-                    _buildSectionHeader(
-                      loc: loc,
-                      titleKey: 'basicInformation',
-                      icon: Icons.info_outline,
-                      isExpanded: _basicInfoExpanded,
-                      onTap: () => setState(
-                          () => _basicInfoExpanded = !_basicInfoExpanded),
-                    ),
-                    if (_basicInfoExpanded) ...[
-                      const SizedBox(height: 16),
-                      _buildInputField(
-                        loc: loc,
-                        labelKey: 'serviceName',
-                        initialValue: _serviceName,
-                        isRequired: true,
-                        hintTextKey: 'enterServiceName',
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
-                            return _getLocalizedText(loc, 'serviceNameRequired',
-                                'Service name is required');
-                          }
-                          return null;
-                        },
-                        onSaved: (val) => _serviceName = val ?? '',
-                      ),
-                      const SizedBox(height: 12),
-                      _buildInputField(
-                        loc: loc,
-                        labelKey: 'description',
-                        initialValue: _serviceDescription,
-                        hintTextKey: 'enterDescription',
-                        maxLines: 3,
-                        onSaved: (val) => _serviceDescription = val ?? '',
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildInputField(
-                              loc: loc,
-                              labelKey: 'categoryId',
-                              initialValue:
-                                  _categoryId > 0 ? _categoryId.toString() : '',
-                              hintTextKey: 'enterCategoryId',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              onSaved: (val) =>
-                                  _categoryId = int.tryParse(val ?? '') ?? 0,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildInputField(
-                              loc: loc,
-                              labelKey: 'providerId',
-                              initialValue:
-                                  _providerId > 0 ? _providerId.toString() : '',
-                              hintTextKey: 'enterProviderId',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              onSaved: (val) =>
-                                  _providerId = int.tryParse(val ?? '') ?? 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _buildInputField(
-                        loc: loc,
-                        labelKey: 'durationMinutes',
-                        initialValue: _actualDuration > 0
-                            ? _actualDuration.toString()
-                            : '',
-                        hintTextKey: 'enterDuration',
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        suffixText: _getLocalizedText(loc, 'minutes', 'min'),
-                        onSaved: (val) =>
-                            _actualDuration = int.tryParse(val ?? '') ?? 0,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Pricing Section
-                    _buildSectionHeader(
-                      loc: loc,
-                      titleKey: 'pricing',
-                      icon: Icons.attach_money,
-                      isExpanded: _pricingExpanded,
-                      onTap: () =>
-                          setState(() => _pricingExpanded = !_pricingExpanded),
-                    ),
-                    if (_pricingExpanded) ...[
-                      const SizedBox(height: 16),
-                      _buildPriceField(
-                        loc: loc,
-                        labelKey: 'basePrice',
-                        value: _basePrice,
-                        onSaved: (val) => _basePrice = val,
-                        isRequired: true,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildPriceField(
-                        loc: loc,
-                        labelKey: 'finalPrice',
-                        value: _finalPrice,
-                        onSaved: (val) => _finalPrice = val,
-                        isRequired: true,
-                      ),
-                      if (_basePrice > 0 && _finalPrice > 0) ...[
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: _discountPercentage > 0
-                                ? colors.primaryContainer.withOpacity(0.2)
-                                : colors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: _discountPercentage > 0
-                                  ? colors.primary.withOpacity(0.3)
-                                  : colors.outline.withOpacity(0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                _discountPercentage > 0
-                                    ? Icons.discount
-                                    : Icons.price_check,
-                                color: _discountPercentage > 0
-                                    ? colors.primary
-                                    : colors.onSurfaceVariant,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _discountPercentage > 0
-                                      ? '${_discountPercentage.toStringAsFixed(1)}% ${_getLocalizedText(loc, 'discountApplied', 'discount applied')}'
-                                      : _getLocalizedText(
-                                          loc, 'noDiscount', 'No discount'),
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: _discountPercentage > 0
-                                        ? colors.primary
-                                        : colors.onSurfaceVariant,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Pricing Configuration Section
-                    _buildSectionHeader(
-                      loc: loc,
-                      titleKey: 'pricingConfiguration',
-                      icon: Icons.settings,
-                      isExpanded: _pricingConfigExpanded,
-                      onTap: () => setState(() =>
-                          _pricingConfigExpanded = !_pricingConfigExpanded),
-                    ),
-                    if (_pricingConfigExpanded) ...[
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildInputField(
-                              loc: loc,
-                              labelKey: 'ageGroup',
-                              initialValue: _ageGroup,
-                              hintTextKey: 'enterAgeGroup',
-                              onSaved: (val) => _ageGroup = val ?? '',
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildInputField(
-                              loc: loc,
-                              labelKey: 'sampleType',
-                              initialValue: _sampleType,
-                              hintTextKey: 'enterSampleType',
-                              onSaved: (val) => _sampleType = val ?? '',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Column(
-                        children: [
-                          _buildCheckboxOption(
-                            loc: loc,
-                            labelKey: 'specialistConsultation',
-                            value: _specialistConsultation,
-                            onChanged: (val) => setState(
-                                () => _specialistConsultation = val ?? false),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildCheckboxOption(
-                            loc: loc,
-                            labelKey: 'governmentFunded',
-                            value: _governmentFunded,
-                            onChanged: (val) => setState(
-                                () => _governmentFunded = val ?? false),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildCheckboxOption(
-                            loc: loc,
-                            labelKey: 'consultationIncluded',
-                            value: _consultationIncluded,
-                            onChanged: (val) => setState(
-                                () => _consultationIncluded = val ?? false),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildCheckboxOption(
-                            loc: loc,
-                            labelKey: 'digitalImaging',
-                            value: _digitalImaging,
-                            onChanged: (val) =>
-                                setState(() => _digitalImaging = val ?? false),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _buildChipInput(
-                        loc: loc,
-                        labelKey: 'materialOptions',
-                        controller: _materialController,
-                        onAdd: _addMaterialOption,
-                        items: _materialOptions,
-                        onRemove: _removeMaterialOption,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildChipInput(
-                        loc: loc,
-                        labelKey: 'includes',
-                        controller: _includesController,
-                        onAdd: _addInclude,
-                        items: _includes,
-                        onRemove: _removeInclude,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Resource Requirements Section
-                    _buildSectionHeader(
-                      loc: loc,
-                      titleKey: 'resourceRequirements',
-                      icon: Icons.inventory,
-                      isExpanded: _resourcesExpanded,
-                      onTap: () => setState(
-                          () => _resourcesExpanded = !_resourcesExpanded),
-                    ),
-                    if (_resourcesExpanded) ...[
-                      const SizedBox(height: 16),
-                      if (_resourceRequirements.isEmpty)
-                        _buildEmptyState(
-                          loc: loc,
-                          messageKey: 'noResourcesAdded',
-                          icon: Icons.inventory_2_outlined,
-                        )
-                      else
-                        ..._resourceRequirements.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final req = entry.value;
-                          return _buildRequirementCard(
-                            loc: loc,
-                            title: req.name,
-                            subtitle:
-                                '${req.quantity} × DZD ${req.costPerUnit.toStringAsFixed(2)} = DZD ${req.totalCost.toStringAsFixed(2)}',
-                            onEdit: () => _showResourceRequirementDialog(
-                              loc: loc,
-                              existing: req,
-                              index: index,
-                            ),
-                            onDelete: () => setState(() {
-                              _resourceRequirements.removeAt(index);
-                            }),
-                          );
-                        }).toList(),
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: _buildFloatingActionButton(
-                          loc: loc,
-                          icon: Icons.add,
-                          tooltipKey: 'addResource',
-                          onPressed: () =>
-                              _showResourceRequirementDialog(loc: loc),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Staff Requirements Section
-                    _buildSectionHeader(
-                      loc: loc,
-                      titleKey: 'staffRequirements',
-                      icon: Icons.people,
-                      isExpanded: _staffExpanded,
-                      onTap: () =>
-                          setState(() => _staffExpanded = !_staffExpanded),
-                    ),
-                    if (_staffExpanded) ...[
-                      const SizedBox(height: 16),
-                      if (_staffRequirements.isEmpty)
-                        _buildEmptyState(
-                          loc: loc,
-                          messageKey: 'noStaffAdded',
-                          icon: Icons.people_outline,
-                        )
-                      else
-                        ..._staffRequirements.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final req = entry.value;
-                          return _buildRequirementCard(
-                            loc: loc,
-                            title:
-                                '${req.role} (${req.minCount}-${req.maxCount})',
-                            subtitle:
-                                '${req.allocatedHours}h × DZD ${req.hourlyRate.toStringAsFixed(2)}/h ≈ DZD ${req.averageCost.toStringAsFixed(2)}',
-                            onEdit: () => _showStaffRequirementDialog(
-                              loc: loc,
-                              existing: req,
-                              index: index,
-                            ),
-                            onDelete: () => setState(() {
-                              _staffRequirements.removeAt(index);
-                            }),
-                          );
-                        }).toList(),
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: _buildFloatingActionButton(
-                          loc: loc,
-                          icon: Icons.add,
-                          tooltipKey: 'addStaff',
-                          onPressed: () =>
-                              _showStaffRequirementDialog(loc: loc),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Cost Summary Section
-                    _buildSectionHeader(
-                      loc: loc,
-                      titleKey: 'costSummary',
-                      icon: Icons.calculate,
-                      isExpanded: _costSummaryExpanded,
-                      onTap: () => setState(
-                          () => _costSummaryExpanded = !_costSummaryExpanded),
-                    ),
-                    if (_costSummaryExpanded) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: colors.surfaceVariant,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          children: [
-                            _buildCostRow(
-                              loc: loc,
-                              labelKey: 'resourceCost',
-                              value: _totalResourceCost,
-                              color: colors.onSurfaceVariant,
-                            ),
-                            const SizedBox(height: 8),
-                            _buildCostRow(
-                              loc: loc,
-                              labelKey: 'staffCost',
-                              value: _totalStaffCost,
-                              color: colors.onSurfaceVariant,
-                            ),
-                            const Divider(height: 24),
-                            _buildCostRow(
-                              loc: loc,
-                              labelKey: 'totalCost',
-                              value: _totalCost,
-                              color: colors.onSurface,
-                              isBold: true,
-                            ),
-                            if (_finalPrice > 0) ...[
-                              const SizedBox(height: 16),
-                              _buildCostRow(
-                                loc: loc,
-                                labelKey: 'finalPriceLabel',
-                                value: _finalPrice,
-                                color: colors.primary,
-                                isBold: true,
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: _profitMargin >= 20
-                                      ? colors.primaryContainer.withOpacity(0.3)
-                                      : _profitMargin >= 10
-                                          ? colors.secondaryContainer
-                                              .withOpacity(0.3)
-                                          : colors.errorContainer
-                                              .withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      _getLocalizedText(
-                                          loc, 'profitMargin', 'Profit Margin'),
-                                      style:
-                                          theme.textTheme.bodyMedium?.copyWith(
-                                        fontWeight: FontWeight.w500,
-                                        color: colors.onSurfaceVariant,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${_profitMargin.toStringAsFixed(1)}%',
-                                      style:
-                                          theme.textTheme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: _profitMargin >= 20
-                                            ? colors.primary
-                                            : _profitMargin >= 10
-                                                ? colors.secondary
-                                                : colors.error,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                  ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Progress: ${(progress * 100).toInt()}%',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
                 ),
+              ),
+              Text(
+                '$completedSections/$totalSections',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: colors.surfaceVariant,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              progress == 1.0 ? colors.primary : colors.secondary,
+            ),
+            minHeight: 4,
+            borderRadius: BorderRadius.circular(2),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _submitForm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: progress == 1.0
+                    ? colors.primary
+                    : colors.primary.withOpacity(0.7),
+                foregroundColor: colors.onPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+                ),
+                elevation: 0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    progress == 1.0 ? Icons.check_circle : Icons.save,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _updatePage ? 'Update Service' : 'Create Service',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // Save Button
-          _buildSaveButton(loc: loc),
+  Widget _buildCostSummary() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
+
+    return Container(
+      padding: AppDesignSystem.cardPadding,
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        borderRadius: BorderRadius.circular(AppDesignSystem.cardBorderRadius),
+      ),
+      child: Column(
+        children: [
+          _buildCostRow(
+            label: 'Resource Cost',
+            value: _totalResourceCost,
+            color: colors.onSurfaceVariant,
+          ),
+          const SizedBox(height: AppDesignSystem.smallSpacing),
+          _buildCostRow(
+            label: 'Staff Cost',
+            value: _totalStaffCost,
+            color: colors.onSurfaceVariant,
+          ),
+          const SizedBox(height: AppDesignSystem.smallSpacing),
+          Divider(color: colors.outline.withOpacity(0.3)),
+          const SizedBox(height: AppDesignSystem.smallSpacing),
+          _buildCostRow(
+            label: 'Total Cost',
+            value: _totalCost,
+            color: colors.onSurface,
+            isBold: true,
+          ),
+          if (_finalPrice > 0) ...[
+            const SizedBox(height: 16),
+            _buildCostRow(
+              label: 'Final Price',
+              value: _finalPrice,
+              color: colors.primary,
+              isBold: true,
+            ),
+            const SizedBox(height: AppDesignSystem.smallSpacing),
+            Container(
+              padding: AppDesignSystem.cardPadding,
+              decoration: BoxDecoration(
+                color: _profitMargin >= 20
+                    ? colors.primaryContainer.withOpacity(0.2)
+                    : _profitMargin >= 10
+                        ? colors.secondaryContainer.withOpacity(0.2)
+                        : colors.errorContainer.withOpacity(0.2),
+                borderRadius:
+                    BorderRadius.circular(AppDesignSystem.inputBorderRadius),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Profit Margin',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    '${_profitMargin.toStringAsFixed(1)}%',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: _profitMargin >= 20
+                          ? colors.primary
+                          : _profitMargin >= 10
+                              ? colors.secondary
+                              : colors.error,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildCostRow({
-    required AppLocalizations loc,
-    required String labelKey,
+    required String label,
     required double value,
     required Color color,
     bool isBold = false,
@@ -1390,7 +1085,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          _getLocalizedText(loc, labelKey, labelKey),
+          label,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
             color: color,
@@ -1407,36 +1102,486 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
     );
   }
 
-  // Material/Include methods
-  void _addMaterialOption() {
-    final material = _materialController.text.trim();
-    if (material.isNotEmpty && !_materialOptions.contains(material)) {
-      setState(() {
-        _materialOptions.add(material);
-        _materialController.clear();
-      });
-    }
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          _updatePage ? 'Edit Service' : 'Create Service',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: false,
+        elevation: 0,
+        backgroundColor: colors.surface,
+        foregroundColor: colors.onSurface,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Basic Information
+                    FormSectionHeader(
+                      title: 'Basic Information',
+                      icon: Icons.info_outline,
+                      isExpanded: _basicInfoExpanded,
+                      isCompleted: _basicInfoCompleted,
+                      isOptional: false,
+                      onTap: () => setState(
+                        () => _basicInfoExpanded = !_basicInfoExpanded,
+                      ),
+                      colors: colors,
+                    ),
+                    if (_basicInfoExpanded) ...[
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      FormInputField(
+                        label: 'Service Name',
+                        initialValue: _serviceName,
+                        hintText: 'Enter service name',
+                        isRequired: true,
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return 'Service name is required';
+                          }
+                          return null;
+                        },
+                        onSaved: (val) {
+                          _serviceName = val ?? '';
+                        },
+                        onChanged: (_) {
+                          setState(_updateCompletionStates);
+                        },
+                      ),
+                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      FormInputField(
+                        label: 'Description',
+                        initialValue: _serviceDescription,
+                        hintText: 'Enter description',
+                        maxLines: 3,
+                        onSaved: (val) {
+                          _serviceDescription = val ?? '';
+                          _updateCompletionStates();
+                        },
+                      ),
+                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FormInputField(
+                              label: 'Category ID',
+                              initialValue:
+                                  _categoryId > 0 ? _categoryId.toString() : '',
+                              hintText: 'Enter category ID',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              onSaved: (val) {
+                                _categoryId = int.tryParse(val ?? '') ?? 0;
+                                _updateCompletionStates();
+                              },
+                              onChanged: (_) {
+                                setState(_updateCompletionStates);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: AppDesignSystem.smallSpacing),
+                          Expanded(
+                            child: FormInputField(
+                              label: 'Provider ID',
+                              initialValue:
+                                  _providerId > 0 ? _providerId.toString() : '',
+                              hintText: 'Enter provider ID',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              onSaved: (val) {
+                                _providerId = int.tryParse(val ?? '') ?? 0;
+                                _updateCompletionStates();
+                              },
+                              onChanged: (_) {
+                                setState(_updateCompletionStates);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      FormInputField(
+                        label: 'Duration (minutes)',
+                        initialValue: _actualDuration > 0
+                            ? _actualDuration.toString()
+                            : '',
+                        hintText: 'Enter duration',
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        suffixText: 'min',
+                        onSaved: (val) {
+                          _actualDuration = int.tryParse(val ?? '') ?? 0;
+                          _updateCompletionStates();
+                        },
+                        onChanged: (_) {
+                          setState(_updateCompletionStates);
+                        },
+                      ),
+                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                    ],
+
+                    // Pricing
+                    FormSectionHeader(
+                      title: 'Pricing',
+                      icon: Icons.attach_money,
+                      isExpanded: _pricingExpanded,
+                      isCompleted: _pricingCompleted,
+                      isOptional: false,
+                      onTap: () => setState(
+                        () => _pricingExpanded = !_pricingExpanded,
+                      ),
+                      colors: colors,
+                    ),
+                    if (_pricingExpanded) ...[
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      FormPriceField(
+                        label: 'Base Price',
+                        value: _basePrice,
+                        isRequired: true,
+                        onSaved: (val) {
+                          _basePrice = val;
+                          _updateCompletionStates();
+                        },
+                      ),
+                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      FormPriceField(
+                        label: 'Final Price',
+                        value: _finalPrice,
+                        isRequired: true,
+                        onSaved: (val) {
+                          _finalPrice = val;
+                          _updateCompletionStates();
+                        },
+                      ),
+                      if (_basePrice > 0 && _finalPrice > 0) ...[
+                        const SizedBox(height: AppDesignSystem.smallSpacing),
+                        Container(
+                          padding: AppDesignSystem.cardPadding,
+                          decoration: BoxDecoration(
+                            color: _discountPercentage > 0
+                                ? colors.primaryContainer.withOpacity(0.15)
+                                : colors.surfaceVariant,
+                            borderRadius: BorderRadius.circular(
+                                AppDesignSystem.inputBorderRadius),
+                            border: Border.all(
+                              color: _discountPercentage > 0
+                                  ? colors.primary.withOpacity(0.2)
+                                  : colors.outline.withOpacity(0.2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _discountPercentage > 0
+                                    ? Icons.discount
+                                    : Icons.price_check,
+                                color: _discountPercentage > 0
+                                    ? colors.primary
+                                    : colors.onSurfaceVariant,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _discountPercentage > 0
+                                      ? '${_discountPercentage.toStringAsFixed(1)}% discount applied'
+                                      : 'No discount',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: _discountPercentage > 0
+                                        ? colors.primary
+                                        : colors.onSurfaceVariant,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                    ],
+
+                    // Pricing Configuration
+                    FormSectionHeader(
+                      title: 'Pricing Configuration',
+                      icon: Icons.settings,
+                      isExpanded: _pricingConfigExpanded,
+                      isCompleted: _pricingConfigCompleted,
+                      isOptional: true,
+                      onTap: () => setState(
+                        () => _pricingConfigExpanded = !_pricingConfigExpanded,
+                      ),
+                      colors: colors,
+                    ),
+                    if (_pricingConfigExpanded) ...[
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FormInputField(
+                              label: 'Age Group',
+                              initialValue: _ageGroup,
+                              hintText: 'Enter age group',
+                              onSaved: (val) {
+                                _ageGroup = val ?? '';
+                                _updateCompletionStates();
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: AppDesignSystem.smallSpacing),
+                          Expanded(
+                            child: FormInputField(
+                              label: 'Sample Type',
+                              initialValue: _sampleType,
+                              hintText: 'Enter sample type',
+                              onSaved: (val) {
+                                _sampleType = val ?? '';
+                                _updateCompletionStates();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      Column(
+                        children: [
+                          FormCheckboxOption(
+                            label: 'Specialist Consultation',
+                            value: _specialistConsultation,
+                            onChanged: (val) {
+                              setState(
+                                  () => _specialistConsultation = val ?? false);
+                              _updateCompletionStates();
+                            },
+                          ),
+                          const SizedBox(height: AppDesignSystem.smallSpacing),
+                          FormCheckboxOption(
+                            label: 'Government Funded',
+                            value: _governmentFunded,
+                            onChanged: (val) {
+                              setState(() => _governmentFunded = val ?? false);
+                              _updateCompletionStates();
+                            },
+                          ),
+                          const SizedBox(height: AppDesignSystem.smallSpacing),
+                          FormCheckboxOption(
+                            label: 'Consultation Included',
+                            value: _consultationIncluded,
+                            onChanged: (val) {
+                              setState(
+                                  () => _consultationIncluded = val ?? false);
+                              _updateCompletionStates();
+                            },
+                          ),
+                          const SizedBox(height: AppDesignSystem.smallSpacing),
+                          FormCheckboxOption(
+                            label: 'Digital Imaging',
+                            value: _digitalImaging,
+                            onChanged: (val) {
+                              setState(() => _digitalImaging = val ?? false);
+                              _updateCompletionStates();
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      FormChipInput(
+                        label: 'Material Options',
+                        items: _materialOptions,
+                        onAdd: (material) {
+                          if (!_materialOptions.contains(material)) {
+                            setState(() => _materialOptions.add(material));
+                            _updateCompletionStates();
+                          }
+                        },
+                        onRemove: (index) {
+                          setState(() => _materialOptions.removeAt(index));
+                          _updateCompletionStates();
+                        },
+                      ),
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      FormChipInput(
+                        label: 'Includes',
+                        items: _includes,
+                        onAdd: (include) {
+                          if (!_includes.contains(include)) {
+                            setState(() => _includes.add(include));
+                            _updateCompletionStates();
+                          }
+                        },
+                        onRemove: (index) {
+                          setState(() => _includes.removeAt(index));
+                          _updateCompletionStates();
+                        },
+                      ),
+                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                    ],
+
+                    // Resource Requirements
+                    FormSectionHeader(
+                      title: 'Resource Requirements',
+                      icon: Icons.inventory,
+                      isExpanded: _resourcesExpanded,
+                      isCompleted: _resourcesCompleted,
+                      isOptional: false,
+                      onTap: () => setState(
+                        () => _resourcesExpanded = !_resourcesExpanded,
+                      ),
+                      colors: colors,
+                    ),
+                    if (_resourcesExpanded) ...[
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      if (_resourceRequirements.isEmpty)
+                        EmptyState(
+                          message: 'No resources added yet',
+                          icon: Icons.inventory_2_outlined,
+                        )
+                      else
+                        ..._resourceRequirements.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final req = entry.value;
+                          return RequirementCard(
+                            title: req.name,
+                            subtitle:
+                                '${req.quantity} × DZD ${req.costPerUnit.toStringAsFixed(2)} = DZD ${(req.costPerUnit * req.quantity).toStringAsFixed(2)}',
+                            onEdit: () => _showResourceDialog(
+                              existing: req,
+                              index: index,
+                            ),
+                            onDelete: () => setState(() {
+                              _resourceRequirements.removeAt(index);
+                              _updateCompletionStates();
+                            }),
+                          );
+                        }).toList(),
+                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: FloatingActionButton.small(
+                          onPressed: () => _showResourceDialog(),
+                          backgroundColor: colors.primary,
+                          foregroundColor: colors.onPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppDesignSystem.inputBorderRadius),
+                          ),
+                          child: const Icon(Icons.add, size: 20),
+                        ),
+                      ),
+                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                    ],
+
+                    // Staff Requirements
+                    FormSectionHeader(
+                      title: 'Staff Requirements',
+                      icon: Icons.people,
+                      isExpanded: _staffExpanded,
+                      isCompleted: _staffCompleted,
+                      isOptional: false,
+                      onTap: () => setState(
+                        () => _staffExpanded = !_staffExpanded,
+                      ),
+                      colors: colors,
+                    ),
+                    if (_staffExpanded) ...[
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      if (_staffRequirements.isEmpty)
+                        EmptyState(
+                          message: 'No staff added yet',
+                          icon: Icons.people_outline,
+                        )
+                      else
+                        ..._staffRequirements.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final req = entry.value;
+                          return RequirementCard(
+                            title:
+                                '${req.role} (${req.minCount}-${req.maxCount})',
+                            subtitle:
+                                '${req.allocatedHours}h × DZD ${req.hourlyRate.toStringAsFixed(2)}/h ≈ DZD ${(req.hourlyRate * req.allocatedHours * ((req.minCount + req.maxCount) / 2)).toStringAsFixed(2)}',
+                            onEdit: () => _showStaffDialog(
+                              existing: req,
+                              index: index,
+                            ),
+                            onDelete: () => setState(() {
+                              _staffRequirements.removeAt(index);
+                              _updateCompletionStates();
+                            }),
+                          );
+                        }).toList(),
+                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: FloatingActionButton.small(
+                          onPressed: () => _showStaffDialog(),
+                          backgroundColor: colors.primary,
+                          foregroundColor: colors.onPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppDesignSystem.inputBorderRadius),
+                          ),
+                          child: const Icon(Icons.add, size: 20),
+                        ),
+                      ),
+                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                    ],
+
+                    // Cost Summary
+                    FormSectionHeader(
+                      title: 'Cost Summary',
+                      icon: Icons.calculate,
+                      isExpanded: _costSummaryExpanded,
+                      isCompleted: _costSummaryCompleted,
+                      isOptional: false,
+                      onTap: () => setState(
+                        () => _costSummaryExpanded = !_costSummaryExpanded,
+                      ),
+                      colors: colors,
+                    ),
+                    if (_costSummaryExpanded) ...[
+                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      _buildCostSummary(),
+                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Progress and Save Button
+          _buildProgressSection(),
+        ],
+      ),
+    );
   }
 
-  void _removeMaterialOption(int index) {
-    setState(() {
-      _materialOptions.removeAt(index);
-    });
+  void _showResourceDialog({ServiceResourceRequirement? existing, int? index}) {
+    // Implementation for resource dialog
   }
 
-  void _addInclude() {
-    final include = _includesController.text.trim();
-    if (include.isNotEmpty && !_includes.contains(include)) {
-      setState(() {
-        _includes.add(include);
-        _includesController.clear();
-      });
-    }
-  }
-
-  void _removeInclude(int index) {
-    setState(() {
-      _includes.removeAt(index);
-    });
+  void _showStaffDialog({ServiceStaffRequirement? existing, int? index}) {
+    // Implementation for staff dialog
   }
 }
