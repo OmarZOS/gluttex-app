@@ -78,6 +78,22 @@ class ProvidedService {
     return ((finalPrice - totalCost) / finalPrice * 100);
   }
 
+  factory ProvidedService.empty() {
+    return ProvidedService(
+        id: 0,
+        name: '',
+        description: '',
+        categoryId: 1,
+        productProviderId: 1,
+        basePrice: 0.0,
+        finalPrice: 0.0,
+        actualDuration: 0,
+        pricingConfig: ProvidedServicePricingConfig(),
+        isActive: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now());
+  }
+
   factory ProvidedService.fromJson(Map<String, dynamic> json) {
     // Parse requirements if they exist
     final List<ServiceResourceRequirement> resourceRequirements = [];
