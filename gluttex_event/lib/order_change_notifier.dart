@@ -254,38 +254,38 @@ class OrderChangeNotifier with ChangeNotifier {
   }
 
   // ============ ORDER VALIDATION ============
-  bool validateOrderData(Map<String, dynamic> orderData) {
-    // Required fields validation
-    final requiredFields = [
-      'customer_id',
-      'total_amount',
-      'items',
-    ];
+  // bool validateOrderData(Map<String, dynamic> orderData) {
+  //   // Required fields validation
+  //   final requiredFields = [
+  //     'customer_id',
+  //     'total_amount',
+  //     'items',
+  //   ];
 
-    for (final field in requiredFields) {
-      if (!orderData.containsKey(field) || orderData[field] == null) {
-        _setError('Missing required field: $field');
-        return false;
-      }
-    }
+  //   for (final field in requiredFields) {
+  //     if (!orderData.containsKey(field) || orderData[field] == null) {
+  //       _setError('Missing required field: $field');
+  //       return false;
+  //     }
+  //   }
 
-    // Items validation
-    final items = orderData['items'];
-    if (items is! List || items.isEmpty) {
-      _setError('Order must contain at least one item');
-      return false;
-    }
+  //   // Items validation
+  //   final items = orderData['items'];
+  //   if (items is! List || items.isEmpty) {
+  //     _setError('Order must contain at least one item');
+  //     return false;
+  //   }
 
-    // Amount validation
-    final totalPrice = orderData['total_amount'];
-    if (totalPrice is! num || totalPrice <= 0) {
-      _setError('Total amount must be a positive number');
-      return false;
-    }
+  //   // Amount validation
+  //   final totalPrice = orderData['total_amount'];
+  //   if (totalPrice is! num || totalPrice <= 0) {
+  //     _setError('Total amount must be a positive number');
+  //     return false;
+  //   }
 
-    _clearError();
-    return true;
-  }
+  //   _clearError();
+  //   return true;
+  // }
 
   // ============ ORDER FILTERING ============
   List<Order> filterOrders({

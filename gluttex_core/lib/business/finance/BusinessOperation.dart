@@ -48,13 +48,13 @@ class BusinessOperation {
 
   // Add this method to your BusinessOperation class
   factory BusinessOperation.fromJson(Map<String, dynamic> json) {
-    print('🔍 Parsing BusinessOperation JSON:');
-    print('  Raw JSON: $json');
+    // print('🔍 Parsing BusinessOperation JSON:');
+    // print('  Raw JSON: $json');
 
     // Log each field to see what's coming in
-    json.forEach((key, value) {
-      print('  $key: $value (type: ${value.runtimeType})');
-    });
+    // json.forEach((key, value) {
+    //   print('  $key: $value (type: ${value.runtimeType})');
+    // });
 
     try {
       return BusinessOperation(

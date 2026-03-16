@@ -5,8 +5,10 @@ import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/NotificationService.dart';
 import 'package:gluttex_core/business/finance/services/InvoiceService.dart';
 import 'package:gluttex_core/business/services/CartService.dart';
+import 'package:gluttex_core/business/services/DeliveryService.dart';
 import 'package:gluttex_core/business/services/ProvidedServiceManagementService.dart';
 import 'package:gluttex_event/assistant_change_notifier.dart';
+import 'package:gluttex_event/delivery_change_notifier.dart';
 import 'package:gluttex_event/finance_change_notifier.dart';
 import 'package:gluttex_event/notification_notifier.dart';
 import 'package:gluttex_event/order_change_notifier.dart';
@@ -18,6 +20,7 @@ import 'package:gluttex_event/views/finance_view_model.dart';
 import 'package:gluttex_impl_app/gluttex_impl_notification.dart';
 import 'package:gluttex_impl_business/finance/gluttex_impl_business_operation.dart';
 import 'package:gluttex_impl_business/finance/gluttex_impl_invoice.dart';
+import 'package:gluttex_impl_business/gluttex_impl_delivery.dart';
 import 'package:gluttex_io/GluttexImageImpl.dart';
 import 'package:gluttex_core/app/Services/AuthService.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
@@ -53,6 +56,8 @@ void setupLocator() {
   // Register your services or dependencies here
   GluttexLocator.registerSingletonService<StorageService>(StorageServiceImpl());
   GluttexLocator.registerSingletonService<AppUserService>(AppUserServiceImpl());
+  GluttexLocator.registerSingletonService<DeliveryService>(
+      DeliveryServiceImpl());
   GluttexLocator.registerSingletonService<RecipeService>(RecipeServiceImpl());
   GluttexLocator.registerSingletonService<SupplierService>(
       SupplierServiceImpl());
@@ -104,6 +109,8 @@ class GluttexApp extends StatelessWidget {
             create: (_) => CartChangeNotifier()),
         ChangeNotifierProvider<AssistantNotifier>(
             create: (_) => AssistantNotifier()),
+        ChangeNotifierProvider<DeliveryChangeNotifier>(
+            create: (_) => DeliveryChangeNotifier()),
         ChangeNotifierProvider<SupplierChangeNotifier>(
             create: (_) => SupplierChangeNotifier()),
         ChangeNotifierProvider<SupplierDashboardProvider>(

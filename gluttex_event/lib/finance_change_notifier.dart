@@ -504,14 +504,14 @@ class FinanceChangeNotifier extends ChangeNotifier {
       sourceIdToDocuments[sourceId]!.add(doc);
     }
 
-    debugPrint('\n=== DOCUMENTS BY SOURCE_ID ===');
-    for (final entry in sourceIdToDocuments.entries) {
-      debugPrint('Source ID ${entry.key}: ${entry.value.length} documents');
-      for (final doc in entry.value) {
-        debugPrint(
-            '  - ${doc.documentType} ${doc.documentId}: \$${doc.documentAmount?.toStringAsFixed(2)} (${doc.paymentStatus})');
-      }
-    }
+    // debugPrint('\n=== DOCUMENTS BY SOURCE_ID ===');
+    // for (final entry in sourceIdToDocuments.entries) {
+    //   debugPrint('Source ID ${entry.key}: ${entry.value.length} documents');
+    //   for (final doc in entry.value) {
+    //     debugPrint(
+    //         '  - ${doc.documentType} ${doc.documentId}: \$${doc.documentAmount?.toStringAsFixed(2)} (${doc.paymentStatus})');
+    //   }
+    // }
 
     // Process each source_id group
     for (final entry in sourceIdToDocuments.entries) {
@@ -536,9 +536,9 @@ class FinanceChangeNotifier extends ChangeNotifier {
       // The first document is the strongest (primary)
       final primaryDoc = documents.first;
 
-      debugPrint('\nProcessing source_id ${entry.key}:');
-      debugPrint(
-          '  Primary: ${primaryDoc.documentType} ${primaryDoc.documentId}');
+      // debugPrint('\nProcessing source_id ${entry.key}:');
+      // debugPrint(
+      //     '  Primary: ${primaryDoc.documentType} ${primaryDoc.documentId}');
 
       // Add to grouped documents list
       _groupedDocuments.add(primaryDoc);
@@ -552,7 +552,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
 
       if (relatedIds.isNotEmpty) {
         _documentGroups[primaryDoc.documentId ?? 0] = relatedIds;
-        debugPrint('  Related document IDs: $relatedIds');
+        // debugPrint('  Related document IDs: $relatedIds');
       }
 
       // Update primary document with aggregated information
@@ -566,25 +566,25 @@ class FinanceChangeNotifier extends ChangeNotifier {
       return dateB.compareTo(dateA);
     });
 
-    debugPrint('\n=== FINAL GROUPING SUMMARY ===');
-    debugPrint(
-        'Grouped ${_allDocuments.length} documents into ${_groupedDocuments.length} primary documents');
+    // debugPrint('\n=== FINAL GROUPING SUMMARY ===');
+    // debugPrint(
+    //     'Grouped ${_allDocuments.length} documents into ${_groupedDocuments.length} primary documents');
 
-    for (final doc in _groupedDocuments) {
-      debugPrint('Primary: ${doc.documentType} ${doc.documentId}: '
-          '\$${doc.documentAmount?.toStringAsFixed(2)} '
-          '(${doc.paymentStatus})');
+    // for (final doc in _groupedDocuments) {
+    //   debugPrint('Primary: ${doc.documentType} ${doc.documentId}: '
+    //       '\$${doc.documentAmount?.toStringAsFixed(2)} '
+    //       '(${doc.paymentStatus})');
 
-      final related = getRelatedDocuments(doc.documentId ?? 0);
-      if (related != null && related.isNotEmpty) {
-        debugPrint('  Has ${related.length} related documents');
-        for (final relatedDoc in related) {
-          debugPrint(
-              '    - ${relatedDoc.documentType} ${relatedDoc.documentId}: '
-              '\$${relatedDoc.documentAmount?.toStringAsFixed(2)}');
-        }
-      }
-    }
+    //   final related = getRelatedDocuments(doc.documentId ?? 0);
+    //   if (related != null && related.isNotEmpty) {
+    //     debugPrint('  Has ${related.length} related documents');
+    //     for (final relatedDoc in related) {
+    //       debugPrint(
+    //           '    - ${relatedDoc.documentType} ${relatedDoc.documentId}: '
+    //           '\$${relatedDoc.documentAmount?.toStringAsFixed(2)}');
+    //     }
+    //   }
+    // }
 
     _clearFilterCache();
     notifyListeners();
@@ -593,14 +593,14 @@ class FinanceChangeNotifier extends ChangeNotifier {
   void _updatePrimaryDocumentWithAggregatedInfo(
       FinancialDocument primaryDoc, List<FinancialDocument> group) {
     if (group.length <= 1) {
-      debugPrint('  Single document group, no aggregation needed');
+      // debugPrint('  Single document group, no aggregation needed');
       return;
     }
 
-    debugPrint(
-        '\n=== AGGREGATING GROUP (Source ID: ${primaryDoc.sourceId}) ===');
-    debugPrint('Primary: ${primaryDoc.documentType} ${primaryDoc.documentId}');
-    debugPrint('Group size: ${group.length} documents');
+    // debugPrint(
+    //     '\n=== AGGREGATING GROUP (Source ID: ${primaryDoc.sourceId}) ===');
+    // debugPrint('Primary: ${primaryDoc.documentType} ${primaryDoc.documentId}');
+    // debugPrint('Group size: ${group.length} documents');
 
     // Track the highest amount from cart/invoice documents
     double maxCartInvoiceAmount = 0.0;
@@ -629,10 +629,10 @@ class FinanceChangeNotifier extends ChangeNotifier {
         totalPaid += doc.totalPaid ?? 0.0;
         totalDeposited += doc.totalDeposited ?? 0.0;
 
-        debugPrint('  ${doc.documentType} ${doc.documentId}: '
-            'Amount=\$${docAmount.toStringAsFixed(2)}, '
-            'PaidInDoc=\$${(doc.totalPaid ?? 0).toStringAsFixed(2)}, '
-            'DepositedInDoc=\$${(doc.totalDeposited ?? 0).toStringAsFixed(2)}');
+        // debugPrint('  ${doc.documentType} ${doc.documentId}: '
+        //     'Amount=\$${docAmount.toStringAsFixed(2)}, '
+        //     'PaidInDoc=\$${(doc.totalPaid ?? 0).toStringAsFixed(2)}, '
+        //     'DepositedInDoc=\$${(doc.totalDeposited ?? 0).toStringAsFixed(2)}');
       }
     }
 
@@ -650,12 +650,12 @@ class FinanceChangeNotifier extends ChangeNotifier {
         if (!isAlreadyCounted) {
           totalPaid += receiptAmount;
           countedPaymentIds.add(docId);
-          debugPrint('  ${doc.documentType} ${doc.documentId}: '
-              'Adds \$${receiptAmount.toStringAsFixed(2)} to paid '
-              '(not already counted)');
+          // debugPrint('  ${doc.documentType} ${doc.documentId}: '
+          //     'Adds \$${receiptAmount.toStringAsFixed(2)} to paid '
+          //     '(not already counted)');
         } else {
-          debugPrint('  ${doc.documentType} ${doc.documentId}: '
-              'SKIPPED - already counted in cart total');
+          // debugPrint('  ${doc.documentType} ${doc.documentId}: '
+          //     'SKIPPED - already counted in cart total');
         }
       } else if (docType == 'deposit') {
         // Check if this deposit amount is already counted in the cart's totalDeposited
@@ -666,12 +666,12 @@ class FinanceChangeNotifier extends ChangeNotifier {
         if (!isAlreadyCounted) {
           totalDeposited += depositAmount;
           countedDepositIds.add(docId);
-          debugPrint('  ${doc.documentType} ${doc.documentId}: '
-              'Adds \$${depositAmount.toStringAsFixed(2)} to deposited '
-              '(not already counted)');
+          // debugPrint('  ${doc.documentType} ${doc.documentId}: '
+          //     'Adds \$${depositAmount.toStringAsFixed(2)} to deposited '
+          //     '(not already counted)');
         } else {
-          debugPrint('  ${doc.documentType} ${doc.documentId}: '
-              'SKIPPED - already counted in cart total');
+          // debugPrint('  ${doc.documentType} ${doc.documentId}: '
+          //     'SKIPPED - already counted in cart total');
         }
       }
     }
@@ -685,16 +685,16 @@ class FinanceChangeNotifier extends ChangeNotifier {
     final combinedStatus = _determineCombinedPaymentStatus(
         group, maxCartInvoiceAmount, totalPaid, totalDeposited);
 
-    debugPrint('\n=== GROUP SUMMARY ===');
-    debugPrint(
-        'Max Cart/Invoice Amount: \$${maxCartInvoiceAmount.toStringAsFixed(2)}');
-    debugPrint('Total Paid: \$${totalPaid.toStringAsFixed(2)}');
-    debugPrint('Total Deposited: \$${totalDeposited.toStringAsFixed(2)}');
-    debugPrint(
-        'Total Payments: \$${(totalPaid + totalDeposited).toStringAsFixed(2)}');
-    debugPrint(
-        'Outstanding Balance: \$${outstandingBalance.toStringAsFixed(2)}');
-    debugPrint('Payment Status: $combinedStatus');
+    // debugPrint('\n=== GROUP SUMMARY ===');
+    // debugPrint(
+    //     'Max Cart/Invoice Amount: \$${maxCartInvoiceAmount.toStringAsFixed(2)}');
+    // debugPrint('Total Paid: \$${totalPaid.toStringAsFixed(2)}');
+    // debugPrint('Total Deposited: \$${totalDeposited.toStringAsFixed(2)}');
+    // debugPrint(
+    //     'Total Payments: \$${(totalPaid + totalDeposited).toStringAsFixed(2)}');
+    // debugPrint(
+    //     'Outstanding Balance: \$${outstandingBalance.toStringAsFixed(2)}');
+    // debugPrint('Payment Status: $combinedStatus');
 
     // Update the primary document
     final index = _groupedDocuments.indexOf(primaryDoc);
@@ -739,7 +739,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
         _allDocuments[allIndex] = updatedDoc;
       }
 
-      debugPrint('  Updated primary document ${primaryDoc.documentId}');
+      // debugPrint('  Updated primary document ${primaryDoc.documentId}');
     }
   }
 
@@ -747,11 +747,11 @@ class FinanceChangeNotifier extends ChangeNotifier {
       double baseAmount, double totalPaid, double totalDeposited) {
     final totalPayments = totalPaid + totalDeposited;
 
-    debugPrint('\n=== STATUS CALCULATION ===');
-    debugPrint('Base Amount: \$${baseAmount.toStringAsFixed(2)}');
-    debugPrint('Total Paid: \$${totalPaid.toStringAsFixed(2)}');
-    debugPrint('Total Deposited: \$${totalDeposited.toStringAsFixed(2)}');
-    debugPrint('Total Payments: \$${totalPayments.toStringAsFixed(2)}');
+    // debugPrint('\n=== STATUS CALCULATION ===');
+    // debugPrint('Base Amount: \$${baseAmount.toStringAsFixed(2)}');
+    // debugPrint('Total Paid: \$${totalPaid.toStringAsFixed(2)}');
+    // debugPrint('Total Deposited: \$${totalDeposited.toStringAsFixed(2)}');
+    // debugPrint('Total Payments: \$${totalPayments.toStringAsFixed(2)}');
 
     if (baseAmount == 0) {
       return 'unknown';

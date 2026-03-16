@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/business/Supplier.dart';
@@ -18,7 +19,6 @@ import 'package:gluttex_ui/components/supplier/supplier_picker.dart';
 import 'package:medicom_catalog/screens/components/form/form_controllers.dart';
 import 'package:medicom_catalog/screens/components/form/pricing_state.dart';
 import 'package:medicom_catalog/screens/components/smart_form.dart';
-import 'package:provider/provider.dart';
 
 class ProductFormFields extends StatelessWidget {
   final ProductFormData formData;

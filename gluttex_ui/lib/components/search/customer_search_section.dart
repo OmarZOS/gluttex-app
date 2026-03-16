@@ -386,7 +386,7 @@ class _CustomerSectionState extends State<CustomerSection> {
             if (widget.clearable || !isDefaultCustomer)
               IconButton(
                 icon: Icon(
-                  Icons.edit,
+                  Icons.delete_forever,
                   color: isPerson ? Colors.orange : theme.colorScheme.primary,
                   size: 20,
                 ),

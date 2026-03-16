@@ -238,6 +238,10 @@ class GluttexConstants {
   static const String getAllOrdersEndpoint = '/business/user';
   static const String getOrderDetailsEndpoint = '/business/order/orders';
 
+  static const String addDeliveryEndpoint = '/business/delivery/add';
+  static const String getAllDeliveriesEndpoint = '/business/delivery';
+  static const String getDeliveryDetailsEndpoint = '/business/delivery';
+
   static const String addSupplierEndpoint = '/supplier/add';
   static const String updateSupplierEndpoint = '/supplier';
   static const String getOrganisations = '/org';

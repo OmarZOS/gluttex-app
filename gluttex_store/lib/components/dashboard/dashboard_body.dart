@@ -15,7 +15,7 @@ import 'package:gluttex_personnel/supplier_entities_screen.dart';
 import 'package:gluttex_store/screens/business_operations_screen.dart';
 import 'package:gluttex_store/screens/finance_screen.dart';
 import 'package:gluttex_store/screens/inventory_screen.dart';
-import 'package:gluttex_store/screens/orders_screen.dart';
+import 'package:gluttex_store/screens/deliveries_screen.dart';
 import 'package:gluttex_store/screens/selling_screen.dart';
 import 'package:gluttex_store/screens/services_screen.dart';
 import 'package:medicom_catalog/screens/orders_screen.dart';
@@ -77,11 +77,11 @@ class DashboardBody extends StatelessWidget {
                 ));
       case DashboardScreenType.orders:
         return Consumer<OrderChangeNotifier>(
-            builder: (context, cartNotifier, child) => SupplierOrdersScreen(
-                  privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
-                  userId: userId,
-                  accessibleSuppliers: accessibleSuppliers,
-                  personnelNotifier: _personnelNotifier,
+            builder: (context, cartNotifier, child) => DeliveryTabbedView(
+                // privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
+                // userId: userId,
+                // accessibleSuppliers: accessibleSuppliers,
+                // personnelNotifier: _personnelNotifier,
                 ));
       case DashboardScreenType.operations:
         return Consumer<PersonnelNotifier>(
