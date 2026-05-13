@@ -2384,13 +2384,13 @@
   "profitMargin": "Marge bénéficiaire",
   "scrollToTop": "Défiler vers le haut",
 
-    "enterPrice": "Saisir le prix",
+  "enterPrice": "Saisir le prix",
   "priceRequired": "Le prix est requis",
   "invalidPrice": "Veuillez saisir un prix valide",
   "typeAndPressEnter": "Tapez et appuyez sur Entrée...",
   "finalPriceLabel": "Prix final",
 
-    "guestCustomer": "Client Invité",
+  "guestCustomer": "Client Invité",
   "walkInCustomer": "Client de Passage",
   "emptyCustomer": "Sélectionner un Client",
   "guestEmail": "invite@exemple.com",

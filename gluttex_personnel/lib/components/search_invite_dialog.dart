@@ -726,19 +726,21 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     int? existingPrivileges;
     if (isUserInTeam) {
       final notifier = context.read<PersonnelNotifier>();
-      final rules = await notifier.getUserPrivileges(
-        ruleId: 0,
+
+      // First ensure data is loaded
+      await notifier.loadPersonnel(
         userId: user.id_app_user ?? 0,
         supplierId: widget.supplierId ?? 0,
       );
 
-      if (rules != null && rules.isNotEmpty) {
-        final ruleForSupplier = rules.firstWhere(
-          (rule) =>
-              rule.productProvider?.id_product_provider == widget.supplierId,
-          orElse: () => rules.first,
-        );
-        // existingPrivileges = ruleForSupplier.privilege ?? 0;
+      // Then get the rule synchronously from cache
+      final rule = notifier.getRuleForUser(
+        userId: user.id_app_user ?? 0,
+        supplierId: widget.supplierId ?? 0,
+      );
+
+      if (rule != null) {
+        // existingPrivileges = rule.management_rule_code ?? 0;
       }
     }
 

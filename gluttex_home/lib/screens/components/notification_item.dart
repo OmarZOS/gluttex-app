@@ -764,12 +764,10 @@ class NotificationItem extends StatelessWidget {
     try {
       // Fix: The getUserPrivileges method signature might be wrong
       // Based on your earlier code, it should be: getUserPrivileges(userId, {supplierId = 0})
-      final privileges = await context
-          .read<PersonnelNotifier>()
-          .getUserPrivileges(
-              ruleId: invitation.ruleId,
-              userId: invitation.addedBy,
-              supplierId: invitation.providerId);
+      final privileges = context.read<PersonnelNotifier>().getRulesForUser(
+            invitation.addedBy,
+            supplierId: invitation.providerId,
+          );
 
       debugPrint(privileges.toString());
       // Debug: Print all privileges to see the structure

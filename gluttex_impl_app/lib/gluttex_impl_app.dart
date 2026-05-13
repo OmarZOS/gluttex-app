@@ -11,62 +11,141 @@ import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 
 class AppUserServiceImpl implements AppUserService {
-  List<AppUserCategory> categories = [];
+  List<AppUserCategory> _categories = [];
+
   @override
   Future<int?> addAppUser(AppUser appUser) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
 
-    return await storageService.insert(
-        GluttexConstants.apiBaseUrl + GluttexConstants.addAppUserEndpoint,
-        appUser.toJson());
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.addAppUserEndpoint}';
+      log('Adding app user at: $url', name: 'AppUserServiceImpl');
+      log('User data: ${appUser.toJson()}', name: 'AppUserServiceImpl');
+
+      final result = await storageService.insert(url, appUser.toJson());
+
+      if (result == null) {
+        log('Failed to add app user: null response',
+            name: 'AppUserServiceImpl');
+        return null;
+      }
+
+      log('Add user result: $result', name: 'AppUserServiceImpl');
+      return result['id_app_user'] as int?;
+    } catch (e, stacktrace) {
+      log('Error adding app user: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
+      return null;
+    }
   }
 
   @override
   Future<AppUser?> updateAppUser(AppUser appUser) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
 
-    return AppUser.fromJson(await storageService.update(
-        GluttexConstants.apiBaseUrl + GluttexConstants.updateAppUserEndpoint,
-        '${appUser.id_app_user}',
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateAppUserEndpoint}/${appUser.id_app_user}';
+      log('Updating app user at: $url', name: 'AppUserServiceImpl');
+
+      final result = await storageService.update(
+        url,
+        appUser.id_app_user.toString(),
         {},
-        appUser.toJson()));
+        appUser.toJson(),
+      );
+
+      if (result == null) {
+        log('Failed to update app user: null response',
+            name: 'AppUserServiceImpl');
+        return null;
+      }
+
+      return AppUser.fromJson(result as Map<String, dynamic>);
+    } catch (e, stacktrace) {
+      log('Error updating app user: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
+      return null;
+    }
   }
 
   @override
-  Future<int?> deleteAppUser(String AppUserId) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
+  Future<int?> deleteAppUser(String appUserId) async {
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
 
-    return await storageService.delete(
-        GluttexConstants.apiBaseUrl + GluttexConstants.deleteAppUserEndpoint,
-        AppUserId);
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteAppUserEndpoint}/$appUserId';
+      log('Deleting app user at: $url', name: 'AppUserServiceImpl');
+
+      final result = await storageService.delete(url, appUserId);
+
+      log('Delete result: $result', name: 'AppUserServiceImpl');
+      return result;
+    } catch (e, stacktrace) {
+      log('Error deleting app user: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
+      return null;
+    }
   }
 
   @override
   Future<int?> updateAppUserImage(AppUser updatedAppUser) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
-    return await storageService.update(
-        GluttexConstants.apiBaseUrl +
-            GluttexConstants.updateAppUserImageEndpoint,
-        '${updatedAppUser.id_app_user}',
-        {'image_url': updatedAppUser.app_user_image_url},
-        updatedAppUser.toJson());
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateAppUserImageEndpoint}';
+      log('Updating app user image at: $url', name: 'AppUserServiceImpl');
+
+      final result = await storageService.update(
+        url,
+        updatedAppUser.id_app_user.toString(),
+        {'image_url': updatedAppUser.app_user_image_url ?? ''},
+        updatedAppUser.toJson(),
+      );
+
+      return result as int?;
+    } catch (e, stacktrace) {
+      log('Error updating app user image: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
+      return null;
+    }
   }
 
   @override
   Future<AppUser?> getAppUser(String id) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
     try {
-      // log('${await storageService.get(GluttexConstants.apiBaseUrl + GluttexConstants.appUserEndpoint, id)}');
-      var data = await storageService.get(
-          GluttexConstants.apiBaseUrl + GluttexConstants.appUserEndpoint, id);
+      final storageService = GluttexLocator.get<StorageService>();
 
-      var appUsers = AppUser.fromJson(data as Map<String, dynamic>);
-      var user = appUsers;
-      return user;
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.appUserEndpoint}/$id';
+      log('Getting app user from: $url', name: 'AppUserServiceImpl');
+
+      final data = await storageService.get(
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.appUserEndpoint}',
+        id,
+      );
+
+      if (data == null) {
+        log('App user not found: $id', name: 'AppUserServiceImpl');
+        return AppUser.empty();
+      }
+
+      // Handle different response formats
+      if (data is Map) {
+        return AppUser.fromJson(data as Map<String, dynamic>);
+      } else if (data is List && data.isNotEmpty) {
+        return AppUser.fromJson(data[0] as Map<String, dynamic>);
+      }
+
+      log('Unexpected response format: ${data.runtimeType}',
+          name: 'AppUserServiceImpl');
+      return AppUser.empty();
     } catch (e, stacktrace) {
-      log('$e');
-      log('$stacktrace');
-
+      log('Error getting app user: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
       return AppUser.empty();
     }
   }
@@ -82,20 +161,42 @@ class AppUserServiceImpl implements AppUserService {
     try {
       final storageService = GluttexLocator.get<StorageService>();
 
-      final route =
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAppUserStaffEndpoint}/"
-          "$orgId/$supplierId/$userId/0/$offset/$limit";
+      // Build URL with query parameters
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getStaffEndpoint}'
+          '?org_id=$orgId&provider_id=$supplierId&user_id=$userId&offset=$offset&limit=$limit';
 
-      final data = await storageService.getAll(route);
+      log('Getting management rules from: $url', name: 'AppUserServiceImpl');
 
-      if (data is! List) return null;
+      final data = await storageService.getAll(url);
 
-      return data
-          .map((json) => ManagementRule.fromJson(json as Map<String, dynamic>))
-          .toList();
+      if (data == null) {
+        log('No management rules found', name: 'AppUserServiceImpl');
+        return null;
+      }
+
+      List<ManagementRule> rules = [];
+
+      if (data is List) {
+        rules = data
+            .map(
+                (json) => ManagementRule.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else if (data is Map && data.containsKey('data')) {
+        final dataList = data['data'];
+        if (dataList is List) {
+          rules = dataList
+              .map((json) =>
+                  ManagementRule.fromJson(json as Map<String, dynamic>))
+              .toList();
+        }
+      }
+
+      log('Found ${rules.length} management rules', name: 'AppUserServiceImpl');
+      return rules;
     } catch (e, stacktrace) {
-      log("ERROR (getManagementRules): $e");
-      log(stacktrace.toString());
+      log('Error getting management rules: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
       return null;
     }
   }
@@ -109,17 +210,34 @@ class AppUserServiceImpl implements AppUserService {
     try {
       final storageService = GluttexLocator.get<StorageService>();
 
-      final route =
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.searchAppUserEndpoint}/$query/$offset/$limit";
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchAppUserEndpoint}'
+          '?query=$query&offset=$offset&limit=$limit';
 
-      final data = await storageService.getAll(route);
+      log('Searching app users with query: $query', name: 'AppUserServiceImpl');
 
-      if (data is! List) return null;
+      final data = await storageService.getAll(url);
 
-      return AppUser.fromJsonList(data);
+      if (data == null) {
+        log('No app users found', name: 'AppUserServiceImpl');
+        return null;
+      }
+
+      if (data is List) {
+        return AppUser.fromJsonList(data);
+      } else if (data is Map && data.containsKey('data')) {
+        final dataList = data['data'];
+        if (dataList is List) {
+          return AppUser.fromJsonList(dataList);
+        }
+      }
+
+      log('Unexpected response format: ${data.runtimeType}',
+          name: 'AppUserServiceImpl');
+      return null;
     } catch (e, stacktrace) {
-      log("ERROR (searchAppUsers): $e");
-      log(stacktrace.toString());
+      log('Error searching app users: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
       return null;
     }
   }
@@ -133,64 +251,124 @@ class AppUserServiceImpl implements AppUserService {
     try {
       final storageService = GluttexLocator.get<StorageService>();
 
-      final route =
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.searchPeopleEndpoint}/$query/$offset/$limit";
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchPersonsByNameEndpoint}'
+          '?query=$query&offset=$offset&limit=$limit';
 
-      final data = await storageService.getAll(route);
+      log('Searching people with query: $query', name: 'AppUserServiceImpl');
 
-      if (data is! List) return null;
+      final data = await storageService.getAll(url);
 
-      return data
-          .map((json) => Person.fromJson(json as Map<String, dynamic>))
-          .toList();
+      if (data == null) {
+        log('No people found', name: 'AppUserServiceImpl');
+        return null;
+      }
+
+      List<Person> people = [];
+
+      if (data is List) {
+        people = data
+            .map((json) => Person.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else if (data is Map && data.containsKey('data')) {
+        final dataList = data['data'];
+        if (dataList is List) {
+          people = dataList
+              .map((json) => Person.fromJson(json as Map<String, dynamic>))
+              .toList();
+        }
+      }
+
+      log('Found ${people.length} people', name: 'AppUserServiceImpl');
+      return people;
     } catch (e, stacktrace) {
-      log("ERROR (searchAppUsers): $e");
-      log(stacktrace.toString());
+      log('Error searching people: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
       return null;
     }
   }
 
   @override
   Future<Person?> getPerson(String id) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
     try {
-      // log('${await storageService.get(GluttexConstants.apiBaseUrl + GluttexConstants.appUserEndpoint, id)}');
-      var data = await storageService.getAll(
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.personEndpoint}/$id');
+      final storageService = GluttexLocator.get<StorageService>();
 
-      var person = Person.fromJson(data[0] as Map<String, dynamic>);
-      return person;
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.personEndpoint}/$id';
+      log('Getting person from: $url', name: 'AppUserServiceImpl');
+
+      final data = await storageService.get(
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.personEndpoint}',
+        id,
+      );
+
+      if (data == null) {
+        log('Person not found: $id', name: 'AppUserServiceImpl');
+        return Person.empty();
+      }
+
+      // Handle different response formats
+      if (data is Map) {
+        return Person.fromJson(data as Map<String, dynamic>);
+      } else if (data is List && data.isNotEmpty) {
+        return Person.fromJson(data[0] as Map<String, dynamic>);
+      }
+
+      log('Unexpected response format: ${data.runtimeType}',
+          name: 'AppUserServiceImpl');
+      return Person.empty();
     } catch (e, stacktrace) {
-      log('$e');
-      log('$stacktrace');
-
+      log('Error getting person: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
       return Person.empty();
     }
   }
 
   @override
   Future<List<AppUserCategory>>? getCategories() async {
-    if (categories.isNotEmpty) return categories;
+    if (_categories.isNotEmpty) {
+      log('Returning cached categories: ${_categories.length}',
+          name: 'AppUserServiceImpl');
+      return _categories;
+    }
+
     try {
-      // Get the storage service instance
-      StorageService storageService = GluttexLocator.get<StorageService>();
+      final storageService = GluttexLocator.get<StorageService>();
 
-      // Make a call to get all categories
-      List<dynamic> responseData = await storageService.getAll(
-          GluttexConstants.apiBaseUrl +
-              GluttexConstants.getAppUserCategoriesEndpoint);
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getAppUserCategoriesEndpoint}';
+      log('Getting app user categories from: $url', name: 'AppUserServiceImpl');
 
-      // Check if the response data is not null and is a list
-      // Convert the list of AppUserCategory maps to a list of Supplier objects
-      List dateien = responseData;
-      List<AppUserCategory?> categories = dateien
-          .map((data) => AppUserCategory.fromJson(data as Map<String, dynamic>))
-          .toList();
-      // developer.//log('${dateien.length}');
-      return categories as List<AppUserCategory>;
+      final responseData = await storageService.getAll(url);
+
+      if (responseData == null) {
+        log('No categories found', name: 'AppUserServiceImpl');
+        return [];
+      }
+
+      List<AppUserCategory> categories = [];
+
+      if (responseData is List) {
+        categories = responseData
+            .map((data) =>
+                AppUserCategory.fromJson(data as Map<String, dynamic>))
+            .toList();
+      } else if (responseData is Map && responseData.containsKey('data')) {
+        final dataList = responseData['data'];
+        if (dataList is List) {
+          categories = dataList
+              .map((data) =>
+                  AppUserCategory.fromJson(data as Map<String, dynamic>))
+              .toList();
+        }
+      }
+
+      _categories = categories;
+      log('Found ${_categories.length} categories', name: 'AppUserServiceImpl');
+
+      return _categories;
     } catch (e) {
-      log(e.toString());
-      // Handle exceptions here
+      log('Error getting categories: $e', name: 'AppUserServiceImpl');
       return [];
     }
   }
@@ -199,33 +377,37 @@ class AppUserServiceImpl implements AppUserService {
   Future<ManagementRule?> addUserToSupplier(
       int appUserId, int supplierId, int orgId, int privilege,
       {bool fromQR = false}) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
-
-    Map<String, dynamic> payload = {
-      "id_management_rule": 0,
-      "rule_ref_org": orgId,
-      "rule_ref_provider": supplierId,
-      "rule_ref_user": appUserId,
-      "management_rule_code": privilege,
-      "management_rule_status": fromQR ? "ACCEPTED" : "PENDING",
-      "management_rule_expiry": "",
-    };
-
     try {
-      var data = await storageService.insert(
-          GluttexConstants.apiBaseUrl + GluttexConstants.addRuleEndpoint,
-          payload);
+      final storageService = GluttexLocator.get<StorageService>();
 
-      ManagementRule managementRule =
-          ManagementRule.fromJson(data as Map<String, dynamic>);
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.addRuleEndpoint}';
+      log('Adding user to supplier at: $url', name: 'AppUserServiceImpl');
 
-      // Now fetch the actual user data
-      // You'll need to implement getUserById in your service
-      // AppUser? user = await getUserById(appUserId);
-      return managementRule;
+      final payload = {
+        "id_management_rule": 0,
+        "rule_ref_org": orgId,
+        "rule_ref_provider": supplierId,
+        "rule_ref_user": appUserId,
+        "management_rule_code": privilege,
+        "management_rule_status": fromQR ? "ACTIVE" : "PENDING",
+        "management_rule_expiry": null,
+      };
+
+      log('Payload: $payload', name: 'AppUserServiceImpl');
+
+      final data = await storageService.insert(url, payload);
+
+      if (data == null) {
+        log('Failed to add user to supplier: null response',
+            name: 'AppUserServiceImpl');
+        return null;
+      }
+
+      return ManagementRule.fromJson(data as Map<String, dynamic>);
     } catch (e, stacktrace) {
-      log('$e');
-      log('$stacktrace');
+      log('Error adding user to supplier: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
       return null;
     }
   }
@@ -238,59 +420,76 @@ class AppUserServiceImpl implements AppUserService {
     int orgId,
     int privilege,
   ) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
-
-    Map<String, dynamic> payload = {
-      "id_management_rule": ruleId,
-      "rule_ref_org": orgId,
-      "rule_ref_provider": supplierId,
-      "rule_ref_user": appUserId,
-      "management_rule_code": privilege,
-      "management_rule_status": "ACTIVE",
-      "management_rule_expiry": "",
-    };
-
     try {
-      var data = await storageService.update(
-          GluttexConstants.apiBaseUrl +
-              GluttexConstants.putAppUserStaffEndpoint +
-              "/${ruleId.toString()}",
-          '',
-          {},
-          payload);
+      final storageService = GluttexLocator.get<StorageService>();
 
-      ManagementRule managementRule =
-          ManagementRule.fromJson(data as Map<String, dynamic>);
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateStaffEndpoint}/$ruleId';
+      log('Updating management rule at: $url', name: 'AppUserServiceImpl');
 
-      // Now fetch the actual user data
-      // You'll need to implement getUserById in your service
-      // AppUser? user = await getUserById(appUserId);
-      return managementRule;
+      final payload = {
+        "id_management_rule": ruleId,
+        "rule_ref_org": orgId,
+        "rule_ref_provider": supplierId,
+        "rule_ref_user": appUserId,
+        "management_rule_code": privilege,
+        "management_rule_status": "ACTIVE",
+        "management_rule_expiry": null,
+      };
+
+      log('Payload: $payload', name: 'AppUserServiceImpl');
+
+      final data = await storageService.update(
+        url,
+        ruleId.toString(),
+        {},
+        payload,
+      );
+
+      if (data == null) {
+        log('Failed to update management rule: null response',
+            name: 'AppUserServiceImpl');
+        return null;
+      }
+
+      return ManagementRule.fromJson(data as Map<String, dynamic>);
     } catch (e, stacktrace) {
-      log('$e');
-      log('$stacktrace');
+      log('Error updating management rule: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
       return null;
     }
   }
 
   @override
   Future<bool> deleteManagementRule(int ruleId) async {
-    StorageService storageService = GluttexLocator.get<StorageService>();
-
     try {
-      var data = await storageService.delete(
-        GluttexConstants.apiBaseUrl +
-            GluttexConstants.deleteAppUserStaffEndpoint,
-        ruleId.toString(),
-      );
-      // Now fetch the actual user data
-      // You'll need to implement getUserById in your service
-      // AppUser? user = await getUserById(appUserId);
-      return true;
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteStaffEndpoint}/$ruleId';
+      log('Deleting management rule at: $url', name: 'AppUserServiceImpl');
+
+      final result = await storageService.delete(url, ruleId.toString());
+
+      log('Delete result: $result', name: 'AppUserServiceImpl');
+      return result != null && result >= 200 && result < 300;
     } catch (e, stacktrace) {
-      log('$e');
-      log('$stacktrace');
+      log('Error deleting management rule: $e', name: 'AppUserServiceImpl');
+      log('Stacktrace: $stacktrace', name: 'AppUserServiceImpl');
       return false;
     }
+  }
+
+  // Helper method to clear cache
+  void clearCache() {
+    _categories.clear();
+    log('App user service cache cleared', name: 'AppUserServiceImpl');
+  }
+
+  // Helper method to refresh categories
+  Future<List<AppUserCategory>> refreshCategories() async {
+    _categories.clear();
+    final categories = await getCategories();
+    return categories ?? [];
   }
 }

@@ -195,99 +195,221 @@ class GluttexConstants {
   static Color get backgroundColor => const Color(0xFF2ECC71);
   static Color get backgroundDarkColor => const Color(0xFF186A3B);
 
-  // API endpoints
-  static const String apiBaseUrl = 'http://localhost:9000/api';
+  static const String apiBaseUrl = 'http://localhost:9000/api/v1';
   static const String fsBaseUrl = 'http://localhost:9000/fs';
 
-  // static const String authApiBaseUrl = 'http://localhost:9090';
+  static const String postImageEndpoint = '/fs/upload';
+
+  // ==================== Authentication Endpoints ====================
+  static const String loginEndpoint = '/authentication/token';
+  static const String logoutEndpoint = '/logout';
+  static const String oauthLoginEndpoint = '/login'; // /login/{provider}
+  static const String oauthCallbackEndpoint = '/auth'; // /auth/{provider}
+  static const String signUpEndpoint = '/app_user';
+
+  // ==================== User/AppUser Endpoints ====================
+  static const String getAppUserCategoriesEndpoint = '/app_user/categorie/all';
   static const String addAppUserEndpoint = '/app_user';
-  static const String deleteAppUserEndpoint = '/app_user/delete';
+  static const String deleteAppUserEndpoint = '/app_user';
   static const String getAllAppUsersEndpoint = '/app_user';
   static const String appUserEndpoint = '/app_user';
   static const String updateAppUserImageEndpoint = '/app_user/update_image_url';
   static const String updateAppUserEndpoint = '/app_user/update';
+  static const String updateAppUserPasswordEndpoint =
+      '/app_user/update_password';
+  static const String searchAppUserEndpoint = '/app_user/search';
+  static const String getUserByEmailEndpoint = '/app_user/by-email';
 
+  // ==================== Person Endpoints ====================
   static const String personEndpoint = '/person';
+  static const String createOrUpdatePersonEndpoint = '/'; // POST /api/v1/
+  static const String getAllPersonsEndpoint = '/'; // GET /api/v1/
+  static const String searchPersonsByNameEndpoint = '/search/name';
+  static const String getAllBloodTypesEndpoint = '/blood-types/all';
+  static const String getBloodTypeEndpoint = '/blood-type';
 
+  // ==================== Staff/Management Rule Endpoints ====================
+  static const String addRuleEndpoint = '/staff';
+  static const String getStaffEndpoint = '/staff';
+  static const String updateStaffEndpoint = '/staff';
+  static const String deleteStaffEndpoint = '/staff/delete';
+  static const String answerStaffInvitationEndpoint = '/staff/answer';
+  static const String getUserStaffEndpoint = '/staff/user';
+  static const String getProviderStaffEndpoint = '/staff/provider';
+  static const String getPendingInvitationsEndpoint = '/staff/pending';
+
+  // ==================== Notification Endpoints ====================
   static const String getNotificationsEndpoint = '/notifications';
-  static const String putNotificationsEndpoint = '/notification';
+  static const String createNotificationEndpoint = '/create';
+  static const String notificationEndpoint = '/'; // /{notification_id}
+  static const String readNotificationEndpoint =
+      '/read'; // /{notification_id}/read
+  static const String userNotificationsEndpoint = '/user'; // /user/{user_ref}
+  static const String userReadAllEndpoint =
+      '/read-all'; // /user/{user_ref}/read-all
+  static const String userAllEndpoint = '/all'; // /user/{user_ref}/all
+  static const String userUnreadCountEndpoint =
+      '/unread-count'; // /user/{user_ref}/unread-count
+  static const String sendInvitationEndpoint = '/invitation/send';
+  static const String bulkCreateNotificationsEndpoint = '/bulk/create';
 
-  static const String addRuleEndpoint = '/staff/add';
-
-  static const String searchAppUserEndpoint = '/search/personnel';
-  static const String searchPeopleEndpoint = '/search/people';
-  static const String getAppUserStaffEndpoint = '/staff';
-
-  static const String deleteAppUserStaffEndpoint = '/staff/delete';
-  static const String putAppUserStaffEndpoint = '/staff';
-
-  static const String getAppUserCategoriesEndpoint = '/app_user/categorie/all';
-
-  static const String postImageEndpoint = '/fs/upload';
-
-  static const String addProductEndpoint = '/product/add';
-  static const String deleteProductEndpoint = '/product/delete';
-  static const String getAllProductsEndpoint = '/product';
-  static const String productEndpoint = '/product';
-  static const String getProductCategoriesEndpoint = '/product/category/all';
-  static const String getAllProductsByCategoryEndpoint = '/product/category';
-  static const String getProductImageEndpoint = '/image/product';
-  static const String getProductFeedEndpoint = '/product/observer';
-
-  static const String addOrderEndpoint = '/business/order/add';
-  static const String getAllOrdersEndpoint = '/business/user';
-  static const String getOrderDetailsEndpoint = '/business/order/orders';
-
-  static const String addDeliveryEndpoint = '/business/delivery/add';
-  static const String getAllDeliveriesEndpoint = '/business/delivery';
-  static const String getDeliveryDetailsEndpoint = '/business/delivery';
-
-  static const String addSupplierEndpoint = '/supplier/add';
-  static const String updateSupplierEndpoint = '/supplier';
-  static const String getOrganisations = '/org';
-
-  static const String deleteSupplierEndpoint = '/supplier/delete';
-  static const String getAllSuppliersEndpoint = '/supplier';
-  static const String supplierEndpoint = '/supplier';
-  static const String getSupplierCategoriesEndpoint = '/supplier/category/all';
-  static const String getRecipeImageEndpoint = '/image/recipe';
-  static const String getSupplierSearchByTokenEndpoint = '/search/supplier';
-  static const String getRecipeSearchByTokenEndpoint = '/search/recipe';
-  static const String getProductSearchByTokenEndpoint = '/search/product';
-  static const String putRuleAnswerEndpoint = '/rule/answer';
-
-  static const String getCartsEndpoint = "/business/cart";
-  static const String cartEndpoint = "/business/cart";
-  static const String postCartEndpoint = "/business/cart/add";
-  static const String getCartDetailsEndpoint = "/business/cart";
-  static const String getAllFinanceDocsEndpoint = "/business/doc";
-
-  static const String getBusinessOperationsEndpoint = "/business/order";
-
-  static const String addServiceEndpoint = "";
-  static const String deleteServiceEndpoint = "";
-  static const String serviceEndpoint = "/business/service";
-
-  static const String getProductSearchByBarcodeEndpoint = '/product/barcode';
+  // ==================== Product Endpoints ====================
+  static const String addProductEndpoint = '/products';
+  static const String deleteProductEndpoint = '/products/delete';
+  static const String getAllProductsEndpoint = '/products';
+  static const String productEndpoint = '/products';
+  static const String updateProductEndpoint =
+      '/products'; // /products/{product_id}
+  static const String getProductCategoriesEndpoint = '/products/category/all';
+  static const String getAllProductsByCategoryEndpoint = '/products/category';
+  static const String getProductImageEndpoint = '/products/image';
+  static const String getProductFeedEndpoint = '/products/observer';
+  static const String getProductSearchByBarcodeEndpoint = '/products/barcode';
   static const String getProductDBSearchByBarcodeEndpoint =
-      '/product/db/barcode';
-  static const String getProductSearchByImageEndpoint = '/product/search/image';
+      '/products/db/barcode';
+  static const String getProductSearchByImageEndpoint =
+      '/products/search/image';
+  static const String getProductByIdEndpoint =
+      '/products'; // /products/{product_id}
 
+  // ==================== Recipe Endpoints ====================
+  static const String addRecipeEndpoint = '/recipes';
+  static const String deleteRecipeEndpoint = '/recipes';
+  static const String getAllRecipesEndpoint = '/recipes';
+  static const String recipeEndpoint = '/recipes';
+  static const String updateRecipeEndpoint = '/recipes'; // /recipes/{recipe_id}
+  static const String getRecipeCategoriesEndpoint = '/recipes/categories';
+  static const String getRecipeImageEndpoint =
+      '/recipes/image'; // Adjust based on your API
+  static const String getRecipeSearchByTokenEndpoint =
+      '/recipes/search'; // Adjust
+  static const String getIngredientEndpoint = '/recipes/ingredients';
+  static const String deleteIngredientEndpoint = '/recipes/ingredients';
+
+  // ==================== Supplier Endpoints ====================
+  static const String addSupplierEndpoint = '/suppliers';
+  static const String updateSupplierEndpoint = '/suppliers';
+  static const String deleteSupplierEndpoint = '/suppliers';
+  static const String getAllSuppliersEndpoint = '/suppliers';
+  static const String supplierEndpoint = '/suppliers';
+  static const String getSupplierCategoriesEndpoint = '/supplier-types';
+  static const String getSupplierSearchByTokenEndpoint =
+      '/suppliers/search'; // Adjust
   static const String getSupplierSearchByGeoEndpoint =
-      '/search/position/supplier';
+      '/suppliers/search/location';
+  static const String getSupplierByIdEndpoint =
+      '/suppliers'; // /suppliers/{provider_id}
 
-  static const String addRecipeEndpoint = '/recipe/add';
-  static const String getIngredientEndpoint = '/ingredient';
-  static const String deleteRecipeEndpoint = '/recipe/delete';
-  static const String getAllRecipesEndpoint = '/recipe';
-  static const String recipeEndpoint = '/recipe';
-  static const String getRecipeCategoriesEndpoint = '/recipe/category/all';
+  // ==================== Organisation Endpoints ====================
+  static const String getOrganisationsEndpoint = '/organisations';
+  static const String createOrganisationEndpoint = '/organisations';
+  static const String updateOrganisationEndpoint = '/organisations';
+  static const String deleteOrganisationEndpoint = '/organisations';
+  static const String getOrganisationByIdEndpoint = '/organisations';
 
-  static const String postPaymentEndpoint = '/business/payment/add';
+  // ==================== Order Endpoints ====================
+  static const String addOrderEndpoint = '/business/orders';
+  static const String getAllOrdersEndpoint = '/business/orders/user';
+  static const String getOrderDetailsEndpoint = '/business/orders';
+  static const String updateOrderEndpoint = '/business/orders';
+  static const String deleteOrderEndpoint = '/business/orders';
+  static const String updateOrderStatusEndpoint = '/business/orders/status';
+  static const String getOrderItemsEndpoint = '/business/orders/items';
 
-  static const String loginEndpoint = '/authentication/token';
-  static const String signUpEndpoint = '/app_user/add';
-  static const String productsEndpoint = '/product';
+  // ==================== Cart Endpoints ====================
+  static const String getCartsEndpoint = '/business/carts';
+  static const String cartEndpoint = '/business/carts';
+  static const String postCartEndpoint = '/business/carts';
+  static const String getCartDetailsEndpoint = '/business/carts';
+  static const String deleteCartEndpoint = '/business/carts';
+  static const String updateCartStatusEndpoint = '/business/carts/status';
+  static const String getCartItemsEndpoint = '/business/carts/items';
+  static const String getCartServicesEndpoint = '/business/carts/services';
+  static const String getCartSummaryEndpoint = '/business/carts/summary';
+
+  // ==================== Delivery Endpoints ====================
+  static const String addDeliveryEndpoint = '/business/deliveries';
+  static const String getAllDeliveriesEndpoint = '/business/deliveries';
+  static const String getDeliveryDetailsEndpoint = '/business/deliveries';
+  static const String updateDeliveryEndpoint = '/business/deliveries';
+  static const String deleteDeliveryEndpoint = '/business/deliveries';
+  static const String updateDeliveryStatusEndpoint =
+      '/business/deliveries/status';
+  static const String updateDeliveryAddressEndpoint =
+      '/business/deliveries/address';
+  static const String updateDeliveryTrackingEndpoint =
+      '/business/deliveries/tracking';
+  static const String getDeliveriesByStatusEndpoint =
+      '/business/deliveries/status';
+  static const String bulkDeleteDeliveriesEndpoint =
+      '/business/deliveries/bulk/delete';
+  static const String bulkUpdateDeliveryStatusEndpoint =
+      '/business/deliveries/bulk/update-status';
+  static const String getDeliveryStatsEndpoint = '/business/deliveries/stats';
+
+  // ==================== Service Endpoints ====================
+  static const String addServiceEndpoint = '/business/services';
+  static const String deleteServiceEndpoint = '/business/services';
+  static const String serviceEndpoint = '/business/services';
+  static const String updateServiceEndpoint = '/business/services';
+  static const String getServicesByCategoryEndpoint =
+      '/business/services/category';
+  static const String getServicesByProviderEndpoint =
+      '/business/services/provider';
+  static const String toggleServiceStatusEndpoint = '/business/services/toggle';
+  static const String getServiceRequirementsEndpoint =
+      '/business/services/requirements';
+  static const String getServiceStaffRequirementsEndpoint =
+      '/business/services/staff-requirements';
+
+  // ==================== Financial Endpoints ====================
+  static const String postPaymentEndpoint = '/business/payments';
+  static const String getPaymentsEndpoint = '/business/payments';
+  static const String getPaymentByIdEndpoint = '/business/payments';
+  static const String createDepositEndpoint = '/business/deposits';
+  static const String getDepositsEndpoint = '/business/deposits';
+  static const String getDepositByIdEndpoint = '/business/deposits';
+  static const String createFeeEndpoint = '/business/fees';
+  static const String getFeesEndpoint = '/business/fees';
+  static const String getFeeByIdEndpoint = '/business/fees';
+  static const String getFinancialDocsEndpoint = '/business/finance'; // Adjust
+
+  // ==================== Business Operations Endpoints ====================
+  static const String getBusinessOperationsEndpoint = '/business/operations';
+
+  // ==================== Health/Medical Endpoints ====================
+  static const String getSerologyHistoryEndpoint = '/patient/serology/history';
+  static const String getSerologyIndicatorsEndpoint = '/serology/indicators';
+  static const String getSerologyIndicatorEndpoint = '/serology/indicator';
+  static const String getSerologyRecordEndpoint = '/serology';
+  static const String addSerologyRecordEndpoint = '/patient/serology';
+  static const String updateSerologyRecordEndpoint = '/patient/serology/update';
+  static const String deleteSerologyRecordEndpoint = '/patient/serology/delete';
+  static const String getAllSymptomsEndpoint = '/symptoms/all';
+  static const String getSymptomEndpoint = '/symptoms';
+  static const String addSymptomOccurrenceEndpoint = '/patient/symptoms';
+  static const String getSymptomHistoryEndpoint = '/patient/symptoms/history';
+  static const String getSymptomOccurrenceEndpoint =
+      '/patient/symptoms/occurrence';
+  static const String deleteSymptomOccurrenceEndpoint =
+      '/patient/symptoms/delete';
+
+  // ==================== Reaction Endpoints ====================
+  static const String reactionEndpoint = '/reaction';
+
+  // ==================== Search Endpoints ====================
+  static const String productSearchEndpoint = '/products/search';
+  static const String recipeSearchEndpoint = '/recipes/search';
+  static const String supplierSearchEndpoint = '/suppliers/search';
+  static const String multiSearchEndpoint = '/search/multi';
+  static const String quickSearchEndpoint = '/search/quick';
+
+  // ==================== Document Endpoints ====================
+  static const String cartInvoiceEndpoint = '/cart/invoice';
+  static const String cartReceiptEndpoint = '/cart/receipt';
+  static const String cartInvoicePdfEndpoint = '/cart/invoice/pdf';
+  static const String cartReceiptPdfEndpoint = '/cart/receipt/pdf';
+  static const String cartDataEndpoint = '/cart/data';
 
   static const int adminCategoryId = 3;
 
@@ -358,7 +480,7 @@ class AppRoutes {
   static const String registration = '/registration';
   static const String home = '/home';
   static const String productDetails = '/product/details';
-  static const String supplierDetails = '/supplier/details';
+  static const String supplierDetails = '/suppliers/details';
   static const String recipeDetails = '/recipe/details';
   static const String productCreate = '/product/create';
   static const String recipeCreate = '/recipe/create';
@@ -371,7 +493,7 @@ class AppRoutes {
   static const String QRScanPage = '/qr/scan';
   static const String productCapturePage = '/product/capture';
 
-  static const String supplierEntitiesPage = '/supplier/entities';
+  static const String supplierEntitiesPage = '/suppliers/entities';
   static const String dashboardPage = '/dashboard/business';
 
   static const String productCatalog = '/productCatalog';

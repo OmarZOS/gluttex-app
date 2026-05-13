@@ -19,18 +19,21 @@ class PrivilegeDialogManager {
     int? existingPrivileges;
 
     if (!isPending) {
-      final rules = await personnelNotifier.getUserPrivileges(
-        ruleId: ruleId,
+      // First ensure data is loaded
+      await personnelNotifier.loadPersonnel(
         userId: user.id_app_user ?? 0,
         supplierId: supplierId,
       );
 
-      if (rules != null && rules.isNotEmpty) {
-        final ruleForSupplier = rules.firstWhere(
-          (rule) => rule.productProvider?.id_product_provider == supplierId,
-          orElse: () => rules.first,
-        );
-        existingPrivileges = ruleForSupplier.management_rule_code;
+      // Then get the rule synchronously from cache
+      final rule = personnelNotifier.getRuleForUser(
+        userId: user.id_app_user ?? 0,
+        ruleId: ruleId,
+        supplierId: supplierId,
+      );
+
+      if (rule != null) {
+        existingPrivileges = rule.management_rule_code;
       }
     }
 
@@ -70,21 +73,26 @@ class PrivilegeDialogManager {
     required VoidCallback onRefresh,
   }) async {
     try {
-      final rules = await personnelNotifier.getUserPrivileges(
-        ruleId: ruleId,
+      // Ensure data is loaded
+      await personnelNotifier.loadPersonnel(
         userId: user.id_app_user ?? 0,
         supplierId: supplierId,
       );
 
-      if (rules == null || rules.isEmpty) return;
-
-      final ruleForSupplier = rules.firstWhere(
-        (rule) => rule.productProvider?.id_product_provider == supplierId,
-        orElse: () => rules.first,
+      // Get the rule from cache
+      final rule = personnelNotifier.getRuleForUser(
+        userId: user.id_app_user ?? 0,
+        ruleId: ruleId,
+        supplierId: supplierId,
       );
 
+      if (rule == null) {
+        debugPrint('Rule not found for user ${user.id_app_user}');
+        return;
+      }
+
       final success = await personnelNotifier.updateTeamMemberPrivileges(
-        ruleId: ruleForSupplier.id_management_rule,
+        ruleId: rule.id_management_rule ?? 0,
         userId: user.id_app_user ?? 0,
         supplierId: supplierId,
         orgId: orgId,
@@ -114,6 +122,20 @@ class PrivilegeDialogManager {
       }
     } catch (e) {
       debugPrint('Error modifying user privileges: $e');
+
+      if (context.mounted) {
+        final localizations = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(localizations.privilegesUpdateFailedMessage),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
     }
   }
 }

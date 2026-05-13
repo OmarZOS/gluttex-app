@@ -24,7 +24,7 @@ class GluttexImplNotification implements NotificationService {
   Future<void> markAsRead(int notificationId) async {
     StorageService storageService = GluttexLocator.get<StorageService>();
     final result = storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.putNotificationsEndpoint}/${notificationId}',
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.readNotificationEndpoint}/${notificationId}',
         notificationId.toString(), {}, {});
     // final GluttexNotification notification =
     //     GluttexNotification.fromJson(result);
