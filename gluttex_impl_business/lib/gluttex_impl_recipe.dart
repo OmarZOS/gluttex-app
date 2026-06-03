@@ -60,8 +60,8 @@ class RecipeServiceImpl implements RecipeService {
     try {
       final storageService = GluttexLocator.get<StorageService>();
 
-      final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateRecipeEndpoint}/${updatedRecipe.id_recipe}';
+      const url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateRecipeEndpoint}';
 
       // Convert recipe to JSON
       Map<String, dynamic> requestBody = updatedRecipe.toJson();

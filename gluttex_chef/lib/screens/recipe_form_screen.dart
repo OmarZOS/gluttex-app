@@ -40,7 +40,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   int? _id_recipe;
   int? _id_recipe_image;
   String imageUrl = "";
-  String _initialRecipeImageUrl = "";
+  String? _initialRecipeImageUrl;
   late Map<int, String> _selectedIngredients;
   bool _initialized = false;
 
@@ -78,7 +78,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
         _recipe_owner_id = recipe.recipe_owner_id ?? currentUserId;
         _recipeName = recipe.recipe_name;
         _recipeDescription = recipe.recipe_description;
-        _initialRecipeImageUrl = recipe.recipe_image_url ?? "";
+        _initialRecipeImageUrl = recipe.recipe_image_url;
         _recipeInstruction = recipe.recipe_instruction;
         _recipe_category_id = recipe.recipe_category_id;
         _recipePreparationTime =
@@ -355,7 +355,8 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               const SizedBox(height: 16.0),
               if (_id_recipe != null && _id_recipe != 0)
                 ImagePickerSection(
-                  initialImageUrl: _initialRecipeImageUrl,
+                  initialImageUrl:
+                      _initialRecipeImageUrl, // Now String? - can be null
                   entityType: 'recipe',
                   ownerId: '$_recipe_owner_id',
                   entityId: '$_id_recipe',
