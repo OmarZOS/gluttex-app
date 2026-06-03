@@ -18,14 +18,19 @@ class RecipeServiceImpl implements RecipeService {
     try {
       final storageService = GluttexLocator.get<StorageService>();
 
-      // Using POST /api/v1/recipes (from earlier agreement)
       final url =
           '${GluttexConstants.apiBaseUrl}${GluttexConstants.addRecipeEndpoint}';
-      developer.log('Adding recipe at: $url', name: 'RecipeServiceImpl');
-      developer.log('Recipe data: ${recipe.toJson()}',
-          name: 'RecipeServiceImpl');
 
-      final result = await storageService.insert(url, recipe.toJson());
+      // Convert recipe to JSON
+      Map<String, dynamic> requestBody = recipe.toJson();
+
+      // Remove any null values if necessary
+      requestBody.removeWhere((key, value) => value == null);
+
+      developer.log('Adding recipe at: $url', name: 'RecipeServiceImpl');
+      developer.log('Request body: $requestBody', name: 'RecipeServiceImpl');
+
+      final result = await storageService.insert(url, requestBody);
 
       if (result == null) {
         developer.log('Failed to add recipe: null response',
@@ -33,9 +38,61 @@ class RecipeServiceImpl implements RecipeService {
         return null;
       }
 
-      return Recipe.fromJson(result as Map<String, dynamic>);
+      // Handle different response formats
+      if (result is Map<String, dynamic>) {
+        // If response contains 'data' field
+        if (result.containsKey('data')) {
+          return Recipe.fromJson(result['data'] as Map<String, dynamic>);
+        }
+        return Recipe.fromJson(result);
+      }
+
+      return null;
     } catch (e, stacktrace) {
       developer.log('Error adding recipe: $e', name: 'RecipeServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
+      return null;
+    }
+  }
+
+  @override
+  Future<Recipe?> updateRecipe(Recipe updatedRecipe) async {
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateRecipeEndpoint}/${updatedRecipe.id_recipe}';
+
+      // Convert recipe to JSON
+      Map<String, dynamic> requestBody = updatedRecipe.toJson();
+      requestBody.removeWhere((key, value) => value == null);
+
+      developer.log('Updating recipe at: $url', name: 'RecipeServiceImpl');
+      developer.log('Request body: $requestBody', name: 'RecipeServiceImpl');
+
+      final result = await storageService.update(
+        url,
+        updatedRecipe.id_recipe.toString(),
+        {},
+        requestBody,
+      );
+
+      if (result == null) {
+        developer.log('Failed to update recipe: null response',
+            name: 'RecipeServiceImpl');
+        return null;
+      }
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('data')) {
+          return Recipe.fromJson(result['data'] as Map<String, dynamic>);
+        }
+        return Recipe.fromJson(result);
+      }
+
+      return null;
+    } catch (e, stacktrace) {
+      developer.log('Error updating recipe: $e', name: 'RecipeServiceImpl');
       developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
       return null;
     }
@@ -57,39 +114,6 @@ class RecipeServiceImpl implements RecipeService {
       return result;
     } catch (e, stacktrace) {
       developer.log('Error deleting recipe: $e', name: 'RecipeServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
-      return null;
-    }
-  }
-
-  @override
-  Future<Recipe?> updateRecipe(Recipe updatedRecipe) async {
-    try {
-      final storageService = GluttexLocator.get<StorageService>();
-
-      // Using PUT /api/v1/recipes/{recipe_id} (from earlier agreement)
-      final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateRecipeEndpoint}/${updatedRecipe.id_recipe}';
-      developer.log('Updating recipe at: $url', name: 'RecipeServiceImpl');
-      developer.log('Recipe data: ${updatedRecipe.toJson()}',
-          name: 'RecipeServiceImpl');
-
-      final result = await storageService.update(
-        url,
-        updatedRecipe.id_recipe.toString(),
-        {}, // No query parameters needed
-        updatedRecipe.toJson(),
-      );
-
-      if (result == null) {
-        developer.log('Failed to update recipe: null response',
-            name: 'RecipeServiceImpl');
-        return null;
-      }
-
-      return Recipe.fromJson(result as Map<String, dynamic>);
-    } catch (e, stacktrace) {
-      developer.log('Error updating recipe: $e', name: 'RecipeServiceImpl');
       developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
       return null;
     }

@@ -369,7 +369,7 @@ class Supplier {
 
   Map<String, dynamic> toJson() {
     return {
-      "supplier": {
+      "provider": {
         'id_product_provider': idProductProvider,
         "id_provider_owner": productProviderOwnerId,
         "idprovider_details_id": productProviderDetailsId,

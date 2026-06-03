@@ -654,6 +654,17 @@ class __PricingCardWrapperState extends State<_PricingCardWrapper> {
         widget.pricingState.updateBasePrice(widget.aiPrice!);
       });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final supplierNotifier = context.read<SupplierChangeNotifier>();
+      if (supplierNotifier.suppliers.isEmpty && !supplierNotifier.isLoading) {
+        final userNotifier = context.read<AppUserNotifier>();
+        supplierNotifier.fetchSuppliers(
+          reset: true,
+          ownerId: userNotifier.appUser?.id_app_user,
+        );
+      }
+    });
   }
 
   @override

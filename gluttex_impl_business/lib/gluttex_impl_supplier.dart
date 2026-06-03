@@ -46,7 +46,7 @@ class SupplierServiceImpl implements SupplierService {
     try {
       final storageService = GluttexLocator.get<StorageService>();
 
-      final url =
+      const url =
           '${GluttexConstants.apiBaseUrl}${GluttexConstants.getSupplierCategoriesEndpoint}';
       developer.log('Fetching supplier categories from: $url',
           name: 'SupplierServiceImpl');
