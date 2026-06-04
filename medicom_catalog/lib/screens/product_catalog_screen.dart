@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -26,14 +28,23 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
   late List<String> _categories = [];
   int _selectedCategoryId = 0;
   final ScrollController _scrollController = ScrollController();
-  late ProductNotifier provider;
+  late ProductNotifier _productNotifier;
+
+  // Debounce search
+  Timer? _searchTimer;
+  static const _searchDelay = Duration(milliseconds: 500);
+
   @override
   void initState() {
-    provider = Provider.of<ProductNotifier>(context, listen: false);
     super.initState();
-    _searchController.addListener(_filterProducts);
+    _productNotifier = Provider.of<ProductNotifier>(context, listen: false);
+    _searchController.addListener(_onSearchChanged);
     _scrollController.addListener(_scrollListener);
-    provider.fetchProducts();
+
+    // Initial fetch with cache support
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _productNotifier.fetchProducts();
+    });
   }
 
   @override
@@ -42,74 +53,112 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
     _initializeCategories();
   }
 
-  void _initializeCategories() {
-    final categs =
-        AppLocalizations.of(context)!.productCategoryTextList.split(",");
-    _categories = [AppLocalizations.of(context)!.allText, ...categs];
-
-    Provider.of<ProductNotifier>(context, listen: false).productCategories =
-        categs;
-  }
-
-  void _filterProducts() {
-    String query = _searchController.text;
-    Provider.of<ProductNotifier>(context, listen: false).searchProducts(query);
-  }
-
-  void _selectCategory(int index) {
-    _selectedCategoryId = index;
-    Provider.of<ProductNotifier>(context, listen: false)
-        .fetchProducts(categoryId: _selectedCategoryId);
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 100 &&
-        !Provider.of<ProductNotifier>(context, listen: false).isLoading) {
-      Provider.of<ProductNotifier>(context, listen: false)
-          .fetchProducts(categoryId: provider.currentCategory);
-    }
-  }
-
   @override
   void dispose() {
-    _searchController.removeListener(_filterProducts);
+    _searchController.removeListener(_onSearchChanged);
+    _searchTimer?.cancel();
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
   }
 
+  void _initializeCategories() {
+    final categs =
+        AppLocalizations.of(context)!.productCategoryTextList.split(",");
+    _categories = [AppLocalizations.of(context)!.allText, ...categs];
+    _productNotifier.productCategories = categs;
+  }
+
+  void _onSearchChanged() {
+    // Debounce search to avoid too many requests
+    if (_searchTimer?.isActive ?? false) _searchTimer?.cancel();
+    _searchTimer = Timer(_searchDelay, () {
+      if (mounted) {
+        _filterProducts();
+      }
+    });
+  }
+
+  void _filterProducts() {
+    String query = _searchController.text;
+    _productNotifier.searchProducts(query);
+  }
+
+  void _selectCategory(int index) {
+    if (_selectedCategoryId == index) return;
+
+    setState(() {
+      _selectedCategoryId = index;
+    });
+
+    // Clear search when changing category
+    if (_searchController.text.isNotEmpty) {
+      _searchController.clear();
+    }
+
+    _productNotifier.fetchProducts(categoryId: _selectedCategoryId);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_productNotifier.isLoading &&
+        _productNotifier.hasMoreProducts) {
+      _productNotifier.fetchProducts(categoryId: _selectedCategoryId);
+    }
+  }
+
+  Future<void> _refreshProducts() async {
+    // Invalidate cache and refresh
+    _productNotifier.invalidateProductCache(null);
+    await _productNotifier.fetchProducts(
+      categoryId: _selectedCategoryId,
+      reset: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isRTL = context.read<LocaleProvider>().locale?.languageCode == "ar";
+
     return Scaffold(
       floatingActionButton: CustomSpeedDial(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        uniqueId: 'product_fab', // Added for stability
+        uniqueId: 'product_fab',
         horizontalButtons: [
           SpeedDialButton(
-              icon: Icon(CupertinoIcons.barcode_viewfinder),
-              label: AppLocalizations.of(context)!.scannerTxt,
-              onTap: () async {
-                String? barcode = await Navigator.pushNamed(
-                    context, AppRoutes.productScanPage) as String?;
+            icon: Icon(CupertinoIcons.barcode_viewfinder),
+            label: AppLocalizations.of(context)!.scannerTxt,
+            onTap: () async {
+              String? barcode = await Navigator.pushNamed(
+                context,
+                AppRoutes.productScanPage,
+              ) as String?;
 
-                if (barcode != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IProductDetailsScreen(
-                        barcode: barcode,
-                      ),
+              if (barcode != null && mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => IProductDetailsScreen(
+                      barcode: barcode,
                     ),
-                  );
-                }
-              }),
+                  ),
+                );
+              }
+            },
+          ),
           SpeedDialButton(
             icon: Icon(Icons.add_box_outlined),
             label: AppLocalizations.of(context)!.addProductTxt,
-            onTap: () => Navigator.pushNamed(context, AppRoutes.productCreate),
+            onTap: () async {
+              final result =
+                  await Navigator.pushNamed(context, AppRoutes.productCreate);
+              if (result == true && mounted) {
+                // Product added, refresh the list
+                await _refreshProducts();
+              }
+            },
           ),
         ],
         verticalButtons: [
@@ -140,10 +189,26 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
           child: TextField(
             controller: _searchController,
             textInputAction: TextInputAction.search,
+            onSubmitted: (value) => _filterProducts(),
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context)?.searchTxt,
-              prefixIcon: Icon(Icons.search_outlined,
-                  color: Theme.of(context).colorScheme.onSurface),
+              prefixIcon: Icon(
+                Icons.search_outlined,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.clear,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 18,
+                      ),
+                      onPressed: () {
+                        _searchController.clear();
+                        _filterProducts();
+                      },
+                    )
+                  : null,
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 10),
             ),
@@ -153,13 +218,20 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
       ),
       body: Consumer<ProductNotifier>(
         builder: (context, productNotifier, child) {
-          final products = productNotifier
-              .filterProductsByCategory(provider.currentCategory);
-          var filteredProducts = products.where((product) {
-            var query = _searchController.text.toLowerCase();
-            return (product.product_name?.toLowerCase().contains(query) ??
-                false);
-          }).toList();
+          final products =
+              productNotifier.filterProductsByCategory(_selectedCategoryId);
+
+          // Apply search filter locally for better performance
+          var filteredProducts = products;
+          final query = _searchController.text.toLowerCase();
+          if (query.isNotEmpty) {
+            filteredProducts = products.where((product) {
+              return (product.product_name?.toLowerCase().contains(query) ??
+                      false) ||
+                  (product.product_brand?.toLowerCase().contains(query) ??
+                      false);
+            }).toList();
+          }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,12 +240,10 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: GluttexConstants.kDefaultPaddin / 4),
+                    horizontal: GluttexConstants.kDefaultPaddin / 4,
+                  ),
                   child: RefreshIndicator(
-                    onRefresh: () async {
-                      await productNotifier.fetchProducts(
-                          categoryId: provider.currentCategory, reset: true);
-                    },
+                    onRefresh: _refreshProducts,
                     child: _buildProductGrid(filteredProducts, productNotifier),
                   ),
                 ),
@@ -188,14 +258,17 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
   Widget _buildCategoryRow() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        children: _categories.map((category) {
-          int index = _categories.indexOf(category);
-          bool isSelected = provider.currentCategory == index;
-          String? iconPath = 'assets/icons/$index.svg';
+        children: _categories.asMap().entries.map((entry) {
+          final index = entry.key;
+          final category = entry.value;
+          final isSelected = _productNotifier.currentCategory == index;
+          final iconPath = 'assets/icons/$index.svg';
 
           return GestureDetector(
-            onTap: () => _selectCategory(_categories.indexOf(category)),
+            onTap: () => _selectCategory(index),
             child: Container(
               margin: const EdgeInsets.symmetric(
                 horizontal: GluttexConstants.kDefaultPaddin / 2,
@@ -212,16 +285,15 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
-                  )
+                  ),
                 ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // SVG Icon
                   SizedBox(
                     width: 24,
                     height: 24,
@@ -234,14 +306,13 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Category Text
                   Text(
                     category,
                     style: TextStyle(
                       color: isSelected
                           ? Theme.of(context).colorScheme.onPrimary
                           : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
                   ),
@@ -258,32 +329,63 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
       List<Product> products, ProductNotifier productNotifier) {
     if (products.isEmpty && !productNotifier.isLoading) {
       return Center(
-        child: Text(
-          AppLocalizations.of(context)?.noProductsFound ?? "",
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inventory_2_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context)?.noProductsFound ??
+                  "No products found",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                fontSize: 16,
+              ),
+            ),
+            if (_searchController.text.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  _searchController.clear();
+                  _filterProducts();
+                },
+                child: Text(AppLocalizations.of(context)?.clearSearch ??
+                    "Clear search"),
+              ),
+            ],
+          ],
         ),
       );
     }
 
     return Column(
       children: [
-        // Product Grid
         Expanded(
           child: GridView.builder(
             physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics()),
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             controller: _scrollController,
             itemCount: products.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.75,
+              childAspectRatio: 0.72,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
             ),
             itemBuilder: (context, index) {
-              return ProductCard(product: products[index]);
+              final product = products[index];
+              return ProductCard(
+                product: product,
+                key: ValueKey(product.id_product),
+              );
             },
           ),
         ),
-        // Loading Indicator
         if (productNotifier.isLoading && products.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),

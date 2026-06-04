@@ -20,6 +20,10 @@ class SupplierProductCard extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
+  bool _isValidImageUrl(String? url) {
+    return url != null && url.isNotEmpty && url.startsWith('http');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -217,7 +221,7 @@ class SupplierProductCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: product.product_image_url != null
+          child: _isValidImageUrl(product.product_image_url)
               ? Image.network(
                   product.product_image_url!,
                   fit: BoxFit.cover,

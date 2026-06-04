@@ -11,6 +11,7 @@ import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_event/product_change_notifier.dart';
 import 'package:gluttex_event/preferenceChangeNotifier.dart';
 import 'package:gluttex_event/cart_change_notifier.dart';
+import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_ui/SupplierProductCard.dart';
 import 'package:gluttex_ui/components/supplier/supplier_screen.dart';
 import 'package:medicom_catalog/screens/cart_screen.dart';
@@ -19,10 +20,9 @@ import 'package:medicom_catalog/screens/components/add_to_cart.dart';
 import 'package:medicom_catalog/screens/components/quantity_and_ref.dart';
 import 'package:medicom_catalog/screens/components/description.dart';
 import 'package:medicom_catalog/screens/components/dialogue/confirmation_dialogue.dart';
-import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:provider/provider.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   // final Product product;
@@ -101,6 +101,10 @@ class _ProductDetailsScreenContentState
   void _updateQuantity(int newValue) {
     if (!mounted) return;
     setState(() => _quantity = newValue); // Add reasonable limits
+  }
+
+  bool _isValidImageUrl(String? url) {
+    return url != null && url.isNotEmpty && url.startsWith('http');
   }
 
   @override
@@ -265,14 +269,7 @@ class _ProductDetailsScreenContentState
                         );
                       },
                     ),
-                    Consumer<SupplierChangeNotifier>(
-                        builder: (context, notifier, _) {
-                      if (notifier.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      return _buildProviderTile();
-                    }),
+                    _buildProviderTile(),
                     if (isLoggedIn) const SizedBox(height: 160),
                   ],
                 ),
@@ -290,8 +287,7 @@ class _ProductDetailsScreenContentState
     // log("Screen id_product: ${product.id_product}");
     return Stack(
       children: [
-        if (product.product_image_url != null &&
-            product.product_image_url!.isNotEmpty)
+        if (_isValidImageUrl(product.product_image_url))
           Align(
             alignment: isRTL ? Alignment.topLeft : Alignment.topRight,
             child: ConstrainedBox(
@@ -629,115 +625,116 @@ class _ProductDetailsScreenContentState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // if (_isLoadingProvider) {
-    //   return const Center(child: CircularProgressIndicator());
-    // }
+    return FutureBuilder<Supplier?>(
+      future: Provider.of<SupplierChangeNotifier>(context, listen: false)
+          .getSupplierById(_product.product_provider_id ?? 0),
+      builder: (context, snapshot) {
+        final provider = snapshot.data;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: GluttexConstants.kDefaultPaddin / 8,
-        vertical: 8,
-      ),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          if ((_provider?.idProductProvider ?? 0) != 0) {
-            showSupplierDetails(context, _provider!);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.providedBy,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+
+        if (provider == null || provider.idProductProvider == 0) {
+          return const SizedBox.shrink();
+        }
+
+        return Card(
+          margin: const EdgeInsets.symmetric(
+            horizontal: GluttexConstants.kDefaultPaddin / 8,
+            vertical: 8,
+          ),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              showSupplierDetails(context, provider);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Provider Avatar/Logo
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
+                  Text(
+                    AppLocalizations.of(context)!.providedBy,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.7),
                     ),
-                    child: _provider != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: SvgPicture.asset(
-                              'assets/icons/${_provider?.productProviderTypeId ?? 0}.svg',
-                              package: "gluttex_localiser",
-                              color: Theme.of(context).colorScheme.primary,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : _buildDefaultProviderIcon(context),
                   ),
-                  const SizedBox(width: 12),
-
-                  // Provider Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _provider?.providerName ??
-                              AppLocalizations.of(context)!.unknownProvider,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        if (_provider?.locationName != null) ...[
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.location_on_outlined,
-                                size: 16,
-                                color: colorScheme.onSurface.withOpacity(0.6),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: SvgPicture.asset(
+                            'assets/icons/${provider.productProviderTypeId ?? 0}.svg',
+                            package: "gluttex_localiser",
+                            color: Theme.of(context).colorScheme.primary,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              provider.providerName ??
+                                  AppLocalizations.of(context)!.unknownProvider,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _provider?.locationName ?? "",
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.6),
-                                ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (provider.locationName != null) ...[
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on_outlined,
+                                    size: 16,
+                                    color:
+                                        colorScheme.onSurface.withOpacity(0.6),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    provider.locationName ?? "",
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurface
+                                          .withOpacity(0.6),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
-                          ),
-                        ],
-                      ],
-                    ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDefaultProviderIcon(
-    BuildContext context,
-  ) {
-    return Center(
-      child: Icon(
-        Icons.store_outlined,
-        color: Theme.of(context).colorScheme.primary,
-      ),
+        );
+      },
     );
   }
 }

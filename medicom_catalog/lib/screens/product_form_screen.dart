@@ -105,7 +105,10 @@ class ProductFormScreenState extends State<ProductFormScreen> {
                       if (!_stateManager.isUpdate)
                         AiAssistanceSection(
                             formData: _formData, controllers: _controllers),
-                      if (_formData.image != null) _buildImagePickerSection(),
+                      if (_formData.image != null ||
+                          (_formData.imageUrl != null &&
+                              _formData.imageUrl!.isNotEmpty))
+                        _buildImagePickerSection(),
                       const SizedBox(height: 24),
                       ProductFormFields(
                         formData: _formData,
