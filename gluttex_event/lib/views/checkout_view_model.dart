@@ -218,7 +218,7 @@ class CheckoutViewModel extends ChangeNotifier {
       paidMoney = _depositAmount.clamp(0.0, totalAmount);
     }
 
-    // Build ordered items from cart (products)
+    // Build ordered items from cart (products) - using correct key name "ordered_items"
     final List<Map<String, dynamic>> orderedItems = [];
 
     for (final cartItem in cart.items.where((item) => item.isProduct)) {
@@ -235,11 +235,11 @@ class CheckoutViewModel extends ChangeNotifier {
       });
     }
 
-    // Build provided services from cart (services)
-    final List<Map<String, dynamic>> providedServices = [];
+    // Build ordered services from cart - using correct key name "ordered_services"
+    final List<Map<String, dynamic>> orderedServices = [];
 
     for (final cartItem in cart.items.where((item) => item.isService)) {
-      providedServices.add({
+      orderedServices.add({
         "ordered_service_service_id": cartItem.service?.id ?? 0,
         "ordered_service_quantity": cartItem.quantity,
         "ordered_service_unit_price": _applyVAT
@@ -248,53 +248,82 @@ class CheckoutViewModel extends ChangeNotifier {
         "ordered_service_total_price": _applyVAT
             ? (cartItem.totalPrice * (1 - vatRate))
             : cartItem.totalPrice,
-        // VAT for services would depend on your business logic
+        "ordered_service_scheduled_at":
+            cartItem.scheduledDate ?? DateTime.now().toIso8601String(),
+        "ordered_service_notes": cartItem.scheduledTime ?? "",
+        "resource_requirement_id": 0,
       });
     }
 
-    // Build cart data
-    final Map<String, dynamic> apiCart = {
+    // Build cart data - using correct key name "cart" (not "api_cart")
+    final Map<String, dynamic> cartData = {
       "cart_id": 0,
       "cart_product_provider_id": providerId,
       "cart_selling_user": sellingUserId,
-      "cart_person_ref": customerRef, // Will be null for guests
-      "cart_client_user": clientUserId ?? 0, // 0 for guests
+      "cart_person_ref": customerRef,
+      "cart_client_user": clientUserId ?? 0,
+      "cart_due_date": _dueDate ?? DateTime.now().toIso8601String(),
       "cart_status": "PENDING",
       "cart_total_amount": totalAmount,
-      "cart_vat_amount": vatAmount,
-      "cart_subtotal": subtotal,
-      "cart_vat_rate": _applyVAT ? vatRate : 0.0,
       "cart_notes": _notes,
-      "cart_due_date": _dueDate ?? "",
       "cart_invoice": _documentType.contains('invoice'),
       "cart_receipt": _documentType.contains('receipt'),
       "cart_deposit": _paymentType == 'deposit',
       "cart_payment": _paymentType == 'payment',
       "cart_paid_money": paidMoney,
-      "cart_payment_method": _paymentMethod,
-      "cart_card_type": _cardType,
-      "cart_card_details": _cardDetails,
-      "cart_bank_details": _bankDetails,
-      "cart_mobile_provider": _mobileProvider,
-      "cart_delivery_type": _deliveryType,
-      "cart_deposit_amount": _depositAmount,
-      "cart_apply_vat": _applyVAT,
     };
 
-    // Add checkout parameters
-    final Map<String, dynamic> parameters = {};
-    for (final param in _parameters) {
-      parameters[param.key] = param.value;
+    // Add additional cart fields if needed
+    if (_applyVAT) {
+      cartData["cart_vat_amount"] = vatAmount;
+      cartData["cart_subtotal"] = subtotal;
+      cartData["cart_vat_rate"] = vatRate;
     }
-    apiCart["cart_parameters"] = parameters;
+
+    if (_paymentMethod.isNotEmpty) {
+      cartData["cart_payment_method"] = _paymentMethod;
+    }
+
+    if (_cardType.isNotEmpty) {
+      cartData["cart_card_type"] = _cardType;
+    }
+
+    if (_cardDetails != null && _cardDetails!.isNotEmpty) {
+      cartData["cart_card_details"] = _cardDetails;
+    }
+
+    if (_bankDetails != null && _bankDetails!.isNotEmpty) {
+      cartData["cart_bank_details"] = _bankDetails;
+    }
+
+    if (_mobileProvider != null && _mobileProvider!.isNotEmpty) {
+      cartData["cart_mobile_provider"] = _mobileProvider;
+    }
+
+    if (_deliveryType.isNotEmpty) {
+      cartData["cart_delivery_type"] = _deliveryType;
+    }
+
+    if (_depositAmount > 0) {
+      cartData["cart_deposit_amount"] = _depositAmount;
+    }
+
+    // Add checkout parameters
+    if (_parameters.isNotEmpty) {
+      final Map<String, dynamic> parameters = {};
+      for (final param in _parameters) {
+        parameters[param.key] = param.value;
+      }
+      cartData["cart_parameters"] = parameters;
+    }
 
     // Build client data - ONLY for real users (id != 0)
-    final Map<String, dynamic> client = {};
+    final Map<String, dynamic> clientData = {};
 
     if (_selectedCustomer != null && _selectedCustomer!.id_app_user != 0) {
       // Only send client data for real users, not guests
       final customer = _selectedCustomer!;
-      client.addAll({
+      clientData.addAll({
         "id_person": customer.idPerson,
         "person_details_id": customer.personDetailsId,
         "id_person_details": customer.personDetailsId,
@@ -309,7 +338,7 @@ class CheckoutViewModel extends ChangeNotifier {
       // Person is always a real record
       final person = _selectedPerson!;
       final details = person.person_details;
-      client.addAll({
+      clientData.addAll({
         "id_person": person.id_person,
         "person_details_id": person.person_details_id,
         "id_person_details": details.id_person_details,
@@ -324,33 +353,43 @@ class CheckoutViewModel extends ChangeNotifier {
       });
     }
 
-    // If client is empty (guest or no customer), send empty object or omit it
-    // depending on your API requirements
-    Map<String, dynamic> data = {
-      "api_ordered_items": orderedItems,
-      "api_provided_services": providedServices,
-      "api_cart": apiCart,
+    // Build the final payload with CORRECT keys
+    final Map<String, dynamic> payload = {
+      "ordered_items": orderedItems,
+      "ordered_services": orderedServices,
+      "cart": cartData,
     };
 
     // Only add client data if we have a real customer
-    if (client.isNotEmpty) {
-      data["client"] = client;
+    if (clientData.isNotEmpty) {
+      payload["client"] = clientData;
     }
 
     // Add delivery data if needed
-    if (deliveryType != "pickup") {
-      data["delivery"] = deliveryData?.toJson();
+    if (_deliveryType != "pickup" && _deliveryData != null) {
+      payload["delivery"] = _deliveryData!.toJson();
     }
 
-    return data;
+    developer.log('Prepared checkout payload keys: ${payload.keys}',
+        name: 'CheckoutViewModel');
+    developer.log('Ordered items count: ${orderedItems.length}',
+        name: 'CheckoutViewModel');
+    developer.log('Ordered services count: ${orderedServices.length}',
+        name: 'CheckoutViewModel');
+    developer.log('Has client: ${clientData.isNotEmpty}',
+        name: 'CheckoutViewModel');
+    developer.log('Has delivery: ${payload.containsKey("delivery")}',
+        name: 'CheckoutViewModel');
+
+    return payload;
   }
 
   Future<CheckoutResult> _submitOrder(Map<String, dynamic> checkoutData) async {
     try {
       developer.log('Submitting order data...', name: 'CheckoutViewModel');
 
-      // Get parameters from cart data
-      final apiCart = checkoutData["api_cart"] as Map<String, dynamic>;
+      // Get parameters from checkout data - using correct key "cart"
+      final apiCart = checkoutData["cart"] as Map<String, dynamic>;
 
       final result = await _cartService.addCart(checkoutData, params: {
         "provider_id": apiCart["cart_product_provider_id"],

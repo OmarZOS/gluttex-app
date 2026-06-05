@@ -35,7 +35,9 @@ for pkg in data["packages"]:
 
 
 # PyVis graph
-net = Network(height="100%", width="100%", directed=True, notebook=False)
+net = Network(height="100vh",
+    width="100vw",
+ directed=True, notebook=False)
 net.barnes_hut()
 
 # Compute in-degree (number of incoming edges)
@@ -58,11 +60,22 @@ for node in G.nodes():
     if node == data["root"]:
         color = "#ffae00"
 
-    net.add_node(node, size=size, color=color, image="package.svg", title=f"{node} dependencies: {len(list(G.successors(node)))}")
+    net.add_node(node, size=size, color=color,gravity=-90000, image="package.svg", title=f"{node} dependencies: {len(list(G.successors(node)))}")
 
 # Add edges
 for source, target in G.edges():
     net.add_edge(source, target)
 
+net.set_options("""
+{
+  "nodes": {
+    "font": {
+      "size": 16,
+      "strokeWidth": 0.5
+    }
+  }
+}
+""")
+
 # Save to HTML
-net.show("dependencies.html")
+net.write_html("dependencies.html")

@@ -1,10 +1,11 @@
 // SupplierService.dart
 
 import 'package:gluttex_core/business/Organisation.dart';
+import 'package:gluttex_core/business/services/TraceableService.dart';
 
 import '../Supplier.dart';
 
-abstract class SupplierService {
+abstract class SupplierService extends TraceableService {
   Future<List<SupplierCategory>> getCategories() async {
     throw UnimplementedError();
   }

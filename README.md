@@ -6,7 +6,7 @@
 > 
 >   cd ..
 > 
->   python3 main.py
+>   python3 generate_dep_graph.py
 >
 
 

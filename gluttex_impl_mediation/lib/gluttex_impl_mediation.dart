@@ -8,7 +8,7 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 
-class StorageServiceImpl implements StorageService<FormData> {
+class StorageServiceImpl extends StorageService<FormData> {
   final Dio _dio;
 
   StorageServiceImpl({Dio? dio})
@@ -43,8 +43,12 @@ class StorageServiceImpl implements StorageService<FormData> {
     );
   }
 
-  void _logRequest(String method, String url, {dynamic data, dynamic params}) {
-    developer.log('[$method] $url');
+  void _logRequest(String method, String url,
+      {dynamic data, dynamic params, String? callerKey}) {
+    developer.log('[$method] $url', name: 'StorageService');
+    if (callerKey != null) {
+      developer.log('CallerKey: $callerKey', name: 'StorageService');
+    }
     if (params != null) {
       developer.log('Params: $params', name: 'StorageService');
     }
@@ -73,80 +77,135 @@ class StorageServiceImpl implements StorageService<FormData> {
 
   int min(int a, int b) => a < b ? a : b;
 
+  // Helper method to get caller key with default
+  String _getCallerKey(String? providedKey, String defaultKey) {
+    return providedKey ??
+        '${defaultKey}_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
   @override
-  Future<int?> delete(String destination, String id) async {
+  Future<int?> delete(String destination, String id,
+      {String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'delete_$id');
     final url = '$destination/$id';
-    _logRequest('DELETE', url);
+    _logRequest('DELETE', url, callerKey: key);
 
     try {
       final response = await _dio.delete(url);
+      setSuccessResponse(key, response.statusCode,
+          statusCode: response.statusCode);
       return response.statusCode;
     } on DioException catch (e) {
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'DELETE_FAILED',
+        message: e.message,
+      );
       throw _createGluttexException(e);
     }
   }
 
   @override
-  Future<dynamic> get(String destination, String id) async {
+  Future<dynamic> get(String destination, String id,
+      {String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'get_$id');
     final url = '$destination/$id';
-    _logRequest('GET', url);
+    _logRequest('GET', url, callerKey: key);
 
     try {
       final response = await _dio.get(url);
 
       if (response.statusCode == 200) {
         _logResponse(response.data);
+        setSuccessResponse(key, response.data, statusCode: response.statusCode);
         return response.data;
       } else if (response.statusCode == 404) {
+        setFailureResponse(
+          key,
+          data: GluttexConstants.notFoundError,
+          statusCode: 404,
+          errorCode: 'NOT_FOUND',
+          message: GluttexConstants.notFoundError,
+        );
         throw Exception(GluttexConstants.notFoundError);
       } else {
+        setFailureResponse(
+          key,
+          data: GluttexConstants.getFailure,
+          statusCode: response.statusCode,
+          errorCode: 'GET_FAILED',
+          message: GluttexConstants.getFailure,
+        );
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e) {
       developer.log('GET Error: ${e.message}', name: 'StorageService');
       developer.log('URL: $url', name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'DIO_EXCEPTION',
+        message: e.message,
+      );
       throw _createGluttexException(e);
     }
   }
 
   @override
-  Future<dynamic> getAll(String destination, {params}) async {
-    _logRequest('GET', destination, params: params);
+  Future<dynamic> getAll(String destination,
+      {params, String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'getAll');
+    _logRequest('GET', destination, params: params, callerKey: key);
 
     try {
       final response = await _dio.get(destination, queryParameters: params);
 
       if (response.statusCode == 200) {
+        setSuccessResponse(key, response.data, statusCode: response.statusCode);
         return response.data;
       } else if (response.statusCode == 404) {
+        setFailureResponse(
+          key,
+          data: GluttexConstants.notFoundError,
+          statusCode: 404,
+          errorCode: 'NOT_FOUND',
+          message: GluttexConstants.notFoundError,
+        );
         throw Exception(GluttexConstants.notFoundError);
       } else {
+        setFailureResponse(
+          key,
+          data: GluttexConstants.getFailure,
+          statusCode: response.statusCode,
+          errorCode: 'GET_FAILED',
+          message: GluttexConstants.getFailure,
+        );
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e) {
       developer.log('GET All Error: ${e.message}', name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'DIO_EXCEPTION',
+        message: e.message,
+      );
       throw _createGluttexException(e);
     }
   }
 
-  // In StorageServiceImpl, modify the insert method:
   @override
   Future<dynamic> insert(String destination, Map<String, dynamic> data,
-      {params}) async {
-    // Enhanced logging
-    _logRequest('POST', destination, data: data, params: params);
-
-    // Log the full URL with query parameters
-    // final uri = Uri.parse(destination);
-
-    // if (params != null) {
-    //   final fullUri = uri.replace(
-    //       queryParameters: params.map((k, v) => MapEntry(k, v.toString())));
-    //   developer.log('Full URL with params: $fullUri', name: 'StorageService');
-    // }
+      {params, String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'insert');
+    _logRequest('POST', destination,
+        data: data, params: params, callerKey: key);
 
     try {
-      // 1. Log exactly what's being sent
       developer.log('Data type: ${data.runtimeType}', name: 'StorageService');
       developer.log('Params type: ${params?.runtimeType}',
           name: 'StorageService');
@@ -156,14 +215,13 @@ class StorageServiceImpl implements StorageService<FormData> {
           name: 'StorageService');
       developer.log(jsonString, name: 'StorageService');
 
-      // 2. Check for any circular references or issues
+      // Validate JSON
       try {
-        jsonDecode(jsonString); // Try to decode it back to ensure it's valid
+        jsonDecode(jsonString);
       } catch (e) {
         developer.log('JSON VALIDATION ERROR: $e', name: 'StorageService');
       }
 
-      // 3. Make the request with detailed logging
       developer.log('Making Dio request...', name: 'StorageService');
       final response = await _dio.post(
         destination,
@@ -189,6 +247,7 @@ class StorageServiceImpl implements StorageService<FormData> {
         developer.log('Response body is null or empty', name: 'StorageService');
       }
 
+      setSuccessResponse(key, response.data, statusCode: response.statusCode);
       return response.data;
     } on DioException catch (e) {
       // Enhanced error logging
@@ -200,32 +259,35 @@ class StorageServiceImpl implements StorageService<FormData> {
           name: 'StorageService');
       developer.log('Error response data: ${e.response?.data}',
           name: 'StorageService');
-      developer.log('Error request: ${e.requestOptions}',
-          name: 'StorageService');
-      developer.log('Error request headers: ${e.requestOptions.headers}',
-          name: 'StorageService');
-      developer.log('Error request data: ${e.requestOptions.data}',
-          name: 'StorageService');
 
-      if (e.response != null) {
-        developer.log('Response headers: ${e.response!.headers}',
-            name: 'StorageService');
-        developer.log('Response real status: ${e.response!.statusCode}',
-            name: 'StorageService');
-      }
-
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'INSERT_FAILED',
+        message: e.message,
+      );
       throw _createGluttexException(e);
     } catch (e, stackTrace) {
       developer.log('❌ UNEXPECTED INSERT ERROR: $e', name: 'StorageService');
       developer.log('Stack trace: $stackTrace', name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.toString(),
+        statusCode: 500,
+        errorCode: 'UNEXPECTED_ERROR',
+        message: e.toString(),
+      );
       rethrow;
     }
   }
 
   @override
-  Future<dynamic> insertBinary(String destination, FormData data) async {
+  Future<dynamic> insertBinary(String destination, FormData data,
+      {String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'insertBinary');
     _logRequest('POST', destination,
-        data: 'FormData with ${data.files.length} files');
+        data: 'FormData with ${data.files.length} files', callerKey: key);
 
     try {
       final response = await _dio.post(
@@ -241,10 +303,18 @@ class StorageServiceImpl implements StorageService<FormData> {
 
       developer.log('Image upload response: ${response.data}',
           name: 'StorageService');
+      setSuccessResponse(key, response.data, statusCode: response.statusCode);
       return response.data;
     } on DioException catch (e) {
       developer.log('Insert Binary Error: ${e.message}',
           name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'UPLOAD_FAILED',
+        message: e.message,
+      );
       throw GluttexException(
         e.response?.data?['error_code']?.toString() ?? 'UPLOAD_FAILED',
         statusCode: e.response?.statusCode,
@@ -253,15 +323,24 @@ class StorageServiceImpl implements StorageService<FormData> {
     } catch (e) {
       developer.log('Unexpected binary upload error: $e',
           name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.toString(),
+        statusCode: 500,
+        errorCode: 'UNEXPECTED_UPLOAD_ERROR',
+        message: e.toString(),
+      );
       return "";
     }
   }
 
   @override
   Future<dynamic> update(String destination, String id,
-      Map<String, dynamic> parameters, Map<String, dynamic> data) async {
+      Map<String, dynamic> parameters, Map<String, dynamic> data,
+      {String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'update_$id');
     final url = '$destination/$id';
-    _logRequest('PUT', url, data: data, params: parameters);
+    _logRequest('PUT', url, data: data, params: parameters, callerKey: key);
 
     try {
       final response = await _dio.put(
@@ -276,18 +355,28 @@ class StorageServiceImpl implements StorageService<FormData> {
 
       developer.log('Update Response: ${response.data}',
           name: 'StorageService');
+      setSuccessResponse(key, response.data, statusCode: response.statusCode);
       return response.data;
     } on DioException catch (e) {
       developer.log('Update Error: ${e.message}', name: 'StorageService');
       developer.log('Error Stack: ${e.stackTrace}', name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'UPDATE_FAILED',
+        message: e.message,
+      );
       throw _createGluttexException(e);
     }
   }
 
   @override
   Future<dynamic> signUpUsingUsernameAndPassword(
-      String destination, Map<String, dynamic> data) async {
-    _logRequest('POST', destination, data: data);
+      String destination, Map<String, dynamic> data,
+      {String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'signUp');
+    _logRequest('POST', destination, data: data, callerKey: key);
 
     try {
       final response = await _dio.post(
@@ -307,23 +396,47 @@ class StorageServiceImpl implements StorageService<FormData> {
           name: 'StorageService');
 
       if (response.statusCode == 406) {
+        setFailureResponse(
+          key,
+          data: response.data["detail"],
+          statusCode: 406,
+          errorCode: 'SIGNUP_FAILED',
+          message: response.data["detail"],
+        );
         throw Exception(response.data["detail"]);
       }
 
+      setSuccessResponse(key, response.data, statusCode: response.statusCode);
       return response.data;
     } on DioException catch (e) {
       developer.log('SignUp Dio Error: ${e.message}', name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'SIGNUP_DIO_ERROR',
+        message: e.message,
+      );
       throw _createGluttexException(e);
     } catch (e) {
       developer.log('Unexpected SignUp Error: $e', name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.toString(),
+        statusCode: 500,
+        errorCode: 'UNEXPECTED_SIGNUP_ERROR',
+        message: e.toString(),
+      );
       throw Exception('Unexpected error occurred.');
     }
   }
 
   @override
   Future<dynamic> signInUsingUsernameAndPassword(
-      String destination, Map<String, dynamic> data) async {
-    _logRequest('POST', destination, data: data);
+      String destination, Map<String, dynamic> data,
+      {String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'signIn');
+    _logRequest('POST', destination, data: data, callerKey: key);
 
     try {
       final response = await _dio.post(
@@ -343,6 +456,13 @@ class StorageServiceImpl implements StorageService<FormData> {
           name: 'StorageService');
 
       if (response.statusCode == 406) {
+        setFailureResponse(
+          key,
+          data: response.data.toString(),
+          statusCode: 406,
+          errorCode: 'INCORRECT_CREDENTIALS',
+          message: 'Invalid username or password',
+        );
         throw GluttexException(
           "INCORRECT_CREDENTIALS",
           statusCode: 406,
@@ -350,17 +470,27 @@ class StorageServiceImpl implements StorageService<FormData> {
         );
       }
 
+      setSuccessResponse(key, response.data, statusCode: response.statusCode);
       return response.data;
     } on DioException catch (e) {
       developer.log('SignIn Dio Error: ${e.message}', name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'SIGNIN_DIO_ERROR',
+        message: e.message,
+      );
       throw _createGluttexException(e);
     }
   }
 
   @override
-  Future<dynamic> signInUsingProvider(String destination, String providerName,
-      Map<String, dynamic> data) async {
-    _logRequest('PUT', destination, data: data);
+  Future<dynamic> signInUsingProvider(
+      String destination, String providerName, Map<String, dynamic> data,
+      {String? callerKey}) async {
+    final key = _getCallerKey(callerKey, 'signInProvider_$providerName');
+    _logRequest('PUT', destination, data: data, callerKey: key);
 
     try {
       final response = await _dio.put(
@@ -375,10 +505,18 @@ class StorageServiceImpl implements StorageService<FormData> {
         ),
       );
 
+      setSuccessResponse(key, response.data, statusCode: response.statusCode);
       return response.data;
     } on DioException catch (e) {
       developer.log('Provider SignIn Error: ${e.message}',
           name: 'StorageService');
+      setFailureResponse(
+        key,
+        data: e.message,
+        statusCode: e.response?.statusCode,
+        errorCode: 'PROVIDER_SIGNIN_FAILED',
+        message: e.message,
+      );
       throw _createGluttexException(e);
     }
   }

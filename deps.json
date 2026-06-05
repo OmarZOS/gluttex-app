@@ -437,7 +437,9 @@
         "gluttex_scanner",
         "gluttex_personnel",
         "fl_chart",
-        "cupertino_icons"
+        "cupertino_icons",
+        "flutter_animate",
+        "confetti"
       ],
       "directDependencies": [
         "flutter",
@@ -460,7 +462,51 @@
         "gluttex_scanner",
         "gluttex_personnel",
         "fl_chart",
-        "cupertino_icons"
+        "cupertino_icons",
+        "flutter_animate",
+        "confetti"
+      ]
+    },
+    {
+      "name": "confetti",
+      "version": "0.8.0",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "vector_math"
+      ],
+      "directDependencies": [
+        "flutter",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_animate",
+      "version": "4.5.2",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "flutter_shaders"
+      ],
+      "directDependencies": [
+        "flutter",
+        "flutter_shaders"
+      ]
+    },
+    {
+      "name": "flutter_shaders",
+      "version": "0.1.3",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter",
+        "vector_math"
+      ],
+      "directDependencies": [
+        "flutter",
+        "vector_math"
       ]
     },
     {
@@ -1876,7 +1922,8 @@
         "google_maps_flutter",
         "provider",
         "font_awesome_flutter",
-        "image_picker"
+        "image_picker",
+        "shimmer"
       ],
       "directDependencies": [
         "flutter",
@@ -1890,7 +1937,20 @@
         "google_maps_flutter",
         "provider",
         "font_awesome_flutter",
-        "image_picker"
+        "image_picker",
+        "shimmer"
+      ]
+    },
+    {
+      "name": "shimmer",
+      "version": "3.0.0",
+      "kind": "transitive",
+      "source": "hosted",
+      "dependencies": [
+        "flutter"
+      ],
+      "directDependencies": [
+        "flutter"
       ]
     },
     {
@@ -2791,18 +2851,6 @@
         "flutter_localizations",
         "flutter_speed_dial",
         "shimmer"
-      ]
-    },
-    {
-      "name": "shimmer",
-      "version": "3.0.0",
-      "kind": "transitive",
-      "source": "hosted",
-      "dependencies": [
-        "flutter"
-      ],
-      "directDependencies": [
-        "flutter"
       ]
     },
     {
