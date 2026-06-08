@@ -31,19 +31,33 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
   final TextEditingController _searchController = TextEditingController();
   List<Organisation> filteredOrganisations = [];
   bool showCreateOption = false;
+  bool _isLoading = false;
 
   late List<Organisation> organisations;
-
   late SupplierChangeNotifier notifier;
 
   @override
   void initState() {
     super.initState();
+    _initData();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  Future<void> _initData() async {
     notifier = Provider.of<SupplierChangeNotifier>(context, listen: false);
-    organisations = notifier.organisations;
+
+    setState(() => _isLoading = true);
+
+    // Load organisations if empty
+    if (notifier.organisations.isEmpty) {
+      await notifier.fetchOrganisations(reset: true);
+    }
+
+    organisations = List.from(notifier.organisations);
     selectedOrganisationId = widget.initialValue;
     filteredOrganisations = List.from(organisations);
-    _searchController.addListener(_onSearchChanged);
+
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -61,13 +75,11 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
         filteredOrganisations = List.from(organisations);
         showCreateOption = false;
       } else {
-        // Filter organisations that match the search
         filteredOrganisations = organisations
             .where((org) =>
                 org.provider_organisation_name.toLowerCase().contains(query))
             .toList();
 
-        // Show create option if no exact match exists and query is not empty
         showCreateOption = query.isNotEmpty &&
             !organisations.any((org) =>
                 org.provider_organisation_name.toLowerCase() ==
@@ -77,10 +89,8 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
   }
 
   void _openOrganisationPicker() async {
-    // Haptic feedback
     HapticFeedback.lightImpact();
 
-    // Reset search when opening the picker
     _searchController.clear();
     setState(() {
       filteredOrganisations = List.from(organisations);
@@ -97,12 +107,12 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
     );
 
     if (result != null) {
-      setState(() => selectedOrganisationId = result.id_provider_organisation);
+      setState(() {
+        selectedOrganisationId = result.id_provider_organisation;
+        newOrganisationName = result.provider_organisation_name;
+      });
       widget.onOrganisationSelected?.call(result);
-
-      newOrganisationName = result.provider_organisation_name;
-    } else
-      newOrganisationName = null;
+    }
   }
 
   Widget _buildBottomSheet() {
@@ -151,7 +161,6 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                           ),
                     ),
                     const Spacer(),
-                    // Add Management Button
                     IconButton(
                       icon: const Icon(Icons.settings, size: 22),
                       tooltip: 'Manage Organisations',
@@ -163,7 +172,6 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                           context: context,
                           builder: (context) => OrganisationManagementPopup(
                             onOrganisationUpdated: (updatedOrg) {
-                              // Refresh organisations when changes are made
                               _refreshOrganisations();
                             },
                           ),
@@ -180,7 +188,89 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                 ),
               ),
 
-              // Rest of your existing code...
+              // Search field
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Search organisations...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              _onSearchChanged();
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).dividerColor.withOpacity(0.5),
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                ),
+              ),
+
+              // Organisation list
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : filteredOrganisations.isEmpty && !showCreateOption
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.business_outlined,
+                                  size: 48,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.5),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No organisations found',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.6),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            controller: scrollController,
+                            itemCount: filteredOrganisations.length +
+                                (showCreateOption ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (showCreateOption &&
+                                  index == filteredOrganisations.length) {
+                                return _buildCreateOption();
+                              }
+                              final org = filteredOrganisations[index];
+                              return _buildOrganisationTile(org);
+                            },
+                          ),
+              ),
             ],
           ),
         );
@@ -188,39 +278,140 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
     );
   }
 
-// Add this method to refresh organisations
+  Widget _buildOrganisationTile(Organisation org) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        child: Text(
+          org.provider_organisation_name[0].toUpperCase(),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      title: Text(org.provider_organisation_name),
+      subtitle: org.provider_organisation_desc.isNotEmpty
+          ? Text(
+              org.provider_organisation_desc,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+      trailing: selectedOrganisationId == org.id_provider_organisation
+          ? Icon(Icons.check_circle,
+              color: Theme.of(context).colorScheme.primary)
+          : null,
+      onTap: () => Navigator.pop(context, org),
+    );
+  }
+
+  Widget _buildCreateOption() {
+    final query = _searchController.text.trim();
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.add, color: Colors.orange),
+      ),
+      title: Text(
+        'Create "$query"',
+        style: const TextStyle(
+          color: Colors.orange,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: const Text('Create a new organisation with this name'),
+      onTap: () async {
+        // Close the bottom sheet first
+        Navigator.pop(context);
+
+        // Create new organisation
+        final newOrg = Organisation(
+          id_provider_organisation: 0,
+          provider_organisation_name: query,
+          provider_organisation_desc: '',
+        );
+
+        final created = await notifier.createOrganisation(newOrg);
+
+        if (created != null && mounted) {
+          // Refresh the list
+          await _refreshOrganisations();
+
+          // Select the newly created organisation
+          setState(() {
+            selectedOrganisationId = created.id_provider_organisation;
+            newOrganisationName = created.provider_organisation_name;
+          });
+          widget.onOrganisationSelected?.call(created);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Organisation created successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        }
+      },
+    );
+  }
+
   Future<void> _refreshOrganisations() async {
     await notifier.fetchOrganisations(reset: true);
-    setState(() {
-      organisations = notifier.organisations;
-      filteredOrganisations = List.from(organisations);
-    });
+    if (mounted) {
+      setState(() {
+        organisations = List.from(notifier.organisations);
+        filteredOrganisations = List.from(organisations);
+      });
+    }
   }
 
   Color _getOrganizationColor() {
     return Theme.of(context).primaryColor;
   }
 
+  Organisation? _getSelectedOrganisation() {
+    if (selectedOrganisationId != null && selectedOrganisationId != 0) {
+      try {
+        return organisations.firstWhere(
+          (org) => org.id_provider_organisation == selectedOrganisationId,
+        );
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedOrg = _getSelectedOrganisation();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // if (widget.showLabel)
-        //   Padding(
-        //     padding: const EdgeInsets.only(bottom: 8.0),
-        //     child: Text(
-        //       "Organisation",
-        //       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        //             color: Theme.of(context)
-        //                 .colorScheme
-        //                 .onSurface
-        //                 .withOpacity(0.7),
-        //           ),
-        //     ),
-        //   ),
+        if (widget.showLabel)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              widget.hintText,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
+                  ),
+            ),
+          ),
         GestureDetector(
-          onTap: _openOrganisationPicker,
+          onTap: _isLoading ? null : _openOrganisationPicker,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
@@ -228,8 +419,7 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                   Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: selectedOrganisationId != null &&
-                        selectedOrganisationId != 0
+                color: selectedOrg != null
                     ? _getOrganizationColor().withOpacity(0.3)
                     : Theme.of(context).colorScheme.outline.withOpacity(0.2),
                 width: 1,
@@ -241,11 +431,10 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                 Expanded(
                   child: Row(
                     children: [
-                      (selectedOrganisationId != null &&
-                              selectedOrganisationId != 0)
+                      selectedOrg != null
                           ? Container(
-                              width: 35,
-                              height: 35,
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
                                 color: Theme.of(context)
                                     .colorScheme
@@ -255,17 +444,13 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                               ),
                               child: Center(
                                 child: Text(
-                                  organisations
-                                      .where((val) =>
-                                          selectedOrganisationId ==
-                                          val.id_provider_organisation)
-                                      .first
-                                      .provider_organisation_name[0],
+                                  selectedOrg.provider_organisation_name[0]
+                                      .toUpperCase(),
                                   style: TextStyle(
                                     color:
                                         Theme.of(context).colorScheme.primary,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ),
@@ -278,7 +463,7 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
-                                Icons.add,
+                                Icons.business_outlined,
                                 color: Colors.orange,
                                 size: 20,
                               ),
@@ -286,62 +471,66 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppLocalizations.of(context)!.organisationText,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withOpacity(0.6),
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.hintText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(0.6),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            Text(
+                              selectedOrg != null
+                                  ? selectedOrg.provider_organisation_name
+                                  : (newOrganisationName ??
+                                      'Select an organisation'),
+                              style: TextStyle(
+                                color: selectedOrg != null
+                                    ? Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color
+                                    : (newOrganisationName != null
+                                        ? Colors.orange
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.6)),
+                                fontWeight: selectedOrg != null
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                                fontSize: 16,
                               ),
-                              Text(
-                                (selectedOrganisationId != null &&
-                                        selectedOrganisationId != 0)
-                                    ? organisations
-                                        .where((val) =>
-                                            selectedOrganisationId ==
-                                            val.id_provider_organisation)
-                                        .first
-                                        .provider_organisation_name
-                                    : (newOrganisationName ?? widget.hintText),
-                                style: TextStyle(
-                                  color: selectedOrganisationId != null &&
-                                          selectedOrganisationId != 0
-                                      ? Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.color
-                                      : (newOrganisationName != null
-                                          ? Colors.orange
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onSurface
-                                              .withOpacity(0.6)),
-                                  fontWeight: selectedOrganisationId == null
-                                      ? FontWeight.normal
-                                      : FontWeight.w600,
-                                  fontSize: 16,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            ]),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                  size: 24,
-                ),
+                if (_isLoading)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.6),
+                    size: 24,
+                  ),
               ],
             ),
           ),

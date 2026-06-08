@@ -50,4 +50,21 @@ abstract class SupplierService extends TraceableService {
   Future<int?> deleteSupplier(String supplierId) async {
     throw UnimplementedError();
   }
+
+  Future<Organisation?> getOrganisation(String id) async {
+    throw UnimplementedError();
+  }
+
+  Future<Organisation?> addOrganisation(Organisation supplier) async {
+    throw UnimplementedError();
+  }
+
+  Future<Organisation?> updateOrganisation(
+      Organisation updatedOrganisation) async {
+    throw UnimplementedError();
+  }
+
+  Future<int?> deleteOrganisation(String id) async {
+    throw UnimplementedError();
+  }
 }

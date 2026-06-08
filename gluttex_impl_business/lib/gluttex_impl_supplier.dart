@@ -216,7 +216,7 @@ class SupplierServiceImpl extends SupplierService {
     try {
       final storageService = GluttexLocator.get<StorageService>();
 
-      final url =
+      const url =
           '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateSupplierEndpoint}';
 
       developer.log('Updating supplier at: $url', name: 'SupplierServiceImpl');
@@ -588,5 +588,208 @@ class SupplierServiceImpl extends SupplierService {
   Future<List<SupplierCategory>> refreshCategories({String? callerKey}) async {
     _categories.clear();
     return await getCategories(callerKey: callerKey);
+  }
+
+  @override
+  Future<Organisation?> getOrganisation(String id, {String? callerKey}) async {
+    final key = callerKey ?? _getCallerKey('getOrganisation', id: id);
+
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getOrganisationsEndpoint}/$id';
+      developer.log('Getting organisation from: $url',
+          name: 'SupplierServiceImpl');
+
+      final responseData = await storageService.get(
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.getOrganisationsEndpoint}',
+        id,
+        callerKey: key,
+      );
+
+      final statusCode = storageService.getStatusCode(key);
+
+      if (responseData == null) {
+        developer.log('Organisation not found: $id',
+            name: 'SupplierServiceImpl');
+        setFailureResponse(key, null,
+            statusCode: statusCode ?? 404,
+            responseCode: 'ORGANISATION_NOT_FOUND');
+        return null;
+      }
+
+      Organisation? organisation;
+
+      // Handle different response formats
+      if (responseData is List && responseData.isNotEmpty) {
+        organisation =
+            Organisation.fromJson(responseData[0] as Map<String, dynamic>);
+      } else if (responseData is Map) {
+        organisation =
+            Organisation.fromJson(responseData as Map<String, dynamic>);
+      }
+
+      if (organisation != null) {
+        setSuccessResponse(key, organisation,
+            statusCode: statusCode ?? 200, responseCode: 'SUCCESS');
+      } else {
+        setFailureResponse(key, responseData,
+            statusCode: statusCode ?? 500, responseCode: 'INVALID_FORMAT');
+      }
+
+      return organisation;
+    } catch (e, stacktrace) {
+      developer.log('Error getting organisation: $e',
+          name: 'SupplierServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'SupplierServiceImpl');
+      setFailureResponse(key, e.toString(),
+          statusCode: 500, responseCode: 'ERROR_GETTING_ORGANISATION');
+      return null;
+    }
+  }
+
+  @override
+  Future<Organisation?> addOrganisation(Organisation organisation,
+      {String? callerKey}) async {
+    final key = callerKey ??
+        _getCallerKey('addOrganisation',
+            suffix: organisation.provider_organisation_name);
+
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      developer.log('Adding organisation: ${organisation.toJson()}',
+          name: 'SupplierServiceImpl');
+
+      final result = await storageService.insert(
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.createOrganisationEndpoint}',
+        organisation.toJson(),
+        callerKey: key,
+      );
+
+      final statusCode = storageService.getStatusCode(key);
+
+      developer.log('Add organisation result: $result',
+          name: 'SupplierServiceImpl');
+
+      if (result == null) {
+        developer.log('Failed to add organisation: null response',
+            name: 'SupplierServiceImpl');
+        setFailureResponse(key, null,
+            statusCode: statusCode ?? 500,
+            responseCode: 'ADD_ORGANISATION_FAILED');
+        return null;
+      }
+
+      final createdOrganisation =
+          Organisation.fromJson(result as Map<String, dynamic>);
+      setSuccessResponse(key, createdOrganisation,
+          statusCode: statusCode ?? 200, responseCode: 'SUCCESS');
+      return createdOrganisation;
+    } catch (e, stacktrace) {
+      developer.log('Error adding organisation: $e',
+          name: 'SupplierServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'SupplierServiceImpl');
+      setFailureResponse(key, e.toString(),
+          statusCode: 500, responseCode: 'ERROR_ADDING_ORGANISATION');
+      return null;
+    }
+  }
+
+  @override
+  Future<Organisation?> updateOrganisation(Organisation updatedOrganisation,
+      {String? callerKey}) async {
+    final key = callerKey ??
+        _getCallerKey('updateOrganisation',
+            id: updatedOrganisation.id_provider_organisation.toString());
+
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      const url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateOrganisationEndpoint}';
+
+      developer.log('Updating organisation at: $url',
+          name: 'SupplierServiceImpl');
+      developer.log('Organisation data: ${updatedOrganisation.toJson()}',
+          name: 'SupplierServiceImpl');
+
+      final result = await storageService.update(
+        url,
+        updatedOrganisation.id_provider_organisation.toString(),
+        {
+          "organisation_id":
+              updatedOrganisation.id_provider_organisation.toString()
+        },
+        updatedOrganisation.toJson(),
+        callerKey: key,
+      );
+
+      final statusCode = storageService.getStatusCode(key);
+
+      developer.log('Update organisation result: $result',
+          name: 'SupplierServiceImpl');
+
+      if (result == null) {
+        developer.log('Failed to update organisation: null response',
+            name: 'SupplierServiceImpl');
+        setFailureResponse(key, null,
+            statusCode: statusCode ?? 500,
+            responseCode: 'UPDATE_ORGANISATION_FAILED');
+        return null;
+      }
+
+      final updated = Organisation.fromJson(result as Map<String, dynamic>);
+      setSuccessResponse(key, updated,
+          statusCode: statusCode ?? 200, responseCode: 'SUCCESS');
+      return updated;
+    } catch (e, stacktrace) {
+      developer.log('Error updating organisation: $e',
+          name: 'SupplierServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'SupplierServiceImpl');
+      setFailureResponse(key, e.toString(),
+          statusCode: 500, responseCode: 'ERROR_UPDATING_ORGANISATION');
+      return null;
+    }
+  }
+
+  @override
+  Future<int?> deleteOrganisation(String id, {String? callerKey}) async {
+    final key = callerKey ?? _getCallerKey('deleteOrganisation', id: id);
+
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      developer.log('Deleting organisation: $id', name: 'SupplierServiceImpl');
+
+      final result = await storageService.delete(
+        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteOrganisationEndpoint}',
+        id,
+        callerKey: key,
+      );
+
+      final statusCode = storageService.getStatusCode(key);
+
+      developer.log('Delete organisation result: $result',
+          name: 'SupplierServiceImpl');
+
+      if (result == 200 || result == 204) {
+        setSuccessResponse(key, true,
+            statusCode: result, responseCode: 'SUCCESS');
+      } else {
+        setFailureResponse(key, false,
+            statusCode: result, responseCode: 'DELETE_ORGANISATION_FAILED');
+      }
+
+      return result;
+    } catch (e, stacktrace) {
+      developer.log('Error deleting organisation: $e',
+          name: 'SupplierServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'SupplierServiceImpl');
+      setFailureResponse(key, e.toString(),
+          statusCode: 500, responseCode: 'ERROR_DELETING_ORGANISATION');
+      return null;
+    }
   }
 }

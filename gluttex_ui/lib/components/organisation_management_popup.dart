@@ -25,6 +25,7 @@ class _OrganisationManagementPopupState
   late SupplierChangeNotifier _notifier;
   List<Organisation> _organisations = [];
   bool _isLoading = true;
+  bool _isSaving = false;
   String? _error;
   String? _operationKey;
 
@@ -55,12 +56,31 @@ class _OrganisationManagementPopupState
     try {
       _notifier = Provider.of<SupplierChangeNotifier>(context, listen: false);
 
-      // Fetch organisations if needed
+      // Use the new getOrganisationsList method or fetch if empty
       if (_notifier.organisations.isEmpty) {
         await _notifier.fetchOrganisations(reset: true);
       }
 
       _organisations = List.from(_notifier.organisations);
+      setState(() => _isLoading = false);
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _refreshOrganisations() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      // Use the refreshOrganisations method to clear cache and fetch fresh
+      final refreshed = await _notifier.refreshOrganisations(clearCache: true);
+      _organisations = refreshed;
       setState(() => _isLoading = false);
     } catch (e) {
       setState(() {
@@ -79,27 +99,36 @@ class _OrganisationManagementPopupState
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() => _isSaving = true);
 
     try {
       if (_editingOrganisation == null) {
-        // Create new organisation
+        // Create new organisation using the notifier
         final newOrg = Organisation(
           id_provider_organisation: 0,
           provider_organisation_name: name,
           provider_organisation_desc: _descController.text.trim(),
         );
 
-        // Note: You'll need to add a createOrganisation method to your SupplierChangeNotifier
-        // await _notifier.createOrganisation(newOrg);
+        final created = await _notifier.createOrganisation(newOrg);
 
-        // For now, just add to local list
-        setState(() {
-          _organisations.insert(0, newOrg);
-          _resetForm();
-        });
+        if (created != null) {
+          setState(() {
+            _organisations.insert(0, created);
+            _resetForm();
+          });
 
-        widget.onOrganisationUpdated(newOrg);
+          widget.onOrganisationUpdated(created);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Organisation created successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          throw Exception('Failed to create organisation');
+        }
       } else {
         // Update existing organisation
         final updatedOrg = Organisation(
@@ -109,31 +138,40 @@ class _OrganisationManagementPopupState
           provider_organisation_desc: _descController.text.trim(),
         );
 
-        // Note: You'll need to add an updateOrganisation method
-        // await _notifier.updateOrganisation(updatedOrg);
+        final updated = await _notifier.updateOrganisation(updatedOrg);
 
-        setState(() {
-          final index = _organisations.indexWhere((o) =>
-              o.id_provider_organisation ==
-              _editingOrganisation!.id_provider_organisation);
-          if (index != -1) {
-            _organisations[index] = updatedOrg;
-          }
-          _resetForm();
-        });
+        if (updated != null) {
+          setState(() {
+            final index = _organisations.indexWhere((o) =>
+                o.id_provider_organisation ==
+                _editingOrganisation!.id_provider_organisation);
+            if (index != -1) {
+              _organisations[index] = updated;
+            }
+            _resetForm();
+          });
 
-        widget.onOrganisationUpdated(updatedOrg);
+          widget.onOrganisationUpdated(updated);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Organisation updated successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          throw Exception('Failed to update organisation');
+        }
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Organisation saved successfully')),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isSaving = false);
     }
   }
 
@@ -143,7 +181,7 @@ class _OrganisationManagementPopupState
       builder: (context) => AlertDialog(
         title: const Text('Delete Organisation'),
         content: Text(
-            'Are you sure you want to delete "${org.provider_organisation_name}"?'),
+            'Are you sure you want to delete "${org.provider_organisation_name}"?\n\nThis action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -160,28 +198,39 @@ class _OrganisationManagementPopupState
 
     if (confirmed != true) return;
 
-    setState(() => _isLoading = true);
+    setState(() => _isSaving = true);
 
     try {
-      // Note: You'll need to add a deleteOrganisation method
-      // await _notifier.deleteOrganisation(org.id_provider_organisation);
-
-      setState(() {
-        _organisations.removeWhere(
-            (o) => o.id_provider_organisation == org.id_provider_organisation);
-      });
-
-      widget.onOrganisationUpdated(null);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Organisation deleted successfully')),
+      final deleted = await _notifier.deleteOrganisation(
+        org.id_provider_organisation,
       );
+
+      if (deleted) {
+        setState(() {
+          _organisations.removeWhere((o) =>
+              o.id_provider_organisation == org.id_provider_organisation);
+        });
+
+        widget.onOrganisationUpdated(null);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Organisation deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        throw Exception('Failed to delete organisation');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isSaving = false);
     }
   }
 
@@ -194,9 +243,11 @@ class _OrganisationManagementPopupState
   }
 
   void _resetForm() {
-    _editingOrganisation = null;
-    _nameController.clear();
-    _descController.clear();
+    setState(() {
+      _editingOrganisation = null;
+      _nameController.clear();
+      _descController.clear();
+    });
   }
 
   @override
@@ -277,6 +328,7 @@ class _OrganisationManagementPopupState
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.business),
                     ),
+                    enabled: !_isSaving,
                   ),
                   const SizedBox(height: 12),
                   TextField(
@@ -287,16 +339,31 @@ class _OrganisationManagementPopupState
                       prefixIcon: Icon(Icons.description),
                     ),
                     maxLines: 2,
+                    enabled: !_isSaving,
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
+                      if (_editingOrganisation != null)
+                        TextButton(
+                          onPressed: _resetForm,
+                          child: const Text('Cancel Edit'),
+                        ),
+                      const Spacer(),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _saveOrganisation,
-                          icon: Icon(_editingOrganisation == null
-                              ? Icons.add
-                              : Icons.save),
+                          onPressed: _isSaving ? null : _saveOrganisation,
+                          icon: _isSaving
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Icon(_editingOrganisation == null
+                                  ? Icons.add
+                                  : Icons.save),
                           label: Text(_editingOrganisation == null
                               ? 'Add Organisation'
                               : 'Update'),
@@ -322,6 +389,12 @@ class _OrganisationManagementPopupState
                     ),
                   ),
                   const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.refresh, size: 20),
+                    onPressed: _isLoading ? null : _refreshOrganisations,
+                    tooltip: 'Refresh',
+                  ),
+                  const SizedBox(width: 4),
                   Text(
                     '${_organisations.length} total',
                     style: theme.textTheme.bodySmall,
@@ -335,9 +408,50 @@ class _OrganisationManagementPopupState
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null
-                      ? Center(child: Text('Error: $_error'))
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline,
+                                  size: 48, color: theme.colorScheme.error),
+                              const SizedBox(height: 16),
+                              Text('Error: $_error'),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _loadOrganisations,
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        )
                       : _organisations.isEmpty
-                          ? const Center(child: Text('No organisations found'))
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.business_outlined,
+                                      size: 48,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5)),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No organisations found',
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Click "Add Organisation" to create one',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                           : ListView.builder(
                               itemCount: _organisations.length,
                               itemBuilder: (context, index) {
@@ -361,8 +475,11 @@ class _OrganisationManagementPopupState
                                     title: Text(org.provider_organisation_name),
                                     subtitle: org.provider_organisation_desc
                                             .isNotEmpty
-                                        ? Text(org.provider_organisation_desc,
-                                            maxLines: 1)
+                                        ? Text(
+                                            org.provider_organisation_desc,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          )
                                         : null,
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -370,16 +487,18 @@ class _OrganisationManagementPopupState
                                         IconButton(
                                           icon:
                                               const Icon(Icons.edit, size: 20),
-                                          onPressed: () =>
-                                              _editOrganisation(org),
+                                          onPressed: _isSaving
+                                              ? null
+                                              : () => _editOrganisation(org),
                                           tooltip: 'Edit',
                                         ),
                                         IconButton(
                                           icon: const Icon(Icons.delete,
                                               size: 20),
                                           color: Colors.red,
-                                          onPressed: () =>
-                                              _deleteOrganisation(org),
+                                          onPressed: _isSaving
+                                              ? null
+                                              : () => _deleteOrganisation(org),
                                           tooltip: 'Delete',
                                         ),
                                       ],

@@ -1121,6 +1121,230 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
     _safeNotifyListeners();
   }
+
+// ============ ORGANISATION CRUD OPERATIONS ============
+
+  /// Fetch a single organisation by ID
+  Future<Organisation?> getOrganisationByIdDetailed(int id,
+      {bool forceRefresh = false, bool notify = true}) async {
+    final operationKey =
+        _generateCallerKey('getOrganisationByIdDetailed', id: id.toString());
+
+    // Check cache first if not forcing refresh
+    if (!forceRefresh) {
+      final cached = _organisations[id];
+      if (cached != null) {
+        _storeSuccessResponse(operationKey, cached,
+            statusCode: 200, responseCode: 'CACHE_HIT');
+        return cached;
+      }
+    }
+
+    _setLoading(true);
+
+    try {
+      final organisation =
+          await _supplierService.getOrganisation(id.toString());
+
+      if (organisation != null) {
+        // Cache the organisation
+        _organisations[organisation.id_provider_organisation] = organisation;
+        _storeSuccessResponse(operationKey, organisation,
+            statusCode: 200, responseCode: 'SUCCESS');
+        return organisation;
+      } else {
+        _storeFailureResponse(operationKey, null,
+            statusCode: 404,
+            errorCode: 'NOT_FOUND',
+            message: 'Organisation with ID $id not found',
+            responseCode: 'NOT_FOUND');
+        return null;
+      }
+    } catch (e, stackTrace) {
+      _handleError('Failed to fetch organisation $id', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'FETCH_ORG_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
+      return null;
+    } finally {
+      _setLoading(false);
+      if (notify) {
+        _safeNotifyListeners();
+      }
+    }
+  }
+
+  /// Create a new organisation
+  Future<Organisation?> createOrganisation(Organisation organisation,
+      {String? callerKey}) async {
+    final operationKey = callerKey ??
+        _generateCallerKey('createOrganisation',
+            suffix: organisation.provider_organisation_name);
+
+    _setLoading(true);
+
+    try {
+      final result = await _supplierService.addOrganisation(organisation);
+
+      if (result == null) {
+        _storeFailureResponse(operationKey, null,
+            statusCode: 500,
+            errorCode: 'CREATE_FAILED',
+            message: 'Failed to create organisation',
+            responseCode: 'CREATE_FAILED');
+        return null;
+      }
+
+      // Cache the new organisation
+      _organisations[result.id_provider_organisation] = result;
+
+      _storeSuccessResponse(operationKey, result,
+          statusCode: 200, responseCode: 'CREATED');
+
+      _safeNotifyListeners();
+      return result;
+    } catch (e, stackTrace) {
+      _handleError('Failed to create organisation', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'CREATE_ORG_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
+      return null;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Update an existing organisation
+  Future<Organisation?> updateOrganisation(Organisation organisation,
+      {String? callerKey}) async {
+    final operationKey = callerKey ??
+        _generateCallerKey('updateOrganisation',
+            id: organisation.id_provider_organisation.toString());
+
+    _setLoading(true);
+
+    try {
+      final result = await _supplierService.updateOrganisation(organisation);
+
+      if (result == null) {
+        _storeFailureResponse(operationKey, null,
+            statusCode: 500,
+            errorCode: 'UPDATE_FAILED',
+            message: 'Failed to update organisation',
+            responseCode: 'UPDATE_FAILED');
+        return null;
+      }
+
+      // Update cache
+      _organisations[result.id_provider_organisation] = result;
+
+      _storeSuccessResponse(operationKey, result,
+          statusCode: 200, responseCode: 'UPDATED');
+
+      _safeNotifyListeners();
+      return result;
+    } catch (e, stackTrace) {
+      _handleError('Failed to update organisation', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'UPDATE_ORG_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
+      return null;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Delete an organisation by ID
+  Future<bool> deleteOrganisation(int id, {String? callerKey}) async {
+    final operationKey = callerKey ??
+        _generateCallerKey('deleteOrganisation', id: id.toString());
+
+    _setLoading(true);
+
+    try {
+      final status = await _supplierService.deleteOrganisation(id.toString());
+      final success = status != null && (status == 200 || status == 204);
+
+      if (success) {
+        // Remove from cache
+        _organisations.remove(id);
+        _storeSuccessResponse(operationKey, true,
+            statusCode: status ?? 200, responseCode: 'DELETED');
+      } else {
+        _storeFailureResponse(operationKey, false,
+            statusCode: status ?? 500,
+            errorCode: 'DELETE_FAILED',
+            message: 'Failed to delete organisation',
+            responseCode: 'DELETE_FAILED');
+      }
+
+      _safeNotifyListeners();
+      return success;
+    } catch (e, stackTrace) {
+      _handleError('Failed to delete organisation', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'DELETE_ORG_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Refresh organisations list (clear cache and fetch fresh)
+  Future<List<Organisation>> refreshOrganisations(
+      {bool clearCache = true}) async {
+    final operationKey = _generateCallerKey('refreshOrganisations');
+
+    if (clearCache) {
+      _organisations.clear();
+    }
+
+    // Reset pagination and fetch fresh
+    _organisationsPage = 0;
+    _hasMoreOrganisations = true;
+
+    await fetchOrganisations(reset: true, notify: true);
+
+    _storeSuccessResponse(operationKey, _organisations.values.toList(),
+        statusCode: 200, responseCode: 'REFRESHED');
+
+    return _organisations.values.toList();
+  }
+
+  /// Get organisation by ID from cache (synchronous)
+  Organisation? getCachedOrganisationById(int id) {
+    return _organisations[id];
+  }
+
+  /// Check if organisation exists in cache
+  bool hasOrganisationInCache(int id) {
+    return _organisations.containsKey(id);
+  }
+
+  /// Clear a specific organisation from cache
+  void clearOrganisationCache(int id) {
+    _organisations.remove(id);
+    debugPrint('Cleared organisation cache for ID: $id');
+    _safeNotifyListeners();
+  }
+
+  /// Get all organisations with optional filtering
+  List<Organisation> getAllOrganisationsList() {
+    return _organisations.values.toList();
+  }
+
+  CallerResponse? getResponse(String callerKey) {
+    return _storageService.getResponse(callerKey);
+  }
 }
 
 // ============ SUPPLIER FILTER DATA CLASS ============
