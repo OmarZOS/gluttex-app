@@ -44,6 +44,10 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   late Map<int, String> _selectedIngredients;
   bool _initialized = false;
 
+  // Track operation key for response
+  String? _currentOperationKey;
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -71,10 +75,9 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
         return;
       }
 
-      // Set owner ID - always use current user's ID for new recipes
       if (recipe?.id_recipe != null && recipe!.id_recipe != 0) {
         updatePage = true;
-        _id_recipe = recipe.id_recipe; // ← This is set correctly for update
+        _id_recipe = recipe.id_recipe;
         _recipe_owner_id = recipe.recipe_owner_id ?? currentUserId;
         _recipeName = recipe.recipe_name;
         _recipeDescription = recipe.recipe_description;
@@ -87,13 +90,13 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
         _id_recipe_image = 0;
         preparationTime = _recipePreparationTime!;
       } else {
-        // NEW RECIPE: Ensure _id_recipe is 0 (not null)
         updatePage = false;
-        _id_recipe = 0; // ← FIX: Explicitly set to 0 for new recipes
+        _id_recipe = 0;
         _recipe_owner_id = currentUserId;
         _recipePreparationTime = const Duration(minutes: 0);
         preparationTime = const Duration(minutes: 0);
         _selectedIngredients = {};
+        _recipe_category_id = 1;
       }
 
       _initialized = true;
@@ -163,6 +166,139 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
   void _onCategoryChanged(int identifier) {
     _recipe_category_id = identifier;
+  }
+
+  Future<void> _submitForm() async {
+    if (_isSubmitting) return;
+
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      _setSubmitting(true);
+
+      // Generate unique key for this operation
+      _currentOperationKey = updatePage
+          ? 'update_recipe_${DateTime.now().millisecondsSinceEpoch}'
+          : 'create_recipe_${DateTime.now().millisecondsSinceEpoch}';
+
+      // Create the recipe object
+      Recipe recipe = Recipe(
+        id_recipe: _id_recipe ?? 0,
+        recipe_owner_id: _recipe_owner_id ?? 0,
+        recipe_category_id: _recipe_category_id ?? 1,
+        id_recipe_image: _id_recipe_image ?? 0,
+        recipe_name: _recipeName,
+        recipe_image_url: imageUrl,
+        recipe_description: _recipeDescription,
+        recipe_created_at: null,
+        recipe_last_updated: null,
+        recipe_instruction: _recipeInstruction,
+        recipe_preparation_time: preparationTime,
+        recipe_category_desc: "",
+        recipe_ingredients: _selectedIngredients,
+      );
+
+      try {
+        // Handle image
+        if (_recipeImage != null) {
+          recipe.recipeImage = _recipeImage!;
+        } else if (recipe.id_recipe == 0) {
+          final imageUrlResult = await Navigator.pushNamed(
+            context,
+            AppRoutes.imageUpload,
+            arguments: {
+              "entity": "recipe",
+              "id": recipe.id_recipe ?? 0,
+            },
+          ) as String?;
+          if (imageUrlResult != null) {
+            recipe.recipe_image_url = imageUrlResult;
+          }
+        }
+
+        final recipeNotifier =
+            Provider.of<RecipeNotifier>(context, listen: false);
+
+        // Call the notifier with callerKey
+        final success = await recipeNotifier.addOrUpdateRecipe(
+          recipe,
+          callerKey: _currentOperationKey,
+        );
+
+        if (!mounted) return;
+
+        if (success) {
+          // Get the response from the notifier (which reads from StorageService)
+          final response = recipeNotifier.getResponse(_currentOperationKey!);
+
+          // Show success message
+          ResponseHandler.handleResponse(
+            context: context,
+            statusCode: response?.statusCode ?? 200,
+            responseCode: response?.responseCode ?? 'SUCCESS',
+            finalMessage: updatePage
+                ? AppLocalizations.of(context)!.updateSuccess
+                : AppLocalizations.of(context)!.putSuccess,
+          );
+
+          // Navigate after a short delay
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              debugPrint('=== NAVIGATION TO HOME ===');
+              debugPrint(
+                  'Current route: ${ModalRoute.of(context)?.settings.name}');
+              debugPrint('Pushing home and removing all previous routes');
+
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                AppRoutes.home,
+                (route) => false,
+              );
+
+              debugPrint('=== NAVIGATION COMPLETE ===');
+            }
+          });
+        } else {
+          // Get the error response from the notifier
+          final response = recipeNotifier.getResponse(_currentOperationKey!);
+
+          ResponseHandler.handleResponse(
+            context: context,
+            statusCode: response?.statusCode ?? 500,
+            responseCode: response?.responseCode ?? 'FAILED',
+            finalMessage:
+                response?.message ?? AppLocalizations.of(context)!.putFailure,
+          );
+        }
+      } on GluttexException catch (e) {
+        if (mounted) {
+          ResponseHandler.handleResponse(
+            context: context,
+            statusCode: e.statusCode ?? 300,
+            responseCode: e.message,
+            finalMessage: e.message,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        _setSubmitting(false);
+      }
+    }
+  }
+
+  void _setSubmitting(bool submitting) {
+    if (mounted) {
+      setState(() {
+        _isSubmitting = submitting;
+      });
+    }
   }
 
   @override
@@ -355,8 +491,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
               const SizedBox(height: 16.0),
               if (_id_recipe != null && _id_recipe != 0)
                 ImagePickerSection(
-                  initialImageUrl:
-                      _initialRecipeImageUrl, // Now String? - can be null
+                  initialImageUrl: _initialRecipeImageUrl,
                   entityType: 'recipe',
                   ownerId: '$_recipe_owner_id',
                   entityId: '$_id_recipe',
@@ -379,77 +514,17 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-
-                    print('Recipe owner ID: $_recipe_owner_id');
-                    print('Recipe ID: $_id_recipe');
-
-                    // Create the recipe object WITHOUT wrapping
-                    Recipe recipe = Recipe(
-                      id_recipe: _id_recipe ?? 0,
-                      recipe_owner_id: _recipe_owner_id ?? 0,
-                      recipe_category_id: _recipe_category_id,
-                      id_recipe_image: _id_recipe_image ?? 0,
-                      recipe_name: _recipeName,
-                      recipe_image_url: imageUrl,
-                      recipe_description: _recipeDescription,
-                      recipe_created_at: null,
-                      recipe_last_updated: null,
-                      recipe_instruction: _recipeInstruction,
-                      recipe_preparation_time: preparationTime,
-                      recipe_category_desc: "",
-                      recipe_ingredients: _selectedIngredients,
-                    );
-
-                    try {
-                      // Handle image
-                      if (_recipeImage != null) {
-                        recipe.recipeImage = _recipeImage!;
-                      } else if (recipe.id_recipe == 0) {
-                        // Only upload image for new recipes
-                        final imageUrlResult = await Navigator.pushNamed(
-                          context,
-                          AppRoutes.imageUpload,
-                          arguments: {
-                            "entity": "recipe",
-                            "id": recipe.id_recipe ?? 0,
-                          },
-                        ) as String?;
-                        if (imageUrlResult != null) {
-                          recipe.recipe_image_url = imageUrlResult;
-                        }
-                      }
-
-                      // Send ONLY the recipe object, NOT wrapped
-                      final insertedRecipe = await Provider.of<RecipeNotifier>(
-                        context,
-                        listen: false,
-                      ).addOrUpdateRecipe(recipe); // This sends recipe.toJson()
-
-                      ResponseHandler.handleResponse(
-                        context: context,
-                        statusCode: 200,
-                        responseCode: GluttexResponseCodes.put_success,
-                        finalMessage: AppLocalizations.of(context)!.putSuccess,
-                      );
-
-                      Navigator.popUntil(
-                        context,
-                        (route) => route.settings.name == AppRoutes.home,
-                      );
-                    } on GluttexException catch (e) {
-                      ResponseHandler.handleResponse(
-                        context: context,
-                        statusCode: e.statusCode ?? 300,
-                        responseCode: e.message,
-                        finalMessage: AppLocalizations.of(context)!.putFailure,
-                      );
-                    }
-                  }
-                },
-                child: Text(AppLocalizations.of(context)!.submitText),
+                onPressed: _isSubmitting ? null : _submitForm,
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(AppLocalizations.of(context)!.submitText),
               ),
             ],
           ),

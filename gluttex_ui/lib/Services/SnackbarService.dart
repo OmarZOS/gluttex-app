@@ -1,73 +1,86 @@
+// SnackbarService.dart
 import 'package:flutter/material.dart';
 
 class SnackbarService {
   static void showSnackbar({
     required BuildContext context,
     required String message,
-    Color backgroundColor = Colors.black87,
+    Color? backgroundColor,
     Duration duration = const Duration(seconds: 3),
-    SnackBarAction? action,
   }) {
-    ScaffoldMessenger.of(context).clearSnackBars();
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: backgroundColor,
-        duration: duration,
-        action: action,
+        backgroundColor: backgroundColor ?? Colors.grey[800],
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        duration: duration,
       ),
     );
   }
 
-  static Color getSnackbarColorFromStatusCode(
-    int statusCode, {
-    Color? successColor,
-    Color? clientErrorColor,
-    Color? authErrorColor,
-    Color? serverErrorColor,
-    Color? defaultColor,
+  static void showSnackbarWithAction({
+    required BuildContext context,
+    required String message,
+    required String actionLabel,
+    required VoidCallback onAction,
+    Color? backgroundColor,
+    Duration duration = const Duration(seconds: 5),
   }) {
-    final colors = _SnackbarColors(
-      success: successColor,
-      clientError: clientErrorColor,
-      authError: authErrorColor,
-      serverError: serverErrorColor,
-      defaultColor: defaultColor,
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor ?? Colors.red[400],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        duration: duration,
+        action: SnackBarAction(
+          label: actionLabel,
+          onPressed: onAction,
+          textColor: Colors.white,
+        ),
+      ),
     );
-
-    if (statusCode >= 200 && statusCode < 300) {
-      return colors.success;
-    } else if (statusCode >= 400 && statusCode < 500) {
-      if (statusCode == 401 || statusCode == 403) {
-        return colors.authError;
-      }
-      return colors.clientError;
-    } else if (statusCode >= 500) {
-      return colors.serverError;
-    }
-    return colors.defaultColor;
   }
-}
 
-class _SnackbarColors {
-  final Color success;
-  final Color clientError;
-  final Color authError;
-  final Color serverError;
-  final Color defaultColor;
-
-  _SnackbarColors({
-    Color? success,
-    Color? clientError,
-    Color? authError,
-    Color? serverError,
-    Color? defaultColor,
-  })  : success = success ?? Colors.green.shade600,
-        clientError = clientError ?? Colors.red.shade400,
-        authError = authError ?? Colors.orange.shade600,
-        serverError = serverError ?? Colors.red.shade800,
-        defaultColor = defaultColor ?? Colors.blueGrey;
+  static Color getSnackbarColorFromStatusCode(int statusCode) {
+    if (statusCode >= 200 && statusCode < 300) {
+      return Colors.green;
+    }
+    switch (statusCode) {
+      case 400:
+        return Colors.orange;
+      case 401:
+      case 403:
+        return Colors.redAccent;
+      case 404:
+        return Colors.orange;
+      case 408:
+      case 504:
+        return Colors.amber;
+      case 409:
+      case 410:
+      case 422:
+        return Colors.deepOrange;
+      case 429:
+        return Colors.purple;
+      case 500:
+      case 502:
+      case 503:
+      case 511:
+        return Colors.red;
+      default:
+        return Colors.grey[800]!;
+    }
+  }
 }

@@ -31,7 +31,13 @@ import 'screens/image_upload_screen.dart';
 
 class AppRouter {
   static Route<dynamic>? generateRoute(RouteSettings settings) {
+    debugPrint('=== GENERATING ROUTE ===');
+    debugPrint('Route name: ${settings.name}');
+    debugPrint('Route arguments: ${settings.arguments}');
+
     return MaterialPageRoute(
+      settings:
+          settings, // Important: This preserves the route name in the stack
       builder: (context) {
         // Use Consumer to get the latest appUser state
         return Consumer<AppUserNotifier>(
@@ -39,7 +45,7 @@ class AppRouter {
             final appUser = authProvider.appUser;
             final isAuthenticated = authProvider.isAuthenticated;
 
-            print(
+            debugPrint(
                 'Router - appUser: ${appUser?.id_app_user}, isAuthenticated: $isAuthenticated');
 
             final args = settings.arguments as Map<String, dynamic>?;
@@ -77,8 +83,12 @@ class AppRouter {
                   const ProductCatalogScreen(),
                 );
               case AppRoutes.recipeCreate:
-                return _buildGuardedRoute(isAuthenticated,
-                    const RecipeFormScreen(), const RecipeCatalogScreen());
+                debugPrint('Creating RecipeFormScreen route');
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const RecipeFormScreen(),
+                  const RecipeCatalogScreen(),
+                );
               case AppRoutes.cartPage:
                 return _buildGuardedRoute(
                     isAuthenticated, const CartScreen(), const HomePage());
@@ -146,7 +156,6 @@ class AppRouter {
           },
         );
       },
-      settings: settings,
     );
   }
 
@@ -155,6 +164,13 @@ class AppRouter {
     Widget authorizedScreen,
     Widget unauthorizedScreen,
   ) {
-    return isAuthenticated ? authorizedScreen : unauthorizedScreen;
+    // Add key to help with debugging
+    return isAuthenticated
+        ? SizedBox(
+            key: Key('authorized_${authorizedScreen.runtimeType}'),
+            child: authorizedScreen)
+        : SizedBox(
+            key: Key('unauthorized_${unauthorizedScreen.runtimeType}'),
+            child: unauthorizedScreen);
   }
 }

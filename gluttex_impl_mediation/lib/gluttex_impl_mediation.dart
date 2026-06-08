@@ -22,24 +22,86 @@ class StorageServiceImpl extends StorageService<FormData> {
   GluttexException _createGluttexException(DioException e) {
     final responseData = e.response?.data;
     String? errorCode;
+    String? message;
+    int? statusCode = e.response?.statusCode;
+    Map<String, dynamic>? details;
 
     if (responseData != null) {
       try {
         if (responseData is Map<String, dynamic>) {
-          errorCode = responseData['error_code']?.toString();
+          // Handle the new error format from backend
+          // {
+          //   "success": false,
+          //   "status_code": 401,
+          //   "code": "INCORRECT_CREDENTIALS",
+          //   "message": "Authentication failed",
+          //   "details": {...}
+          // }
+          errorCode = responseData['code']?.toString() ??
+              responseData['error_code']?.toString();
+          message = responseData['message']?.toString();
+          statusCode = responseData['status_code'] as int? ?? statusCode;
+          details = responseData['details'] as Map<String, dynamic>?;
         } else if (responseData is String) {
-          final decoded = jsonDecode(responseData) as Map<String, dynamic>?;
-          errorCode = decoded?['error_code']?.toString();
+          final decoded = jsonDecode(responseData) as Map<String, dynamic>;
+          errorCode =
+              decoded['code']?.toString() ?? decoded['error_code']?.toString();
+          message = decoded['message']?.toString();
+          statusCode = decoded['status_code'] as int? ?? statusCode;
+          details = decoded['details'] as Map<String, dynamic>?;
         }
       } catch (_) {
         // Ignore parsing errors
       }
     }
 
+    // Fallback to default error codes based on status code
+    if (errorCode == null || errorCode.isEmpty) {
+      switch (statusCode) {
+        case 400:
+          errorCode = 'BAD_REQUEST';
+          break;
+        case 401:
+          errorCode = 'UNAUTHORIZED';
+          break;
+        case 403:
+          errorCode = 'FORBIDDEN';
+          break;
+        case 404:
+          errorCode = 'NOT_FOUND';
+          break;
+        case 409:
+          errorCode = 'CONFLICT';
+          break;
+        case 422:
+          errorCode = 'VALIDATION_ERROR';
+          break;
+        case 429:
+          errorCode = 'RATE_LIMITED';
+          break;
+        case 500:
+          errorCode = 'INTERNAL_SERVER_ERROR';
+          break;
+        case 502:
+          errorCode = 'BAD_GATEWAY';
+          break;
+        case 503:
+          errorCode = 'SERVICE_UNAVAILABLE';
+          break;
+        case 504:
+          errorCode = 'GATEWAY_TIMEOUT';
+          break;
+        default:
+          errorCode = 'HTTP_EXCEPTION';
+      }
+    }
+
     return GluttexException(
-      errorCode ?? 'HTTP_EXCEPTION',
-      statusCode: e.response?.statusCode,
+      errorCode,
+      statusCode: statusCode,
       error: e,
+      responseCode: errorCode,
+      details: details,
     );
   }
 
@@ -93,17 +155,19 @@ class StorageServiceImpl extends StorageService<FormData> {
     try {
       final response = await _dio.delete(url);
       setSuccessResponse(key, response.statusCode,
-          statusCode: response.statusCode);
+          statusCode: response.statusCode, responseCode: 'SUCCESS');
       return response.statusCode;
     } on DioException catch (e) {
+      final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'DELETE_FAILED',
-        message: e.message,
+        data: gluttexException.message,
+        statusCode: gluttexException.statusCode,
+        errorCode: gluttexException.message,
+        message: gluttexException.message,
+        responseCode: gluttexException.responseCode,
       );
-      throw _createGluttexException(e);
+      throw gluttexException;
     }
   }
 
@@ -119,7 +183,8 @@ class StorageServiceImpl extends StorageService<FormData> {
 
       if (response.statusCode == 200) {
         _logResponse(response.data);
-        setSuccessResponse(key, response.data, statusCode: response.statusCode);
+        setSuccessResponse(key, response.data,
+            statusCode: response.statusCode, responseCode: 'SUCCESS');
         return response.data;
       } else if (response.statusCode == 404) {
         setFailureResponse(
@@ -128,6 +193,7 @@ class StorageServiceImpl extends StorageService<FormData> {
           statusCode: 404,
           errorCode: 'NOT_FOUND',
           message: GluttexConstants.notFoundError,
+          responseCode: 'NOT_FOUND',
         );
         throw Exception(GluttexConstants.notFoundError);
       } else {
@@ -137,20 +203,23 @@ class StorageServiceImpl extends StorageService<FormData> {
           statusCode: response.statusCode,
           errorCode: 'GET_FAILED',
           message: GluttexConstants.getFailure,
+          responseCode: 'GET_FAILED',
         );
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e) {
       developer.log('GET Error: ${e.message}', name: 'StorageService');
       developer.log('URL: $url', name: 'StorageService');
+      final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'DIO_EXCEPTION',
-        message: e.message,
+        data: gluttexException.message,
+        statusCode: gluttexException.statusCode,
+        errorCode: gluttexException.message,
+        message: gluttexException.message,
+        responseCode: gluttexException.responseCode,
       );
-      throw _createGluttexException(e);
+      throw gluttexException;
     }
   }
 
@@ -164,7 +233,8 @@ class StorageServiceImpl extends StorageService<FormData> {
       final response = await _dio.get(destination, queryParameters: params);
 
       if (response.statusCode == 200) {
-        setSuccessResponse(key, response.data, statusCode: response.statusCode);
+        setSuccessResponse(key, response.data,
+            statusCode: response.statusCode, responseCode: 'SUCCESS');
         return response.data;
       } else if (response.statusCode == 404) {
         setFailureResponse(
@@ -173,6 +243,7 @@ class StorageServiceImpl extends StorageService<FormData> {
           statusCode: 404,
           errorCode: 'NOT_FOUND',
           message: GluttexConstants.notFoundError,
+          responseCode: 'NOT_FOUND',
         );
         throw Exception(GluttexConstants.notFoundError);
       } else {
@@ -182,19 +253,22 @@ class StorageServiceImpl extends StorageService<FormData> {
           statusCode: response.statusCode,
           errorCode: 'GET_FAILED',
           message: GluttexConstants.getFailure,
+          responseCode: 'GET_FAILED',
         );
         throw Exception(GluttexConstants.getFailure);
       }
     } on DioException catch (e) {
       developer.log('GET All Error: ${e.message}', name: 'StorageService');
+      final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'DIO_EXCEPTION',
-        message: e.message,
+        data: gluttexException.message,
+        statusCode: gluttexException.statusCode,
+        errorCode: gluttexException.message,
+        message: gluttexException.message,
+        responseCode: gluttexException.responseCode,
       );
-      throw _createGluttexException(e);
+      throw gluttexException;
     }
   }
 
@@ -247,7 +321,8 @@ class StorageServiceImpl extends StorageService<FormData> {
         developer.log('Response body is null or empty', name: 'StorageService');
       }
 
-      setSuccessResponse(key, response.data, statusCode: response.statusCode);
+      setSuccessResponse(key, response.data,
+          statusCode: response.statusCode, responseCode: 'SUCCESS');
       return response.data;
     } on DioException catch (e) {
       // Enhanced error logging
@@ -260,14 +335,16 @@ class StorageServiceImpl extends StorageService<FormData> {
       developer.log('Error response data: ${e.response?.data}',
           name: 'StorageService');
 
+      final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'INSERT_FAILED',
-        message: e.message,
+        data: gluttexException.message,
+        statusCode: gluttexException.statusCode,
+        errorCode: gluttexException.message,
+        message: gluttexException.message,
+        responseCode: gluttexException.responseCode,
       );
-      throw _createGluttexException(e);
+      throw gluttexException;
     } catch (e, stackTrace) {
       developer.log('❌ UNEXPECTED INSERT ERROR: $e', name: 'StorageService');
       developer.log('Stack trace: $stackTrace', name: 'StorageService');
@@ -277,6 +354,7 @@ class StorageServiceImpl extends StorageService<FormData> {
         statusCode: 500,
         errorCode: 'UNEXPECTED_ERROR',
         message: e.toString(),
+        responseCode: 'UNEXPECTED_ERROR',
       );
       rethrow;
     }
@@ -303,23 +381,22 @@ class StorageServiceImpl extends StorageService<FormData> {
 
       developer.log('Image upload response: ${response.data}',
           name: 'StorageService');
-      setSuccessResponse(key, response.data, statusCode: response.statusCode);
+      setSuccessResponse(key, response.data,
+          statusCode: response.statusCode, responseCode: 'SUCCESS');
       return response.data;
     } on DioException catch (e) {
       developer.log('Insert Binary Error: ${e.message}',
           name: 'StorageService');
+      final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'UPLOAD_FAILED',
-        message: e.message,
+        data: gluttexException.message,
+        statusCode: gluttexException.statusCode,
+        errorCode: gluttexException.message,
+        message: gluttexException.message,
+        responseCode: gluttexException.responseCode,
       );
-      throw GluttexException(
-        e.response?.data?['error_code']?.toString() ?? 'UPLOAD_FAILED',
-        statusCode: e.response?.statusCode,
-        error: e,
-      );
+      throw gluttexException;
     } catch (e) {
       developer.log('Unexpected binary upload error: $e',
           name: 'StorageService');
@@ -329,6 +406,7 @@ class StorageServiceImpl extends StorageService<FormData> {
         statusCode: 500,
         errorCode: 'UNEXPECTED_UPLOAD_ERROR',
         message: e.toString(),
+        responseCode: 'UNEXPECTED_UPLOAD_ERROR',
       );
       return "";
     }
@@ -355,19 +433,22 @@ class StorageServiceImpl extends StorageService<FormData> {
 
       developer.log('Update Response: ${response.data}',
           name: 'StorageService');
-      setSuccessResponse(key, response.data, statusCode: response.statusCode);
+      setSuccessResponse(key, response.data,
+          statusCode: response.statusCode, responseCode: 'SUCCESS');
       return response.data;
     } on DioException catch (e) {
       developer.log('Update Error: ${e.message}', name: 'StorageService');
       developer.log('Error Stack: ${e.stackTrace}', name: 'StorageService');
+      final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'UPDATE_FAILED',
-        message: e.message,
+        data: gluttexException.message,
+        statusCode: gluttexException.statusCode,
+        errorCode: gluttexException.message,
+        message: gluttexException.message,
+        responseCode: gluttexException.responseCode,
       );
-      throw _createGluttexException(e);
+      throw gluttexException;
     }
   }
 
@@ -383,7 +464,8 @@ class StorageServiceImpl extends StorageService<FormData> {
         destination,
         data: data,
         options: Options(
-          validateStatus: (status) => status == 200 || status == 406,
+          validateStatus: (status) =>
+              status == 200 || status == 409 || status == 422,
           headers: {
             'Content-Type': 'application/json',
             'accept': 'application/json',
@@ -395,29 +477,46 @@ class StorageServiceImpl extends StorageService<FormData> {
       developer.log('SignUp Response: ${response.data}',
           name: 'StorageService');
 
-      if (response.statusCode == 406) {
+      if (response.statusCode == 200) {
+        setSuccessResponse(key, response.data,
+            statusCode: response.statusCode, responseCode: 'SIGNUP_SUCCESS');
+        return response.data;
+      } else {
+        // Handle error response
+        final errorData = response.data is Map
+            ? response.data
+            : jsonDecode(response.data) as Map<String, dynamic>;
+
+        final errorCode = errorData['code'] ?? 'SIGNUP_FAILED';
+        final errorMessage = errorData['message'] ?? 'Sign up failed';
+
         setFailureResponse(
           key,
-          data: response.data["detail"],
-          statusCode: 406,
-          errorCode: 'SIGNUP_FAILED',
-          message: response.data["detail"],
+          data: errorMessage,
+          statusCode: response.statusCode,
+          errorCode: errorCode,
+          message: errorMessage,
+          responseCode: errorCode,
         );
-        throw Exception(response.data["detail"]);
+        throw GluttexException(
+          errorCode,
+          statusCode: response.statusCode,
+          error: errorMessage,
+          responseCode: errorCode,
+        );
       }
-
-      setSuccessResponse(key, response.data, statusCode: response.statusCode);
-      return response.data;
     } on DioException catch (e) {
       developer.log('SignUp Dio Error: ${e.message}', name: 'StorageService');
+      final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'SIGNUP_DIO_ERROR',
-        message: e.message,
+        data: gluttexException.message,
+        statusCode: gluttexException.statusCode,
+        errorCode: gluttexException.message,
+        message: gluttexException.message,
+        responseCode: gluttexException.responseCode,
       );
-      throw _createGluttexException(e);
+      throw gluttexException;
     } catch (e) {
       developer.log('Unexpected SignUp Error: $e', name: 'StorageService');
       setFailureResponse(
@@ -426,6 +525,7 @@ class StorageServiceImpl extends StorageService<FormData> {
         statusCode: 500,
         errorCode: 'UNEXPECTED_SIGNUP_ERROR',
         message: e.toString(),
+        responseCode: 'UNEXPECTED_SIGNUP_ERROR',
       );
       throw Exception('Unexpected error occurred.');
     }
@@ -439,49 +539,136 @@ class StorageServiceImpl extends StorageService<FormData> {
     _logRequest('POST', destination, data: data, callerKey: key);
 
     try {
+      // Use JSON, not form-urlencoded
       final response = await _dio.post(
         destination,
-        data: data,
+        data: data, // Send as JSON
         options: Options(
-          validateStatus: (status) => status == 200 || status == 406,
+          validateStatus: (status) =>
+              status == 200 || status == 401 || status == 403 || status == 422,
           headers: {
             'Content-Type': 'application/json',
-            'accept': 'application/json',
+            'Accept': 'application/json',
           },
-          contentType: 'application/json',
         ),
       );
 
-      developer.log('SignIn Response: ${response.data}',
+      developer.log('SignIn Response status: ${response.statusCode}',
+          name: 'StorageService');
+      developer.log('SignIn Response data: ${response.data}',
           name: 'StorageService');
 
-      if (response.statusCode == 406) {
+      if (response.statusCode == 200) {
+        setSuccessResponse(key, response.data,
+            statusCode: response.statusCode, responseCode: 'LOGIN_SUCCESS');
+        return response.data;
+      } else {
+        // Handle error response
+        Map<String, dynamic> errorData;
+        if (response.data is Map) {
+          errorData = response.data;
+        } else if (response.data is String) {
+          try {
+            errorData = jsonDecode(response.data) as Map<String, dynamic>;
+          } catch (_) {
+            errorData = {};
+          }
+        } else {
+          errorData = {};
+        }
+
+        final errorCode = errorData['code'] ??
+            errorData['error_code'] ??
+            _getErrorCodeFromStatus(response.statusCode);
+        final errorMessage = errorData['message'] ??
+            errorData['detail'] ??
+            'Authentication failed';
+        final details = errorData['details'] as Map<String, dynamic>?;
+
+        developer.log('SignIn Error - Code: $errorCode, Message: $errorMessage',
+            name: 'StorageService');
+
         setFailureResponse(
           key,
-          data: response.data.toString(),
-          statusCode: 406,
-          errorCode: 'INCORRECT_CREDENTIALS',
-          message: 'Invalid username or password',
+          data: errorMessage,
+          statusCode: response.statusCode,
+          errorCode: errorCode,
+          message: errorMessage,
+          responseCode: errorCode,
         );
+
         throw GluttexException(
-          "INCORRECT_CREDENTIALS",
-          statusCode: 406,
-          error: response.data.toString(),
+          errorCode,
+          statusCode: response.statusCode,
+          error: errorMessage,
+          responseCode: errorCode,
+          details: details,
         );
       }
-
-      setSuccessResponse(key, response.data, statusCode: response.statusCode);
-      return response.data;
     } on DioException catch (e) {
       developer.log('SignIn Dio Error: ${e.message}', name: 'StorageService');
+      developer.log('SignIn Dio Response: ${e.response?.data}',
+          name: 'StorageService');
+
+      // Try to extract error from Dio response
+      String errorCode = 'HTTP_EXCEPTION';
+      String errorMessage = e.message ?? 'Network error';
+      Map<String, dynamic>? details;
+
+      if (e.response?.data != null) {
+        try {
+          final responseData = e.response!.data;
+          if (responseData is Map) {
+            errorCode = responseData['code'] ?? errorCode;
+            errorMessage = responseData['message'] ?? errorMessage;
+            details = responseData['details'];
+          } else if (responseData is String) {
+            final decoded = jsonDecode(responseData) as Map<String, dynamic>;
+            errorCode = decoded['code'] ?? errorCode;
+            errorMessage = decoded['message'] ?? errorMessage;
+            details = decoded['details'];
+          }
+        } catch (_) {}
+      }
+
+      final gluttexException = GluttexException(
+        errorCode,
+        statusCode: e.response?.statusCode,
+        error: e,
+        responseCode: errorCode,
+        details: details,
+      );
+
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'SIGNIN_DIO_ERROR',
-        message: e.message,
+        data: errorMessage,
+        statusCode: gluttexException.statusCode,
+        errorCode: errorCode,
+        message: errorMessage,
+        responseCode: errorCode,
       );
-      throw _createGluttexException(e);
+      throw gluttexException;
+    }
+  }
+
+  String _getErrorCodeFromStatus(int? statusCode) {
+    switch (statusCode) {
+      case 401:
+        return 'UNAUTHORIZED';
+      case 403:
+        return 'FORBIDDEN';
+      case 404:
+        return 'NOT_FOUND';
+      case 409:
+        return 'CONFLICT';
+      case 422:
+        return 'VALIDATION_ERROR';
+      case 429:
+        return 'RATE_LIMITED';
+      case 500:
+        return 'INTERNAL_SERVER_ERROR';
+      default:
+        return 'HTTP_EXCEPTION';
     }
   }
 
@@ -505,19 +692,22 @@ class StorageServiceImpl extends StorageService<FormData> {
         ),
       );
 
-      setSuccessResponse(key, response.data, statusCode: response.statusCode);
+      setSuccessResponse(key, response.data,
+          statusCode: response.statusCode, responseCode: 'SUCCESS');
       return response.data;
     } on DioException catch (e) {
       developer.log('Provider SignIn Error: ${e.message}',
           name: 'StorageService');
+      final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,
-        data: e.message,
-        statusCode: e.response?.statusCode,
-        errorCode: 'PROVIDER_SIGNIN_FAILED',
-        message: e.message,
+        data: gluttexException.message,
+        statusCode: gluttexException.statusCode,
+        errorCode: gluttexException.message,
+        message: gluttexException.message,
+        responseCode: gluttexException.responseCode,
       );
-      throw _createGluttexException(e);
+      throw gluttexException;
     }
   }
 

@@ -5298,4 +5298,367 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guestLocation => 'Emplacement du Magasin';
+
+  @override
+  String get something_went_wrong => 'Une erreur s\'est produite. Veuillez réessayer.';
+
+  @override
+  String get auth_required => 'Authentification requise. Veuillez vous connecter.';
+
+  @override
+  String get auth_decode_failed => 'Session expirée. Veuillez vous reconnecter.';
+
+  @override
+  String get auth_unauthorized => 'Vous n\'êtes pas autorisé à effectuer cette action.';
+
+  @override
+  String get user_auth_creation_failed => 'Échec de la création du compte. Veuillez réessayer.';
+
+  @override
+  String get user_net_failed => 'Erreur réseau. Veuillez vérifier votre connexion.';
+
+  @override
+  String get appuser_not_exists => 'Utilisateur introuvable.';
+
+  @override
+  String get appuser_already_exists => 'L\'utilisateur existe déjà.';
+
+  @override
+  String get appusertype_not_exists => 'Type d\'utilisateur introuvable.';
+
+  @override
+  String get user_fetch_not_found => 'Utilisateur introuvable.';
+
+  @override
+  String get user_insert_failed => 'Échec de la création de l\'utilisateur.';
+
+  @override
+  String get user_update_failed => 'Échec de la mise à jour des informations utilisateur.';
+
+  @override
+  String get user_delete_failed => 'Échec de la suppression de l\'utilisateur.';
+
+  @override
+  String get person_not_exists => 'Personne introuvable.';
+
+  @override
+  String get person_insert_failed => 'Échec de la création de la fiche personne.';
+
+  @override
+  String get person_update_failed => 'Échec de la mise à jour des informations de la personne.';
+
+  @override
+  String get person_delete_failed => 'Échec de la suppression de la fiche personne.';
+
+  @override
+  String get person_detail_insert_failed => 'Échec de la création des détails de la personne.';
+
+  @override
+  String get person_details_not_found => 'Détails de la personne introuvables.';
+
+  @override
+  String get person_fetch_not_found => 'Personne introuvable.';
+
+  @override
+  String get product_not_exists => 'Produit introuvable.';
+
+  @override
+  String get product_already_exists => 'Le produit existe déjà.';
+
+  @override
+  String get product_category_not_exists => 'Catégorie de produit introuvable.';
+
+  @override
+  String get product_quantity_not_enough => 'Quantité de produit insuffisante.';
+
+  @override
+  String get product_quantity_restore_failed => 'Échec de la restauration de la quantité du produit.';
+
+  @override
+  String get product_supplier_not_exists => 'Fournisseur du produit introuvable.';
+
+  @override
+  String get product_supplier_already_exists => 'Le fournisseur du produit existe déjà.';
+
+  @override
+  String get product_fetch_not_found => 'Produit introuvable.';
+
+  @override
+  String get product_insert_failed => 'Échec de la création du produit.';
+
+  @override
+  String get product_update_failed => 'Échec de la mise à jour du produit.';
+
+  @override
+  String get product_delete_failed => 'Échec de la suppression du produit.';
+
+  @override
+  String get product_search_not_found => 'Aucun produit trouvé.';
+
+  @override
+  String get product_image_not_found => 'Image du produit introuvable.';
+
+  @override
+  String get supplier_not_exists => 'Fournisseur introuvable.';
+
+  @override
+  String get supplier_type_not_exists => 'Type de fournisseur introuvable.';
+
+  @override
+  String get supplier_fetch_not_found => 'Fournisseur introuvable.';
+
+  @override
+  String get supplier_insert_failed => 'Échec de la création du fournisseur.';
+
+  @override
+  String get supplier_update_failed => 'Échec de la mise à jour du fournisseur.';
+
+  @override
+  String get supplier_delete_failed => 'Échec de la suppression du fournisseur.';
+
+  @override
+  String get organisation_not_found => 'Organisation introuvable.';
+
+  @override
+  String get organisation_name_used => 'Le nom de l\'organisation est déjà utilisé.';
+
+  @override
+  String get org_already_exists => 'L\'organisation existe déjà.';
+
+  @override
+  String get org_insert_failed => 'Échec de la création de l\'organisation.';
+
+  @override
+  String get org_update_failed => 'Échec de la mise à jour de l\'organisation.';
+
+  @override
+  String get org_delete_failed => 'Échec de la suppression de l\'organisation.';
+
+  @override
+  String get recipe_not_exists => 'Recette introuvable.';
+
+  @override
+  String get recipe_update_failed => 'Échec de la mise à jour de la recette.';
+
+  @override
+  String get recipe_delete_failed => 'Échec de la suppression de la recette.';
+
+  @override
+  String get recipe_fetch_not_found => 'Recette introuvable.';
+
+  @override
+  String get recipe_category_not_exists => 'Catégorie de recette introuvable.';
+
+  @override
+  String get recipe_already_exists => 'La recette existe déjà.';
+
+  @override
+  String get recipe_insert_failed => 'Échec de la création de la recette.';
+
+  @override
+  String get recipe_image_not_found => 'Image de la recette introuvable.';
+
+  @override
+  String get recipe_search_not_found => 'Aucune recette trouvée.';
+
+  @override
+  String get ingredient_not_exists => 'Ingrédient introuvable.';
+
+  @override
+  String get ingredient_already_exists => 'L\'ingrédient existe déjà.';
+
+  @override
+  String get ingredient_insert_failed => 'Échec de la création de l\'ingrédient.';
+
+  @override
+  String get ingredient_update_failed => 'Échec de la mise à jour de l\'ingrédient.';
+
+  @override
+  String get ingredient_delete_failed => 'Échec de la suppression de l\'ingrédient.';
+
+  @override
+  String get order_not_exists => 'Commande introuvable.';
+
+  @override
+  String get order_fetch_not_found => 'Commande introuvable.';
+
+  @override
+  String get order_insert_failed => 'Échec de la création de la commande.';
+
+  @override
+  String get order_insert_conflict => 'Impossible de créer la commande en raison d\'un conflit.';
+
+  @override
+  String get order_update_failed => 'Échec de la mise à jour de la commande.';
+
+  @override
+  String get order_delete_failed => 'Échec de la suppression de la commande.';
+
+  @override
+  String get invalid_order_status => 'Changement de statut de commande invalide.';
+
+  @override
+  String get order_items_delete_failed => 'Échec de la suppression des articles de la commande.';
+
+  @override
+  String get order_item_insert_failed => 'Échec de l\'ajout d\'un article à la commande.';
+
+  @override
+  String get cart_not_exists => 'Panier introuvable.';
+
+  @override
+  String get cart_insert_failed => 'Échec de la création du panier.';
+
+  @override
+  String get delivery_not_exists => 'Livraison introuvable.';
+
+  @override
+  String get delivery_update_failed => 'Échec de la mise à jour de la livraison.';
+
+  @override
+  String get delivery_cannot_be_updated => 'La livraison ne peut pas être modifiée dans son état actuel.';
+
+  @override
+  String get delivery_bulk_update_failed => 'Échec de la mise à jour des livraisons.';
+
+  @override
+  String get delivery_delete_failed => 'Échec de la suppression de la livraison.';
+
+  @override
+  String get delivery_bulk_delete_failed => 'Échec de la suppression des livraisons.';
+
+  @override
+  String get delivery_insert_failed => 'Échec de la création de la livraison.';
+
+  @override
+  String get delivery_validation_failed => 'Informations de livraison invalides.';
+
+  @override
+  String get service_not_found => 'Service introuvable.';
+
+  @override
+  String get service_insert_conflict => 'Le service existe déjà.';
+
+  @override
+  String get service_category_not_found => 'Catégorie de service introuvable.';
+
+  @override
+  String get rule_already_exists => 'L\'affectation du personnel existe déjà.';
+
+  @override
+  String get rule_not_exists => 'Affectation du personnel introuvable.';
+
+  @override
+  String get rule_insert_failed => 'Échec de la création de l\'affectation du personnel.';
+
+  @override
+  String get rule_update_failed => 'Échec de la mise à jour de l\'affectation du personnel.';
+
+  @override
+  String get rule_delete_failed => 'Échec de la suppression de l\'affectation du personnel.';
+
+  @override
+  String get rule_invalid_status => 'Statut d\'affectation du personnel invalide.';
+
+  @override
+  String get notification_not_exists => 'Notification introuvable.';
+
+  @override
+  String get notification_already_exists => 'La notification existe déjà.';
+
+  @override
+  String get notification_insert_failed => 'Échec de la création de la notification.';
+
+  @override
+  String get notification_update_failed => 'Échec de la mise à jour de la notification.';
+
+  @override
+  String get notification_delete_failed => 'Échec de la suppression de la notification.';
+
+  @override
+  String get notification_bulk_insert_failed => 'Échec de la création des notifications.';
+
+  @override
+  String get location_not_exists => 'Emplacement introuvable.';
+
+  @override
+  String get location_update_failed => 'Échec de la mise à jour de l\'emplacement.';
+
+  @override
+  String get location_fetch_not_found => 'Emplacement introuvable.';
+
+  @override
+  String get location_insert_failed => 'Échec de la création de l\'emplacement.';
+
+  @override
+  String get location_delete_failed => 'Échec de la suppression de l\'emplacement.';
+
+  @override
+  String get address_not_found => 'Adresse introuvable.';
+
+  @override
+  String get payment_failed => 'Échec du traitement du paiement.';
+
+  @override
+  String get deposit_creation_failed => 'Échec de la création de l\'acompte.';
+
+  @override
+  String get image_insert_failed => 'Échec du téléchargement de l\'image.';
+
+  @override
+  String get image_update_failed => 'Échec de la mise à jour de l\'image.';
+
+  @override
+  String get failed => 'Opération échouée.';
+
+  @override
+  String get not_found => 'Non trouvé.';
+
+  @override
+  String get network_timeout => 'Délai réseau dépassé. Veuillez vérifier votre connexion.';
+
+  @override
+  String get validation_error => 'Veuillez vérifier vos saisies et réessayer.';
+
+  @override
+  String get rate_limited => 'Trop de requêtes. Veuillez patienter un instant.';
+
+  @override
+  String get permission_denied => 'Permission refusée.';
+
+  @override
+  String get client_not_exists => 'Client introuvable.';
+
+  @override
+  String get created_successfully => 'Créé avec succès !';
+
+  @override
+  String get bad_request => 'Requête invalide. Veuillez vérifier vos saisies.';
+
+  @override
+  String get unauthorized => 'Veuillez vous connecter pour continuer.';
+
+  @override
+  String get forbidden => 'Vous n\'êtes pas autorisé à accéder à cette ressource.';
+
+  @override
+  String get conflict => 'Conflit de ressource. Veuillez réessayer.';
+
+  @override
+  String get gone => 'Cette ressource n\'est plus disponible.';
+
+  @override
+  String get bad_gateway => 'Service temporairement indisponible. Veuillez réessayer plus tard.';
+
+  @override
+  String get service_unavailable => 'Le service est temporairement indisponible.';
+
+  @override
+  String get gateway_timeout => 'Délai de requête dépassé. Veuillez réessayer.';
+
+  @override
+  String get network_authentication_required => 'Authentification réseau requise.';
+
+  @override
+  String get no_response_data => 'Aucune donnée de réponse disponible.';
 }

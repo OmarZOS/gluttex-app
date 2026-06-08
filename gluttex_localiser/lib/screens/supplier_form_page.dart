@@ -1,17 +1,12 @@
-import 'dart:developer';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_constants/gluttex_response_codes.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/business/Organisation.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
-import 'package:gluttex_localiser/components/image_picker.dart';
-import 'package:gluttex_ui/Services/ResponseHandler.dart';
 import 'package:gluttex_ui/components/ImagePickerSection.dart';
 import 'package:gluttex_ui/components/category_picker.dart';
 import 'package:gluttex_ui/components/map_picker.dart';
@@ -50,7 +45,10 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   LatLng? _position;
   int? _id_location;
   late SupplierChangeNotifier _notifier;
-  bool _initialized = false; // to prevent re-initialization
+  bool _initialized = false;
+
+  // Track if operation is in progress
+  bool _isSubmitting = false;
 
   // Dynamic contact fields
   final List<TextEditingController> _contactControllers = [];
@@ -125,25 +123,22 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
             final type = match.group(1)?.trim() ?? '';
             final value = match.group(2)?.trim() ?? '';
 
-            // check if _contactTypes contains this type (case-insensitive)
-
             final checkedType = _getTypeText(type);
 
             _contactControllers.add(TextEditingController(text: value));
-            _selectedContactTypes.add(checkedType); // keep lowercase
+            _selectedContactTypes.add(checkedType);
             _contactFocusNodes.add(FocusNode());
           }
         }
       }
 
-      // fallback in case no valid contacts parsed
       if (_contactControllers.isEmpty) {
         _contactControllers.add(TextEditingController());
         _selectedContactTypes.add(_contactTypes.first);
         _contactFocusNodes.add(FocusNode());
       }
 
-      _initialized = true; // prevents running this block again
+      _initialized = true;
     }
   }
 
@@ -173,7 +168,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                 org.provider_organisation_name.toLowerCase().contains(query))
             .toList();
 
-        // Check if the current text doesn't match any organization
         isCustomOrganization = filteredOrganizations.isEmpty ||
             !filteredOrganizations.any((org) =>
                 org.provider_organisation_name.toLowerCase() ==
@@ -188,7 +182,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
       _organizationController.text = org.provider_organisation_name;
       isCustomOrganization = false;
     });
-    // Close the dropdown
     FocusScope.of(context).unfocus();
   }
 
@@ -199,7 +192,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     setState(() {
       _contactControllers.add(controller);
       _contactFocusNodes.add(focusNode);
-      _selectedContactTypes.add(_contactTypes.first); // initialize same length
+      _selectedContactTypes.add(_contactTypes.first);
     });
   }
 
@@ -218,10 +211,17 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   }
 
   Future<void> _submitForm() async {
+    if (_isSubmitting) return;
+
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Concatenate contact info fields with index mapping
+      // Prevent double submission
+      setState(() {
+        _isSubmitting = true;
+      });
+
+      // Concatenate contact info fields
       _provider_contact_info = _contactControllers
           .asMap()
           .entries
@@ -229,8 +229,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           .map((entry) =>
               '${_selectedContactTypes[entry.key]}:${entry.value.text}')
           .join(',');
-
-      // log("${_provider_contact_info}");
 
       Supplier supplier = Supplier(
         idLocation: _id_location ?? 0,
@@ -261,9 +259,9 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
       );
 
       try {
-        if (supplier_image != null)
-          // ignore: curly_braces_in_flow_control_structures
+        if (supplier_image != null) {
           supplier = supplier.copyWith(supplierImage: supplier_image);
+        }
 
         if (supplier.idProductProvider == 0) {
           final image_url = await Navigator.pushNamed(
@@ -274,39 +272,54 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               "id": supplier.idProductProvider,
             },
           ) as String?;
-          if (image_url != null)
+          if (image_url != null) {
             supplier = supplier.copyWith(supplierImageUrl: image_url);
+          }
         }
 
-        await Provider.of<SupplierChangeNotifier>(
-          context,
-          listen: false,
-        ).createOrUpdateSupplier(supplier);
+        // Execute the operation - the notifier will store the response
+        await _notifier.createOrUpdateSupplier(supplier);
 
-        ResponseHandler.handleResponse(
-          context: context,
-          statusCode: 200,
-          responseCode: GluttexResponseCodes.put_success,
-          finalMessage: AppLocalizations.of(context)!.putSuccess,
-        );
+        // The response is now stored in StorageService with the generated callerKey
+        // Since we don't have the callerKey directly, we need to handle this differently
 
-        Navigator.popUntil(
-            context, (route) => route.settings.name == AppRoutes.home);
-        // Show success message once
+        // For now, show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.putSuccess),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
 
-        // ⚠️ Do NOT popUntil right after, otherwise the push gets cancelled
-        // If you want to go home AFTER image upload, handle it in imageUpload screen
+          // Navigate back on success
+          Navigator.popUntil(
+              context, (route) => route.settings.name == AppRoutes.home);
+        }
       } on GluttexException catch (e) {
-        // Handle recipe submission error
-        ResponseHandler.handleResponse(
-          context: context,
-          statusCode: e.statusCode ?? 300,
-          responseCode: e.message,
-          finalMessage: AppLocalizations.of(context)!.putFailure,
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text(e.message ?? AppLocalizations.of(context)!.putFailure),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+        }
       }
     }
   }
+
+  // Alternative: If you want to track the callerKey, add this method to your notifier
+  // But for now, we'll use the simpler approach above
 
   @override
   Widget build(BuildContext context) {
@@ -327,10 +340,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Supplier Image Section
-              // _buildImageSection(context),
-              // const SizedBox(height: 24),
-
               if (_id_product_provider != null && _id_product_provider != 0)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,15 +353,12 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                       onImageUploaded: (newImage) {
                         setState(() {
                           supplier_image = newImage;
-                          _supplierImageId =
-                              0; // Reset image ID to 0 for new uploads
+                          _supplierImageId = 0;
                         });
                       },
                     ),
                   ],
                 ),
-
-              // Basic Information Section
               _buildSectionHeader(localizations.basicInformation),
               _buildTextField(context,
                   label: localizations.supplierNameMsg,
@@ -387,7 +393,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                       ? localizations.postalCodeText
                       : null,
                   initialValue: _address_postal_code),
-
               const SizedBox(height: 6),
               _buildTextField(context,
                   label: localizations.countryText,
@@ -396,17 +401,10 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                   validator: (value) =>
                       value?.isEmpty ?? true ? localizations.countryText : null,
                   initialValue: _address_country),
-
               const SizedBox(height: 16),
-
-              // Replace your TextFormField with this premium component
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Label
-
-                  // Searchable input with TypeAhead
-
                   OrganisationPicker(
                     initialValue: _id_provider_organisation,
                     onOrganisationSelected: (value) {
@@ -417,11 +415,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                     },
                     hintText: localizations.selectOrganisationHintText,
                   ),
-                  // _buildOrgPicker(conterxt),
-
-                  // const SizedBox(height: 12),
-
-                  // Selected organisation chip (pretty card style)
                   if (selectedOrganization != null)
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -456,54 +449,11 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                         ],
                       ),
                     ),
-
-                  // Suggestion to create a new one
-                  if (selectedOrganization == null &&
-                      _organizationController.text.isNotEmpty)
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.orange[50],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.add_circle,
-                              color: Colors.orange[700], size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                style: TextStyle(
-                                  color: Colors.orange[800],
-                                  fontSize: 14,
-                                ),
-                                children: [
-                                  const TextSpan(text: 'New organisation: '),
-                                  TextSpan(
-                                    text: _organizationController.text,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const TextSpan(
-                                      text: ' will be created on submission'),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                 ],
               ),
-
               const SizedBox(height: 16),
-              // Category Picker
               _buildCategoryPicker(context),
               const SizedBox(height: 16),
-
-              // Location Information Section
               _buildSectionHeader(localizations.locationInformation),
               _buildTextField(context,
                   label: localizations.locationNameText,
@@ -516,33 +466,33 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               const SizedBox(height: 16),
               _buildLocationPicker(context),
               const SizedBox(height: 24),
-
-              // Contact Information Section
               _buildSectionHeader(localizations.contactInformation),
               ..._buildContactFields(context),
-              // _buildAddContactButton(context),
               const SizedBox(height: 32),
-
-              // Submit Button
               ElevatedButton(
-                onPressed: _submitForm,
+                onPressed: _isSubmitting ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .primary, // Button background color
-                  foregroundColor: Theme.of(context)
-                      .colorScheme
-                      .onPrimary, // Text & icon color
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 12), // optional
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
-                  localizations.saveSupplier,
-                  style: const TextStyle(fontSize: 16),
-                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        localizations.saveSupplier,
+                        style: const TextStyle(fontSize: 16),
+                      ),
               ),
             ],
           ),
@@ -568,7 +518,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
       pathFunction: (int id) => "assets/icons/${id}.svg",
       category_id: 1,
       package: 'gluttex_localiser',
-      // initialSelection: 0, // Default to first category
     );
   }
 
@@ -684,16 +633,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     'other',
   ];
 
-  // final Map<String, IconData> _contactIcons = {
-  //   'Instagram':
-  //       FontAwesomeIcons.instagram, // replace with brand icons if needed
-  //   'Facebook': FontAwesomeIcons.facebook,
-  //   'Email': FontAwesomeIcons.envelope,
-  //   'Phone': FontAwesomeIcons.phone,
-  //   'TikTok': FontAwesomeIcons.tiktok,
-  // };
-
-// Stores selected type for each contact row
   List<String> _selectedContactTypes = [];
 
   List<Widget> _buildContactFields(BuildContext context) {
@@ -727,7 +666,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Contact type dropdown (icon-only)
                     SizedBox(
                       width: 48,
                       height: 48,
@@ -785,8 +723,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-
-                    // Contact input field
                     Expanded(
                       child: TextFormField(
                         controller: controller,
@@ -804,20 +740,11 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                           hintStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface.withOpacity(0.5),
                           ),
-                          // prefixIcon: Padding(
-                          //   padding: const EdgeInsets.only(left: 12, right: 8),
-                          //   child: Icon(
-                          //     _contactIcons[selectedType],
-                          //     size: 20,
-                          //     color: theme.colorScheme.onSurface,
-                          //   ),
-                          // ),
                           suffixIcon: _contactControllers.length > 1
                               ? IconButton(
                                   icon: Icon(Icons.remove_circle,
                                       color: theme.colorScheme.error),
                                   onPressed: () => _removeContactField(index),
-                                  // tooltip: loc.removeContact,
                                 )
                               : null,
                         ),
@@ -841,8 +768,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                   ],
                 ),
               ),
-
-              // Add new field button (only on last field)
               if (isLastField)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
@@ -880,7 +805,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     }).toList();
   }
 
-// Helper method to determine keyboard type based on contact type
   TextInputType _getKeyboardType(String contactType) {
     if (contactType.toLowerCase().contains('phone')) {
       return TextInputType.phone;
@@ -892,7 +816,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     return TextInputType.text;
   }
 
-// Helper method to provide contextual hints
   String _getContactHint(String contactType) {
     switch (contactType.toLowerCase()) {
       case 'phone':
@@ -901,30 +824,10 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         return 'Enter email address';
       case 'website':
         return 'Enter website URL';
-      case 'social':
-        return 'Enter social media handle';
       default:
         return 'Enter contact information';
     }
   }
-
-  // Widget _buildAddContactButton(BuildContext context) {
-  //   return TextButton.icon(
-  //     icon: const Icon(Icons.add_circle_outline),
-  //     label: Text(AppLocalizations.of(context)!.addContactInfoMsg),
-  //     onPressed: () {
-  //       _addContactField();
-  //       WidgetsBinding.instance.addPostFrameCallback((_) {
-  //         _scrollController.animateTo(
-  //           _scrollController.position.maxScrollExtent,
-  //           duration: const Duration(milliseconds: 300),
-  //           curve: Curves.easeOut,
-  //         );
-  //         FocusScope.of(context).requestFocus(_contactFocusNodes.last);
-  //       });
-  //     },
-  //   );
-  // }
 
   Widget _buildSectionHeader(String title) {
     return Padding(
@@ -938,16 +841,6 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
       ),
     );
   }
-
-  // Widget _buildOrganisationPicker(BuildContext context) {
-  //   return OrganisationPicker(
-  //     organisations: _notifier.supplierOrganisations,
-  //     initialOrganisationId: 1,
-  //     onOrganisationChanged: (id) {
-  //       // print("Selected organisation id: $id");
-  //     },
-  //   );
-  // }
 
   String _getTypeText(String type) {
     final lowercaseType = type.toLowerCase();
@@ -966,7 +859,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     if (lowercaseType.contains('whatsapp')) return FontAwesomeIcons.whatsapp;
     if (lowercaseType.contains('tiktok')) return FontAwesomeIcons.tiktok;
 
-    return FontAwesomeIcons.addressCard; // default icon
+    return FontAwesomeIcons.addressCard;
   }
 
   Widget _buildTextField(

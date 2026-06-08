@@ -1,10 +1,13 @@
 // import 'package:dio/dio.dart';
 
+// import 'package:dio/dio.dart';
+
 class CallerResponse {
   final dynamic data;
   final int? statusCode;
   final String? errorCode;
   final String? message;
+  final String? responseCode; // NEW: Add responseCode field
   final bool isSuccess;
   final DateTime timestamp;
 
@@ -13,14 +16,17 @@ class CallerResponse {
     this.statusCode,
     this.errorCode,
     this.message,
+    this.responseCode, // NEW: Add to constructor
     required this.isSuccess,
     required this.timestamp,
   });
 
-  factory CallerResponse.success(dynamic data, {int? statusCode}) {
+  factory CallerResponse.success(dynamic data,
+      {int? statusCode, String? responseCode}) {
     return CallerResponse(
       data: data,
       statusCode: statusCode ?? 200,
+      responseCode: responseCode,
       isSuccess: true,
       timestamp: DateTime.now(),
     );
@@ -31,12 +37,14 @@ class CallerResponse {
     int? statusCode,
     String? errorCode,
     String? message,
+    String? responseCode,
   }) {
     return CallerResponse(
       data: data,
       statusCode: statusCode ?? 500,
       errorCode: errorCode,
       message: message,
+      responseCode: responseCode,
       isSuccess: false,
       timestamp: DateTime.now(),
     );
@@ -44,7 +52,7 @@ class CallerResponse {
 
   @override
   String toString() {
-    return 'CallerResponse(isSuccess: $isSuccess, statusCode: $statusCode, errorCode: $errorCode)';
+    return 'CallerResponse(isSuccess: $isSuccess, statusCode: $statusCode, responseCode: $responseCode, errorCode: $errorCode)';
   }
 }
 
@@ -55,9 +63,13 @@ abstract class StorageService<T> {
   // ==================== Response Storage Methods ====================
 
   /// Store a successful response for a caller key
-  void setSuccessResponse(String callerKey, dynamic data, {int? statusCode}) {
-    _callerResponses[callerKey] =
-        CallerResponse.success(data, statusCode: statusCode);
+  void setSuccessResponse(String callerKey, dynamic data,
+      {int? statusCode, String? responseCode}) {
+    _callerResponses[callerKey] = CallerResponse.success(
+      data,
+      statusCode: statusCode,
+      responseCode: responseCode,
+    );
   }
 
   /// Store a failure response for a caller key
@@ -67,12 +79,14 @@ abstract class StorageService<T> {
     int? statusCode,
     String? errorCode,
     String? message,
+    String? responseCode,
   }) {
     _callerResponses[callerKey] = CallerResponse.failure(
       data: data,
       statusCode: statusCode,
       errorCode: errorCode,
       message: message,
+      responseCode: responseCode,
     );
   }
 
@@ -91,14 +105,74 @@ abstract class StorageService<T> {
     return _callerResponses[callerKey]?.statusCode;
   }
 
-  /// Check if the latest call for a caller key was successful
-  bool isCallerSuccess(String callerKey) {
-    return _callerResponses[callerKey]?.isSuccess ?? false;
+  /// Get the response code for a caller key
+  String? getResponseCode(String callerKey) {
+    return _callerResponses[callerKey]?.responseCode;
+  }
+
+  /// Set the response code for a caller key (updates existing response)
+  void setResponseCode(String callerKey, String responseCode) {
+    final existing = _callerResponses[callerKey];
+    if (existing != null) {
+      if (existing.isSuccess) {
+        _callerResponses[callerKey] = CallerResponse.success(
+          existing.data,
+          statusCode: existing.statusCode,
+          responseCode: responseCode,
+        );
+      } else {
+        _callerResponses[callerKey] = CallerResponse.failure(
+          data: existing.data,
+          statusCode: existing.statusCode,
+          errorCode: existing.errorCode,
+          message: existing.message,
+          responseCode: responseCode,
+        );
+      }
+    }
+  }
+
+  /// Get error code for a caller key
+  String? getErrorCode(String callerKey) {
+    return _callerResponses[callerKey]?.errorCode;
+  }
+
+  /// Set error code for a caller key (updates existing response)
+  void setErrorCode(String callerKey, String errorCode) {
+    final existing = _callerResponses[callerKey];
+    if (existing != null && !existing.isSuccess) {
+      _callerResponses[callerKey] = CallerResponse.failure(
+        data: existing.data,
+        statusCode: existing.statusCode,
+        errorCode: errorCode,
+        message: existing.message,
+        responseCode: existing.responseCode,
+      );
+    }
   }
 
   /// Get error message for a caller key
   String? getErrorMessage(String callerKey) {
     return _callerResponses[callerKey]?.message;
+  }
+
+  /// Set error message for a caller key (updates existing response)
+  void setErrorMessage(String callerKey, String message) {
+    final existing = _callerResponses[callerKey];
+    if (existing != null && !existing.isSuccess) {
+      _callerResponses[callerKey] = CallerResponse.failure(
+        data: existing.data,
+        statusCode: existing.statusCode,
+        errorCode: existing.errorCode,
+        message: message,
+        responseCode: existing.responseCode,
+      );
+    }
+  }
+
+  /// Check if the latest call for a caller key was successful
+  bool isCallerSuccess(String callerKey) {
+    return _callerResponses[callerKey]?.isSuccess ?? false;
   }
 
   /// Remove response for a caller key
@@ -168,18 +242,6 @@ abstract class StorageService<T> {
   Future<dynamic> signInUsingProvider(
       String destination, String providerName, Map<String, dynamic> data,
       {String? callerKey}) async {
-    return null;
-  }
-}
-
-// Optional: Extension for easier access
-extension StorageServiceExtension on StorageService {
-  /// Get response data with automatic type casting
-  T? getResponseDataAs<T>(String callerKey) {
-    final data = getResponseData(callerKey);
-    if (data is T) {
-      return data;
-    }
     return null;
   }
 }

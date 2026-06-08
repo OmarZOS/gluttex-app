@@ -10422,6 +10422,732 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Store Location'**
   String get guestLocation;
+
+  /// No description provided for @something_went_wrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get something_went_wrong;
+
+  /// No description provided for @auth_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication required. Please log in.'**
+  String get auth_required;
+
+  /// No description provided for @auth_decode_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired. Please log in again.'**
+  String get auth_decode_failed;
+
+  /// No description provided for @auth_unauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have permission to perform this action.'**
+  String get auth_unauthorized;
+
+  /// No description provided for @user_auth_creation_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create account. Please try again.'**
+  String get user_auth_creation_failed;
+
+  /// No description provided for @user_net_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your connection.'**
+  String get user_net_failed;
+
+  /// No description provided for @appuser_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'User not found.'**
+  String get appuser_not_exists;
+
+  /// No description provided for @appuser_already_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'User already exists.'**
+  String get appuser_already_exists;
+
+  /// No description provided for @appusertype_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'User type not found.'**
+  String get appusertype_not_exists;
+
+  /// No description provided for @user_fetch_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'User not found.'**
+  String get user_fetch_not_found;
+
+  /// No description provided for @user_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create user.'**
+  String get user_insert_failed;
+
+  /// No description provided for @user_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update user information.'**
+  String get user_update_failed;
+
+  /// No description provided for @user_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete user.'**
+  String get user_delete_failed;
+
+  /// No description provided for @person_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Person not found.'**
+  String get person_not_exists;
+
+  /// No description provided for @person_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create person record.'**
+  String get person_insert_failed;
+
+  /// No description provided for @person_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update person information.'**
+  String get person_update_failed;
+
+  /// No description provided for @person_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete person record.'**
+  String get person_delete_failed;
+
+  /// No description provided for @person_detail_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create person details.'**
+  String get person_detail_insert_failed;
+
+  /// No description provided for @person_details_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Person details not found.'**
+  String get person_details_not_found;
+
+  /// No description provided for @person_fetch_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Person not found.'**
+  String get person_fetch_not_found;
+
+  /// No description provided for @product_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Product not found.'**
+  String get product_not_exists;
+
+  /// No description provided for @product_already_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Product already exists.'**
+  String get product_already_exists;
+
+  /// No description provided for @product_category_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Product category not found.'**
+  String get product_category_not_exists;
+
+  /// No description provided for @product_quantity_not_enough.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient product quantity.'**
+  String get product_quantity_not_enough;
+
+  /// No description provided for @product_quantity_restore_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore product quantity.'**
+  String get product_quantity_restore_failed;
+
+  /// No description provided for @product_supplier_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Product supplier not found.'**
+  String get product_supplier_not_exists;
+
+  /// No description provided for @product_supplier_already_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Product supplier already exists.'**
+  String get product_supplier_already_exists;
+
+  /// No description provided for @product_fetch_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Product not found.'**
+  String get product_fetch_not_found;
+
+  /// No description provided for @product_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create product.'**
+  String get product_insert_failed;
+
+  /// No description provided for @product_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update product.'**
+  String get product_update_failed;
+
+  /// No description provided for @product_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete product.'**
+  String get product_delete_failed;
+
+  /// No description provided for @product_search_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No products found.'**
+  String get product_search_not_found;
+
+  /// No description provided for @product_image_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Product image not found.'**
+  String get product_image_not_found;
+
+  /// No description provided for @supplier_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier not found.'**
+  String get supplier_not_exists;
+
+  /// No description provided for @supplier_type_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier type not found.'**
+  String get supplier_type_not_exists;
+
+  /// No description provided for @supplier_fetch_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier not found.'**
+  String get supplier_fetch_not_found;
+
+  /// No description provided for @supplier_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create supplier.'**
+  String get supplier_insert_failed;
+
+  /// No description provided for @supplier_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update supplier.'**
+  String get supplier_update_failed;
+
+  /// No description provided for @supplier_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete supplier.'**
+  String get supplier_delete_failed;
+
+  /// No description provided for @organisation_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation not found.'**
+  String get organisation_not_found;
+
+  /// No description provided for @organisation_name_used.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation name is already in use.'**
+  String get organisation_name_used;
+
+  /// No description provided for @org_already_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation already exists.'**
+  String get org_already_exists;
+
+  /// No description provided for @org_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create organisation.'**
+  String get org_insert_failed;
+
+  /// No description provided for @org_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update organisation.'**
+  String get org_update_failed;
+
+  /// No description provided for @org_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete organisation.'**
+  String get org_delete_failed;
+
+  /// No description provided for @recipe_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe not found.'**
+  String get recipe_not_exists;
+
+  /// No description provided for @recipe_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update recipe.'**
+  String get recipe_update_failed;
+
+  /// No description provided for @recipe_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete recipe.'**
+  String get recipe_delete_failed;
+
+  /// No description provided for @recipe_fetch_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe not found.'**
+  String get recipe_fetch_not_found;
+
+  /// No description provided for @recipe_category_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe category not found.'**
+  String get recipe_category_not_exists;
+
+  /// No description provided for @recipe_already_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe already exists.'**
+  String get recipe_already_exists;
+
+  /// No description provided for @recipe_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create recipe.'**
+  String get recipe_insert_failed;
+
+  /// No description provided for @recipe_image_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe image not found.'**
+  String get recipe_image_not_found;
+
+  /// No description provided for @recipe_search_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found.'**
+  String get recipe_search_not_found;
+
+  /// No description provided for @ingredient_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient not found.'**
+  String get ingredient_not_exists;
+
+  /// No description provided for @ingredient_already_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient already exists.'**
+  String get ingredient_already_exists;
+
+  /// No description provided for @ingredient_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create ingredient.'**
+  String get ingredient_insert_failed;
+
+  /// No description provided for @ingredient_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update ingredient.'**
+  String get ingredient_update_failed;
+
+  /// No description provided for @ingredient_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete ingredient.'**
+  String get ingredient_delete_failed;
+
+  /// No description provided for @order_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Order not found.'**
+  String get order_not_exists;
+
+  /// No description provided for @order_fetch_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Order not found.'**
+  String get order_fetch_not_found;
+
+  /// No description provided for @order_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create order.'**
+  String get order_insert_failed;
+
+  /// No description provided for @order_insert_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to create order due to conflict.'**
+  String get order_insert_conflict;
+
+  /// No description provided for @order_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update order.'**
+  String get order_update_failed;
+
+  /// No description provided for @order_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete order.'**
+  String get order_delete_failed;
+
+  /// No description provided for @invalid_order_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid order status change.'**
+  String get invalid_order_status;
+
+  /// No description provided for @order_items_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove order items.'**
+  String get order_items_delete_failed;
+
+  /// No description provided for @order_item_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add item to order.'**
+  String get order_item_insert_failed;
+
+  /// No description provided for @cart_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart not found.'**
+  String get cart_not_exists;
+
+  /// No description provided for @cart_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create cart.'**
+  String get cart_insert_failed;
+
+  /// No description provided for @delivery_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery not found.'**
+  String get delivery_not_exists;
+
+  /// No description provided for @delivery_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update delivery.'**
+  String get delivery_update_failed;
+
+  /// No description provided for @delivery_cannot_be_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery cannot be updated in its current status.'**
+  String get delivery_cannot_be_updated;
+
+  /// No description provided for @delivery_bulk_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update deliveries.'**
+  String get delivery_bulk_update_failed;
+
+  /// No description provided for @delivery_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete delivery.'**
+  String get delivery_delete_failed;
+
+  /// No description provided for @delivery_bulk_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete deliveries.'**
+  String get delivery_bulk_delete_failed;
+
+  /// No description provided for @delivery_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create delivery.'**
+  String get delivery_insert_failed;
+
+  /// No description provided for @delivery_validation_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid delivery information.'**
+  String get delivery_validation_failed;
+
+  /// No description provided for @service_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Service not found.'**
+  String get service_not_found;
+
+  /// No description provided for @service_insert_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Service already exists.'**
+  String get service_insert_conflict;
+
+  /// No description provided for @service_category_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Service category not found.'**
+  String get service_category_not_found;
+
+  /// No description provided for @rule_already_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff assignment already exists.'**
+  String get rule_already_exists;
+
+  /// No description provided for @rule_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff assignment not found.'**
+  String get rule_not_exists;
+
+  /// No description provided for @rule_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create staff assignment.'**
+  String get rule_insert_failed;
+
+  /// No description provided for @rule_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update staff assignment.'**
+  String get rule_update_failed;
+
+  /// No description provided for @rule_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete staff assignment.'**
+  String get rule_delete_failed;
+
+  /// No description provided for @rule_invalid_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid staff assignment status.'**
+  String get rule_invalid_status;
+
+  /// No description provided for @notification_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification not found.'**
+  String get notification_not_exists;
+
+  /// No description provided for @notification_already_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification already exists.'**
+  String get notification_already_exists;
+
+  /// No description provided for @notification_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create notification.'**
+  String get notification_insert_failed;
+
+  /// No description provided for @notification_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update notification.'**
+  String get notification_update_failed;
+
+  /// No description provided for @notification_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete notification.'**
+  String get notification_delete_failed;
+
+  /// No description provided for @notification_bulk_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create notifications.'**
+  String get notification_bulk_insert_failed;
+
+  /// No description provided for @location_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not found.'**
+  String get location_not_exists;
+
+  /// No description provided for @location_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update location.'**
+  String get location_update_failed;
+
+  /// No description provided for @location_fetch_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not found.'**
+  String get location_fetch_not_found;
+
+  /// No description provided for @location_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create location.'**
+  String get location_insert_failed;
+
+  /// No description provided for @location_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete location.'**
+  String get location_delete_failed;
+
+  /// No description provided for @address_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Address not found.'**
+  String get address_not_found;
+
+  /// No description provided for @payment_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment processing failed.'**
+  String get payment_failed;
+
+  /// No description provided for @deposit_creation_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create deposit.'**
+  String get deposit_creation_failed;
+
+  /// No description provided for @image_insert_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload image.'**
+  String get image_insert_failed;
+
+  /// No description provided for @image_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update image.'**
+  String get image_update_failed;
+
+  /// No description provided for @failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed.'**
+  String get failed;
+
+  /// No description provided for @not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found.'**
+  String get not_found;
+
+  /// No description provided for @network_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Network timeout. Please check your connection.'**
+  String get network_timeout;
+
+  /// No description provided for @validation_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your input and try again.'**
+  String get validation_error;
+
+  /// No description provided for @rate_limited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please wait a moment.'**
+  String get rate_limited;
+
+  /// No description provided for @permission_denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied.'**
+  String get permission_denied;
+
+  /// No description provided for @client_not_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Client not found.'**
+  String get client_not_exists;
+
+  /// No description provided for @created_successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Created successfully!'**
+  String get created_successfully;
+
+  /// No description provided for @bad_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid request. Please check your input.'**
+  String get bad_request;
+
+  /// No description provided for @unauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to continue.'**
+  String get unauthorized;
+
+  /// No description provided for @forbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have permission to access this resource.'**
+  String get forbidden;
+
+  /// No description provided for @conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource conflict. Please try again.'**
+  String get conflict;
+
+  /// No description provided for @gone.
+  ///
+  /// In en, this message translates to:
+  /// **'This resource is no longer available.'**
+  String get gone;
+
+  /// No description provided for @bad_gateway.
+  ///
+  /// In en, this message translates to:
+  /// **'Service temporarily unavailable. Please try again later.'**
+  String get bad_gateway;
+
+  /// No description provided for @service_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Service is temporarily unavailable.'**
+  String get service_unavailable;
+
+  /// No description provided for @gateway_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Request timed out. Please try again.'**
+  String get gateway_timeout;
+
+  /// No description provided for @network_authentication_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Network authentication required.'**
+  String get network_authentication_required;
+
+  /// No description provided for @no_response_data.
+  ///
+  /// In en, this message translates to:
+  /// **'No response data available.'**
+  String get no_response_data;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

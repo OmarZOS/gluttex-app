@@ -1,16 +1,20 @@
+import 'package:gluttex_core/business/services/TraceableService.dart';
+
 import '../AppUser.dart';
 
 // AuthService.dart
-abstract class AuthService {
+abstract class AuthService extends TraceableService {
   // Sign up with email and password
-  Future<dynamic> signUpWithData(Map<String, dynamic> data) async {
+  Future<dynamic> signUpWithData(Map<String, dynamic> data,
+      {String? callerKey}) async {
     // UserCredential userCredential = await _firebaseAuth.createUserWithUsernameAndPassword(Username: Username, password: password);
     throw UnimplementedError();
   }
 
   // Sign in with Username and password
   Future<dynamic> signInWithUsernameAndPassword(
-      String username, String password) async {
+      String username, String password,
+      {String? callerKey}) async {
     throw UnimplementedError();
   }
 

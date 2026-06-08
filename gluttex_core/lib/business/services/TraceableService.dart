@@ -69,7 +69,7 @@ abstract class TraceableService {
   }
 
   // Helper method to generate caller key
-  String _getCallerKey(String method, {String? id, String? suffix}) {
+  String getCallerKey(String method, {String? id, String? suffix}) {
     final parts = [method];
     if (id != null) parts.add(id);
     if (suffix != null) parts.add(suffix);

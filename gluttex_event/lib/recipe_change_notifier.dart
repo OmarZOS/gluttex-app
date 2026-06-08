@@ -1,23 +1,27 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
+import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 
 class RecipeNotifier extends ChangeNotifier {
   final RecipeService _recipeService = GluttexLocator.get<RecipeService>();
+  final StorageService _storageService = GluttexLocator.get<StorageService>();
 
   final Map<int, Recipe> _recipes = {};
   final Map<int, RecipeIngredient> _recipeIngredients = {};
   bool isLoading = false;
   String currentSearch = "";
   int currentPage = 0;
-  int currentCategory = 0; // Track the current category
+  int currentCategory = 0;
   final int itemsPerPage = GluttexConstants.itemsPerPage;
 
   List<String> get categories => _recipeCategories;
@@ -41,8 +45,17 @@ class RecipeNotifier extends ChangeNotifier {
   bool _hasMoreRecipes = true;
   bool get hasMoreRecipes => _hasMoreRecipes;
 
+  // Helper method to generate caller key
+  String _getCallerKey(String method, {String? id, String? suffix}) {
+    final parts = [method];
+    if (id != null) parts.add(id);
+    if (suffix != null) parts.add(suffix);
+    parts.add(DateTime.now().millisecondsSinceEpoch.toString());
+    return parts.join('_');
+  }
+
   Future<void> initialize() async {
-    await fetchCategories(); // First fetch categories
+    await fetchCategories();
     await fetchRecipes(reset: true);
   }
 
@@ -52,16 +65,19 @@ class RecipeNotifier extends ChangeNotifier {
 
   // ==================== Category Management ====================
 
-  /// Fetch recipe categories from API
-  Future<void> fetchCategories() async {
+  Future<void> fetchCategories({String? callerKey}) async {
+    final key = callerKey ?? _getCallerKey('fetchCategories');
+
     try {
-      final fetchedCategories = await _recipeService.getCategories();
+      final fetchedCategories =
+          await _recipeService.getCategories(callerKey: key);
+
       if (fetchedCategories?.isNotEmpty ?? false) {
         _recipeCategories = fetchedCategories!
             .map((category) => category.recipe_category_desc)
             .toList();
-        notifyListeners();
       }
+      notifyListeners();
     } catch (e) {
       log("Failed to fetch categories: $e");
     }
@@ -69,34 +85,34 @@ class RecipeNotifier extends ChangeNotifier {
 
   // ==================== Recipe Management ====================
 
-  Future<Recipe?> addOrUpdateRecipe(Recipe recipe) async {
+  Future<bool> addOrUpdateRecipe(Recipe recipe, {String? callerKey}) async {
+    final key = callerKey ??
+        _getCallerKey(
+            recipe.id_recipe == null || recipe.id_recipe == 0
+                ? 'addRecipe'
+                : 'updateRecipe',
+            id: recipe.id_recipe?.toString(),
+            suffix: recipe.recipe_name);
+
     try {
       log('Adding/updating recipe: ${recipe.recipe_name}');
-      log('Recipe owner ID: ${recipe.recipe_owner_id}');
-      log('Recipe ID: ${recipe.id_recipe}');
-      log('Recipe image URL: ${recipe.recipe_image_url}');
 
-      // Handle image upload if present
       if (recipe.recipeImage != null) {
         String? imageUrl = await recipe.recipeImage?.uploadImage();
         recipe.recipe_image_url = imageUrl;
         recipe.id_recipe_image = 0;
       }
 
-      // Determine if new or existing
       final isNewRecipe = recipe.id_recipe == null || recipe.id_recipe == 0;
 
       Recipe? data;
-
       if (isNewRecipe) {
-        log('Creating new recipe');
-        data = await _recipeService.addRecipe(recipe);
+        data = await _recipeService.addRecipe(recipe, callerKey: key);
         if (data != null && data.id_recipe != null) {
           _recipes[data.id_recipe!] = data;
         }
       } else {
-        log('Updating existing recipe: ${recipe.id_recipe}');
-        data = await _recipeService.updateRecipe(recipe);
+        data = await _recipeService.updateRecipe(recipe, callerKey: key);
         if (data != null) {
           _recipes[recipe.id_recipe!] = data;
         }
@@ -104,25 +120,28 @@ class RecipeNotifier extends ChangeNotifier {
 
       if (data != null) {
         await fetchRecipes(categoryId: currentCategory, reset: true);
+        notifyListeners();
+        return true;
       }
-
-      notifyListeners();
-      return data;
+      return false;
     } catch (e) {
       log("Failed to add/update recipe: $e");
-      return null;
+      return false;
     }
   }
 
-  /// Fetch recipes with pagination and filtering
   Future<void> fetchRecipes({
     int categoryId = 0,
     String searchQuery = "",
     bool reset = false,
+    String? callerKey,
   }) async {
+    final key = callerKey ??
+        _getCallerKey('fetchRecipes',
+            suffix: '${categoryId}_${searchQuery}_$currentPage');
+
     if (isLoading) return;
 
-    // Reset if category or search changes
     if (reset ||
         currentCategory != categoryId ||
         currentSearch != searchQuery) {
@@ -132,11 +151,10 @@ class RecipeNotifier extends ChangeNotifier {
       _hasMoreRecipes = true;
 
       if (reset) {
-        _recipes.clear(); // Clear recipes only if reset is true
+        _recipes.clear();
       }
     }
 
-    // Don't fetch if no more recipes
     if (!_hasMoreRecipes) return;
 
     isLoading = true;
@@ -147,19 +165,19 @@ class RecipeNotifier extends ChangeNotifier {
         currentCategory,
         currentPage * itemsPerPage,
         itemsPerPage,
-        user_id: 0, // Pass user_id if needed
+        user_id: 0,
         query: currentSearch,
+        callerKey: key,
       );
 
       if (fetchedRecipes != null && fetchedRecipes.isNotEmpty) {
         for (var recipe in fetchedRecipes) {
           if (recipe.id_recipe != null) {
-            _recipes[recipe.id_recipe!] = recipe; // Prevent duplicates
+            _recipes[recipe.id_recipe!] = recipe;
           }
         }
         currentPage++;
 
-        // Check if we've reached the end
         if (fetchedRecipes.length < itemsPerPage) {
           _hasMoreRecipes = false;
         }
@@ -176,17 +194,39 @@ class RecipeNotifier extends ChangeNotifier {
     }
   }
 
-  /// Load more recipes for infinite scrolling
-  Future<void> loadMoreRecipes() async {
+  Future<void> loadMoreRecipes({String? callerKey}) async {
     if (!isLoading && _hasMoreRecipes) {
-      await fetchRecipes();
+      await fetchRecipes(callerKey: callerKey);
+    }
+  }
+
+  Future<bool> deleteRecipe(int idRecipe, {String? callerKey}) async {
+    final key =
+        callerKey ?? _getCallerKey('deleteRecipe', id: idRecipe.toString());
+
+    try {
+      int? status = await _recipeService.deleteRecipe(idRecipe.toString(),
+          callerKey: key);
+
+      if (status == 200 || status == 204) {
+        _recipes.remove(idRecipe);
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      log("Failed to delete recipe: $e");
+      return false;
     }
   }
 
   // ==================== Ingredient Management ====================
 
-  /// Fetches all ingredients and stores them in a map for fast lookups
-  Future<void> fetchIngredients({bool reset = false}) async {
+  Future<void> fetchIngredients({bool reset = false, String? callerKey}) async {
+    final key = callerKey ??
+        _getCallerKey('fetchIngredients',
+            suffix: '${currentIngredientPage}_$reset');
+
     if (reset) {
       _recipeIngredients.clear();
       currentIngredientPage = 0;
@@ -202,6 +242,7 @@ class RecipeNotifier extends ChangeNotifier {
       final fetchedIngredients = await _recipeService.getAllIngredients(
         currentIngredientPage * ingredientsPerPage,
         ingredientsPerPage,
+        callerKey: key,
       );
 
       if (fetchedIngredients != null && fetchedIngredients.isNotEmpty) {
@@ -210,7 +251,6 @@ class RecipeNotifier extends ChangeNotifier {
         }
         currentIngredientPage++;
 
-        // Check if we've reached the end
         if (fetchedIngredients.length < ingredientsPerPage) {
           hasMoreIngredients = false;
         }
@@ -227,41 +267,38 @@ class RecipeNotifier extends ChangeNotifier {
     }
   }
 
-  /// Get ingredient by ID (with caching)
   RecipeIngredient? getIngredientById(int id) {
     return _recipeIngredients[id];
   }
 
-  /// Load more ingredients for infinite scrolling
-  Future<void> loadMoreIngredients() async {
+  Future<void> loadMoreIngredients({String? callerKey}) async {
     if (!isLoading && hasMoreIngredients) {
-      await fetchIngredients();
+      await fetchIngredients(callerKey: callerKey);
     }
   }
 
   // ==================== User Management ====================
 
-  Future<AppUser?> getUserById(int id) async {
-    // First check if user exists in local list
+  Future<AppUser?> getUserById(int id, {String? callerKey}) async {
+    final key = callerKey ?? _getCallerKey('getUserById', id: id.toString());
+
     final existingUser = _users.firstWhere(
       (user) => user.id_app_user == id,
       orElse: () => AppUser.empty(),
     );
 
-    // Return if found (and not empty)
     if (existingUser.id_app_user != 0) {
       return existingUser;
     }
 
-    // If not found locally, fetch from API
     _isLoading = true;
     notifyListeners();
 
     try {
       final result_user =
           await GluttexLocator.get<AppUserService>().getAppUser(id.toString());
+
       if (result_user != null && result_user.id_app_user != 0) {
-        // Add to local cache
         _users.add(result_user);
         notifyListeners();
         return result_user;
@@ -278,7 +315,6 @@ class RecipeNotifier extends ChangeNotifier {
 
   // ==================== Local Recipe Operations ====================
 
-  /// Adds a new recipe to local state without API call (for optimistic updates)
   void addRecipeLocally(Recipe recipe) {
     if (recipe.id_recipe != null && recipe.id_recipe != 0) {
       _recipes[recipe.id_recipe!] = recipe;
@@ -286,7 +322,6 @@ class RecipeNotifier extends ChangeNotifier {
     }
   }
 
-  /// Updates a recipe in local state efficiently
   void updateLocalRecipe(Recipe recipe) {
     if (recipe.id_recipe != null && _recipes.containsKey(recipe.id_recipe)) {
       _recipes[recipe.id_recipe!] = recipe;
@@ -294,32 +329,17 @@ class RecipeNotifier extends ChangeNotifier {
     }
   }
 
-  /// Deletes a recipe and updates the local state efficiently
-  Future<void> deleteRecipe(int idRecipe) async {
-    try {
-      int? status = await _recipeService.deleteRecipe(idRecipe.toString());
-      if (status != null) {
-        _recipes.remove(idRecipe);
-        notifyListeners();
-      }
-    } catch (e) {
-      log("Failed to delete recipe: $e");
-    }
-  }
-
   // ==================== Filtering Helpers ====================
 
-  /// Helper method to filter recipes by category
   List<Recipe> filterRecipesByCategory(int categoryId) {
     if (categoryId == 0) {
-      return _recipes.values.toList(); // Return all recipes for "All" category
+      return _recipes.values.toList();
     }
     return _recipes.values
         .where((recipe) => recipe.recipe_category_id == categoryId)
         .toList();
   }
 
-  /// Search recipes locally (client-side filtering)
   List<Recipe> searchRecipesLocally(String query) {
     if (query.isEmpty) {
       return _recipes.values.toList();
@@ -333,7 +353,6 @@ class RecipeNotifier extends ChangeNotifier {
 
   // ==================== Cache Management ====================
 
-  /// Clear all cached data
   void clearCache() {
     _recipes.clear();
     _recipeIngredients.clear();
@@ -345,33 +364,26 @@ class RecipeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Refresh all data from API
-  Future<void> refreshAll() async {
+  Future<void> refreshAll({String? callerKey}) async {
     clearCache();
-    await fetchCategories();
-    await fetchRecipes(reset: true);
-    await fetchIngredients(reset: true);
+    await fetchCategories(callerKey: callerKey);
+    await fetchRecipes(reset: true, callerKey: callerKey);
+    await fetchIngredients(reset: true, callerKey: callerKey);
   }
 
   // ==================== State Helpers ====================
 
-  /// Check if a recipe exists in local cache
   bool hasRecipe(int id) {
     return _recipes.containsKey(id);
   }
 
-  /// Get recipe by ID from local cache
   Recipe? getRecipeById(int id) {
     return _recipes[id];
   }
 
-  /// Get the total count of recipes
   int get totalRecipeCount => _recipes.length;
-
-  /// Get the total count of ingredients
   int get totalIngredientCount => _recipeIngredients.length;
 
-  /// Reset all state
   void reset() {
     _recipes.clear();
     _recipeIngredients.clear();
@@ -386,5 +398,47 @@ class RecipeNotifier extends ChangeNotifier {
     isLoading = false;
     _isLoading = false;
     notifyListeners();
+  }
+
+  // ============ HELPER METHODS FOR RESPONSE RETRIEVAL ============
+
+  /// Get the stored response from the RecipeService (through StorageService)
+  CallerResponse? getResponse(String callerKey) {
+    return _storageService.getResponse(callerKey);
+  }
+
+  /// Check if a call was successful
+  bool isSuccess(String callerKey) {
+    return _storageService.isCallerSuccess(callerKey);
+  }
+
+  /// Get response data
+  dynamic getResponseData(String callerKey) {
+    return _storageService.getResponseData(callerKey);
+  }
+
+  /// Get status code
+  int? getStatusCode(String callerKey) {
+    return _storageService.getStatusCode(callerKey);
+  }
+
+  /// Get response code
+  String? getResponseCode(String callerKey) {
+    return _storageService.getResponseCode(callerKey);
+  }
+
+  /// Get error message
+  String? getErrorMessage(String callerKey) {
+    return _storageService.getErrorMessage(callerKey);
+  }
+
+  /// Clear response for a caller key
+  void clearResponse(String callerKey) {
+    _storageService.clearResponse(callerKey);
+  }
+
+  /// Clear all responses
+  void clearAllResponses() {
+    _storageService.clearAllResponses();
   }
 }

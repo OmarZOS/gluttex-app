@@ -5298,4 +5298,367 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guestLocation => 'Store Location';
+
+  @override
+  String get something_went_wrong => 'Something went wrong. Please try again.';
+
+  @override
+  String get auth_required => 'Authentication required. Please log in.';
+
+  @override
+  String get auth_decode_failed => 'Session expired. Please log in again.';
+
+  @override
+  String get auth_unauthorized => 'You don\'t have permission to perform this action.';
+
+  @override
+  String get user_auth_creation_failed => 'Failed to create account. Please try again.';
+
+  @override
+  String get user_net_failed => 'Network error. Please check your connection.';
+
+  @override
+  String get appuser_not_exists => 'User not found.';
+
+  @override
+  String get appuser_already_exists => 'User already exists.';
+
+  @override
+  String get appusertype_not_exists => 'User type not found.';
+
+  @override
+  String get user_fetch_not_found => 'User not found.';
+
+  @override
+  String get user_insert_failed => 'Failed to create user.';
+
+  @override
+  String get user_update_failed => 'Failed to update user information.';
+
+  @override
+  String get user_delete_failed => 'Failed to delete user.';
+
+  @override
+  String get person_not_exists => 'Person not found.';
+
+  @override
+  String get person_insert_failed => 'Failed to create person record.';
+
+  @override
+  String get person_update_failed => 'Failed to update person information.';
+
+  @override
+  String get person_delete_failed => 'Failed to delete person record.';
+
+  @override
+  String get person_detail_insert_failed => 'Failed to create person details.';
+
+  @override
+  String get person_details_not_found => 'Person details not found.';
+
+  @override
+  String get person_fetch_not_found => 'Person not found.';
+
+  @override
+  String get product_not_exists => 'Product not found.';
+
+  @override
+  String get product_already_exists => 'Product already exists.';
+
+  @override
+  String get product_category_not_exists => 'Product category not found.';
+
+  @override
+  String get product_quantity_not_enough => 'Insufficient product quantity.';
+
+  @override
+  String get product_quantity_restore_failed => 'Failed to restore product quantity.';
+
+  @override
+  String get product_supplier_not_exists => 'Product supplier not found.';
+
+  @override
+  String get product_supplier_already_exists => 'Product supplier already exists.';
+
+  @override
+  String get product_fetch_not_found => 'Product not found.';
+
+  @override
+  String get product_insert_failed => 'Failed to create product.';
+
+  @override
+  String get product_update_failed => 'Failed to update product.';
+
+  @override
+  String get product_delete_failed => 'Failed to delete product.';
+
+  @override
+  String get product_search_not_found => 'No products found.';
+
+  @override
+  String get product_image_not_found => 'Product image not found.';
+
+  @override
+  String get supplier_not_exists => 'Supplier not found.';
+
+  @override
+  String get supplier_type_not_exists => 'Supplier type not found.';
+
+  @override
+  String get supplier_fetch_not_found => 'Supplier not found.';
+
+  @override
+  String get supplier_insert_failed => 'Failed to create supplier.';
+
+  @override
+  String get supplier_update_failed => 'Failed to update supplier.';
+
+  @override
+  String get supplier_delete_failed => 'Failed to delete supplier.';
+
+  @override
+  String get organisation_not_found => 'Organisation not found.';
+
+  @override
+  String get organisation_name_used => 'Organisation name is already in use.';
+
+  @override
+  String get org_already_exists => 'Organisation already exists.';
+
+  @override
+  String get org_insert_failed => 'Failed to create organisation.';
+
+  @override
+  String get org_update_failed => 'Failed to update organisation.';
+
+  @override
+  String get org_delete_failed => 'Failed to delete organisation.';
+
+  @override
+  String get recipe_not_exists => 'Recipe not found.';
+
+  @override
+  String get recipe_update_failed => 'Failed to update recipe.';
+
+  @override
+  String get recipe_delete_failed => 'Failed to delete recipe.';
+
+  @override
+  String get recipe_fetch_not_found => 'Recipe not found.';
+
+  @override
+  String get recipe_category_not_exists => 'Recipe category not found.';
+
+  @override
+  String get recipe_already_exists => 'Recipe already exists.';
+
+  @override
+  String get recipe_insert_failed => 'Failed to create recipe.';
+
+  @override
+  String get recipe_image_not_found => 'Recipe image not found.';
+
+  @override
+  String get recipe_search_not_found => 'No recipes found.';
+
+  @override
+  String get ingredient_not_exists => 'Ingredient not found.';
+
+  @override
+  String get ingredient_already_exists => 'Ingredient already exists.';
+
+  @override
+  String get ingredient_insert_failed => 'Failed to create ingredient.';
+
+  @override
+  String get ingredient_update_failed => 'Failed to update ingredient.';
+
+  @override
+  String get ingredient_delete_failed => 'Failed to delete ingredient.';
+
+  @override
+  String get order_not_exists => 'Order not found.';
+
+  @override
+  String get order_fetch_not_found => 'Order not found.';
+
+  @override
+  String get order_insert_failed => 'Failed to create order.';
+
+  @override
+  String get order_insert_conflict => 'Unable to create order due to conflict.';
+
+  @override
+  String get order_update_failed => 'Failed to update order.';
+
+  @override
+  String get order_delete_failed => 'Failed to delete order.';
+
+  @override
+  String get invalid_order_status => 'Invalid order status change.';
+
+  @override
+  String get order_items_delete_failed => 'Failed to remove order items.';
+
+  @override
+  String get order_item_insert_failed => 'Failed to add item to order.';
+
+  @override
+  String get cart_not_exists => 'Cart not found.';
+
+  @override
+  String get cart_insert_failed => 'Failed to create cart.';
+
+  @override
+  String get delivery_not_exists => 'Delivery not found.';
+
+  @override
+  String get delivery_update_failed => 'Failed to update delivery.';
+
+  @override
+  String get delivery_cannot_be_updated => 'Delivery cannot be updated in its current status.';
+
+  @override
+  String get delivery_bulk_update_failed => 'Failed to update deliveries.';
+
+  @override
+  String get delivery_delete_failed => 'Failed to delete delivery.';
+
+  @override
+  String get delivery_bulk_delete_failed => 'Failed to delete deliveries.';
+
+  @override
+  String get delivery_insert_failed => 'Failed to create delivery.';
+
+  @override
+  String get delivery_validation_failed => 'Invalid delivery information.';
+
+  @override
+  String get service_not_found => 'Service not found.';
+
+  @override
+  String get service_insert_conflict => 'Service already exists.';
+
+  @override
+  String get service_category_not_found => 'Service category not found.';
+
+  @override
+  String get rule_already_exists => 'Staff assignment already exists.';
+
+  @override
+  String get rule_not_exists => 'Staff assignment not found.';
+
+  @override
+  String get rule_insert_failed => 'Failed to create staff assignment.';
+
+  @override
+  String get rule_update_failed => 'Failed to update staff assignment.';
+
+  @override
+  String get rule_delete_failed => 'Failed to delete staff assignment.';
+
+  @override
+  String get rule_invalid_status => 'Invalid staff assignment status.';
+
+  @override
+  String get notification_not_exists => 'Notification not found.';
+
+  @override
+  String get notification_already_exists => 'Notification already exists.';
+
+  @override
+  String get notification_insert_failed => 'Failed to create notification.';
+
+  @override
+  String get notification_update_failed => 'Failed to update notification.';
+
+  @override
+  String get notification_delete_failed => 'Failed to delete notification.';
+
+  @override
+  String get notification_bulk_insert_failed => 'Failed to create notifications.';
+
+  @override
+  String get location_not_exists => 'Location not found.';
+
+  @override
+  String get location_update_failed => 'Failed to update location.';
+
+  @override
+  String get location_fetch_not_found => 'Location not found.';
+
+  @override
+  String get location_insert_failed => 'Failed to create location.';
+
+  @override
+  String get location_delete_failed => 'Failed to delete location.';
+
+  @override
+  String get address_not_found => 'Address not found.';
+
+  @override
+  String get payment_failed => 'Payment processing failed.';
+
+  @override
+  String get deposit_creation_failed => 'Failed to create deposit.';
+
+  @override
+  String get image_insert_failed => 'Failed to upload image.';
+
+  @override
+  String get image_update_failed => 'Failed to update image.';
+
+  @override
+  String get failed => 'Operation failed.';
+
+  @override
+  String get not_found => 'Not found.';
+
+  @override
+  String get network_timeout => 'Network timeout. Please check your connection.';
+
+  @override
+  String get validation_error => 'Please check your input and try again.';
+
+  @override
+  String get rate_limited => 'Too many requests. Please wait a moment.';
+
+  @override
+  String get permission_denied => 'Permission denied.';
+
+  @override
+  String get client_not_exists => 'Client not found.';
+
+  @override
+  String get created_successfully => 'Created successfully!';
+
+  @override
+  String get bad_request => 'Invalid request. Please check your input.';
+
+  @override
+  String get unauthorized => 'Please log in to continue.';
+
+  @override
+  String get forbidden => 'You don\'t have permission to access this resource.';
+
+  @override
+  String get conflict => 'Resource conflict. Please try again.';
+
+  @override
+  String get gone => 'This resource is no longer available.';
+
+  @override
+  String get bad_gateway => 'Service temporarily unavailable. Please try again later.';
+
+  @override
+  String get service_unavailable => 'Service is temporarily unavailable.';
+
+  @override
+  String get gateway_timeout => 'Request timed out. Please try again.';
+
+  @override
+  String get network_authentication_required => 'Network authentication required.';
+
+  @override
+  String get no_response_data => 'No response data available.';
 }

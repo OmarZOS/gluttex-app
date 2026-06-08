@@ -11,6 +11,7 @@ import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/business/Organisation.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
+import 'package:gluttex_core/mediation/StorageService.dart';
 
 // ============ CACHE ENTRY WITH TTL ============
 class _CacheEntry<T> {
@@ -22,7 +23,6 @@ class _CacheEntry<T> {
 
   bool get isExpired =>
       DateTime.now().difference(timestamp).inSeconds > ttlSeconds;
-
   bool get isValid => !isExpired;
 }
 
@@ -57,6 +57,7 @@ class CacheStats {
 class SupplierChangeNotifier extends ChangeNotifier {
   final SupplierService _supplierService =
       GluttexLocator.get<SupplierService>();
+  final StorageService _storageService = GluttexLocator.get<StorageService>();
 
   // ============ CACHE STORAGE ============
   final List<Supplier> _suppliers = [];
@@ -108,6 +109,37 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
   SupplierChangeNotifier();
 
+  // ============ RESPONSE TRACKING HELPER METHODS ============
+
+  String _generateCallerKey(String operation, {String? id, String? suffix}) {
+    final parts = [operation];
+    if (id != null) parts.add(id);
+    if (suffix != null) parts.add(suffix);
+    parts.add(DateTime.now().millisecondsSinceEpoch.toString());
+    return parts.join('_');
+  }
+
+  void _storeSuccessResponse(String callerKey, dynamic data,
+      {int? statusCode, String? responseCode}) {
+    _storageService.setSuccessResponse(callerKey, data,
+        statusCode: statusCode ?? 200, responseCode: responseCode);
+    debugPrint('✅ Stored SUCCESS: $callerKey - $responseCode');
+  }
+
+  void _storeFailureResponse(String callerKey, dynamic data,
+      {int? statusCode,
+      String? errorCode,
+      String? message,
+      String? responseCode}) {
+    _storageService.setFailureResponse(callerKey,
+        data: data,
+        statusCode: statusCode ?? 500,
+        errorCode: errorCode,
+        message: message,
+        responseCode: responseCode);
+    debugPrint('❌ Stored FAILURE: $callerKey - $responseCode');
+  }
+
   // ============ LIFECYCLE ============
 
   @override
@@ -148,12 +180,10 @@ class SupplierChangeNotifier extends ChangeNotifier {
   void _addToLRUCache(int id, Supplier supplier) {
     if (!_enableCache) return;
 
-    // Remove if already exists
     if (_lruCache.containsKey(id)) {
       _lruCache.remove(id);
     }
 
-    // Check size limit and remove oldest if needed
     while (_lruCache.length >= _maxCacheSize) {
       final oldestKey = _lruCache.keys.first;
       _lruCache.remove(oldestKey);
@@ -174,7 +204,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
       return null;
     }
 
-    // Move to end (most recently used)
     _lruCache.remove(id);
     _lruCache[id] = entry;
 
@@ -189,7 +218,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
     _listCache[key] = _CacheEntry<List<int>>(ids,
         ttlSeconds: ttlSeconds ?? _defaultCacheTTLSeconds);
 
-    // Also cache individual suppliers
     for (final supplier in suppliers) {
       _cacheSupplier(supplier);
     }
@@ -207,14 +235,12 @@ class SupplierChangeNotifier extends ChangeNotifier {
       return null;
     }
 
-    // Retrieve full suppliers from cache
     final suppliers = <Supplier>[];
     for (final id in entry.data) {
       final cached = _getCachedSupplier(id);
       if (cached != null) {
         suppliers.add(cached);
       } else {
-        // Cache incomplete, invalidate and return null
         _listCache.remove(key);
         _cacheMisses++;
         return null;
@@ -237,20 +263,16 @@ class SupplierChangeNotifier extends ChangeNotifier {
   Supplier? _getCachedSupplier(int id) {
     if (!_enableCache) return null;
 
-    // Check LRU cache first (fastest)
     final lruCached = _getFromLRUCache(id);
     if (lruCached != null) return lruCached;
 
-    // Check detailed cache
     final entry = _detailedCache[id];
     if (entry != null && entry.isValid) {
-      // Add to LRU for future quick access
       _addToLRUCache(id, entry.data);
       _cacheHits++;
       return entry.data;
     }
 
-    // Expired or not found
     if (entry != null && entry.isExpired) {
       _detailedCache.remove(id);
     }
@@ -281,12 +303,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
   // ============ PUBLIC GETTERS ============
 
   List<Supplier> get suppliers => List.unmodifiable(_suppliers);
-
   List<Supplier> get filteredSuppliers => _applyFilters();
-
   List<Supplier> get detailedSuppliers =>
       _detailedCache.values.map((e) => e.data).toList();
-
   List<Organisation> get organisations =>
       List.unmodifiable(_organisations.values);
 
@@ -374,13 +393,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
           return false;
         }
       }
-      // if (_filter.minRating != null &&
-      //     (supplier.averageRating ?? 0) < _filter.minRating!) {
-      //   return false;
-      // }
-      // if (_filter.status != null && supplier.status != _filter.status) {
-      //   return false;
-      // }
       if (_filter.hasLocation != null) {
         final hasLoc = supplier.locationLatitude != null &&
             supplier.locationLongitude != null;
@@ -405,6 +417,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
     bool notify = true,
     bool forceRefresh = false,
   }) async {
+    final operationKey = _generateCallerKey('fetchSuppliers',
+        suffix: '${ownerId ?? 0}_${organisationId ?? 0}_$_suppliersPage');
+
     // Check cache
     if (!forceRefresh && !reset) {
       final cacheKey =
@@ -412,11 +427,20 @@ class SupplierChangeNotifier extends ChangeNotifier {
       final cached = _getFromListCache(cacheKey);
       if (cached != null && cached.isNotEmpty) {
         _addSuppliers(cached, notify: notify);
+        _storeSuccessResponse(operationKey, cached,
+            statusCode: 200, responseCode: 'CACHE_HIT');
         return;
       }
     }
 
-    if (_isLoading || (!reset && !_hasMoreSuppliers)) return;
+    if (_isLoading || (!reset && !_hasMoreSuppliers)) {
+      _storeFailureResponse(operationKey, null,
+          statusCode: 429,
+          errorCode: 'LOADING_OR_END',
+          message: 'Already loading or no more suppliers',
+          responseCode: 'RATE_LIMITED');
+      return;
+    }
 
     if (reset) {
       _suppliers.clear();
@@ -434,7 +458,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
         _itemsPerPage,
       );
 
-      // Cache the results
       if (!reset) {
         final cacheKey =
             'suppliers_${ownerId ?? 0}_${organisationId ?? 0}_$_suppliersPage';
@@ -448,8 +471,16 @@ class SupplierChangeNotifier extends ChangeNotifier {
       } else {
         _suppliersPage++;
       }
+
+      _storeSuccessResponse(operationKey, fetched,
+          statusCode: 200, responseCode: 'SUCCESS');
     } catch (e, stackTrace) {
       _handleError('Failed to fetch suppliers', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'FETCH_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
       rethrow;
     } finally {
       _setLoading(false);
@@ -463,16 +494,23 @@ class SupplierChangeNotifier extends ChangeNotifier {
       {bool forceRefresh = false,
       bool notify = true,
       int? customTTLSeconds}) async {
+    final operationKey =
+        _generateCallerKey('getSupplierById', id: id.toString());
+
     // Check cache first
     if (!forceRefresh) {
       final cached = _getCachedSupplier(id);
       if (cached != null && cached.idProductProvider != 0) {
+        _storeSuccessResponse(operationKey, cached,
+            statusCode: 200, responseCode: 'CACHE_HIT');
         return cached;
       }
     }
 
     // Prevent duplicate concurrent requests for same ID
     if (_pendingRequests.containsKey(id)) {
+      _storeSuccessResponse(operationKey, await _pendingRequests[id],
+          statusCode: 200, responseCode: 'PENDING_REQUEST');
       return _pendingRequests[id];
     }
 
@@ -482,10 +520,23 @@ class SupplierChangeNotifier extends ChangeNotifier {
       if (supplier != null && supplier.idProductProvider != 0) {
         _cacheSupplier(supplier, ttlSeconds: customTTLSeconds);
         _updateSupplierInList(supplier, notify: false);
+        _storeSuccessResponse(operationKey, supplier,
+            statusCode: 200, responseCode: 'SUCCESS');
+      } else {
+        _storeFailureResponse(operationKey, null,
+            statusCode: 404,
+            errorCode: 'NOT_FOUND',
+            message: 'Supplier with ID $id not found',
+            responseCode: 'NOT_FOUND');
       }
       return supplier;
     }).catchError((e, stackTrace) {
       _handleError('Failed to fetch supplier $id', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'FETCH_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
       return null;
     }).whenComplete(() {
       _pendingRequests.remove(id);
@@ -505,7 +556,14 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
   Future<List<Supplier>> getSuppliersByIds(List<int> ids,
       {bool forceRefresh = false}) async {
-    if (ids.isEmpty) return [];
+    final operationKey =
+        _generateCallerKey('getSuppliersByIds', suffix: ids.join(','));
+
+    if (ids.isEmpty) {
+      _storeSuccessResponse(operationKey, [],
+          statusCode: 200, responseCode: 'EMPTY_LIST');
+      return [];
+    }
 
     // Remove duplicates
     final uniqueIds = ids.toSet().toList();
@@ -531,11 +589,11 @@ class SupplierChangeNotifier extends ChangeNotifier {
     if (missingIds.isNotEmpty) {
       final cacheKey = 'batch_${missingIds.join(',')}';
 
-      // Check if we already have a pending batch request
       if (_pendingBatchRequests.containsKey(cacheKey)) {
-        // Safe because containsKey guarantees the value exists
         final batchResults = await _pendingBatchRequests[cacheKey]!;
         results.addAll(batchResults);
+        _storeSuccessResponse(operationKey, results,
+            statusCode: 200, responseCode: 'BATCH_PENDING');
         return results;
       }
 
@@ -545,6 +603,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
       try {
         final fetched = await batchFuture;
         results.addAll(fetched);
+        _storeSuccessResponse(operationKey, results,
+            statusCode: 200, responseCode: 'BATCH_SUCCESS');
       } finally {
         _pendingBatchRequests.remove(cacheKey);
       }
@@ -556,7 +616,6 @@ class SupplierChangeNotifier extends ChangeNotifier {
   Future<List<Supplier>> _fetchSuppliersBatch(List<int> ids) async {
     final results = <Supplier>[];
 
-    // Fetch sequentially to avoid overwhelming the API
     for (final id in ids) {
       try {
         final supplier = await _supplierService.getSupplier(id.toString());
@@ -572,7 +631,15 @@ class SupplierChangeNotifier extends ChangeNotifier {
     return results;
   }
 
+  // ============ CUD OPERATIONS WITH RESPONSE TRACKING ============
+
   Future<Supplier> createOrUpdateSupplier(Supplier supplier) async {
+    final isCreating = supplier.idProductProvider == 0;
+    final operationKey = _generateCallerKey(
+        isCreating ? 'createSupplier' : 'updateSupplier',
+        id: isCreating ? null : supplier.idProductProvider.toString(),
+        suffix: supplier.providerName);
+
     _setLoading(true);
 
     try {
@@ -582,11 +649,16 @@ class SupplierChangeNotifier extends ChangeNotifier {
         supplier = supplier.copyWith(supplierImageUrl: imageUrl);
       }
 
-      final result = supplier.idProductProvider == 0
+      final result = isCreating
           ? await _supplierService.addSupplier(supplier)
           : await _supplierService.updateSupplier(supplier);
 
       if (result == null) {
+        _storeFailureResponse(operationKey, null,
+            statusCode: 500,
+            errorCode: 'SAVE_FAILED',
+            message: 'Failed to save supplier',
+            responseCode: 'SAVE_FAILED');
         throw GluttexException('Failed to save supplier');
       }
 
@@ -596,13 +668,21 @@ class SupplierChangeNotifier extends ChangeNotifier {
       _updateSupplierInList(result, notify: false);
 
       // Refresh list if needed
-      if (supplier.idProductProvider == 0) {
+      if (isCreating) {
         await fetchSuppliers(reset: true, notify: false);
       }
+
+      _storeSuccessResponse(operationKey, result,
+          statusCode: 200, responseCode: isCreating ? 'CREATED' : 'UPDATED');
 
       return result;
     } catch (e, stackTrace) {
       _handleError('Failed to save supplier', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'SAVE_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
       rethrow;
     } finally {
       _setLoading(false);
@@ -611,20 +691,36 @@ class SupplierChangeNotifier extends ChangeNotifier {
   }
 
   Future<bool> deleteSupplier(int id) async {
+    final operationKey =
+        _generateCallerKey('deleteSupplier', id: id.toString());
+
     _setLoading(true);
 
     try {
       final status = await _supplierService.deleteSupplier(id.toString());
-      final success = status != null;
+      final success = status != null && (status == 200 || status == 204);
 
       if (success) {
         _suppliers.removeWhere((s) => s.idProductProvider == id);
         _invalidateCache(supplierId: id);
+        _storeSuccessResponse(operationKey, true,
+            statusCode: status ?? 200, responseCode: 'DELETED');
+      } else {
+        _storeFailureResponse(operationKey, false,
+            statusCode: status ?? 500,
+            errorCode: 'DELETE_FAILED',
+            message: 'Failed to delete supplier',
+            responseCode: 'DELETE_FAILED');
       }
 
       return success;
     } catch (e, stackTrace) {
       _handleError('Failed to delete supplier', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'DELETE_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
       return false;
     } finally {
       _setLoading(false);
@@ -636,29 +732,31 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
   Future<void> searchSuppliers(String query,
       {Duration delay = const Duration(milliseconds: 500)}) async {
-    // Cancel previous timer
+    final operationKey = _generateCallerKey('searchSuppliers', suffix: query);
+
     _searchTimer?.cancel();
 
     if (query.isEmpty) {
       clearFilter();
+      _storeSuccessResponse(operationKey, null,
+          statusCode: 200, responseCode: 'QUERY_CLEARED');
       return;
     }
 
-    // Check search cache
     final cacheKey = 'search_${query.toLowerCase()}';
     final cached = _getFromListCache(cacheKey);
     if (cached != null) {
       _addSuppliers(cached, notify: true);
+      _storeSuccessResponse(operationKey, cached,
+          statusCode: 200, responseCode: 'SEARCH_CACHE_HIT');
       return;
     }
 
-    // Debounce search
     _searchTimer = Timer(delay, () async {
       if (_isDisposed) return;
 
       setFilter(SupplierFilter(name: query));
 
-      // Local search first
       final localResults = _applyFilters();
       if (localResults.isNotEmpty) {
         _safeNotifyListeners();
@@ -670,13 +768,23 @@ class SupplierChangeNotifier extends ChangeNotifier {
         final remoteResults = await _supplierService.searchSuppliersByToken(
           query,
           0,
-          50, // Limit search results
+          50,
         );
 
         _cacheList(cacheKey, remoteResults, ttlSeconds: _shortCacheTTLSeconds);
         _addSuppliers(remoteResults, notify: false);
+
+        _storeSuccessResponse(operationKey, remoteResults,
+            statusCode: 200,
+            responseCode:
+                remoteResults.isEmpty ? 'SEARCH_NO_RESULTS' : 'SEARCH_SUCCESS');
       } catch (e, stackTrace) {
         _handleError('Failed to search suppliers', e, stackTrace);
+        _storeFailureResponse(operationKey, e.toString(),
+            statusCode: 500,
+            errorCode: 'SEARCH_ERROR',
+            message: e.toString(),
+            responseCode: 'SEARCH_ERROR');
       } finally {
         _setLoading(false);
         _safeNotifyListeners();
@@ -691,12 +799,16 @@ class SupplierChangeNotifier extends ChangeNotifier {
     bool reset = false,
     bool notify = true,
   }) async {
-    // Check cache
+    final operationKey = _generateCallerKey('searchSuppliersByGeo',
+        suffix: '${longitude}_${latitude}_${radiusKm}');
+
     final cacheKey = 'geo_${longitude}_${latitude}_${radiusKm}_$_suppliersPage';
     if (!reset) {
       final cached = _getFromListCache(cacheKey);
       if (cached != null) {
         _addSuppliers(cached, notify: notify);
+        _storeSuccessResponse(operationKey, cached,
+            statusCode: 200, responseCode: 'GEO_CACHE_HIT');
         return;
       }
     }
@@ -726,8 +838,17 @@ class SupplierChangeNotifier extends ChangeNotifier {
       } else {
         _suppliersPage++;
       }
+
+      _storeSuccessResponse(operationKey, results,
+          statusCode: 200,
+          responseCode: results.isEmpty ? 'GEO_NO_RESULTS' : 'GEO_SUCCESS');
     } catch (e, stackTrace) {
       _handleError('Failed to search suppliers by location', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'GEO_SEARCH_ERROR',
+          message: e.toString(),
+          responseCode: 'GEO_ERROR');
       rethrow;
     } finally {
       _setLoading(false);
@@ -740,24 +861,39 @@ class SupplierChangeNotifier extends ChangeNotifier {
   // ============ LOCATION MANAGEMENT ============
 
   Future<void> getCurrentLocation({bool notify = true}) async {
-    if (_isLoading) return;
+    final operationKey = _generateCallerKey('getCurrentLocation');
 
-    // Only allow on mobile platforms
+    if (_isLoading) {
+      _storeFailureResponse(operationKey, null,
+          statusCode: 429,
+          errorCode: 'LOADING',
+          message: 'Location fetch already in progress',
+          responseCode: 'LOADING');
+      return;
+    }
+
     if (!Platform.isAndroid && !Platform.isIOS) {
+      _storeFailureResponse(operationKey, null,
+          statusCode: 400,
+          errorCode: 'UNSUPPORTED_PLATFORM',
+          message: 'Location only available on mobile platforms',
+          responseCode: 'UNSUPPORTED');
       return;
     }
 
     _setLoading(true);
 
     try {
-      // Check if location services are enabled
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        debugPrint('Location services are disabled');
+        _storeFailureResponse(operationKey, null,
+            statusCode: 400,
+            errorCode: 'SERVICES_DISABLED',
+            message: 'Location services are disabled',
+            responseCode: 'SERVICES_DISABLED');
         return;
       }
 
-      // Check permissions
       LocationPermission permission = await Geolocator.checkPermission();
 
       if (permission == LocationPermission.denied ||
@@ -766,28 +902,43 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
         if (permission == LocationPermission.denied ||
             permission == LocationPermission.deniedForever) {
-          debugPrint('Location permissions are denied');
+          _storeFailureResponse(operationKey, null,
+              statusCode: 403,
+              errorCode: 'PERMISSION_DENIED',
+              message: 'Location permissions are denied',
+              responseCode: 'PERMISSION_DENIED');
           return;
         }
       }
 
-      // Verify we have proper permission
       if (permission != LocationPermission.whileInUse &&
           permission != LocationPermission.always) {
+        _storeFailureResponse(operationKey, null,
+            statusCode: 403,
+            errorCode: 'INSUFFICIENT_PERMISSION',
+            message: 'Insufficient location permission',
+            responseCode: 'INSUFFICIENT_PERMISSION');
         return;
       }
 
-      // Get location with timeout
       _currentLocation = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       ).timeout(const Duration(seconds: 15));
 
-      debugPrint(
-          'Location obtained: ${_currentLocation?.latitude}, ${_currentLocation?.longitude}');
+      _storeSuccessResponse(operationKey, _currentLocation,
+          statusCode: 200, responseCode: 'SUCCESS');
     } on TimeoutException {
-      debugPrint('Location request timed out');
+      _storeFailureResponse(operationKey, null,
+          statusCode: 408,
+          errorCode: 'TIMEOUT',
+          message: 'Location request timed out',
+          responseCode: 'TIMEOUT');
     } catch (e) {
-      debugPrint('Location error: $e');
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'LOCATION_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
     } finally {
       _setLoading(false);
       if (notify) {
@@ -804,7 +955,17 @@ class SupplierChangeNotifier extends ChangeNotifier {
     int? organisationId,
     bool notify = true,
   }) async {
-    if (_isLoading || (!reset && !_hasMoreOrganisations)) return;
+    final operationKey = _generateCallerKey('fetchOrganisations',
+        suffix: '${ownerId ?? 0}_${organisationId ?? 0}_$_organisationsPage');
+
+    if (_isLoading || (!reset && !_hasMoreOrganisations)) {
+      _storeFailureResponse(operationKey, null,
+          statusCode: 429,
+          errorCode: 'LOADING_OR_END',
+          message: 'Already loading or no more organisations',
+          responseCode: 'RATE_LIMITED');
+      return;
+    }
 
     if (reset) {
       _organisations.clear();
@@ -822,7 +983,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
         _organisationsPerPage,
       );
 
-      if (results != null && results.isNotEmpty) {
+      if (results.isNotEmpty) {
         for (final org in results) {
           _organisations[org.id_provider_organisation] = org;
         }
@@ -834,8 +995,17 @@ class SupplierChangeNotifier extends ChangeNotifier {
       } else {
         _hasMoreOrganisations = false;
       }
+
+      _storeSuccessResponse(operationKey, results,
+          statusCode: 200,
+          responseCode: results.isEmpty ? 'NO_ORGANISATIONS' : 'SUCCESS');
     } catch (e, stackTrace) {
       _handleError('Failed to fetch organisations', e, stackTrace);
+      _storeFailureResponse(operationKey, e.toString(),
+          statusCode: 500,
+          errorCode: 'FETCH_ORGS_ERROR',
+          message: e.toString(),
+          responseCode: 'ERROR');
       rethrow;
     } finally {
       _setLoading(false);
@@ -888,7 +1058,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
   // ============ BATCH OPERATIONS ============
 
   Future<void> refreshAll({bool notify = true}) async {
-    // Invalidate all caches
+    final operationKey = _generateCallerKey('refreshAll');
+
     _clearAllCaches();
 
     await Future.wait([
@@ -896,18 +1067,27 @@ class SupplierChangeNotifier extends ChangeNotifier {
       fetchOrganisations(reset: true, notify: false),
     ]);
 
+    _storeSuccessResponse(operationKey, true,
+        statusCode: 200, responseCode: 'REFRESHED');
+
     if (notify) {
       _safeNotifyListeners();
     }
   }
 
   Future<void> prefetchSupplierDetails(List<int> supplierIds) async {
+    final operationKey = _generateCallerKey('prefetchSupplierDetails',
+        suffix: supplierIds.join(','));
+
     final missingIds =
         supplierIds.where((id) => _getCachedSupplier(id) == null).toList();
 
-    if (missingIds.isEmpty) return;
+    if (missingIds.isEmpty) {
+      _storeSuccessResponse(operationKey, true,
+          statusCode: 200, responseCode: 'ALL_CACHED');
+      return;
+    }
 
-    // Prefetch in batches of 10 to avoid overwhelming
     const batchSize = 10;
     for (var i = 0; i < missingIds.length; i += batchSize) {
       final end = (i + batchSize) < missingIds.length
@@ -916,6 +1096,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
       final batch = missingIds.sublist(i, end);
       await getSuppliersByIds(batch);
     }
+
+    _storeSuccessResponse(operationKey, true,
+        statusCode: 200, responseCode: 'PREFETCHED');
   }
 
   // ============ STATE RESET ============
@@ -1022,63 +1205,3 @@ class SupplierFilter {
         isActive,
       );
 }
-
-// ============ USAGE EXAMPLE ============
-
-/*
-// How to use in your app:
-
-class MyWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<SupplierChangeNotifier>(
-      builder: (context, notifier, child) {
-        return Column(
-          children: [
-            // Display cache stats for debugging
-            if (kDebugMode)
-              Text('Cache hit rate: ${(notifier.getCacheStats().hitRate * 100).toStringAsFixed(1)}%'),
-            
-            Expanded(
-              child: ListView.builder(
-                itemCount: notifier.filteredSuppliers.length,
-                itemBuilder: (context, index) {
-                  final supplier = notifier.filteredSuppliers[index];
-                  return ListTile(
-                    title: Text(supplier.providerName),
-                    onTap: () async {
-                      // This will use cache if available
-                      final detailed = await notifier.getSupplierById(supplier.idProductProvider);
-                      // Navigate to detail screen
-                    },
-                  );
-                },
-              ),
-            ),
-            
-            // Load more button
-            if (notifier.hasMoreSuppliers && !notifier.isLoading)
-              ElevatedButton(
-                onPressed: () => notifier.fetchSuppliers(),
-                child: Text('Load More'),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-// Prefetch data for a list of IDs
-await notifier.prefetchSupplierDetails([1, 2, 3, 4, 5]);
-
-// Force refresh a specific supplier
-final freshSupplier = await notifier.getSupplierById(123, forceRefresh: true);
-
-// Clear cache for a specific supplier after update
-notifier.invalidateCache(supplierId: 123);
-
-// Get cache statistics for debugging
-final stats = notifier.getCacheStats();
-print('Cache stats: ${stats.hits} hits, ${stats.misses} misses');
-*/

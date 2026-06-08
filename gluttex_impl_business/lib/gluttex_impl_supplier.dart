@@ -80,7 +80,7 @@ class SupplierServiceImpl extends SupplierService {
 
       // Get status info from storage service
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       if (responseData == null) {
         developer.log('No categories found', name: 'SupplierServiceImpl');
@@ -141,7 +141,7 @@ class SupplierServiceImpl extends SupplierService {
       );
 
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       developer.log('Add supplier result: $result',
           name: 'SupplierServiceImpl');
@@ -184,7 +184,7 @@ class SupplierServiceImpl extends SupplierService {
       );
 
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       developer.log('Delete result: $result', name: 'SupplierServiceImpl');
 
@@ -232,7 +232,7 @@ class SupplierServiceImpl extends SupplierService {
       );
 
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       developer.log('Update result: $result', name: 'SupplierServiceImpl');
 
@@ -275,7 +275,7 @@ class SupplierServiceImpl extends SupplierService {
       );
 
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       if (responseData == null) {
         developer.log('Supplier not found: $id', name: 'SupplierServiceImpl');
@@ -332,7 +332,7 @@ class SupplierServiceImpl extends SupplierService {
       final responseData = await storageService.getAll(url, callerKey: key);
 
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       if (responseData == null) {
         developer.log('No suppliers found for search',
@@ -400,7 +400,7 @@ class SupplierServiceImpl extends SupplierService {
       final responseData = await storageService.getAll(url, callerKey: key);
 
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       if (responseData == null) {
         developer.log('No suppliers found for location',
@@ -468,7 +468,7 @@ class SupplierServiceImpl extends SupplierService {
       final responseData = await storageService.getAll(url, callerKey: key);
 
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       if (responseData == null) {
         developer.log('No suppliers found', name: 'SupplierServiceImpl');
@@ -537,7 +537,7 @@ class SupplierServiceImpl extends SupplierService {
       final responseData = await storageService.getAll(url, callerKey: key);
 
       final statusCode = storageService.getStatusCode(key);
-      // final responseCode = storageService.getResponseCode(key);
+      final responseCode = storageService.getResponseCode(key);
 
       if (responseData == null) {
         developer.log('No organisations found', name: 'SupplierServiceImpl');

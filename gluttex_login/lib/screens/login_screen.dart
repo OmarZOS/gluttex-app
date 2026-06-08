@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_login/screens/registration_screen.dart';
@@ -32,6 +30,12 @@ class _LoginScreenState extends State<LoginScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _slideAnimation;
+
+  // Track the current operation key for response handling
+  String? _currentOperationKey;
+
+  // Flag to prevent navigation after dispose
+  bool _isNavigating = false;
 
   static const _animationDuration = Duration(milliseconds: 800);
   static const _buttonAnimationDuration = Duration(milliseconds: 300);
@@ -64,7 +68,9 @@ class _LoginScreenState extends State<LoginScreen>
 
     // Start animations after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _animationController.forward();
+      if (mounted) {
+        _animationController.forward();
+      }
     });
   }
 
@@ -77,95 +83,211 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _submit() async {
-    if (_formKey.currentState == null || !_formKey.currentState!.validate())
+    if (_formKey.currentState == null || !_formKey.currentState!.validate()) {
       return;
+    }
+
+    if (_isNavigating) return;
 
     _setLoading(true);
     FocusScope.of(context).unfocus();
 
-    try {
-      await context.read<AppUserNotifier>().signInWithUsernameAndPassword(
-            _usernameController.text.trim(),
-            _passwordController.text,
-          );
+    // Generate unique key for this login attempt
+    _currentOperationKey = 'login_${DateTime.now().millisecondsSinceEpoch}';
 
-      // _showSuccessMessage();
-      _navigateToHome();
-    } on GluttexException catch (error) {
-      _handleError(error);
+    try {
+      final notifier = context.read<AppUserNotifier>();
+
+      final success = await notifier.signInWithUsernameAndPassword(
+        _usernameController.text.trim(),
+        _passwordController.text,
+        callerKey: _currentOperationKey,
+      );
+
+      if (!mounted) return;
+
+      if (success) {
+        // Get the stored response for the message
+        final response = notifier.getResponse(_currentOperationKey!);
+
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: response?.statusCode ?? 200,
+          responseCode: response?.responseCode ?? 'LOGIN_SUCCESS',
+          finalMessage: AppLocalizations.of(context)!.successfullLoginMsg,
+        );
+
+        // Navigate after a short delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted && !_isNavigating) {
+            _navigateToHome();
+          }
+        });
+      } else {
+        // Get the error response
+        final response = notifier.getResponse(_currentOperationKey!);
+
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: response?.statusCode ?? 401,
+          responseCode: response?.responseCode ?? 'LOGIN_FAILED',
+          finalMessage:
+              response?.message ?? AppLocalizations.of(context)!.failedLogin,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar('${AppLocalizations.of(context)!.failedLogin} $e');
+      }
     } finally {
-      _setLoading(false);
+      if (mounted) {
+        _setLoading(false);
+      }
     }
   }
 
   Future<void> _loginAsGuest() async {
+    if (_isNavigating) return;
+
     _setLoading(true);
+    _currentOperationKey =
+        'guest_login_${DateTime.now().millisecondsSinceEpoch}';
 
     try {
-      await context.read<AppUserNotifier>().signInAsGuest();
-      _navigateToHome();
+      final notifier = context.read<AppUserNotifier>();
+
+      await notifier.signInAsGuest(callerKey: _currentOperationKey);
+
+      if (!mounted) return;
+
+      final response = notifier.getResponse(_currentOperationKey!);
+
+      if (response != null && response.isSuccess) {
+        ResponseHandler.handleNotifierResponse(
+          context: context,
+          callerKey: _currentOperationKey!,
+          notifier: notifier,
+          customSuccessMessage:
+              AppLocalizations.of(context)!.continueAsGuestText,
+        );
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted && !_isNavigating) {
+            _navigateToHome();
+          }
+        });
+      } else {
+        ResponseHandler.handleNotifierResponse(
+          context: context,
+          callerKey: _currentOperationKey!,
+          notifier: notifier,
+          customErrorMessage: AppLocalizations.of(context)!.failedLogin,
+        );
+      }
     } on GluttexException catch (error) {
-      _handleError(error);
+      if (mounted) {
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: error.statusCode ?? 300,
+          responseCode: error.message,
+          finalMessage: error.message,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar('${AppLocalizations.of(context)!.failedLogin} $e');
+      }
     } finally {
-      _setLoading(false);
+      if (mounted) {
+        _setLoading(false);
+      }
     }
   }
 
   Future<void> _loginWithGoogle() async {
+    if (_isNavigating) return;
+
     _setLoading(true);
     FocusScope.of(context).unfocus();
+    _currentOperationKey =
+        'google_login_${DateTime.now().millisecondsSinceEpoch}';
 
     try {
       final result = await GoogleLoginManager.loginWithGoogle(context: context);
 
-      if (result != null) {
-        await context.read<AppUserNotifier>().signInWithGoogle(result);
+      if (result != null && mounted) {
+        final notifier = context.read<AppUserNotifier>();
 
-        await Future.delayed(const Duration(milliseconds: 500));
+        await notifier.signInWithGoogle(
+          result,
+          callerKey: _currentOperationKey,
+        );
 
-        final authProvider = context.read<AppUserNotifier>();
-        if (authProvider.isAuthenticated && mounted) {
-          _navigateToHome();
+        if (!mounted) return;
+
+        final response = notifier.getResponse(_currentOperationKey!);
+
+        if (response != null && response.isSuccess) {
+          ResponseHandler.handleNotifierResponse(
+            context: context,
+            callerKey: _currentOperationKey!,
+            notifier: notifier,
+            customSuccessMessage: 'Google sign in successful',
+          );
+
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted && !_isNavigating) {
+              _navigateToHome();
+            }
+          });
         } else {
-          throw Exception(AppLocalizations.of(context)!.failedAuthAfterSignIn);
+          ResponseHandler.handleNotifierResponse(
+            context: context,
+            callerKey: _currentOperationKey!,
+            notifier: notifier,
+            customErrorMessage:
+                AppLocalizations.of(context)!.failedAuthAfterSignIn,
+          );
         }
       }
     } on TimeoutException {
-      _showSnackBar(AppLocalizations.of(context)!.loginTimeoutMsg);
+      if (mounted) {
+        _showSnackBar(AppLocalizations.of(context)!.loginTimeoutMsg);
+      }
     } catch (e) {
-      _showSnackBar('${AppLocalizations.of(context)!.failedLogin} $e');
+      if (mounted) {
+        _showSnackBar('${AppLocalizations.of(context)!.failedLogin} $e');
+      }
     } finally {
-      _setLoading(false);
+      if (mounted) {
+        _setLoading(false);
+      }
     }
   }
 
   void _setLoading(bool loading) {
-    if (mounted) setState(() => _isLoading = loading);
-  }
-
-  void _showSuccessMessage() {
-    ResponseHandler.handleResponse(
-      context: context,
-      statusCode: 200,
-      responseCode: "SUCCESSFULL_LOGIN",
-      finalMessage: AppLocalizations.of(context)!.successfullLoginMsg,
-    );
+    if (mounted) {
+      setState(() => _isLoading = loading);
+    }
   }
 
   void _navigateToHome() {
-    globalNavigatorKey.currentState?.pushNamedAndRemoveUntil(
-      AppRoutes.home,
-      (route) => false,
-    );
-  }
+    if (_isNavigating) return;
+    _isNavigating = true;
 
-  void _handleError(GluttexException error) {
-    ResponseHandler.handleResponse(
-      context: context,
-      statusCode: error.statusCode ?? 300,
-      responseCode: error.message,
-      finalMessage: error.message,
-    );
+    debugPrint('=== NAVIGATION DEBUG ===');
+    debugPrint('Navigating to home screen');
+    debugPrint('Current context: ${context.runtimeType}');
+
+    if (mounted) {
+      // Use the current context's navigator to pop until home
+      Navigator.of(context).popUntil((route) {
+        debugPrint('Route in stack: ${route.settings.name}');
+        return route.settings.name == AppRoutes.home;
+      });
+    }
+
+    debugPrint('=== END NAVIGATION DEBUG ===');
   }
 
   void _showSnackBar(String message) {
@@ -185,6 +307,8 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   void _navigateToRegistration() {
+    if (_isNavigating) return;
+
     Navigator.push(
       context,
       PageRouteBuilder(
@@ -323,9 +447,6 @@ class _LoginScreenState extends State<LoginScreen>
 
               // Login Button
               _buildLoginButton(colors),
-              // const SizedBox(height: 20),
-              // // Guest login section
-              // _buildGuestLoginSection(colors),
             ],
           ),
         ),
@@ -355,6 +476,12 @@ class _LoginScreenState extends State<LoginScreen>
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       textInputAction: textInputAction,
+      validator: (value) {
+        if (value?.isEmpty ?? true) {
+          return AppLocalizations.of(context)!.pleaseInputUsernameMsg;
+        }
+        return null;
+      },
     );
   }
 
@@ -402,7 +529,6 @@ class _LoginScreenState extends State<LoginScreen>
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {
-          // TODO: Implement forgot password
           _showSnackBar(AppLocalizations.of(context)!.comingSoon);
         },
         style: TextButton.styleFrom(
@@ -452,48 +578,13 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildGuestLoginSection(ColorScheme colors) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: Column(
-        children: [
-          _buildDivider(),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: _isLoading ? null : _loginAsGuest,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                side: BorderSide(color: colors.primary.withOpacity(0.7)),
-                backgroundColor: colors.surface,
-              ),
-              child: Text(
-                AppLocalizations.of(context)!.continueAsGuestText,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: colors.primary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-          // const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSocialLoginSection() {
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Column(
         children: [
-          // _buildDivider(),
-          // const SizedBox(height: 24),
+          _buildDivider(),
+          const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context)!.signInWithText,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -537,10 +628,16 @@ class _LoginScreenState extends State<LoginScreen>
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: _buildSocialLoginTile(
-        icon: FontAwesomeIcons.google,
-        title: AppLocalizations.of(context)!.google,
-        onPressed: _loginWithGoogle,
+      child: Column(
+        children: [
+          _buildSocialLoginTile(
+            icon: FontAwesomeIcons.google,
+            title: AppLocalizations.of(context)!.google,
+            onPressed: _loginWithGoogle,
+          ),
+          const SizedBox(height: 12),
+          _buildGuestLoginTile(),
+        ],
       ),
     );
   }
@@ -581,34 +678,40 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  // Widget _buildSocialLoginButton({
-  //   required IconData icon,
-  //   required Color color,
-  //   required VoidCallback onPressed,
-  // }) {
-  //   final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildGuestLoginTile() {
+    final colors = Theme.of(context).colorScheme;
 
-  //   return AnimatedContainer(
-  //     duration: _buttonAnimationDuration,
-  //     child: IconButton(
-  //       icon: FaIcon(icon, size: 24),
-  //       onPressed: _isLoading ? null : onPressed,
-  //       style: IconButton.styleFrom(
-  //         backgroundColor: isDarkMode
-  //             ? Colors.grey[800]!.withOpacity(0.3)
-  //             : Colors.grey[100],
-  //         padding: const EdgeInsets.all(16),
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(12),
-  //           side: BorderSide(
-  //             color: Theme.of(context).dividerColor.withOpacity(0.3),
-  //             width: 1,
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withOpacity(0.2),
+        ),
+      ),
+      child: ListTile(
+        leading: Icon(Icons.person_outline, color: colors.primary),
+        title: Text(
+          AppLocalizations.of(context)!.continueAsGuestText,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: colors.primary,
+          ),
+        ),
+        trailing: _isLoading
+            ? SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                ),
+              )
+            : Icon(Icons.chevron_right_rounded, color: colors.primary),
+        onTap: _isLoading ? null : _loginAsGuest,
+      ),
+    );
+  }
 
   Widget _buildRegistrationPrompt(ThemeData theme, ColorScheme colors) {
     return FadeTransition(

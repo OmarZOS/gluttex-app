@@ -5317,4 +5317,367 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get guestLocation => 'موقع المتجر';
+
+  @override
+  String get something_went_wrong => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get auth_required => 'مطلوب مصادقة. يرجى تسجيل الدخول.';
+
+  @override
+  String get auth_decode_failed => 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.';
+
+  @override
+  String get auth_unauthorized => 'ليس لديك إذن لتنفيذ هذا الإجراء.';
+
+  @override
+  String get user_auth_creation_failed => 'فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get user_net_failed => 'خطأ في الشبكة. يرجى التحقق من اتصالك.';
+
+  @override
+  String get appuser_not_exists => 'المستخدم غير موجود.';
+
+  @override
+  String get appuser_already_exists => 'المستخدم موجود بالفعل.';
+
+  @override
+  String get appusertype_not_exists => 'نوع المستخدم غير موجود.';
+
+  @override
+  String get user_fetch_not_found => 'المستخدم غير موجود.';
+
+  @override
+  String get user_insert_failed => 'فشل إنشاء المستخدم.';
+
+  @override
+  String get user_update_failed => 'فشل تحديث معلومات المستخدم.';
+
+  @override
+  String get user_delete_failed => 'فشل حذف المستخدم.';
+
+  @override
+  String get person_not_exists => 'الشخص غير موجود.';
+
+  @override
+  String get person_insert_failed => 'فشل إنشاء سجل الشخص.';
+
+  @override
+  String get person_update_failed => 'فشل تحديث معلومات الشخص.';
+
+  @override
+  String get person_delete_failed => 'فشل حذف سجل الشخص.';
+
+  @override
+  String get person_detail_insert_failed => 'فشل إنشاء تفاصيل الشخص.';
+
+  @override
+  String get person_details_not_found => 'تفاصيل الشخص غير موجودة.';
+
+  @override
+  String get person_fetch_not_found => 'الشخص غير موجود.';
+
+  @override
+  String get product_not_exists => 'المنتج غير موجود.';
+
+  @override
+  String get product_already_exists => 'المنتج موجود بالفعل.';
+
+  @override
+  String get product_category_not_exists => 'فئة المنتج غير موجودة.';
+
+  @override
+  String get product_quantity_not_enough => 'كمية المنتج غير كافية.';
+
+  @override
+  String get product_quantity_restore_failed => 'فشل استعادة كمية المنتج.';
+
+  @override
+  String get product_supplier_not_exists => 'مورد المنتج غير موجود.';
+
+  @override
+  String get product_supplier_already_exists => 'مورد المنتج موجود بالفعل.';
+
+  @override
+  String get product_fetch_not_found => 'المنتج غير موجود.';
+
+  @override
+  String get product_insert_failed => 'فشل إنشاء المنتج.';
+
+  @override
+  String get product_update_failed => 'فشل تحديث المنتج.';
+
+  @override
+  String get product_delete_failed => 'فشل حذف المنتج.';
+
+  @override
+  String get product_search_not_found => 'لم يتم العثور على منتجات.';
+
+  @override
+  String get product_image_not_found => 'صورة المنتج غير موجودة.';
+
+  @override
+  String get supplier_not_exists => 'المورد غير موجود.';
+
+  @override
+  String get supplier_type_not_exists => 'نوع المورد غير موجود.';
+
+  @override
+  String get supplier_fetch_not_found => 'المورد غير موجود.';
+
+  @override
+  String get supplier_insert_failed => 'فشل إنشاء المورد.';
+
+  @override
+  String get supplier_update_failed => 'فشل تحديث المورد.';
+
+  @override
+  String get supplier_delete_failed => 'فشل حذف المورد.';
+
+  @override
+  String get organisation_not_found => 'المؤسسة غير موجودة.';
+
+  @override
+  String get organisation_name_used => 'اسم المؤسسة مستخدم بالفعل.';
+
+  @override
+  String get org_already_exists => 'المؤسسة موجودة بالفعل.';
+
+  @override
+  String get org_insert_failed => 'فشل إنشاء المؤسسة.';
+
+  @override
+  String get org_update_failed => 'فشل تحديث المؤسسة.';
+
+  @override
+  String get org_delete_failed => 'فشل حذف المؤسسة.';
+
+  @override
+  String get recipe_not_exists => 'الوصفة غير موجودة.';
+
+  @override
+  String get recipe_update_failed => 'فشل تحديث الوصفة.';
+
+  @override
+  String get recipe_delete_failed => 'فشل حذف الوصفة.';
+
+  @override
+  String get recipe_fetch_not_found => 'الوصفة غير موجودة.';
+
+  @override
+  String get recipe_category_not_exists => 'فئة الوصفة غير موجودة.';
+
+  @override
+  String get recipe_already_exists => 'الوصفة موجودة بالفعل.';
+
+  @override
+  String get recipe_insert_failed => 'فشل إنشاء الوصفة.';
+
+  @override
+  String get recipe_image_not_found => 'صورة الوصفة غير موجودة.';
+
+  @override
+  String get recipe_search_not_found => 'لم يتم العثور على وصفات.';
+
+  @override
+  String get ingredient_not_exists => 'المكون غير موجود.';
+
+  @override
+  String get ingredient_already_exists => 'المكون موجود بالفعل.';
+
+  @override
+  String get ingredient_insert_failed => 'فشل إنشاء المكون.';
+
+  @override
+  String get ingredient_update_failed => 'فشل تحديث المكون.';
+
+  @override
+  String get ingredient_delete_failed => 'فشل حذف المكون.';
+
+  @override
+  String get order_not_exists => 'الطلب غير موجود.';
+
+  @override
+  String get order_fetch_not_found => 'الطلب غير موجود.';
+
+  @override
+  String get order_insert_failed => 'فشل إنشاء الطلب.';
+
+  @override
+  String get order_insert_conflict => 'تعذر إنشاء الطلب بسبب تعارض.';
+
+  @override
+  String get order_update_failed => 'فشل تحديث الطلب.';
+
+  @override
+  String get order_delete_failed => 'فشل حذف الطلب.';
+
+  @override
+  String get invalid_order_status => 'تغيير حالة الطلب غير صالح.';
+
+  @override
+  String get order_items_delete_failed => 'فشل إزالة عناصر الطلب.';
+
+  @override
+  String get order_item_insert_failed => 'فشل إضافة عنصر إلى الطلب.';
+
+  @override
+  String get cart_not_exists => 'سلة التسوق غير موجودة.';
+
+  @override
+  String get cart_insert_failed => 'فشل إنشاء سلة التسوق.';
+
+  @override
+  String get delivery_not_exists => 'التوصيل غير موجود.';
+
+  @override
+  String get delivery_update_failed => 'فشل تحديث التوصيل.';
+
+  @override
+  String get delivery_cannot_be_updated => 'لا يمكن تحديث التوصيل في حالته الحالية.';
+
+  @override
+  String get delivery_bulk_update_failed => 'فشل تحديث عمليات التوصيل.';
+
+  @override
+  String get delivery_delete_failed => 'فشل حذف التوصيل.';
+
+  @override
+  String get delivery_bulk_delete_failed => 'فشل حذف عمليات التوصيل.';
+
+  @override
+  String get delivery_insert_failed => 'فشل إنشاء التوصيل.';
+
+  @override
+  String get delivery_validation_failed => 'معلومات التوصيل غير صالحة.';
+
+  @override
+  String get service_not_found => 'الخدمة غير موجودة.';
+
+  @override
+  String get service_insert_conflict => 'الخدمة موجودة بالفعل.';
+
+  @override
+  String get service_category_not_found => 'فئة الخدمة غير موجودة.';
+
+  @override
+  String get rule_already_exists => 'تخصيص الموظف موجود بالفعل.';
+
+  @override
+  String get rule_not_exists => 'تخصيص الموظف غير موجود.';
+
+  @override
+  String get rule_insert_failed => 'فشل إنشاء تخصيص الموظف.';
+
+  @override
+  String get rule_update_failed => 'فشل تحديث تخصيص الموظف.';
+
+  @override
+  String get rule_delete_failed => 'فشل حذف تخصيص الموظف.';
+
+  @override
+  String get rule_invalid_status => 'حالة تخصيص الموظف غير صالحة.';
+
+  @override
+  String get notification_not_exists => 'الإشعار غير موجود.';
+
+  @override
+  String get notification_already_exists => 'الإشعار موجود بالفعل.';
+
+  @override
+  String get notification_insert_failed => 'فشل إنشاء الإشعار.';
+
+  @override
+  String get notification_update_failed => 'فشل تحديث الإشعار.';
+
+  @override
+  String get notification_delete_failed => 'فشل حذف الإشعار.';
+
+  @override
+  String get notification_bulk_insert_failed => 'فشل إنشاء الإشعارات.';
+
+  @override
+  String get location_not_exists => 'الموقع غير موجود.';
+
+  @override
+  String get location_update_failed => 'فشل تحديث الموقع.';
+
+  @override
+  String get location_fetch_not_found => 'الموقع غير موجود.';
+
+  @override
+  String get location_insert_failed => 'فشل إنشاء الموقع.';
+
+  @override
+  String get location_delete_failed => 'فشل حذف الموقع.';
+
+  @override
+  String get address_not_found => 'العنوان غير موجود.';
+
+  @override
+  String get payment_failed => 'فشل معالجة الدفع.';
+
+  @override
+  String get deposit_creation_failed => 'فشل إنشاء الدفعة المقدمة.';
+
+  @override
+  String get image_insert_failed => 'فشل رفع الصورة.';
+
+  @override
+  String get image_update_failed => 'فشل تحديث الصورة.';
+
+  @override
+  String get failed => 'فشلت العملية.';
+
+  @override
+  String get not_found => 'غير موجود.';
+
+  @override
+  String get network_timeout => 'انتهت مهلة الشبكة. يرجى التحقق من اتصالك.';
+
+  @override
+  String get validation_error => 'يرجى التحقق من إدخالكات والمحاولة مرة أخرى.';
+
+  @override
+  String get rate_limited => 'عدد الطلبات كبير جداً. يرجى الانتظار قليلاً.';
+
+  @override
+  String get permission_denied => 'تم رفض الإذن.';
+
+  @override
+  String get client_not_exists => 'العميل غير موجود.';
+
+  @override
+  String get created_successfully => 'تم الإنشاء بنجاح!';
+
+  @override
+  String get bad_request => 'طلب غير صالح. يرجى التحقق من إدخالكات.';
+
+  @override
+  String get unauthorized => 'يرجى تسجيل الدخول للمتابعة.';
+
+  @override
+  String get forbidden => 'ليس لديك إذن للوصول إلى هذا المورد.';
+
+  @override
+  String get conflict => 'تعارض في المورد. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get gone => 'هذا المورد لم يعد متاحاً.';
+
+  @override
+  String get bad_gateway => 'الخدمة غير متاحة مؤقتاً. يرجى المحاولة مرة أخرى لاحقاً.';
+
+  @override
+  String get service_unavailable => 'الخدمة غير متاحة مؤقتاً.';
+
+  @override
+  String get gateway_timeout => 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get network_authentication_required => 'مطلوب مصادقة الشبكة.';
+
+  @override
+  String get no_response_data => 'لا تتوفر بيانات الاستجابة.';
 }
