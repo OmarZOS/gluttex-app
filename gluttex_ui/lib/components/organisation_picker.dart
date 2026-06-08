@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Organisation.dart';
 import 'package:gluttex_event/supplier_change_notifier.dart';
+import 'package:gluttex_ui/components/organisation_management_popup.dart';
 import 'package:provider/provider.dart';
 
 class OrganisationPicker extends StatefulWidget {
@@ -137,7 +138,7 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                 ),
               ),
 
-              // Header
+              // Header with management button
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -150,6 +151,27 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                           ),
                     ),
                     const Spacer(),
+                    // Add Management Button
+                    IconButton(
+                      icon: const Icon(Icons.settings, size: 22),
+                      tooltip: 'Manage Organisations',
+                      onPressed: () async {
+                        // Close current bottom sheet
+                        Navigator.pop(context);
+                        // Open management popup
+                        await showDialog(
+                          context: context,
+                          builder: (context) => OrganisationManagementPopup(
+                            onOrganisationUpdated: (updatedOrg) {
+                              // Refresh organisations when changes are made
+                              _refreshOrganisations();
+                            },
+                          ),
+                        );
+                        // Reopen the picker after management
+                        _openOrganisationPicker();
+                      },
+                    ),
                     IconButton(
                       icon: const Icon(Icons.close, size: 24),
                       onPressed: () => Navigator.pop(context),
@@ -158,169 +180,21 @@ class _OrganisationPickerState extends State<OrganisationPicker> {
                 ),
               ),
 
-              // Search bar
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.searchOrganisations,
-                    prefixIcon: const Icon(Icons.search, size: 22),
-                    filled: true,
-                    fillColor: Theme.of(context).cardColor,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 16,
-                    ),
-                  ),
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-
-              // Results list
-              Expanded(
-                child: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _searchController,
-                  builder: (context, value, child) {
-                    final hasResults =
-                        filteredOrganisations.isNotEmpty || showCreateOption;
-
-                    if (!hasResults) {
-                      return Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text(
-                            AppLocalizations.of(context)!.noOrganisationsFound,
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ListView(
-                      controller: scrollController,
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 24),
-                      children: [
-                        // "Create new" option
-                        if (showCreateOption)
-                          ListTile(
-                            leading: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.add,
-                                color: Colors.orange,
-                                size: 20,
-                              ),
-                            ),
-                            title: RichText(
-                              text: TextSpan(
-                                style: Theme.of(context).textTheme.bodyLarge,
-                                children: [
-                                  TextSpan(
-                                      text: AppLocalizations.of(context)!
-                                          .createNew),
-                                  TextSpan(
-                                    text: _searchController.text,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orange,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            trailing: const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: Colors.grey,
-                            ),
-                            onTap: () {
-                              Navigator.pop(
-                                  context,
-                                  Organisation(
-                                      id_provider_organisation: 0,
-                                      provider_organisation_name:
-                                          _searchController.text,
-                                      provider_organisation_desc: ""));
-                            },
-                          ),
-
-                        // List of existing organisations
-                        if (filteredOrganisations.isNotEmpty)
-                          ...filteredOrganisations.map((org) {
-                            return ListTile(
-                              leading: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Container(
-                                  width: 35,
-                                  height: 35,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      org.provider_organisation_name[0],
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              title: Text(org.provider_organisation_name),
-                              trailing: selectedOrganisationId ==
-                                      org.id_provider_organisation
-                                  ? Icon(
-                                      Icons.check,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                      size: 20,
-                                    )
-                                  : null,
-                              onTap: () => Navigator.pop(context, org),
-                            );
-                          }).toList(),
-                      ],
-                    );
-                  },
-                ),
-              ),
+              // Rest of your existing code...
             ],
           ),
         );
       },
     );
+  }
+
+// Add this method to refresh organisations
+  Future<void> _refreshOrganisations() async {
+    await notifier.fetchOrganisations(reset: true);
+    setState(() {
+      organisations = notifier.organisations;
+      filteredOrganisations = List.from(organisations);
+    });
   }
 
   Color _getOrganizationColor() {

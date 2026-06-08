@@ -171,7 +171,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
                         return loc.pleaseInputvalidnumberMsg;
                       }
                       if (number <= 0) {
-                        return loc.pleaseInputvalidnumberMsg;
+                        return loc.amountMustBeGreaterThanZero;
                       }
                       return null;
                     },
