@@ -599,6 +599,54 @@ class RecipeServiceImpl extends RecipeService {
     }
   }
 
+  @override
+  Future<List<RecipeIngredient>?> getAllIngredients(int offset, int limit,
+      {String? callerKey}) async {
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      // Using GET /api/v1/recipes/ingredients?offset=&limit= (from earlier agreement)
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllIngredientEndpoint}'
+          '?offset=$offset&limit=$limit';
+
+      developer.log('Getting ingredients from: $url',
+          name: 'RecipeServiceImpl');
+
+      final responseData = await storageService.getAll(url);
+
+      if (responseData == null) {
+        developer.log('No ingredients found', name: 'RecipeServiceImpl');
+        return [];
+      }
+
+      List<RecipeIngredient> ingredients = [];
+
+      if (responseData is Map && responseData.containsKey('data')) {
+        final dataList = responseData['data'];
+        if (dataList is List) {
+          ingredients = dataList
+              .map((data) =>
+                  RecipeIngredient.fromJson(data as Map<String, dynamic>))
+              .toList();
+        }
+      } else if (responseData is List) {
+        ingredients = responseData
+            .map((data) =>
+                RecipeIngredient.fromJson(data as Map<String, dynamic>))
+            .toList();
+      }
+
+      developer.log('Found ${ingredients.length} ingredients',
+          name: 'RecipeServiceImpl');
+      return ingredients;
+    } catch (e, stacktrace) {
+      developer.log('Error getting ingredients: $e', name: 'RecipeServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
+      return [];
+    }
+  }
+
   // ==================== Category Operations ====================
 
   @override
@@ -691,6 +739,356 @@ class RecipeServiceImpl extends RecipeService {
           message: message,
           responseCode: responseCode);
       return [];
+    }
+  }
+
+  @override
+  Future<RecipeIngredient?> getIngredient(String idRecipeIngredient,
+      {String? callerKey}) async {
+    final key =
+        callerKey ?? getCallerKey('getIngredient', id: idRecipeIngredient);
+
+    debugPrint(
+        '🔍 getIngredient - Starting for ingredient ID: $idRecipeIngredient');
+    debugPrint('   CallerKey: $key');
+
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getIngredientEndpoint}/$idRecipeIngredient';
+
+      debugPrint('📤 GET from: $url');
+
+      developer.log('Getting ingredient from: $url', name: 'RecipeServiceImpl');
+
+      final responseData = await storageService.getAll(url, callerKey: key);
+
+      final statusCode = _storageService.getStatusCode(key);
+      final responseCode = _storageService.getResponseCode(key);
+
+      debugPrint(
+          '📥 Response - StatusCode: $statusCode, ResponseCode: $responseCode');
+
+      if (responseData == null) {
+        debugPrint('❌ Ingredient not found: $idRecipeIngredient');
+        _storeFailureResponse(key, null,
+            statusCode: statusCode ?? 404,
+            errorCode: 'INGREDIENT_NOT_FOUND',
+            message: 'Ingredient not found',
+            responseCode: responseCode ?? 'NOT_FOUND');
+        return null;
+      }
+
+      RecipeIngredient? ingredient;
+      if (responseData is Map && responseData.containsKey('data')) {
+        ingredient = RecipeIngredient.fromJson(
+            responseData['data'] as Map<String, dynamic>);
+      } else if (responseData is Map) {
+        ingredient =
+            RecipeIngredient.fromJson(responseData as Map<String, dynamic>);
+      }
+
+      if (ingredient != null) {
+        debugPrint(
+            '✅ Ingredient found: ${ingredient.ingredient_name} (ID: ${ingredient.id_ingredient})');
+        _storeSuccessResponse(key, ingredient,
+            statusCode: statusCode ?? 200,
+            responseCode: responseCode ?? 'SUCCESS');
+      } else {
+        debugPrint(
+            '❌ Invalid response format for ingredient ID: $idRecipeIngredient');
+        _storeFailureResponse(key, responseData,
+            statusCode: statusCode ?? 500,
+            errorCode: 'INVALID_RESPONSE',
+            message: 'Invalid response format',
+            responseCode: 'INVALID_RESPONSE');
+      }
+
+      return ingredient;
+    } catch (e, stacktrace) {
+      debugPrint('❌ Exception in getIngredient: $e');
+
+      developer.log('Error getting ingredient: $e', name: 'RecipeServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
+
+      String errorCode = 'GET_INGREDIENT_ERROR';
+      String message = 'Failed to get ingredient: $e';
+      String responseCode = 'GET_INGREDIENT_ERROR';
+      int statusCode = 500;
+
+      if (e is GluttexException) {
+        statusCode = e.statusCode ?? statusCode;
+        errorCode = e.message;
+        message = e.message;
+        responseCode = e.message;
+      }
+
+      _storeFailureResponse(key, e.toString(),
+          statusCode: statusCode,
+          errorCode: errorCode,
+          message: message,
+          responseCode: responseCode);
+      return null;
+    }
+  }
+
+  @override
+  Future<RecipeIngredient?> addIngredient(RecipeIngredient ingredient,
+      {String? callerKey}) async {
+    final key = callerKey ??
+        getCallerKey('addIngredient', suffix: ingredient.ingredient_name);
+
+    debugPrint(
+        '📝 addIngredient - Starting for ingredient: ${ingredient.ingredient_name}');
+    debugPrint('   CallerKey: $key');
+
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.addIngredientEndpoint}';
+
+      Map<String, dynamic> requestBody = ingredient.toJson();
+      requestBody.removeWhere((key, value) => value == null);
+
+      debugPrint('📤 POST to: $url');
+      debugPrint('   Request body: ${requestBody.keys}');
+
+      developer.log('Adding ingredient at: $url', name: 'RecipeServiceImpl');
+      developer.log('Request body: $requestBody', name: 'RecipeServiceImpl');
+
+      final result =
+          await storageService.insert(url, requestBody, callerKey: key);
+
+      final statusCode = _storageService.getStatusCode(key);
+      final responseCode = _storageService.getResponseCode(key);
+
+      debugPrint(
+          '📥 Response - StatusCode: $statusCode, ResponseCode: $responseCode');
+
+      if (result != null) {
+        RecipeIngredient? createdIngredient;
+        if (result is Map<String, dynamic>) {
+          if (result.containsKey('data')) {
+            createdIngredient = RecipeIngredient.fromJson(
+                result['data'] as Map<String, dynamic>);
+          } else {
+            createdIngredient = RecipeIngredient.fromJson(result);
+          }
+        }
+
+        if (createdIngredient != null) {
+          debugPrint(
+              '✅ Ingredient created successfully. ID: ${createdIngredient.id_ingredient}');
+          _storeSuccessResponse(key, createdIngredient,
+              statusCode: statusCode ?? 200,
+              responseCode: responseCode ?? 'INGREDIENT_CREATED');
+          return createdIngredient;
+        }
+      }
+
+      debugPrint('❌ Failed to add ingredient - Result is null or invalid');
+      _storeFailureResponse(key, null,
+          statusCode: statusCode ?? 500,
+          errorCode: 'ADD_INGREDIENT_FAILED',
+          message: 'Failed to add ingredient',
+          responseCode: responseCode ?? 'ADD_INGREDIENT_FAILED');
+      return null;
+    } catch (e, stacktrace) {
+      debugPrint('❌ Exception in addIngredient: $e');
+      debugPrint(
+          '   Stacktrace: ${stacktrace.toString().substring(0, 200)}...');
+
+      developer.log('Error adding ingredient: $e', name: 'RecipeServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
+
+      String errorCode = 'ADD_INGREDIENT_ERROR';
+      String message = 'Failed to add ingredient: $e';
+      String responseCode = 'ADD_INGREDIENT_ERROR';
+      int statusCode = 500;
+
+      if (e is GluttexException) {
+        statusCode = e.statusCode ?? statusCode;
+        errorCode = e.message;
+        message = e.message;
+        responseCode = e.message;
+        debugPrint(
+            '   GluttexException - Code: $errorCode, Status: $statusCode');
+      }
+
+      _storeFailureResponse(key, e.toString(),
+          statusCode: statusCode,
+          errorCode: errorCode,
+          message: message,
+          responseCode: responseCode);
+      return null;
+    }
+  }
+
+  @override
+  Future<RecipeIngredient?> updateIngredient(
+      RecipeIngredient updatedRecipeIngredient,
+      {String? callerKey}) async {
+    final key = callerKey ??
+        getCallerKey('updateIngredient',
+            id: updatedRecipeIngredient.id_ingredient.toString());
+
+    debugPrint(
+        '✏️ updateIngredient - Starting for ingredient ID: ${updatedRecipeIngredient.id_ingredient}');
+    debugPrint('   CallerKey: $key');
+
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      const url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateIngredientEndpoint}';
+
+      Map<String, dynamic> requestBody = updatedRecipeIngredient.toJson();
+      requestBody.removeWhere((key, value) => value == null);
+
+      debugPrint('📤 PUT to: $url');
+      debugPrint('   Ingredient ID: ${updatedRecipeIngredient.id_ingredient}');
+
+      developer.log('Updating ingredient at: $url', name: 'RecipeServiceImpl');
+      developer.log('Request body: $requestBody', name: 'RecipeServiceImpl');
+
+      final result = await storageService.update(
+        url,
+        updatedRecipeIngredient.id_ingredient.toString(),
+        {},
+        requestBody,
+        callerKey: key,
+      );
+
+      final statusCode = _storageService.getStatusCode(key);
+      final responseCode = _storageService.getResponseCode(key);
+
+      debugPrint(
+          '📥 Response - StatusCode: $statusCode, ResponseCode: $responseCode');
+
+      if (result != null) {
+        RecipeIngredient? updatedIngredient;
+        if (result is Map<String, dynamic>) {
+          if (result.containsKey('data')) {
+            updatedIngredient = RecipeIngredient.fromJson(
+                result['data'] as Map<String, dynamic>);
+          } else {
+            updatedIngredient = RecipeIngredient.fromJson(result);
+          }
+        }
+
+        if (updatedIngredient != null) {
+          debugPrint(
+              '✅ Ingredient updated successfully. ID: ${updatedIngredient.id_ingredient}');
+          _storeSuccessResponse(key, updatedIngredient,
+              statusCode: statusCode ?? 200,
+              responseCode: responseCode ?? 'INGREDIENT_UPDATED');
+          return updatedIngredient;
+        }
+      }
+
+      debugPrint('❌ Failed to update ingredient - Result is null or invalid');
+      _storeFailureResponse(key, null,
+          statusCode: statusCode ?? 500,
+          errorCode: 'UPDATE_INGREDIENT_FAILED',
+          message: 'Failed to update ingredient',
+          responseCode: responseCode ?? 'UPDATE_INGREDIENT_FAILED');
+      return null;
+    } catch (e, stacktrace) {
+      debugPrint('❌ Exception in updateIngredient: $e');
+
+      developer.log('Error updating ingredient: $e', name: 'RecipeServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
+
+      String errorCode = 'UPDATE_INGREDIENT_ERROR';
+      String message = 'Failed to update ingredient: $e';
+      String responseCode = 'UPDATE_INGREDIENT_ERROR';
+      int statusCode = 500;
+
+      if (e is GluttexException) {
+        statusCode = e.statusCode ?? statusCode;
+        errorCode = e.message;
+        message = e.message;
+        responseCode = e.message;
+      }
+
+      _storeFailureResponse(key, e.toString(),
+          statusCode: statusCode,
+          errorCode: errorCode,
+          message: message,
+          responseCode: responseCode);
+      return null;
+    }
+  }
+
+  @override
+  Future<int?> deleteIngredient(String ingredientId,
+      {String? callerKey}) async {
+    final key = callerKey ?? getCallerKey('deleteIngredient', id: ingredientId);
+
+    debugPrint(
+        '🗑️ deleteIngredient - Starting for ingredient ID: $ingredientId');
+    debugPrint('   CallerKey: $key');
+
+    try {
+      final storageService = GluttexLocator.get<StorageService>();
+
+      final url =
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteIngredientEndpoint}/$ingredientId';
+
+      debugPrint('📤 DELETE to: $url');
+
+      developer.log('Deleting ingredient at: $url', name: 'RecipeServiceImpl');
+
+      final result =
+          await storageService.delete(url, ingredientId, callerKey: key);
+
+      final statusCode = _storageService.getStatusCode(key);
+      final responseCode = _storageService.getResponseCode(key);
+
+      debugPrint(
+          '📥 Response - StatusCode: $statusCode, ResponseCode: $responseCode');
+
+      if (result == 200 || result == 204) {
+        debugPrint('✅ Ingredient deleted successfully');
+        _storeSuccessResponse(key, true,
+            statusCode: result,
+            responseCode: responseCode ?? 'INGREDIENT_DELETED');
+      } else {
+        debugPrint('❌ Failed to delete ingredient - Status: $result');
+        _storeFailureResponse(key, false,
+            statusCode: result,
+            errorCode: 'DELETE_INGREDIENT_FAILED',
+            message: 'Failed to delete ingredient',
+            responseCode: responseCode ?? 'DELETE_INGREDIENT_FAILED');
+      }
+
+      return result;
+    } catch (e, stacktrace) {
+      debugPrint('❌ Exception in deleteIngredient: $e');
+
+      developer.log('Error deleting ingredient: $e', name: 'RecipeServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'RecipeServiceImpl');
+
+      String errorCode = 'DELETE_INGREDIENT_ERROR';
+      String message = 'Failed to delete ingredient: $e';
+      String responseCode = 'DELETE_INGREDIENT_ERROR';
+      int statusCode = 500;
+
+      if (e is GluttexException) {
+        statusCode = e.statusCode ?? statusCode;
+        errorCode = e.message;
+        message = e.message;
+        responseCode = e.message;
+      }
+
+      _storeFailureResponse(key, e.toString(),
+          statusCode: statusCode,
+          errorCode: errorCode,
+          message: message,
+          responseCode: responseCode);
+      return null;
     }
   }
 }

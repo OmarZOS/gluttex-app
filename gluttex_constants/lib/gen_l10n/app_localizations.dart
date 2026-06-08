@@ -11148,6 +11148,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No response data available.'**
   String get no_response_data;
+
+  /// No description provided for @noIngredientsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredients found'**
+  String get noIngredientsFound;
+
+  /// No description provided for @manageIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Ingredients'**
+  String get manageIngredients;
+
+  /// No description provided for @pleaseEnterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter amount'**
+  String get pleaseEnterAmount;
+
+  /// No description provided for @amountMustBeGreaterThanZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be positive'**
+  String get amountMustBeGreaterThanZero;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

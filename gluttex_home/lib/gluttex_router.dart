@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_chef/screens/ingredient_management_screen.dart';
 import 'package:gluttex_chef/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_chef/screens/recipe_form_screen.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
@@ -97,6 +98,13 @@ class AppRouter {
                   isAuthenticated,
                   const SupplierFormScreen(),
                   const SuppliersMapScreen(),
+                );
+
+              case AppRoutes.ingredientManagement:
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const IngredientManagementScreen(),
+                  const RecipeCatalogScreen(),
                 );
 
               case AppRoutes.supplierManage:

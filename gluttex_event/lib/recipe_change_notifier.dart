@@ -441,4 +441,141 @@ class RecipeNotifier extends ChangeNotifier {
   void clearAllResponses() {
     _storageService.clearAllResponses();
   }
+
+  /// Fetch all ingredients (no pagination, simple version)
+  Future<void> fetchAllIngredients({String? callerKey}) async {
+    final key = callerKey ?? _getCallerKey('fetchAllIngredients');
+
+    if (isLoading) return;
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final fetchedIngredients = await _recipeService.getAllIngredients(
+        0,
+        1000, // Fetch up to 1000 ingredients
+        callerKey: key,
+      );
+
+      if (fetchedIngredients != null && fetchedIngredients.isNotEmpty) {
+        _recipeIngredients.clear();
+        for (var ingredient in fetchedIngredients) {
+          _recipeIngredients[ingredient.id_ingredient] = ingredient;
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      log("Failed to fetch all ingredients: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Get ingredient by ID (from local cache)
+  RecipeIngredient? getIngredient(int id) {
+    return _recipeIngredients[id];
+  }
+
+  /// Get all ingredients from local cache
+  List<RecipeIngredient> getAllIngredients() {
+    return _recipeIngredients.values.toList();
+  }
+
+  /// Search ingredients locally by name
+  List<RecipeIngredient> searchIngredients(String query) {
+    if (query.isEmpty) {
+      return _recipeIngredients.values.toList();
+    }
+    return _recipeIngredients.values
+        .where((ingredient) => ingredient.ingredient_name
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+  }
+
+  /// Add a new ingredient
+  Future<bool> addIngredient(String name, String iconUrl,
+      {String? callerKey}) async {
+    final key = callerKey ?? _getCallerKey('addIngredient', suffix: name);
+
+    try {
+      final ingredient = RecipeIngredient(
+        id_ingredient: 0,
+        ingredient_name: name,
+        ingredient_icon: iconUrl,
+      );
+
+      final created =
+          await _recipeService.addIngredient(ingredient, callerKey: key);
+
+      if (created != null) {
+        _recipeIngredients[created.id_ingredient] = created;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      log("Failed to add ingredient: $e");
+      return false;
+    }
+  }
+
+  /// Update an existing ingredient
+  Future<bool> updateIngredient(int id, String name, String iconUrl,
+      {String? callerKey}) async {
+    final key =
+        callerKey ?? _getCallerKey('updateIngredient', id: id.toString());
+
+    try {
+      final ingredient = RecipeIngredient(
+        id_ingredient: id,
+        ingredient_name: name,
+        ingredient_icon: iconUrl,
+      );
+
+      final updated =
+          await _recipeService.updateIngredient(ingredient, callerKey: key);
+
+      if (updated != null) {
+        _recipeIngredients[id] = updated;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      log("Failed to update ingredient: $e");
+      return false;
+    }
+  }
+
+  /// Delete an ingredient
+  Future<bool> deleteIngredient(int id, {String? callerKey}) async {
+    final key =
+        callerKey ?? _getCallerKey('deleteIngredient', id: id.toString());
+
+    try {
+      final result =
+          await _recipeService.deleteIngredient(id.toString(), callerKey: key);
+
+      if (result == 200 || result == 204) {
+        _recipeIngredients.remove(id);
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      log("Failed to delete ingredient: $e");
+      return false;
+    }
+  }
+
+  /// Refresh ingredients from API (clears and reloads)
+  Future<void> refreshIngredients({String? callerKey}) async {
+    _recipeIngredients.clear();
+    currentIngredientPage = 0;
+    hasMoreIngredients = true;
+    await fetchAllIngredients(callerKey: callerKey);
+  }
 }

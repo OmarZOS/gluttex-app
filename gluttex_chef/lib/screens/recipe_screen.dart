@@ -36,6 +36,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
   AppUser? _provider;
   bool _isLoadingProvider = true;
+  bool _ingredientsLoaded = false;
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
     _recipe = widget.recipe;
     notifier = Provider.of<RecipeNotifier>(context, listen: false);
     _loadProviderData();
+    _loadIngredients();
   }
 
   @override
@@ -56,6 +58,16 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
     if (_isLoadingProvider) {
       _loadProviderData();
     }
+  }
+
+  Future<void> _loadIngredients() async {
+    if (_ingredientsLoaded) return;
+
+    if (notifier.recipeIngredients.isEmpty) {
+      await notifier.fetchAllIngredients();
+    }
+    _ingredientsLoaded = true;
+    setState(() {});
   }
 
   late Future<AppUser?> _providerFuture;
@@ -87,10 +99,33 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
     }
   }
 
+  /// Get ingredient name from notifier's ingredients
+  String _getIngredientName(int id) {
+    final ingredient = notifier.getIngredient(id);
+    if (ingredient != null && ingredient.ingredient_name.isNotEmpty) {
+      return ingredient.ingredient_name;
+    }
+
+    // Fallback to translations if API name not available
+    try {
+      final names = AppLocalizations.of(context)!.ingredientTextList.split(',');
+      if (id > 0 && id <= names.length) {
+        return names[id - 1];
+      }
+      return 'Ingredient $id';
+    } catch (e) {
+      return 'Ingredient $id';
+    }
+  }
+
+  /// Get ingredient icon URL from notifier's ingredients
+  String? _getIngredientIconUrl(int id) {
+    final ingredient = notifier.getIngredient(id);
+    return ingredient?.ingredient_icon;
+  }
+
   @override
   Widget build(BuildContext context) {
-    notifier = Provider.of<RecipeNotifier>(context,
-        listen: false); // Problem: Using context in initState
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isOwner = is_recipe_owner(context, _recipe.recipe_owner_id ?? 0);
@@ -156,8 +191,12 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   }
 
   Widget _buildRecipeImage(Size size) {
-    return _recipe.recipe_image_url != null &&
-            _recipe.recipe_image_url!.isNotEmpty
+    final hasValidUrl = _recipe.recipe_image_url != null &&
+        _recipe.recipe_image_url!.isNotEmpty &&
+        (_recipe.recipe_image_url!.startsWith('http') ||
+            _recipe.recipe_image_url!.startsWith('https'));
+
+    return hasValidUrl
         ? Hero(
             tag: 'recipe-image-${_recipe.id_recipe}',
             child: Image.network(
@@ -214,10 +253,6 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
   List<Widget> _buildAppBarActions(BuildContext context) {
     return [
-      // IconButton(
-      //   icon: const Icon(Icons.edit),
-      //   onPressed: () => _navigateToEditScreen(context),
-      // ),
       IconButton(
         icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.tertiary),
         onPressed: () => _showDeleteConfirmation(context),
@@ -238,7 +273,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          notifier.categories[_recipe.recipe_category_id! - 1],
+          notifier.categories.isNotEmpty &&
+                  _recipe.recipe_category_id! - 1 < notifier.categories.length
+              ? notifier.categories[_recipe.recipe_category_id! - 1]
+              : '',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withOpacity(0.7),
           ),
@@ -267,24 +305,21 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
   Widget _buildCategoryTag(ThemeData theme, String categoryName) {
     return Chip(
-        avatar:
-            // Add icon here
-            SvgPicture.asset(
-          'assets/icons/${_recipe.recipe_category_id}.svg',
-          package: "gluttex_chef",
-          color: theme.colorScheme.onSurface,
-        ), // Replace with your desired icon
-        // size: 18,
-        // color: theme.colorScheme.primary,
-        label: Text(categoryName),
-        backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-        labelStyle: TextStyle(
-          color: theme.colorScheme.onSurface,
-          fontWeight: FontWeight.bold,
-        ),
-        shape: StadiumBorder(
-          side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
-        ));
+      avatar: SvgPicture.asset(
+        'assets/icons/${_recipe.recipe_category_id}.svg',
+        package: "gluttex_chef",
+        color: theme.colorScheme.onSurface,
+      ),
+      label: Text(categoryName),
+      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+      labelStyle: TextStyle(
+        color: theme.colorScheme.onSurface,
+        fontWeight: FontWeight.bold,
+      ),
+      shape: StadiumBorder(
+        side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
+      ),
+    );
   }
 
   Widget _buildIngredientsList(BuildContext context) {
@@ -307,17 +342,17 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             itemBuilder: (context, index) {
               final key = _recipe.recipe_ingredients!.keys.elementAt(index);
               final quantity = _recipe.recipe_ingredients![key]!;
-              // final currentIngredient = notifier.recipeIngredients[key - 1];
-              // log("Ingredient: $currentIngredient, Quantity: $quantity");
+              final ingredientName = _getIngredientName(key);
+              final ingredientIconUrl = _getIngredientIconUrl(key);
+
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: IngredientCard(
                   onClicked: () {},
-                  name: AppLocalizations.of(context)!
-                      .ingredientTextList
-                      .split(',')[key - 1],
+                  name: ingredientName,
                   quantity: quantity,
                   id: key,
+                  imageUrl: ingredientIconUrl,
                 ),
               );
             },
@@ -348,16 +383,15 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   }
 
   Future<void> _navigateToEditScreen(BuildContext context) async {
-    // final updatedRecipe =
-    Navigator.pushNamed(
+    await Navigator.pushNamed(
       context,
       AppRoutes.recipeCreate,
       arguments: {"recipe": _recipe},
     );
-
-    // if (updatedRecipe != null) {
-    //   setState(() => _recipe = updatedRecipe);
-    // }
+    // Refresh the recipe data when coming back
+    if (mounted) {
+      // Could refresh recipe details if needed
+    }
   }
 
   void _showDeleteConfirmation(BuildContext context) {
@@ -373,7 +407,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             responseCode: "SUCCESS",
             finalMessage: AppLocalizations.of(context)!.deleteSuccess,
           );
-          Navigator.pop(context);
+          if (mounted) Navigator.pop(context);
         } on GluttexException catch (e) {
           ResponseHandler.handleResponse(
             context: context,
@@ -412,7 +446,6 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                // Provider Avatar/Logo
                 Container(
                   width: 48,
                   height: 48,
@@ -420,75 +453,53 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     color: colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: provider != null
-                      ? provider.id_app_user != 0 &&
-                              provider.app_user_image_url != null
+                  child: provider != null && provider.id_app_user != 0
+                      ? provider.app_user_image_url != null &&
+                              provider.app_user_image_url!.isNotEmpty
                           ? ClipOval(
                               child: Image.network(
                                 provider.app_user_image_url!,
-                                width: 24,
-                                height: 24,
-                                fit: BoxFit.cover,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                    .cumulativeBytesLoaded /
-                                                (loadingProgress
-                                                        .expectedTotalBytes ??
-                                                    1)
-                                            : null,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const SizedBox(
-                                    height: 24,
-                                    // color: Colors.grey[200],
-                                    child: Center(
-                                      child: Icon(Icons.person, size: 24),
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                          : ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
-                                'assets/images/logo.png',
-                                package: "gluttex_home",
+                                width: 48,
                                 height: 48,
-                                color: Colors.lightGreen,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(
+                                    Icons.person,
+                                    size: 32,
+                                    color: colorScheme.primary,
+                                  );
+                                },
                               ),
                             )
-                      : _buildDefaultProviderIcon(),
+                          : Icon(
+                              Icons.person,
+                              size: 32,
+                              color: colorScheme.primary,
+                            )
+                      : Icon(
+                          Icons.store_outlined,
+                          size: 32,
+                          color: colorScheme.primary,
+                        ),
                 ),
                 const SizedBox(width: 12),
-
-                // Provider Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${provider?.personFirstName} ${provider?.personLastName}" ??
-                            AppLocalizations.of(context)!.unknownProvider,
+                        provider != null && provider.id_app_user != 0
+                            ? "${provider.personFirstName} ${provider.personLastName}"
+                                .trim()
+                            : AppLocalizations.of(context)!.unknownProvider,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (provider?.addressCity != "") ...[
+                      if (provider?.addressCity != null &&
+                          provider!.addressCity!.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Row(
                           children: [
@@ -499,7 +510,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              provider!.addressCity,
+                              provider.addressCity!,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurface.withOpacity(0.6),
                               ),
@@ -510,74 +521,11 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     ],
                   ),
                 ),
-
-                // Contact Button
-                // IconButton(
-                //   icon: Icon(
-                //     Icons.contact_support_outlined,
-                //     color: colorScheme.primary,
-                //   ),
-                //   onPressed: () => _showContactOptions(context, provider),
-                // ),
               ],
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDefaultProviderIcon() {
-    return Center(
-      child: Icon(
-        Icons.store_outlined,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    );
-  }
-
-  void _showContactOptions(BuildContext context, AppUser? provider) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.phone),
-                title: Text(AppLocalizations.of(context)!.callProvider),
-                onTap: () {
-                  Navigator.pop(context);
-                  // if (provider?.phone != null) {
-                  //   // Implement phone call functionality
-                  // }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.email),
-                // title: Text("AppLocalizations.of(context)!.emailProvider"),
-                onTap: () {
-                  Navigator.pop(context);
-                  // if (provider?.email != null) {
-                  //   // Implement email functionality
-                  // }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.map_outlined),
-                title: Text(AppLocalizations.of(context)!.viewOnMap),
-                onTap: () {
-                  Navigator.pop(context);
-                  // if (provider?.location != null) {
-                  //   // Implement map view functionality
-                  // }
-                },
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

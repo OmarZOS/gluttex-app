@@ -5661,4 +5661,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get no_response_data => 'Aucune donnée de réponse disponible.';
+
+  @override
+  String get noIngredientsFound => 'Aucun ingrédient trouvé';
+
+  @override
+  String get manageIngredients => 'Gérer les Ingrédients';
+
+  @override
+  String get pleaseEnterAmount => 'Veuillez entrer la quantité';
+
+  @override
+  String get amountMustBeGreaterThanZero => 'La quantité doit être positive';
 }

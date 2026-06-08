@@ -43,6 +43,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   String? _initialRecipeImageUrl;
   late Map<int, String> _selectedIngredients;
   bool _initialized = false;
+  bool _ingredientsLoaded = false;
 
   // Track operation key for response
   String? _currentOperationKey;
@@ -100,7 +101,21 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
       }
 
       _initialized = true;
+
+      // Load ingredients data
+      _loadIngredients();
     }
+  }
+
+  Future<void> _loadIngredients() async {
+    if (_ingredientsLoaded) return;
+
+    final recipeNotifier = Provider.of<RecipeNotifier>(context, listen: false);
+    if (recipeNotifier.recipeIngredients.isEmpty) {
+      await recipeNotifier.fetchAllIngredients();
+    }
+    _ingredientsLoaded = true;
+    setState(() {});
   }
 
   void showTimePickerModal(BuildContext context) {
@@ -166,6 +181,33 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
   void _onCategoryChanged(int identifier) {
     _recipe_category_id = identifier;
+  }
+
+  /// Get ingredient name from notifier's ingredients
+  String _getIngredientName(int id) {
+    final notifier = Provider.of<RecipeNotifier>(context, listen: false);
+    final ingredient = notifier.getIngredient(id);
+    if (ingredient != null && ingredient.ingredient_name.isNotEmpty) {
+      return ingredient.ingredient_name;
+    }
+
+    // Fallback to translations if API name not available
+    try {
+      final names = AppLocalizations.of(context)!.ingredientTextList.split(',');
+      if (id > 0 && id <= names.length) {
+        return names[id - 1];
+      }
+      return 'Ingredient $id';
+    } catch (e) {
+      return 'Ingredient $id';
+    }
+  }
+
+  /// Get ingredient icon URL from notifier's ingredients
+  String? _getIngredientIconUrl(int id) {
+    final notifier = Provider.of<RecipeNotifier>(context, listen: false);
+    final ingredient = notifier.getIngredient(id);
+    return ingredient?.ingredient_icon;
   }
 
   Future<void> _submitForm() async {
@@ -303,9 +345,6 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ingredientNames =
-        AppLocalizations.of(context)!.ingredientTextList.split(',');
-
     return Scaffold(
       appBar: AppBar(
         title: Text(updatePage
@@ -425,15 +464,19 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                         itemBuilder: (context, index) {
                           int key = _selectedIngredients.keys.elementAt(index);
                           String quantity = _selectedIngredients[key]!;
+                          final ingredientName = _getIngredientName(key);
+                          final ingredientIconUrl = _getIngredientIconUrl(key);
+
                           return IngredientCard(
                             onClicked: () {
                               setState(() {
                                 _selectedIngredients.remove(key);
                               });
                             },
-                            name: ingredientNames[key - 1],
+                            name: ingredientName,
                             quantity: quantity,
                             id: key,
+                            imageUrl: ingredientIconUrl,
                           );
                         },
                       ),
@@ -461,6 +504,9 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                     ),
                     onTap: () async {
                       HapticFeedback.selectionClick();
+                      // Ensure ingredients are loaded before showing popup
+                      await _loadIngredients();
+
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {

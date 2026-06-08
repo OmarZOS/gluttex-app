@@ -283,8 +283,11 @@ class GluttexConstants {
       '/recipes/image'; // Adjust based on your API
   static const String getRecipeSearchByTokenEndpoint =
       '/recipes/search'; // Adjust
-  static const String getIngredientEndpoint = '/recipes/ingredients';
+  static const String getAllIngredientEndpoint = '/recipes/ingredients/all';
   static const String deleteIngredientEndpoint = '/recipes/ingredients';
+  static const String getIngredientEndpoint = "/recipes/ingredients";
+  static const String addIngredientEndpoint = "/recipes/ingredients";
+  static const String updateIngredientEndpoint = "/recipes/ingredients";
 
   // ==================== Supplier Endpoints ====================
   static const String addSupplierEndpoint = '/suppliers';
@@ -492,6 +495,8 @@ class AppRoutes {
   static const String productScanPage = '/product/scan';
   static const String QRScanPage = '/qr/scan';
   static const String productCapturePage = '/product/capture';
+
+  static const String ingredientManagement = '/ingredient/management';
 
   static const String supplierEntitiesPage = '/suppliers/entities';
   static const String dashboardPage = '/dashboard/business';

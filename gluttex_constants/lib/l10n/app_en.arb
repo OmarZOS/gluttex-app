@@ -2439,7 +2439,12 @@
   "gateway_timeout": "Request timed out. Please try again.",
   "network_authentication_required": "Network authentication required.",
   
-  "no_response_data": "No response data available."
+  "no_response_data": "No response data available.",
+
+   "noIngredientsFound": "No ingredients found",
+   "manageIngredients" : "Manage Ingredients",
+   "pleaseEnterAmount": "Please enter amount",
+   "amountMustBeGreaterThanZero": "Amount must be positive"
   
 
 

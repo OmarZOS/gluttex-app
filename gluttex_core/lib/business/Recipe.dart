@@ -235,7 +235,7 @@ class RecipeIngredient {
   factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
     return RecipeIngredient(
         id_ingredient: json['id_ingredient'] ?? 0,
-        ingredient_icon: json['ingredient_icon'] ?? "",
+        ingredient_icon: json['ingredient_icon_url'] ?? "",
         ingredient_name: json['ingredient_name'] ?? "");
   }
 
@@ -243,7 +243,7 @@ class RecipeIngredient {
     return {
       'id_ingredient': id_ingredient,
       'ingredient_name': ingredient_name,
-      'ingredient_icon': ingredient_icon
+      'ingredient_icon_url': ingredient_icon
     };
   }
 }

@@ -5661,4 +5661,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get no_response_data => 'No response data available.';
+
+  @override
+  String get noIngredientsFound => 'No ingredients found';
+
+  @override
+  String get manageIngredients => 'Manage Ingredients';
+
+  @override
+  String get pleaseEnterAmount => 'Please enter amount';
+
+  @override
+  String get amountMustBeGreaterThanZero => 'Amount must be positive';
 }

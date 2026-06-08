@@ -2535,6 +2535,12 @@
   "gateway_timeout": "Délai de requête dépassé. Veuillez réessayer.",
   "network_authentication_required": "Authentification réseau requise.",
   
-  "no_response_data": "Aucune donnée de réponse disponible."
+  "no_response_data": "Aucune donnée de réponse disponible.",
+
+   "noIngredientsFound": "Aucun ingrédient trouvé",
+   "manageIngredients": "Gérer les Ingrédients",
+
+      "pleaseEnterAmount": "Veuillez entrer la quantité",
+   "amountMustBeGreaterThanZero": "La quantité doit être positive"
 
 }

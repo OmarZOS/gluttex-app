@@ -5680,4 +5680,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get no_response_data => 'لا تتوفر بيانات الاستجابة.';
+
+  @override
+  String get noIngredientsFound => 'لم يتم العثور على أي مكونات';
+
+  @override
+  String get manageIngredients => 'إدارة المكونات';
+
+  @override
+  String get pleaseEnterAmount => 'الرجاء إدخال الكمية';
+
+  @override
+  String get amountMustBeGreaterThanZero => 'الكمية يجب أن تكون أكبر من الصفر';
 }

@@ -34,4 +34,25 @@ abstract class RecipeService {
   Future<int?> deleteRecipe(String recipeId, {String? callerKey}) async {
     return null;
   }
+
+  Future<RecipeIngredient?> getIngredient(String idRecipeIngredient,
+      {String? callerKey}) async {
+    return null;
+  }
+
+  Future<RecipeIngredient?> addIngredient(RecipeIngredient ingredient,
+      {String? callerKey}) async {
+    return null;
+  }
+
+  Future<RecipeIngredient?> updateIngredient(
+      RecipeIngredient updatedRecipeIngredient,
+      {String? callerKey}) async {
+    return null;
+  }
+
+  Future<int?> deleteIngredient(String ingredientId,
+      {String? callerKey}) async {
+    return null;
+  }
 }

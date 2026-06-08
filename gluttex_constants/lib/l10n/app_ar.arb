@@ -2488,6 +2488,13 @@
   "gateway_timeout": "انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.",
   "network_authentication_required": "مطلوب مصادقة الشبكة.",
   
-  "no_response_data": "لا تتوفر بيانات الاستجابة."
+  "no_response_data": "لا تتوفر بيانات الاستجابة.",
+  "noIngredientsFound": "لم يتم العثور على أي مكونات",
+  "manageIngredients": "إدارة المكونات",
+     "pleaseEnterAmount": "الرجاء إدخال الكمية",
+   "amountMustBeGreaterThanZero": "الكمية يجب أن تكون أكبر من الصفر"
   
+
+
+
 }

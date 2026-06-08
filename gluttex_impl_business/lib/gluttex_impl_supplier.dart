@@ -217,7 +217,7 @@ class SupplierServiceImpl extends SupplierService {
       final storageService = GluttexLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateSupplierEndpoint}/${updatedSupplier.idProductProvider}';
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateSupplierEndpoint}';
 
       developer.log('Updating supplier at: $url', name: 'SupplierServiceImpl');
       developer.log('Supplier data: ${updatedSupplier.toJson()}',
