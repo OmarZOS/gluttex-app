@@ -501,27 +501,122 @@ class ProductFormFields extends StatelessWidget {
   }
 
   Widget _buildSupplierPicker(BuildContext context) {
-    final userNotifier = context.read<AppUserNotifier>();
-    final supplierNotifier = context.read<SupplierChangeNotifier>();
+    final userNotifier = context.watch<AppUserNotifier>();
+    final supplierNotifier = context.watch<SupplierChangeNotifier>();
+    final personnelNotifier = context.watch<PersonnelNotifier>();
 
-    final managedSuppliers = context
-        .read<PersonnelNotifier>()
-        .getAccessibleSupplierIds(userNotifier.appUser!.id_app_user!);
+    final currentUserId = userNotifier.appUser?.id_app_user;
 
-    final suppliers = supplierNotifier.suppliers
-        .where((s) =>
-            s?.productProviderOwnerId == userNotifier.appUser?.id_app_user ||
-            managedSuppliers.contains(s?.idProductProvider))
-        .whereType<Supplier>()
-        .toList();
+    if (currentUserId == null) {
+      return const SizedBox.shrink();
+    }
 
-    return SupplierPicker(
-      onSupplierChanged: (selectedSupplier) {
-        formData.selectedProviderId = selectedSupplier.idProductProvider;
-      },
-      suppliers: suppliers,
-      initialSelection:
-          suppliers.isNotEmpty ? suppliers.first : Supplier.empty(),
+    // Ensure personnel rules are loaded if not already
+    if (personnelNotifier.personnel.isEmpty &&
+        !personnelNotifier.isLoading &&
+        personnelNotifier.hasMore) {
+      // Load the rules in the background
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        personnelNotifier.loadPersonnel(
+          userId: currentUserId,
+          reset: true,
+          includePending: false,
+        );
+      });
+    }
+
+    // Get suppliers owned by the user
+    final userOwnedSuppliers = supplierNotifier.suppliers.where((supplier) {
+      return supplier.productProviderOwnerId == currentUserId;
+    }).toList();
+
+    // Get managed suppliers from personnel (if user has access to other suppliers)
+    final managedSupplierIds =
+        personnelNotifier.getAccessibleSupplierIds(currentUserId);
+    final managedSuppliers = supplierNotifier.suppliers.where((supplier) {
+      return managedSupplierIds.contains(supplier.idProductProvider);
+    }).toList();
+
+    // Combine and remove duplicates
+    final allAccessibleSuppliers = {
+      ...userOwnedSuppliers,
+      ...managedSuppliers,
+    }.toList();
+
+    // Show loading indicator while personnel rules are being loaded
+    if (personnelNotifier.isLoading && allAccessibleSuppliers.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // If no suppliers available, show message and option to create
+    if (allAccessibleSuppliers.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'No suppliers available',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.providerCreate);
+            },
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Create Supplier'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Supplier',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
+                  ),
+            ),
+            if (personnelNotifier.isLoading)
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SupplierPicker(
+          onSupplierChanged: (selectedSupplier) {
+            formData.selectedProviderId = selectedSupplier.idProductProvider;
+            formData.selectedProviderId = selectedSupplier.idProductProvider;
+          },
+          suppliers: allAccessibleSuppliers,
+          initialSelection: allAccessibleSuppliers.isNotEmpty
+              ? allAccessibleSuppliers.firstWhere(
+                  (s) => s.idProductProvider == formData.selectedProviderId,
+                  orElse: () => allAccessibleSuppliers.first,
+                )
+              : null,
+        ),
+      ],
     );
   }
 

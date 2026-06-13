@@ -402,7 +402,7 @@ class RecipeNotifier extends ChangeNotifier {
 
   // ============ HELPER METHODS FOR RESPONSE RETRIEVAL ============
 
-  /// Get the stored response from the RecipeService (through StorageService)
+  // Get the stored response from the RecipeService (through StorageService)
   CallerResponse? getResponse(String callerKey) {
     return _storageService.getResponse(callerKey);
   }

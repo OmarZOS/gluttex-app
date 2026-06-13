@@ -211,8 +211,8 @@ class AppUserServiceImpl implements AppUserService {
       final storageService = GluttexLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchAppUserEndpoint}'
-          '?query=$query&offset=$offset&limit=$limit';
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchAppUserEndpoint}/$query'
+          '?offset=$offset&limit=$limit';
 
       log('Searching app users with query: $query', name: 'AppUserServiceImpl');
 
@@ -252,8 +252,8 @@ class AppUserServiceImpl implements AppUserService {
       final storageService = GluttexLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchPersonsByNameEndpoint}'
-          '?query=$query&offset=$offset&limit=$limit';
+          '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchPersonsByNameEndpoint}/$query'
+          '?offset=$offset&limit=$limit';
 
       log('Searching people with query: $query', name: 'AppUserServiceImpl');
 

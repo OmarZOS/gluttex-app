@@ -335,8 +335,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         );
 
         // Navigate back on success
-        Navigator.popUntil(
-            context, (route) => route.settings.name == AppRoutes.home);
+        Navigator.pop(context);
       }
     } on GluttexException catch (e) {
       if (mounted) {

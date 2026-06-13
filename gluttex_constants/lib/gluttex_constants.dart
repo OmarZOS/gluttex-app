@@ -217,14 +217,14 @@ class GluttexConstants {
   static const String updateAppUserEndpoint = '/app_user/update';
   static const String updateAppUserPasswordEndpoint =
       '/app_user/update_password';
-  static const String searchAppUserEndpoint = '/app_user/search';
+  static const String searchAppUserEndpoint = '/search/personnel';
   static const String getUserByEmailEndpoint = '/app_user/by-email';
 
   // ==================== Person Endpoints ====================
   static const String personEndpoint = '/person';
   static const String createOrUpdatePersonEndpoint = '/'; // POST /api/v1/
   static const String getAllPersonsEndpoint = '/'; // GET /api/v1/
-  static const String searchPersonsByNameEndpoint = '/search/name';
+  static const String searchPersonsByNameEndpoint = '/search/people';
   static const String getAllBloodTypesEndpoint = '/blood-types/all';
   static const String getBloodTypeEndpoint = '/blood-type';
 
@@ -290,6 +290,7 @@ class GluttexConstants {
   static const String updateIngredientEndpoint = "/recipes/ingredients";
 
   // ==================== Supplier Endpoints ====================
+
   static const String addSupplierEndpoint = '/suppliers';
   static const String updateSupplierEndpoint = '/suppliers';
   static const String deleteSupplierEndpoint = '/suppliers';
@@ -302,8 +303,8 @@ class GluttexConstants {
       '/suppliers/search/location';
   static const String getSupplierByIdEndpoint =
       '/suppliers'; // /suppliers/{provider_id}
-
   // ==================== Organisation Endpoints ====================
+
   static const String getOrganisationsEndpoint = '/organisations';
   static const String createOrganisationEndpoint = '/organisations';
   static const String updateOrganisationEndpoint = '/organisations';
@@ -479,6 +480,7 @@ class OrderStates {
 }
 
 class AppRoutes {
+  static const String root = '/';
   static const String login = '/login';
   static const String registration = '/registration';
   static const String home = '/home';

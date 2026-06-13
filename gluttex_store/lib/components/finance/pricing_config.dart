@@ -39,17 +39,30 @@ class PricingConfigScreen extends StatefulWidget {
   State<PricingConfigScreen> createState() => _PricingConfigScreenState();
 }
 
-class _PricingConfigScreenState extends State<PricingConfigScreen> {
+class _PricingConfigScreenState extends State<PricingConfigScreen>
+    with SingleTickerProviderStateMixin {
   late double _localBasePrice;
   late double _localTaxPercentage;
   late double _localProfitMargin;
   late double _localFinalPrice;
   late PricingMode _localMode;
 
+  bool _isEditingBasePrice = false;
+  bool _isEditingTax = false;
+  bool _isEditingProfit = false;
+  bool _isEditingFinalPrice = false;
+
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
-    // Initialize with viewModel values
+    _initLocalValues();
+    _initAnimation();
+  }
+
+  void _initLocalValues() {
     _localBasePrice = widget.viewModel.basePrice;
     _localTaxPercentage = widget.viewModel.taxPercentage;
     _localProfitMargin = widget.viewModel.profitMargin;
@@ -57,12 +70,22 @@ class _PricingConfigScreenState extends State<PricingConfigScreen> {
     _localMode = widget.viewModel.mode;
   }
 
+  void _initAnimation() {
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _animationController.forward();
+  }
+
   @override
   void didUpdateWidget(covariant PricingConfigScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Only update local state when viewModel changes significantly
-    // This prevents frequent updates that reset text fields
     if (widget.viewModel.basePrice != oldWidget.viewModel.basePrice &&
         !_isEditingBasePrice) {
       _localBasePrice = widget.viewModel.basePrice;
@@ -84,67 +107,153 @@ class _PricingConfigScreenState extends State<PricingConfigScreen> {
     }
   }
 
-  bool _isEditingBasePrice = false;
-  bool _isEditingTax = false;
-  bool _isEditingProfit = false;
-  bool _isEditingFinalPrice = false;
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PricingConfigCard(
-              basePrice: _localBasePrice,
-              taxPercentage: _localTaxPercentage,
-              profitMargin: _localProfitMargin,
-              finalPrice: _localFinalPrice,
-              mode: _localMode,
-              onBasePriceChanged: (value) {
-                setState(() => _localBasePrice = value);
-                widget.onBasePriceChanged(value);
-              },
-              onTaxPercentageChanged: (value) {
-                setState(() => _localTaxPercentage = value);
-                widget.onTaxPercentageChanged(value);
-              },
-              onProfitMarginChanged: (value) {
-                setState(() => _localProfitMargin = value);
-                widget.onProfitMarginChanged(value);
-              },
-              onFinalPriceChanged: (value) {
-                setState(() => _localFinalPrice = value);
-                widget.onFinalPriceChanged(value);
-              },
-              onModeChanged: (value) {
-                setState(() => _localMode = value);
-                widget.onModeChanged(value);
-              },
-            ),
-            // ... rest of your code remains the same
-            const SizedBox(height: 20),
-            _buildProductSelector(context),
-            if (widget.viewModel.selectedProducts.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              _buildBatchActions(context),
-            ],
-            if (widget.isLoading) ...[
-              const SizedBox(height: 20),
-              _buildLoadingIndicator(context),
-            ],
-          ],
-        ),
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      backgroundColor: colorScheme.background,
+      appBar: _buildAppBar(context),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: _buildBody(context),
       ),
+      floatingActionButton: _buildFloatingActionButton(),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return AppBar(
+      title: const Text('Pricing Configuration'),
+      centerTitle: false,
+      elevation: 0,
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      actions: [
+        if (widget.viewModel.selectedProducts.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle, size: 16, color: colorScheme.primary),
+                const SizedBox(width: 4),
+                Text(
+                  '${widget.viewModel.selectedProducts.length} selected',
+                  style: TextStyle(
+                    color: colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        IconButton(
+          icon: const Icon(Icons.save_outlined),
+          onPressed: widget.isLoading ? null : widget.onSave,
+          tooltip: 'Save Configuration',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Pricing Configuration Card
+                PricingConfigCard(
+                  basePrice: _localBasePrice,
+                  taxPercentage: _localTaxPercentage,
+                  profitMargin: _localProfitMargin,
+                  finalPrice: _localFinalPrice,
+                  mode: _localMode,
+                  onBasePriceChanged: (value) {
+                    setState(() => _localBasePrice = value);
+                    widget.onBasePriceChanged(value);
+                  },
+                  onTaxPercentageChanged: (value) {
+                    setState(() => _localTaxPercentage = value);
+                    widget.onTaxPercentageChanged(value);
+                  },
+                  onProfitMarginChanged: (value) {
+                    setState(() => _localProfitMargin = value);
+                    widget.onProfitMarginChanged(value);
+                  },
+                  onFinalPriceChanged: (value) {
+                    setState(() => _localFinalPrice = value);
+                    widget.onFinalPriceChanged(value);
+                  },
+                  onModeChanged: (value) {
+                    setState(() => _localMode = value);
+                    widget.onModeChanged(value);
+                  },
+                ),
+                const SizedBox(height: 24),
+
+                // Product Selector Section
+                _buildProductSelector(context),
+
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+
+        // Batch Actions Section
+        if (widget.viewModel.selectedProducts.isNotEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: _buildBatchActions(context),
+            ),
+          ),
+
+        // Loading Indicator
+        if (widget.isLoading)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ),
+
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 80),
+        ),
+      ],
     );
   }
 
   Widget _buildProductSelector(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer<ProductNotifier>(
       builder: (context, productNotifier, _) {
         final products = productNotifier.products;
+
+        if (productNotifier.isLoading && products.isEmpty) {
+          return _buildLoadingSkeleton(context);
+        }
 
         if (products.isEmpty) {
           return _buildEmptyProductState(context);
@@ -155,6 +264,16 @@ class _PricingConfigScreenState extends State<PricingConfigScreen> {
           children: [
             Row(
               children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.production_quantity_limits,
+                      size: 20, color: colorScheme.primary),
+                ),
+                const SizedBox(width: 12),
                 Text(
                   'Select Products',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -162,9 +281,15 @@ class _PricingConfigScreenState extends State<PricingConfigScreen> {
                       ),
                 ),
                 const Spacer(),
-                TextButton(
-                  onPressed: () => widget.onToggleSelectAll(),
-                  child: Text(
+                TextButton.icon(
+                  onPressed: widget.onToggleSelectAll,
+                  icon: Icon(
+                    widget.viewModel.selectedProducts.length == products.length
+                        ? Icons.deselect
+                        : Icons.select_all,
+                    size: 18,
+                  ),
+                  label: Text(
                     widget.viewModel.selectedProducts.length == products.length
                         ? 'Deselect All'
                         : 'Select All',
@@ -172,19 +297,23 @@ class _PricingConfigScreenState extends State<PricingConfigScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
+                crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 1.2,
+                childAspectRatio: 1.0,
               ),
               itemCount: products.length,
               itemBuilder: (context, index) {
-                return _buildProductSelectionCard(context, products[index]);
+                return _buildProductSelectionCard(
+                  context,
+                  products[index],
+                  index,
+                );
               },
             ),
           ],
@@ -193,204 +322,453 @@ class _PricingConfigScreenState extends State<PricingConfigScreen> {
     );
   }
 
-  Widget _buildProductSelectionCard(BuildContext context, Product product) {
+  Widget _buildProductSelectionCard(
+      BuildContext context, Product product, int index) {
     final isSelected = widget.viewModel.selectedProducts.contains(product);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      onTap: () => widget.onToggleProductSelection(product),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? colorScheme.primaryContainer
-              : colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? colorScheme.primary : Colors.transparent,
-            width: 2,
-          ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      transform: Matrix4.identity()..scale(isSelected ? 1.02 : 1.0),
+      decoration: BoxDecoration(
+        gradient: isSelected
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colorScheme.primaryContainer,
+                  colorScheme.primaryContainer.withOpacity(0.8),
+                ],
+              )
+            : null,
+        color: isSelected ? null : colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected ? colorScheme.primary : Colors.transparent,
+          width: 2,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    product.product_name ?? 'Product',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+        boxShadow: isSelected
+            ? [
+                BoxShadow(
+                  color: colorScheme.primary.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                Icon(
-                  isSelected
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                  size: 20,
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => widget.onToggleProductSelection(product),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        product.product_name ?? 'Product',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? colorScheme.onPrimaryContainer
+                                  : colorScheme.onSurface,
+                            ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        isSelected
+                            ? Icons.check_circle
+                            : Icons.radio_button_unchecked,
+                        key: ValueKey(isSelected),
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                        size: 22,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Current:',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                          Text(
+                            'DZD ${product.product_price?.toStringAsFixed(2)}',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      if (isSelected) ...[
+                        const Divider(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'New:',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: colorScheme.primary,
+                                  ),
+                            ),
+                            Text(
+                              'DZD ${widget.viewModel.finalPrice.toStringAsFixed(2)}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Profit:',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: widget.viewModel.profitMargin >= 0
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: (widget.viewModel.profitMargin >= 0
+                                        ? Colors.green
+                                        : Colors.red)
+                                    .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '${widget.viewModel.profitMargin.toStringAsFixed(2)}%',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: widget.viewModel.profitMargin >= 0
+                                          ? Colors.green
+                                          : Colors.red,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Current: DZD${product.product_price?.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            if (isSelected)
-              Text(
-                'New: DZD${widget.viewModel.finalPrice.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            const SizedBox(height: 2),
-            if (isSelected)
-              Text(
-                'Profit: ${widget.viewModel.profitMargin.toStringAsFixed(2)}%',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: widget.viewModel.profitMargin >= 0
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-              ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildBatchActions(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Update ${widget.viewModel.selectedProducts.length} Products',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+    final colorScheme = Theme.of(context).colorScheme;
+    final selectedCount = widget.viewModel.selectedProducts.length;
+
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 300),
+      builder: (context, double opacity, child) {
+        return Opacity(opacity: opacity, child: child);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primaryContainer,
+              colorScheme.primaryContainer.withOpacity(0.7),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    selectedCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: widget.viewModel.profitMargin >= 0
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${widget.viewModel.profitMargin.toStringAsFixed(2)}% Profit',
-                  style: TextStyle(
-                    color: widget.viewModel.profitMargin >= 0
-                        ? Colors.green
-                        : Colors.red,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Final Price: DZD${widget.viewModel.finalPrice.toStringAsFixed(2)} per product',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: widget.onClearSelection,
-                  icon: const Icon(Icons.clear),
-                  label: const Text('Clear Selection'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Products Selected',
+                        style:
+                            Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                      ),
+                      Text(
+                        'Update ${selectedCount} product${selectedCount > 1 ? 's' : ''}',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed:
-                      widget.isLoading ? null : widget.onUpdateSelectedProducts,
-                  icon: widget.isLoading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.update),
-                  label:
-                      Text(widget.isLoading ? 'Updating...' : 'Update Prices'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: (widget.viewModel.profitMargin >= 0
+                            ? Colors.green
+                            : Colors.red)
+                        .withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${widget.viewModel.profitMargin.toStringAsFixed(2)}% Profit',
+                    style: TextStyle(
+                      color: widget.viewModel.profitMargin >= 0
+                          ? Colors.green
+                          : Colors.red,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surface.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-          ),
-        ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Final Price per Product:',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                  ),
+                  Text(
+                    'DZD ${widget.viewModel.finalPrice.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: widget.onClearSelection,
+                    icon: const Icon(Icons.clear, size: 18),
+                    label: const Text('Clear'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      backgroundColor: colorScheme.surface,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    onPressed: widget.isLoading
+                        ? null
+                        : widget.onUpdateSelectedProducts,
+                    icon: widget.isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.update, size: 18),
+                    label: Text(
+                        widget.isLoading ? 'Updating...' : 'Update Prices'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildLoadingIndicator(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(
-            'Loading pricing data...',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+  Widget _buildLoadingSkeleton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 100,
+              height: 24,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            const Spacer(),
+            Container(
+              width: 80,
+              height: 36,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.0,
           ),
-        ],
-      ),
+          itemCount: 4,
+          itemBuilder: (context, index) {
+            return Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
   Widget _buildEmptyProductState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         children: [
-          Icon(
-            Icons.inventory_2,
-            size: 48,
-            color:
-                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceVariant,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.inventory_2_outlined,
+              size: 64,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             'No Products Available',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             'Add products to configure pricing',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
             textAlign: TextAlign.center,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton.extended(
+      onPressed: widget.isLoading ? null : widget.onSave,
+      icon: const Icon(Icons.save),
+      label: const Text('Save'),
+      elevation: 2,
     );
   }
 }
