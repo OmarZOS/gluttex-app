@@ -1,20 +1,21 @@
-import 'dart:developer';
-
+// Notifications/RoleInvitation.dart
 import 'package:gluttex_core/app/Notifications/NotificationContent.dart';
 
 class RoleInvitation extends NotificationContent {
-  final int organizationId;
-  final int providerId;
+  final int? organizationId;
+  final int? providerId;
   final int role;
   final int invitedBy;
   final int ruleId;
+  final String status;
 
   RoleInvitation({
-    required this.organizationId,
-    required this.providerId,
+    this.organizationId,
+    this.providerId,
     required this.role,
     required this.invitedBy,
     required this.ruleId,
+    this.status = 'PENDING',
     required DateTime timestamp,
   }) : super(
           type: 'role_invitation',
@@ -24,91 +25,129 @@ class RoleInvitation extends NotificationContent {
 
   factory RoleInvitation.fromJson(Map<String, dynamic> json) {
     return RoleInvitation(
-      organizationId: json['organization_id'] as int? ?? 0,
-      providerId: json['provider_id'] as int? ?? 0,
-      role: json['role'] as int? ?? 0,
-      invitedBy: json['invited_by'] as int? ?? 0,
-      ruleId: json['rule_id'] as int? ?? 0,
-      timestamp: json['timestamp'] != null
-          ? DateTime.parse(json['timestamp'])
+      organizationId: _parseInt(json['organization_id']),
+      providerId: _parseInt(json['provider_id']),
+      role: _parseInt(json['role']) ?? 0,
+      invitedBy: _parseInt(json['invited_by']) ?? 0,
+      ruleId: _parseInt(json['management_rule_id']) ??
+          _parseInt(json['rule_id']) ??
+          0,
+      status: json['status'] as String? ?? 'PENDING',
+      timestamp: json['invitation_date'] != null
+          ? DateTime.parse(json['invitation_date'] as String)
           : DateTime.now(),
     );
   }
 
-  @override
-  String get displayTitle => 'Role Invitation';
-
-  // @override
-  // String get displayMessage {
-  //   final status = isPending
-  //       ? 'pending'
-  //       : isAccepted
-  //           ? 'accepted'
-  //           : 'rejected';
-  //   return 'You have been invited to join a team with role $role (Status: $status)';
-  // }
-
-  // @override
-  // String get actionText {
-  //   // if (isPending) return 'Review Invitation';
-  //   // if (isAccepted) return 'View Team';
-  //   // return 'Dismiss';
-  // }
-
-  // @override
-  // bool get requiresAction => isPending;
-
-  // Business logic properties
-  // bool get isPending => ruleType == 'PENDING';
-  // bool get isAccepted => ruleType == 'ACCEPTED';
-  // bool get isRejected => ruleType == 'REJECTED';
-
-  RoleInvitation copyWith({
-    int? ruleId,
-    int? role,
-    int? organizationId,
-    int? providerId,
-    DateTime? timestamp,
-    int? invitedBy,
-  }) {
-    return RoleInvitation(
-      ruleId: ruleId ?? this.ruleId,
-      role: role ?? this.role,
-      organizationId: organizationId ?? this.organizationId,
-      providerId: providerId ?? this.providerId,
-      timestamp: timestamp ?? this.timestamp,
-      invitedBy: invitedBy ?? this.invitedBy,
-    );
-  }
-
-  // RoleInvitation markAsAccepted() {
-  //   return copyWith(ruleType: 'ACCEPTED');
-  // }
-
-  // RoleInvitation markAsRejected() {
-  //   return copyWith(ruleType: 'REJECTED');
-  // }
-
-  @override
-  String toString() {
-    return 'RoleInvitation(ruleId: $ruleId, role: $role)';
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   @override
   Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
+    return {
+      if (organizationId != null) 'organization_id': organizationId,
+      if (providerId != null) 'provider_id': providerId,
+      'role': role,
+      'invited_by': invitedBy,
+      'rule_id': ruleId,
+      'status': status,
+      'invitation_date': timestamp.toIso8601String(),
+    };
   }
 
   @override
-  // TODO: implement actionText
-  String get actionText => throw UnimplementedError();
+  String get displayTitle {
+    switch (status) {
+      case 'ACCEPTED':
+        return 'Invitation Accepted';
+      case 'REJECTED':
+        return 'Invitation Declined';
+      default:
+        return 'Role Invitation';
+    }
+  }
 
   @override
-  // TODO: implement displayMessage
-  String get displayMessage => throw UnimplementedError();
+  String get displayMessage {
+    final roleName = _getRoleName(role);
+    final entityName = organizationId != null && organizationId! > 0
+        ? 'Organization #$organizationId'
+        : 'Supplier #$providerId';
+
+    switch (status) {
+      case 'ACCEPTED':
+        return 'You have accepted the invitation to join $entityName as $roleName.';
+      case 'REJECTED':
+        return 'You have declined the invitation to join $entityName as $roleName.';
+      default:
+        return 'You have been invited to join $entityName as $roleName.';
+    }
+  }
+
+  String _getRoleName(int roleCode) {
+    switch (roleCode) {
+      case 1:
+        return 'Basic User';
+      case 2:
+        return 'Manager';
+      case 3:
+        return 'Admin';
+      case 4:
+        return 'Supervisor';
+      case 5:
+        return 'Viewer';
+      case 6:
+        return 'Contributor';
+      default:
+        return 'Team Member';
+    }
+  }
 
   @override
-  // TODO: implement requiresAction
-  bool get requiresAction => throw UnimplementedError();
+  String get actionText {
+    if (status != 'PENDING') return 'View';
+    if (organizationId != null && organizationId! > 0)
+      return 'Join Organization';
+    return 'Join Supplier';
+  }
+
+  @override
+  bool get requiresAction => status == 'PENDING';
+
+  bool get isPending => status == 'PENDING';
+  bool get isAccepted => status == 'ACCEPTED';
+  bool get isRejected => status == 'REJECTED';
+
+  RoleInvitation markAsAccepted() {
+    return RoleInvitation(
+      organizationId: organizationId,
+      providerId: providerId,
+      role: role,
+      invitedBy: invitedBy,
+      ruleId: ruleId,
+      status: 'ACCEPTED',
+      timestamp: timestamp,
+    );
+  }
+
+  RoleInvitation markAsRejected() {
+    return RoleInvitation(
+      organizationId: organizationId,
+      providerId: providerId,
+      role: role,
+      invitedBy: invitedBy,
+      ruleId: ruleId,
+      status: 'REJECTED',
+      timestamp: timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'RoleInvitation(ruleId: $ruleId, role: $role, status: $status)';
+  }
 }

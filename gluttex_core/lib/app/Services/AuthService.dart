@@ -1,4 +1,4 @@
-import 'package:gluttex_core/business/services/TraceableService.dart';
+import 'package:gluttex_core/app/TraceableService.dart';
 
 import '../AppUser.dart';
 

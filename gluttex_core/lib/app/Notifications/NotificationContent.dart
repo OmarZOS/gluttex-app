@@ -4,8 +4,12 @@ abstract class NotificationContent {
   final String type;
   final DateTime timestamp;
   final int addedBy;
-  const NotificationContent(
-      {required this.timestamp, required this.type, required this.addedBy});
+
+  const NotificationContent({
+    required this.timestamp,
+    required this.type,
+    required this.addedBy,
+  });
 
   /// Convert the notification content to JSON
   Map<String, dynamic> toJson();
@@ -23,5 +27,6 @@ abstract class NotificationContent {
   bool get requiresAction;
 
   @override
-  String toString() => 'NotificationContent(type: $type)';
+  String toString() =>
+      'NotificationContent(type: $type, timestamp: $timestamp)';
 }

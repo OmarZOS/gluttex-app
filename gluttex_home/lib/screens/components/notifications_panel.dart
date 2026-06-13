@@ -2,12 +2,52 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/Notifications/GluttexNotification.dart';
 import 'package:gluttex_event/notification_notifier.dart';
+import 'package:gluttex_event/user_change_notifier.dart';
 import 'package:gluttex_home/screens/components/NotificationAction.dart';
 import 'package:gluttex_home/screens/components/notification_item.dart';
 import 'package:provider/provider.dart';
 
-class NotificationsPanel extends StatelessWidget {
+class NotificationsPanel extends StatefulWidget {
   const NotificationsPanel({super.key});
+
+  @override
+  State<NotificationsPanel> createState() => _NotificationsPanelState();
+}
+
+class _NotificationsPanelState extends State<NotificationsPanel> {
+  bool _isInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _isInitialized = true;
+      // Load notifications when panel opens
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadNotifications();
+      });
+    }
+  }
+
+  Future<void> _loadNotifications() async {
+    final userNotifier = context.read<AppUserNotifier>();
+    final notifier = context.read<NotificationNotifier>();
+
+    final currentUserId = userNotifier.appUser?.id_app_user;
+    if (currentUserId != null && currentUserId > 0) {
+      await notifier.loadInitialNotifications(currentUserId);
+    }
+  }
+
+  Future<void> _refreshNotifications() async {
+    final userNotifier = context.read<AppUserNotifier>();
+    final notifier = context.read<NotificationNotifier>();
+
+    final currentUserId = userNotifier.appUser?.id_app_user;
+    if (currentUserId != null && currentUserId > 0) {
+      await notifier.refreshNotifications(currentUserId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +58,8 @@ class NotificationsPanel extends StatelessWidget {
       builder: (context, notifier, child) {
         final unreadCount = notifier.unreadCount;
         final notifications = notifier.sortedByDate;
+        final isLoading = notifier.isLoading;
+        final error = notifier.error;
 
         return Container(
           margin: const EdgeInsets.all(16),
@@ -36,104 +78,341 @@ class NotificationsPanel extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Header
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.notifications_active_rounded,
-                      color: colorScheme.onPrimaryContainer,
-                      size: 28,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Notifications',
-                      style: textTheme.headlineSmall?.copyWith(
-                        color: colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    Badge(
-                      backgroundColor: colorScheme.error,
-                      label: Text(
-                        unreadCount > 99 ? '99+' : unreadCount.toString(),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      isLabelVisible: unreadCount > 0,
-                    ),
-                    const SizedBox(width: 16),
-                    IconButton(
-                      icon: Icon(
-                        Icons.close_rounded,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-              ),
-              // Notifications List
+              _buildHeader(context, notifier, unreadCount),
+              // Content
               Expanded(
-                child: notifier.isLoading && notifications.isEmpty
-                    ? _buildLoadingIndicator()
-                    : notifications.isNotEmpty
-                        ? _buildNotificationsList(
-                            context, notifier, notifications)
-                        : _buildEmptyNotifications(context),
-              ),
-              // Actions
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: colorScheme.outline.withOpacity(0.1),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: unreadCount > 0
-                            ? () async {
-                                await notifier.markAllAsRead();
-                                // ignore: use_build_context_synchronously
-                                Navigator.pop(context);
-                              }
-                            : null,
-                        child: const Text('Mark All as Read'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          // TODO: Navigate to full notifications screen
-                        },
-                        child: const Text('View All'),
-                      ),
-                    ),
-                  ],
+                child: _buildContent(
+                  context,
+                  notifier,
+                  notifications,
+                  isLoading,
+                  error,
                 ),
               ),
+              // Footer Actions
+              _buildFooter(context, notifier, unreadCount),
             ],
           ),
         );
       },
     );
+  }
+
+  Widget _buildHeader(
+    BuildContext context,
+    NotificationNotifier notifier,
+    int unreadCount,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.notifications_active_rounded,
+            color: colorScheme.onPrimaryContainer,
+            size: 28,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Notifications',
+            style: textTheme.headlineSmall?.copyWith(
+              color: colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Spacer(),
+          if (unreadCount > 0)
+            Badge(
+              backgroundColor: colorScheme.error,
+              label: Text(
+                unreadCount > 99 ? '99+' : unreadCount.toString(),
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              isLabelVisible: true,
+            ),
+          const SizedBox(width: 16),
+          IconButton(
+            icon: Icon(
+              Icons.close_rounded,
+              color: colorScheme.onPrimaryContainer,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    NotificationNotifier notifier,
+    List<GluttexNotification> notifications,
+    bool isLoading,
+    String? error,
+  ) {
+    if (isLoading && notifications.isEmpty) {
+      return _buildLoadingIndicator();
+    }
+
+    if (error != null && notifications.isEmpty) {
+      return _buildErrorState(context, error, notifier);
+    }
+
+    if (notifications.isEmpty) {
+      return _buildEmptyNotifications(context);
+    }
+
+    // Show max 5 in preview panel
+    final displayNotifications =
+        notifications.length > 5 ? notifications.sublist(0, 5) : notifications;
+
+    return RefreshIndicator(
+      onRefresh: _refreshNotifications,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: displayNotifications.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemBuilder: (context, index) => NotificationItem(
+          notification: displayNotifications[index],
+          onMarkAsRead: () => notifier.markAsRead(
+            displayNotifications[index].idNotification,
+          ),
+          onAction: (action) =>
+              _handleNotificationAction(context, notifier, action),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooter(
+    BuildContext context,
+    NotificationNotifier notifier,
+    int unreadCount,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: colorScheme.outline.withOpacity(0.1),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: unreadCount > 0 && !notifier.isLoading
+                  ? () async {
+                      await notifier.markAllAsRead();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('All notifications marked as read'),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    }
+                  : null,
+              child: notifier.isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Mark All as Read'),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: FilledButton(
+              onPressed: notifier.isLoading
+                  ? null
+                  : () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to full notifications screen
+                    },
+              child: const Text('View All'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleNotificationAction(
+    BuildContext context,
+    NotificationNotifier notifier,
+    NotificationAction action,
+  ) {
+    // Handle different action types
+    switch (action.type) {
+      case ActionType.accept:
+        _handleAcceptAction(context, notifier, action);
+        break;
+      case ActionType.reject:
+        _handleRejectAction(context, notifier, action);
+        break;
+      case ActionType.view:
+        _handleViewAction(context, action);
+        break;
+      case ActionType.dismiss:
+        _handleDismissAction(context, notifier, action);
+        break;
+      case ActionType.reply:
+        _handleReplyAction(context, action);
+        break;
+      case ActionType.archive:
+        _handleArchiveAction(context, notifier, action);
+        break;
+      case ActionType.download:
+        _handleDownloadAction(context, action);
+        break;
+    }
+  }
+
+  void _handleAcceptAction(
+    BuildContext context,
+    NotificationNotifier notifier,
+    NotificationAction action,
+  ) {
+    final ruleId = action.metadata?['rule_id'];
+    if (ruleId != null) {
+      // The actual acceptance is handled in NotificationItem's _handleActionPress
+      // This is just for UI feedback after the action is completed
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invitation accepted'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      // Refresh notifications to update the list
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _refreshNotifications();
+      });
+    }
+  }
+
+  void _handleRejectAction(
+    BuildContext context,
+    NotificationNotifier notifier,
+    NotificationAction action,
+  ) {
+    final ruleId = action.metadata?['rule_id'];
+    if (ruleId != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invitation declined'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      // Refresh notifications to update the list
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _refreshNotifications();
+      });
+    }
+  }
+
+  void _handleViewAction(BuildContext context, NotificationAction action) {
+    // Navigate based on notification type
+    final metadata = action.metadata;
+    if (metadata != null && metadata['organization_id'] != null) {
+      // Navigate to organization/supplier details
+      Navigator.pushNamed(
+        context,
+        '/supplier/manage',
+        arguments: {
+          'organization_id': metadata['organization_id'],
+          'provider_id': metadata['provider_id'],
+        },
+      );
+    }
+  }
+
+  void _handleDismissAction(
+    BuildContext context,
+    NotificationNotifier notifier,
+    NotificationAction action,
+  ) {
+    // Just dismiss - notification is already handled
+    debugPrint('Notification dismissed: ${action.notificationId}');
+  }
+
+  void _handleReplyAction(BuildContext context, NotificationAction action) {
+    // Show reply dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reply'),
+        content: const TextField(
+          decoration: InputDecoration(
+            hintText: 'Type your reply...',
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleArchiveAction(
+    BuildContext context,
+    NotificationNotifier notifier,
+    NotificationAction action,
+  ) {
+    // Archive the notification
+    notifier.deleteNotification(action.notificationId);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Notification archived'),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _handleDownloadAction(BuildContext context, NotificationAction action) {
+    // Handle download
+    final url = action.metadata?['url'];
+    if (url != null) {
+      // Implement download logic
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Download started'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Widget _buildLoadingIndicator() {
@@ -142,154 +421,51 @@ class NotificationsPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationsList(BuildContext context,
-      NotificationNotifier notifier, List<GluttexNotification> notifications) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: notifications.length.clamp(0, 5), // Show max 5 in preview
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
-      itemBuilder: (context, index) => NotificationItem(
-        notification: notifications[index],
-        onMarkAsRead: () =>
-            notifier.markAsRead(notifications[index].idNotification),
-        // onDismiss: () =>
-        //     notifier.dismissNotification(notifications[index].idNotification),
-        // onAction: (action) => _handleNotificationAction(context, action),
-      ),
-    );
-  }
-
-  // void _handleAcceptRoleInvitation(NotificationAction action) {
-  //   final ruleId = action.metadata['rule_id'];
-  //   notifier.acceptRoleInvitation(action.notificationId, ruleId);
-
-  //   // Show success feedback
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(content: Text('Role invitation accepted')),
-  //   );
-  // }
-
-  // void _handleRejectRoleInvitation(NotificationAction action) {
-  //   final ruleId = action.metadata['rule_id'];
-  //   notifier.rejectRoleInvitation(action.notificationId, ruleId);
-
-  //   // Show feedback
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(content: Text('Role invitation rejected')),
-  //   );
-  // }
-
-  // void _handleViewNotification(NotificationAction action) {
-  //   // Navigate to notification details
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => NotificationDetailsPage(
-  //         notificationId: action.notificationId,
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // void _handleReplyToMessage(NotificationAction action) {
-  //   // Open reply dialog or navigate to chat
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => ReplyDialog(notificationId: action.notificationId),
-  //   );
-  // }
-
-  Widget _buildNotificationItem(BuildContext context,
-      NotificationNotifier notifier, GluttexNotification notification) {
+  Widget _buildErrorState(
+    BuildContext context,
+    String error,
+    NotificationNotifier notifier,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () async {
-          if (!notification.isRead) {
-            await notifier.markAsRead(notification.idNotification);
-          }
-          // TODO: Handle notification specific action
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: notification.isRead
-                ? colorScheme.surfaceVariant.withOpacity(0.3)
-                : colorScheme.primaryContainer.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: colorScheme.outline.withOpacity(0.1),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline_rounded,
+            size: 48,
+            color: colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Failed to load notifications',
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _getNotificationColor(notification, colorScheme),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getNotificationIcon(notification),
-                  color: colorScheme.onPrimary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _getNotificationTitle(notification),
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _getNotificationMessage(notification),
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _formatTimeAgo(notification.effectiveDate),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (!notification.isRead)
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-            ],
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: _refreshNotifications,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildEmptyNotifications(
-    BuildContext context,
-  ) {
+  Widget _buildEmptyNotifications(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -312,7 +488,7 @@ class NotificationsPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'You\'re all caught up!',
+            "You're all caught up!",
             style: textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant.withOpacity(0.7),
             ),
@@ -320,68 +496,5 @@ class NotificationsPanel extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getNotificationColor(
-      GluttexNotification notification, ColorScheme colorScheme) {
-    if (notification.requiresAction) {
-      return colorScheme.error;
-    }
-
-    switch (notification.notificationCode) {
-      case 'role_invitation':
-        return colorScheme.primary;
-      case 'system_alert':
-        return colorScheme.secondary;
-      case 'message':
-        return colorScheme.tertiary;
-      default:
-        return colorScheme.primary;
-    }
-  }
-
-  IconData _getNotificationIcon(GluttexNotification notification) {
-    switch (notification.notificationCode) {
-      case 'role_invitation':
-        return Icons.person_add_rounded;
-      case 'system_alert':
-        return Icons.warning_rounded;
-      case 'message':
-        return Icons.message_rounded;
-      default:
-        return Icons.notifications_rounded;
-    }
-  }
-
-  String _getNotificationTitle(GluttexNotification notification) {
-    switch (notification.notificationCode) {
-      case 'role_invitation':
-        return 'Role Invitation';
-      case 'system_alert':
-        return 'System Alert';
-      case 'message':
-        return 'New Message';
-      default:
-        return 'Notification';
-    }
-  }
-
-  String _getNotificationMessage(GluttexNotification notification) {
-    if (notification.content != null) {
-      return notification.content.toString();
-    }
-    return 'You have a new notification';
-  }
-
-  String _formatTimeAgo(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inMinutes < 1) return 'Just now';
-    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
-    if (difference.inHours < 24) return '${difference.inHours}h ago';
-    if (difference.inDays < 7) return '${difference.inDays}d ago';
-
-    return '${difference.inDays ~/ 7}w ago';
   }
 }

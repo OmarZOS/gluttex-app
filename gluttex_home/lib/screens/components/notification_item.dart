@@ -1,3 +1,5 @@
+// notification_item.dart (fixed version)
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Notifications/GluttexNotification.dart';
 import 'package:gluttex_core/app/Notifications/Notifications/RoleInvitation.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
@@ -42,7 +45,6 @@ class NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
 
     return AnimatedSize(
       duration: _animationDuration,
@@ -204,19 +206,15 @@ class NotificationItem extends StatelessWidget {
   }
 
   Widget _buildNotificationIcon(BuildContext context, String? userImageUrl) {
-    final isRoleInvitation = notification.content?.type == 'role_invitation';
+    final isRoleInvitation = notification.content?.type == 'role_invitation' ||
+        notification.notificationCode == 'ROLE_INVITATION' ||
+        notification.notificationCode == 'role_invitation';
 
     if (isRoleInvitation && userImageUrl != null && userImageUrl.isNotEmpty) {
       return _buildUserAvatar(context, userImageUrl);
     }
 
-    return FutureBuilder<IconData>(
-      future: _getNotificationIcon(),
-      builder: (context, snapshot) {
-        return _buildIconWidget(
-            context, snapshot.data ?? Icons.notifications_rounded);
-      },
-    );
+    return _buildIconWidget(context, _getNotificationIcon());
   }
 
   Widget _buildUserAvatar(BuildContext context, String imageUrl) {
@@ -292,11 +290,15 @@ class NotificationItem extends StatelessWidget {
   }
 
   Future<String?> _getUserImageUrl(BuildContext context) async {
-    if (notification.content?.type != 'role_invitation') {
+    final isRoleInvitation = notification.content?.type == 'role_invitation' ||
+        notification.notificationCode == 'ROLE_INVITATION' ||
+        notification.notificationCode == 'role_invitation';
+
+    if (!isRoleInvitation) {
       return null;
     }
 
-    final addedBy = notification.content!.addedBy?.toString();
+    final addedBy = notification.content?.addedBy?.toString();
     if (addedBy == null || addedBy.isEmpty) {
       return null;
     }
@@ -311,14 +313,25 @@ class NotificationItem extends StatelessWidget {
     }
   }
 
-  Future<IconData> _getNotificationIcon() async {
-    switch (notification.content?.type) {
+  IconData _getNotificationIcon() {
+    final code = notification.notificationCode.toLowerCase();
+
+    switch (code) {
+      case 'order_status':
       case 'order_received':
         return Icons.shopping_bag_rounded;
       case 'role_invitation':
         return Icons.people_alt_rounded;
       case 'product_updated':
         return Icons.inventory_2_rounded;
+      case 'system_alert':
+        return Icons.warning_rounded;
+      case 'stock_alert':
+        return Icons.inventory_rounded;
+      case 'reminder':
+        return Icons.alarm_rounded;
+      case 'promotion':
+        return Icons.local_offer_rounded;
       default:
         return Icons.notifications_rounded;
     }
@@ -353,13 +366,18 @@ class NotificationItem extends StatelessWidget {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
+    // Get the timestamp safely
+    final timestamp = notification.content?.timestamp ??
+        notification.notificationCreatedAt ??
+        DateTime.now();
+
     return Row(
       children: [
         AnimatedOpacity(
           duration: _animationDuration,
           opacity: 0.8,
           child: Text(
-            _formatTimeAgo(notification.content!.timestamp, localizations),
+            _formatTimeAgo(timestamp, localizations),
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
               fontWeight: FontWeight.w600,
@@ -459,7 +477,10 @@ class NotificationItem extends StatelessWidget {
             )
             .then((success) {
           if (success) {
-            // Remove the notification or update it
+            // Mark notification as read
+            onMarkAsRead?.call();
+
+            // Trigger action callback
             onAction?.call(action);
 
             // Show feedback
@@ -473,6 +494,7 @@ class NotificationItem extends StatelessWidget {
                 backgroundColor: action.type == ActionType.accept
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.error,
+                behavior: SnackBarBehavior.floating,
               ),
             );
           }
@@ -483,6 +505,11 @@ class NotificationItem extends StatelessWidget {
 
     // For other actions, use the NotificationActionHandler
     NotificationActionHandler.handle(context, action);
+
+    // Mark as read after action
+    if (!notification.isRead) {
+      onMarkAsRead?.call();
+    }
   }
 
   Widget _buildUnreadIndicator(BuildContext context) {
@@ -539,14 +566,20 @@ class NotificationItem extends StatelessWidget {
   // Content helper methods
   Color _getNotificationColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final code = notification.notificationCode.toLowerCase();
 
-    switch (notification.content?.type) {
+    switch (code) {
+      case 'order_status':
       case 'order_received':
         return colorScheme.primary;
       case 'role_invitation':
         return colorScheme.secondary;
       case 'product_updated':
         return colorScheme.tertiary;
+      case 'system_alert':
+        return colorScheme.error;
+      case 'stock_alert':
+        return Colors.orange;
       default:
         return colorScheme.surface;
     }
@@ -567,7 +600,7 @@ class NotificationItem extends StatelessWidget {
     } else {
       return LinearGradient(
         colors: [
-          colorScheme.primaryContainer.withOpacity(0.1),
+          colorScheme.primaryContainer.withOpacity(0.15),
           colorScheme.surfaceVariant.withOpacity(0.05),
         ],
         begin: Alignment.topLeft,
@@ -578,8 +611,10 @@ class NotificationItem extends StatelessWidget {
 
   Gradient _getNotificationGradient(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final code = notification.notificationCode.toLowerCase();
 
-    switch (notification.content?.type) {
+    switch (code) {
+      case 'order_status':
       case 'order_received':
         return LinearGradient(
           colors: [colorScheme.primary, colorScheme.primaryContainer],
@@ -600,13 +635,24 @@ class NotificationItem extends StatelessWidget {
   }
 
   String _getNotificationTitle(AppLocalizations localizations) {
-    switch (notification.content?.type) {
+    final code = notification.notificationCode.toLowerCase();
+
+    switch (code) {
+      case 'order_status':
       case 'order_received':
         return localizations.notificationOrderReceivedTitle;
       case 'role_invitation':
         return localizations.notificationRoleInvitationTitle;
       case 'product_updated':
         return localizations.notificationProductUpdatedTitle;
+      case 'system_alert':
+        return 'System Alert';
+      case 'stock_alert':
+        return 'Stock Alert';
+      case 'reminder':
+        return 'Reminder';
+      case 'promotion':
+        return 'Special Offer';
       default:
         return notification.content?.displayTitle ??
             localizations.notificationDefaultTitle;
@@ -619,15 +665,22 @@ class NotificationItem extends StatelessWidget {
   ) async {
     if (notification.content is RoleInvitation) {
       final invitation = notification.content as RoleInvitation;
-      final supplier = await context
-          .read<SupplierChangeNotifier>()
-          .getSupplierById(invitation.providerId);
-
-      return '${supplier?.providerOrganisationName} • ${supplier?.providerName}';
+      if ((invitation.providerId ?? 0) > 0) {
+        final supplier = await context
+            .read<SupplierChangeNotifier>()
+            .getSupplierById(invitation.providerId ?? 0);
+        return '${supplier?.providerOrganisationName} • ${supplier?.providerName}';
+      }
+      if ((invitation.organizationId ?? 0) > 0) {
+        final org = await context
+            .read<SupplierChangeNotifier>()
+            .getOrganisationByIdDetailed((invitation.organizationId ?? 0));
+        return org?.provider_organisation_name;
+      }
     }
 
-    switch (notification.content?.type) {
-      case 'order_received':
+    switch (notification.notificationCode.toLowerCase()) {
+      case 'order_status':
         return localizations.notificationOrderReceivedSubtitle;
       case 'product_updated':
         return localizations.notificationProductUpdatedSubtitle;
@@ -640,50 +693,47 @@ class NotificationItem extends StatelessWidget {
     BuildContext context,
     AppLocalizations localizations,
   ) async {
-    switch (notification.content?.type) {
+    final code = notification.notificationCode.toLowerCase();
+
+    switch (code) {
+      case 'order_status':
       case 'order_received':
         return localizations.notificationOrderReceivedMessage;
+
       case 'role_invitation':
         if (notification.content is RoleInvitation) {
           final invitation = notification.content as RoleInvitation;
-
-          // Get privilege IDs from the role bitmask
-          // final privilegeIds =
-          //     RoleBitMapper.numberToPrivilegeIds(invitation.role);
-
-          // Optimize the privilege list (remove redundancies - e.g., remove inventory_view if inventory_manage exists)
-          // final optimizedPrivilegeIds =
-          //     PrivilegeUIManager.getOptimizedPrivilegeIds(privilegeIds);
-
-          // Get the highest/most significant role from the optimized privileges
-          final highestRole = PrivilegeUIManager.getHighestRole(
-            invitation.role,
-            context: context,
-          );
 
           final appUser = await _fetchUserResponsible(context);
           final userName = appUser != null
               ? "${appUser.personFirstName} ${appUser.personLastName}".trim()
               : localizations.no_username ?? "Someone";
 
-          // If we have a highest role, use it for a concise message
+          final highestRole = PrivilegeUIManager.getHighestRole(
+            invitation.role,
+            context: context,
+          );
+
           if (highestRole != null && highestRole.isNotEmpty) {
             return localizations.notificationRoleInvitationMessage(
                 userName, highestRole);
           }
 
-          // Fallback to access level summary if no specific role found
-          final accessSummary = PrivilegeUIManager.getAccessLevelSummary(
-            invitation.role,
-            context: context,
-          );
-
-          return localizations.notificationRoleInvitationMessage(
-              userName, accessSummary);
+          return localizations.notificationRoleInvitationDefaultMessage;
         }
         return localizations.notificationRoleInvitationDefaultMessage;
+
       case 'product_updated':
         return localizations.notificationProductUpdatedMessage;
+
+      case 'system_alert':
+        return notification.content?.displayMessage ??
+            'System maintenance or update notification';
+
+      case 'stock_alert':
+        return notification.content?.displayMessage ??
+            'Product stock is running low';
+
       default:
         return notification.content?.displayMessage ??
             localizations.notificationDefaultMessage;
@@ -711,7 +761,10 @@ class NotificationItem extends StatelessWidget {
     BuildContext context,
     AppLocalizations localizations,
   ) async {
-    switch (notification.content?.type) {
+    final code = notification.notificationCode.toLowerCase();
+
+    switch (code) {
+      case 'order_status':
       case 'order_received':
         return [
           NotificationAction(
@@ -719,11 +772,6 @@ class NotificationItem extends StatelessWidget {
             label: localizations.actionTrackOrder,
             notificationId: notification.idNotification,
           ),
-          // NotificationAction(
-          //   type: ActionType.download,
-          //   label: localizations.actionDownloadInvoice,
-          //   notificationId: notification.idNotification,
-          // ),
         ];
 
       case 'role_invitation':
@@ -762,42 +810,21 @@ class NotificationItem extends StatelessWidget {
     if (invitation == null) return [];
 
     try {
-      // Fix: The getUserPrivileges method signature might be wrong
-      // Based on your earlier code, it should be: getUserPrivileges(userId, {supplierId = 0})
+      // Get rules for the user who sent the invitation
       final privileges = context.read<PersonnelNotifier>().getRulesForUser(
             invitation.addedBy,
-            supplierId: invitation.providerId,
+            supplierId: invitation.providerId ?? 0,
           );
 
-      debugPrint(privileges.toString());
-      // Debug: Print all privileges to see the structure
-      debugPrint("=== DEBUG PRIVILEGES ===");
-      debugPrint("Invitation providerId: ${invitation.providerId}");
-      debugPrint("Invitation ruleId: ${invitation.ruleId}");
-      debugPrint("Invitation addedBy: ${invitation.addedBy}");
-
-      if (privileges != null) {
-        for (final rule in privileges) {
-          debugPrint(
-              "Rule: id=${rule.id_management_rule}, status=${rule.ruleStatus}, providerId=${rule.productProvider?.id_product_provider}");
-        }
-      } else {
-        debugPrint("No privileges found for user ${invitation.addedBy}");
-      }
-      debugPrint("=== END DEBUG ===");
-
-      // Use where + firstOrNull pattern
+      // Find the specific rule
       final targetedRule = privileges
           ?.where((item) => item.id_management_rule == invitation.ruleId)
           .firstOrNull;
 
-      debugPrint("Targeted rule: $targetedRule");
-      debugPrint("Rule status: ${targetedRule?.ruleStatus}");
-
-      // If no rule found, assume it's pending (new invitation)
-      final ruleStatus = targetedRule?.ruleStatus ?? RuleStates.pending;
-      final isPending = ruleStatus.toUpperCase() == RuleStates.pending;
-      final isActive = ruleStatus.toUpperCase() == RuleStates.active;
+      final ruleStatus =
+          targetedRule?.ruleStatus?.toUpperCase() ?? RuleStates.pending;
+      final isPending = ruleStatus == RuleStates.pending;
+      final isActive = ruleStatus == RuleStates.active;
 
       final actions = <NotificationAction>[];
 
@@ -872,11 +899,11 @@ class NotificationItem extends StatelessWidget {
       case ActionType.accept:
         return colorScheme.primary;
       case ActionType.reject:
-        return colorScheme.tertiary;
-      case ActionType.download:
         return colorScheme.error;
-      case ActionType.view:
+      case ActionType.download:
         return colorScheme.secondary;
+      case ActionType.view:
+        return colorScheme.tertiary;
       default:
         return colorScheme.surfaceVariant;
     }
@@ -884,9 +911,16 @@ class NotificationItem extends StatelessWidget {
 
   Color _getActionTextColor(BuildContext context, ActionType type) {
     final colorScheme = Theme.of(context).colorScheme;
-    return type.index <= ActionType.view.index
-        ? colorScheme.onPrimary
-        : colorScheme.onSurfaceVariant;
+
+    switch (type) {
+      case ActionType.accept:
+      case ActionType.reject:
+      case ActionType.download:
+      case ActionType.view:
+        return colorScheme.onPrimary;
+      default:
+        return colorScheme.onSurfaceVariant;
+    }
   }
 
   IconData? _getActionIcon(ActionType type) {

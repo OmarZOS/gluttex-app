@@ -239,19 +239,27 @@ class GluttexConstants {
   static const String getPendingInvitationsEndpoint = '/staff/pending';
 
   // ==================== Notification Endpoints ====================
-  static const String getNotificationsEndpoint = '/notifications';
-  static const String createNotificationEndpoint = '/create';
+
+  static const String notificationsBaseEndpoint = '/notifications';
+  static const String getNotificationsEndpoint = '/notifications/user';
+  static const String getNotificationByIdEndpoint = '/notifications';
+  static const String createNotificationEndpoint = '/notifications/create';
+  static const String readNotificationEndpoint = '/notifications';
+  static const String readAllNotificationsEndpoint = '/notifications/user';
+  static const String deleteNotificationEndpoint = '/notifications';
+  static const String deleteAllNotificationsEndpoint = '/notifications/user';
+  static const String unreadCountEndpoint = '/notifications/user';
+  static const String sendInvitationEndpoint = '/notifications/invitation/send';
+  static const String bulkCreateNotificationsEndpoint =
+      '/notifications/bulk/create';
+
   static const String notificationEndpoint = '/'; // /{notification_id}
-  static const String readNotificationEndpoint =
-      '/read'; // /{notification_id}/read
   static const String userNotificationsEndpoint = '/user'; // /user/{user_ref}
   static const String userReadAllEndpoint =
       '/read-all'; // /user/{user_ref}/read-all
   static const String userAllEndpoint = '/all'; // /user/{user_ref}/all
   static const String userUnreadCountEndpoint =
       '/unread-count'; // /user/{user_ref}/unread-count
-  static const String sendInvitationEndpoint = '/invitation/send';
-  static const String bulkCreateNotificationsEndpoint = '/bulk/create';
 
   // ==================== Product Endpoints ====================
   static const String addProductEndpoint = '/products';

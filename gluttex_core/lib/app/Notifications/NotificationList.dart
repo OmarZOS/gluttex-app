@@ -6,16 +6,59 @@ import 'package:gluttex_core/app/Notifications/Notifications/RoleInvitation.dart
 
 class NotificationList {
   final List<GluttexNotification> notifications;
+  final int totalCount;
+  final int unreadCount;
 
-  NotificationList(this.notifications);
+  NotificationList({
+    required this.notifications,
+    this.totalCount = 0,
+    this.unreadCount = 0,
+  });
 
-  factory NotificationList.fromJson(List<dynamic> jsonList) {
-    log("Getting notifications");
-    final notifications = jsonList
-        .map((json) =>
-            GluttexNotification.fromJson(json as Map<String, dynamic>))
-        .toList();
-    return NotificationList(notifications);
+  factory NotificationList.fromJson(dynamic json) {
+    log("Getting notifications from JSON: $json");
+
+    List<GluttexNotification> notifications = [];
+    int totalCount = 0;
+    int unreadCount = 0;
+
+    // Handle different response formats
+    if (json is List) {
+      notifications = json
+          .map((item) =>
+              GluttexNotification.fromJson(item as Map<String, dynamic>))
+          .toList();
+      totalCount = notifications.length;
+      unreadCount = notifications.where((n) => !n.isRead).length;
+    } else if (json is Map<String, dynamic>) {
+      // Handle paginated response
+      if (json.containsKey('notifications') && json['notifications'] is List) {
+        notifications = (json['notifications'] as List)
+            .map((item) =>
+                GluttexNotification.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } else if (json.containsKey('data') && json['data'] is List) {
+        notifications = (json['data'] as List)
+            .map((item) =>
+                GluttexNotification.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } else if (json.containsKey('items') && json['items'] is List) {
+        notifications = (json['items'] as List)
+            .map((item) =>
+                GluttexNotification.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+
+      totalCount = json['total_count'] ?? json['total'] ?? notifications.length;
+      unreadCount =
+          json['unread_count'] ?? notifications.where((n) => !n.isRead).length;
+    }
+
+    return NotificationList(
+      notifications: notifications,
+      totalCount: totalCount,
+      unreadCount: unreadCount,
+    );
   }
 
   List<GluttexNotification> get unreadNotifications =>
@@ -36,8 +79,6 @@ class NotificationList {
     return notifications.where((n) => n.content is T).toList();
   }
 
-  int get unreadCount => unreadNotifications.length;
-
   int get pendingActionCount => requiresActionNotifications.length;
 
   // Sort by date (newest first)
@@ -55,19 +96,33 @@ class NotificationList {
   NotificationList markAllAsRead() {
     final updatedNotifications =
         notifications.map((n) => n.isRead ? n : n.markAsRead()).toList();
-    return NotificationList(updatedNotifications);
+    return NotificationList(
+      notifications: updatedNotifications,
+      totalCount: totalCount,
+      unreadCount: 0,
+    );
   }
 
   NotificationList markAsRead(int id) {
     final updatedNotifications = notifications.map((n) {
       return n.idNotification == id ? n.markAsRead() : n;
     }).toList();
-    return NotificationList(updatedNotifications);
+    final newUnreadCount = updatedNotifications.where((n) => !n.isRead).length;
+    return NotificationList(
+      notifications: updatedNotifications,
+      totalCount: totalCount,
+      unreadCount: newUnreadCount,
+    );
   }
 
   NotificationList removeNotification(int id) {
     final updatedNotifications =
         notifications.where((n) => n.idNotification != id).toList();
-    return NotificationList(updatedNotifications);
+    return NotificationList(
+      notifications: updatedNotifications,
+      totalCount: totalCount - 1,
+      unreadCount:
+          unreadCount - (getNotificationById(id)?.isRead == false ? 1 : 0),
+    );
   }
 }

@@ -1,7 +1,7 @@
 // SupplierService.dart
 
+import 'package:gluttex_core/app/TraceableService.dart';
 import 'package:gluttex_core/business/Organisation.dart';
-import 'package:gluttex_core/business/services/TraceableService.dart';
 
 import '../Supplier.dart';
 
