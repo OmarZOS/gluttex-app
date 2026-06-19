@@ -31,8 +31,8 @@ class AppUserNotifier extends ChangeNotifier {
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;
   int get selectedTabIndex => _selectedTabIndex;
-  bool get isCookingChef =>
-      ((appUser?.app_user_type_id ?? 0) == AppConstants.cookingChefDBId);
+  bool get isCookingrecipe_catalog => ((appUser?.app_user_type_id ?? 0) ==
+      AppConstants.cookingrecipe_catalogDBId);
 
   // Helper method to generate caller key
   String _getCallerKey(String method, {String? id, String? suffix}) {

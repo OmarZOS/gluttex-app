@@ -406,7 +406,7 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                           errorBuilder: (context, error, stackTrace) {
                             return SvgPicture.asset(
                               'assets/icons/${supplier.productProviderTypeId}.svg',
-                              package: "store_geo",
+                              package: "provider_geo",
                               width: 40,
                               height: 40,
                               color: Theme.of(context).colorScheme.onSurface,
@@ -416,7 +416,7 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                       )
                     : SvgPicture.asset(
                         'assets/icons/${supplier.productProviderTypeId}.svg',
-                        package: "store_geo",
+                        package: "provider_geo",
                         width: 40,
                         height: 40,
                         color: Theme.of(context).colorScheme.onSurface,

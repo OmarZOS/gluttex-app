@@ -30,7 +30,7 @@ import 'package:gluttex_core/business/services/RecipeService.dart';
 import 'package:gluttex_core/business/services/BusinessOperationService.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
-import 'package:gluttex_home/gluttex_router.dart';
+import 'package:tabbed_home/gluttex_router.dart';
 import 'package:impl_app/impl_app.dart';
 import 'package:impl_app/impl_auth.dart';
 import 'package:event/user_change_notifier.dart';

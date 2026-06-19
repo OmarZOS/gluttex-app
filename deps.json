@@ -11,21 +11,22 @@
         "locator",
         "gluttex_core",
         "app_constants",
-        "chef",
+        "gluttex_localizations",
+        "recipe_catalog",
         "health",
-        "store_geo",
+        "provider_geo",
         "product_catalog",
         "gluttex_play",
         "login",
         "ui",
         "event",
         "io",
-        "gluttex_home",
+        "tabbed_home",
         "business",
         "impl_app",
         "impl_mediation",
         "scanner",
-        "store",
+        "provider_store",
         "flutter_test"
       ],
       "directDependencies": [
@@ -33,21 +34,22 @@
         "locator",
         "gluttex_core",
         "app_constants",
-        "chef",
+        "gluttex_localizations",
+        "recipe_catalog",
         "health",
-        "store_geo",
+        "provider_geo",
         "product_catalog",
         "gluttex_play",
         "login",
         "ui",
         "event",
         "io",
-        "gluttex_home",
+        "tabbed_home",
         "business",
         "impl_app",
         "impl_mediation",
         "scanner",
-        "store"
+        "provider_store"
       ],
       "devDependencies": [
         "flutter_test"
@@ -412,7 +414,7 @@
       ]
     },
     {
-      "name": "store",
+      "name": "provider_store",
       "version": "1.0.0+1",
       "kind": "direct",
       "source": "path",
@@ -421,16 +423,17 @@
         "locator",
         "gluttex_core",
         "app_constants",
-        "chef",
+        "recipe_catalog",
         "health",
-        "store_geo",
+        "provider_geo",
         "product_catalog",
         "gluttex_play",
+        "gluttex_localizations",
         "login",
         "ui",
         "event",
         "io",
-        "gluttex_home",
+        "tabbed_home",
         "business",
         "impl_app",
         "impl_mediation",
@@ -446,16 +449,17 @@
         "locator",
         "gluttex_core",
         "app_constants",
-        "chef",
+        "recipe_catalog",
         "health",
-        "store_geo",
+        "provider_geo",
         "product_catalog",
         "gluttex_play",
+        "gluttex_localizations",
         "login",
         "ui",
         "event",
         "io",
-        "gluttex_home",
+        "tabbed_home",
         "business",
         "impl_app",
         "impl_mediation",
@@ -557,7 +561,7 @@
         "app_constants",
         "event",
         "io",
-        "gluttex_home",
+        "tabbed_home",
         "business",
         "ui",
         "impl_app",
@@ -573,7 +577,7 @@
         "app_constants",
         "event",
         "io",
-        "gluttex_home",
+        "tabbed_home",
         "business",
         "ui",
         "impl_app",
@@ -768,7 +772,8 @@
         "vibration",
         "image_picker",
         "path",
-        "app_constants"
+        "app_constants",
+        "gluttex_localizations"
       ],
       "directDependencies": [
         "flutter",
@@ -778,11 +783,12 @@
         "vibration",
         "image_picker",
         "path",
-        "app_constants"
+        "app_constants",
+        "gluttex_localizations"
       ]
     },
     {
-      "name": "app_constants",
+      "name": "gluttex_localizations",
       "version": "0.0.1",
       "kind": "direct",
       "source": "path",
@@ -838,6 +844,14 @@
         "path",
         "vector_math"
       ]
+    },
+    {
+      "name": "app_constants",
+      "version": "0.0.1",
+      "kind": "direct",
+      "source": "path",
+      "dependencies": [],
+      "directDependencies": []
     },
     {
       "name": "image_picker",
@@ -1915,6 +1929,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "event",
         "flutter_svg",
         "flutter_linkify",
@@ -1930,6 +1945,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "event",
         "flutter_svg",
         "flutter_linkify",
@@ -2586,7 +2602,7 @@
       ]
     },
     {
-      "name": "gluttex_home",
+      "name": "tabbed_home",
       "version": "1.0.0+1",
       "kind": "direct",
       "source": "path",
@@ -2595,16 +2611,17 @@
         "locator",
         "gluttex_core",
         "app_constants",
-        "chef",
+        "gluttex_localizations",
+        "recipe_catalog",
         "health",
-        "store_geo",
+        "provider_geo",
         "product_catalog",
         "gluttex_play",
         "ui",
         "login",
         "event",
         "provider_personnel",
-        "store",
+        "provider_store",
         "flutter_pdfview",
         "qr_flutter"
       ],
@@ -2613,16 +2630,17 @@
         "locator",
         "gluttex_core",
         "app_constants",
-        "chef",
+        "gluttex_localizations",
+        "recipe_catalog",
         "health",
-        "store_geo",
+        "provider_geo",
         "product_catalog",
         "gluttex_play",
         "ui",
         "login",
         "event",
         "provider_personnel",
-        "store",
+        "provider_store",
         "flutter_pdfview",
         "qr_flutter"
       ]
@@ -2664,6 +2682,7 @@
         "font_awesome_flutter",
         "locator",
         "gluttex_core",
+        "gluttex_localizations",
         "ui",
         "event",
         "flutter_svg",
@@ -2676,6 +2695,7 @@
         "font_awesome_flutter",
         "locator",
         "gluttex_core",
+        "gluttex_localizations",
         "ui",
         "event",
         "flutter_svg",
@@ -2774,13 +2794,15 @@
         "flutter",
         "flame",
         "flutter_svg",
-        "app_constants"
+        "app_constants",
+        "gluttex_localizations"
       ],
       "directDependencies": [
         "flutter",
         "flame",
         "flutter_svg",
-        "app_constants"
+        "app_constants",
+        "gluttex_localizations"
       ]
     },
     {
@@ -2821,6 +2843,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "event",
         "ui",
         "scanner",
@@ -2839,6 +2862,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "event",
         "ui",
         "scanner",
@@ -2950,7 +2974,7 @@
       ]
     },
     {
-      "name": "store_geo",
+      "name": "provider_geo",
       "version": "1.0.0+1",
       "kind": "direct",
       "source": "path",
@@ -2960,6 +2984,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "ui",
         "event",
         "http",
@@ -2977,6 +3002,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "ui",
         "event",
         "http",
@@ -3009,16 +3035,18 @@
       "dependencies": [
         "flutter",
         "fl_chart",
-        "app_constants"
+        "app_constants",
+        "gluttex_localizations"
       ],
       "directDependencies": [
         "flutter",
         "fl_chart",
-        "app_constants"
+        "app_constants",
+        "gluttex_localizations"
       ]
     },
     {
-      "name": "chef",
+      "name": "recipe_catalog",
       "version": "1.0.0+1",
       "kind": "direct",
       "source": "path",
@@ -3027,6 +3055,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "event",
         "ui",
         "cupertino_icons",
@@ -3041,6 +3070,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "event",
         "ui",
         "cupertino_icons",
@@ -3060,6 +3090,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "path",
         "dio"
       ],
@@ -3067,6 +3098,7 @@
         "locator",
         "gluttex_core",
         "app_constants",
+        "gluttex_localizations",
         "path",
         "dio"
       ]

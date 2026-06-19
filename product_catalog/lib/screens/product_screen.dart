@@ -682,7 +682,7 @@ class _ProductDetailsScreenContentState
                           borderRadius: BorderRadius.circular(8),
                           child: SvgPicture.asset(
                             'assets/icons/${provider.productProviderTypeId ?? 0}.svg',
-                            package: "store_geo",
+                            package: "provider_geo",
                             color: Theme.of(context).colorScheme.primary,
                             fit: BoxFit.cover,
                           ),

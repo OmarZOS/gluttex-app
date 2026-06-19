@@ -1,6 +1,6 @@
 {
     "liveServer.settings.port": 5501,
-    "cmake.sourceDirectory": "/home/omar/Projects/gluttex/gluttex app/chef/linux",
+    "cmake.sourceDirectory": "/home/omar/Projects/gluttex/gluttex app/recipe_catalog/linux",
     "files.associations": {
         "data": "c",
         "chrono": "c",

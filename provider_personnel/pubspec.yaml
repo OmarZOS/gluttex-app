@@ -40,8 +40,8 @@ dependencies:
     path: ../event
   io:
     path: ../io
-  gluttex_home:
-    path: ../gluttex_home
+  tabbed_home:
+    path: ../tabbed_home
   business:
     path: ../business
   ui:

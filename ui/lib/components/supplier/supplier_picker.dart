@@ -59,7 +59,7 @@ class _SupplierPickerState extends State<SupplierPicker> {
                         color: theme.colorScheme.primary,
                         width: 16,
                         height: 16,
-                        package: "store_geo",
+                        package: "provider_geo",
                       )
                     : Icon(
                         Icons.store,
@@ -201,7 +201,7 @@ class SupplierSelectionSheet extends StatelessWidget {
                       color: theme.colorScheme.primary,
                       width: 20,
                       height: 20,
-                      package: "store_geo",
+                      package: "provider_geo",
                     ),
                   ),
                   title: Text(supplier.providerName),

@@ -1,0 +1,12 @@
+{
+  "ar": [
+    "serviceDescBloodTesting",
+    "serviceDescDiagnosticImaging",
+    "currencyCode"
+  ],
+
+  "fr": [
+    "serviceDescBloodTesting",
+    "serviceDescDiagnosticImaging"
+  ]
+}

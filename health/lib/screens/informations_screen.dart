@@ -43,7 +43,7 @@ class _HealthInfoScreenState extends State<HealthInfoScreen>
                     child: Center(
                       child: Image.asset(
                         'assets/images/logo.png',
-                        package: "gluttex_home",
+                        package: "tabbed_home",
                         height: 80,
                         color: Colors.white,
                       ),

@@ -38,12 +38,12 @@ dependencies:
     path: ../app_constants
   gluttex_localizations:
     path: ../gluttex_localizations
-  chef:
-    path: ../chef
+  recipe_catalog:
+    path: ../recipe_catalog
   health:
     path: ../health
-  store_geo:
-    path: ../store_geo
+  provider_geo:
+    path: ../provider_geo
   product_catalog:
     path: ../product_catalog
   gluttex_play:
@@ -56,8 +56,8 @@ dependencies:
     path: ../event
   io:
     path: ../io
-  gluttex_home:
-    path: ../gluttex_home
+  tabbed_home:
+    path: ../tabbed_home
   business:
     path: ../business
   impl_app:
@@ -66,8 +66,8 @@ dependencies:
     path: ../impl_mediation
   scanner:
     path: ../scanner
-  store:
-    path: ../store
+  provider_store:
+    path: ../provider_store
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

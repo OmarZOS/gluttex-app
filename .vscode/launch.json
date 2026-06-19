@@ -105,21 +105,21 @@
             "flutterMode": "release"
         },
         {
-            "name": "store_geo",
-            "cwd": "store_geo",
+            "name": "provider_geo",
+            "cwd": "provider_geo",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "store_geo (profile mode)",
-            "cwd": "store_geo",
+            "name": "provider_geo (profile mode)",
+            "cwd": "provider_geo",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "store_geo (release mode)",
-            "cwd": "store_geo",
+            "name": "provider_geo (release mode)",
+            "cwd": "provider_geo",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

@@ -76,7 +76,7 @@ class SupplierCard extends StatelessWidget {
                 )
               : SvgPicture.asset(
                   'assets/icons/${productProvider.product_provider_type_id + 1}.svg',
-                  package: "store_geo",
+                  package: "provider_geo",
                   width: 20,
                   height: 20,
                   color: Theme.of(context).colorScheme.onSurface,

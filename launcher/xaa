@@ -11,12 +11,12 @@
  1015  echo $GIT_PASS 
  1016  cd ../app_constants/
  1017  flutter gen-l10n
- 1018  cd ../gluttex_home/
+ 1018  cd ../tabbed_home/
  1019  flutter run
  1020  flutter build apk
  1021  cd app_constants/
  1022  flutter gen-l10n
- 1023  cd ../gluttex_home/
+ 1023  cd ../tabbed_home/
  1024  flutter run
  1025  flutter clean
  1026  flutter pub get
@@ -40,13 +40,13 @@
  1044  cd ../impl_mediation/
  1045  flutter clean
  1046  flutter pub get
- 1047  cd ../gluttex_home/
+ 1047  cd ../tabbed_home/
  1048  flutter run
  1049  cd ../gluttex_lo
  1050  cd ../login/
  1051  flutter clean
  1052  flutter pub get
- 1053  cd ../gluttex_home/
+ 1053  cd ../tabbed_home/
  1054  flutter run
  1055  flutter clean
  1056  flutter pub get
@@ -57,11 +57,11 @@
  1061  flutter clean
  1062  flutter pub get
  1063  flutter run
- 1064  cd ../gluttex_home/
+ 1064  cd ../tabbed_home/
  1065  flutter run
  1066  cd ../app_constants/
  1067  flutter gen-l10n
- 1068  cd ../gluttex_home/
+ 1068  cd ../tabbed_home/
  1069  cd ../app_constants/
  1070  flutter gen-l10n
  1071  pip install rembg pillow
@@ -76,7 +76,7 @@
  1080  flutter run
  1081  cd ../login/
  1082  flutter pub get
- 1083  cd ../gluttex_home/
+ 1083  cd ../tabbed_home/
  1084  flutter run
  1085  flutter pub get
  1086  flutter run
@@ -84,7 +84,7 @@
  1088  git add --all
  1089  git commit -a -m "improved UI/UX"
  1090  git push
- 1091  cd gluttex_home/
+ 1091  cd tabbed_home/
  1092  flutter clean
  1093  flutter pub get
  1094  flutter run
@@ -92,18 +92,18 @@
  1096  flutter run
  1097  cd ../app_constants/
  1098  flutter gen-l10n
- 1099  cd ../gluttex_home/
+ 1099  cd ../tabbed_home/
  1100  flutter run
  1101  flutter build web
  1102  # flutter build web --web-renderer html --release
  1103  flutter build web --web-renderer html --release
  1104  cd ../app_constants/
  1105  flutter gen-l10n
- 1106  cd ../gluttex_home/
+ 1106  cd ../tabbed_home/
  1107  flutter build web  --release
  1108  cd app_constants/
  1109  flutter gen-l10n
- 1110  cd ../gluttex_home/
+ 1110  cd ../tabbed_home/
  1111  flutter run
  1112  flutter build web --release
  1113  flutter build app --release
@@ -116,30 +116,30 @@
  1120  flutter run
  1121  flutter build apk --release
  1122  code .
- 1123  cd gluttex_home/
+ 1123  cd tabbed_home/
  1124  flutter run
  1125  cd ../app_constants/
  1126  flutter gen-l10n
- 1127  cd ../gluttex_home/
+ 1127  cd ../tabbed_home/
  1128  flutter run
- 1129  cd gluttex_home/
+ 1129  cd tabbed_home/
  1130  flutter run
- 1131  cd gluttex_home/
+ 1131  cd tabbed_home/
  1132  flutter run
- 1133  cd gluttex_home/
+ 1133  cd tabbed_home/
  1134  flutter run
  1135  echo ""  > "mcmtest_activate.ini"
  1136  poweroff
  1137  code .
- 1138  cd gluttex_home/
+ 1138  cd tabbed_home/
  1139  flutter run
- 1140  cd gluttex_home/
+ 1140  cd tabbed_home/
  1141  flutter run
  1142  flutter doctor
  1143  flutter run
  1144  flutter
  1145  flutter run
- 1146  cd gluttex_home/
+ 1146  cd tabbed_home/
  1147  flutter run
  1148  flutter clean
  1149  flutter pub get
@@ -211,14 +211,14 @@
  1215  sudo apt remove libwine
  1216  sudo apt upgrade
  1217  sudo rm -r medicum/
- 1218  cd gluttex_home/
+ 1218  cd tabbed_home/
  1219  flutter run
  1220  flutter clean
  1221  flutter run
  1222  source /home/omar/Projects/gluttex/gluttex-api/.venv/bin/activate
  1223  flutter run
  1224  code .
- 1225  cd gluttex_home/
+ 1225  cd tabbed_home/
  1226  flutter run
  1227  poweroff
  1228  lsusb
@@ -235,7 +235,7 @@
  1239  source /home/omar/Projects/gluttex/gluttex-api/.venv/bin/activate
  1240  flutter run
  1241  code .
- 1242  cd gluttex_home/
+ 1242  cd tabbed_home/
  1243  flutter run
  1244  cd ..
  1245  git add --all
@@ -244,7 +244,7 @@
  1248  git add --all
  1249  git commit -a -m "changed features: user, recipe, product"
  1250  git push
- 1251  cd gluttex_home/
+ 1251  cd tabbed_home/
  1252  flutter build apk
  1253  flutter run
  1254  flutter run --release
@@ -260,7 +260,7 @@
  1264  git push
  1265  fdisk
  1266  lsblk
- 1267  cd gluttex_home/
+ 1267  cd tabbed_home/
  1268  flutter run
  1269  cat ingredient_data.csv 
  1270  mkdir svgs
@@ -275,7 +275,7 @@
  1279  git push
  1280  code .
  1281  ls
- 1282  cd gluttex_home/
+ 1282  cd tabbed_home/
  1283  flutter run
  1284  flutter build --release
  1285  flutter build apk --release
@@ -283,18 +283,18 @@
  1287  git add --all
  1288  git commit -a -m "fixed ingredient pagination feature"
  1289  git push
- 1290  cd gluttex_home/
+ 1290  cd tabbed_home/
  1291  flutter run
- 1292  cd gluttex_home/
+ 1292  cd tabbed_home/
  1293  flutter run
- 1294  cd gluttex_home/
+ 1294  cd tabbed_home/
  1295  flutter run
  1296  restart
  1297  poweroff
  1298  flutter run
  1299  docker images
  1300  flutter run
- 1301  cd gluttex_home/
+ 1301  cd tabbed_home/
  1302  flutter run
  1303  flutter clean
  1304  flutter run
@@ -308,11 +308,11 @@
  1312  git add --all
  1313  git commit -a -m "added horizontal product list to product/supplier screens"
  1314  git push
- 1315  cd gluttex_home/
+ 1315  cd tabbed_home/
  1316  flutter run
  1317  cd ../app_constants/
  1318  flutter gen-l10n
- 1319  cd ../gluttex_home/
+ 1319  cd ../tabbed_home/
  1320  flutter run
  1321  git add --all
  1322  git commit -a -m "translatable units in ingredients amounts"
@@ -320,29 +320,29 @@
  1324  flutter run
  1325  cd ../app_constants/
  1326  flutter gen-l10n
- 1327  cd ../gluttex_home/
+ 1327  cd ../tabbed_home/
  1328  flutter run
  1329  code .
  1330  flutter clean
  1331  flutter run
  1332  cd ..
- 1333  cd gluttex_home/
+ 1333  cd tabbed_home/
  1334  flutter run
  1335  flutter build apk --release
- 1336  cd gluttex_home/
+ 1336  cd tabbed_home/
  1337  flutter run
- 1338  cd gluttex_home/
+ 1338  cd tabbed_home/
  1339  flutter run
  1340  fg
  1341  flutter run
  1342  cd ..
- 1343  cd gluttex_home/
+ 1343  cd tabbed_home/
  1344  flutter run
  1345  code .
  1346  flutter run
  1347  cd ../app_constants/
  1348  flutter gen-l10n
- 1349  cd ../gluttex_home/
+ 1349  cd ../tabbed_home/
  1350  flutter run
  1351  flutter build apk --release
  1352  flutter run
@@ -353,19 +353,19 @@
  1357  git add --all
  1358  git commit -a  -m "added provider_id parameter in querying products"
  1359  git push
- 1360  cd gluttex_home/
+ 1360  cd tabbed_home/
  1361  flutter run
- 1362  cd gluttex_home/
+ 1362  cd tabbed_home/
  1363  flutter run
  1364  dart devtools --appSizeBase=aab-code-size-analysis_01.json 
- 1365  cd gluttex_home/
+ 1365  cd tabbed_home/
  1366  flutter build apk --analyze-size
  1367  flutter build apk --analyze-size --target-platform android-x64
  1368  flutter build appbundle --analyze-size
  1369  flutter build appbundle --analyze-size --target-platform android-arm
  1370  flutter build apk --release
  1371  flutter run
- 1372  cd gluttex_home/
+ 1372  cd tabbed_home/
  1373  flutter build apk --analyze-size
  1374  flutter build apk --analyze-size --target-platform android-arm64
  1375  flutter build apk  --split-per-abi
@@ -422,7 +422,7 @@
  1426  git add --all
  1427  git commit -a -m "added dependecy graph"
  1428  git push
- 1429  cd gluttex_home/
+ 1429  cd tabbed_home/
  1430  dart pub deps --json > ../deps.json
  1431  venv venv/bin/activate
  1432  env venv/bin/activate
@@ -431,7 +431,7 @@
  1435  ls
  1436  source venv/bin/activate
  1437  python3 main.py 
- 1438  cd gluttex_home/
+ 1438  cd tabbed_home/
  1439  flutter run
  1440  source venv/bin/activate
  1441  python3 main.py 
@@ -450,21 +450,21 @@
  1454  cd ..
  1455  flutter create --package ui
  1456  flutter create  ui
- 1457  cd gluttex_home/
+ 1457  cd tabbed_home/
  1458  flutter run
  1459  flutter clean
  1460  flutter run
  1461  flutter clean
  1462  flutter run
- 1463  cd gluttex_home/
+ 1463  cd tabbed_home/
  1464  flutter run
- 1465  cd gluttex_home/
+ 1465  cd tabbed_home/
  1466  flutter run
  1467  fg
  1468  flutter run
  1469  cd ..
  1470  flutter create event
- 1471  cd gluttex_home/
+ 1471  cd tabbed_home/
  1472  flutter clean
  1473  flutter pub get
  1474  flutter run
@@ -475,14 +475,14 @@
  1479  python3 main.py
  1480  source venv/bin/activate
  1481  python3 main.py
- 1482  cd gluttex_home/
+ 1482  cd tabbed_home/
  1483  flutter run
  1484  dart pub deps --json > ../deps.json
  1485  source venv/bin/activate
  1486  python3 main.py
  1487  cd ..
  1488  flutter create io
- 1489  cd gluttex_home/
+ 1489  cd tabbed_home/
  1490  flutter clean
  1491  flutter run
  1492  flutter clean
@@ -536,7 +536,7 @@
  1540  flutter clean
  1541  rm -rf .dart_tool .packages
  1542  flutter pub get
- 1543  cd ../gluttex_home/
+ 1543  cd ../tabbed_home/
  1544  flutter clean
  1545  rm -rf .dart_tool .packages
  1546  cd ../launcher/
@@ -915,7 +915,7 @@
  1919  source venv/bin/activate
  1920  python3 main.py 
  1921  flutter run
- 1922  cd gluttex_home/
+ 1922  cd tabbed_home/
  1923  cd ../launcher/
  1924  flutter run
  1925  flutter run --build apk 

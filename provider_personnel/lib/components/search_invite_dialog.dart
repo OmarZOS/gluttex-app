@@ -815,7 +815,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
         return colorScheme.error;
       case 'manager':
         return colorScheme.primary;
-      case 'chef':
+      case 'recipe_catalog':
         return colorScheme.secondary;
       case 'supplier':
         return colorScheme.tertiary;
@@ -832,7 +832,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
         return Icons.security_rounded;
       case 'manager':
         return Icons.manage_accounts_rounded;
-      case 'chef':
+      case 'recipe_catalog':
         return Icons.restaurant_menu_rounded;
       case 'supplier':
         return Icons.inventory_2_rounded;
