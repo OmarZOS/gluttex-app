@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/Response.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/Supplier.dart';
@@ -135,9 +135,9 @@ class _ProductDetailsScreenContentState
             SliverToBoxAdapter(
               child: Container(
                 padding: const EdgeInsets.only(
-                  top: GluttexConstants.kDefaultPaddin,
-                  left: GluttexConstants.kDefaultPaddin,
-                  right: GluttexConstants.kDefaultPaddin,
+                  top: AppConstants.kDefaultPaddin,
+                  left: AppConstants.kDefaultPaddin,
+                  right: AppConstants.kDefaultPaddin,
                 ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.background,
@@ -148,7 +148,7 @@ class _ProductDetailsScreenContentState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildProductHeader(context, isRTL, _product),
-                    const SizedBox(height: GluttexConstants.kDefaultPaddin),
+                    const SizedBox(height: AppConstants.kDefaultPaddin),
                     Consumer<ProductNotifier>(
                       builder: (context, productNotifier, _) {
                         final currentProduct =
@@ -160,17 +160,16 @@ class _ProductDetailsScreenContentState
                         return QuantityAndRef(product: currentProduct);
                       },
                     ),
-                    const SizedBox(height: GluttexConstants.kDefaultPaddin / 2),
+                    const SizedBox(height: AppConstants.kDefaultPaddin / 2),
                     Description(product: _product),
                     if (isLoggedIn) ...[
-                      const SizedBox(
-                          height: GluttexConstants.kDefaultPaddin / 2),
+                      const SizedBox(height: AppConstants.kDefaultPaddin / 2),
                       AddToCart(
                         product: _product,
                         onAddToCartPressed: _panelController.open,
                       ),
                     ],
-                    const SizedBox(height: GluttexConstants.kDefaultPaddin / 2),
+                    const SizedBox(height: AppConstants.kDefaultPaddin / 2),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Text(
@@ -323,7 +322,7 @@ class _ProductDetailsScreenContentState
           ),
         Padding(
           padding: const EdgeInsets.symmetric(
-            vertical: GluttexConstants.kDefaultPaddin,
+            vertical: AppConstants.kDefaultPaddin,
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -347,7 +346,7 @@ class _ProductDetailsScreenContentState
                     ),
                   ),
                 ),
-                const SizedBox(height: GluttexConstants.kDefaultPaddin),
+                const SizedBox(height: AppConstants.kDefaultPaddin),
                 RichText(
                   text: TextSpan(
                     style: theme.textTheme.bodyLarge,
@@ -423,7 +422,7 @@ class _ProductDetailsScreenContentState
                 color: Theme.of(context).colorScheme.secondary),
             onPressed: () => _navigateToEditScreen(context, product),
           ),
-        const SizedBox(width: GluttexConstants.kDefaultPaddin / 2),
+        const SizedBox(width: AppConstants.kDefaultPaddin / 2),
       ],
     );
   }
@@ -646,7 +645,7 @@ class _ProductDetailsScreenContentState
 
         return Card(
           margin: const EdgeInsets.symmetric(
-            horizontal: GluttexConstants.kDefaultPaddin / 8,
+            horizontal: AppConstants.kDefaultPaddin / 8,
             vertical: 8,
           ),
           elevation: 2,

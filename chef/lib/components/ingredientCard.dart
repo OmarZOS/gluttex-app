@@ -2,8 +2,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 
 class IngredientCard extends StatelessWidget {
   final String name;
@@ -153,7 +153,7 @@ class IngredientCard extends StatelessWidget {
 
     final unitCode = parts[0];
     final amount = parts.length > 1 ? parts[1] : '';
-    final unitIndex = GluttexConstants.recipeUnits
+    final unitIndex = AppConstants.recipeUnits
         .indexOf(unitCode); // 'units' is your list of short codes
     final unitName = unitIndex != -1
         ? loc.ingredientUnits.split(',')[unitIndex]

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
@@ -20,7 +20,7 @@ class RecipeNotifier extends TraceableNotifier {
   String currentSearch = "";
   int currentPage = 0;
   int currentCategory = 0;
-  final int itemsPerPage = GluttexConstants.itemsPerPage;
+  final int itemsPerPage = AppConstants.itemsPerPage;
 
   List<String> get categories => _recipeCategories;
   List<String> _recipeCategories = [];

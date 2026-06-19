@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/Person.dart';
 import 'package:gluttex_core/app/Address.dart';
 import 'package:gluttex_core/business/Delivery.dart';

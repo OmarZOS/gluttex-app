@@ -34,8 +34,8 @@ dependencies:
     path: ../locator
   gluttex_core:
     path: ../gluttex_core
-  gluttex_constants:
-    path: ../gluttex_constants
+  app_constants:
+    path: ../app_constants
   event:
     path: ../event
   io:

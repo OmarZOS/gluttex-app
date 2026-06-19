@@ -11,7 +11,7 @@ with open("deps.json", "r") as f:
 # # Initialize graph
 # G = nx.DiGraph()
 
-internal_packages = ["chef",     "launcher" ,"io","ui"     ,"event"     ,"gluttex_core","impl_app","impl_mediation","login","gluttex_play","gluttex_constants","gluttex_home","business","store_geo"  ,"health","locator","product_catalog"]
+internal_packages = ["chef",     "launcher" ,"io","ui"     ,"event"     ,"gluttex_core","impl_app","impl_mediation","login","gluttex_play","app_constants","gluttex_home","business","store_geo"  ,"health","locator","product_catalog"]
 
 ui_packages = ["chef",     "launcher","ui","login","gluttex_play","product_catalog","gluttex_home","health","store_geo"]
 
@@ -66,16 +66,16 @@ for node in G.nodes():
 for source, target in G.edges():
     net.add_edge(source, target)
 
-net.set_options("""
-{
-  "nodes": {
-    "font": {
-      "size": 16,
-      "strokeWidth": 0.5
-    }
-  }
-}
-""")
+# net.set_options("""
+# {
+#   "nodes": {
+#     "font": {
+#       "size": 16,
+#       "strokeWidth": 0.5
+#     }
+#   }
+# }
+# """)
 
 # Save to HTML
 net.write_html("dependencies.html")

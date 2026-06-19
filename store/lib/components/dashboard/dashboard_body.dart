@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';

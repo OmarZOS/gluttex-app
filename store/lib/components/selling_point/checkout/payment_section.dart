@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:event/cart_change_notifier.dart';
 import 'package:store/components/selling_point/checkout/payment_details_section.dart';
 import 'package:store/components/selling_point/checkout/payment_method_section.dart';

@@ -3,7 +3,7 @@ library business;
 import 'dart:developer' as developer;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:gluttex_core/business/services/RecipeService.dart';
@@ -68,8 +68,7 @@ class RecipeServiceImpl extends RecipeService {
     try {
       final storageService = AppLocator.get<StorageService>();
 
-      final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.addRecipeEndpoint}';
+      final url = '${AppConstants.apiBaseUrl}${AppConstants.addRecipeEndpoint}';
 
       Map<String, dynamic> requestBody = recipe.toJson();
       requestBody.removeWhere((key, value) => value == null);
@@ -162,7 +161,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       const url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateRecipeEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.updateRecipeEndpoint}';
 
       Map<String, dynamic> requestBody = updatedRecipe.toJson();
       requestBody.removeWhere((key, value) => value == null);
@@ -253,7 +252,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteRecipeEndpoint}/$recipeId';
+          '${AppConstants.apiBaseUrl}${AppConstants.deleteRecipeEndpoint}/$recipeId';
 
       debugPrint('📤 DELETE to: $url');
 
@@ -319,7 +318,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.recipeEndpoint}/$id?full=true';
+          '${AppConstants.apiBaseUrl}${AppConstants.recipeEndpoint}/$id?full=true';
 
       debugPrint('📤 GET from: $url');
 
@@ -419,7 +418,7 @@ class RecipeServiceImpl extends RecipeService {
       }
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllRecipesEndpoint}'
+          '${AppConstants.apiBaseUrl}${AppConstants.getAllRecipesEndpoint}'
           '?user_id=$user_id&category_id=$category&offset=$page&limit=$limit';
 
       debugPrint('📤 GET from: $url');
@@ -527,7 +526,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getRecipeSearchByTokenEndpoint}'
+          '${AppConstants.apiBaseUrl}${AppConstants.getRecipeSearchByTokenEndpoint}'
           '?query=$token&offset=$offset&limit=$itemsPerPage';
 
       debugPrint('📤 GET from: $url');
@@ -608,7 +607,7 @@ class RecipeServiceImpl extends RecipeService {
 
       // Using GET /api/v1/recipes/ingredients?offset=&limit= (from earlier agreement)
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllIngredientEndpoint}'
+          '${AppConstants.apiBaseUrl}${AppConstants.getAllIngredientEndpoint}'
           '?offset=$offset&limit=$limit';
 
       developer.log('Getting ingredients from: $url',
@@ -668,7 +667,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getRecipeCategoriesEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.getRecipeCategoriesEndpoint}';
 
       debugPrint('📤 GET from: $url');
 
@@ -757,7 +756,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getIngredientEndpoint}/$idRecipeIngredient';
+          '${AppConstants.apiBaseUrl}${AppConstants.getIngredientEndpoint}/$idRecipeIngredient';
 
       debugPrint('📤 GET from: $url');
 
@@ -848,7 +847,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.addIngredientEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.addIngredientEndpoint}';
 
       Map<String, dynamic> requestBody = ingredient.toJson();
       requestBody.removeWhere((key, value) => value == null);
@@ -943,7 +942,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       const url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateIngredientEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.updateIngredientEndpoint}';
 
       Map<String, dynamic> requestBody = updatedRecipeIngredient.toJson();
       requestBody.removeWhere((key, value) => value == null);
@@ -1036,7 +1035,7 @@ class RecipeServiceImpl extends RecipeService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteIngredientEndpoint}/$ingredientId';
+          '${AppConstants.apiBaseUrl}${AppConstants.deleteIngredientEndpoint}/$ingredientId';
 
       debugPrint('📤 DELETE to: $url');
 

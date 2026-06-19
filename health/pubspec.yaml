@@ -31,8 +31,10 @@ dependencies:
   flutter:
     sdk: flutter
   fl_chart: ^0.66.0 
-  gluttex_constants:
-    path: ../gluttex_constants
+  app_constants:
+    path: ../app_constants
+  gluttex_localizations:
+    path: ../gluttex_localizations
   # flutter_form_builder: ^7.7.0
 
   # The following adds the Cupertino Icons font to your application.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:product_catalog/screens/order_now_screen.dart';
 
@@ -22,12 +22,12 @@ class AddToCart extends StatelessWidget {
 
     return Padding(
       padding:
-          const EdgeInsets.symmetric(vertical: GluttexConstants.kDefaultPaddin),
+          const EdgeInsets.symmetric(vertical: AppConstants.kDefaultPaddin),
       child: Row(
         children: [
           // Add to Cart Button
           _buildAddToCartButton(context, isDarkMode),
-          const SizedBox(width: GluttexConstants.kDefaultPaddin),
+          const SizedBox(width: AppConstants.kDefaultPaddin),
           // Order Now Button
           Expanded(
             child: _buildOrderNowButton(context, theme),

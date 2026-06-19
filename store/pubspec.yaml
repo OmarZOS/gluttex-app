@@ -34,8 +34,8 @@ dependencies:
     path: ../locator
   gluttex_core:
     path: ../gluttex_core
-  gluttex_constants:
-    path: ../gluttex_constants
+  app_constants:
+    path: ../app_constants
   chef:
     path: ../chef
   health:
@@ -46,6 +46,8 @@ dependencies:
     path: ../product_catalog
   gluttex_play:
     path: ../gluttex_play
+  gluttex_localizations:
+    path: ../gluttex_localizations
   login:
     path: ../login
   ui:

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:event/user_change_notifier.dart';
 import 'package:event/preferenceChangeNotifier.dart';
 import 'package:provider/provider.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RegistrationForm extends StatefulWidget {
@@ -59,7 +59,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // User Credentials Section
-              const SizedBox(height: GluttexConstants.kDefaultPaddin),
+              const SizedBox(height: AppConstants.kDefaultPaddin),
               _buildSectionHeader(
                   context, AppLocalizations.of(context)!.userCredentialsText),
               _buildTextField(

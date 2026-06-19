@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 
 class QuantityAndRef extends StatelessWidget {
@@ -14,7 +14,7 @@ class QuantityAndRef extends StatelessWidget {
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(color: GluttexConstants.kTextColor),
+              style: const TextStyle(color: AppConstants.kTextColor),
               children: [
                 TextSpan(
                     text: "${AppLocalizations.of(context)!.productQuantity}\n"),
@@ -32,7 +32,7 @@ class QuantityAndRef extends StatelessWidget {
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(color: GluttexConstants.kTextColor),
+              style: const TextStyle(color: AppConstants.kTextColor),
               children: [
                 TextSpan(
                     text:
@@ -62,8 +62,8 @@ class ColorDot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(
-        top: GluttexConstants.kDefaultPaddin / 4,
-        right: GluttexConstants.kDefaultPaddin / 2,
+        top: AppConstants.kDefaultPaddin / 4,
+        right: AppConstants.kDefaultPaddin / 2,
       ),
       padding: const EdgeInsets.all(2.5),
       height: 24,

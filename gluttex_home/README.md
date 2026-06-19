@@ -34,7 +34,7 @@ The application uses the following custom packages and modules:
 ### Core Packages
 - **locator**: Handles dependency injection and service location.
 - **gluttex_core**: Core business logic and shared utilities.
-- **gluttex_constants**: Centralized constants and localization files.
+- **app_constants**: Centralized constants and localization files.
 
 ### Feature-Specific Packages
 - **impl_app**: Application-level implementation details.

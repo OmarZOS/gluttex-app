@@ -9,12 +9,12 @@
  1013  git commit -a -m "paused blood type insertions"
  1014  git push
  1015  echo $GIT_PASS 
- 1016  cd ../gluttex_constants/
+ 1016  cd ../app_constants/
  1017  flutter gen-l10n
  1018  cd ../gluttex_home/
  1019  flutter run
  1020  flutter build apk
- 1021  cd gluttex_constants/
+ 1021  cd app_constants/
  1022  flutter gen-l10n
  1023  cd ../gluttex_home/
  1024  flutter run
@@ -59,10 +59,10 @@
  1063  flutter run
  1064  cd ../gluttex_home/
  1065  flutter run
- 1066  cd ../gluttex_constants/
+ 1066  cd ../app_constants/
  1067  flutter gen-l10n
  1068  cd ../gluttex_home/
- 1069  cd ../gluttex_constants/
+ 1069  cd ../app_constants/
  1070  flutter gen-l10n
  1071  pip install rembg pillow
  1072  /home/omar/Projects/playground/.venv/bin/python "/home/omar/Projects/playground/background remove/main.py"
@@ -90,18 +90,18 @@
  1094  flutter run
  1095  flutter build apk
  1096  flutter run
- 1097  cd ../gluttex_constants/
+ 1097  cd ../app_constants/
  1098  flutter gen-l10n
  1099  cd ../gluttex_home/
  1100  flutter run
  1101  flutter build web
  1102  # flutter build web --web-renderer html --release
  1103  flutter build web --web-renderer html --release
- 1104  cd ../gluttex_constants/
+ 1104  cd ../app_constants/
  1105  flutter gen-l10n
  1106  cd ../gluttex_home/
  1107  flutter build web  --release
- 1108  cd gluttex_constants/
+ 1108  cd app_constants/
  1109  flutter gen-l10n
  1110  cd ../gluttex_home/
  1111  flutter run
@@ -118,7 +118,7 @@
  1122  code .
  1123  cd gluttex_home/
  1124  flutter run
- 1125  cd ../gluttex_constants/
+ 1125  cd ../app_constants/
  1126  flutter gen-l10n
  1127  cd ../gluttex_home/
  1128  flutter run
@@ -310,7 +310,7 @@
  1314  git push
  1315  cd gluttex_home/
  1316  flutter run
- 1317  cd ../gluttex_constants/
+ 1317  cd ../app_constants/
  1318  flutter gen-l10n
  1319  cd ../gluttex_home/
  1320  flutter run
@@ -318,7 +318,7 @@
  1322  git commit -a -m "translatable units in ingredients amounts"
  1323  git push
  1324  flutter run
- 1325  cd ../gluttex_constants/
+ 1325  cd ../app_constants/
  1326  flutter gen-l10n
  1327  cd ../gluttex_home/
  1328  flutter run
@@ -340,7 +340,7 @@
  1344  flutter run
  1345  code .
  1346  flutter run
- 1347  cd ../gluttex_constants/
+ 1347  cd ../app_constants/
  1348  flutter gen-l10n
  1349  cd ../gluttex_home/
  1350  flutter run
@@ -512,7 +512,7 @@
  1516  source venv/bin/activate
  1517  python3 main.py
  1518  cd ..
- 1519  cd gluttex_constants/
+ 1519  cd app_constants/
  1520  flutter gen-l10n
  1521  cd ../launcher/
  1522  flutter run

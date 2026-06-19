@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations_ar.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations_ar.dart';
+import 'package:app_constants/app_constants.dart';
 
 // We need satefull widget for our categories
 
@@ -20,7 +20,7 @@ class _CategoriesState extends State<Categories> {
   Widget build(BuildContext context) {
     return Padding(
       padding:
-          const EdgeInsets.symmetric(vertical: GluttexConstants.kDefaultPaddin),
+          const EdgeInsets.symmetric(vertical: AppConstants.kDefaultPaddin),
       child: SizedBox(
         height: 25,
         child: ListView.builder(
@@ -40,8 +40,8 @@ class _CategoriesState extends State<Categories> {
         });
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: GluttexConstants.kDefaultPaddin),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppConstants.kDefaultPaddin),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -52,13 +52,13 @@ class _CategoriesState extends State<Categories> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: selectedIndex == index
-                    ? GluttexConstants.kTextColor
-                    : GluttexConstants.kTextLightColor,
+                    ? AppConstants.kTextColor
+                    : AppConstants.kTextLightColor,
               ),
             ),
             Container(
               margin: const EdgeInsets.only(
-                  top: GluttexConstants.kDefaultPaddin / 4), //top padding 5
+                  top: AppConstants.kDefaultPaddin / 4), //top padding 5
               height: 2,
               width: 30,
               color: selectedIndex == index ? Colors.black : Colors.transparent,

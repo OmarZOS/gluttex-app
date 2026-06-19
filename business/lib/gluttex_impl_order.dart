@@ -3,7 +3,7 @@ library business;
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_core/business/services/OrderService.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
@@ -42,7 +42,7 @@ class OrderServiceImpl extends OrderService {
     final key = callerKey ?? _getCallerKey('addOrder');
     try {
       final result = await _storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.addOrderEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.addOrderEndpoint}',
         orderData,
         callerKey: key,
       );
@@ -68,7 +68,7 @@ class OrderServiceImpl extends OrderService {
     try {
       // Fixed: Previously threw UnimplementedError, now properly implemented
       final result = await _storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteOrderEndpoint}/$orderId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteOrderEndpoint}/$orderId',
         orderId,
         callerKey: key,
       );
@@ -94,7 +94,7 @@ class OrderServiceImpl extends OrderService {
     try {
       // Fixed: Using correct endpoint for order update
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateOrderEndpoint ?? GluttexConstants.orderEndpoint}/${updatedOrder.idPlacedOrder}',
+        '${AppConstants.apiBaseUrl}${AppConstants.updateOrderEndpoint ?? AppConstants.orderEndpoint}/${updatedOrder.idPlacedOrder}',
         updatedOrder.idPlacedOrder?.toString() ?? '',
         {},
         updatedOrder.toJson(),
@@ -121,7 +121,7 @@ class OrderServiceImpl extends OrderService {
     final key = callerKey ?? _getCallerKey('getOrder', id: id);
     try {
       final data = await _storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.orderEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.orderEndpoint}',
         id,
         callerKey: key,
       );
@@ -149,7 +149,7 @@ class OrderServiceImpl extends OrderService {
             suffix: 'offset_$offset-limit_$limit-user_$idUser');
     try {
       final responseData = await _storageService.getAll(
-        "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllOrdersEndpoint}/$idUser/$offset/$limit",
+        "${AppConstants.apiBaseUrl}${AppConstants.getAllOrdersEndpoint}/$idUser/$offset/$limit",
         callerKey: key,
       );
 
@@ -178,7 +178,7 @@ class OrderServiceImpl extends OrderService {
         callerKey ?? _getCallerKey('getOrderDetails', id: idOrder.toString());
     try {
       final responseData = await _storageService.getAll(
-        "${GluttexConstants.apiBaseUrl}${GluttexConstants.getOrderDetailsEndpoint}/$idOrder",
+        "${AppConstants.apiBaseUrl}${AppConstants.getOrderDetailsEndpoint}/$idOrder",
         callerKey: key,
       );
 
@@ -208,7 +208,7 @@ class OrderServiceImpl extends OrderService {
         _getCallerKey('getOrdersByStatus', suffix: 'status_$status');
     try {
       final responseData = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.orderEndpoint}/status/$status',
+        '${AppConstants.apiBaseUrl}${AppConstants.orderEndpoint}/status/$status',
         callerKey: key,
       );
 
@@ -237,7 +237,7 @@ class OrderServiceImpl extends OrderService {
             id: orderId, suffix: 'status_$newStatus');
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.orderEndpoint}/status/$orderId',
+        '${AppConstants.apiBaseUrl}${AppConstants.orderEndpoint}/status/$orderId',
         orderId,
         {},
         {'status': newStatus},
@@ -264,7 +264,7 @@ class OrderServiceImpl extends OrderService {
         callerKey ?? _getCallerKey('getOrdersByUser', id: userId.toString());
     try {
       final responseData = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.orderEndpoint}/user/$userId',
+        '${AppConstants.apiBaseUrl}${AppConstants.orderEndpoint}/user/$userId',
         callerKey: key,
       );
 

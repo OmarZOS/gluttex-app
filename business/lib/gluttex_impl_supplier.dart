@@ -3,7 +3,7 @@
 library business;
 
 import 'dart:developer' as developer;
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Organisation.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_core/business/services/SupplierService.dart';
@@ -72,7 +72,7 @@ class SupplierServiceImpl extends SupplierService {
       final storageService = AppLocator.get<StorageService>();
 
       const url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getSupplierCategoriesEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.getSupplierCategoriesEndpoint}';
       developer.log('Fetching supplier categories from: $url',
           name: 'SupplierServiceImpl');
 
@@ -135,7 +135,7 @@ class SupplierServiceImpl extends SupplierService {
           name: 'SupplierServiceImpl');
 
       final result = await storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.addSupplierEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.addSupplierEndpoint}',
         supplier.toJson(),
         callerKey: key,
       );
@@ -178,7 +178,7 @@ class SupplierServiceImpl extends SupplierService {
           name: 'SupplierServiceImpl');
 
       final result = await storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteSupplierEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteSupplierEndpoint}',
         supplierId,
         callerKey: key,
       );
@@ -217,7 +217,7 @@ class SupplierServiceImpl extends SupplierService {
       final storageService = AppLocator.get<StorageService>();
 
       const url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateSupplierEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.updateSupplierEndpoint}';
 
       developer.log('Updating supplier at: $url', name: 'SupplierServiceImpl');
       developer.log('Supplier data: ${updatedSupplier.toJson()}',
@@ -265,11 +265,11 @@ class SupplierServiceImpl extends SupplierService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.supplierEndpoint}/$id';
+          '${AppConstants.apiBaseUrl}${AppConstants.supplierEndpoint}/$id';
       developer.log('Getting supplier from: $url', name: 'SupplierServiceImpl');
 
       final responseData = await storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.supplierEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.supplierEndpoint}',
         id,
         callerKey: key,
       );
@@ -325,7 +325,7 @@ class SupplierServiceImpl extends SupplierService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getSupplierSearchByTokenEndpoint}/$token/$offset/$itemsPerPage';
+          '${AppConstants.apiBaseUrl}${AppConstants.getSupplierSearchByTokenEndpoint}/$token/$offset/$itemsPerPage';
       developer.log('Searching suppliers with token: $token',
           name: 'SupplierServiceImpl');
 
@@ -391,7 +391,7 @@ class SupplierServiceImpl extends SupplierService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getSupplierSearchByGeoEndpoint}/$longitude/$latitude/$distance/$offset/$itemsPerPage';
+          '${AppConstants.apiBaseUrl}${AppConstants.getSupplierSearchByGeoEndpoint}/$longitude/$latitude/$distance/$offset/$itemsPerPage';
 
       developer.log(
           'Searching suppliers near: ($longitude, $latitude) within ${distance}km',
@@ -459,7 +459,7 @@ class SupplierServiceImpl extends SupplierService {
 
       // Build URL with query parameters
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllSuppliersEndpoint}'
+          '${AppConstants.apiBaseUrl}${AppConstants.getAllSuppliersEndpoint}'
           '?owner_id=$owner_id&org_id=$org_id&offset=$offset&limit=$itemsPerPage';
 
       developer.log('Getting all suppliers from: $url',
@@ -524,7 +524,7 @@ class SupplierServiceImpl extends SupplierService {
 
       // Build URL with query parameters
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getOrganisationsEndpoint}'
+          '${AppConstants.apiBaseUrl}${AppConstants.getOrganisationsEndpoint}'
           '?offset=$offset&limit=$limit';
 
       if (owner_id > 0) {
@@ -598,12 +598,12 @@ class SupplierServiceImpl extends SupplierService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getOrganisationsEndpoint}/$id';
+          '${AppConstants.apiBaseUrl}${AppConstants.getOrganisationsEndpoint}/$id';
       developer.log('Getting organisation from: $url',
           name: 'SupplierServiceImpl');
 
       final responseData = await storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.getOrganisationsEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.getOrganisationsEndpoint}',
         id,
         callerKey: key,
       );
@@ -663,7 +663,7 @@ class SupplierServiceImpl extends SupplierService {
           name: 'SupplierServiceImpl');
 
       final result = await storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.createOrganisationEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.createOrganisationEndpoint}',
         organisation.toJson(),
         callerKey: key,
       );
@@ -708,7 +708,7 @@ class SupplierServiceImpl extends SupplierService {
       final storageService = AppLocator.get<StorageService>();
 
       const url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateOrganisationEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.updateOrganisationEndpoint}';
 
       developer.log('Updating organisation at: $url',
           name: 'SupplierServiceImpl');
@@ -764,7 +764,7 @@ class SupplierServiceImpl extends SupplierService {
       developer.log('Deleting organisation: $id', name: 'SupplierServiceImpl');
 
       final result = await storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteOrganisationEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteOrganisationEndpoint}',
         id,
         callerKey: key,
       );

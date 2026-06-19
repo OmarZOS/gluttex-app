@@ -1,7 +1,7 @@
 library business;
 
 import 'dart:developer' as developer;
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_core/business/finance/services/InvoiceService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
@@ -15,7 +15,7 @@ class InvoiceServiceImpl implements InvoiceService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.postPaymentEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.postPaymentEndpoint}';
       developer.log('Adding financial document at: $url',
           name: 'InvoiceServiceImpl');
       developer.log('Financial document data: $financialDocument',
@@ -46,7 +46,7 @@ class InvoiceServiceImpl implements InvoiceService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getPaymentsEndpoint}/$financialDocumentId';
+          '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}/$financialDocumentId';
       developer.log('Deleting financial document at: $url',
           name: 'InvoiceServiceImpl');
 
@@ -94,7 +94,7 @@ class InvoiceServiceImpl implements InvoiceService {
       if (invoiceId > 0) queryParams['invoice_id'] = invoiceId;
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getFinancialDocsEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.getFinancialDocsEndpoint}';
       developer.log('Getting financial documents from: $url',
           name: 'InvoiceServiceImpl');
       developer.log('Query params: $queryParams', name: 'InvoiceServiceImpl');
@@ -173,12 +173,12 @@ class InvoiceServiceImpl implements InvoiceService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getPaymentsEndpoint}/$idFinancialDocument';
+          '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}/$idFinancialDocument';
       developer.log('Getting financial document from: $url',
           name: 'InvoiceServiceImpl');
 
       final responseData = await storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.getPaymentsEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}',
         idFinancialDocument,
       );
 
@@ -214,7 +214,7 @@ class InvoiceServiceImpl implements InvoiceService {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getPaymentsEndpoint}/${updatedFinancialDocument.documentId}';
+          '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}/${updatedFinancialDocument.documentId}';
       developer.log('Updating financial document at: $url',
           name: 'InvoiceServiceImpl');
       developer.log('Update data: ${updatedFinancialDocument.toJson()}',
@@ -262,7 +262,7 @@ class InvoiceServiceImpl implements InvoiceService {
       if (invoiceId != null) queryParams['invoice_id'] = invoiceId;
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getPaymentsEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}';
       developer.log('Getting payments from: $url', name: 'InvoiceServiceImpl');
 
       final responseData =
@@ -294,7 +294,7 @@ class InvoiceServiceImpl implements InvoiceService {
       if (cartId != null) queryParams['cart_id'] = cartId;
 
       final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getDepositsEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.getDepositsEndpoint}';
       developer.log('Getting deposits from: $url', name: 'InvoiceServiceImpl');
 
       final responseData =
@@ -327,8 +327,7 @@ class InvoiceServiceImpl implements InvoiceService {
       if (providerId != null) queryParams['provider_id'] = providerId;
       if (userId != null) queryParams['user_id'] = userId;
 
-      final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getFeesEndpoint}';
+      final url = '${AppConstants.apiBaseUrl}${AppConstants.getFeesEndpoint}';
       developer.log('Getting fees from: $url', name: 'InvoiceServiceImpl');
 
       final responseData =

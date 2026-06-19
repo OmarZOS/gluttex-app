@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/Services/AuthService.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
@@ -32,7 +32,7 @@ class AppUserNotifier extends ChangeNotifier {
   bool get isLoading => _isLoading;
   int get selectedTabIndex => _selectedTabIndex;
   bool get isCookingChef =>
-      ((appUser?.app_user_type_id ?? 0) == GluttexConstants.cookingChefDBId);
+      ((appUser?.app_user_type_id ?? 0) == AppConstants.cookingChefDBId);
 
   // Helper method to generate caller key
   String _getCallerKey(String method, {String? id, String? suffix}) {

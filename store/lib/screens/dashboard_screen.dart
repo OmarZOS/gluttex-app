@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:store/components/dashboard/dashboard_content.dart';
 import 'package:provider/provider.dart';

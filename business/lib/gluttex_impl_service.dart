@@ -2,7 +2,7 @@ library business;
 
 import 'dart:developer';
 import 'dart:typed_data';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:gluttex_core/business/services/ProvidedServiceManagementService.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
@@ -43,7 +43,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
         _getCallerKey('addProvidedService', suffix: service.name ?? 'unnamed');
     try {
       final result = await _storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.addServiceEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.addServiceEndpoint}',
         service.toJson(),
         callerKey: key,
       );
@@ -71,7 +71,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
         callerKey ?? _getCallerKey('deleteProvidedService', id: serviceId);
     try {
       final result = await _storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteServiceEndpoint}/$serviceId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteServiceEndpoint}/$serviceId',
         serviceId,
         callerKey: key,
       );
@@ -97,7 +97,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
             id: updatedService.id?.toString() ?? 'unknown');
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.serviceEndpoint}/${updatedService.id}',
+        '${AppConstants.apiBaseUrl}${AppConstants.serviceEndpoint}/${updatedService.id}',
         updatedService.id?.toString() ?? '',
         {"service_id": updatedService.id?.toString() ?? ''},
         updatedService.toJson(),
@@ -166,7 +166,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
       // }
 
       route =
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.serviceEndpoint}/$serviceId/$categoryId/$providerId/$page/$limit";
+          "${AppConstants.apiBaseUrl}${AppConstants.serviceEndpoint}/$serviceId/$categoryId/$providerId/$page/$limit";
 
       final responseData = await _storageService.getAll(
         route,
@@ -211,7 +211,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
         callerKey ?? _getCallerKey('searchServicesByToken', suffix: token);
     try {
       final data = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchServiceEndpoint}/$token/$page/$limit',
+        '${AppConstants.apiBaseUrl}${AppConstants.searchServiceEndpoint}/$token/$page/$limit',
         callerKey: key,
       );
 

@@ -10,7 +10,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "chef",
         "health",
         "store_geo",
@@ -32,7 +32,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "chef",
         "health",
         "store_geo",
@@ -420,7 +420,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "chef",
         "health",
         "store_geo",
@@ -445,7 +445,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "chef",
         "health",
         "store_geo",
@@ -554,7 +554,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "event",
         "io",
         "gluttex_home",
@@ -570,7 +570,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "event",
         "io",
         "gluttex_home",
@@ -768,7 +768,7 @@
         "vibration",
         "image_picker",
         "path",
-        "gluttex_constants"
+        "app_constants"
       ],
       "directDependencies": [
         "flutter",
@@ -778,11 +778,11 @@
         "vibration",
         "image_picker",
         "path",
-        "gluttex_constants"
+        "app_constants"
       ]
     },
     {
-      "name": "gluttex_constants",
+      "name": "app_constants",
       "version": "0.0.1",
       "kind": "direct",
       "source": "path",
@@ -1375,7 +1375,7 @@
       "dependencies": [
         "dio",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "sqflite",
         "path",
         "shared_preferences",
@@ -1384,7 +1384,7 @@
       "directDependencies": [
         "dio",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "sqflite",
         "path",
         "shared_preferences",
@@ -1768,13 +1768,13 @@
       "source": "path",
       "dependencies": [
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "locator",
         "google_sign_in"
       ],
       "directDependencies": [
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "locator",
         "google_sign_in"
       ]
@@ -1914,7 +1914,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "event",
         "flutter_svg",
         "flutter_linkify",
@@ -1929,7 +1929,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "event",
         "flutter_svg",
         "flutter_linkify",
@@ -2303,14 +2303,14 @@
       "dependencies": [
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "shared_preferences",
         "geolocator"
       ],
       "directDependencies": [
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "shared_preferences",
         "geolocator"
       ]
@@ -2472,14 +2472,14 @@
       "source": "path",
       "dependencies": [
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "locator",
         "geolocator",
         "permission_handler"
       ],
       "directDependencies": [
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "locator",
         "geolocator",
         "permission_handler"
@@ -2594,7 +2594,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "chef",
         "health",
         "store_geo",
@@ -2612,7 +2612,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "chef",
         "health",
         "store_geo",
@@ -2774,13 +2774,13 @@
         "flutter",
         "flame",
         "flutter_svg",
-        "gluttex_constants"
+        "app_constants"
       ],
       "directDependencies": [
         "flutter",
         "flame",
         "flutter_svg",
-        "gluttex_constants"
+        "app_constants"
       ]
     },
     {
@@ -2820,7 +2820,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "event",
         "ui",
         "scanner",
@@ -2838,7 +2838,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "event",
         "ui",
         "scanner",
@@ -2959,7 +2959,7 @@
         "google_maps_flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "ui",
         "event",
         "http",
@@ -2976,7 +2976,7 @@
         "google_maps_flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "ui",
         "event",
         "http",
@@ -3009,12 +3009,12 @@
       "dependencies": [
         "flutter",
         "fl_chart",
-        "gluttex_constants"
+        "app_constants"
       ],
       "directDependencies": [
         "flutter",
         "fl_chart",
-        "gluttex_constants"
+        "app_constants"
       ]
     },
     {
@@ -3026,7 +3026,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "event",
         "ui",
         "cupertino_icons",
@@ -3040,7 +3040,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "event",
         "ui",
         "cupertino_icons",
@@ -3059,14 +3059,14 @@
       "dependencies": [
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "path",
         "dio"
       ],
       "directDependencies": [
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "path",
         "dio"
       ]

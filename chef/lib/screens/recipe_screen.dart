@@ -8,8 +8,8 @@ import 'package:chef/components/RecipeOwner.dart';
 import 'package:chef/components/ingredientCard.dart';
 import 'package:chef/screens/recipe_form_screen.dart';
 import 'package:ui/components/confirmation_dialogue.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/Response.dart';
@@ -229,10 +229,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
           colors: (Theme.of(context).brightness == Brightness.dark)
               ? [
                   const Color.fromARGB(255, 100, 110, 105),
-                  GluttexConstants.backgroundDarkColor,
+                  AppConstants.backgroundDarkColor,
                 ]
               : [
-                  GluttexConstants.backgroundColor,
+                  AppConstants.backgroundColor,
                   const Color.fromARGB(255, 143, 197, 166),
                 ],
           begin: Alignment.topLeft,
@@ -425,7 +425,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
     final colorScheme = theme.colorScheme;
     return Card(
       margin: const EdgeInsets.symmetric(
-        horizontal: GluttexConstants.kDefaultPaddin / 8,
+        horizontal: AppConstants.kDefaultPaddin / 8,
         vertical: 8,
       ),
       elevation: 2,

@@ -12,8 +12,8 @@ dependencies:
   #   sdk: flutter
   gluttex_core:
     path: ../gluttex_core
-  gluttex_constants:
-    path: ../gluttex_constants  
+  app_constants:
+    path: ../app_constants  
   locator:
     path: ../locator
   google_sign_in: ^6.2.1

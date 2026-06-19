@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:store/components/service/details/service_details_header.dart';
 import 'package:store/components/service/details/service_info_section.dart';

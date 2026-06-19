@@ -5,8 +5,8 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chef/screens/recipe_catalog_screen.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:gluttex_home/screens/SettingsScreen.dart';
@@ -342,8 +342,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
     final backgroundColor = isDarkMode
-        ? GluttexConstants.backgroundDarkColor
-        : GluttexConstants.backgroundColor;
+        ? AppConstants.backgroundDarkColor
+        : AppConstants.backgroundColor;
 
     return Scaffold(
       appBar: _buildAppBar(theme, backgroundColor),
@@ -402,8 +402,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final displayName =
         '${appUser?.personFirstName} ${appUser?.personLastName}'.trim();
     final backgroundColor = Theme.of(context).brightness == Brightness.light
-        ? GluttexConstants.backgroundColor
-        : GluttexConstants.backgroundDarkColor;
+        ? AppConstants.backgroundColor
+        : AppConstants.backgroundDarkColor;
 
     return [
       _buildNavigationItem(

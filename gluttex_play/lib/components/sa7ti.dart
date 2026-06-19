@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/custom_localizations.dart';
+import 'package:gluttex_localizations/custom_localizations.dart';
 import 'package:gluttex_play/components/QuizAnswerIndexes.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 
 class GlutenFreeQuiz extends StatefulWidget {
   @override

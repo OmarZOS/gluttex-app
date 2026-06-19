@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:event/recipe_change_notifier.dart';
 import 'package:provider/provider.dart';
@@ -130,7 +130,7 @@ class _IngredientPopupState extends State<IngredientPopup> {
 
   Future<void> _showQuantityDialog(RecipeIngredient ingredient) async {
     // Map of unit short codes to full names
-    var units = GluttexConstants.recipeUnits;
+    var units = AppConstants.recipeUnits;
     final loc = AppLocalizations.of(context)!;
     String selectedUnit = 'g'; // Default selected unit
     final amountController = TextEditingController();

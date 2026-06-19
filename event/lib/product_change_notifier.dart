@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:locator/locator.dart';
@@ -40,7 +40,7 @@ class ProductNotifier extends ChangeNotifier {
   final Map<int, bool> _supplierFetchingState = {};
   final Map<int, List<Function(List<Product>)>> _supplierCallbacks = {};
 
-  final int itemsPerPage = GluttexConstants.itemsPerPage;
+  final int itemsPerPage = AppConstants.itemsPerPage;
   List<String> _productCategories = [];
 
   bool _isDisposed = false;

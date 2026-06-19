@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:chef/screens/ingredient_management_screen.dart';
 import 'package:chef/screens/recipe_catalog_screen.dart';
 import 'package:chef/screens/recipe_form_screen.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:event/cart_change_notifier.dart';
 import 'package:event/order_change_notifier.dart';
 import 'package:gluttex_home/screens/app_user_update_form_screen.dart';

@@ -1,7 +1,7 @@
 library business;
 
 import 'dart:developer' as developer;
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
@@ -26,11 +26,11 @@ class BusinessOperationServiceImpl implements BusinessOperationService {
       // else
       // ignore: curly_braces_in_flow_control_structures
       route =
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getBusinessOperationsEndpoint}/$supplierId/$orderId/$cartId/$clientId/$sellerId/$page/$limit";
+          "${AppConstants.apiBaseUrl}${AppConstants.getBusinessOperationsEndpoint}/$supplierId/$orderId/$cartId/$clientId/$sellerId/$page/$limit";
       // if (category > 0) {
       // } else {
       //   route =
-      //       "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllServicesEndpoint}/$page/$limit";
+      //       "${AppConstants.apiBaseUrl}${AppConstants.getAllServicesEndpoint}/$page/$limit";
       // }
       // Make a call to get all Services
       // developer.log("Getting data from: $route");

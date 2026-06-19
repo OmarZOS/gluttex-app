@@ -14,8 +14,8 @@ dependencies:
   # eventsource: ^1.0.1
   gluttex_core:
     path: ../gluttex_core
-  gluttex_constants:
-    path: ../gluttex_constants
+  app_constants:
+    path: ../app_constants
   sqflite: ^2.0.0+4
   path: ^1.8.0
   shared_preferences: ^2.0.0

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 
 class CartCounter extends StatefulWidget {
   const CartCounter({super.key});
@@ -39,7 +39,7 @@ class _CartCounterState extends State<CartCounter> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: GluttexConstants.kDefaultPaddin / 2),
+              horizontal: AppConstants.kDefaultPaddin / 2),
           child: Text(
             // if our item is less  then 10 then  it shows 01 02 like that
             numOfItems.toString().padLeft(2, "0"),

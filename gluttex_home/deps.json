@@ -10,7 +10,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "impl_app",
         "business",
         "impl_mediation",
@@ -29,7 +29,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "impl_app",
         "business",
         "impl_mediation",
@@ -818,7 +818,7 @@
         "flutter",
         "fluttertoast",
         "locator",
-        "gluttex_constants",
+        "app_constants",
         "dio",
         "path"
       ],
@@ -826,7 +826,7 @@
         "flutter",
         "fluttertoast",
         "locator",
-        "gluttex_constants",
+        "app_constants",
         "dio",
         "path"
       ]
@@ -872,7 +872,7 @@
       ]
     },
     {
-      "name": "gluttex_constants",
+      "name": "app_constants",
       "version": "0.0.1",
       "kind": "direct",
       "source": "path",
@@ -986,7 +986,7 @@
         "flutter",
         "dio",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "sqflite",
         "path",
         "shared_preferences",
@@ -996,7 +996,7 @@
         "flutter",
         "dio",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "sqflite",
         "path",
         "shared_preferences",
@@ -1341,14 +1341,14 @@
       "dependencies": [
         "flutter",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "locator",
         "google_sign_in"
       ],
       "directDependencies": [
         "flutter",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "locator",
         "google_sign_in"
       ]
@@ -1500,14 +1500,14 @@
         "flutter",
         "flame",
         "flutter_svg",
-        "gluttex_constants",
+        "app_constants",
         "cupertino_icons"
       ],
       "directDependencies": [
         "flutter",
         "flame",
         "flutter_svg",
-        "gluttex_constants",
+        "app_constants",
         "cupertino_icons"
       ]
     },
@@ -1548,7 +1548,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "impl_app",
         "business",
         "impl_mediation",
@@ -1569,7 +1569,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "impl_app",
         "business",
         "impl_mediation",
@@ -1963,7 +1963,7 @@
         "google_maps_flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "impl_app",
         "business",
         "impl_mediation",
@@ -1985,7 +1985,7 @@
         "google_maps_flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "impl_app",
         "business",
         "impl_mediation",
@@ -2183,7 +2183,7 @@
       "dependencies": [
         "flutter",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "locator",
         "geolocator",
         "permission_handler"
@@ -2191,7 +2191,7 @@
       "directDependencies": [
         "flutter",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "locator",
         "geolocator",
         "permission_handler"
@@ -2465,13 +2465,13 @@
       "dependencies": [
         "flutter",
         "fl_chart",
-        "gluttex_constants",
+        "app_constants",
         "cupertino_icons"
       ],
       "directDependencies": [
         "flutter",
         "fl_chart",
-        "gluttex_constants",
+        "app_constants",
         "cupertino_icons"
       ]
     },
@@ -2512,7 +2512,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "impl_app",
         "business",
         "impl_mediation",
@@ -2528,7 +2528,7 @@
         "flutter",
         "locator",
         "gluttex_core",
-        "gluttex_constants",
+        "app_constants",
         "impl_app",
         "business",
         "impl_mediation",

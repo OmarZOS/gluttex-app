@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 
 class HealthInfoScreen extends StatefulWidget {
   const HealthInfoScreen({super.key});
@@ -30,10 +30,10 @@ class _HealthInfoScreenState extends State<HealthInfoScreen>
                         colors: isDarkMode
                             ? [
                                 const Color.fromARGB(255, 100, 110, 105),
-                                GluttexConstants.backgroundDarkColor
+                                AppConstants.backgroundDarkColor
                               ] // Darker green shades
                             : [
-                                GluttexConstants.backgroundColor,
+                                AppConstants.backgroundColor,
                                 const Color.fromARGB(255, 143, 197, 166)
                               ], // Your main color + slightly darker
                         begin: Alignment.topLeft,

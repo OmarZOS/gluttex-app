@@ -3,7 +3,7 @@ library gluttex_impl_cart;
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/finance/Cart.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_core/business/services/CartService.dart';
@@ -50,7 +50,7 @@ class CartServiceImpl extends CartService {
         _getCallerKey('getAllCarts', suffix: 'offset_$offset-limit_$limit');
     try {
       final responseData = await _storageService.getAll(
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getCartsEndpoint}/$providerId/$sellerId/$cartId/$clientId/$personId/$offset/$limit',
+          '${AppConstants.apiBaseUrl}${AppConstants.getCartsEndpoint}/$providerId/$sellerId/$cartId/$clientId/$personId/$offset/$limit',
           callerKey: key);
 
       if (responseData == null || responseData.isEmpty) {
@@ -97,8 +97,7 @@ class CartServiceImpl extends CartService {
       {dynamic params, String? callerKey}) async {
     final key = callerKey ?? _getCallerKey('addCart');
     try {
-      final url =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.postCartEndpoint}';
+      final url = '${AppConstants.apiBaseUrl}${AppConstants.postCartEndpoint}';
 
       final result = await _storageService.insert(
         url,
@@ -137,7 +136,7 @@ class CartServiceImpl extends CartService {
             id: updatedCart.cartId?.toString() ?? 'unknown');
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.cartEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.cartEndpoint}',
         updatedCart.cartId?.toString() ?? '',
         {},
         updatedCart.toJson(),
@@ -164,7 +163,7 @@ class CartServiceImpl extends CartService {
     final key = callerKey ?? _getCallerKey('deleteCart', id: cartId);
     try {
       final result = await _storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteCartEndpoint ?? GluttexConstants.cartEndpoint}/$cartId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteCartEndpoint ?? AppConstants.cartEndpoint}/$cartId',
         cartId,
         callerKey: key,
       );
@@ -189,7 +188,7 @@ class CartServiceImpl extends CartService {
         callerKey ?? _getCallerKey('getCartDetails', id: idCart.toString());
     try {
       final responseData = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.getCartDetailsEndpoint}/$idCart',
+        '${AppConstants.apiBaseUrl}${AppConstants.getCartDetailsEndpoint}/$idCart',
         callerKey: key,
       );
 
@@ -220,7 +219,7 @@ class CartServiceImpl extends CartService {
             suffix: 'user_$userId-status_$status');
     try {
       final responseData = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.cartEndpoint}/status/$userId/$status',
+        '${AppConstants.apiBaseUrl}${AppConstants.cartEndpoint}/status/$userId/$status',
         callerKey: key,
       );
 
@@ -249,7 +248,7 @@ class CartServiceImpl extends CartService {
             suffix: 'user_$userId-provider_$providerId');
     try {
       final responseData = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.cartEndpoint}/provider/$userId/$providerId',
+        '${AppConstants.apiBaseUrl}${AppConstants.cartEndpoint}/provider/$userId/$providerId',
         callerKey: key,
       );
 
@@ -278,7 +277,7 @@ class CartServiceImpl extends CartService {
             id: cartId, suffix: 'status_$newStatus');
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.cartEndpoint}/status/$cartId',
+        '${AppConstants.apiBaseUrl}${AppConstants.cartEndpoint}/status/$cartId',
         cartId,
         {},
         {'status': newStatus},

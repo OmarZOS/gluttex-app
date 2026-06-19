@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:ui/components/finance/Payment_Type_UI_Manager.dart';
 
 class PaymentTypeSection extends StatefulWidget {

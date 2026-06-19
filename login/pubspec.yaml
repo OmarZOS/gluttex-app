@@ -38,6 +38,8 @@ dependencies:
     path: ../locator
   gluttex_core:
     path: ../gluttex_core
+  gluttex_localizations:
+    path: ../gluttex_localizations
   ui:
     path: ../ui
   event:

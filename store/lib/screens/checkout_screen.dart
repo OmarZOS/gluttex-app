@@ -16,7 +16,7 @@ import 'package:ui/components/document/DocumentTypeManager.dart';
 import 'package:ui/components/finance/Payment_Type_UI_Manager.dart';
 import 'package:ui/components/search/customer_search_section.dart';
 import 'package:provider/provider.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final int supplierId;

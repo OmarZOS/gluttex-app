@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:ui/components/services/ServiceUIProvider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 
 class ServiceConfigurationSheet extends StatefulWidget {
   final ProvidedService service;

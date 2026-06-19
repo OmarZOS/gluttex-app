@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/business/iProduct.dart';
 import 'package:gluttex_core/business/product_form_data.dart';
@@ -414,7 +414,7 @@ class AiAssistant {
 
       if (quantifierField != null && !quantifierField.isEdited) {
         final quantifier = quantifierField.value?.toString() ?? 'pc';
-        if (GluttexConstants.productUnits.contains(quantifier)) {
+        if (AppConstants.productUnits.contains(quantifier)) {
           formData.quantifier = quantifier;
         }
       }

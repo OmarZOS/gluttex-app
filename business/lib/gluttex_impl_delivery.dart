@@ -3,7 +3,7 @@ library business;
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Delivery.dart';
 import 'package:gluttex_core/business/services/DeliveryService.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
@@ -43,7 +43,7 @@ class DeliveryServiceImpl extends DeliveryService {
     final key = callerKey ?? _getCallerKey('addDelivery');
     try {
       final result = await _storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.addDeliveryEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.addDeliveryEndpoint}',
         deliveryData,
         callerKey: key,
       );
@@ -70,7 +70,7 @@ class DeliveryServiceImpl extends DeliveryService {
       // Note: The original implementation threw UnimplementedError
       // Now properly implemented with traceability
       final result = await _storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteDeliveryEndpoint}/$deliveryId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteDeliveryEndpoint}/$deliveryId',
         deliveryId,
         callerKey: key,
       );
@@ -97,7 +97,7 @@ class DeliveryServiceImpl extends DeliveryService {
     try {
       // Fixed: Using correct endpoint for delivery update
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateDeliveryEndpoint ?? GluttexConstants.deliveryEndpoint}/${updatedDelivery.id_delivery}',
+        '${AppConstants.apiBaseUrl}${AppConstants.updateDeliveryEndpoint ?? AppConstants.deliveryEndpoint}/${updatedDelivery.id_delivery}',
         updatedDelivery.id_delivery?.toString() ?? '',
         {},
         updatedDelivery.toJson(),
@@ -124,7 +124,7 @@ class DeliveryServiceImpl extends DeliveryService {
     final key = callerKey ?? _getCallerKey('getDelivery', id: id);
     try {
       final data = await _storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deliveryEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.deliveryEndpoint}',
         id,
         callerKey: key,
       );
@@ -155,7 +155,7 @@ class DeliveryServiceImpl extends DeliveryService {
             suffix: 'offset_$offset-limit_$limit');
     try {
       final responseData = await _storageService.getAll(
-        "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllDeliveriesEndpoint}/$providerId/$orderId/$brokerId/$offset/$limit",
+        "${AppConstants.apiBaseUrl}${AppConstants.getAllDeliveriesEndpoint}/$providerId/$orderId/$brokerId/$offset/$limit",
         callerKey: key,
       );
 
@@ -185,7 +185,7 @@ class DeliveryServiceImpl extends DeliveryService {
         _getCallerKey('getDeliveriesByStatus', suffix: 'status_$status');
     try {
       final responseData = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deliveryEndpoint}/status/$status',
+        '${AppConstants.apiBaseUrl}${AppConstants.deliveryEndpoint}/status/$status',
         callerKey: key,
       );
 
@@ -214,7 +214,7 @@ class DeliveryServiceImpl extends DeliveryService {
             id: deliveryId, suffix: 'status_$newStatus');
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deliveryEndpoint}/status/$deliveryId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deliveryEndpoint}/status/$deliveryId',
         deliveryId,
         {},
         {'status': newStatus},

@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_constants/gluttex_response_codes.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
+import 'package:app_constants/app_response_codes.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
@@ -60,7 +60,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
       ResponseHandler.handleResponse(
         context: context,
         statusCode: 500,
-        responseCode: GluttexResponseCodes.put_success,
+        responseCode: AppResponseCodes.put_success,
         finalMessage: AppLocalizations.of(context)!.putSuccess,
       );
       // _showErrorSnackbar('Failed to pick image: ${e.message}');
@@ -401,7 +401,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
         if (_imageChanged)
           Column(
             children: [
-              const SizedBox(height: GluttexConstants.kDefaultPaddin),
+              const SizedBox(height: AppConstants.kDefaultPaddin),
               TextButton(
                 onPressed: () => setState(() {
                   _imageChanged = false;

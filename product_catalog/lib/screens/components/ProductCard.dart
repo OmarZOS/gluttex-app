@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 
 class ProductCard extends StatelessWidget {
@@ -16,7 +16,7 @@ class ProductCard extends StatelessWidget {
     int categoryId = product.product_category_id ?? 0;
     // log("Card id_product: ${product.id_product}");
     return Card(
-      // color: GluttexConstants().getCardColor(
+      // color: AppConstants().getCardColor(
       //     categoryId - 1, Theme.of(context).brightness == Brightness.dark),
       elevation: 2,
       shape: RoundedRectangleBorder(

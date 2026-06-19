@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 
 class Description extends StatelessWidget {
@@ -10,7 +10,7 @@ class Description extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding:
-          const EdgeInsets.symmetric(vertical: GluttexConstants.kDefaultPaddin),
+          const EdgeInsets.symmetric(vertical: AppConstants.kDefaultPaddin),
       child: Text(
         product.product_description ?? "",
         style: const TextStyle(height: 1.5),

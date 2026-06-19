@@ -1,7 +1,7 @@
 // organisation_management_popup.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Organisation.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:ui/Services/ResponseHandler.dart';

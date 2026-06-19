@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:event/service_change_notifier.dart';
 import 'package:store/components/selling_point/selling_items/item_card_with_controls.dart';

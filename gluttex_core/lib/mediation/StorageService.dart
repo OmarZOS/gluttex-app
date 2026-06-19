@@ -1,4 +1,4 @@
-// import 'package:dio/dio.dart';
+// storage_service.dart
 
 // import 'package:dio/dio.dart';
 
@@ -7,7 +7,7 @@ class CallerResponse {
   final int? statusCode;
   final String? errorCode;
   final String? message;
-  final String? responseCode; // NEW: Add responseCode field
+  final String? responseCode;
   final bool isSuccess;
   final DateTime timestamp;
 
@@ -16,7 +16,7 @@ class CallerResponse {
     this.statusCode,
     this.errorCode,
     this.message,
-    this.responseCode, // NEW: Add to constructor
+    this.responseCode,
     required this.isSuccess,
     required this.timestamp,
   });
@@ -59,6 +59,35 @@ class CallerResponse {
 abstract class StorageService<T> {
   // Map to store latest response for each caller key
   final Map<String, CallerResponse> _callerResponses = {};
+
+  // ==================== Token Management ====================
+
+  String? _authToken;
+
+  /// Set the authentication token (Bearer token or Cookie)
+  void setAuthToken(String token) {
+    _authToken = token;
+  }
+
+  /// Get the current authentication token
+  String? getAuthToken() {
+    return _authToken;
+  }
+
+  /// Clear the authentication token
+  void clearAuthToken() {
+    _authToken = null;
+  }
+
+  /// Check if token is set
+  bool hasAuthToken() {
+    return _authToken != null && _authToken!.isNotEmpty;
+  }
+
+  /// Get token for request (internal use)
+  String? getTokenForRequest(String? providedToken) {
+    return providedToken ?? _authToken;
+  }
 
   // ==================== Response Storage Methods ====================
 
@@ -193,12 +222,12 @@ abstract class StorageService<T> {
   // ==================== Existing Abstract Methods ====================
 
   Future<dynamic> getAll(String destination,
-      {params, String? callerKey}) async {
+      {params, String? callerKey, String? token}) async {
     return null;
   }
 
   Future<dynamic> insert(String destination, Map<String, dynamic> data,
-      {params, String? callerKey}) async {
+      {params, String? callerKey, String? token}) async {
     return null;
   }
 
@@ -207,41 +236,41 @@ abstract class StorageService<T> {
   }
 
   Future<dynamic> insertBinary(String destination, T data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 
   Future<dynamic> get(String destination, String id,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 
   Future<int?> delete(String destination, String id,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 
   Future<dynamic> update(String destination, String id,
       Map<String, dynamic> parameters, Map<String, dynamic> data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 
   Future<dynamic> signUpUsingUsernameAndPassword(
       String destination, Map<String, dynamic> data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 
   Future<dynamic> signInUsingUsernameAndPassword(
       String destination, Map<String, dynamic> data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 
   Future<dynamic> signInUsingProvider(
       String destination, String providerName, Map<String, dynamic> data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 }

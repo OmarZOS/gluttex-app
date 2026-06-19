@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_core/business/Supplier.dart';
@@ -15,7 +15,7 @@ import 'package:event/personnel_notifier.dart';
 import 'package:badges/badges.dart' as badges;
 
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:ui/components/order/order_ui_manager.dart';
 

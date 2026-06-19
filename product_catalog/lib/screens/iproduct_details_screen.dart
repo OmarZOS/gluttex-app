@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/iProduct.dart';
 import 'package:event/assistant_change_notifier.dart';
 import 'package:event/components/lib.dart';
@@ -300,7 +300,7 @@ class _IProductDetailsScreenState extends State<IProductDetailsScreen> {
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(GluttexConstants.kDefaultPaddin),
+                padding: const EdgeInsets.all(AppConstants.kDefaultPaddin),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

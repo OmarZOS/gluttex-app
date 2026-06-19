@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_response_codes.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_response_codes.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/business/product_form_data.dart';
 import 'package:event/product_change_notifier.dart';
@@ -30,7 +30,7 @@ class SubmitHandler {
         ResponseHandler.handleResponse(
           context: context,
           statusCode: 200,
-          responseCode: GluttexResponseCodes.put_success,
+          responseCode: AppResponseCodes.put_success,
           finalMessage: AppLocalizations.of(context)!.putSuccess,
         );
 

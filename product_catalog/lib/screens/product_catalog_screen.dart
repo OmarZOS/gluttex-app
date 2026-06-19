@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/iProduct.dart';
 import 'package:event/user_change_notifier.dart';
@@ -240,7 +240,7 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: GluttexConstants.kDefaultPaddin / 4,
+                    horizontal: AppConstants.kDefaultPaddin / 4,
                   ),
                   child: RefreshIndicator(
                     onRefresh: _refreshProducts,
@@ -271,12 +271,12 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
             onTap: () => _selectCategory(index),
             child: Container(
               margin: const EdgeInsets.symmetric(
-                horizontal: GluttexConstants.kDefaultPaddin / 2,
-                vertical: GluttexConstants.kDefaultPaddin / 4,
+                horizontal: AppConstants.kDefaultPaddin / 2,
+                vertical: AppConstants.kDefaultPaddin / 4,
               ),
               padding: const EdgeInsets.symmetric(
-                horizontal: GluttexConstants.kDefaultPaddin / 2,
-                vertical: GluttexConstants.kDefaultPaddin / 3,
+                horizontal: AppConstants.kDefaultPaddin / 2,
+                vertical: AppConstants.kDefaultPaddin / 3,
               ),
               decoration: BoxDecoration(
                 color: isSelected

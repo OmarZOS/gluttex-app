@@ -1,7 +1,7 @@
 library business;
 
 import 'dart:developer';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
@@ -42,7 +42,7 @@ class ProductServiceImpl extends ProductService {
         _getCallerKey('addProduct', suffix: product.product_name ?? 'unnamed');
     try {
       final result = await _storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.addProductEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.addProductEndpoint}',
         product.toJson(),
         callerKey: key,
       );
@@ -67,7 +67,7 @@ class ProductServiceImpl extends ProductService {
     final key = callerKey ?? _getCallerKey('deleteProduct', id: productId);
     try {
       final result = await _storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteProductEndpoint}/$productId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteProductEndpoint}/$productId',
         productId,
         callerKey: key,
       );
@@ -92,7 +92,7 @@ class ProductServiceImpl extends ProductService {
             id: updatedProduct.id_product?.toString() ?? 'unknown');
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateProductEndpoint ?? GluttexConstants.productEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.updateProductEndpoint ?? AppConstants.productEndpoint}',
         updatedProduct.id_product?.toString() ?? '',
         {"product_id": updatedProduct.id_product?.toString() ?? ''},
         updatedProduct.toJson(),
@@ -119,7 +119,7 @@ class ProductServiceImpl extends ProductService {
     final key = callerKey ?? _getCallerKey('getProduct', id: id);
     try {
       final data = await _storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.productEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.productEndpoint}',
         id,
         callerKey: key,
       );
@@ -157,7 +157,7 @@ class ProductServiceImpl extends ProductService {
 
       // Build the route with all parameters
       final route =
-          "${GluttexConstants.apiBaseUrl}${GluttexConstants.getAllProductsEndpoint}/$userId/$providerId/$category/$page/$limit";
+          "${AppConstants.apiBaseUrl}${AppConstants.getAllProductsEndpoint}/$userId/$providerId/$category/$page/$limit";
 
       final responseData = await _storageService.getAll(
         route,
@@ -205,7 +205,7 @@ class ProductServiceImpl extends ProductService {
         callerKey ?? _getCallerKey('searchProductsByToken', suffix: token);
     try {
       final data = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.productSearchEndpoint}/$token/$offset/$itemsPerPage',
+        '${AppConstants.apiBaseUrl}${AppConstants.productSearchEndpoint}/$token/$offset/$itemsPerPage',
         callerKey: key,
       );
 
@@ -246,7 +246,7 @@ class ProductServiceImpl extends ProductService {
 
     try {
       final route =
-          '${GluttexConstants.apiBaseUrl}${GluttexConstants.getProductCategoriesEndpoint}';
+          '${AppConstants.apiBaseUrl}${AppConstants.getProductCategoriesEndpoint}';
 
       final responseData = await _storageService.getAll(
         route,
@@ -291,7 +291,7 @@ class ProductServiceImpl extends ProductService {
     final key = callerKey ?? _getCallerKey('focusOnProduct', id: idProduct);
     try {
       final responseData = await _storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.productEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.productEndpoint}',
         idProduct,
         callerKey: key,
       );

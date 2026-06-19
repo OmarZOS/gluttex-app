@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:chef/components/RecipeCard.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:event/user_change_notifier.dart';
 import 'package:event/recipe_change_notifier.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Recipe.dart';
 import 'package:provider/provider.dart';
 
@@ -157,7 +157,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: GluttexConstants.kDefaultPaddin),
+                      horizontal: AppConstants.kDefaultPaddin),
                   child: _buildRecipeList(recipeNotifier, recipes),
                 ),
               ),
@@ -221,7 +221,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
 
           return Padding(
             padding: const EdgeInsets.symmetric(
-                horizontal: GluttexConstants.kDefaultPaddin / 4),
+                horizontal: AppConstants.kDefaultPaddin / 4),
             child: ChoiceChip(
               label: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -257,8 +257,8 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
                 side: BorderSide(color: colorScheme.outline.withOpacity(0.2)),
               ),
               padding: const EdgeInsets.symmetric(
-                horizontal: GluttexConstants.kDefaultPaddin / 2,
-                vertical: GluttexConstants.kDefaultPaddin / 4,
+                horizontal: AppConstants.kDefaultPaddin / 2,
+                vertical: AppConstants.kDefaultPaddin / 4,
               ),
             ),
           );
@@ -323,7 +323,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
             delegate: SliverChildBuilderDelegate(
               (context, index) => Padding(
                 padding: const EdgeInsets.only(
-                  bottom: GluttexConstants.kDefaultPaddin,
+                  bottom: AppConstants.kDefaultPaddin,
                 ),
                 child: RecipeCard(recipe: recipes[index]),
               ),

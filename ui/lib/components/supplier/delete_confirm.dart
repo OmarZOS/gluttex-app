@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:ui/Services/ResponseHandler.dart';

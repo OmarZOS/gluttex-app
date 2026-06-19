@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Person.dart';
@@ -333,7 +333,7 @@ class PersonnelNotifier with ChangeNotifier {
 
       // Make the API call and capture the response
       final result = await _storageService.update(
-        "${GluttexConstants.apiBaseUrl}${GluttexConstants.answerStaffInvitationEndpoint}",
+        "${AppConstants.apiBaseUrl}${AppConstants.answerStaffInvitationEndpoint}",
         ruleId.toString(),
         {"accept": answer == 0},
         {},

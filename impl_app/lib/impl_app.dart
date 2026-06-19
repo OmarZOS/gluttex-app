@@ -2,7 +2,7 @@ library impl_app;
 
 import 'dart:developer';
 
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
@@ -45,7 +45,7 @@ class AppUserServiceImpl extends AppUserService {
         callerKey ?? _getCallerKey('addAppUser', suffix: appUser.app_user_name);
     try {
       final result = await _storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.addAppUserEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.addAppUserEndpoint}',
         appUser.toJson(),
         callerKey: key,
       );
@@ -68,7 +68,7 @@ class AppUserServiceImpl extends AppUserService {
         _getCallerKey('updateAppUser', id: appUser.id_app_user.toString());
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateAppUserEndpoint}/${appUser.id_app_user}',
+        '${AppConstants.apiBaseUrl}${AppConstants.updateAppUserEndpoint}/${appUser.id_app_user}',
         appUser.id_app_user.toString(),
         {},
         appUser.toJson(),
@@ -93,7 +93,7 @@ class AppUserServiceImpl extends AppUserService {
     final key = callerKey ?? _getCallerKey('deleteAppUser', id: appUserId);
     try {
       final result = await _storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteAppUserEndpoint}/$appUserId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteAppUserEndpoint}/$appUserId',
         appUserId,
         callerKey: key,
       );
@@ -117,7 +117,7 @@ class AppUserServiceImpl extends AppUserService {
             id: updatedAppUser.id_app_user.toString());
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateAppUserImageEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.updateAppUserImageEndpoint}',
         updatedAppUser.id_app_user.toString(),
         {'image_url': updatedAppUser.app_user_image_url ?? ''},
         updatedAppUser.toJson(),
@@ -140,7 +140,7 @@ class AppUserServiceImpl extends AppUserService {
     final key = callerKey ?? _getCallerKey('getAppUser', id: id);
     try {
       final data = await _storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.appUserEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.appUserEndpoint}',
         id,
         callerKey: key,
       );
@@ -172,7 +172,7 @@ class AppUserServiceImpl extends AppUserService {
     final key = callerKey ?? _getCallerKey('getManagementRules');
     try {
       final data = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.getStaffEndpoint}'
+        '${AppConstants.apiBaseUrl}${AppConstants.getStaffEndpoint}'
         '?org_id=$orgId&provider_id=$supplierId&user_id=$userId&offset=$offset&limit=$limit',
         callerKey: key,
       );
@@ -206,7 +206,7 @@ class AppUserServiceImpl extends AppUserService {
     final key = callerKey ?? _getCallerKey('addUserToSupplier');
     try {
       final result = await _storageService.insert(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.addRuleEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.addRuleEndpoint}',
         {
           "id_management_rule": 0,
           "rule_ref_org": orgId,
@@ -240,7 +240,7 @@ class AppUserServiceImpl extends AppUserService {
         _getCallerKey('updateManagementRule', id: ruleId.toString());
     try {
       final result = await _storageService.update(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.updateStaffEndpoint}/$ruleId',
+        '${AppConstants.apiBaseUrl}${AppConstants.updateStaffEndpoint}/$ruleId',
         ruleId.toString(),
         {},
         {
@@ -274,7 +274,7 @@ class AppUserServiceImpl extends AppUserService {
         _getCallerKey('deleteManagementRule', id: ruleId.toString());
     try {
       final result = await _storageService.delete(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.deleteStaffEndpoint}/$ruleId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteStaffEndpoint}/$ruleId',
         ruleId.toString(),
         callerKey: key,
       );
@@ -297,7 +297,7 @@ class AppUserServiceImpl extends AppUserService {
     final key = callerKey ?? _getCallerKey('searchAppUsers', suffix: query);
     try {
       final data = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchAppUserEndpoint}/$query?offset=$offset&limit=$limit',
+        '${AppConstants.apiBaseUrl}${AppConstants.searchAppUserEndpoint}/$query?offset=$offset&limit=$limit',
         callerKey: key,
       );
       if (data == null) {
@@ -325,7 +325,7 @@ class AppUserServiceImpl extends AppUserService {
     final key = callerKey ?? _getCallerKey('searchPeople', suffix: query);
     try {
       final data = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.searchPersonsByNameEndpoint}/$query?offset=$offset&limit=$limit',
+        '${AppConstants.apiBaseUrl}${AppConstants.searchPersonsByNameEndpoint}/$query?offset=$offset&limit=$limit',
         callerKey: key,
       );
       if (data == null) {
@@ -356,7 +356,7 @@ class AppUserServiceImpl extends AppUserService {
     final key = callerKey ?? _getCallerKey('getPerson', id: id);
     try {
       final data = await _storageService.get(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.personEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.personEndpoint}',
         id,
         callerKey: key,
       );
@@ -391,7 +391,7 @@ class AppUserServiceImpl extends AppUserService {
     }
     try {
       final data = await _storageService.getAll(
-        '${GluttexConstants.apiBaseUrl}${GluttexConstants.getAppUserCategoriesEndpoint}',
+        '${AppConstants.apiBaseUrl}${AppConstants.getAppUserCategoriesEndpoint}',
         callerKey: key,
       );
       if (data == null) return [];

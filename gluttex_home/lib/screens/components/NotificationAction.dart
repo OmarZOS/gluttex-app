@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/Notifications/Notifications/RoleInvitation.dart';
 import 'package:event/notification_notifier.dart';
 import 'package:event/personnel_notifier.dart';

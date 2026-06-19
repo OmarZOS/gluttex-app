@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/business/ProductResponse.dart';
 import 'package:gluttex_core/business/iProduct.dart';
@@ -44,11 +44,11 @@ class AssistantNotifier extends ChangeNotifier {
 
     try {
       final endpoint = onlyFromDB
-          ? GluttexConstants.getProductDBSearchByBarcodeEndpoint
-          : GluttexConstants.getProductSearchByBarcodeEndpoint;
+          ? AppConstants.getProductDBSearchByBarcodeEndpoint
+          : AppConstants.getProductSearchByBarcodeEndpoint;
 
       final result = await _storageService.get(
-        GluttexConstants.apiBaseUrl + endpoint,
+        AppConstants.apiBaseUrl + endpoint,
         barcode,
       );
 
@@ -95,8 +95,7 @@ class AssistantNotifier extends ChangeNotifier {
 
     try {
       final result = await _storageService.insertBinary(
-        GluttexConstants.apiBaseUrl +
-            GluttexConstants.getProductSearchByImageEndpoint,
+        AppConstants.apiBaseUrl + AppConstants.getProductSearchByImageEndpoint,
         _storageService.toFormData(imageData),
       );
 

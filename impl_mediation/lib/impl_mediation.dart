@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
-import 'package:gluttex_constants/gluttex_constants.dart';
+import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 
@@ -19,6 +19,27 @@ class StorageServiceImpl extends StorageService<FormData> {
               sendTimeout: const Duration(seconds: 7),
             ));
 
+  // Helper to add token to request headers
+  Options _applyToken(Options options, String? token) {
+    final effectiveToken = getTokenForRequest(token);
+
+    if (effectiveToken != null && effectiveToken.isNotEmpty) {
+      final headers = options.headers ?? {};
+      // Check if token is a bearer token or raw token
+      if (effectiveToken.startsWith('Bearer ')) {
+        headers['Authorization'] = effectiveToken;
+      } else if (effectiveToken.contains('=') || effectiveToken.contains(';')) {
+        // Likely a cookie string
+        headers['Cookie'] = effectiveToken;
+      } else {
+        // Default to Bearer
+        headers['Authorization'] = 'Bearer $effectiveToken';
+      }
+      return options.copyWith(headers: headers);
+    }
+    return options;
+  }
+
   GluttexException _createGluttexException(DioException e) {
     final responseData = e.response?.data;
     String? errorCode;
@@ -29,14 +50,6 @@ class StorageServiceImpl extends StorageService<FormData> {
     if (responseData != null) {
       try {
         if (responseData is Map<String, dynamic>) {
-          // Handle the new error format from backend
-          // {
-          //   "success": false,
-          //   "status_code": 401,
-          //   "code": "INCORRECT_CREDENTIALS",
-          //   "message": "Authentication failed",
-          //   "details": {...}
-          // }
           errorCode = responseData['code']?.toString() ??
               responseData['error_code']?.toString();
           message = responseData['message']?.toString();
@@ -55,7 +68,6 @@ class StorageServiceImpl extends StorageService<FormData> {
       }
     }
 
-    // Fallback to default error codes based on status code
     if (errorCode == null || errorCode.isEmpty) {
       switch (statusCode) {
         case 400:
@@ -106,10 +118,15 @@ class StorageServiceImpl extends StorageService<FormData> {
   }
 
   void _logRequest(String method, String url,
-      {dynamic data, dynamic params, String? callerKey}) {
+      {dynamic data, dynamic params, String? callerKey, String? token}) {
     developer.log('[$method] $url', name: 'StorageService');
     if (callerKey != null) {
       developer.log('CallerKey: $callerKey', name: 'StorageService');
+    }
+    final effectiveToken = getTokenForRequest(token);
+    if (effectiveToken != null) {
+      developer.log('Token: ${effectiveToken.isNotEmpty ? "***" : "empty"}',
+          name: 'StorageService');
     }
     if (params != null) {
       developer.log('Params: $params', name: 'StorageService');
@@ -139,7 +156,6 @@ class StorageServiceImpl extends StorageService<FormData> {
 
   int min(int a, int b) => a < b ? a : b;
 
-  // Helper method to get caller key with default
   String _getCallerKey(String? providedKey, String defaultKey) {
     return providedKey ??
         '${defaultKey}_${DateTime.now().millisecondsSinceEpoch}';
@@ -147,13 +163,14 @@ class StorageServiceImpl extends StorageService<FormData> {
 
   @override
   Future<int?> delete(String destination, String id,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'delete_$id');
     final url = '$destination/$id';
-    _logRequest('DELETE', url, callerKey: key);
+    _logRequest('DELETE', url, callerKey: key, token: token);
 
     try {
-      final response = await _dio.delete(url);
+      final options = _applyToken(Options(), token);
+      final response = await _dio.delete(url, options: options);
       setSuccessResponse(key, response.statusCode,
           statusCode: response.statusCode, responseCode: 'SUCCESS');
       return response.statusCode;
@@ -173,13 +190,14 @@ class StorageServiceImpl extends StorageService<FormData> {
 
   @override
   Future<dynamic> get(String destination, String id,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'get_$id');
     final url = '$destination/$id';
-    _logRequest('GET', url, callerKey: key);
+    _logRequest('GET', url, callerKey: key, token: token);
 
     try {
-      final response = await _dio.get(url);
+      final options = _applyToken(Options(), token);
+      final response = await _dio.get(url, options: options);
 
       if (response.statusCode == 200) {
         _logResponse(response.data);
@@ -189,23 +207,23 @@ class StorageServiceImpl extends StorageService<FormData> {
       } else if (response.statusCode == 404) {
         setFailureResponse(
           key,
-          data: GluttexConstants.notFoundError,
+          data: AppConstants.notFoundError,
           statusCode: 404,
           errorCode: 'NOT_FOUND',
-          message: GluttexConstants.notFoundError,
+          message: AppConstants.notFoundError,
           responseCode: 'NOT_FOUND',
         );
-        throw Exception(GluttexConstants.notFoundError);
+        throw Exception(AppConstants.notFoundError);
       } else {
         setFailureResponse(
           key,
-          data: GluttexConstants.getFailure,
+          data: AppConstants.getFailure,
           statusCode: response.statusCode,
           errorCode: 'GET_FAILED',
-          message: GluttexConstants.getFailure,
+          message: AppConstants.getFailure,
           responseCode: 'GET_FAILED',
         );
-        throw Exception(GluttexConstants.getFailure);
+        throw Exception(AppConstants.getFailure);
       }
     } on DioException catch (e) {
       developer.log('GET Error: ${e.message}', name: 'StorageService');
@@ -225,12 +243,15 @@ class StorageServiceImpl extends StorageService<FormData> {
 
   @override
   Future<dynamic> getAll(String destination,
-      {params, String? callerKey}) async {
+      {params, String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'getAll');
-    _logRequest('GET', destination, params: params, callerKey: key);
+    _logRequest('GET', destination,
+        params: params, callerKey: key, token: token);
 
     try {
-      final response = await _dio.get(destination, queryParameters: params);
+      final options = _applyToken(Options(), token);
+      final response = await _dio.get(destination,
+          queryParameters: params, options: options);
 
       if (response.statusCode == 200) {
         setSuccessResponse(key, response.data,
@@ -239,23 +260,23 @@ class StorageServiceImpl extends StorageService<FormData> {
       } else if (response.statusCode == 404) {
         setFailureResponse(
           key,
-          data: GluttexConstants.notFoundError,
+          data: AppConstants.notFoundError,
           statusCode: 404,
           errorCode: 'NOT_FOUND',
-          message: GluttexConstants.notFoundError,
+          message: AppConstants.notFoundError,
           responseCode: 'NOT_FOUND',
         );
-        throw Exception(GluttexConstants.notFoundError);
+        throw Exception(AppConstants.notFoundError);
       } else {
         setFailureResponse(
           key,
-          data: GluttexConstants.getFailure,
+          data: AppConstants.getFailure,
           statusCode: response.statusCode,
           errorCode: 'GET_FAILED',
-          message: GluttexConstants.getFailure,
+          message: AppConstants.getFailure,
           responseCode: 'GET_FAILED',
         );
-        throw Exception(GluttexConstants.getFailure);
+        throw Exception(AppConstants.getFailure);
       }
     } on DioException catch (e) {
       developer.log('GET All Error: ${e.message}', name: 'StorageService');
@@ -274,10 +295,10 @@ class StorageServiceImpl extends StorageService<FormData> {
 
   @override
   Future<dynamic> insert(String destination, Map<String, dynamic> data,
-      {params, String? callerKey}) async {
+      {params, String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'insert');
     _logRequest('POST', destination,
-        data: data, params: params, callerKey: key);
+        data: data, params: params, callerKey: key, token: token);
 
     try {
       developer.log('Data type: ${data.runtimeType}', name: 'StorageService');
@@ -289,7 +310,6 @@ class StorageServiceImpl extends StorageService<FormData> {
           name: 'StorageService');
       developer.log(jsonString, name: 'StorageService');
 
-      // Validate JSON
       try {
         jsonDecode(jsonString);
       } catch (e) {
@@ -297,17 +317,23 @@ class StorageServiceImpl extends StorageService<FormData> {
       }
 
       developer.log('Making Dio request...', name: 'StorageService');
-      final response = await _dio.post(
-        destination,
-        queryParameters: params,
-        data: data,
-        options: Options(
+
+      final options = _applyToken(
+        Options(
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
           contentType: 'application/json',
         ),
+        token,
+      );
+
+      final response = await _dio.post(
+        destination,
+        queryParameters: params,
+        data: data,
+        options: options,
       );
 
       developer.log('Response status: ${response.statusCode}',
@@ -325,7 +351,6 @@ class StorageServiceImpl extends StorageService<FormData> {
           statusCode: response.statusCode, responseCode: 'SUCCESS');
       return response.data;
     } on DioException catch (e) {
-      // Enhanced error logging
       developer.log('❌ INSERT ERROR DETAILS:', name: 'StorageService');
       developer.log('Error type: ${e.type}', name: 'StorageService');
       developer.log('Error message: ${e.message}', name: 'StorageService');
@@ -362,21 +387,28 @@ class StorageServiceImpl extends StorageService<FormData> {
 
   @override
   Future<dynamic> insertBinary(String destination, FormData data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'insertBinary');
     _logRequest('POST', destination,
-        data: 'FormData with ${data.files.length} files', callerKey: key);
+        data: 'FormData with ${data.files.length} files',
+        callerKey: key,
+        token: token);
 
     try {
-      final response = await _dio.post(
-        destination,
-        data: data,
-        options: Options(
+      final options = _applyToken(
+        Options(
           headers: {
             'accept': 'application/json',
             'Content-Type': 'multipart/form-data',
           },
         ),
+        token,
+      );
+
+      final response = await _dio.post(
+        destination,
+        data: data,
+        options: options,
       );
 
       developer.log('Image upload response: ${response.data}',
@@ -415,20 +447,26 @@ class StorageServiceImpl extends StorageService<FormData> {
   @override
   Future<dynamic> update(String destination, String id,
       Map<String, dynamic> parameters, Map<String, dynamic> data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'update_$id');
     final url = '$destination/$id';
-    _logRequest('PUT', url, data: data, params: parameters, callerKey: key);
+    _logRequest('PUT', url,
+        data: data, params: parameters, callerKey: key, token: token);
 
     try {
+      final options = _applyToken(
+        Options(
+          headers: {'Content-Type': 'application/json'},
+          contentType: 'application/json',
+        ),
+        token,
+      );
+
       final response = await _dio.put(
         url,
         data: data,
         queryParameters: parameters,
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          contentType: 'application/json',
-        ),
+        options: options,
       );
 
       developer.log('Update Response: ${response.data}',
@@ -455,15 +493,13 @@ class StorageServiceImpl extends StorageService<FormData> {
   @override
   Future<dynamic> signUpUsingUsernameAndPassword(
       String destination, Map<String, dynamic> data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'signUp');
-    _logRequest('POST', destination, data: data, callerKey: key);
+    _logRequest('POST', destination, data: data, callerKey: key, token: token);
 
     try {
-      final response = await _dio.post(
-        destination,
-        data: data,
-        options: Options(
+      final options = _applyToken(
+        Options(
           validateStatus: (status) =>
               status == 200 || status == 409 || status == 422,
           headers: {
@@ -472,6 +508,13 @@ class StorageServiceImpl extends StorageService<FormData> {
           },
           contentType: 'application/json',
         ),
+        token,
+      );
+
+      final response = await _dio.post(
+        destination,
+        data: data,
+        options: options,
       );
 
       developer.log('SignUp Response: ${response.data}',
@@ -482,7 +525,6 @@ class StorageServiceImpl extends StorageService<FormData> {
             statusCode: response.statusCode, responseCode: 'SIGNUP_SUCCESS');
         return response.data;
       } else {
-        // Handle error response
         final errorData = response.data is Map
             ? response.data
             : jsonDecode(response.data) as Map<String, dynamic>;
@@ -534,16 +576,13 @@ class StorageServiceImpl extends StorageService<FormData> {
   @override
   Future<dynamic> signInUsingUsernameAndPassword(
       String destination, Map<String, dynamic> data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'signIn');
-    _logRequest('POST', destination, data: data, callerKey: key);
+    _logRequest('POST', destination, data: data, callerKey: key, token: token);
 
     try {
-      // Use JSON, not form-urlencoded
-      final response = await _dio.post(
-        destination,
-        data: data, // Send as JSON
-        options: Options(
+      final options = _applyToken(
+        Options(
           validateStatus: (status) =>
               status == 200 || status == 401 || status == 403 || status == 422,
           headers: {
@@ -551,6 +590,13 @@ class StorageServiceImpl extends StorageService<FormData> {
             'Accept': 'application/json',
           },
         ),
+        token,
+      );
+
+      final response = await _dio.post(
+        destination,
+        data: data,
+        options: options,
       );
 
       developer.log('SignIn Response status: ${response.statusCode}',
@@ -563,7 +609,6 @@ class StorageServiceImpl extends StorageService<FormData> {
             statusCode: response.statusCode, responseCode: 'LOGIN_SUCCESS');
         return response.data;
       } else {
-        // Handle error response
         Map<String, dynamic> errorData;
         if (response.data is Map) {
           errorData = response.data;
@@ -610,7 +655,6 @@ class StorageServiceImpl extends StorageService<FormData> {
       developer.log('SignIn Dio Response: ${e.response?.data}',
           name: 'StorageService');
 
-      // Try to extract error from Dio response
       String errorCode = 'HTTP_EXCEPTION';
       String errorMessage = e.message ?? 'Network error';
       Map<String, dynamic>? details;
@@ -675,21 +719,26 @@ class StorageServiceImpl extends StorageService<FormData> {
   @override
   Future<dynamic> signInUsingProvider(
       String destination, String providerName, Map<String, dynamic> data,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = _getCallerKey(callerKey, 'signInProvider_$providerName');
-    _logRequest('PUT', destination, data: data, callerKey: key);
+    _logRequest('PUT', destination, data: data, callerKey: key, token: token);
 
     try {
-      final response = await _dio.put(
-        destination,
-        data: data,
-        options: Options(
+      final options = _applyToken(
+        Options(
           headers: {
             'Content-Type': 'application/json',
             'accept': 'application/json',
           },
           contentType: 'application/json',
         ),
+        token,
+      );
+
+      final response = await _dio.put(
+        destination,
+        data: data,
+        options: options,
       );
 
       setSuccessResponse(key, response.data,
