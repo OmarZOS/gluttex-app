@@ -4,9 +4,9 @@ import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_home/screens/PasswordChangeScreen.dart';
 import 'package:gluttex_home/screens/PdfViewerScreen.dart';
 import 'package:gluttex_home/screens/app_user_update_form_screen.dart';
-import 'package:gluttex_event/user_change_notifier.dart';
-import 'package:gluttex_event/preferenceChangeNotifier.dart';
-import 'package:gluttex_medical/screens/informations_screen.dart';
+import 'package:event/user_change_notifier.dart';
+import 'package:event/preferenceChangeNotifier.dart';
+import 'package:health/screens/informations_screen.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {

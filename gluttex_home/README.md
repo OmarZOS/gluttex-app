@@ -37,15 +37,15 @@ The application uses the following custom packages and modules:
 - **gluttex_constants**: Centralized constants and localization files.
 
 ### Feature-Specific Packages
-- **gluttex_impl_app**: Application-level implementation details.
-- **gluttex_impl_business**: Business logic specific to Gluttex.
-- **gluttex_impl_mediation**: Handles communication between different modules.
-- **gluttex_chef**: Module for managing chefs and related data.
-- **gluttex_medical**: Manages medical-related functionality and data.
-- **gluttex_localiser**: Localization handling and location-based services.
-- **medicom_catalog**: Catalog management, including product browsing and supplier details.
+- **impl_app**: Application-level implementation details.
+- **business**: Business logic specific to Gluttex.
+- **impl_mediation**: Handles communication between different modules.
+- **chef**: Module for managing chefs and related data.
+- **health**: Manages medical-related functionality and data.
+- **store_geo**: Localization handling and location-based services.
+- **product_catalog**: Catalog management, including product browsing and supplier details.
 - **gluttex_play**: Entertainment and gamification features.
-- **gluttex_login**: User authentication and login system.
+- **login**: User authentication and login system.
 
 ---
 

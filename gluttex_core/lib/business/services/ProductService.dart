@@ -1,10 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:gluttex_core/app/TraceableService.dart';
+
 import '../Product.dart';
 
 // ProductService.dart
-abstract class ProductService {
-  Future<List<ProductCategory>?>? getCategories() async {
+abstract class ProductService extends TraceableService {
+  Future<List<ProductCategory>?>? getCategories({String? callerKey}) async {
     return null;
   }
 
@@ -14,27 +16,29 @@ abstract class ProductService {
       int category = 0,
       String query = "",
       int page = 1,
-      int limit = 10}) async {
+      int limit = 10,
+      String? callerKey}) async {
     return null;
   }
 
-  Future<dynamic> focusOnProduct(String idProduct) async {
+  Future<dynamic> focusOnProduct(String idProduct, {String? callerKey}) async {
     return null;
   }
 
-  Future<Product?> getProduct(String idProduct) async {
+  Future<Product?> getProduct(String idProduct, {String? callerKey}) async {
     return null;
   }
 
-  Future<Product?> addProduct(Product product) async {
+  Future<Product?> addProduct(Product product, {String? callerKey}) async {
     return null;
   }
 
-  Future<Product?> updateProduct(Product updatedProduct) async {
+  Future<Product?> updateProduct(Product updatedProduct,
+      {String? callerKey}) async {
     return null;
   }
 
-  Future<int?> deleteProduct(String productId) async {
+  Future<int?> deleteProduct(String productId, {String? callerKey}) async {
     return null;
   }
 }

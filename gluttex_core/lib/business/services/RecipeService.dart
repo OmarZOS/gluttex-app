@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:gluttex_core/app/TraceableService.dart';
+
 import '../Recipe.dart';
 
 // RecipeService.dart
-abstract class RecipeService {
+abstract class RecipeService extends TraceableService {
   Future<List<RecipeIngredient>?> getAllIngredients(int offset, int limit,
       {String? callerKey}) async {
     return null;

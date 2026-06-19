@@ -240,12 +240,17 @@ class GluttexConstants {
 
   // ==================== Notification Endpoints ====================
 
+  static const String searchServiceEndpoint = "";
+  static const String deliveryEndpoint = "";
+  static const String orderEndpoint = "";
+
   static const String notificationsBaseEndpoint = '/notifications';
-  static const String getNotificationsEndpoint = '/notifications/user';
+  static const String getNotificationsEndpoint = '/notifications/user/read-all';
   static const String getNotificationByIdEndpoint = '/notifications';
   static const String createNotificationEndpoint = '/notifications/create';
-  static const String readNotificationEndpoint = '/notifications';
-  static const String readAllNotificationsEndpoint = '/notifications/user';
+  static const String readNotificationEndpoint = '/notifications/read';
+  static const String readAllNotificationsEndpoint =
+      '/notifications/user/read-all';
   static const String deleteNotificationEndpoint = '/notifications';
   static const String deleteAllNotificationsEndpoint = '/notifications/user';
   static const String unreadCountEndpoint = '/notifications/user';

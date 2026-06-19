@@ -45,81 +45,81 @@
             "flutterMode": "release"
         },
         {
-            "name": "gluttex_impl_app",
-            "cwd": "gluttex_impl_app",
+            "name": "impl_app",
+            "cwd": "impl_app",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "gluttex_impl_app (profile mode)",
-            "cwd": "gluttex_impl_app",
+            "name": "impl_app (profile mode)",
+            "cwd": "impl_app",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "gluttex_impl_app (release mode)",
-            "cwd": "gluttex_impl_app",
+            "name": "impl_app (release mode)",
+            "cwd": "impl_app",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
         },
         {
-            "name": "gluttex_impl_business",
-            "cwd": "gluttex_impl_business",
+            "name": "business",
+            "cwd": "business",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "gluttex_impl_business (profile mode)",
-            "cwd": "gluttex_impl_business",
+            "name": "business (profile mode)",
+            "cwd": "business",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "gluttex_impl_business (release mode)",
-            "cwd": "gluttex_impl_business",
+            "name": "business (release mode)",
+            "cwd": "business",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
         },
         {
-            "name": "gluttex_impl_mediation",
-            "cwd": "gluttex_impl_mediation",
+            "name": "impl_mediation",
+            "cwd": "impl_mediation",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "gluttex_impl_mediation (profile mode)",
-            "cwd": "gluttex_impl_mediation",
+            "name": "impl_mediation (profile mode)",
+            "cwd": "impl_mediation",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "gluttex_impl_mediation (release mode)",
-            "cwd": "gluttex_impl_mediation",
+            "name": "impl_mediation (release mode)",
+            "cwd": "impl_mediation",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
         },
         {
-            "name": "gluttex_localiser",
-            "cwd": "gluttex_localiser",
+            "name": "store_geo",
+            "cwd": "store_geo",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "gluttex_localiser (profile mode)",
-            "cwd": "gluttex_localiser",
+            "name": "store_geo (profile mode)",
+            "cwd": "store_geo",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "gluttex_localiser (release mode)",
-            "cwd": "gluttex_localiser",
+            "name": "store_geo (release mode)",
+            "cwd": "store_geo",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
@@ -155,15 +155,15 @@
             ]
         },
         {
-            "name": "medicom_catalog (profile mode)",
-            "cwd": "medicom_catalog",
+            "name": "product_catalog (profile mode)",
+            "cwd": "product_catalog",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "medicom_catalog (release mode)",
-            "cwd": "medicom_catalog",
+            "name": "product_catalog (release mode)",
+            "cwd": "product_catalog",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

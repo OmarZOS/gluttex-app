@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gen_l10n/app_localizations.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
-import 'package:gluttex_event/user_change_notifier.dart';
-import 'package:gluttex_ui/components/ImagePickerSection.dart';
+import 'package:event/user_change_notifier.dart';
+import 'package:ui/components/ImagePickerSection.dart';
 import 'package:provider/provider.dart';
 
 class UploadImagePage extends StatefulWidget {

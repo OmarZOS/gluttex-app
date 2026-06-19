@@ -437,10 +437,10 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.7.0"
-  gluttex_chef:
+  chef:
     dependency: "direct main"
     description:
-      path: "../gluttex_chef"
+      path: "../chef"
       relative: true
     source: path
     version: "1.0.0+1"
@@ -458,66 +458,66 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
-  gluttex_event:
+  event:
     dependency: "direct main"
     description:
-      path: "../gluttex_event"
+      path: "../event"
       relative: true
     source: path
     version: "1.0.0+1"
-  gluttex_impl_app:
+  impl_app:
     dependency: transitive
     description:
-      path: "../gluttex_impl_app"
+      path: "../impl_app"
       relative: true
     source: path
     version: "0.0.1"
-  gluttex_impl_business:
+  business:
     dependency: transitive
     description:
-      path: "../gluttex_impl_business"
+      path: "../business"
       relative: true
     source: path
     version: "0.0.1"
-  gluttex_impl_mediation:
+  impl_mediation:
     dependency: transitive
     description:
-      path: "../gluttex_impl_mediation"
+      path: "../impl_mediation"
       relative: true
     source: path
     version: "0.0.1"
-  gluttex_io:
+  io:
     dependency: transitive
     description:
-      path: "../gluttex_io"
+      path: "../io"
       relative: true
     source: path
     version: "1.0.0+1"
-  gluttex_localiser:
+  store_geo:
     dependency: "direct main"
     description:
-      path: "../gluttex_localiser"
+      path: "../store_geo"
       relative: true
     source: path
     version: "1.0.0+1"
-  gluttex_login:
+  login:
     dependency: "direct main"
     description:
-      path: "../gluttex_login"
+      path: "../login"
       relative: true
     source: path
     version: "1.0.0+1"
-  gluttex_medical:
+  health:
     dependency: "direct main"
     description:
-      path: "../gluttex_medical"
+      path: "../health"
       relative: true
     source: path
     version: "1.0.0+1"
-  gluttex_personnel:
+  provider_personnel:
     dependency: "direct main"
     description:
-      path: "../gluttex_personnel"
+      path: "../provider_personnel"
       relative: true
     source: path
     version: "1.0.0+1"
@@ -528,24 +528,24 @@ packages:
       relative: true
     source: path
     version: "1.0.0+1"
-  gluttex_scanner:
+  scanner:
     dependency: transitive
     description:
-      path: "../gluttex_scanner"
+      path: "../scanner"
       relative: true
     source: path
     version: "1.0.0+1"
-  gluttex_store:
+  store:
     dependency: "direct main"
     description:
-      path: "../gluttex_store"
+      path: "../store"
       relative: true
     source: path
     version: "1.0.0+1"
-  gluttex_ui:
+  ui:
     dependency: "direct main"
     description:
-      path: "../gluttex_ui"
+      path: "../ui"
       relative: true
     source: path
     version: "1.0.0+1"
@@ -828,10 +828,10 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.1"
-  medicom_catalog:
+  product_catalog:
     dependency: "direct main"
     description:
-      path: "../medicom_catalog"
+      path: "../product_catalog"
       relative: true
     source: path
     version: "1.0.0+1"

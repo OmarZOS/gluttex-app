@@ -2,82 +2,70 @@
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Person.dart';
+import 'package:gluttex_core/app/TraceableService.dart';
 
 import '../AppUser.dart';
 
 // AppUserService.dart
-abstract class AppUserService {
-  Future<List<AppUserCategory>?>? getCategories() async {
+abstract class AppUserService extends TraceableService {
+  Future<List<AppUserCategory>?>? getCategories({String? callerKey}) async {
     return null;
   }
 
-  Future<AppUser?> getAppUser(String idAppUser) async {
+  Future<AppUser?> getAppUser(String idAppUser, {String? callerKey}) async {
     return null;
   }
 
-  Future<Person?> getPerson(String idPerson) async {
+  Future<Person?> getPerson(String idPerson, {String? callerKey}) async {
     return null;
   }
 
   Future<List<ManagementRule>?>? getManagementRules(
-    int orgId,
-    int supplierId,
-    int userId,
-    int offset,
-    int limit,
-  ) async {
+      int orgId, int supplierId, int userId, int offset, int limit,
+      {String? callerKey}) async {
     return null;
   }
 
-  Future<List<AppUser>?> searchAppUsers(
-    String query,
-    int offset,
-    int limit,
-  ) async {
+  Future<List<AppUser>?> searchAppUsers(String query, int offset, int limit,
+      {String? callerKey}) async {
     return null;
   }
 
-  Future<List<Person>?> searchPeople(
-    String query,
-    int offset,
-    int limit,
-  ) async {
+  Future<List<Person>?> searchPeople(String query, int offset, int limit,
+      {String? callerKey}) async {
     return null;
   }
 
-  Future<AppUser?> updateAppUser(AppUser appUser) async {
+  Future<AppUser?> updateAppUser(AppUser appUser, {String? callerKey}) async {
     return null;
   }
 
-  Future<int?> addAppUser(AppUser appUser) async {
+  Future<int?> addAppUser(AppUser appUser, {String? callerKey}) async {
     return null;
   }
 
-  Future<int?> updateAppUserImage(AppUser updatedAppUser) async {
+  Future<int?> updateAppUserImage(AppUser updatedAppUser,
+      {String? callerKey}) async {
     return null;
   }
 
-  Future<int?> deleteAppUser(String appUserId) async {
+  Future<int?> deleteAppUser(String appUserId, {String? callerKey}) async {
     return null;
   }
 
   Future<ManagementRule?> addUserToSupplier(
       int appUserId, int supplierId, int orgId, int privilege,
-      {bool fromQR = false}) async {
+      {bool fromQR = false, String? callerKey}) async {
     return null;
   }
 
   Future<ManagementRule?> updateManagementRule(
-    int ruleId,
-    int appUserId,
-    int supplierId,
-    int orgId,
-    int privilege,
-  ) async {
+      int ruleId, int appUserId, int supplierId, int orgId, int privilege,
+      {String? callerKey}) async {
     return null;
   }
 
-  Future<bool> deleteManagementRule(int ruleId) async {
+  Future<bool> deleteManagementRule(int ruleId, {String? callerKey}) async {
     return false;
   }
 }

@@ -1,10 +1,13 @@
 // notifications_panel.dart
 import 'package:flutter/material.dart';
+import 'package:gluttex_constants/gluttex_constants.dart';
 import 'package:gluttex_core/app/Notifications/GluttexNotification.dart';
-import 'package:gluttex_event/notification_notifier.dart';
-import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:event/notification_notifier.dart';
+import 'package:event/personnel_notifier.dart';
+import 'package:event/user_change_notifier.dart';
 import 'package:gluttex_home/screens/components/NotificationAction.dart';
 import 'package:gluttex_home/screens/components/notification_item.dart';
+import 'package:ui/Services/ResponseHandler.dart';
 import 'package:provider/provider.dart';
 
 class NotificationsPanel extends StatefulWidget {
@@ -16,16 +19,42 @@ class NotificationsPanel extends StatefulWidget {
 
 class _NotificationsPanelState extends State<NotificationsPanel> {
   bool _isInitialized = false;
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false;
+  int _currentPage = 0;
+  static const int _pageSize = 20;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
       _isInitialized = true;
-      // Load notifications when panel opens
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadNotifications();
       });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final notifier = context.read<NotificationNotifier>();
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        notifier.hasMore &&
+        !notifier.isLoading &&
+        !_isLoadingMore) {
+      _loadMoreNotifications();
     }
   }
 
@@ -35,50 +64,72 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
 
     final currentUserId = userNotifier.appUser?.id_app_user;
     if (currentUserId != null && currentUserId > 0) {
-      await notifier.loadInitialNotifications(currentUserId);
+      _currentPage = 0;
+      await notifier.loadInitialNotifications(
+        currentUserId,
+        limit: _pageSize,
+      );
+    }
+  }
+
+  Future<void> _loadMoreNotifications() async {
+    if (_isLoadingMore) return;
+    setState(() => _isLoadingMore = true);
+
+    final notifier = context.read<NotificationNotifier>();
+    _currentPage++;
+    await notifier.loadMoreNotifications(limit: _pageSize);
+
+    if (mounted) {
+      setState(() => _isLoadingMore = false);
     }
   }
 
   Future<void> _refreshNotifications() async {
     final userNotifier = context.read<AppUserNotifier>();
     final notifier = context.read<NotificationNotifier>();
-
     final currentUserId = userNotifier.appUser?.id_app_user;
     if (currentUserId != null && currentUserId > 0) {
-      await notifier.refreshNotifications(currentUserId);
+      _currentPage = 0;
+      await notifier.refreshNotifications(
+        currentUserId,
+        limit: _pageSize,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
-    return Consumer<NotificationNotifier>(
-      builder: (context, notifier, child) {
-        final unreadCount = notifier.unreadCount;
-        final notifications = notifier.sortedByDate;
-        final isLoading = notifier.isLoading;
-        final error = notifier.error;
-
-        return Container(
-          margin: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.shadow.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
-          child: Column(
+        ],
+      ),
+      child: Consumer<NotificationNotifier>(
+        builder: (context, notifier, child) {
+          final unreadCount = notifier.unreadCount;
+          final notifications = notifier.sortedByDate;
+          final isLoading = notifier.isLoading;
+          final error = notifier.error;
+          final hasMore = notifier.hasMore;
+          final totalCount = notifier.totalCount;
+
+          return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Header
-              _buildHeader(context, notifier, unreadCount),
+              _buildHeader(context, notifier, unreadCount, totalCount),
+
               // Content
               Expanded(
                 child: _buildContent(
@@ -87,14 +138,17 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                   notifications,
                   isLoading,
                   error,
+                  hasMore,
                 ),
               ),
+
               // Footer Actions
-              _buildFooter(context, notifier, unreadCount),
+              if (notifications.isNotEmpty)
+                _buildFooter(context, notifier, unreadCount),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -102,12 +156,13 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
     BuildContext context,
     NotificationNotifier notifier,
     int unreadCount,
+    int totalCount,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: colorScheme.primaryContainer,
         borderRadius: const BorderRadius.only(
@@ -120,35 +175,55 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
           Icon(
             Icons.notifications_active_rounded,
             color: colorScheme.onPrimaryContainer,
-            size: 28,
+            size: 24,
           ),
           const SizedBox(width: 12),
-          Text(
-            'Notifications',
-            style: textTheme.headlineSmall?.copyWith(
-              color: colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Notifications',
+                  style: textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (totalCount > 0)
+                  Text(
+                    '$totalCount total • ${unreadCount} unread',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onPrimaryContainer.withOpacity(0.7),
+                    ),
+                  ),
+              ],
             ),
           ),
-          const Spacer(),
           if (unreadCount > 0)
-            Badge(
-              backgroundColor: colorScheme.error,
-              label: Text(
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: colorScheme.error,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
                 unreadCount > 99 ? '99+' : unreadCount.toString(),
                 style: const TextStyle(
-                  fontSize: 10,
+                  color: Colors.white,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              isLabelVisible: true,
             ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           IconButton(
             icon: Icon(
               Icons.close_rounded,
               color: colorScheme.onPrimaryContainer,
+              size: 20,
             ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -162,6 +237,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
     List<GluttexNotification> notifications,
     bool isLoading,
     String? error,
+    bool hasMore,
   ) {
     if (isLoading && notifications.isEmpty) {
       return _buildLoadingIndicator();
@@ -175,24 +251,59 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
       return _buildEmptyNotifications(context);
     }
 
-    // Show max 5 in preview panel
-    final displayNotifications =
-        notifications.length > 5 ? notifications.sublist(0, 5) : notifications;
+    // Show all notifications with pagination
+    final hasMoreToShow = hasMore;
 
     return RefreshIndicator(
       onRefresh: _refreshNotifications,
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: displayNotifications.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) => NotificationItem(
-          notification: displayNotifications[index],
-          onMarkAsRead: () => notifier.markAsRead(
-            displayNotifications[index].idNotification,
+        controller: _scrollController,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        itemCount: notifications.length + (hasMoreToShow ? 1 : 0),
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          if (index == notifications.length) {
+            return _buildLoadMoreIndicator(notifier);
+          }
+          return NotificationItem(
+            notification: notifications[index],
+            onMarkAsRead: () => notifier.markAsRead(
+              notifications[index].idNotification,
+            ),
+            onAction: (action) =>
+                _handleNotificationAction(context, notifier, action),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadMoreIndicator(NotificationNotifier notifier) {
+    if (!notifier.hasMore) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: Text(
+            'No more notifications',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
           ),
-          onAction: (action) =>
-              _handleNotificationAction(context, notifier, action),
         ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: _isLoadingMore
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const SizedBox.shrink(),
       ),
     );
   }
@@ -205,7 +316,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
@@ -217,6 +328,10 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
         children: [
           Expanded(
             child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                visualDensity: VisualDensity.compact,
+              ),
               onPressed: unreadCount > 0 && !notifier.isLoading
                   ? () async {
                       await notifier.markAllAsRead();
@@ -231,10 +346,10 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                       }
                     }
                   : null,
-              child: notifier.isLoading
+              child: notifier.isLoading && _isLoadingMore
                   ? const SizedBox(
-                      width: 20,
-                      height: 20,
+                      width: 18,
+                      height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text('Mark All as Read'),
@@ -243,6 +358,10 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
           const SizedBox(width: 12),
           Expanded(
             child: FilledButton(
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                visualDensity: VisualDensity.compact,
+              ),
               onPressed: notifier.isLoading
                   ? null
                   : () {
@@ -261,163 +380,275 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
     BuildContext context,
     NotificationNotifier notifier,
     NotificationAction action,
-  ) {
-    // Handle different action types
+  ) async {
+    // Generate a unique caller key for this action
+    final callerKey =
+        'notification_action_${action.type}_${action.notificationId}_${DateTime.now().millisecondsSinceEpoch}';
+
     switch (action.type) {
       case ActionType.accept:
-        _handleAcceptAction(context, notifier, action);
+        await _handleAcceptAction(context, notifier, action, callerKey);
         break;
       case ActionType.reject:
-        _handleRejectAction(context, notifier, action);
+        await _handleRejectAction(context, notifier, action, callerKey);
         break;
       case ActionType.view:
         _handleViewAction(context, action);
         break;
       case ActionType.dismiss:
-        _handleDismissAction(context, notifier, action);
+        await _handleDismissAction(context, notifier, action, callerKey);
         break;
       case ActionType.reply:
-        _handleReplyAction(context, action);
+        await _handleReplyAction(context, action, callerKey);
         break;
       case ActionType.archive:
-        _handleArchiveAction(context, notifier, action);
+        await _handleArchiveAction(context, notifier, action, callerKey);
         break;
       case ActionType.download:
-        _handleDownloadAction(context, action);
+        await _handleDownloadAction(context, action, callerKey);
         break;
     }
   }
 
-  void _handleAcceptAction(
+  Future<void> _handleAcceptAction(
     BuildContext context,
     NotificationNotifier notifier,
     NotificationAction action,
-  ) {
-    final ruleId = action.metadata?['rule_id'];
-    if (ruleId != null) {
-      // The actual acceptance is handled in NotificationItem's _handleActionPress
-      // This is just for UI feedback after the action is completed
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invitation accepted'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
+    String callerKey,
+  ) async {
+    try {
+      final personnelNotifier = context.read<PersonnelNotifier>();
+
+      final success = await personnelNotifier.answerInvitation(
+        ruleId: action.metadata['rule_id'],
+        answer: 0,
+        callerKey: callerKey,
       );
-      // Refresh notifications to update the list
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _refreshNotifications();
-      });
+
+      if (success) {
+        await notifier.markAsRead(action.notificationId);
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: 200,
+          responseCode: 'INVITATION_ACCEPTED',
+          finalMessage: 'Invitation accepted successfully',
+        );
+        await _refreshNotifications();
+      } else {
+        final response = personnelNotifier.getResponse(callerKey);
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: response?.statusCode ?? 500,
+          responseCode: response?.responseCode ?? 'ACCEPT_FAILED',
+          finalMessage: response?.message ?? 'Failed to accept invitation',
+        );
+      }
+    } catch (e) {
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 500,
+        responseCode: 'ACCEPT_ERROR',
+        finalMessage: 'Error accepting invitation: $e',
+      );
     }
   }
 
-  void _handleRejectAction(
+  Future<void> _handleRejectAction(
     BuildContext context,
     NotificationNotifier notifier,
     NotificationAction action,
-  ) {
-    final ruleId = action.metadata?['rule_id'];
-    if (ruleId != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invitation declined'),
-          backgroundColor: Colors.orange,
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
+    String callerKey,
+  ) async {
+    try {
+      final personnelNotifier = context.read<PersonnelNotifier>();
+
+      final success = await personnelNotifier.answerInvitation(
+        ruleId: action.metadata['rule_id'],
+        answer: 1,
+        callerKey: callerKey,
       );
-      // Refresh notifications to update the list
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _refreshNotifications();
-      });
+
+      if (success) {
+        await notifier.markAsRead(action.notificationId);
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: 200,
+          responseCode: 'INVITATION_REJECTED',
+          finalMessage: 'Invitation rejected',
+        );
+        await _refreshNotifications();
+      } else {
+        final response = personnelNotifier.getResponse(callerKey);
+        ResponseHandler.handleResponse(
+          context: context,
+          statusCode: response?.statusCode ?? 500,
+          responseCode: response?.responseCode ?? 'REJECT_FAILED',
+          finalMessage: response?.message ?? 'Failed to reject invitation',
+        );
+      }
+    } catch (e) {
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 500,
+        responseCode: 'REJECT_ERROR',
+        finalMessage: 'Error rejecting invitation: $e',
+      );
     }
   }
 
   void _handleViewAction(BuildContext context, NotificationAction action) {
-    // Navigate based on notification type
-    final metadata = action.metadata;
-    if (metadata != null && metadata['organization_id'] != null) {
-      // Navigate to organization/supplier details
-      Navigator.pushNamed(
-        context,
-        '/supplier/manage',
-        arguments: {
-          'organization_id': metadata['organization_id'],
-          'provider_id': metadata['provider_id'],
-        },
+    // Use safe navigation with proper argument handling
+    final orgId = action.metadata['organization_id'] ?? 0;
+    final providerId = action.metadata['provider_id'] ?? 0;
+    final supplierName = action.metadata['supplier_name'] ?? '';
+
+    Navigator.pushNamed(
+      context,
+      AppRoutes.supplierManage,
+      arguments: {
+        "supplierName": supplierName,
+        "orgId": orgId is int ? orgId : int.tryParse(orgId.toString()) ?? 0,
+        "supplierId": providerId is int
+            ? providerId
+            : int.tryParse(providerId.toString()) ?? 0,
+      },
+    );
+  }
+
+  Future<void> _handleDismissAction(
+    BuildContext context,
+    NotificationNotifier notifier,
+    NotificationAction action,
+    String callerKey,
+  ) async {
+    try {
+      await notifier.markAsRead(action.notificationId, callerKey: callerKey);
+
+      final response = notifier.getResponse(callerKey);
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: response?.statusCode ?? 200,
+        responseCode: response?.responseCode ?? 'DISMISSED',
+        finalMessage: 'Notification dismissed',
+      );
+    } catch (e) {
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 500,
+        responseCode: 'DISMISS_ERROR',
+        finalMessage: 'Error dismissing notification: $e',
       );
     }
   }
 
-  void _handleDismissAction(
+  Future<void> _handleReplyAction(
     BuildContext context,
-    NotificationNotifier notifier,
     NotificationAction action,
-  ) {
-    // Just dismiss - notification is already handled
-    debugPrint('Notification dismissed: ${action.notificationId}');
-  }
+    String callerKey,
+  ) async {
+    final TextEditingController controller = TextEditingController();
 
-  void _handleReplyAction(BuildContext context, NotificationAction action) {
-    // Show reply dialog
-    showDialog(
+    final replyText = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reply'),
-        content: const TextField(
-          decoration: InputDecoration(
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
             hintText: 'Type your reply...',
           ),
           maxLines: 3,
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, null),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, controller.text),
             child: const Text('Send'),
           ),
         ],
       ),
     );
-  }
 
-  void _handleArchiveAction(
-    BuildContext context,
-    NotificationNotifier notifier,
-    NotificationAction action,
-  ) {
-    // Archive the notification
-    notifier.deleteNotification(action.notificationId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Notification archived'),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 1),
-      ),
-    );
-  }
-
-  void _handleDownloadAction(BuildContext context, NotificationAction action) {
-    // Handle download
-    final url = action.metadata?['url'];
-    if (url != null) {
-      // Implement download logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Download started'),
-          behavior: SnackBarBehavior.floating,
-        ),
+    if (replyText != null && replyText.isNotEmpty) {
+      // TODO: Implement reply API call
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 200,
+        responseCode: 'REPLY_SENT',
+        finalMessage: 'Reply sent successfully',
+      );
+    } else if (replyText == null) {
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 400,
+        responseCode: 'REPLY_CANCELLED',
+        finalMessage: 'Reply cancelled',
       );
     }
   }
 
+  Future<void> _handleArchiveAction(
+    BuildContext context,
+    NotificationNotifier notifier,
+    NotificationAction action,
+    String callerKey,
+  ) async {
+    try {
+      await notifier.deleteNotification(action.notificationId,
+          callerKey: callerKey);
+
+      final response = notifier.getResponse(callerKey);
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: response?.statusCode ?? 200,
+        responseCode: response?.responseCode ?? 'ARCHIVED',
+        finalMessage: 'Notification archived',
+      );
+    } catch (e) {
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 500,
+        responseCode: 'ARCHIVE_ERROR',
+        finalMessage: 'Error archiving notification: $e',
+      );
+    }
+  }
+
+  Future<void> _handleDownloadAction(
+    BuildContext context,
+    NotificationAction action,
+    String callerKey,
+  ) async {
+    final url = action.metadata['url'];
+    if (url == null) {
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 400,
+        responseCode: 'NO_DOWNLOAD_URL',
+        finalMessage: 'No download URL available',
+      );
+      return;
+    }
+
+    // TODO: Implement actual download logic
+    ResponseHandler.handleResponse(
+      context: context,
+      statusCode: 200,
+      responseCode: 'DOWNLOAD_STARTED',
+      finalMessage: 'Download started',
+    );
+  }
+
   Widget _buildLoadingIndicator() {
     return const Center(
-      child: CircularProgressIndicator(),
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 
@@ -481,7 +712,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
           const SizedBox(height: 16),
           Text(
             'No Notifications',
-            style: textTheme.headlineSmall?.copyWith(
+            style: textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
             ),

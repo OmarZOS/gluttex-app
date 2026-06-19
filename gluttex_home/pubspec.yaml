@@ -36,26 +36,26 @@ dependencies:
     path: ../gluttex_core
   gluttex_constants:
     path: ../gluttex_constants
-  gluttex_chef:
-    path: ../gluttex_chef
-  gluttex_medical:
-    path: ../gluttex_medical
-  gluttex_localiser:
-    path: ../gluttex_localiser
-  medicom_catalog:
-    path: ../medicom_catalog
+  chef:
+    path: ../chef
+  health:
+    path: ../health
+  store_geo:
+    path: ../store_geo
+  product_catalog:
+    path: ../product_catalog
   gluttex_play:
     path: ../gluttex_play
-  gluttex_ui:
-    path: ../gluttex_ui
-  gluttex_login:
-    path: ../gluttex_login
-  gluttex_event:
-    path: ../gluttex_event
-  gluttex_personnel:
-    path: ../gluttex_personnel
-  gluttex_store:
-    path: ../gluttex_store
+  ui:
+    path: ../ui
+  login:
+    path: ../login
+  event:
+    path: ../event
+  provider_personnel:
+    path: ../provider_personnel
+  store:
+    path: ../store
 
   
 

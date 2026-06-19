@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_constants/gluttex_constants.dart';
-import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:event/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatelessWidget {

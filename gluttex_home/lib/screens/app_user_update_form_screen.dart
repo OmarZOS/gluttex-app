@@ -8,9 +8,9 @@ import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:gluttex_core/app/Services/UserService.dart';
-import 'package:gluttex_event/user_change_notifier.dart';
-import 'package:gluttex_ui/Services/ResponseHandler.dart';
-import 'package:gluttex_ui/components/map_picker.dart';
+import 'package:event/user_change_notifier.dart';
+import 'package:ui/Services/ResponseHandler.dart';
+import 'package:ui/components/map_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
 import 'package:provider/provider.dart';
@@ -91,7 +91,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
     unawaited(Future(() async {
       try {
         if (_imageChanged && _editedImage != null) {
-          GluttexImage image = GluttexLocator.get<GluttexImage>();
+          GluttexImage image = AppLocator.get<GluttexImage>();
           image.setupImage(
             filepath: _editedImage!.path,
             filename: _editedImage!.path.split("/").last,

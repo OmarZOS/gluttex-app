@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_event/notification_notifier.dart';
-import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:event/notification_notifier.dart';
+import 'package:event/user_change_notifier.dart';
 import 'package:provider/provider.dart';
 
 class NotificationButton extends StatefulWidget {

@@ -11,11 +11,11 @@ import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Notifications/GluttexNotification.dart';
 import 'package:gluttex_core/app/Notifications/Notifications/RoleInvitation.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
-import 'package:gluttex_event/personnel_notifier.dart';
-import 'package:gluttex_event/supplier_change_notifier.dart';
-import 'package:gluttex_event/user_change_notifier.dart';
+import 'package:event/personnel_notifier.dart';
+import 'package:event/supplier_change_notifier.dart';
+import 'package:event/user_change_notifier.dart';
 import 'package:gluttex_home/screens/components/NotificationAction.dart';
-import 'package:gluttex_personnel/components/privilege_ui.dart';
+import 'package:provider_personnel/components/privilege_ui.dart';
 import 'package:provider/provider.dart';
 
 class NotificationItem extends StatelessWidget {
@@ -828,6 +828,12 @@ class NotificationItem extends StatelessWidget {
 
       final actions = <NotificationAction>[];
 
+      // Ensure all IDs are properly converted to int
+      final ruleId = invitation.ruleId ?? 0;
+      final orgId = invitation.organizationId ?? 0;
+      final providerId = invitation.providerId ?? 0;
+      final role = invitation.role ?? 0;
+
       if (isPending) {
         actions.addAll([
           NotificationAction(
@@ -835,10 +841,10 @@ class NotificationItem extends StatelessWidget {
             label: localizations.actionAccept,
             notificationId: notification.idNotification,
             metadata: {
-              'rule_id': invitation.ruleId,
-              'organization_id': invitation.organizationId,
-              'provider_id': invitation.providerId,
-              'role': invitation.role,
+              'rule_id': ruleId, // This is int
+              'organization_id': orgId, // This is int
+              'provider_id': providerId, // This is int
+              'role': role, // This is int
             },
           ),
           NotificationAction(
@@ -846,9 +852,9 @@ class NotificationItem extends StatelessWidget {
             label: localizations.actionDecline,
             notificationId: notification.idNotification,
             metadata: {
-              'rule_id': invitation.ruleId,
-              'organization_id': invitation.organizationId,
-              'provider_id': invitation.providerId,
+              'rule_id': ruleId, // This is int
+              'organization_id': orgId, // This is int
+              'provider_id': providerId, // This is int
             },
           ),
         ]);
@@ -860,8 +866,9 @@ class NotificationItem extends StatelessWidget {
           label: localizations.actionViewTeam,
           notificationId: notification.idNotification,
           metadata: {
-            'organization_id': invitation.organizationId,
-            'provider_id': invitation.providerId,
+            'organization_id': orgId, // This is int
+            'provider_id': providerId, // This is int
+            'supplier_name': '',
           },
         ));
       }

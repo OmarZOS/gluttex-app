@@ -1,31 +1,34 @@
 import 'dart:typed_data';
 
+import 'package:gluttex_core/app/TraceableService.dart';
+
 import '../finance/Order.dart';
 
 // OrderService.dart
-abstract class OrderService {
+abstract class OrderService extends TraceableService {
   Future<List<Order>> getAllOrders(int offset, int limit,
-      {int idUser = 0}) async {
+      {int idUser = 0, String? callerKey}) async {
     throw UnimplementedError();
   }
 
-  Future<Order?> getOrder(String idOrder) async {
+  Future<Order?> getOrder(String idOrder, {String? callerKey}) async {
     return null;
   }
 
-  Future<Order?> addOrder(dynamic order) async {
+  Future<Order?> addOrder(dynamic order, {String? callerKey}) async {
     return null;
   }
 
-  Future<Order?> updateOrder(Order updatedOrder) async {
+  Future<Order?> updateOrder(Order updatedOrder, {String? callerKey}) async {
     return null;
   }
 
-  Future<int?> deleteOrder(String productId) async {
+  Future<int?> deleteOrder(String productId, {String? callerKey}) async {
     return null;
   }
 
-  Future<List<OrderedItem>> getOrderDetails(int idOrder) async {
+  Future<List<OrderedItem>> getOrderDetails(int idOrder,
+      {String? callerKey}) async {
     return [];
   }
 }
