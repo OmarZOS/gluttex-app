@@ -23,10 +23,10 @@ class _CategoryPickerState extends State<CategoryPicker> {
 
   @override
   void initState() {
-    _selectedCategoryIndex = widget.categories.indexWhere(
-        (category) => category.id_app_user_type == widget.category_id);
+    _selectedCategoryIndex = widget.categories
+        .indexWhere((category) => category.idAppUserType == widget.category_id);
     widget.onCategoryChanged(
-      widget.categories[_selectedCategoryIndex].id_app_user_type,
+      widget.categories[_selectedCategoryIndex].idAppUserType,
     );
     super.initState();
   }
@@ -38,7 +38,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
         ListTile(
           // tileColor: Colors.blue[50],
           title: Text(
-            widget.categories[_selectedCategoryIndex].app_user_type_desc,
+            widget.categories[_selectedCategoryIndex].appUserTypeDesc,
           ),
           onTap: () {
             _showPicker(context);
@@ -68,11 +68,11 @@ class _CategoryPickerState extends State<CategoryPicker> {
               // //log('${widget.categories[index].recipe_provider_type_id}');
 
               widget.onCategoryChanged(
-                widget.categories[index].id_app_user_type,
+                widget.categories[index].idAppUserType,
               );
             },
             children: widget.categories.map((AppUserCategory category) {
-              return Center(child: Text(category.app_user_type_desc));
+              return Center(child: Text(category.appUserTypeDesc));
             }).toList(),
           ),
         );

@@ -1,4 +1,5 @@
 // organisation_management_popup.dart
+import 'package:event/user_change_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
@@ -110,7 +111,8 @@ class _OrganisationManagementPopupState
           provider_organisation_desc: _descController.text.trim(),
         );
 
-        final created = await _notifier.createOrganisation(newOrg);
+        final created = await _notifier.createOrganisation(newOrg,
+            Provider.of<AppUserNotifier>(context, listen: false).token ?? "");
 
         if (created != null) {
           setState(() {
@@ -138,7 +140,8 @@ class _OrganisationManagementPopupState
           provider_organisation_desc: _descController.text.trim(),
         );
 
-        final updated = await _notifier.updateOrganisation(updatedOrg);
+        final updated = await _notifier.updateOrganisation(updatedOrg,
+            Provider.of<AppUserNotifier>(context, listen: false).token ?? "");
 
         if (updated != null) {
           setState(() {
@@ -202,8 +205,8 @@ class _OrganisationManagementPopupState
 
     try {
       final deleted = await _notifier.deleteOrganisation(
-        org.id_provider_organisation,
-      );
+          org.id_provider_organisation,
+          Provider.of<AppUserNotifier>(context, listen: false).token ?? "");
 
       if (deleted) {
         setState(() {

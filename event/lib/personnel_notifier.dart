@@ -211,11 +211,11 @@ class PersonnelNotifier with ChangeNotifier {
     final pendingUsers = _getPendingUsersForSupplier(supplierId);
     if (pendingUsers.isEmpty) return activeUsers;
 
-    final activeIds = activeUsers.map((user) => user.id_app_user ?? 0).toSet();
+    final activeIds = activeUsers.map((user) => user.idAppUser ?? 0).toSet();
     final allUsers = List<AppUser>.from(activeUsers);
 
     for (final user in pendingUsers) {
-      if (!activeIds.contains(user.id_app_user)) {
+      if (!activeIds.contains(user.idAppUser)) {
         allUsers.add(user);
       }
     }
@@ -303,8 +303,7 @@ class PersonnelNotifier with ChangeNotifier {
     for (final user in activeUsers) {
       if (user.isAdmin) {
         admins++;
-      } else if (user.app_user_type_desc?.toLowerCase().contains('manager') ??
-          false) {
+      } else if (user.appUserType.toString().contains('manager') ?? false) {
         managers++;
       }
     }
@@ -564,7 +563,7 @@ class PersonnelNotifier with ChangeNotifier {
 
   void syncRuleState(ManagementRule updatedRule) {
     final ruleId = updatedRule.id_management_rule;
-    final userId = updatedRule.appUser?.id_app_user;
+    final userId = updatedRule.appUser?.idAppUser;
 
     if (ruleId == null || userId == null) return;
     if (_isRebuildingState) return;
@@ -789,7 +788,7 @@ class PersonnelNotifier with ChangeNotifier {
 
   void _updateUserRulesBatch(List<ManagementRule> rules) {
     for (final rule in rules) {
-      final userId = rule.appUser?.id_app_user;
+      final userId = rule.appUser?.idAppUser;
       if (userId == null) continue;
       _updateUserRule(userId, rule);
     }
@@ -1039,7 +1038,7 @@ class PersonnelNotifier with ChangeNotifier {
         _hasMore = false;
       } else {
         final updatedUserIds = rules
-            .map((rule) => rule.appUser?.id_app_user)
+            .map((rule) => rule.appUser?.idAppUser)
             .where((id) => id != null)
             .cast<int>()
             .toSet();

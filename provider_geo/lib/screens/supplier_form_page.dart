@@ -282,7 +282,8 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
           provider_organisation_desc: '',
         );
 
-        final created = await _notifier.createOrganisation(newOrg);
+        final created = await _notifier.createOrganisation(newOrg,
+            Provider.of<AppUserNotifier>(context, listen: false).token ?? "");
         if (created != null) {
           _id_provider_organisation = created.id_provider_organisation;
           _provider_organisation_name = created.provider_organisation_name;
@@ -307,7 +308,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         productProviderOwnerId:
             Provider.of<AppUserNotifier>(context, listen: false)
                     .appUser!
-                    .id_app_user ??
+                    .idAppUser ??
                 0,
         supplierImageUrl: _supplierImageUrl,
         supplierImageId: _supplierImageId,
@@ -323,7 +324,8 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
       }
 
       // Execute the operation using the notifier
-      final result = await _notifier.createOrUpdateSupplier(supplier);
+      final result = await _notifier.createOrUpdateSupplier(supplier,
+          Provider.of<AppUserNotifier>(context, listen: false).token ?? "s");
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

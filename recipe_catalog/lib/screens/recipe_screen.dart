@@ -134,14 +134,14 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         .split(",")[(_recipe.recipe_category_id ?? 1) - 1];
 
     return Scaffold(
-      floatingActionButton: Provider.of<AppUserNotifier>(context, listen: false)
-              .isCookingrecipe_catalog
-          ? FloatingActionButton(
-              heroTag: 'floating-button-2',
-              onPressed: () => _navigateToEditScreen(context),
-              child: Icon(color: theme.colorScheme.secondary, Icons.edit),
-            )
-          : null,
+      floatingActionButton:
+          Provider.of<AppUserNotifier>(context, listen: false).isCookingRecipe
+              ? FloatingActionButton(
+                  heroTag: 'floating-button-2',
+                  onPressed: () => _navigateToEditScreen(context),
+                  child: Icon(color: theme.colorScheme.secondary, Icons.edit),
+                )
+              : null,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -453,12 +453,12 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     color: colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: provider != null && provider.id_app_user != 0
-                      ? provider.app_user_image_url != null &&
-                              provider.app_user_image_url!.isNotEmpty
+                  child: provider != null && provider.idAppUser != 0
+                      ? provider.appUserImageUrl != null &&
+                              provider.appUserImageUrl!.isNotEmpty
                           ? ClipOval(
                               child: Image.network(
-                                provider.app_user_image_url!,
+                                provider.appUserImageUrl!,
                                 width: 48,
                                 height: 48,
                                 fit: BoxFit.cover,
@@ -488,7 +488,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        provider != null && provider.id_app_user != 0
+                        provider != null && provider.idAppUser != 0
                             ? "${provider.personFirstName} ${provider.personLastName}"
                                 .trim()
                             : AppLocalizations.of(context)!.unknownProvider,

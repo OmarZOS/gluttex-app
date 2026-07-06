@@ -46,7 +46,7 @@ class _SupplierEntitiesContentState extends State<SupplierEntitiesContent>
     final supplierNotifier = context.read<SupplierChangeNotifier>();
     final personnelNotifier = context.read<PersonnelNotifier>();
     final userNotifier = context.read<AppUserNotifier>();
-    final userId = userNotifier.appUser?.id_app_user;
+    final userId = userNotifier.appUser?.idAppUser;
 
     if (userId == null) return;
 
@@ -97,7 +97,7 @@ class _SupplierEntitiesContentState extends State<SupplierEntitiesContent>
     return Consumer3<SupplierChangeNotifier, PersonnelNotifier,
         AppUserNotifier>(
       builder: (context, supplierNotifier, personnelNotifier, userNotifier, _) {
-        final userId = userNotifier.appUser?.id_app_user;
+        final userId = userNotifier.appUser?.idAppUser;
         if (userId == null) return const SliverFillRemaining(child: SizedBox());
 
         final ownedSuppliers = widget.controller.filterOwnedSuppliers(

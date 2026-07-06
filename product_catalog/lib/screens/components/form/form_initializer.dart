@@ -39,7 +39,7 @@ class FormStateManager {
 
     // Set owner ID from current user
     final userNotifier = context.read<AppUserNotifier>();
-    formData.ownerId = userNotifier.appUser?.id_app_user;
+    formData.ownerId = userNotifier.appUser?.idAppUser;
 
     // Set initial supplier
     final supplierNotifier = context.read<SupplierChangeNotifier>();

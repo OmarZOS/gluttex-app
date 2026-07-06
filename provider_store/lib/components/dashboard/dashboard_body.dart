@@ -47,7 +47,7 @@ class DashboardBody extends StatelessWidget {
     final _personnelNotifier = context.read<PersonnelNotifier>();
     final _userNotifier = context.read<AppUserNotifier>();
 
-    final userId = _userNotifier.appUser?.id_app_user ?? 0;
+    final userId = _userNotifier.appUser?.idAppUser ?? 0;
     final accessibleSuppliers =
         _personnelNotifier.getAccessibleSupplierIds(userId);
     final userRules = _personnelNotifier.getRulesForUser(userId);

@@ -66,7 +66,7 @@ class _UploadImagePageState extends State<UploadImagePage> {
                         });
                       },
                       landscape: (entity == "recipe"),
-                      ownerId: userNotifier.appUser!.id_app_user.toString(),
+                      ownerId: userNotifier.appUser!.idAppUser.toString(),
                       entityId: entityId,
                     ),
                     if (_isUploading) ...[

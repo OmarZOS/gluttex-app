@@ -21,13 +21,13 @@ class PrivilegeDialogManager {
     if (!isPending) {
       // First ensure data is loaded
       await personnelNotifier.loadPersonnel(
-        userId: user.id_app_user ?? 0,
+        userId: user.idAppUser ?? 0,
         supplierId: supplierId,
       );
 
       // Then get the rule synchronously from cache
       final rule = personnelNotifier.getRuleForUser(
-        userId: user.id_app_user ?? 0,
+        userId: user.idAppUser ?? 0,
         ruleId: ruleId,
         supplierId: supplierId,
       );
@@ -75,25 +75,25 @@ class PrivilegeDialogManager {
     try {
       // Ensure data is loaded
       await personnelNotifier.loadPersonnel(
-        userId: user.id_app_user ?? 0,
+        userId: user.idAppUser ?? 0,
         supplierId: supplierId,
       );
 
       // Get the rule from cache
       final rule = personnelNotifier.getRuleForUser(
-        userId: user.id_app_user ?? 0,
+        userId: user.idAppUser ?? 0,
         ruleId: ruleId,
         supplierId: supplierId,
       );
 
       if (rule == null) {
-        debugPrint('Rule not found for user ${user.id_app_user}');
+        debugPrint('Rule not found for user ${user.idAppUser}');
         return;
       }
 
       final success = await personnelNotifier.updateTeamMemberPrivileges(
         ruleId: rule.id_management_rule ?? 0,
-        userId: user.id_app_user ?? 0,
+        userId: user.idAppUser ?? 0,
         supplierId: supplierId,
         orgId: orgId,
         privilege: privileges,
@@ -108,7 +108,8 @@ class PrivilegeDialogManager {
           SnackBar(
             content: Text(
               success
-                  ? localizations.privilegesUpdatedMessage(user.personFirstName)
+                  ? localizations
+                      .privilegesUpdatedMessage(user.personFirstName ?? "")
                   : localizations.privilegesUpdateFailedMessage,
             ),
             backgroundColor: success ? colorScheme.tertiary : colorScheme.error,

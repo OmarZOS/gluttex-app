@@ -449,7 +449,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     AppLocalizations localizations,
     Color backgroundColor,
   ) {
-    final isGuestUser = (appUser?.id_app_user ?? 0) == 0;
+    final isGuestUser = (appUser?.idAppUser ?? 0) == 0;
     final profileLabel = isGuestUser || displayName.isEmpty
         ? localizations.profileText
         : displayName;
@@ -462,9 +462,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildProfileIcon(AppUser? appUser) {
-    final hasProfileImage = appUser?.id_app_user != 0 &&
-        appUser?.app_user_image_url != null &&
-        appUser!.app_user_image_url!.isNotEmpty;
+    final hasProfileImage = appUser?.idAppUser != 0 &&
+        appUser?.appUserImageUrl != null &&
+        appUser!.appUserImageUrl!.isNotEmpty;
 
     if (!hasProfileImage) {
       return const Icon(size: 24.0, CupertinoIcons.profile_circled);
@@ -472,7 +472,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     return ClipOval(
       child: Image.network(
-        appUser.app_user_image_url!,
+        appUser.appUserImageUrl!,
         width: 24,
         height: 24,
         fit: BoxFit.cover,

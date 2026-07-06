@@ -47,7 +47,7 @@ class AppRouter {
             final isAuthenticated = authProvider.isAuthenticated;
 
             debugPrint(
-                'Router - appUser: ${appUser?.id_app_user}, isAuthenticated: $isAuthenticated');
+                'Router - appUser: ${appUser?.idAppUser}, isAuthenticated: $isAuthenticated');
 
             final args = settings.arguments as Map<String, dynamic>?;
 

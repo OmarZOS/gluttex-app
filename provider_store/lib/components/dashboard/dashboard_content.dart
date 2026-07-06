@@ -33,7 +33,7 @@ class DashboardContentState extends State<DashboardContent> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = widget.currentUser.id_app_user ?? 0;
+    final userId = widget.currentUser.idAppUser ?? 0;
     final accessibleSuppliers =
         widget.personnelNotifier.getAccessibleSupplierIds(userId);
 

@@ -62,7 +62,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
     final userNotifier = context.read<AppUserNotifier>();
     final notifier = context.read<NotificationNotifier>();
 
-    final currentUserId = userNotifier.appUser?.id_app_user;
+    final currentUserId = userNotifier.appUser?.idAppUser;
     if (currentUserId != null && currentUserId > 0) {
       _currentPage = 0;
       await notifier.loadInitialNotifications(
@@ -88,7 +88,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
   Future<void> _refreshNotifications() async {
     final userNotifier = context.read<AppUserNotifier>();
     final notifier = context.read<NotificationNotifier>();
-    final currentUserId = userNotifier.appUser?.id_app_user;
+    final currentUserId = userNotifier.appUser?.idAppUser;
     if (currentUserId != null && currentUserId > 0) {
       _currentPage = 0;
       await notifier.refreshNotifications(

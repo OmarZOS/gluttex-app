@@ -282,7 +282,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   }
 
   void _showSearchInviteDialog() {
-    final currentUserId = _userNotifier.appUser?.id_app_user;
+    final currentUserId = _userNotifier.appUser?.idAppUser;
     if (currentUserId == null || !mounted) return;
 
     showDialog(
@@ -331,7 +331,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   Future<void> _addUserToSupplier(AppUser user, int privileges,
       {bool fromQR = false}) async {
     final success = await _personnelNotifier.addTeamMember(
-      user.id_app_user ?? 0,
+      user.idAppUser ?? 0,
       supplierId: widget.supplierId,
       orgId: widget.orgId,
       privilege: privileges,
@@ -376,7 +376,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
       onConfirm: () async {
         final success = await _personnelNotifier.removeUserFromSupplier(
           ruleId,
-          user.id_app_user ?? 0,
+          user.idAppUser ?? 0,
           widget.supplierId,
         );
 
@@ -396,7 +396,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   void _showRemoveDialog(int ruleId, AppUser user) {
     ConfirmationDialogs.showRemoveMemberDialog(
       context: context,
-      userName: user.personFirstName,
+      userName: user.personFirstName ?? "",
       supplierName: widget.supplierName,
       onConfirm: () => _removeUserFromSupplier(ruleId, user),
     );
@@ -405,7 +405,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   Future<void> _removeUserFromSupplier(int ruleId, AppUser user) async {
     final success = await _personnelNotifier.removeUserFromSupplier(
       ruleId,
-      user.id_app_user ?? 0,
+      user.idAppUser ?? 0,
       widget.supplierId,
     );
 

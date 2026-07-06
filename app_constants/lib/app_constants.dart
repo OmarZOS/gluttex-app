@@ -275,7 +275,7 @@ class AppConstants {
 
   static const int itemsPerPage = 6;
 
-  static const int cookingrecipe_catalogDBId = 3;
+  static const String cookingRecipeCatalogDBId = "provider";
   static const int supplierDBId = 4;
 
   // Texts

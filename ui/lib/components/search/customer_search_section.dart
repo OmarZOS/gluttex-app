@@ -68,8 +68,8 @@ class _CustomerSectionState extends State<CustomerSection> {
     final hasAnySelection = hasCustomer || hasPerson;
 
     // Check if this is the default customer
-    final isDefaultCustomer = widget.selectedCustomer?.id_app_user ==
-        widget.defaultCustomer?.id_app_user;
+    final isDefaultCustomer =
+        widget.selectedCustomer?.idAppUser == widget.defaultCustomer?.idAppUser;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),

@@ -34,7 +34,7 @@ class PersonnelTabContent extends StatelessWidget {
         final filteredUsers = includePending
             ? users
             : users.where((user) {
-                final userId = user.id_app_user ?? 0;
+                final userId = user.idAppUser ?? 0;
                 return !notifier.hasPendingRulesForSupplier(userId, supplierId);
               }).toList();
 
@@ -73,7 +73,7 @@ class PersonnelTabContent extends StatelessWidget {
             itemBuilder: (context, index) {
               final user = filteredUsers[index];
               final isPending = notifier.hasPendingRulesForSupplier(
-                user.id_app_user ?? 0,
+                user.idAppUser ?? 0,
                 supplierId,
               );
 
@@ -81,14 +81,14 @@ class PersonnelTabContent extends StatelessWidget {
               if (isPending) {
                 rule = notifier
                     .getPendingRulesForUser(
-                      user.id_app_user ?? 0,
+                      user.idAppUser ?? 0,
                       supplierId: supplierId,
                     )
                     .firstOrNull;
               } else {
                 rule = notifier
                     .getRulesForUser(
-                      user.id_app_user ?? 0,
+                      user.idAppUser ?? 0,
                       supplierId: supplierId,
                     )
                     .firstOrNull;

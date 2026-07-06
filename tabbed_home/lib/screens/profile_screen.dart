@@ -72,10 +72,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildProfileSection(
             title: localizations.userInfoText,
             children: [
-              _buildInfoTile(localizations.usernameText, user.app_user_name),
+              _buildInfoTile(localizations.usernameText, user.appUserName),
               // _buildInfoTile(localizations.emailText, user.app_user_email),
               _buildInfoTile(
-                  localizations.userTypeText, user.app_user_type_desc),
+                  localizations.userTypeText, user.appUserType.toString()),
             ],
             theme: theme,
           ),
@@ -216,7 +216,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildUserAvatarSection(AppUser user, ThemeData theme) {
     return GestureDetector(
-      // onTap: _isEditing ? _changeProfilePicture : null,
       child: Center(
         child: Column(
           children: [
@@ -224,8 +223,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               alignment: Alignment.bottomRight,
               children: [
                 FlippingAvatar(
-                  imageUrl: user.app_user_image_url!,
-                  qrData: "user:${user.id_app_user!}",
+                  imageUrl: user.appUserImageUrl ??
+                      '', // Use null-aware operator with fallback
+                  qrData:
+                      "user:${user.idAppUser ?? 0}", // Use null-aware operator with fallback
                   size: MediaQuery.of(context).size.width * 0.25,
                   borderColor: Theme.of(context).colorScheme.primary,
                   backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
@@ -234,7 +235,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              '${user.personFirstName} ${user.personLastName}',
+              '${user.personFirstName ?? ''} ${user.personLastName ?? ''}'
+                  .trim(),
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

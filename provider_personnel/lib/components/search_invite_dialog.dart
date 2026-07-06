@@ -49,8 +49,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       if (query.isEmpty) {
         notifier.clearSearch(supplierId: widget.supplierId ?? 0);
       } else if (query.length >= 2) {
-        final userId =
-            context.read<AppUserNotifier>().appUser!.id_app_user ?? 0;
+        final userId = context.read<AppUserNotifier>().appUser!.idAppUser ?? 0;
         notifier.searchPersonnel(
           query,
           // userId,
@@ -379,8 +378,8 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     final textTheme = Theme.of(context).textTheme;
 
     // Check if user is already in the team
-    final isUserInTeam = _isUserAlreadyInTeam(user.id_app_user ?? 0, notifier);
-    final isPending = _isUserPending(user.id_app_user ?? 0, notifier);
+    final isUserInTeam = _isUserAlreadyInTeam(user.idAppUser ?? 0, notifier);
+    final isPending = _isUserPending(user.idAppUser ?? 0, notifier);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -469,8 +468,8 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      if (user.app_user_name != null &&
-                          user.app_user_name!.isNotEmpty)
+                      if (user.appUserName != null &&
+                          user.appUserName!.isNotEmpty)
                         Row(
                           children: [
                             Icon(
@@ -480,7 +479,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '@${user.app_user_name!}',
+                              '@${user.appUserName!}',
                               style: textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),
@@ -491,7 +490,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                         ),
                       const SizedBox(height: 4),
                       _buildUserRole(
-                          user.app_user_type_desc, colorScheme, textTheme),
+                          user.appUserType.toString(), colorScheme, textTheme),
                     ],
                   ),
                 ),
@@ -537,31 +536,31 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
-            child: user.app_user_image_url != null &&
-                    user.app_user_image_url!.isNotEmpty
-                ? Image.network(
-                    user.app_user_image_url!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return _buildFallbackAvatar(
-                          colorScheme, user, isUserInTeam, isPending);
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                          strokeWidth: 2,
-                          color: colorScheme.primary,
-                        ),
-                      );
-                    },
-                  )
-                : _buildFallbackAvatar(
-                    colorScheme, user, isUserInTeam, isPending),
+            child:
+                user.appUserImageUrl != null && user.appUserImageUrl!.isNotEmpty
+                    ? Image.network(
+                        user.appUserImageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildFallbackAvatar(
+                              colorScheme, user, isUserInTeam, isPending);
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                              strokeWidth: 2,
+                              color: colorScheme.primary,
+                            ),
+                          );
+                        },
+                      )
+                    : _buildFallbackAvatar(
+                        colorScheme, user, isUserInTeam, isPending),
           ),
         ),
         if (isUserInTeam)
@@ -600,7 +599,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       Colors.purple,
       Colors.teal,
     ];
-    final color = colors[user.id_app_user! % colors.length];
+    final color = colors[user.idAppUser! % colors.length];
     final initials = _getUserInitials(user);
 
     return Container(
@@ -706,7 +705,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       includePending: true,
     );
 
-    return users.any((user) => user.id_app_user == userId);
+    return users.any((user) => user.idAppUser == userId);
   }
 
   bool _isUserPending(int userId, PersonnelNotifier notifier) {
@@ -729,13 +728,13 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
 
       // First ensure data is loaded
       await notifier.loadPersonnel(
-        userId: user.id_app_user ?? 0,
+        userId: user.idAppUser ?? 0,
         supplierId: widget.supplierId ?? 0,
       );
 
       // Then get the rule synchronously from cache
       final rule = notifier.getRuleForUser(
-        userId: user.id_app_user ?? 0,
+        userId: user.idAppUser ?? 0,
         supplierId: widget.supplierId ?? 0,
       );
 

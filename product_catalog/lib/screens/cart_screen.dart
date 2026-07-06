@@ -62,7 +62,7 @@ class CartScreen extends StatelessWidget {
 
     try {
       final orderData = Order.buildOrderData(
-          cartNotifier.cart.items, userNotifier.appUser!.id_app_user!);
+          cartNotifier.cart.items, userNotifier.appUser!.idAppUser!);
 
       final response = await orderNotifier.submitOrder(orderData);
 

@@ -27,7 +27,7 @@ class PrivilegeChecker extends StatelessWidget {
         }
 
         final userRules = personnelNotifier
-            .getRulesForUser(currentUser.id_app_user ?? 0)
+            .getRulesForUser(currentUser.idAppUser ?? 0)
             .where((r) => r.isActiveStatus)
             .toList();
 

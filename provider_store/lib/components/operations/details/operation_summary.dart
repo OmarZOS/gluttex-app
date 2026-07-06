@@ -274,7 +274,7 @@ class _ClientSummaryItem extends StatelessWidget {
   String _getUserDisplayName(AppUser user) {
     final firstName = user.personFirstName?.trim();
     final lastName = user.personLastName?.trim();
-    final userName = user.app_user_name?.trim();
+    final userName = user.appUserName?.trim();
 
     if (firstName != null && firstName.isNotEmpty) {
       if (lastName != null && lastName.isNotEmpty) {
@@ -287,7 +287,7 @@ class _ClientSummaryItem extends StatelessWidget {
       return userName;
     }
 
-    return 'User #${user.id_app_user}';
+    return 'User #${user.idAppUser}';
   }
 }
 
@@ -419,7 +419,7 @@ class _SellerSummaryItem extends StatelessWidget {
   String _getUserDisplayName(AppUser user) {
     final firstName = user.personFirstName?.trim();
     final lastName = user.personLastName?.trim();
-    final userName = user.app_user_name?.trim();
+    final userName = user.appUserName?.trim();
 
     if (firstName != null && firstName.isNotEmpty) {
       if (lastName != null && lastName.isNotEmpty) {
@@ -432,7 +432,7 @@ class _SellerSummaryItem extends StatelessWidget {
       return userName;
     }
 
-    return 'User #${user.id_app_user}';
+    return 'User #${user.idAppUser}';
   }
 }
 

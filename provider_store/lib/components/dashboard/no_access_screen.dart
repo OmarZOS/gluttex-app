@@ -120,7 +120,7 @@ class NoAccessButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final localizations = AppLocalizations.of(context);
-    final userId = currentUser.id_app_user ?? 0;
+    final userId = currentUser.idAppUser ?? 0;
 
     return Column(
       children: [

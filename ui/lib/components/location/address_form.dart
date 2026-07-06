@@ -505,10 +505,10 @@ class _AddressFormState extends State<AddressForm> {
 
     final user = widget.user!;
     final address = Address(
-      address_street: user.addressStreet,
-      address_city: user.addressCity,
-      address_postal_code: user.addressPostalCode,
-      address_country: user.addressCountry,
+      address_street: user.addressStreet ?? "",
+      address_city: user.addressCity ?? "",
+      address_postal_code: user.addressPostalCode ?? "",
+      address_country: user.addressCountry ?? "",
       address_type: 'shipping',
     );
 

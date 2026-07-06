@@ -66,7 +66,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
       final currentUserId = Provider.of<AppUserNotifier>(context, listen: false)
           .appUser
-          ?.id_app_user;
+          ?.idAppUser;
 
       if (currentUserId == null) {
         ScaffoldMessenger.of(context).showSnackBar(

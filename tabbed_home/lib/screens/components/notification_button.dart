@@ -75,7 +75,7 @@ class _NotificationButtonState extends State<NotificationButton>
 
     final notifier = context.read<NotificationNotifier>();
     final userNotifier = context.read<AppUserNotifier>();
-    final userId = userNotifier.appUser?.id_app_user ?? 0;
+    final userId = userNotifier.appUser?.idAppUser ?? 0;
 
     // More comprehensive checks
     final shouldLoad = userId > 0 &&

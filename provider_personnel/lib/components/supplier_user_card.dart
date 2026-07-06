@@ -85,7 +85,7 @@ class SupplierUserCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildUserName(context, localizations),
-                                if (user.app_user_name?.isNotEmpty == true &&
+                                if (user.appUserName?.isNotEmpty == true &&
                                     !isCompact)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4),
@@ -166,7 +166,7 @@ class SupplierUserCard extends StatelessWidget {
   }
 
   Widget _buildAvatarImage(ColorScheme colorScheme) {
-    final imageUrl = user.app_user_image_url;
+    final imageUrl = user.appUserImageUrl;
 
     if (imageUrl == null || imageUrl.isEmpty) {
       return _buildFallbackAvatar(colorScheme);
@@ -264,7 +264,7 @@ class SupplierUserCard extends StatelessWidget {
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            user.app_user_name!,
+            user.appUserName!,
             style: theme.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
@@ -486,8 +486,8 @@ class SupplierUserCard extends StatelessWidget {
     final lastName = user.personLastName?.trim() ?? '';
 
     if (firstName.isEmpty && lastName.isEmpty) {
-      return user.app_user_name?.isNotEmpty == true
-          ? user.app_user_name!.substring(0, 1).toUpperCase()
+      return user.appUserName?.isNotEmpty == true
+          ? user.appUserName!.substring(0, 1).toUpperCase()
           : '?';
     }
 

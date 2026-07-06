@@ -5,6 +5,7 @@ import 'package:event/cart_change_notifier.dart';
 import 'package:event/product_change_notifier.dart';
 import 'package:event/user_change_notifier.dart';
 import 'package:event/views/checkout_view_model.dart';
+import 'package:gluttex_core/health/blood_type.dart';
 import 'package:provider_store/components/selling_point/checkout/checkout_footer.dart';
 import 'package:provider_store/components/selling_point/checkout/delivery_section.dart';
 import 'package:provider_store/components/selling_point/checkout/document_type_section.dart';
@@ -95,7 +96,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   //     // Process checkout
   //     final result = await _viewModel.processCartCheckout(
   //       cart: cartNotifier.cart,
-  //       sellingUserId: currentUser.id_app_user ?? 0,
+  //       sellingUserId: currentUser.idAppUser ?? 0,
   //       providerId: widget.supplierId,
   //     );
 
@@ -444,7 +445,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // Process checkout
       final result = await _viewModel.processCartCheckout(
         cart: cartNotifier.cart,
-        sellingUserId: currentUser.id_app_user ?? 0,
+        sellingUserId: currentUser.idAppUser ?? 0,
         providerId: widget.supplierId,
       );
 
@@ -611,25 +612,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     setState(() => _customerExpanded = !_customerExpanded),
                 child: CustomerSection(
                   defaultCustomer: AppUser(
-                    id_app_user: 0, // ID 0 indicates guest/anonymous
-                    app_user_person_id: 0,
-                    app_user_type_id:
-                        3, // Guest type ID (you may have a specific ID for guests)
-                    app_user_name: 'guest',
-                    app_user_password: '',
-                    app_user_preferences: '',
-                    app_user_type_desc: loc.guestCustomer ?? 'Guest',
-                    app_user_image_url: '',
+                    idAppUser: 0, // ID 0 indicates guest/anonymous
+                    appUserPersonId: 0,
+                    appUserType: AppUserType
+                        .guest, // Guest type ID (you may have a specific ID for guests)
+                    appUserName: 'guest',
+                    appUserPassword: '',
+                    appUserPreferences: '',
+                    // app_user_type_desc: loc.guestCustomer ?? 'Guest',
+                    appUserImageUrl: '',
                     idPerson: 0,
                     personDetailsId: 0,
                     personFirstName: loc.guestCustomer ?? 'Guest',
                     personLastName: '',
                     personBirthDate: '',
-                    app_user_email: loc.guestEmail ?? 'guest@example.com',
+                    appUserEmail: loc.guestEmail ?? 'guest@example.com',
                     personGender: '',
-                    personNationality: '',
-                    idBloodType: 0,
-                    bloodTypeDesc: '',
+                    personCountryCode: '',
+                    bloodType: "B+",
                     idLocation: 0,
                     locationLatitude: 0.0,
                     locationLongitude: 0.0,

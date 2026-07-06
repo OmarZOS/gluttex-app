@@ -124,7 +124,8 @@ class SupplierServiceImpl extends SupplierService {
   }
 
   @override
-  Future<Supplier?> addSupplier(Supplier supplier, {String? callerKey}) async {
+  Future<Supplier?> addSupplier(Supplier supplier,
+      {String? callerKey, String? token}) async {
     final key = callerKey ??
         _getCallerKey('addSupplier', suffix: supplier.providerName);
 
@@ -135,10 +136,10 @@ class SupplierServiceImpl extends SupplierService {
           name: 'SupplierServiceImpl');
 
       final result = await storageService.insert(
-        '${AppConstants.apiBaseUrl}${AppConstants.addSupplierEndpoint}',
-        supplier.toJson(),
-        callerKey: key,
-      );
+          '${AppConstants.apiBaseUrl}${AppConstants.addSupplierEndpoint}',
+          supplier.toJson(),
+          callerKey: key,
+          token: token);
 
       final statusCode = storageService.getStatusCode(key);
       final responseCode = storageService.getResponseCode(key);
@@ -168,7 +169,8 @@ class SupplierServiceImpl extends SupplierService {
   }
 
   @override
-  Future<int?> deleteSupplier(String supplierId, {String? callerKey}) async {
+  Future<int?> deleteSupplier(String supplierId,
+      {String? callerKey, String? token}) async {
     final key = callerKey ?? _getCallerKey('deleteSupplier', id: supplierId);
 
     try {
@@ -178,10 +180,10 @@ class SupplierServiceImpl extends SupplierService {
           name: 'SupplierServiceImpl');
 
       final result = await storageService.delete(
-        '${AppConstants.apiBaseUrl}${AppConstants.deleteSupplierEndpoint}',
-        supplierId,
-        callerKey: key,
-      );
+          '${AppConstants.apiBaseUrl}${AppConstants.deleteSupplierEndpoint}',
+          supplierId,
+          callerKey: key,
+          token: token);
 
       final statusCode = storageService.getStatusCode(key);
       final responseCode = storageService.getResponseCode(key);
@@ -208,7 +210,7 @@ class SupplierServiceImpl extends SupplierService {
 
   @override
   Future<Supplier?> updateSupplier(Supplier updatedSupplier,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = callerKey ??
         _getCallerKey('updateSupplier',
             id: updatedSupplier.idProductProvider.toString());
@@ -224,12 +226,12 @@ class SupplierServiceImpl extends SupplierService {
           name: 'SupplierServiceImpl');
 
       final result = await storageService.update(
-        url,
-        updatedSupplier.idProductProvider.toString(),
-        {"supplier_id": updatedSupplier.idProductProvider.toString()},
-        updatedSupplier.toJson(),
-        callerKey: key,
-      );
+          url,
+          updatedSupplier.idProductProvider.toString(),
+          {"supplier_id": updatedSupplier.idProductProvider.toString()},
+          updatedSupplier.toJson(),
+          callerKey: key,
+          token: token);
 
       final statusCode = storageService.getStatusCode(key);
       final responseCode = storageService.getResponseCode(key);
@@ -651,7 +653,7 @@ class SupplierServiceImpl extends SupplierService {
 
   @override
   Future<Organisation?> addOrganisation(Organisation organisation,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = callerKey ??
         _getCallerKey('addOrganisation',
             suffix: organisation.provider_organisation_name);
@@ -663,10 +665,10 @@ class SupplierServiceImpl extends SupplierService {
           name: 'SupplierServiceImpl');
 
       final result = await storageService.insert(
-        '${AppConstants.apiBaseUrl}${AppConstants.createOrganisationEndpoint}',
-        organisation.toJson(),
-        callerKey: key,
-      );
+          '${AppConstants.apiBaseUrl}${AppConstants.createOrganisationEndpoint}',
+          organisation.toJson(),
+          callerKey: key,
+          token: token);
 
       final statusCode = storageService.getStatusCode(key);
 
@@ -699,7 +701,7 @@ class SupplierServiceImpl extends SupplierService {
 
   @override
   Future<Organisation?> updateOrganisation(Organisation updatedOrganisation,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = callerKey ??
         _getCallerKey('updateOrganisation',
             id: updatedOrganisation.id_provider_organisation.toString());
@@ -716,15 +718,15 @@ class SupplierServiceImpl extends SupplierService {
           name: 'SupplierServiceImpl');
 
       final result = await storageService.update(
-        url,
-        updatedOrganisation.id_provider_organisation.toString(),
-        {
-          "organisation_id":
-              updatedOrganisation.id_provider_organisation.toString()
-        },
-        updatedOrganisation.toJson(),
-        callerKey: key,
-      );
+          url,
+          updatedOrganisation.id_provider_organisation.toString(),
+          {
+            "organisation_id":
+                updatedOrganisation.id_provider_organisation.toString()
+          },
+          updatedOrganisation.toJson(),
+          callerKey: key,
+          token: token);
 
       final statusCode = storageService.getStatusCode(key);
 
@@ -755,7 +757,8 @@ class SupplierServiceImpl extends SupplierService {
   }
 
   @override
-  Future<int?> deleteOrganisation(String id, {String? callerKey}) async {
+  Future<int?> deleteOrganisation(String id,
+      {String? callerKey, String? token}) async {
     final key = callerKey ?? _getCallerKey('deleteOrganisation', id: id);
 
     try {
@@ -764,10 +767,10 @@ class SupplierServiceImpl extends SupplierService {
       developer.log('Deleting organisation: $id', name: 'SupplierServiceImpl');
 
       final result = await storageService.delete(
-        '${AppConstants.apiBaseUrl}${AppConstants.deleteOrganisationEndpoint}',
-        id,
-        callerKey: key,
-      );
+          '${AppConstants.apiBaseUrl}${AppConstants.deleteOrganisationEndpoint}',
+          id,
+          callerKey: key,
+          token: token);
 
       final statusCode = storageService.getStatusCode(key);
 

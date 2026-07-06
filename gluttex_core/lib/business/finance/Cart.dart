@@ -818,7 +818,7 @@ class CheckoutData {
       "cart_selling_user": cart.cartSellingUser ?? 0,
       "cart_person_ref": cart.cartPersonRef ?? 0,
       "cart_client_user":
-          cart.cartClientUser ?? selectedCustomer?.id_app_user ?? 0,
+          cart.cartClientUser ?? selectedCustomer?.idAppUser ?? 0,
       "cart_status": "PENDING",
       "cart_total_amount": totalAmount,
       "cart_notes": notes,
@@ -831,14 +831,14 @@ class CheckoutData {
 
     // Build client data from selected customer
     final Map<String, dynamic> client = {
-      "id_person": selectedCustomer?.id_app_user ?? selectedCustomer?.idPerson,
+      "id_person": selectedCustomer?.idAppUser ?? selectedCustomer?.idPerson,
       "person_details_id": 0,
       "id_person_details": 0,
       "person_first_name": selectedCustomer?.personFirstName ?? "string",
       "person_last_name": selectedCustomer?.personLastName ?? "string",
       "person_birth_date": selectedCustomer?.personBirthDate ?? "string",
       "person_gender": selectedCustomer?.personGender ?? "string",
-      "person_nationality": selectedCustomer?.personNationality ?? "string",
+      "person_nationality": selectedCustomer?.personCountryCode ?? "string",
       "id_blood_type": 0,
     };
 

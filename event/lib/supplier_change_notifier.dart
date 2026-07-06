@@ -632,7 +632,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
   // ============ CUD OPERATIONS WITH RESPONSE TRACKING ============
 
-  Future<Supplier> createOrUpdateSupplier(Supplier supplier) async {
+  Future<Supplier> createOrUpdateSupplier(
+      Supplier supplier, String token) async {
     final isCreating = supplier.idProductProvider == 0;
     final operationKey = _generateCallerKey(
         isCreating ? 'createSupplier' : 'updateSupplier',
@@ -649,8 +650,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
       }
 
       final result = isCreating
-          ? await _supplierService.addSupplier(supplier)
-          : await _supplierService.updateSupplier(supplier);
+          ? await _supplierService.addSupplier(supplier, token: token)
+          : await _supplierService.updateSupplier(supplier, token: token);
 
       if (result == null) {
         _storeFailureResponse(operationKey, null,
@@ -689,14 +690,15 @@ class SupplierChangeNotifier extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteSupplier(int id) async {
+  Future<bool> deleteSupplier(int id, String token) async {
     final operationKey =
         _generateCallerKey('deleteSupplier', id: id.toString());
 
     _setLoading(true);
 
     try {
-      final status = await _supplierService.deleteSupplier(id.toString());
+      final status =
+          await _supplierService.deleteSupplier(id.toString(), token: token);
       final success = status != null && (status == 200 || status == 204);
 
       if (success) {
@@ -1176,7 +1178,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
   }
 
   /// Create a new organisation
-  Future<Organisation?> createOrganisation(Organisation organisation,
+  Future<Organisation?> createOrganisation(
+      Organisation organisation, String token,
       {String? callerKey}) async {
     final operationKey = callerKey ??
         _generateCallerKey('createOrganisation',
@@ -1185,7 +1188,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      final result = await _supplierService.addOrganisation(organisation);
+      final result =
+          await _supplierService.addOrganisation(organisation, token: token);
 
       if (result == null) {
         _storeFailureResponse(operationKey, null,
@@ -1218,7 +1222,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
   }
 
   /// Update an existing organisation
-  Future<Organisation?> updateOrganisation(Organisation organisation,
+  Future<Organisation?> updateOrganisation(
+      Organisation organisation, String token,
       {String? callerKey}) async {
     final operationKey = callerKey ??
         _generateCallerKey('updateOrganisation',
@@ -1227,7 +1232,8 @@ class SupplierChangeNotifier extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      final result = await _supplierService.updateOrganisation(organisation);
+      final result =
+          await _supplierService.updateOrganisation(organisation, token: token);
 
       if (result == null) {
         _storeFailureResponse(operationKey, null,
@@ -1260,14 +1266,16 @@ class SupplierChangeNotifier extends ChangeNotifier {
   }
 
   /// Delete an organisation by ID
-  Future<bool> deleteOrganisation(int id, {String? callerKey}) async {
+  Future<bool> deleteOrganisation(int id, String token,
+      {String? callerKey}) async {
     final operationKey = callerKey ??
         _generateCallerKey('deleteOrganisation', id: id.toString());
 
     _setLoading(true);
 
     try {
-      final status = await _supplierService.deleteOrganisation(id.toString());
+      final status = await _supplierService.deleteOrganisation(id.toString(),
+          token: token);
       final success = status != null && (status == 200 || status == 204);
 
       if (success) {

@@ -65,7 +65,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
       final orderData = Order.buildSingleOrderData(
         product: widget.product,
         quantity: quantity,
-        orderingUserId: userNotifier.appUser?.id_app_user ?? 0,
+        orderingUserId: userNotifier.appUser?.idAppUser ?? 0,
         discount: maxDiscount,
         taxRate: taxRate,
       );

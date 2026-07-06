@@ -298,11 +298,11 @@ class RecipeNotifier extends TraceableNotifier {
     final key = callerKey ?? getCallerKey('getUserById', id: id.toString());
 
     final existingUser = _users.firstWhere(
-      (user) => user.id_app_user == id,
+      (user) => user.idAppUser == id,
       orElse: () => AppUser.empty(),
     );
 
-    if (existingUser.id_app_user != 0) {
+    if (existingUser.idAppUser != 0) {
       storeSuccess(key, existingUser, responseCode: 'CACHED');
       return existingUser;
     }
@@ -314,7 +314,7 @@ class RecipeNotifier extends TraceableNotifier {
       final result_user =
           await AppLocator.get<AppUserService>().getAppUser(id.toString());
 
-      if (result_user != null && result_user.id_app_user != 0) {
+      if (result_user != null && result_user.idAppUser != 0) {
         _users.add(result_user);
         storeSuccess(key, result_user);
         notifyListeners();

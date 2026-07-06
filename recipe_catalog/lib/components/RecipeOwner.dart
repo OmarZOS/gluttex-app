@@ -12,7 +12,7 @@ bool is_recipe_owner(BuildContext context, int ownerId) {
   AppUser appUser =
       Provider.of<AppUserNotifier>(context, listen: false).appUser!;
 
-  return appUser.id_app_user == ownerId || appUser.isAdmin;
+  return appUser.idAppUser == ownerId || appUser.isAdmin;
 }
 
 class RecipeOwner extends StatelessWidget {

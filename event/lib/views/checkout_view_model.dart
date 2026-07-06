@@ -188,10 +188,10 @@ class CheckoutViewModel extends ChangeNotifier {
     // IMPORTANT: Only set customerRef if we have a valid user (id != 0)
     if (_selectedCustomer != null) {
       // Check if this is a real user (id != 0) or guest (id == 0)
-      if (_selectedCustomer!.id_app_user != 0) {
+      if (_selectedCustomer!.idAppUser != 0) {
         // Real user - include their data
         customerRef = _selectedCustomer!.idPerson;
-        clientUserId = _selectedCustomer!.id_app_user;
+        clientUserId = _selectedCustomer!.idAppUser;
       } else {
         // Guest user (id == 0) - don't send customer reference
         // Still send clientUserId as 0 to indicate guest
@@ -320,7 +320,7 @@ class CheckoutViewModel extends ChangeNotifier {
     // Build client data - ONLY for real users (id != 0)
     final Map<String, dynamic> clientData = {};
 
-    if (_selectedCustomer != null && _selectedCustomer!.id_app_user != 0) {
+    if (_selectedCustomer != null && _selectedCustomer!.idAppUser != 0) {
       // Only send client data for real users, not guests
       final customer = _selectedCustomer!;
       clientData.addAll({
@@ -331,7 +331,7 @@ class CheckoutViewModel extends ChangeNotifier {
         "person_last_name": customer.personLastName ?? "",
         "person_birth_date": customer.personBirthDate ?? "",
         "person_gender": customer.personGender ?? "",
-        "person_nationality": customer.personNationality ?? "",
+        "person_nationality": customer.personCountryCode ?? "",
         "id_blood_type": 0,
       });
     } else if (_selectedPerson != null) {
@@ -693,7 +693,7 @@ class CheckoutViewModel extends ChangeNotifier {
   String getCustomerName() {
     if (_selectedCustomer != null) {
       final customer = _selectedCustomer!;
-      if (customer.id_app_user == 0) {
+      if (customer.idAppUser == 0) {
         // Guest user
         return 'Guest';
       }
@@ -707,7 +707,7 @@ class CheckoutViewModel extends ChangeNotifier {
 // Helper method to check if current customer is a guest
   bool get isGuestCustomer {
     if (_selectedCustomer != null) {
-      return _selectedCustomer!.id_app_user == 0;
+      return _selectedCustomer!.idAppUser == 0;
     }
     return false; // Person is never a guest
   }
@@ -715,7 +715,7 @@ class CheckoutViewModel extends ChangeNotifier {
 // Helper method to check if we have a real customer
   bool get hasRealCustomer {
     if (_selectedCustomer != null) {
-      return _selectedCustomer!.id_app_user != 0;
+      return _selectedCustomer!.idAppUser != 0;
     }
     return _selectedPerson != null; // Person is always real
   }
@@ -760,7 +760,7 @@ class CheckoutViewModel extends ChangeNotifier {
 
     // If you want to require REAL customer (not guest), use:
     // return cartNotifier.cart.isNotEmpty &&
-    //        ((_selectedCustomer != null && _selectedCustomer!.id_app_user != 0) ||
+    //        ((_selectedCustomer != null && _selectedCustomer!.idAppUser != 0) ||
     //         _selectedPerson != null);
   } // Helper to get checkout summary
 

@@ -306,7 +306,7 @@ class NotificationItem extends StatelessWidget {
     try {
       final notifier = context.read<AppUserNotifier>();
       final appUser = await notifier.fetchUserPassively(addedBy);
-      return appUser?.app_user_image_url;
+      return appUser?.appUserImageUrl;
     } catch (error) {
       debugPrint('Error fetching user image: $error');
       return null;

@@ -38,8 +38,8 @@ class AppUserNotifier extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isRefreshing => _isRefreshing;
   int get selectedTabIndex => _selectedTabIndex;
-  bool get isCookingRecipe => ((appUser?.app_user_type_id ?? 0) ==
-      AppConstants.cookingrecipe_catalogDBId);
+  bool get isCookingRecipe => ((appUser?.appUserType ?? "customer") ==
+      AppConstants.cookingRecipeCatalogDBId);
 
   bool get hasValidToken {
     if (_token == null || _tokenExpiry == null) return false;
@@ -98,7 +98,11 @@ class AppUserNotifier extends ChangeNotifier {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', _token!);
         await prefs.setString('auth_refresh_token', _refreshToken ?? '');
-        await prefs.setString('user_data', jsonEncode(_appUser!.toJson()));
+
+        // Store the raw user data as it came from the API
+        // Use toJson() for storage, but make sure it's the full object
+        final userJson = _appUser!.toJson();
+        await prefs.setString('user_data', jsonEncode(userJson));
         await prefs.setBool('is_authenticated', true);
         await prefs.setString(
             'token_expiry', _tokenExpiry?.toIso8601String() ?? '');
@@ -242,33 +246,61 @@ class AppUserNotifier extends ChangeNotifier {
         _token = storedToken;
         _refreshToken = storedRefreshToken;
         _isAuthenticated = true;
-        _appUser = AppUser.fromJson(jsonDecode(storedUserData));
+
+        // Parse the stored user data
+        try {
+          final userJson = jsonDecode(storedUserData);
+
+          // Check if the stored data is using the nested format (from toJson)
+          if (userJson.containsKey('user') &&
+              userJson.containsKey('person_record')) {
+            // Use fromPersistedJson for the nested format
+            _appUser = AppUser.fromPersistedJson(userJson);
+            debugPrint('✅ Parsed user from persisted JSON format');
+          } else {
+            // Use fromJson for the flat API format
+            _appUser = AppUser.fromPersistedJson(userJson);
+            debugPrint('✅ Parsed user from API JSON format');
+          }
+        } catch (e) {
+          debugPrint('❌ Error parsing user data: $e');
+          _appUser = null;
+        }
 
         // Restore token expiry
         if (storedExpiry != null && storedExpiry.isNotEmpty) {
           _tokenExpiry = DateTime.tryParse(storedExpiry);
         }
 
-        // Check if token is expired or needs refresh
-        if (_tokenExpiry != null && DateTime.now().isAfter(_tokenExpiry!)) {
-          debugPrint('⚠️ Token expired, attempting refresh...');
-          final refreshed = await refreshTokenNow(callerKey: key);
-          if (!refreshed) {
-            debugPrint('❌ Token refresh failed, clearing auth');
-            await _clearAuthData();
-            _isAuthenticated = false;
-            _token = null;
-            _appUser = null;
+        if (_appUser != null) {
+          // Check if token is expired or needs refresh
+          if (_tokenExpiry != null && DateTime.now().isAfter(_tokenExpiry!)) {
+            debugPrint('⚠️ Token expired, attempting refresh...');
+            final refreshed = await refreshTokenNow(callerKey: key);
+            if (!refreshed) {
+              debugPrint('❌ Token refresh failed, clearing auth');
+              await _clearAuthData();
+              _isAuthenticated = false;
+              _token = null;
+              _appUser = null;
+            }
+          } else if (needsTokenRefresh) {
+            debugPrint('🔄 Token needs refresh (expires soon), refreshing...');
+            await refreshTokenNow(callerKey: key);
           }
-        } else if (needsTokenRefresh) {
-          debugPrint('🔄 Token needs refresh (expires soon), refreshing...');
-          await refreshTokenNow(callerKey: key);
-        }
 
-        _storeSuccessResponse(key, _appUser,
-            statusCode: 200, responseCode: 'AUTH_RESTORED');
-        debugPrint('✅ Auth state restored: ${_appUser?.app_user_name}');
-        debugPrint('   Token valid until: $_tokenExpiry');
+          _storeSuccessResponse(key, _appUser,
+              statusCode: 200, responseCode: 'AUTH_RESTORED');
+          debugPrint('✅ Auth state restored: ${_appUser?.appUserName}');
+          debugPrint('   Token valid until: $_tokenExpiry');
+        } else {
+          // User data parsing failed
+          debugPrint('⚠️ Failed to parse user data, clearing auth');
+          await _clearAuthData();
+          _isAuthenticated = false;
+          _token = null;
+          _appUser = null;
+        }
       } else {
         debugPrint('ℹ️ No valid auth state found, clearing data');
         await _clearAuthData();
@@ -298,7 +330,6 @@ class AppUserNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
-
   // ============ USER MANAGEMENT ============
 
   /// Fetch user data
@@ -388,7 +419,7 @@ class AppUserNotifier extends ChangeNotifier {
   /// Update user
   Future<void> updateAppUser(AppUser user, {String? callerKey}) async {
     final key = callerKey ??
-        _getCallerKey('updateAppUser', id: user.id_app_user.toString());
+        _getCallerKey('updateAppUser', id: user.idAppUser.toString());
 
     try {
       _isLoading = true;
@@ -399,7 +430,7 @@ class AppUserNotifier extends ChangeNotifier {
       }
 
       await _appUserService.updateAppUser(user);
-      await fetchAppUser('${user.id_app_user}');
+      await fetchAppUser('${user.idAppUser}');
 
       _storeSuccessResponse(key, user,
           statusCode: 200, responseCode: 'UPDATED');
@@ -446,7 +477,7 @@ class AppUserNotifier extends ChangeNotifier {
             3600;
 
         final app_user_id =
-            authResult['app_user_id'] ?? authResult['user']?['id_app_user'];
+            authResult['app_user_id'] ?? authResult['user']?['idAppUser'];
 
         if (accessToken == null) {
           throw Exception('No access token received');
@@ -523,7 +554,7 @@ class AppUserNotifier extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
 
-      debugPrint('✅ Google sign-in successful: ${_appUser?.app_user_name}');
+      debugPrint('✅ Google sign-in successful: ${_appUser?.appUserName}');
       return _appUser;
     } catch (e) {
       debugPrint('❌ Google sign-in error: $e');
@@ -578,7 +609,7 @@ class AppUserNotifier extends ChangeNotifier {
       {String? callerKey}) async {
     final key = callerKey ??
         _getCallerKey('signUpWithData',
-            suffix: data['app_user_name']?.toString());
+            suffix: data['appUserName']?.toString());
 
     try {
       _isLoading = true;
@@ -586,7 +617,7 @@ class AppUserNotifier extends ChangeNotifier {
 
       final result = await _authService.signUpWithData(data);
 
-      if (result['id_app_user'] != null) {
+      if (result['idAppUser'] != null) {
         final accessToken = result['access_token'];
         final refreshToken = result['refresh_token'];
         final expiresIn = result['expires_in'] ?? 3600;
@@ -594,7 +625,7 @@ class AppUserNotifier extends ChangeNotifier {
         if (accessToken != null) {
           _setTokens(accessToken, refreshToken ?? '', expiresIn);
           _isAuthenticated = true;
-          await fetchAppUser(result['id_app_user'].toString());
+          await fetchAppUser(result['idAppUser'].toString());
           await _storeAuthData();
         }
 
@@ -682,7 +713,7 @@ class AppUserNotifier extends ChangeNotifier {
   /// Add new user
   Future<int?> addAppUser(AppUser appUser, {String? callerKey}) async {
     final key =
-        callerKey ?? _getCallerKey('addAppUser', suffix: appUser.app_user_name);
+        callerKey ?? _getCallerKey('addAppUser', suffix: appUser.appUserName);
 
     try {
       _isLoading = true;
@@ -694,7 +725,7 @@ class AppUserNotifier extends ChangeNotifier {
 
       final status = await _appUserService.addAppUser(appUser);
       if (status != null && status > 0) {
-        await fetchAppUser('${appUser.id_app_user}');
+        await fetchAppUser('${appUser.idAppUser}');
         _storeSuccessResponse(key, status,
             statusCode: 200, responseCode: 'CREATED');
       } else {
@@ -723,7 +754,7 @@ class AppUserNotifier extends ChangeNotifier {
   /// Update user image
   Future<int?> updateAppUserImage(AppUser appUser, {String? callerKey}) async {
     final key = callerKey ??
-        _getCallerKey('updateAppUserImage', id: appUser.id_app_user.toString());
+        _getCallerKey('updateAppUserImage', id: appUser.idAppUser.toString());
 
     try {
       _isLoading = true;
@@ -735,7 +766,7 @@ class AppUserNotifier extends ChangeNotifier {
 
       final status = await _appUserService.updateAppUserImage(appUser);
       if (status != null && status > 0) {
-        await fetchAppUser('${appUser.id_app_user}');
+        await fetchAppUser('${appUser.idAppUser}');
         _storeSuccessResponse(key, status,
             statusCode: 200, responseCode: 'IMAGE_UPDATED');
       } else {

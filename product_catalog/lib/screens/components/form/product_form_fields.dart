@@ -505,7 +505,7 @@ class ProductFormFields extends StatelessWidget {
     final supplierNotifier = context.watch<SupplierChangeNotifier>();
     final personnelNotifier = context.watch<PersonnelNotifier>();
 
-    final currentUserId = userNotifier.appUser?.id_app_user;
+    final currentUserId = userNotifier.appUser?.idAppUser;
 
     if (currentUserId == null) {
       return const SizedBox.shrink();
@@ -756,7 +756,7 @@ class __PricingCardWrapperState extends State<_PricingCardWrapper> {
         final userNotifier = context.read<AppUserNotifier>();
         supplierNotifier.fetchSuppliers(
           reset: true,
-          ownerId: userNotifier.appUser?.id_app_user,
+          ownerId: userNotifier.appUser?.idAppUser,
         );
       }
     });

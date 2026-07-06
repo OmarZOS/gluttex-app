@@ -32,7 +32,7 @@ class PendingTabContent extends StatelessWidget {
         );
 
         final pendingUsers = allUsers.where((user) {
-          final userId = user.id_app_user ?? 0;
+          final userId = user.idAppUser ?? 0;
           return notifier.hasPendingRulesForSupplier(userId, supplierId);
         }).toList();
 
@@ -83,7 +83,7 @@ class PendingTabContent extends StatelessWidget {
               final user = pendingUsers[index];
               final pendingRule = notifier
                   .getPendingRulesForUser(
-                    user.id_app_user ?? 0,
+                    user.idAppUser ?? 0,
                     supplierId: supplierId,
                   )
                   .firstOrNull;

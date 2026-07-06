@@ -214,7 +214,7 @@ class ManagementRule {
   String toString() {
     return 'ManagementRule(id: $id_management_rule, code: $management_rule_code, '
         'status: $ruleStatus, provider: ${productProvider?.product_provider_details.provider_name}, '
-        'user: ${appUser?.app_user_name})';
+        'user: ${appUser?.appUserName})';
   }
 }
 

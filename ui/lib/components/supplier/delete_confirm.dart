@@ -1,7 +1,9 @@
+import 'package:event/user_change_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:event/supplier_change_notifier.dart';
+import 'package:provider/provider.dart';
 import 'package:ui/Services/ResponseHandler.dart';
 import 'package:ui/components/confirmation_dialogue.dart';
 // import 'package:ui/components/SupplierProductCard.dart';
@@ -13,7 +15,8 @@ void showDeleteConfirmation(BuildContext context,
     AppLocalizations.of(context)!.recipedeletionConfirmationMessage,
     () async {
       try {
-        await supplierNotifer.deleteSupplier(idProductProvider);
+        await supplierNotifer.deleteSupplier(idProductProvider,
+            Provider.of<AppUserNotifier>(context, listen: false).token ?? "");
         ResponseHandler.handleResponse(
           context: context,
           statusCode: 200,

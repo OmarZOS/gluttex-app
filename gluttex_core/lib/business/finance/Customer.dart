@@ -22,7 +22,7 @@ class Customer {
       if (_user?.personLastName?.isNotEmpty == true) {
         return '${_user?.personFirstName} ${_user?.personLastName}';
       }
-      return _user?.app_user_name ?? 'User #$customerId';
+      return _user?.appUserName ?? 'User #$customerId';
     }
 
     if (customerType == 'person') {
@@ -34,7 +34,7 @@ class Customer {
 
   String? get email {
     return switch (customerType) {
-      'user' => _user?.app_user_name,
+      'user' => _user?.appUserName,
       'person' => _person?.person_details.person_email,
       _ => null,
     };
@@ -49,7 +49,7 @@ class Customer {
 
   String? get address {
     return switch (customerType) {
-      'user' => _user?.addressStreet != null && _user!.addressStreet.isNotEmpty
+      'user' => _user?.addressStreet != null && _user!.addressStreet!.isNotEmpty
           ? '${_user!.addressStreet}, ${_user!.addressCity}, ${_user!.addressCountry}'
           : null,
       'person' => _person?.person_details.addressLine,
@@ -59,7 +59,7 @@ class Customer {
 
   String? get avatarUrl {
     return switch (customerType) {
-      'user' => _user?.app_user_image_url,
+      'user' => _user?.appUserImageUrl,
       _ => null,
     };
   }
@@ -106,7 +106,7 @@ class Customer {
   factory Customer.fromUser(AppUser user) {
     return Customer._(
       customerType: 'user',
-      customerId: user.id_app_user ?? 0,
+      customerId: user.idAppUser ?? 0,
       user: user,
     );
   }

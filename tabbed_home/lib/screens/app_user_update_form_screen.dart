@@ -96,12 +96,12 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
             filepath: _editedImage!.path,
             filename: _editedImage!.path.split("/").last,
             entityType: 'user',
-            ownerId: '${_editedUser.id_app_user}',
-            entityId: '${_editedUser.id_app_user}',
+            ownerId: '${_editedUser.idAppUser}',
+            entityId: '${_editedUser.idAppUser}',
           );
           final imageUrl = await image.uploadImage();
 
-          localUser = localUser.copyWith(app_user_image_url: imageUrl);
+          localUser = localUser.copyWith(appUserImageUrl: imageUrl);
         }
 
         await Provider.of<AppUserNotifier>(context, listen: false)
@@ -157,10 +157,10 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                     _buildSectionHeader(loc.accountInformation, theme),
                     _buildTextFormField(
                       label: loc.username,
-                      initialValue: _editedUser.app_user_name,
+                      initialValue: _editedUser.appUserName,
                       enabled: false,
                       onSaved: (v) =>
-                          _editedUser = _editedUser.copyWith(app_user_name: v),
+                          _editedUser = _editedUser.copyWith(appUserName: v),
                     ),
                     _buildSectionHeader(loc.personalInformation, theme),
                     _buildTextFormField(
@@ -311,7 +311,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                   const SizedBox(height: 4),
                   Text(
                     hasLocation
-                        ? '${_editedUser.locationLatitude.toStringAsFixed(4)}, ${_editedUser.locationLongitude.toStringAsFixed(4)}'
+                        ? '${_editedUser.locationLatitude?.toStringAsFixed(4)}, ${_editedUser.locationLongitude?.toStringAsFixed(4)}'
                         : loc.insertCoordinatesMsg,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: hasLocation
@@ -323,7 +323,7 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
-                        _editedUser.locationName,
+                        _editedUser.locationName ?? "",
                         style: theme.textTheme.bodySmall,
                       ),
                     ),
@@ -365,10 +365,10 @@ class _AppUserEditFormScreenState extends State<AppUserEditFormScreen> {
                   ? CircleAvatar(
                       radius: MediaQuery.of(context).size.width * 0.5,
                       backgroundColor: theme.colorScheme.surfaceVariant,
-                      child: _editedUser.app_user_image_url != null
+                      child: _editedUser.appUserImageUrl != null
                           ? ClipOval(
                               child: Image.network(
-                                _editedUser.app_user_image_url!,
+                                _editedUser.appUserImageUrl!,
                                 width: MediaQuery.of(context).size.width * 0.5,
                                 height: MediaQuery.of(context).size.width * 0.5,
                                 fit: BoxFit.cover,

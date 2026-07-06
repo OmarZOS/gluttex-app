@@ -77,7 +77,7 @@ class PrivilegeDialogHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  user.app_user_name ?? 'No username',
+                  user.appUserName ?? 'No username',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -104,7 +104,7 @@ class PrivilegeDialogHeader extends StatelessWidget {
 
   Widget _buildUserAvatar(ColorScheme colorScheme) {
     final hasImage =
-        user.app_user_image_url != null && user.app_user_image_url!.isNotEmpty;
+        user.appUserImageUrl != null && user.appUserImageUrl!.isNotEmpty;
 
     return Container(
       width: 50,
@@ -113,7 +113,7 @@ class PrivilegeDialogHeader extends StatelessWidget {
       //   borderRadius: BorderRadius.circular(25),
       //   image: hasImage
       //       ? DecorationImage(
-      //           image: NetworkImage(user.app_user_image_url!),
+      //           image: NetworkImage(user.appUserImageUrl!),
       //           fit: BoxFit.cover,
       //         )
       //       : null,

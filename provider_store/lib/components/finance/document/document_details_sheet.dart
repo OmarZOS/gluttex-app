@@ -1301,7 +1301,7 @@ class DocumentDetailsSheet extends StatelessWidget {
     // Get the best display name
     final firstName = user.personFirstName?.trim();
     final lastName = user.personLastName?.trim();
-    final userName = user.app_user_name?.trim();
+    final userName = user.appUserName?.trim();
 
     if (firstName != null && firstName.isNotEmpty) {
       if (lastName != null && lastName.isNotEmpty) {
@@ -1314,7 +1314,7 @@ class DocumentDetailsSheet extends StatelessWidget {
       return userName;
     }
 
-    return user.app_user_name?.trim() ?? 'User #${user.id_app_user}';
+    return user.appUserName?.trim() ?? 'User #${user.idAppUser}';
   }
 
   Widget _buildAddressCard({

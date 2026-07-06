@@ -39,15 +39,18 @@ abstract class SupplierService extends TraceableService {
     throw UnimplementedError();
   }
 
-  Future<Supplier?> addSupplier(Supplier supplier) async {
+  Future<Supplier?> addSupplier(Supplier supplier,
+      {String? callerKey, String? token}) async {
     throw UnimplementedError();
   }
 
-  Future<Supplier?> updateSupplier(Supplier updatedSupplier) async {
+  Future<Supplier?> updateSupplier(Supplier updatedSupplier,
+      {String? callerKey, String? token}) async {
     throw UnimplementedError();
   }
 
-  Future<int?> deleteSupplier(String supplierId) async {
+  Future<int?> deleteSupplier(String supplierId,
+      {String? callerKey, String? token}) async {
     throw UnimplementedError();
   }
 
@@ -55,16 +58,18 @@ abstract class SupplierService extends TraceableService {
     throw UnimplementedError();
   }
 
-  Future<Organisation?> addOrganisation(Organisation supplier) async {
+  Future<Organisation?> addOrganisation(Organisation supplier,
+      {String? callerKey, String? token}) async {
     throw UnimplementedError();
   }
 
-  Future<Organisation?> updateOrganisation(
-      Organisation updatedOrganisation) async {
+  Future<Organisation?> updateOrganisation(Organisation updatedOrganisation,
+      {String? callerKey, String? token}) async {
     throw UnimplementedError();
   }
 
-  Future<int?> deleteOrganisation(String id) async {
+  Future<int?> deleteOrganisation(String id,
+      {String? callerKey, String? token}) async {
     throw UnimplementedError();
   }
 }

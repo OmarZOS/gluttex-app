@@ -78,7 +78,7 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
 
     _debounceTimer = Timer(const Duration(milliseconds: 350), () {
       if (query.length >= 2) {
-        final userId = _userNotifier.appUser?.id_app_user ?? 0;
+        final userId = _userNotifier.appUser?.idAppUser ?? 0;
         _personnelNotifier.searchPersonnel(
           query,
           // userId,
@@ -119,9 +119,9 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
   // AppUser _convertPersonToAppUser(Person person) {
   //   return AppUser(
   //     id_app_user: person.id_person,
-  //     app_user_name:
+  //     appUserName:
   //         person.person_details.person_email ?? 'person_${person.id_person}',
-  //     app_user_image_url: null,
+  //     appUserImageUrl: null,
   //     personFirstName: person.person_details.person_first_name,
   //     personLastName: person.person_details.person_last_name,
   //     // personEmail: person.person_details.person_email,
@@ -448,8 +448,8 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
             itemCount: recentUsers.length,
             itemBuilder: (context, index) {
               final user = recentUsers[index];
-              final isSelected = widget.currentSelectedCustomer?.id_app_user ==
-                  user.id_app_user;
+              final isSelected =
+                  widget.currentSelectedCustomer?.idAppUser == user.idAppUser;
               return _buildCustomerTile(user, isSelected, isPerson: false);
             },
           ),
@@ -596,8 +596,8 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
             itemCount: searchResults.length,
             itemBuilder: (context, index) {
               final user = searchResults[index];
-              final isSelected = widget.currentSelectedCustomer?.id_app_user ==
-                  user.id_app_user;
+              final isSelected =
+                  widget.currentSelectedCustomer?.idAppUser == user.idAppUser;
               return _buildCustomerTile(user, isSelected, isPerson: false);
             },
           ),
@@ -797,8 +797,8 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      if (customer.app_user_name != null &&
-                          customer.app_user_name!.isNotEmpty &&
+                      if (customer.appUserName != null &&
+                          customer.appUserName!.isNotEmpty &&
                           !isPerson)
                         Row(
                           children: [
@@ -811,7 +811,7 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '@${customer.app_user_name!}',
+                              '@${customer.appUserName!}',
                               style: textTheme.bodyMedium?.copyWith(
                                 color: isSelected
                                     ? colorScheme.primary.withOpacity(0.8)
@@ -1144,10 +1144,10 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
-            child: customer.app_user_image_url != null &&
-                    customer.app_user_image_url!.isNotEmpty
+            child: customer.appUserImageUrl != null &&
+                    customer.appUserImageUrl!.isNotEmpty
                 ? Image.network(
-                    customer.app_user_image_url!,
+                    customer.appUserImageUrl!,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return _buildFallbackAvatar(customer, isSelected,
@@ -1260,9 +1260,8 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
       Colors.purple,
       Colors.teal,
     ];
-    final color = isPerson
-        ? Colors.orange
-        : colors[customer.id_app_user! % colors.length];
+    final color =
+        isPerson ? Colors.orange : colors[customer.idAppUser! % colors.length];
     final initials = _getCustomerInitials(customer);
 
     return Container(

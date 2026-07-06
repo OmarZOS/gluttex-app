@@ -34,7 +34,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     final userId = Provider.of<AppUserNotifier>(context, listen: false)
         .appUser!
-        .id_app_user!;
+        .idAppUser!;
 
     // Use the provided cartChangeNotifier or get from context
     if (widget.cartChangeNotifier != null) {
@@ -52,7 +52,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Future<void> _refreshOrders() async {
     final userId = Provider.of<AppUserNotifier>(context, listen: false)
         .appUser!
-        .id_app_user!;
+        .idAppUser!;
 
     if (widget.cartChangeNotifier != null) {
       await widget.cartChangeNotifier!.fetchOrders(appUserId: userId);

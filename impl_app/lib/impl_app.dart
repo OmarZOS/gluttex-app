@@ -42,14 +42,14 @@ class AppUserServiceImpl extends AppUserService {
   @override
   Future<int?> addAppUser(AppUser appUser, {String? callerKey}) async {
     final key =
-        callerKey ?? _getCallerKey('addAppUser', suffix: appUser.app_user_name);
+        callerKey ?? _getCallerKey('addAppUser', suffix: appUser.appUserName);
     try {
       final result = await _storageService.insert(
         '${AppConstants.apiBaseUrl}${AppConstants.addAppUserEndpoint}',
         appUser.toJson(),
         callerKey: key,
       );
-      final userId = result?['id_app_user'] as int?;
+      final userId = result?['idAppUser'] as int?;
       if (userId != null)
         _storeSuccess(key, userId);
       else
@@ -65,11 +65,11 @@ class AppUserServiceImpl extends AppUserService {
   @override
   Future<AppUser?> updateAppUser(AppUser appUser, {String? callerKey}) async {
     final key = callerKey ??
-        _getCallerKey('updateAppUser', id: appUser.id_app_user.toString());
+        _getCallerKey('updateAppUser', id: appUser.idAppUser.toString());
     try {
       final result = await _storageService.update(
-        '${AppConstants.apiBaseUrl}${AppConstants.updateAppUserEndpoint}/${appUser.id_app_user}',
-        appUser.id_app_user.toString(),
+        '${AppConstants.apiBaseUrl}${AppConstants.updateAppUserEndpoint}/${appUser.idAppUser}',
+        appUser.idAppUser.toString(),
         {},
         appUser.toJson(),
         callerKey: key,
@@ -114,12 +114,12 @@ class AppUserServiceImpl extends AppUserService {
       {String? callerKey}) async {
     final key = callerKey ??
         _getCallerKey('updateAppUserImage',
-            id: updatedAppUser.id_app_user.toString());
+            id: updatedAppUser.idAppUser.toString());
     try {
       final result = await _storageService.update(
         '${AppConstants.apiBaseUrl}${AppConstants.updateAppUserImageEndpoint}',
-        updatedAppUser.id_app_user.toString(),
-        {'image_url': updatedAppUser.app_user_image_url ?? ''},
+        updatedAppUser.idAppUser.toString(),
+        {'image_url': updatedAppUser.appUserImageUrl ?? ''},
         updatedAppUser.toJson(),
         callerKey: key,
       );

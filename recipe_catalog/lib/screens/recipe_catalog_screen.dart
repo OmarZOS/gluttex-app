@@ -127,7 +127,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
     return Scaffold(
       floatingActionButton: Consumer<AppUserNotifier>(
         builder: (context, userNotifier, child) {
-          if (!userNotifier.isCookingrecipe_catalog) return Container();
+          if (!userNotifier.isCookingRecipe) return Container();
           return FloatingActionButton(
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,
