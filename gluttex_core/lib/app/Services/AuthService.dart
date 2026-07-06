@@ -28,6 +28,11 @@ abstract class AuthService extends TraceableService {
     throw UnimplementedError();
   }
 
+  Future<dynamic> refreshTokenNow(String refreshToken,
+      {String? callerKey}) async {
+    throw UnimplementedError();
+  }
+
   // Sign out
   Future<void> signOut() async {
     throw UnimplementedError();

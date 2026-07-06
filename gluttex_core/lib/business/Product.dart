@@ -18,7 +18,7 @@ class Product {
   final double? product_price;
   final String? product_quantifier;
   final int? product_quantity;
-  final String? product_category_desc;
+  final String? product_category_name; // Changed from product_category_desc
   String? product_image_url;
   final String? product_description;
   final DateTime? product_created_at;
@@ -26,26 +26,26 @@ class Product {
 
   GluttexImage? productImage;
 
-  Product(
-      {required this.id_product,
-      required this.product_provider_id,
-      required this.product_category_id,
-      required this.id_product_category,
-      required this.id_product_image,
-      required this.product_ref_id,
-      required this.product_name,
-      required this.product_brand,
-      required this.product_quantifier,
-      required this.product_barcode,
-      required this.product_category_desc,
-      // required this.product_image_data,
-      required this.product_image_url,
-      required this.product_price,
-      required this.product_quantity,
-      required this.product_description,
-      required this.product_created_at,
-      required this.product_last_updated,
-      required this.product_owner_id});
+  Product({
+    required this.id_product,
+    required this.product_provider_id,
+    required this.product_category_id,
+    required this.id_product_category,
+    required this.id_product_image,
+    required this.product_ref_id,
+    required this.product_name,
+    required this.product_brand,
+    required this.product_quantifier,
+    required this.product_barcode,
+    required this.product_category_name, // Changed
+    required this.product_image_url,
+    required this.product_price,
+    required this.product_quantity,
+    required this.product_description,
+    required this.product_created_at,
+    required this.product_last_updated,
+    required this.product_owner_id,
+  });
 
   factory Product.empty() {
     return Product(
@@ -59,7 +59,7 @@ class Product {
       product_brand: '',
       product_quantifier: '',
       product_barcode: '',
-      product_category_desc: '',
+      product_category_name: '', // Changed
       product_image_url: null,
       product_price: 0.0,
       product_quantity: 0,
@@ -73,10 +73,11 @@ class Product {
   factory Product.fromJson(dynamic json) {
     String? imageUrl;
     int imageId = 0;
-    String productCategory = "Missing";
-    // log("Got product");
+    String productCategoryName = "Missing"; // Changed variable name
 
     log("$json");
+
+    // Handle product image
     if (json['product_image'] != null && json['product_image'] is List) {
       if (json['product_image']?.isNotEmpty) {
         imageId = json['product_image'].last["id_product_image"] ?? 0;
@@ -84,8 +85,11 @@ class Product {
       }
     }
 
+    // Handle product category - using the correct field name
     if (json['product_category'] != null) {
-      productCategory = json['product_category']['product_category_desc'];
+      // The field is 'product_category_name' not 'product_category_desc'
+      productCategoryName =
+          json['product_category']['product_category_name'] ?? "Missing";
     }
 
     return Product(
@@ -99,45 +103,25 @@ class Product {
       product_brand: json['product_brand'] ?? "",
       product_barcode: json['product_barcode'] ?? "",
       product_quantifier: json['product_quantifier'] ?? "",
-      product_category_desc: productCategory,
-      // product_image_data: null,
+      product_category_name: productCategoryName, // Changed
       product_image_url: imageUrl ?? "",
       product_price: json['product_price'] ?? 0.0,
       product_quantity: json['product_quantity'] ?? 0,
-      product_description: json['product_description'],
-      product_created_at: DateTime.now(),
-      product_last_updated: DateTime.now(),
-      product_owner_id: json['product_owner'],
-      // product_created_at: DateTime.tryParse(json['created'] ?? 0),
-      // product_last_updated: DateTime.tryParse(json['last_updated'] ?? 0),
+      product_description: json['product_description'] ?? "",
+      product_created_at:
+          DateTime.tryParse(json['created'] ?? "") ?? DateTime.now(),
+      product_last_updated:
+          DateTime.tryParse(json['last_updated'] ?? "") ?? DateTime.now(),
+      product_owner_id: json['product_owner'] ?? 0,
     );
   }
 
   factory Product.fromSearchJson(dynamic json) {
     if (json == null) {
-      return Product(
-        id_product: 0,
-        product_provider_id: 0,
-        product_category_id: 0,
-        id_product_category: 0,
-        id_product_image: 0,
-        product_ref_id: 0,
-        product_name: "",
-        product_brand: "",
-        product_barcode: "",
-        product_quantifier: "",
-        product_category_desc: "Missing",
-        product_image_url: "",
-        product_price: 0.0,
-        product_quantity: 0,
-        product_description: "",
-        product_created_at: DateTime.now(),
-        product_last_updated: DateTime.now(),
-        product_owner_id: 0,
-      );
+      return Product.empty();
     }
 
-    // handle images if they exist
+    // Handle images if they exist
     String? imageUrl;
     int imageId = 0;
     if (json['product_image'] != null && json['product_image'] is List) {
@@ -149,12 +133,13 @@ class Product {
       }
     }
 
-    // handle category description if present
-    String productCategory = "Missing";
+    // Handle category - using correct field name
+    String productCategoryName = "Missing";
     if (json['product_category'] != null &&
         json['product_category'] is Map<String, dynamic>) {
-      productCategory =
-          json['product_category']?['product_category_desc'] ?? "Missing";
+      productCategoryName = json['product_category']
+              ?['product_category_name'] ??
+          "Missing"; // Changed
     }
 
     return Product(
@@ -168,7 +153,7 @@ class Product {
       product_name: json['product_name'] ?? "",
       product_brand: json['product_brand'] ?? "",
       product_barcode: json['product_barcode'] ?? "",
-      product_category_desc: productCategory,
+      product_category_name: productCategoryName, // Changed
       product_image_url: imageUrl ?? "",
       product_price: (json['product_price'] is num)
           ? (json['product_price'] as num).toDouble()
@@ -186,26 +171,29 @@ class Product {
   Product copyWith({
     int? id_product,
     int? product_quantity,
+    String? product_image_url,
   }) {
     return Product(
-        id_product: id_product ?? this.id_product,
-        product_provider_id: product_provider_id ?? product_provider_id,
-        product_category_id: product_category_id ?? product_category_id,
-        id_product_category: id_product_category ?? id_product_category,
-        id_product_image: id_product_image ?? id_product_image,
-        product_ref_id: product_ref_id ?? product_ref_id,
-        product_name: product_name ?? product_name,
-        product_brand: product_brand ?? product_brand,
-        product_barcode: product_barcode ?? product_barcode,
-        product_quantifier: product_quantifier ?? product_quantifier,
-        product_category_desc: product_category_desc ?? product_category_desc,
-        product_image_url: product_image_url ?? product_image_url,
-        product_price: product_price ?? product_price,
-        product_quantity: product_quantity ?? this.product_quantity,
-        product_description: product_description ?? product_description,
-        product_created_at: product_created_at ?? product_created_at,
-        product_last_updated: product_last_updated ?? product_last_updated,
-        product_owner_id: product_owner_id ?? product_owner_id);
+      id_product: id_product ?? this.id_product,
+      product_provider_id: product_provider_id ?? this.product_provider_id,
+      product_category_id: product_category_id ?? this.product_category_id,
+      id_product_category: id_product_category ?? this.id_product_category,
+      id_product_image: id_product_image ?? this.id_product_image,
+      product_ref_id: product_ref_id ?? this.product_ref_id,
+      product_name: product_name ?? this.product_name,
+      product_brand: product_brand ?? this.product_brand,
+      product_barcode: product_barcode ?? this.product_barcode,
+      product_quantifier: product_quantifier ?? this.product_quantifier,
+      product_category_name:
+          product_category_name ?? this.product_category_name,
+      product_image_url: product_image_url ?? this.product_image_url,
+      product_price: product_price ?? this.product_price,
+      product_quantity: product_quantity ?? this.product_quantity,
+      product_description: product_description ?? this.product_description,
+      product_created_at: product_created_at ?? this.product_created_at,
+      product_last_updated: product_last_updated ?? this.product_last_updated,
+      product_owner_id: product_owner_id ?? this.product_owner_id,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -220,7 +208,8 @@ class Product {
         'product_brand': product_brand ?? "",
         'product_barcode': product_barcode ?? "",
         'product_quantifier': product_quantifier ?? "",
-        'product_category_desc': product_category_desc ?? "",
+        'product_category_desc':
+            product_category_name ?? "", // Keep as desc for API
         'product_price': product_price ?? 0,
         'product_quantity': product_quantity ?? 0,
         'product_description': product_description ?? "",
@@ -228,8 +217,7 @@ class Product {
       },
       "image": {
         "id_product_image": id_product_image ?? 0,
-        "product_image_url":
-            product_image_url ?? "", // For reasons of simplicity
+        "product_image_url": product_image_url ?? "",
         "product_ref_id": product_ref_id ?? 0
       }
     };
@@ -239,14 +227,17 @@ class Product {
 class ProductCategory {
   final int product_provider_type_id;
   final String product_category_desc;
-  ProductCategory(
-      {required this.product_provider_type_id,
-      required this.product_category_desc});
+
+  ProductCategory({
+    required this.product_provider_type_id,
+    required this.product_category_desc,
+  });
 
   factory ProductCategory.fromJson(Map<String, dynamic> json) {
     return ProductCategory(
-        product_provider_type_id: json['id_product_category'] ?? 0,
-        product_category_desc: json['product_category_desc'] ?? "");
+      product_provider_type_id: json['id_product_category'] ?? 0,
+      product_category_desc: json['product_category_desc'] ?? "",
+    );
   }
 
   Map<String, dynamic> toJson() {

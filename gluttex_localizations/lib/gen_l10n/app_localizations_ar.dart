@@ -181,7 +181,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get clientText => 'زبون';
 
   @override
-  String get cookingrecipe_catalogText => 'الطاهي';
+  String get cookingChefText => 'الطاهي';
 
   @override
   String get genderTextList => 'ذكر,أنثى,آخر';

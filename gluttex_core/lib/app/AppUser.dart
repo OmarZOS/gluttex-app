@@ -135,99 +135,131 @@ class AppUser {
   }
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
-    // Uint8List? imageData;
-    // if (json['app_user_image'] != null && json['app_user_image']!.isNotEmpty) {
-    //   final imageBase64 = json['app_user_image'];
-    //   if (imageBase64 != null && imageBase64 != "" && imageBase64 != "string") {
-    //     imageData = base64Decode(imageBase64);
-    //   }
-    // }
+    // Initialize variables
+    int idPerson = 0;
+    int personDetailsId = 0;
+    String personFirstName = '';
+    String personLastName = '';
+    String personBirthDate = '';
+    String personGender = '';
+    String personNationality = '';
+    int idBloodType = 0;
+    String bloodTypeDesc = '';
+    int idLocation = 0;
+    double locationLatitude = 0.0;
+    double locationLongitude = 0.0;
+    String locationName = '';
+    int locationAddressId = 0;
+    String addressStreet = '';
+    String addressCity = '';
+    String addressPostalCode = '';
+    String addressCountry = '';
 
-    var idBloodType;
-    var bloodTypeDesc;
-    var personBirthDate;
-    var idPersonDetails;
-    var personNationality;
-    var personFirstName;
-    var personLastName;
-    var personGender;
-    var locationLatitude;
-    var locationLongitude;
-    var locationAddressId;
-    var locationName;
-    var addressCity;
-    var addressStreet;
-    var addressCountry;
-    var addressPostalCode;
+    // Parse app_user_person
+    final appUserPerson = json['app_user_person'];
+    if (appUserPerson != null && appUserPerson is Map<String, dynamic>) {
+      // Get person ID
+      idPerson = appUserPerson['id_person'] ?? 0;
 
-    var appUserPerson = json['app_user_person'];
-    if (appUserPerson != null && appUserPerson.isNotEmpty) {
-      var personBloodType = appUserPerson["person_blood_type"];
-      if (personBloodType != null && personBloodType.isNotEmpty) {
-        idBloodType = personBloodType["id_blood_type"];
-        bloodTypeDesc = personBloodType["blood_type_desc"];
+      // Parse person_blood_type if it exists and is a Map
+      final personBloodType = appUserPerson['person_blood_type'];
+      if (personBloodType != null && personBloodType is Map<String, dynamic>) {
+        idBloodType = personBloodType['id_blood_type'] ?? 0;
+        bloodTypeDesc = personBloodType['blood_type_desc'] ?? '';
       }
 
-      var personDetails = appUserPerson['person_details'];
-      if (personDetails != null && personDetails.isNotEmpty) {
-        personBirthDate = personDetails['person_birth_date'];
-        idPersonDetails = personDetails['id_person_details'];
-        personNationality = personDetails['person_nationality'];
-        personFirstName = personDetails['person_first_name'];
-        personLastName = personDetails['person_last_name'];
-        personGender = personDetails['person_gender'];
-      }
+      // Parse person_location if it exists
+      final personLocation = appUserPerson['person_location'];
+      if (personLocation != null && personLocation is Map<String, dynamic>) {
+        idLocation = personLocation['id_location'] ?? 0;
+        locationLatitude =
+            (personLocation['location_latitude'] ?? 0.0).toDouble();
+        locationLongitude =
+            (personLocation['location_longitude'] ?? 0.0).toDouble();
+        locationName = personLocation['location_name'] ?? '';
+        locationAddressId = personLocation['location_address_id'] ?? 0;
 
-      var personLocation = appUserPerson['person_location'];
-      if (personLocation != null && personLocation.isNotEmpty) {
-        locationLatitude = personLocation["location_latitude"];
-        locationLongitude = personLocation["location_longitude"];
-        locationAddressId = personLocation["location_address_id"];
-        locationName = personLocation["location_name"];
-
-        var locationAddress = personLocation['location_address'];
-        if (locationAddress != null && locationAddress.isNotEmpty) {
-          addressCity = locationAddress['address_city'];
-          addressStreet = locationAddress['address_street'];
-          addressCountry = locationAddress['address_country'];
-          addressPostalCode = locationAddress['address_postal_code'];
+        // Parse location_address if it exists
+        final locationAddress = personLocation['location_address'];
+        if (locationAddress != null &&
+            locationAddress is Map<String, dynamic>) {
+          addressStreet = locationAddress['address_street'] ?? '';
+          addressCity = locationAddress['address_city'] ?? '';
+          addressPostalCode = locationAddress['address_postal_code'] ?? '';
+          addressCountry = locationAddress['address_country'] ?? '';
         }
       }
     }
 
-    // log("locking in");
-    return AppUser(
-        id_app_user: json['id_app_user'] ?? 0,
-        app_user_person_id: json['app_user_person_id'] ?? 0,
-        app_user_type_id: json['app_user_type_id'] ?? 0,
-        app_user_name: json['app_user_name'] ?? "",
-        app_user_password: json['app_user_password'] ?? "",
-        app_user_preferences: json['app_user_preferences'] ?? "",
-        app_user_type_desc: json['app_user_type']?['app_user_type_desc'] ?? "",
-        // app_user_image: imageData,
-        app_user_image_url: json['app_user_image_url'] ?? "",
-        idPerson: json['idPerson'] ?? 0,
-        personDetailsId: idPersonDetails ?? 0,
-        personFirstName: personFirstName ?? "",
-        personLastName: personLastName ?? "",
-        personBirthDate: personBirthDate ?? "",
-        personGender: personGender ?? "",
-        personNationality: personNationality ?? "",
-        idBloodType: idBloodType ?? 0,
-        idLocation: json['app_user_person']?["person_location_id"] ?? 0,
-        locationLatitude: locationLatitude ?? 0.0,
-        locationLongitude: locationLongitude ?? 0.0,
-        locationName: locationName ?? "",
-        locationAddressId: locationAddressId ?? 0,
-        addressStreet: addressStreet ?? "",
-        addressCity: addressCity ?? "",
-        addressPostalCode: addressPostalCode ?? "",
-        addressCountry: addressCountry ?? "",
-        bloodTypeDesc: bloodTypeDesc ?? "",
-        privileges: null,
-        app_user_email: json['app_user_email'] ?? '');
-  }
+    // Parse app_user_preferences if it's a string (JSON)
+    String? preferences = json['app_user_preferences'];
+    if (preferences != null &&
+        preferences is String &&
+        preferences.isNotEmpty) {
+      // Keep as string - it's already JSON
+    } else if (preferences != null && preferences is Map) {
+      // Convert map to JSON string
+      preferences = jsonEncode(preferences);
+    }
 
+    // Get user type ID and description
+    int userTypeId = 0;
+    String userTypeDesc = '';
+    final userType = json['app_user_type'];
+    if (userType != null) {
+      if (userType is String) {
+        // Map string type to ID
+        switch (userType.toLowerCase()) {
+          case 'admin':
+            userTypeId = 3;
+            break;
+          case 'provider':
+            userTypeId = 2;
+            break;
+          case 'customer':
+            userTypeId = 1;
+            break;
+          default:
+            userTypeId = 0;
+        }
+        userTypeDesc = userType;
+      } else if (userType is Map) {
+        userTypeDesc = userType['app_user_type_desc'] ?? '';
+        userTypeId = userType['id_app_user_type'] ?? 0;
+      }
+    }
+
+    return AppUser(
+      id_app_user: json['id_app_user'] ?? 0,
+      app_user_person_id: json['app_user_person_id'] ?? 0,
+      app_user_type_id: userTypeId,
+      app_user_name: json['app_user_name'] ?? '',
+      app_user_password: json['app_user_password'] ?? '',
+      app_user_preferences: preferences ?? '',
+      app_user_type_desc: userTypeDesc,
+      app_user_image_url: json['app_user_image_url'] ?? '',
+      idPerson: idPerson,
+      personDetailsId: personDetailsId,
+      personFirstName: personFirstName,
+      personLastName: personLastName,
+      personBirthDate: personBirthDate,
+      personGender: personGender,
+      personNationality: personNationality,
+      idBloodType: idBloodType,
+      bloodTypeDesc: bloodTypeDesc,
+      idLocation: idLocation,
+      locationLatitude: locationLatitude,
+      locationLongitude: locationLongitude,
+      locationName: locationName,
+      locationAddressId: locationAddressId,
+      addressStreet: addressStreet,
+      addressCity: addressCity,
+      addressPostalCode: addressPostalCode,
+      addressCountry: addressCountry,
+      app_user_email: json['app_user_email'] ?? '',
+      privileges: null,
+    );
+  }
   // Parse multiple users from JSON list
   // Parse multiple users from JSON list - WITH GROUPING
   static List<AppUser> fromJsonList(List<dynamic> jsonList) {

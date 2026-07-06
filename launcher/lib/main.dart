@@ -86,13 +86,18 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize GoogleLoginManager
   GoogleLoginManager.initialize();
-  runApp(GluttexApp(localeProvider));
+
+  final appUserNotifier = AppUserNotifier();
+  await appUserNotifier.initializeAuthState();
+
+  runApp(GluttexApp(localeProvider, appUserNotifier));
 }
 
 class GluttexApp extends StatelessWidget {
   final LocaleProvider localeProvider;
+  final AppUserNotifier appUserNotifier;
 
-  const GluttexApp(this.localeProvider, {super.key});
+  const GluttexApp(this.localeProvider, this.appUserNotifier, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -101,8 +106,7 @@ class GluttexApp extends StatelessWidget {
         ChangeNotifierProvider<ProductNotifier>(
             create: (_) => ProductNotifier()),
         ChangeNotifierProvider<RecipeNotifier>(create: (_) => RecipeNotifier()),
-        ChangeNotifierProvider<AppUserNotifier>(
-            create: (_) => AppUserNotifier()),
+        ChangeNotifierProvider<AppUserNotifier>(create: (_) => appUserNotifier),
         ChangeNotifierProvider<CartChangeNotifier>(
             create: (_) => CartChangeNotifier()),
         ChangeNotifierProvider<AssistantNotifier>(

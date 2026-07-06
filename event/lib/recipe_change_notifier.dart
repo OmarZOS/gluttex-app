@@ -63,7 +63,7 @@ class RecipeNotifier extends TraceableNotifier {
 
       if (fetchedCategories?.isNotEmpty ?? false) {
         _recipeCategories = fetchedCategories!
-            .map((category) => category.recipe_category_desc)
+            .map((category) => category.recipe_category_name)
             .toList();
         storeSuccess(key, _recipeCategories);
       } else {

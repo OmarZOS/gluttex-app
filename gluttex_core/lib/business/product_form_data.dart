@@ -38,7 +38,7 @@ class ProductFormData {
       product_brand: productBrand ?? '',
       product_barcode: productBarcode ?? '',
       product_image_url: imageUrl,
-      product_category_desc: '',
+      product_category_name: '',
       product_price: price ?? 0.0,
       product_quantity: quantity ?? 0,
       product_description: productDescription ?? '',

@@ -91,8 +91,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
                   },
                   {
                     'value': 3,
-                    'label':
-                        AppLocalizations.of(context)!.cookingrecipe_catalogText
+                    'label': AppLocalizations.of(context)!.cookingChefText
                   },
                   {
                     'value': 4,

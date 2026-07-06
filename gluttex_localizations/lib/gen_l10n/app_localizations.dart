@@ -442,11 +442,11 @@ abstract class AppLocalizations {
   /// **'Client'**
   String get clientText;
 
-  /// No description provided for @cookingrecipe_catalogText.
+  /// No description provided for @cookingChefText.
   ///
   /// In en, this message translates to:
   /// **'Cooking recipe_catalog'**
-  String get cookingrecipe_catalogText;
+  String get cookingChefText;
 
   /// No description provided for @genderTextList.
   ///

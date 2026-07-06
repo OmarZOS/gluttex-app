@@ -232,4 +232,66 @@ class AuthServiceImpl extends AuthService {
       rethrow;
     }
   }
+
+  @override
+  Future<dynamic> refreshTokenNow(String refreshToken,
+      {String? callerKey}) async {
+    final key = callerKey ?? getCallerKey('refreshTokenNow');
+
+    const String destination =
+        '${AppConstants.apiBaseUrl}${AppConstants.refreshTokenEndpoint}';
+
+    final Map<String, dynamic> data = {
+      "refresh_token": refreshToken,
+    };
+
+    try {
+      debugPrint('🔄 Refreshing token... - AuthServiceImpl');
+
+      final result =
+          await _storageService.insert(destination, data, callerKey: key);
+
+      final statusCode = _storageService.getStatusCode(key);
+      String responseCode = _storageService.getResponseCode(key) ?? 'SUCCESS';
+
+      if (result != null) {
+        _storeSuccessResponse(key, result,
+            statusCode: statusCode ?? 200, responseCode: responseCode);
+        debugPrint('✅ Token refreshed successfully - AuthServiceImpl');
+
+        return result;
+      } else {
+        // Refresh failed - clear stored tokens
+
+        _storeFailureResponse(key, null,
+            statusCode: statusCode ?? 401,
+            errorCode: 'REFRESH_FAILED',
+            message: 'Token refresh failed',
+            responseCode: responseCode);
+        return null;
+      }
+    } catch (e, stackTrace) {
+      debugPrint('❌ Token refresh error: $e - AuthServiceImpl');
+      debugPrint('Stacktrace: $stackTrace - AuthServiceImpl');
+
+      String errorCode = 'REFRESH_ERROR';
+      String message = 'Token refresh failed: $e';
+      String responseCode = 'REFRESH_ERROR';
+      int statusCode = 500;
+
+      if (e is GluttexException) {
+        statusCode = e.statusCode ?? statusCode;
+        errorCode = e.message;
+        message = e.message;
+        responseCode = e.message;
+      }
+
+      _storeFailureResponse(key, e.toString(),
+          statusCode: statusCode,
+          errorCode: errorCode,
+          message: message,
+          responseCode: responseCode);
+      rethrow;
+    }
+  }
 }

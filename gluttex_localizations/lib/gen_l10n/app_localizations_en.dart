@@ -182,7 +182,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clientText => 'Client';
 
   @override
-  String get cookingrecipe_catalogText => 'Cooking recipe_catalog';
+  String get cookingChefText => 'Cooking Chef';
 
   @override
   String get genderTextList => 'Male,Female,Other';

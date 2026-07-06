@@ -56,7 +56,7 @@
     "postalCodeText": "Code postal",
     "countryText": "Pays",
     "clientText": "Client",
-    "cookingrecipe_catalogText": "recipe_catalog cuisinier",
+    "cookingChefText": "recipe_catalog cuisinier",
     "genderTextList": "Homme,Femme,Autre",
     "nationalityTextList": "Algérien,Autre",
     "missingText": "Manquant",

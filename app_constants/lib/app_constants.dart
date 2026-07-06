@@ -48,6 +48,7 @@ class AppConstants {
   static const String oauthLoginEndpoint = '/login'; // /login/{provider}
   static const String oauthCallbackEndpoint = '/auth'; // /auth/{provider}
   static const String signUpEndpoint = '/app_user';
+  static const String refreshTokenEndpoint = '/authentication/refresh';
 
   // ==================== User/AppUser Endpoints ====================
   static const String getAppUserCategoriesEndpoint = '/app_user/categorie/all';
