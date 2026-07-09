@@ -341,7 +341,7 @@ class _SupplierSummaryItem extends StatelessWidget {
       final supplier = await supplierNotifier.getSupplierById(
         operation.supplierId!,
         forceRefresh: false,
-        notify: false,
+        // notify: false,
       );
 
       if (supplier != null && supplier.providerName?.isNotEmpty == true) {

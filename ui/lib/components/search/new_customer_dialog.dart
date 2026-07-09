@@ -64,7 +64,7 @@ class _NewCustomerDialogState extends State<NewCustomerDialog> {
         person_first_name: _firstNameController.text.trim(),
         person_birth_date: _selectedDate,
         person_gender: _selectedGender ?? '',
-        person_nationality: _selectedNationality ?? '',
+        person_country_code: _selectedNationality ?? '',
         person_email: _emailController.text.trim().isNotEmpty
             ? _emailController.text.trim()
             : null,
@@ -91,7 +91,7 @@ class _NewCustomerDialogState extends State<NewCustomerDialog> {
       final person = Person(
         id_person: 0, // Will be set by backend
         person_details_id: 0, // Will be set by backend
-        person_blood_type_id: 0, // Default blood type
+        person_blood_type: "B+", // Default blood type
         person_location_id: null,
         person_details: personDetails,
         created_at: DateTime.now(),

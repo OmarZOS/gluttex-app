@@ -674,7 +674,7 @@ class NotificationItem extends StatelessWidget {
       if ((invitation.organizationId ?? 0) > 0) {
         final org = await context
             .read<SupplierChangeNotifier>()
-            .getOrganisationByIdDetailed((invitation.organizationId ?? 0));
+            .getOrganisationById((invitation.organizationId ?? 0));
         return org?.provider_organisation_name;
       }
     }

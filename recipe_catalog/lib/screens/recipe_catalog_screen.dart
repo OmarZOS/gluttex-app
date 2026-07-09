@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:recipe_catalog/components/RecipeCard.dart';

@@ -2444,8 +2444,8 @@
    "noIngredientsFound": "No ingredients found",
    "manageIngredients" : "Manage Ingredients",
    "pleaseEnterAmount": "Please enter amount",
-   "amountMustBeGreaterThanZero": "Amount must be positive"
-  
+   "amountMustBeGreaterThanZero": "Amount must be positive",
+   "returnBack": "Return to previous screen"
 
 
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:recipe_catalog/components/RecipeCard.dart';
@@ -101,7 +102,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
   /// Get ingredient name from notifier's ingredients
   String _getIngredientName(int id) {
-    final ingredient = notifier.getIngredient(id);
+    final ingredient = notifier.getIngredientById(id);
     if (ingredient != null && ingredient.ingredient_name.isNotEmpty) {
       return ingredient.ingredient_name;
     }
@@ -120,7 +121,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
   /// Get ingredient icon URL from notifier's ingredients
   String? _getIngredientIconUrl(int id) {
-    final ingredient = notifier.getIngredient(id);
+    final ingredient = notifier.getIngredientById(id);
     return ingredient?.ingredient_icon;
   }
 

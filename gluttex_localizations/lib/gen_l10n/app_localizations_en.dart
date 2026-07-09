@@ -60,8 +60,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseInputPasswordMsg => 'Please enter your password';
 
   @override
-  String get passwordLengthConstraintMsg =>
-      'Password must be at least 6 characters';
+  String get passwordLengthConstraintMsg => 'Password must be at least 6 characters';
 
   @override
   String get suggestRegistrationMsg => 'Don\'t have an account? Register';
@@ -160,8 +159,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapNotAvailableText => 'Map actually not available on this device';
 
   @override
-  String get pdfNotSupportedOnWeb =>
-      'PDF files are not supported on web. Please use a mobile device.';
+  String get pdfNotSupportedOnWeb => 'PDF files are not supported on web. Please use a mobile device.';
 
   @override
   String get registrationConditionsText => 'Conditions of registration';
@@ -182,7 +180,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clientText => 'Client';
 
   @override
-  String get cookingChefText => 'Cooking Chef';
+  String get cookingChefText => 'Cooking recipe_catalog';
 
   @override
   String get genderTextList => 'Male,Female,Other';
@@ -194,12 +192,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get missingText => 'Missing';
 
   @override
-  String get productdeletionConfirmationMessage =>
-      'Are you sure you want to delete this product?';
+  String get productdeletionConfirmationMessage => 'Are you sure you want to delete this product?';
 
   @override
-  String get recipedeletionConfirmationMessage =>
-      'Are you sure you want to delete this recipe?';
+  String get recipedeletionConfirmationMessage => 'Are you sure you want to delete this recipe?';
 
   @override
   String get cartAddConfirmationMessage => 'Confirm Add to Cart';
@@ -223,8 +219,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseInputvalidnumberMsg => 'Please enter a valid number';
 
   @override
-  String get pleaseInputProductDescriptionMsg =>
-      'Please enter a product description';
+  String get pleaseInputProductDescriptionMsg => 'Please enter a product description';
 
   @override
   String get pleaseInputProductQuantityMsg => 'Please enter a product amount';
@@ -239,8 +234,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recipeDescriptionText => 'Recipe description';
 
   @override
-  String get pleaseInputRecipeDescriptionMsg =>
-      'Please enter a recipe description';
+  String get pleaseInputRecipeDescriptionMsg => 'Please enter a recipe description';
 
   @override
   String get recipeinstructiontext => 'Recipe instructions';
@@ -249,8 +243,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get instructionsText => 'Instructions';
 
   @override
-  String get numberConstraintMsg =>
-      'Please enter a number between 0 and 999999';
+  String get numberConstraintMsg => 'Please enter a number between 0 and 999999';
 
   @override
   String get productQuantityText => 'Product Amount';
@@ -461,23 +454,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get productCategoryTextList =>
-      'Baked Goods,Spreads,Cereals,Pasta,Snacks,Beverages,Desserts,Frozen Foods,Baking Ingredients,Packaged Goods';
+  String get productCategoryTextList => 'Baked Goods,Spreads,Cereals,Pasta,Snacks,Beverages,Desserts,Frozen Foods,Baking Ingredients,Packaged Goods';
 
   @override
   String get allText => 'All';
 
   @override
-  String get providerCategoryTextList =>
-      'Restaurant,Bakery,Factory,Supermarket,Grocery Store,Distributor';
+  String get providerCategoryTextList => 'Restaurant,Bakery,Factory,Supermarket,Grocery Store,Distributor';
 
   @override
-  String get recipeCategoryTextList =>
-      'Appetizers & Snacks,Soups & Stews,Salads,Main Courses,Side Dishes,Pasta & Noodles,Casseroles,Breakfast & Brunch,Breads & Baking,Desserts,Drinks & Beverages,Sauces & Condiments,International Cuisine,Healthy & Special Diets,Holiday & Seasonal,Kids & Family,Slow Cooker & Instant Pot,Quick & Easy,One-Pan Recipes,Grilling & BBQ';
+  String get recipeCategoryTextList => 'Appetizers & Snacks,Soups & Stews,Salads,Main Courses,Side Dishes,Pasta & Noodles,Casseroles,Breakfast & Brunch,Breads & Baking,Desserts,Drinks & Beverages,Sauces & Condiments,International Cuisine,Healthy & Special Diets,Holiday & Seasonal,Kids & Family,Slow Cooker & Instant Pot,Quick & Easy,One-Pan Recipes,Grilling & BBQ';
 
   @override
-  String get ingredientTextList =>
-      'Wheat,Barley ,Rye,Oats ,Corn ,Rice ,Soy,Milk ,Egg,Peanuts,Tree Nuts,Fish ,Shellfish,Lentils,Chickpeas,Buckwheat,Almond ,Coconut,Sunflower Seeds,Pumpkin Seeds,Sesame Seeds ,Potato ,Sweet Potato ,Gelatin,Lupin,Mustard,Fennel ,Cumin,Ginger ,Garlic ,Onion,Leek ,Shallot,Scallion ,Chive,Parsley,Cilantro ,Basil,Oregano,Thyme,Rosemary ,Sage ,Mint ,Lemongrass ,Lavender ,Paprika,Chili Pepper ,Black Pepper ,White Pepper ,Green Pepper ,Red Pepper ,Cinnamon ,Allspice ,Butter ,Margarine,Vegetable Oil,Baking Powder,Baking Soda,Cornstarch ,All-Purpose Flour,Pastry Flour ,Self-Rising Flour';
+  String get ingredientTextList => 'Wheat,Barley ,Rye,Oats ,Corn ,Rice ,Soy,Milk ,Egg,Peanuts,Tree Nuts,Fish ,Shellfish,Lentils,Chickpeas,Buckwheat,Almond ,Coconut,Sunflower Seeds,Pumpkin Seeds,Sesame Seeds ,Potato ,Sweet Potato ,Gelatin,Lupin,Mustard,Fennel ,Cumin,Ginger ,Garlic ,Onion,Leek ,Shallot,Scallion ,Chive,Parsley,Cilantro ,Basil,Oregano,Thyme,Rosemary ,Sage ,Mint ,Lemongrass ,Lavender ,Paprika,Chili Pepper ,Black Pepper ,White Pepper ,Green Pepper ,Red Pepper ,Cinnamon ,Allspice ,Butter ,Margarine,Vegetable Oil,Baking Powder,Baking Soda,Cornstarch ,All-Purpose Flour,Pastry Flour ,Self-Rising Flour';
 
   @override
   String get cartText => 'Cart';
@@ -532,8 +521,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_3 => 'What is Celiac Disease?';
 
   @override
-  String get options_3 =>
-      'A gluten allergy,An autoimmune disorder,A viral infection,A type of flu';
+  String get options_3 => 'A gluten allergy,An autoimmune disorder,A viral infection,A type of flu';
 
   @override
   String get question_4 => 'Which of these is safe for a gluten-free diet?';
@@ -545,8 +533,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_5 => 'What does gluten do in baking?';
 
   @override
-  String get options_5 =>
-      'Adds sweetness,Gives elasticity,Increases moisture,Reduces calories';
+  String get options_5 => 'Adds sweetness,Gives elasticity,Increases moisture,Reduces calories';
 
   @override
   String get question_6 => 'Which of these is naturally gluten-free?';
@@ -564,19 +551,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_8 => 'Which type of pasta is gluten-free?';
 
   @override
-  String get options_8 =>
-      'Whole wheat pasta,Egg noodles,Rice noodles,Semolina pasta';
+  String get options_8 => 'Whole wheat pasta,Egg noodles,Rice noodles,Semolina pasta';
 
   @override
   String get question_9 => 'Which beer is safe for a gluten-free diet?';
 
   @override
-  String get options_9 =>
-      'Wheat beer,Barley malt beer,Rice-based beer,Lager beer';
+  String get options_9 => 'Wheat beer,Barley malt beer,Rice-based beer,Lager beer';
 
   @override
-  String get question_10 =>
-      'Which of these ingredients should be avoided in a GF diet?';
+  String get question_10 => 'Which of these ingredients should be avoided in a GF diet?';
 
   @override
   String get options_10 => 'Xanthan gum,Malt extract,Tapioca starch,Corn flour';
@@ -585,19 +569,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_11 => 'What does \'certified gluten-free\' mean?';
 
   @override
-  String get options_11 =>
-      'Contains some wheat,Has less than 20 ppm gluten,Made with whole grains,Labeled for celiacs';
+  String get options_11 => 'Contains some wheat,Has less than 20 ppm gluten,Made with whole grains,Labeled for celiacs';
 
   @override
   String get question_12 => 'What is cross-contamination?';
 
   @override
-  String get options_12 =>
-      'Mixing food colors,Unintentional gluten exposure,Overcooking food,Adding spices';
+  String get options_12 => 'Mixing food colors,Unintentional gluten exposure,Overcooking food,Adding spices';
 
   @override
-  String get question_13 =>
-      'Which food requires a gluten-free label to be safe?';
+  String get question_13 => 'Which food requires a gluten-free label to be safe?';
 
   @override
   String get options_13 => 'Apple,Fresh fish,Flavored yogurt,White rice';
@@ -627,22 +608,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get options_17 => 'Flour,Cornstarch,Roux,Wheat starch';
 
   @override
-  String get question_18 =>
-      'Which of these is NOT a symptom of gluten intolerance?';
+  String get question_18 => 'Which of these is NOT a symptom of gluten intolerance?';
 
   @override
   String get options_18 => 'Headaches,Joint pain,Improved digestion,Fatigue';
 
   @override
-  String get question_19 =>
-      'Which country has the highest awareness of gluten-free diets?';
+  String get question_19 => 'Which country has the highest awareness of gluten-free diets?';
 
   @override
   String get options_19 => 'USA,Italy,Japan,India';
 
   @override
-  String get question_20 =>
-      'Which of these brands offers gluten-free products?';
+  String get question_20 => 'Which of these brands offers gluten-free products?';
 
   @override
   String get options_20 => 'Kellogg’s,Udi’s,Nestlé,Oreo';
@@ -663,8 +641,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_23 => 'What is cross-contamination?';
 
   @override
-  String get options_23 =>
-      'Cooking with GF ingredients,When gluten touches GF food,Certified gluten-free process,A type of wheat';
+  String get options_23 => 'Cooking with GF ingredients,When gluten touches GF food,Certified gluten-free process,A type of wheat';
 
   @override
   String get question_24 => 'Which of these breakfast cereals is GF?';
@@ -688,29 +665,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_27 => 'What is a GF alternative to breadcrumbs?';
 
   @override
-  String get options_27 =>
-      'Oat flour,Rice flour,Crushed nuts,All-purpose flour';
+  String get options_27 => 'Oat flour,Rice flour,Crushed nuts,All-purpose flour';
 
   @override
   String get question_28 => 'Which of these is a symptom of Celiac Disease?';
 
   @override
-  String get options_28 =>
-      'Rashes,Weight gain,Increased appetite,Lower immunity';
+  String get options_28 => 'Rashes,Weight gain,Increased appetite,Lower immunity';
 
   @override
   String get question_29 => 'Which of these snacks is GF?';
 
   @override
-  String get options_29 =>
-      'Pretzels,Chips (corn-based),Granola bars,Ritz crackers';
+  String get options_29 => 'Pretzels,Chips (corn-based),Granola bars,Ritz crackers';
 
   @override
   String get question_30 => 'Which famous athlete promotes a GF diet?';
 
   @override
-  String get options_30 =>
-      'Serena Williams,Tom Brady,LeBron James,Cristiano Ronaldo';
+  String get options_30 => 'Serena Williams,Tom Brady,LeBron James,Cristiano Ronaldo';
 
   @override
   String get question_31 => 'What kind of pizza crust is GF?';
@@ -722,8 +695,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_32 => 'Which pasta alternative is GF?';
 
   @override
-  String get options_32 =>
-      'Whole wheat pasta,Chickpea pasta,Semolina pasta,Egg noodles';
+  String get options_32 => 'Whole wheat pasta,Chickpea pasta,Semolina pasta,Egg noodles';
 
   @override
   String get question_33 => 'Which of these condiments contains gluten?';
@@ -753,8 +725,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_37 => 'Which soup ingredient might contain gluten?';
 
   @override
-  String get options_37 =>
-      'Chicken broth,Rice noodles,Vegetable stock,Soy milk';
+  String get options_37 => 'Chicken broth,Rice noodles,Vegetable stock,Soy milk';
 
   @override
   String get question_38 => 'Which of these vitamins may be low in a GF diet?';
@@ -781,15 +752,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get options_41 => 'Wheat flour,Cornstarch,Roux,All-purpose flour';
 
   @override
-  String get question_42 =>
-      'Which of these gluten-free foods is high in fiber?';
+  String get question_42 => 'Which of these gluten-free foods is high in fiber?';
 
   @override
   String get options_42 => 'White rice,Brown rice,Corn flakes,Puffed rice';
 
   @override
-  String get question_43 =>
-      'Which flour is used in traditional Italian polenta?';
+  String get question_43 => 'Which flour is used in traditional Italian polenta?';
 
   @override
   String get options_43 => 'Cornmeal,Wheat flour,Oat flour,Rye flour';
@@ -825,8 +794,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get options_48 => 'Quinoa,Wheat,Rye,Barley';
 
   @override
-  String get question_49 =>
-      'What is a common gluten-free pizza crust made from?';
+  String get question_49 => 'What is a common gluten-free pizza crust made from?';
 
   @override
   String get options_49 => 'Wheat,Oats,Cauliflower,Rye';
@@ -847,8 +815,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_52 => 'Is soy sauce gluten-free?';
 
   @override
-  String get options_52 =>
-      'Yes,No,Only tamari sauce is,Only organic soy sauce is';
+  String get options_52 => 'Yes,No,Only tamari sauce is,Only organic soy sauce is';
 
   @override
   String get question_53 => 'Which flour is often used in gluten-free baking?';
@@ -860,15 +827,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_54 => 'Which soup is usually gluten-free?';
 
   @override
-  String get options_54 =>
-      'Minestrone,Clam chowder,Tomato soup,French onion soup';
+  String get options_54 => 'Minestrone,Clam chowder,Tomato soup,French onion soup';
 
   @override
   String get question_55 => 'Which of these is safe for celiacs?';
 
   @override
-  String get options_55 =>
-      'Malt vinegar,Oats (certified GF),Wheat germ,Barley malt';
+  String get options_55 => 'Malt vinegar,Oats (certified GF),Wheat germ,Barley malt';
 
   @override
   String get question_56 => 'Which of these protein sources is naturally GF?';
@@ -877,8 +842,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get options_56 => 'Seitan,Tofu,Barley protein,Rye protein';
 
   @override
-  String get question_57 =>
-      'Which of these grains is commonly used in gluten-free beer?';
+  String get question_57 => 'Which of these grains is commonly used in gluten-free beer?';
 
   @override
   String get options_57 => 'Barley,Sorghum,Rye,Spelt';
@@ -890,23 +854,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get options_58 => 'Cornstarch,Rice flour,Wheat flour,Arrowroot';
 
   @override
-  String get question_59 =>
-      'Can gluten-free foods still cause cross-contamination?';
+  String get question_59 => 'Can gluten-free foods still cause cross-contamination?';
 
   @override
-  String get options_59 =>
-      'Yes,No,Only when cooked,Only when eaten with gluten';
+  String get options_59 => 'Yes,No,Only when cooked,Only when eaten with gluten';
 
   @override
-  String get question_60 =>
-      'Which of these is a naturally gluten-free sweetener?';
+  String get question_60 => 'Which of these is a naturally gluten-free sweetener?';
 
   @override
   String get options_60 => 'Malt syrup,Honey,Barley malt extract,Wheat syrup';
 
   @override
-  String get question_61 =>
-      'What gluten-free grain is used in Ethiopian injera bread?';
+  String get question_61 => 'What gluten-free grain is used in Ethiopian injera bread?';
 
   @override
   String get options_61 => 'Rye,Teff,Barley,Spelt';
@@ -915,8 +875,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_62 => 'Which of these cheeses is always gluten-free?';
 
   @override
-  String get options_62 =>
-      'Blue cheese,Cheddar,Processed cheese,Flavored cheese';
+  String get options_62 => 'Blue cheese,Cheddar,Processed cheese,Flavored cheese';
 
   @override
   String get question_63 => 'Which grain is safe for a GF diet?';
@@ -925,29 +884,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get options_63 => 'Wheat,Oats (certified GF),Barley,Rye';
 
   @override
-  String get question_64 =>
-      'Which gluten-free flour works well for thickening soups?';
+  String get question_64 => 'Which gluten-free flour works well for thickening soups?';
 
   @override
   String get options_64 => 'Rice flour,Wheat flour,Semolina,Rye flour';
 
   @override
-  String get question_65 =>
-      'Which flour is commonly used in gluten-free bread?';
+  String get question_65 => 'Which flour is commonly used in gluten-free bread?';
 
   @override
   String get options_65 => 'Rye flour,Tapioca flour,Durum wheat,Spelt';
 
   @override
-  String get question_66 =>
-      'What common breakfast item is often NOT gluten-free?';
+  String get question_66 => 'What common breakfast item is often NOT gluten-free?';
 
   @override
   String get options_66 => 'Eggs,Pancakes,Smoothies,Bacon';
 
   @override
-  String get question_67 =>
-      'Which ingredient should be checked for hidden gluten?';
+  String get question_67 => 'Which ingredient should be checked for hidden gluten?';
 
   @override
   String get options_67 => 'Sugar,Salt,Soy sauce,Pepper';
@@ -962,24 +917,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_69 => 'Which of these breakfast foods is naturally GF?';
 
   @override
-  String get options_69 =>
-      'Granola bars,Oatmeal (certified GF),Waffles,French toast';
+  String get options_69 => 'Granola bars,Oatmeal (certified GF),Waffles,French toast';
 
   @override
-  String get question_70 =>
-      'Which of these is safe for someone with gluten intolerance?';
+  String get question_70 => 'Which of these is safe for someone with gluten intolerance?';
 
   @override
-  String get options_70 =>
-      'Whole wheat bread,Quinoa salad,Barley soup,Spelt muffins';
+  String get options_70 => 'Whole wheat bread,Quinoa salad,Barley soup,Spelt muffins';
 
   @override
-  String get question_71 =>
-      'Which of these is a gluten-free pasta alternative?';
+  String get question_71 => 'Which of these is a gluten-free pasta alternative?';
 
   @override
-  String get options_71 =>
-      'Semolina pasta,Wheat noodles,Lentil pasta,Egg noodles';
+  String get options_71 => 'Semolina pasta,Wheat noodles,Lentil pasta,Egg noodles';
 
   @override
   String get question_72 => 'Which fast-food chain offers gluten-free options?';
@@ -991,8 +941,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_73 => 'What is a common gluten-free breakfast option?';
 
   @override
-  String get options_73 =>
-      'Wheat toast,Oatmeal (certified GF),Bagels,Croissants';
+  String get options_73 => 'Wheat toast,Oatmeal (certified GF),Bagels,Croissants';
 
   @override
   String get question_74 => 'Which of these is a gluten-free snack?';
@@ -1019,8 +968,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get options_77 => 'Beer,Whiskey,Vodka (potato-based),Malt liquor';
 
   @override
-  String get question_78 =>
-      'Which of these dairy products is always gluten-free?';
+  String get question_78 => 'Which of these dairy products is always gluten-free?';
 
   @override
   String get options_78 => 'Yogurt,Ice cream,Plain milk,Flavored milk';
@@ -1035,8 +983,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_80 => 'What is a sign of gluten intolerance?';
 
   @override
-  String get options_80 =>
-      'Skin rash,Blurred vision,Excessive sweating,Ear infection';
+  String get options_80 => 'Skin rash,Blurred vision,Excessive sweating,Ear infection';
 
   @override
   String get question_81 => 'Which of these is a gluten-free grain?';
@@ -1054,36 +1001,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_83 => 'Which of these soups is gluten-free?';
 
   @override
-  String get options_83 =>
-      'Miso soup,Cream of mushroom,French onion soup,Clam chowder';
+  String get options_83 => 'Miso soup,Cream of mushroom,French onion soup,Clam chowder';
 
   @override
   String get question_84 => 'Which meat is safe for a gluten-free diet?';
 
   @override
-  String get options_84 =>
-      'Breaded chicken,Plain grilled steak,Meatballs,Sausages';
+  String get options_84 => 'Breaded chicken,Plain grilled steak,Meatballs,Sausages';
 
   @override
   String get question_85 => 'Which of these sauces is gluten-free?';
 
   @override
-  String get options_85 =>
-      'Soy sauce,Tomato sauce,Teriyaki sauce,Worcestershire sauce';
+  String get options_85 => 'Soy sauce,Tomato sauce,Teriyaki sauce,Worcestershire sauce';
 
   @override
   String get question_86 => 'Which pasta alternative is gluten-free?';
 
   @override
-  String get options_86 =>
-      'Whole wheat pasta,Semolina pasta,Zucchini noodles,Egg noodles';
+  String get options_86 => 'Whole wheat pasta,Semolina pasta,Zucchini noodles,Egg noodles';
 
   @override
   String get question_87 => 'Which type of bread is gluten-free?';
 
   @override
-  String get options_87 =>
-      'Rye bread,Baguette,Cornbread (made with GF ingredients),Ciabatta';
+  String get options_87 => 'Rye bread,Baguette,Cornbread (made with GF ingredients),Ciabatta';
 
   @override
   String get question_88 => 'Which of these is a gluten-free treat?';
@@ -1119,8 +1061,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_93 => 'Which restaurant meal is most likely gluten-free?';
 
   @override
-  String get options_93 =>
-      'Pasta Alfredo,Grilled salmon with steamed veggies,Chicken tenders,Breaded shrimp';
+  String get options_93 => 'Pasta Alfredo,Grilled salmon with steamed veggies,Chicken tenders,Breaded shrimp';
 
   @override
   String get question_94 => 'Which salad dressing is typically gluten-free?';
@@ -1135,15 +1076,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get options_95 => 'Hops,Yeast,Barley,Water';
 
   @override
-  String get question_96 =>
-      'Which common kitchen ingredient often contains hidden gluten?';
+  String get question_96 => 'Which common kitchen ingredient often contains hidden gluten?';
 
   @override
   String get options_96 => 'Sugar,Flour,Butter,Olive oil';
 
   @override
-  String get question_97 =>
-      'Which restaurant cuisine has the most gluten-free options?';
+  String get question_97 => 'Which restaurant cuisine has the most gluten-free options?';
 
   @override
   String get options_97 => 'Italian,Japanese,Mexican,French';
@@ -1152,8 +1091,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get question_98 => 'Which of these is NOT a gluten-free cereal?';
 
   @override
-  String get options_98 =>
-      'Rice Krispies,Corn Flakes,Oatmeal (certified GF),Chex';
+  String get options_98 => 'Rice Krispies,Corn Flakes,Oatmeal (certified GF),Chex';
 
   @override
   String get question_99 => 'Which of these grains can be used for GF baking?';
@@ -1248,27 +1186,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutAppTab => 'About App';
 
   @override
-  String get appPurposeContent =>
-      'This app is designed to help people with celiac disease or gluten intolerance by providing a secure e-commerce platform, adapted recipes, educational games, and resources to maintain a safe gluten-free lifestyle.';
+  String get appPurposeContent => 'This app is designed to help people with celiac disease or gluten intolerance by providing a secure e-commerce platform, adapted recipes, educational games, and resources to maintain a safe gluten-free lifestyle.';
 
   @override
   String get featuresTitle => 'Key Features';
 
   @override
-  String get feature1 =>
-      '🛒 **Gluten-Free Online Store** - Shop with confidence for certified gluten-free products with direct delivery.';
+  String get feature1 => '🛒 **Gluten-Free Online Store** - Shop with confidence for certified gluten-free products with direct delivery.';
 
   @override
-  String get feature2 =>
-      '🎮 **Educational Mini-Games** - Learn to identify safe foods in a fun way with our interactive games.';
+  String get feature2 => '🎮 **Educational Mini-Games** - Learn to identify safe foods in a fun way with our interactive games.';
 
   @override
-  String get feature3 =>
-      '🍽 **Gluten-Free Recipes** - Discover delicious and safe meal ideas created by nutrition experts.';
+  String get feature3 => '🍽 **Gluten-Free Recipes** - Discover delicious and safe meal ideas created by nutrition experts.';
 
   @override
-  String get feature4 =>
-      '📍 **Local Business Directory** - Find certified gluten-free grocery stores and restaurants near you.';
+  String get feature4 => '📍 **Local Business Directory** - Find certified gluten-free grocery stores and restaurants near you.';
 
   @override
   String get contactUsTitle => 'Contact Us';
@@ -1280,43 +1213,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contactPhone => '+213-XXX-XXX-XXX';
 
   @override
-  String get illnessOverviewContent =>
-      'Celiac disease is an autoimmune disorder where gluten ingestion damages the small intestine. It can cause digestive problems, nutritional deficiencies, and other complications. Strict lifelong gluten avoidance is the only effective treatment.';
+  String get illnessOverviewContent => 'Celiac disease is an autoimmune disorder where gluten ingestion damages the small intestine. It can cause digestive problems, nutritional deficiencies, and other complications. Strict lifelong gluten avoidance is the only effective treatment.';
 
   @override
-  String get symptom1 =>
-      '💨 **Digestive Issues** - Bloating, diarrhea, constipation, nausea and vomiting.';
+  String get symptom1 => '💨 **Digestive Issues** - Bloating, diarrhea, constipation, nausea and vomiting.';
 
   @override
-  String get symptom2 =>
-      '⚡ **Chronic Fatigue** - Caused by malabsorption of essential nutrients.';
+  String get symptom2 => '⚡ **Chronic Fatigue** - Caused by malabsorption of essential nutrients.';
 
   @override
-  String get symptom3 =>
-      '🦴 **Bone Complications** - Increased risk of osteoporosis due to poor calcium and vitamin D absorption.';
+  String get symptom3 => '🦴 **Bone Complications** - Increased risk of osteoporosis due to poor calcium and vitamin D absorption.';
 
   @override
-  String get treatmentContent =>
-      'Treatment requires strict lifelong gluten-free diet. Patients must avoid wheat, barley, rye and their derivatives. Nutritional support and tools like Gluttex help prevent accidental exposure.';
+  String get treatmentContent => 'Treatment requires strict lifelong gluten-free diet. Patients must avoid wheat, barley, rye and their derivatives. Nutritional support and tools like Gluttex help prevent accidental exposure.';
 
   @override
-  String get resource1 =>
-      '📖 **Celiac Disease Foundation** - [www.celiac.org](https://www.celiac.org)';
+  String get resource1 => '📖 **Celiac Disease Foundation** - [www.celiac.org](https://www.celiac.org)';
 
   @override
-  String get resource2 =>
-      '📱 **Interactive Shopping Guide** - Built-in app feature to scan suspicious ingredient lists.';
+  String get resource2 => '📱 **Interactive Shopping Guide** - Built-in app feature to scan suspicious ingredient lists.';
 
   @override
-  String get resource3 =>
-      '👩‍⚕️ **Specialist Directory** - Find gastroenterologists and nutritionists specializing in celiac disease near you.';
+  String get resource3 => '👩‍⚕️ **Specialist Directory** - Find gastroenterologists and nutritionists specializing in celiac disease near you.';
 
   @override
   String get resourcesTitle => 'Useful Resources';
 
   @override
-  String get userCredentialsText =>
-      'Your login credentials include your username and password. Make sure to keep them secure and do not share them with anyone.';
+  String get userCredentialsText => 'Your login credentials include your username and password. Make sure to keep them secure and do not share them with anyone.';
 
   @override
   String get processingRequest => 'Processing your request...';
@@ -1355,48 +1279,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treatmentTitle => 'Treatment & Management';
 
   @override
-  String get internal_server_error =>
-      'Internal server error. Please try again later.';
+  String get internal_server_error => 'Internal server error. Please try again later.';
 
   @override
   String get http_exception => 'HTTP request failed. Check your connection.';
 
   @override
-  String get integrity_error =>
-      'Data integrity violation. The operation cannot be completed.';
+  String get integrity_error => 'Data integrity violation. The operation cannot be completed.';
 
   @override
   String get data_error => 'Invalid data format. Please verify your input.';
 
   @override
-  String get operational_error =>
-      'An operational error occurred. Contact support if the issue persists.';
+  String get operational_error => 'An operational error occurred. Contact support if the issue persists.';
 
   @override
-  String get programming_error =>
-      'A programming error occurred. Developers have been notified.';
+  String get programming_error => 'A programming error occurred. Developers have been notified.';
 
   @override
-  String get database_error =>
-      'Database operation failed. Try again or contact support.';
+  String get database_error => 'Database operation failed. Try again or contact support.';
 
   @override
   String get internal_error => 'An internal system error occurred.';
 
   @override
-  String get interface_error =>
-      'Interface communication failed. Check configurations.';
+  String get interface_error => 'Interface communication failed. Check configurations.';
 
   @override
-  String get statement_error =>
-      'Invalid SQL statement. Syntax or logic error detected.';
+  String get statement_error => 'Invalid SQL statement. Syntax or logic error detected.';
 
   @override
   String get incorrect_credentials => 'Incorrect username or password';
 
   @override
-  String get sqlalchemy_error =>
-      'SQLAlchemy database error. Check query or connection.';
+  String get sqlalchemy_error => 'SQLAlchemy database error. Check query or connection.';
 
   @override
   String get changePassword => 'Change Password';
@@ -1405,8 +1321,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordChangeTitle => 'Create a new password';
 
   @override
-  String get passwordChangeSubtitle =>
-      'Your new password must be different from previous passwords';
+  String get passwordChangeSubtitle => 'Your new password must be different from previous passwords';
 
   @override
   String get currentPassword => 'Current Password';
@@ -1466,15 +1381,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newPasswordRequired => 'New password is required';
 
   @override
-  String get passwordUppercaseError =>
-      'Must contain at least one uppercase letter';
+  String get passwordUppercaseError => 'Must contain at least one uppercase letter';
 
   @override
   String get passwordNumberError => 'Must contain at least one number';
 
   @override
-  String get passwordSameAsCurrent =>
-      'New password must be different from current password';
+  String get passwordSameAsCurrent => 'New password must be different from current password';
 
   @override
   String get confirmPasswordRequired => 'Please confirm your new password';
@@ -1552,8 +1465,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disclaimerTitle => 'Important Disclaimer';
 
   @override
-  String get disclaimerContent =>
-      'While we verify recipes, always check labels as manufacturers may change ingredients.';
+  String get disclaimerContent => 'While we verify recipes, always check labels as manufacturers may change ingredients.';
 
   @override
   String get versionText => 'App Version';
@@ -1592,19 +1504,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
-  String get termsAgreementText =>
-      'I agree to the Terms of Use governing my use of Gluttex';
+  String get termsAgreementText => 'I agree to the Terms of Use governing my use of Gluttex';
 
   @override
-  String get privacyAgreementText =>
-      'I agree to how Gluttex collects and processes my data';
+  String get privacyAgreementText => 'I agree to how Gluttex collects and processes my data';
 
   @override
   String get readFullDocument => 'Read full document';
 
   @override
-  String get acceptAllTermsError =>
-      'You must accept both documents to continue';
+  String get acceptAllTermsError => 'You must accept both documents to continue';
 
   @override
   String get outOfStock => 'Out of Stock';
@@ -1615,8 +1524,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get ingredientUnits =>
-      'Gram,Kilogram,Milligram,Pound,Ounce,Milliliter,Liter,Cup,Tablespoon,Teaspoon,Pinch';
+  String get ingredientUnits => 'Gram,Kilogram,Milligram,Pound,Ounce,Milliliter,Liter,Cup,Tablespoon,Teaspoon,Pinch';
 
   @override
   String get unitText => 'Unit';
@@ -1640,8 +1548,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noOtherProductsAvailable =>
-      'No products available from this supplier.';
+  String get noOtherProductsAvailable => 'No products available from this supplier.';
 
   @override
   String get gallery => 'Gallery';
@@ -1700,8 +1607,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get no_location_information_available =>
-      'No available information about location';
+  String get no_location_information_available => 'No available information about location';
 
   @override
   String get orderFor => 'Order for';
@@ -1759,8 +1665,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dateTimeNotAvailable => 'Date not available';
 
   @override
-  String dateTimeFormat(
-      Object day, Object hour, Object min, Object month, Object year) {
+  String dateTimeFormat(Object day, Object hour, Object min, Object month, Object year) {
     return '$day/$month/$year $hour:$min';
   }
 
@@ -1850,8 +1755,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alignBarcode => 'Align barcode within the frame';
 
   @override
-  String get positionBarcode =>
-      'Position the barcode inside the scanning area for automatic detection';
+  String get positionBarcode => 'Position the barcode inside the scanning area for automatic detection';
 
   @override
   String get barcodeScanSuccess => 'Barcode scanned successfully!';
@@ -1908,8 +1812,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scannerHint => 'Position QR Code in Frame';
 
   @override
-  String get alignQR =>
-      'Align the QR code within the scanning area for automatic detection';
+  String get alignQR => 'Align the QR code within the scanning area for automatic detection';
 
   @override
   String get manualInput => 'Manual Input';
@@ -1933,8 +1836,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiWillAnalyseImage => 'AI will analyze the product image';
 
   @override
-  String get automaticallyFillDetailsFromBarcode =>
-      'Automatically fill details from barcode';
+  String get automaticallyFillDetailsFromBarcode => 'Automatically fill details from barcode';
 
   @override
   String get aiGenerated => 'AI-Generated';
@@ -1964,8 +1866,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationProductUpdatedSubtitle => 'New changes available';
 
   @override
-  String get notificationOrderReceivedMessage =>
-      'Your order has been successfully received and is being processed. You can track its status in your orders.';
+  String get notificationOrderReceivedMessage => 'Your order has been successfully received and is being processed. You can track its status in your orders.';
 
   @override
   String notificationRoleInvitationMessage(Object ruleName, Object ruleType) {
@@ -1973,12 +1874,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get notificationRoleInvitationDefaultMessage =>
-      'You have been invited to join a team.';
+  String get notificationRoleInvitationDefaultMessage => 'You have been invited to join a team.';
 
   @override
-  String get notificationProductUpdatedMessage =>
-      'A product you are following has been updated with new features and improvements. Check it out!';
+  String get notificationProductUpdatedMessage => 'A product you are following has been updated with new features and improvements. Check it out!';
 
   @override
   String get notificationDefaultMessage => 'You have a new notification';
@@ -2074,15 +1973,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inventory_view_title => 'View Inventory';
 
   @override
-  String get inventory_view_description =>
-      'View stock levels and product information';
+  String get inventory_view_description => 'View stock levels and product information';
 
   @override
   String get inventory_manage_title => 'Manage Inventory';
 
   @override
-  String get inventory_manage_description =>
-      'Add, edit, and remove inventory items';
+  String get inventory_manage_description => 'Add, edit, and remove inventory items';
 
   @override
   String get orders_view_title => 'View Orders';
@@ -2100,8 +1997,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personnel_view_title => 'View Personnel';
 
   @override
-  String get personnel_view_description =>
-      'View employee information and profiles';
+  String get personnel_view_description => 'View employee information and profiles';
 
   @override
   String get personnel_manage_title => 'Manage Personnel';
@@ -2221,8 +2117,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchAndInviteText => 'Search & Invite';
 
   @override
-  String get searchAndInviteExistingUsersText =>
-      'Search and invite existing users';
+  String get searchAndInviteExistingUsersText => 'Search and invite existing users';
 
   @override
   String get cancelText => 'Cancel';
@@ -2231,8 +2126,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelInvitationTitle => 'Cancel Invitation';
 
   @override
-  String get cancelInvitationMessage =>
-      'Cancel invitation? This cannot be undone.';
+  String get cancelInvitationMessage => 'Cancel invitation? This cannot be undone.';
 
   @override
   String get cancelInvitationAction => 'Cancel Invitation';
@@ -2260,8 +2154,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privilegesUpdateFailedMessage => 'Failed to update privileges';
 
   @override
-  String get privilegesUpdateError =>
-      'An error occurred while updating privileges';
+  String get privilegesUpdateError => 'An error occurred while updating privileges';
 
   @override
   String get barcodeText => 'Barcode';
@@ -2294,12 +2187,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noProductDataTitle => 'Product Not Found';
 
   @override
-  String get noProductDataDescription =>
-      'No product information found for this barcode. The product may be new or not in our database yet.';
+  String get noProductDataDescription => 'No product information found for this barcode. The product may be new or not in our database yet.';
 
   @override
-  String get noProductDataHelp =>
-      'You can try scanning again or add the product details manually.';
+  String get noProductDataHelp => 'You can try scanning again or add the product details manually.';
 
   @override
   String get scanAgainText => 'Scan Again';
@@ -2317,22 +2208,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noOwnedBusinessesTitle => 'No Owned Businesses';
 
   @override
-  String get noOwnedBusinessesDescription =>
-      'You don\'t own any businesses yet';
+  String get noOwnedBusinessesDescription => 'You don\'t own any businesses yet';
 
   @override
   String get noManagedBusinessesTitle => 'No Managed Businesses';
 
   @override
-  String get noManagedBusinessesDescription =>
-      'You\'re not managing any businesses';
+  String get noManagedBusinessesDescription => 'You\'re not managing any businesses';
 
   @override
   String get noBusinessesTitle => 'No Businesses';
 
   @override
-  String get noBusinessesDescription =>
-      'You don\'t own or manage any businesses yet';
+  String get noBusinessesDescription => 'You don\'t own or manage any businesses yet';
 
   @override
   String get noResultsTitle => 'No Results';
@@ -2377,8 +2265,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeAndPricing => 'Finance & Pricing';
 
   @override
-  String get manageInvoicesAndConfigurePricing =>
-      'Manage invoices and configure pricing';
+  String get manageInvoicesAndConfigurePricing => 'Manage invoices and configure pricing';
 
   @override
   String get exportData => 'Export Data';
@@ -2420,8 +2307,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectSupplierFirstText => 'Select a Supplier First';
 
   @override
-  String get selectSupplierToViewText =>
-      'Please select a supplier to view their product inventory';
+  String get selectSupplierToViewText => 'Please select a supplier to view their product inventory';
 
   @override
   String get noProductsText => 'No Products Available';
@@ -2430,8 +2316,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noProductsFoundText => 'No Products Found';
 
   @override
-  String get tryDifferentSearchText =>
-      'Try a different search term or browse other suppliers';
+  String get tryDifferentSearchText => 'Try a different search term or browse other suppliers';
 
   @override
   String get addFirstProductText => 'Add your first product to start selling';
@@ -2488,16 +2373,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accessRequired => 'Access Required';
 
   @override
-  String get pleaseLoginToAccessDashboard =>
-      'Please log in to access the dashboard.';
+  String get pleaseLoginToAccessDashboard => 'Please log in to access the dashboard.';
 
   @override
-  String get needBusinessAssignment =>
-      'You need to be assigned to a business to access management features.';
+  String get needBusinessAssignment => 'You need to be assigned to a business to access management features.';
 
   @override
-  String get contactAdminOrJoinTeam =>
-      'Contact your administrator or join a business team.';
+  String get contactAdminOrJoinTeam => 'Contact your administrator or join a business team.';
 
   @override
   String get checkAccessStatus => 'Check Access Status';
@@ -2536,8 +2418,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noAnalyticsData => 'No Analytics Data';
 
   @override
-  String get generateInvoicesToSeeAnalytics =>
-      'Generate invoices to see financial analytics';
+  String get generateInvoicesToSeeAnalytics => 'Generate invoices to see financial analytics';
 
   @override
   String get financialOverview => 'Financial Overview';
@@ -2612,8 +2493,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noInvoicesYet => 'No Invoices Yet';
 
   @override
-  String get noInvoicesDescription =>
-      'Your invoices will appear here once you complete sales';
+  String get noInvoicesDescription => 'Your invoices will appear here once you complete sales';
 
   @override
   String get createFirstInvoice => 'Create First Invoice';
@@ -2681,15 +2561,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noServicesFound => 'No services found';
 
   @override
-  String get noServicesDescription =>
-      'Add your first service to start offering healthcare services to patients.';
+  String get noServicesDescription => 'Add your first service to start offering healthcare services to patients.';
 
   @override
   String get proTip => 'Pro Tip';
 
   @override
-  String get addServicesToManage =>
-      'Add services to manage appointments, pricing, and resource allocation efficiently.';
+  String get addServicesToManage => 'Add services to manage appointments, pricing, and resource allocation efficiently.';
 
   @override
   String get status_inactive => 'Inactive';
@@ -2779,15 +2657,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noBusinessOperations => 'No Business Operations';
 
   @override
-  String get generateOperationsToSeeData =>
-      'Generate business operations to see detailed analytics and transaction data';
+  String get generateOperationsToSeeData => 'Generate business operations to see detailed analytics and transaction data';
 
   @override
   String get exportOperations => 'Export Operations';
 
   @override
-  String get viewAllBusinessTransactions =>
-      'View all business transactions and operations';
+  String get viewAllBusinessTransactions => 'View all business transactions and operations';
 
   @override
   String get topSuppliers => 'Top Suppliers';
@@ -2892,8 +2768,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noItemsFound => 'No items found';
 
   @override
-  String get itemsWillBeLoadedFromServer =>
-      'Items will be loaded from the server';
+  String get itemsWillBeLoadedFromServer => 'Items will be loaded from the server';
 
   @override
   String get loadItems => 'Load Items';
@@ -2938,8 +2813,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noServicesAvailable => 'No services available';
 
   @override
-  String get servicesWillAppearHere =>
-      'Services will appear here when available';
+  String get servicesWillAppearHere => 'Services will appear here when available';
 
   @override
   String get loadingProducts => 'Loading products...';
@@ -3104,12 +2978,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serviceGeneralMedical => 'General Medical Service';
 
   @override
-  String get serviceDescBloodTesting =>
-      'Complete blood count, cholesterol, glucose, and other blood tests';
+  String get serviceDescBloodTesting => 'Complete blood count, cholesterol, glucose, and other blood tests';
 
   @override
-  String get serviceDescDiagnosticImaging =>
-      'X-rays, MRIs, CT scans, and ultrasound services';
+  String get serviceDescDiagnosticImaging => 'X-rays, MRIs, CT scans, and ultrasound services';
 
   @override
   String get supplierCategoryRestaurant => 'Restaurant';
@@ -3175,8 +3047,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResultsForFilter => 'No results for current filter';
 
   @override
-  String get createYourFirstInvoice =>
-      'Create your first invoice to get started';
+  String get createYourFirstInvoice => 'Create your first invoice to get started';
 
   @override
   String get tryDifferentFilter => 'Try a different filter or search term';
@@ -3260,8 +3131,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDelete => 'Confirm Delete';
 
   @override
-  String get deleteDocumentConfirmation =>
-      'Are you sure you want to delete this document?';
+  String get deleteDocumentConfirmation => 'Are you sure you want to delete this document?';
 
   @override
   String get documentDeleted => 'Document deleted';
@@ -3626,36 +3496,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pos_manage_title => 'Manage POS';
 
   @override
-  String get pos_manage_description =>
-      'Process sales and manage POS operations';
+  String get pos_manage_description => 'Process sales and manage POS operations';
 
   @override
   String get operations_view_title => 'View Operations';
 
   @override
-  String get operations_view_description =>
-      'View operational reports and metrics';
+  String get operations_view_description => 'View operational reports and metrics';
 
   @override
   String get operations_manage_title => 'Manage Operations';
 
   @override
-  String get operations_manage_description =>
-      'Configure system operations and settings';
+  String get operations_manage_description => 'Configure system operations and settings';
 
   @override
   String get finance_view_title => 'View Finance';
 
   @override
-  String get finance_view_description =>
-      'View financial reports and transactions';
+  String get finance_view_description => 'View financial reports and transactions';
 
   @override
   String get finance_manage_title => 'Manage Finance';
 
   @override
-  String get finance_manage_description =>
-      'Manage financial operations and accounting';
+  String get finance_manage_description => 'Manage financial operations and accounting';
 
   @override
   String get category_services => 'Services Management';
@@ -3682,8 +3547,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privilegesUpdated => 'Privileges updated successfully';
 
   @override
-  String get confirmPrivilegeChange =>
-      'Are you sure you want to change privileges?';
+  String get confirmPrivilegeChange => 'Are you sure you want to change privileges?';
 
   @override
   String get noPrivilegesSelected => 'No privileges selected';
@@ -4136,8 +4000,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkDetails => 'Check Details';
 
   @override
-  String get checkPaymentNote =>
-      'Payment by check will be processed upon receipt';
+  String get checkPaymentNote => 'Payment by check will be processed upon receipt';
 
   @override
   String get selectCustomer => 'Select Customer';
@@ -4149,8 +4012,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchCustomersHint => 'Search by name, email, or phone...';
 
   @override
-  String get searchCustomerInstructions =>
-      'Enter customer name, email, or phone number to search';
+  String get searchCustomerInstructions => 'Enter customer name, email, or phone number to search';
 
   @override
   String get addNewCustomer => 'Add New Customer';
@@ -4171,8 +4033,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchResults => 'Search results';
 
   @override
-  String get addNewCustomerInstruction =>
-      'Create a new customer profile to add them to the system';
+  String get addNewCustomerInstruction => 'Create a new customer profile to add them to the system';
 
   @override
   String get create => 'Create';
@@ -4205,20 +4066,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutHelp => 'Checkout Help';
 
   @override
-  String get customerHelpDescription =>
-      'Select or add a customer for this order. You can search by name, email, or scan a QR code.';
+  String get customerHelpDescription => 'Select or add a customer for this order. You can search by name, email, or scan a QR code.';
 
   @override
-  String get documentTypeHelpDescription =>
-      'Choose between invoice or receipt. An invoice is for credit sales, a receipt is for cash sales.';
+  String get documentTypeHelpDescription => 'Choose between invoice or receipt. An invoice is for credit sales, a receipt is for cash sales.';
 
   @override
-  String get paymentMethodHelpDescription =>
-      'Select how the customer will pay: cash, card, bank transfer, or mobile money.';
+  String get paymentMethodHelpDescription => 'Select how the customer will pay: cash, card, bank transfer, or mobile money.';
 
   @override
-  String get notesParametersHelpDescription =>
-      'Add notes or custom parameters to this order for reference.';
+  String get notesParametersHelpDescription => 'Add notes or custom parameters to this order for reference.';
 
   @override
   String get gotIt => 'Got it';
@@ -4239,8 +4096,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noParametersAdded => 'No parameters added';
 
   @override
-  String get addParametersToCustomizeOrder =>
-      'Add parameters to customize this order';
+  String get addParametersToCustomizeOrder => 'Add parameters to customize this order';
 
   @override
   String get changeCustomer => 'Change Customer';
@@ -4294,8 +4150,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterBankDetails => 'Please enter bank details';
 
   @override
-  String get pleaseEnterMobilePaymentDetails =>
-      'Please select mobile payment provider';
+  String get pleaseEnterMobilePaymentDetails => 'Please select mobile payment provider';
 
   @override
   String get visa => 'VISA';
@@ -4343,8 +4198,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchForCustomers => 'Search for customers';
 
   @override
-  String get enterNameOrEmailToFindCustomers =>
-      'Enter name, username or email to find customers';
+  String get enterNameOrEmailToFindCustomers => 'Enter name, username or email to find customers';
 
   @override
   String get allCustomers => 'All customers';
@@ -4365,8 +4219,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullPaymentApplied => 'Full Payment Applied';
 
   @override
-  String get fullPaymentDescDetail =>
-      'Customer will pay the full amount immediately';
+  String get fullPaymentDescDetail => 'Customer will pay the full amount immediately';
 
   @override
   String get depositOnlyDesc => 'Pay a deposit now, rest later';
@@ -4471,12 +4324,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutError => 'Checkout Error';
 
   @override
-  String get itemsHelpDescription =>
-      'Review the items in your cart before checkout. You can modify quantities if needed.';
+  String get itemsHelpDescription => 'Review the items in your cart before checkout. You can modify quantities if needed.';
 
   @override
-  String get deliveryHelpDescription =>
-      'Choose whether the customer will pick up the order or if it needs to be delivered.';
+  String get deliveryHelpDescription => 'Choose whether the customer will pick up the order or if it needs to be delivered.';
 
   @override
   String get deliveryDetails => 'Delivery Details';
@@ -4893,8 +4744,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationPermission => 'Location Permission';
 
   @override
-  String get locationPermissionMessage =>
-      'Please enable location services to use your current location';
+  String get locationPermissionMessage => 'Please enable location services to use your current location';
 
   @override
   String get enableLocation => 'Enable Location';
@@ -5062,12 +4912,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get freightShipping => 'Freight Shipping';
 
   @override
-  String get selectDeliveryType =>
-      'Choose how you\'d like to receive your order';
+  String get selectDeliveryType => 'Choose how you\'d like to receive your order';
 
   @override
-  String get fillAddressAutomatically =>
-      'Fill address from customer profile automatically';
+  String get fillAddressAutomatically => 'Fill address from customer profile automatically';
 
   @override
   String get weightUnit => 'kg';
@@ -5076,8 +4924,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dimensionUnitCm => 'cm';
 
   @override
-  String get enterPackageDimensions =>
-      'Enter package dimensions for accurate shipping';
+  String get enterPackageDimensions => 'Enter package dimensions for accurate shipping';
 
   @override
   String get dimensionUnitM => 'm';
@@ -5208,15 +5055,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterValidAmount => 'Please enter a valid amount';
 
   @override
-  String get selectDateForInstallment =>
-      'Please select a date for the installment';
+  String get selectDateForInstallment => 'Please select a date for the installment';
 
   @override
   String get success => 'Success';
 
   @override
-  String get additionalDepositSubmitted =>
-      'Additional deposit submitted successfully';
+  String get additionalDepositSubmitted => 'Additional deposit submitted successfully';
 
   @override
   String get depositSubmitted => 'Deposit submitted successfully';
@@ -5249,22 +5094,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noDocumentsYet => 'No documents yet';
 
   @override
-  String get tryAdjustingFilters =>
-      'Try adjusting your filters to see more results';
+  String get tryAdjustingFilters => 'Try adjusting your filters to see more results';
 
   @override
   String get noDocumentsMatch => 'No documents match';
 
   @override
-  String get startCreatingFirstDocument =>
-      'Start by creating your first financial document';
+  String get startCreatingFirstDocument => 'Start by creating your first financial document';
 
   @override
   String get createFirstDocument => 'Create First Document';
 
   @override
-  String get documentsWillAppearHere =>
-      'Documents will appear here once they are created';
+  String get documentsWillAppearHere => 'Documents will appear here once they are created';
 
   @override
   String get tip => '💡 Tip';
@@ -5467,12 +5309,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth_decode_failed => 'Session expired. Please log in again.';
 
   @override
-  String get auth_unauthorized =>
-      'You don\'t have permission to perform this action.';
+  String get auth_unauthorized => 'You don\'t have permission to perform this action.';
 
   @override
-  String get user_auth_creation_failed =>
-      'Failed to create account. Please try again.';
+  String get user_auth_creation_failed => 'Failed to create account. Please try again.';
 
   @override
   String get user_net_failed => 'Network error. Please check your connection.';
@@ -5532,15 +5372,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get product_quantity_not_enough => 'Insufficient product quantity.';
 
   @override
-  String get product_quantity_restore_failed =>
-      'Failed to restore product quantity.';
+  String get product_quantity_restore_failed => 'Failed to restore product quantity.';
 
   @override
   String get product_supplier_not_exists => 'Product supplier not found.';
 
   @override
-  String get product_supplier_already_exists =>
-      'Product supplier already exists.';
+  String get product_supplier_already_exists => 'Product supplier already exists.';
 
   @override
   String get product_fetch_not_found => 'Product not found.';
@@ -5678,8 +5516,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delivery_update_failed => 'Failed to update delivery.';
 
   @override
-  String get delivery_cannot_be_updated =>
-      'Delivery cannot be updated in its current status.';
+  String get delivery_cannot_be_updated => 'Delivery cannot be updated in its current status.';
 
   @override
   String get delivery_bulk_update_failed => 'Failed to update deliveries.';
@@ -5739,8 +5576,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notification_delete_failed => 'Failed to delete notification.';
 
   @override
-  String get notification_bulk_insert_failed =>
-      'Failed to create notifications.';
+  String get notification_bulk_insert_failed => 'Failed to create notifications.';
 
   @override
   String get location_not_exists => 'Location not found.';
@@ -5779,8 +5615,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get not_found => 'Not found.';
 
   @override
-  String get network_timeout =>
-      'Network timeout. Please check your connection.';
+  String get network_timeout => 'Network timeout. Please check your connection.';
 
   @override
   String get validation_error => 'Please check your input and try again.';
@@ -5813,8 +5648,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gone => 'This resource is no longer available.';
 
   @override
-  String get bad_gateway =>
-      'Service temporarily unavailable. Please try again later.';
+  String get bad_gateway => 'Service temporarily unavailable. Please try again later.';
 
   @override
   String get service_unavailable => 'Service is temporarily unavailable.';
@@ -5823,8 +5657,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gateway_timeout => 'Request timed out. Please try again.';
 
   @override
-  String get network_authentication_required =>
-      'Network authentication required.';
+  String get network_authentication_required => 'Network authentication required.';
 
   @override
   String get no_response_data => 'No response data available.';
@@ -5840,4 +5673,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get amountMustBeGreaterThanZero => 'Amount must be positive';
+
+  @override
+  String get returnBack => 'Return to previous screen';
 }

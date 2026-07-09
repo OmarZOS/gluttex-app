@@ -1,3 +1,4 @@
+import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe_catalog/screens/recipe_screen.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';

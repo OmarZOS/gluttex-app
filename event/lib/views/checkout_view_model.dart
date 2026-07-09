@@ -349,7 +349,7 @@ class CheckoutViewModel extends ChangeNotifier {
         "person_nationality": details.person_nationality,
         "person_email": details.person_email ?? "",
         "person_phone": details.person_phone ?? "",
-        "id_blood_type": person.person_blood_type_id,
+        // "id_blood_type": person.person_blood_type_id,
       });
     }
 

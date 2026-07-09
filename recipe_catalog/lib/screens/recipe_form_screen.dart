@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:app_constants/app_routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -186,7 +187,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   /// Get ingredient name from notifier's ingredients
   String _getIngredientName(int id) {
     final notifier = Provider.of<RecipeNotifier>(context, listen: false);
-    final ingredient = notifier.getIngredient(id);
+    final ingredient = notifier.getIngredientById(id);
     if (ingredient != null && ingredient.ingredient_name.isNotEmpty) {
       return ingredient.ingredient_name;
     }
@@ -206,7 +207,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   /// Get ingredient icon URL from notifier's ingredients
   String? _getIngredientIconUrl(int id) {
     final notifier = Provider.of<RecipeNotifier>(context, listen: false);
-    final ingredient = notifier.getIngredient(id);
+    final ingredient = notifier.getIngredientById(id);
     return ingredient?.ingredient_icon;
   }
 

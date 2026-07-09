@@ -9,10 +9,12 @@ import 'pending_invitations_dialog.dart';
 class NoAccessScreen extends StatelessWidget {
   final AppUser currentUser;
   final PersonnelNotifier personnelNotifier;
+  final VoidCallback? onReturn; // Optional callback for return action
 
   const NoAccessScreen({
     required this.currentUser,
     required this.personnelNotifier,
+    this.onReturn,
   });
 
   @override
@@ -20,12 +22,30 @@ class NoAccessScreen extends StatelessWidget {
     return Consumer<AppUserNotifier>(
       builder: (context, userNotifier, _) {
         return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Text(
+              AppLocalizations.of(context)?.accessRequired ?? 'Access Required',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: () => _handleReturn(context),
+              tooltip: AppLocalizations.of(context)?.returnBack ?? 'Return',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            elevation: 0,
+          ),
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(32),
               child: NoAccessContent(
                 currentUser: currentUser,
                 personnelNotifier: personnelNotifier,
+                onReturn: onReturn,
               ),
             ),
           ),
@@ -33,15 +53,49 @@ class NoAccessScreen extends StatelessWidget {
       },
     );
   }
+
+  void _handleReturn(BuildContext context) {
+    if (onReturn != null) {
+      onReturn!();
+    } else {
+      // Default behavior: navigate back if possible
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        // If can't pop, close the app or navigate to home
+        // Option 1: Close the app
+        // SystemNavigator.pop();
+
+        // Option 2: Navigate to home screen
+        // Navigator.of(context).pushReplacementNamed('/home');
+
+        // For now, just show a snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.returnBack ??
+                  'Return to previous screen',
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
+  }
 }
 
 class NoAccessContent extends StatelessWidget {
   final AppUser currentUser;
   final PersonnelNotifier personnelNotifier;
+  final VoidCallback? onReturn;
 
   const NoAccessContent({
     required this.currentUser,
     required this.personnelNotifier,
+    this.onReturn,
   });
 
   @override
@@ -101,6 +155,7 @@ class NoAccessContent extends StatelessWidget {
         NoAccessButtons(
           currentUser: currentUser,
           personnelNotifier: personnelNotifier,
+          onReturn: onReturn,
         ),
       ],
     );
@@ -110,10 +165,12 @@ class NoAccessContent extends StatelessWidget {
 class NoAccessButtons extends StatelessWidget {
   final AppUser currentUser;
   final PersonnelNotifier personnelNotifier;
+  final VoidCallback? onReturn;
 
   const NoAccessButtons({
     required this.currentUser,
     required this.personnelNotifier,
+    this.onReturn,
   });
 
   @override
@@ -124,6 +181,23 @@ class NoAccessButtons extends StatelessWidget {
 
     return Column(
       children: [
+        // Return Button
+        OutlinedButton.icon(
+          onPressed: () => _handleReturn(context),
+          icon: Icon(Icons.arrow_back_rounded, color: colorScheme.primary),
+          label: Text(
+            localizations?.returnBack ?? 'Return Back',
+            style: TextStyle(color: colorScheme.primary),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: colorScheme.primary),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         FilledButton.icon(
           onPressed: () => _refreshAccess(context),
           icon: Icon(Icons.refresh_rounded, color: colorScheme.onPrimary),
@@ -157,6 +231,31 @@ class NoAccessButtons extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _handleReturn(BuildContext context) {
+    if (onReturn != null) {
+      onReturn!();
+    } else {
+      // Default behavior: navigate back if possible
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        // If can't pop, show a message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.returnBack ??
+                  'Return to previous screen',
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _refreshAccess(BuildContext context) async {

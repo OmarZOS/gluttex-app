@@ -2541,6 +2541,7 @@
    "manageIngredients": "Gérer les Ingrédients",
 
       "pleaseEnterAmount": "Veuillez entrer la quantité",
-   "amountMustBeGreaterThanZero": "La quantité doit être positive"
+   "amountMustBeGreaterThanZero": "La quantité doit être positive",
+   "returnBack": "Retour à la page précédente"
 
 }

@@ -665,9 +665,8 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                           FutureBuilder<Supplier?>(
                             future: context
                                 .read<SupplierChangeNotifier>()
-                                .getSupplierById(context
-                                    .read<ProductNotifier>()
-                                    .currentProviderId),
+                                .getSupplierById(document
+                                    .supplierId), // Use document.supplierId directly
                             builder: (context, snapshot) {
                               if (snapshot.hasData && snapshot.data != null) {
                                 return Row(
@@ -679,7 +678,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      snapshot!.data!.displayName,
+                                      snapshot.data!.displayName,
                                       style:
                                           theme.textTheme.bodySmall?.copyWith(
                                         color: theme.colorScheme.tertiary,

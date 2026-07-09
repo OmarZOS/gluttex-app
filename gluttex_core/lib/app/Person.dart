@@ -3,7 +3,7 @@ import 'dart:developer';
 class Person {
   final int id_person;
   final int person_details_id;
-  final int person_blood_type_id;
+  final String? person_blood_type; // Changed from person_blood_type_id
   final int? person_location_id;
   final PersonDetails person_details;
   final DateTime? created_at;
@@ -12,7 +12,7 @@ class Person {
   const Person({
     required this.id_person,
     required this.person_details_id,
-    required this.person_blood_type_id,
+    this.person_blood_type, // Changed
     this.person_location_id,
     required this.person_details,
     this.created_at,
@@ -34,7 +34,7 @@ class Person {
   String? get gender => person_details.person_gender;
 
   // Get nationality
-  String? get nationality => person_details.person_nationality;
+  String? get nationality => person_details.person_country_code;
 
   // Get birth date
   DateTime? get birthDate => person_details.person_birth_date;
@@ -59,16 +59,20 @@ class Person {
   }
 
   factory Person.fromJson(Map<String, dynamic> json) {
+    // Parse person_details from nested structure
+    final personDetailsJson =
+        json['person_details'] as Map<String, dynamic>? ?? {};
+
     return Person(
       id_person: (json['id_person'] as num?)?.toInt() ?? 0,
       person_details_id: (json['person_details_id'] as num?)?.toInt() ?? 0,
-      person_blood_type_id:
-          (json['person_blood_type_id'] as num?)?.toInt() ?? 0,
+      person_blood_type:
+          json['person_blood_type'] as String?, // Direct string from JSON
       person_location_id: (json['person_location_id'] as num?)?.toInt(),
-      person_details: PersonDetails.fromJson((json['person_details'] ?? {})),
-      // created_at: json['created_at'] != null
-      //     ? DateTime.tryParse(json['created_at'] as String)
-      //     : null,
+      person_details: PersonDetails.fromJson(personDetailsJson),
+      created_at: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)
+          : null,
       updated_at: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'] as String)
           : null,
@@ -80,7 +84,7 @@ class Person {
     return {
       'id_person': id_person,
       'person_details_id': person_details_id,
-      'person_blood_type_id': person_blood_type_id,
+      'person_blood_type': person_blood_type,
       'person_location_id': person_location_id,
       'person_details': person_details.toJson(),
       if (created_at != null) 'created_at': created_at!.toIso8601String(),
@@ -92,7 +96,7 @@ class Person {
   Person copyWith({
     int? id_person,
     int? person_details_id,
-    int? person_blood_type_id,
+    String? person_blood_type,
     int? person_location_id,
     PersonDetails? person_details,
     DateTime? created_at,
@@ -101,7 +105,7 @@ class Person {
     return Person(
       id_person: id_person ?? this.id_person,
       person_details_id: person_details_id ?? this.person_details_id,
-      person_blood_type_id: person_blood_type_id ?? this.person_blood_type_id,
+      person_blood_type: person_blood_type ?? this.person_blood_type,
       person_location_id: person_location_id ?? this.person_location_id,
       person_details: person_details ?? this.person_details,
       created_at: created_at ?? this.created_at,
@@ -114,7 +118,7 @@ class Person {
     return Person(
       id_person: 0,
       person_details_id: 0,
-      person_blood_type_id: 1,
+      person_blood_type: null,
       person_location_id: null,
       person_details: PersonDetails.empty(),
       created_at: null,
@@ -185,7 +189,7 @@ class PersonDetails {
   final String person_first_name;
   final DateTime? person_birth_date;
   final String person_gender;
-  final String person_nationality;
+  final String person_country_code; // Changed from person_nationality
   final String? person_email;
   final String? person_phone;
   final String? person_address;
@@ -202,7 +206,7 @@ class PersonDetails {
     required this.person_first_name,
     this.person_birth_date,
     required this.person_gender,
-    required this.person_nationality,
+    required this.person_country_code, // Changed
     this.person_email,
     this.person_phone,
     this.person_address,
@@ -221,10 +225,12 @@ class PersonDetails {
   // Get full name
   String get fullName => '$person_first_name $person_last_name'.trim();
 
+  // Get nationality (alias for person_country_code)
+  String? get person_nationality => person_country_code;
+
   // Get formatted phone number
   String? get formattedPhone {
     if (person_phone == null || person_phone!.isEmpty) return null;
-    // Simple formatting - you can customize this
     if (person_phone!.length == 10) {
       return '${person_phone!.substring(0, 4)}-${person_phone!.substring(4, 7)}-${person_phone!.substring(7)}';
     }
@@ -254,7 +260,8 @@ class PersonDetails {
           ? DateTime.tryParse(json['person_birth_date'] as String)
           : null,
       person_gender: json['person_gender'] as String? ?? '',
-      person_nationality: json['person_nationality'] as String? ?? '',
+      person_country_code:
+          json['person_country_code'] as String? ?? '', // Changed key
       person_email: json['person_email'] as String?,
       person_phone: json['person_phone'] as String?,
       person_address: json['person_address'] as String?,
@@ -279,7 +286,7 @@ class PersonDetails {
       'person_first_name': person_first_name,
       'person_birth_date': person_birth_date?.toIso8601String(),
       'person_gender': person_gender,
-      'person_nationality': person_nationality,
+      'person_country_code': person_country_code, // Changed key
       'person_email': person_email,
       'person_phone': person_phone,
       'person_address': person_address,
@@ -299,7 +306,7 @@ class PersonDetails {
     String? person_first_name,
     DateTime? person_birth_date,
     String? person_gender,
-    String? person_nationality,
+    String? person_country_code,
     String? person_email,
     String? person_phone,
     String? person_address,
@@ -316,7 +323,7 @@ class PersonDetails {
       person_first_name: person_first_name ?? this.person_first_name,
       person_birth_date: person_birth_date ?? this.person_birth_date,
       person_gender: person_gender ?? this.person_gender,
-      person_nationality: person_nationality ?? this.person_nationality,
+      person_country_code: person_country_code ?? this.person_country_code,
       person_email: person_email ?? this.person_email,
       person_phone: person_phone ?? this.person_phone,
       person_address: person_address ?? this.person_address,
@@ -337,7 +344,7 @@ class PersonDetails {
       person_first_name: '',
       person_birth_date: null,
       person_gender: '',
-      person_nationality: '',
+      person_country_code: '',
       person_email: null,
       person_phone: null,
       person_address: null,
@@ -367,7 +374,7 @@ extension PersonExtensions on Person {
         person_details.person_email?.toLowerCase().contains(searchQuery) ==
             true ||
         person_details.person_phone?.contains(query) == true ||
-        person_details.person_nationality.toLowerCase().contains(searchQuery);
+        person_details.person_country_code.toLowerCase().contains(searchQuery);
   }
 }
 

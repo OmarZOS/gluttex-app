@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_constants/app_routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -110,7 +111,7 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
 
   Future<void> _refreshProducts() async {
     // Invalidate cache and refresh
-    _productNotifier.invalidateProductCache(null);
+    _productNotifier.invalidateProductCache();
     await _productNotifier.fetchProducts(
       categoryId: _selectedCategoryId,
       reset: true,

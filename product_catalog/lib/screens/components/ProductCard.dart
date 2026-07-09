@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';

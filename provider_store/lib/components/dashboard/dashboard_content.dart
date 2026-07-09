@@ -1,3 +1,5 @@
+import 'package:app_constants/app_routes.dart';
+import 'package:event/supplier_change_notifier.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
@@ -17,11 +19,13 @@ import 'package:provider/provider.dart';
 class DashboardContent extends StatefulWidget {
   final AppUser currentUser;
   final PersonnelNotifier personnelNotifier;
+  final SupplierChangeNotifier supplierNotifier;
 
   const DashboardContent({
     super.key,
     required this.currentUser,
     required this.personnelNotifier,
+    required this.supplierNotifier,
   });
 
   @override
@@ -32,8 +36,22 @@ class DashboardContentState extends State<DashboardContent> {
   int _selectedIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Load supplier data for the current user
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userId = widget.currentUser.idAppUser ?? 0;
+      if (userId > 0) {
+        widget.supplierNotifier.fetchSuppliers(ownerId: userId, reset: true);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final userId = widget.currentUser.idAppUser ?? 0;
+
+    // Get accessible suppliers (synchronous, uses cached data)
     final accessibleSuppliers =
         widget.personnelNotifier.getAccessibleSupplierIds(userId);
 
@@ -130,8 +148,6 @@ class DashboardContentState extends State<DashboardContent> {
       accessibleSuppliers,
       ['pos_manage', 'pos_view'],
     );
-
-    // POS
     if (posPrivilege != null) {
       items.add(DashboardItem(
         type: DashboardScreenType.pos,
@@ -148,7 +164,6 @@ class DashboardContentState extends State<DashboardContent> {
       accessibleSuppliers,
       ['orders_manage', 'orders_view'],
     );
-
     if (ordersPrivilege != null) {
       items.add(DashboardItem(
         type: DashboardScreenType.orders,
@@ -164,7 +179,6 @@ class DashboardContentState extends State<DashboardContent> {
       accessibleSuppliers,
       ['operations_manage', 'operations_view'],
     );
-
     if (operationsPrivilege != null) {
       items.add(DashboardItem(
         type: DashboardScreenType.operations,
@@ -181,7 +195,6 @@ class DashboardContentState extends State<DashboardContent> {
       accessibleSuppliers,
       ['finance_manage', 'finance_view'],
     );
-
     if (financePrivilege != null) {
       items.add(DashboardItem(
         type: DashboardScreenType.finance,
@@ -253,13 +266,11 @@ class DashboardContentState extends State<DashboardContent> {
           ),
         ),
       );
-
       return;
     }
 
     if (type == DashboardScreenType.inventory) {
       Navigator.pushNamed(context, AppRoutes.productCreate);
-
       return;
     }
 
@@ -268,7 +279,6 @@ class DashboardContentState extends State<DashboardContent> {
         context,
         AppRoutes.serviceForm,
       );
-
       return;
     }
 

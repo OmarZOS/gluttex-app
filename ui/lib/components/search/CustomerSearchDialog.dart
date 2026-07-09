@@ -965,7 +965,7 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
                       ),
                       const SizedBox(height: 4),
                       if (details.person_gender.isNotEmpty ||
-                          details.person_nationality.isNotEmpty)
+                          details.person_nationality != "")
                         Row(
                           children: [
                             if (details.person_gender.isNotEmpty)
@@ -992,7 +992,7 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
                                 ],
                               ),
                             if (details.person_gender.isNotEmpty &&
-                                details.person_nationality.isNotEmpty)
+                                details.person_nationality != "")
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 8),
@@ -1006,7 +1006,7 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
                                   ),
                                 ),
                               ),
-                            if (details.person_nationality.isNotEmpty)
+                            if (details.person_nationality != "")
                               Row(
                                 children: [
                                   Icon(
@@ -1016,7 +1016,7 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    details.person_nationality,
+                                    details.person_nationality ?? "",
                                     style: textTheme.bodySmall?.copyWith(
                                       color: colorScheme.onSurfaceVariant,
                                     ),

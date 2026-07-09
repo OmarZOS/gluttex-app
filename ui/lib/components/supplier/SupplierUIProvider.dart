@@ -441,7 +441,7 @@ class SupplierUIProvider {
       final supplier = await supplierNotifier.getSupplierById(
         supplierId,
         forceRefresh: false,
-        notify: false,
+        // notify: false,
       );
 
       final supplierName = supplier?.providerName.trim() ?? '';
