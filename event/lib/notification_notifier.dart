@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
 
+import 'package:event/TraceableNotifier.dart';
 import 'package:flutter/material.dart';
 import 'package:locator/locator.dart';
 
@@ -26,10 +27,9 @@ class _CacheEntry<T> {
 }
 
 // ============ NOTIFICATION CHANGE NOTIFIER ============
-class NotificationNotifier extends ChangeNotifier {
+class NotificationNotifier extends TraceableNotifier {
   final NotificationService _notificationService =
       AppLocator.get<NotificationService>();
-  final StorageService _storageService = AppLocator.get<StorageService>();
 
   // ============ CACHE STORAGE ============
   final Map<int, GluttexNotification> _notificationCache = {};
@@ -74,37 +74,6 @@ class NotificationNotifier extends ChangeNotifier {
   }
 
   NotificationNotifier();
-
-  // ============ RESPONSE TRACKING HELPER METHODS ============
-
-  String _generateCallerKey(String operation, {String? id, String? suffix}) {
-    final parts = [operation];
-    if (id != null) parts.add(id);
-    if (suffix != null) parts.add(suffix);
-    parts.add(DateTime.now().millisecondsSinceEpoch.toString());
-    return parts.join('_');
-  }
-
-  void _storeSuccessResponse(String callerKey, dynamic data,
-      {int? statusCode, String? responseCode}) {
-    _storageService.setSuccessResponse(callerKey, data,
-        statusCode: statusCode ?? 200, responseCode: responseCode);
-    debugPrint('✅ Stored SUCCESS: $callerKey - $responseCode');
-  }
-
-  void _storeFailureResponse(String callerKey, dynamic data,
-      {int? statusCode,
-      String? errorCode,
-      String? message,
-      String? responseCode}) {
-    _storageService.setFailureResponse(callerKey,
-        data: data,
-        statusCode: statusCode ?? 500,
-        errorCode: errorCode,
-        message: message,
-        responseCode: responseCode);
-    debugPrint('❌ Stored FAILURE: $callerKey - $responseCode');
-  }
 
   // ============ LIFECYCLE ============
 
@@ -275,7 +244,7 @@ class NotificationNotifier extends ChangeNotifier {
     bool unreadOnly = false,
     bool forceRefresh = false,
   }) async {
-    final operationKey = _generateCallerKey('loadInitialNotifications',
+    final operationKey = getCallerKey('loadInitialNotifications',
         suffix: '${userId}_${limit}_${unreadOnly}');
 
     // Check cache
@@ -289,16 +258,15 @@ class NotificationNotifier extends ChangeNotifier {
         _showOnlyUnread = unreadOnly;
         _totalCount = cached.totalCount;
         _hasMore = cached.notifications.length < cached.totalCount;
-        _storeSuccessResponse(operationKey, cached,
-            statusCode: 200, responseCode: 'CACHE_HIT');
+        storeSuccess(operationKey, cached, responseCode: 'CACHE_HIT');
         _safeNotifyListeners();
         return;
       }
     }
 
     if (_isLoading) {
-      _storeFailureResponse(operationKey, null,
-          statusCode: 429, errorCode: 'LOADING', responseCode: 'RATE_LIMITED');
+      storeFailure(operationKey, null,
+          errorCode: 'LOADING', message: 'Already loading');
       return;
     }
 
@@ -313,12 +281,11 @@ class NotificationNotifier extends ChangeNotifier {
         userId,
         page: 0,
         limit: limit,
-        // unreadOnly: unreadOnly,
         callerKey: operationKey,
       );
 
-      final statusCode = _storageService.getStatusCode(operationKey);
-      final responseCode = _storageService.getResponseCode(operationKey);
+      final statusCode = getStatusCode(operationKey);
+      final responseCode = getResponseCode(operationKey);
 
       // Cache the result
       final cacheKey = _getListCacheKey(userId, 0, limit, unreadOnly);
@@ -329,19 +296,15 @@ class NotificationNotifier extends ChangeNotifier {
       _totalCount = response.totalCount;
       _hasMore = response.notifications.length < response.totalCount;
 
-      _storeSuccessResponse(operationKey, response,
-          statusCode: statusCode ?? 200,
-          responseCode: responseCode ?? 'SUCCESS');
-      log('Loaded ${response.notifications.length} notifications for user $userId');
+      storeSuccess(operationKey, response,
+          code: statusCode ?? 200, responseCode: responseCode ?? 'SUCCESS');
+      logInfo(
+          'Loaded ${response.notifications.length} notifications for user $userId');
     } catch (e, stackTrace) {
       _setError('Failed to load notifications: $e');
-      log('Error loading notifications: $e');
-      log(stackTrace.toString());
-      _storeFailureResponse(operationKey, e.toString(),
-          statusCode: 500,
-          errorCode: 'LOAD_ERROR',
-          message: e.toString(),
-          responseCode: 'ERROR');
+      logError('Error loading notifications', error: e, stackTrace: stackTrace);
+      storeFailure(operationKey, e.toString(),
+          errorCode: 'LOAD_ERROR', message: e.toString());
     } finally {
       _setLoading(false);
     }
@@ -350,7 +313,7 @@ class NotificationNotifier extends ChangeNotifier {
   Future<void> loadMoreNotifications({int limit = 20}) async {
     if (_isLoading || !_hasMore) return;
 
-    final operationKey = _generateCallerKey('loadMoreNotifications',
+    final operationKey = getCallerKey('loadMoreNotifications',
         suffix: '${_currentUserId}_${_currentPage}_${limit}');
 
     // Check cache for next page
@@ -370,8 +333,7 @@ class NotificationNotifier extends ChangeNotifier {
       _currentPage++;
       _hasMore =
           _notificationList.notifications.length < _notificationList.totalCount;
-      _storeSuccessResponse(operationKey, cached,
-          statusCode: 200, responseCode: 'CACHE_HIT');
+      storeSuccess(operationKey, cached, responseCode: 'CACHE_HIT');
       _safeNotifyListeners();
       return;
     }
@@ -383,12 +345,11 @@ class NotificationNotifier extends ChangeNotifier {
         _currentUserId,
         page: _currentPage,
         limit: limit,
-        // unreadOnly: _showOnlyUnread,
         callerKey: operationKey,
       );
 
-      final statusCode = _storageService.getStatusCode(operationKey);
-      final responseCode = _storageService.getResponseCode(operationKey);
+      final statusCode = getStatusCode(operationKey);
+      final responseCode = getResponseCode(operationKey);
 
       // Cache the result
       _cacheList(cacheKey, response, ttlSeconds: _shortCacheTTLSeconds);
@@ -407,18 +368,14 @@ class NotificationNotifier extends ChangeNotifier {
       _hasMore =
           _notificationList.notifications.length < _notificationList.totalCount;
 
-      _storeSuccessResponse(operationKey, response,
-          statusCode: statusCode ?? 200,
-          responseCode: responseCode ?? 'SUCCESS');
-      log('Loaded ${response.notifications.length} more notifications');
+      storeSuccess(operationKey, response,
+          code: statusCode ?? 200, responseCode: responseCode ?? 'SUCCESS');
+      logInfo('Loaded ${response.notifications.length} more notifications');
     } catch (e) {
       _setError('Failed to load more notifications: $e');
-      log('Error loading more notifications: $e');
-      _storeFailureResponse(operationKey, e.toString(),
-          statusCode: 500,
-          errorCode: 'LOAD_MORE_ERROR',
-          message: e.toString(),
-          responseCode: 'ERROR');
+      logError('Error loading more notifications', error: e);
+      storeFailure(operationKey, e.toString(),
+          errorCode: 'LOAD_MORE_ERROR', message: e.toString());
     } finally {
       _setLoading(false);
     }
@@ -436,12 +393,12 @@ class NotificationNotifier extends ChangeNotifier {
   // ============ NOTIFICATION ACTIONS ============
 
   Future<void> markAsRead(int notificationId, {String? callerKey}) async {
-    final operationKey = callerKey ??
-        _generateCallerKey('markAsRead', id: notificationId.toString());
+    final operationKey =
+        callerKey ?? getCallerKey('markAsRead', id: notificationId.toString());
 
     if (_isLoading) {
-      _storeFailureResponse(operationKey, null,
-          statusCode: 429, errorCode: 'LOADING', responseCode: 'RATE_LIMITED');
+      storeFailure(operationKey, null,
+          errorCode: 'LOADING', message: 'Already loading');
       return;
     }
 
@@ -451,25 +408,21 @@ class NotificationNotifier extends ChangeNotifier {
       await _notificationService.markAsRead(notificationId,
           callerKey: operationKey);
 
-      final statusCode = _storageService.getStatusCode(operationKey);
-      final responseCode = _storageService.getResponseCode(operationKey);
+      final statusCode = getStatusCode(operationKey);
+      final responseCode = getResponseCode(operationKey);
 
       // Update local state
       _notificationList = _notificationList.markAsRead(notificationId);
       _invalidateCache(notificationId: notificationId);
 
-      _storeSuccessResponse(operationKey, true,
-          statusCode: statusCode ?? 200,
-          responseCode: responseCode ?? 'SUCCESS');
-      log('Marked notification $notificationId as read');
+      storeSuccess(operationKey, true,
+          code: statusCode ?? 200, responseCode: responseCode ?? 'SUCCESS');
+      logInfo('Marked notification $notificationId as read');
     } catch (e) {
-      log('Error marking notification as read: $e');
+      logError('Error marking notification as read', error: e);
       _setError('Failed to mark notification as read: $e');
-      _storeFailureResponse(operationKey, e.toString(),
-          statusCode: 500,
-          errorCode: 'MARK_READ_ERROR',
-          message: e.toString(),
-          responseCode: 'ERROR');
+      storeFailure(operationKey, e.toString(),
+          errorCode: 'MARK_READ_ERROR', message: e.toString());
     } finally {
       _setLoading(false);
     }
@@ -477,11 +430,11 @@ class NotificationNotifier extends ChangeNotifier {
 
   Future<void> markAllAsRead({String? callerKey}) async {
     final operationKey = callerKey ??
-        _generateCallerKey('markAllAsRead', id: _currentUserId.toString());
+        getCallerKey('markAllAsRead', id: _currentUserId.toString());
 
     if (_isLoading) {
-      _storeFailureResponse(operationKey, null,
-          statusCode: 429, errorCode: 'LOADING', responseCode: 'RATE_LIMITED');
+      storeFailure(operationKey, null,
+          errorCode: 'LOADING', message: 'Already loading');
       return;
     }
 
@@ -491,24 +444,20 @@ class NotificationNotifier extends ChangeNotifier {
       await _notificationService.markAllAsRead(_currentUserId,
           callerKey: operationKey);
 
-      final statusCode = _storageService.getStatusCode(operationKey);
-      final responseCode = _storageService.getResponseCode(operationKey);
+      final statusCode = getStatusCode(operationKey);
+      final responseCode = getResponseCode(operationKey);
 
       // Update local state
       _notificationList = _notificationList.markAllAsRead();
 
-      _storeSuccessResponse(operationKey, true,
-          statusCode: statusCode ?? 200,
-          responseCode: responseCode ?? 'SUCCESS');
-      log('Marked all notifications as read for user $_currentUserId');
+      storeSuccess(operationKey, true,
+          code: statusCode ?? 200, responseCode: responseCode ?? 'SUCCESS');
+      logInfo('Marked all notifications as read for user $_currentUserId');
     } catch (e) {
-      log('Error marking all notifications as read: $e');
+      logError('Error marking all notifications as read', error: e);
       _setError('Failed to mark all notifications as read: $e');
-      _storeFailureResponse(operationKey, e.toString(),
-          statusCode: 500,
-          errorCode: 'MARK_ALL_READ_ERROR',
-          message: e.toString(),
-          responseCode: 'ERROR');
+      storeFailure(operationKey, e.toString(),
+          errorCode: 'MARK_ALL_READ_ERROR', message: e.toString());
     } finally {
       _setLoading(false);
     }
@@ -517,11 +466,11 @@ class NotificationNotifier extends ChangeNotifier {
   Future<void> deleteNotification(int notificationId,
       {String? callerKey}) async {
     final operationKey = callerKey ??
-        _generateCallerKey('deleteNotification', id: notificationId.toString());
+        getCallerKey('deleteNotification', id: notificationId.toString());
 
     if (_isLoading) {
-      _storeFailureResponse(operationKey, null,
-          statusCode: 429, errorCode: 'LOADING', responseCode: 'RATE_LIMITED');
+      storeFailure(operationKey, null,
+          errorCode: 'LOADING', message: 'Already loading');
       return;
     }
 
@@ -533,35 +482,29 @@ class NotificationNotifier extends ChangeNotifier {
         callerKey: operationKey,
       );
 
-      final statusCode = _storageService.getStatusCode(operationKey);
-      final responseCode = _storageService.getResponseCode(operationKey);
+      final statusCode = getStatusCode(operationKey);
+      final responseCode = getResponseCode(operationKey);
 
-      // if (success) {
-      //   // Update local state
-      //   _notificationList =
-      //       _notificationList.removeNotification(notificationId);
-      //   _invalidateCache(notificationId: notificationId);
-      //   _totalCount--;
+      if (statusCode == 200 || statusCode == 201) {
+        // Update local state
+        _notificationList =
+            _notificationList.removeNotification(notificationId);
+        _invalidateCache(notificationId: notificationId);
+        _totalCount--;
 
-      //   _storeSuccessResponse(operationKey, true,
-      //       statusCode: statusCode ?? 200,
-      //       responseCode: responseCode ?? 'SUCCESS');
-      //   log('Deleted notification $notificationId');
-      // } else {
-      //   _storeFailureResponse(operationKey, false,
-      //       statusCode: statusCode ?? 500,
-      //       errorCode: 'DELETE_FAILED',
-      //       message: 'Failed to delete notification',
-      //       responseCode: 'ERROR');
-      // }
+        storeSuccess(operationKey, true,
+            code: statusCode ?? 200, responseCode: responseCode ?? 'SUCCESS');
+        logInfo('Deleted notification $notificationId');
+      } else {
+        storeFailure(operationKey, false,
+            errorCode: 'DELETE_FAILED',
+            message: 'Failed to delete notification');
+      }
     } catch (e) {
-      log('Error deleting notification: $e');
+      logError('Error deleting notification', error: e);
       _setError('Failed to delete notification: $e');
-      _storeFailureResponse(operationKey, e.toString(),
-          statusCode: 500,
-          errorCode: 'DELETE_ERROR',
-          message: e.toString(),
-          responseCode: 'ERROR');
+      storeFailure(operationKey, e.toString(),
+          errorCode: 'DELETE_ERROR', message: e.toString());
     } finally {
       _setLoading(false);
     }
@@ -612,9 +555,5 @@ class NotificationNotifier extends ChangeNotifier {
     _pendingRequests.clear();
 
     _safeNotifyListeners();
-  }
-
-  CallerResponse? getResponse(String callerKey) {
-    return _storageService.getResponse(callerKey);
   }
 }

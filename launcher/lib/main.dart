@@ -59,8 +59,7 @@ void setupLocator() {
   AppLocator.registerSingletonService<DeliveryService>(DeliveryServiceImpl());
   AppLocator.registerSingletonService<RecipeService>(RecipeServiceImpl());
   AppLocator.registerSingletonService<SupplierService>(SupplierServiceImpl());
-  AppLocator.registerSingletonService<NotificationService>(
-      GluttexImplNotification());
+  AppLocator.registerSingletonService<NotificationService>(NotificationImpl());
   AppLocator.registerSingletonService<ProductService>(ProductServiceImpl());
   AppLocator.registerSingletonService<OrderService>(OrderServiceImpl());
   AppLocator.registerSingletonService<CartService>(CartServiceImpl());

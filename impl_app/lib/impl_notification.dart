@@ -6,7 +6,7 @@ import 'package:gluttex_core/app/Services/NotificationService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 
-class GluttexImplNotification extends NotificationService {
+class NotificationImpl extends NotificationService {
   // Helper method to generate caller key
   String _getCallerKey(String method, {String? id, String? suffix}) {
     final parts = [method];
@@ -63,7 +63,7 @@ class GluttexImplNotification extends NotificationService {
       return notificationList;
     } catch (e, stacktrace) {
       developer.log('Error getting notifications for user $userId: $e',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_GETTING_NOTIFICATIONS');
       return NotificationList(notifications: []);
@@ -85,7 +85,7 @@ class GluttexImplNotification extends NotificationService {
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getNotificationByIdEndpoint}/$notificationId';
       developer.log('Getting notification $notificationId from: $url',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final responseData = await storageService
           .get(url, notificationId.toString(), callerKey: key);
@@ -95,7 +95,7 @@ class GluttexImplNotification extends NotificationService {
 
       if (responseData == null) {
         developer.log('Notification $notificationId not found',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
         setFailureResponse(key, null,
             statusCode: statusCode ?? 404,
             responseCode: 'NOTIFICATION_NOT_FOUND');
@@ -106,7 +106,7 @@ class GluttexImplNotification extends NotificationService {
           GluttexNotification.fromJson(responseData as Map<String, dynamic>);
 
       developer.log('Found notification $notificationId',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
       setSuccessResponse(key, notification,
           statusCode: statusCode ?? 200,
           responseCode: responseCode ?? 'SUCCESS');
@@ -114,8 +114,8 @@ class GluttexImplNotification extends NotificationService {
       return notification;
     } catch (e, stacktrace) {
       developer.log('Error getting notification $notificationId: $e',
-          name: 'GluttexImplNotification');
-      developer.log('Stacktrace: $stacktrace', name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_GETTING_NOTIFICATION');
       return null;
@@ -137,7 +137,7 @@ class GluttexImplNotification extends NotificationService {
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.readNotificationEndpoint}';
       developer.log('Marking notification $notificationId as read at: $url',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final result = await storageService.update(
         url,
@@ -152,12 +152,12 @@ class GluttexImplNotification extends NotificationService {
 
       developer.log(
           'Mark as read result for notification $notificationId: $result',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       if (result == null) {
         developer.log(
             'Failed to mark notification $notificationId as read: null response',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
         setFailureResponse(key, null,
             statusCode: statusCode ?? 500, responseCode: 'MARK_READ_FAILED');
         return null;
@@ -175,7 +175,7 @@ class GluttexImplNotification extends NotificationService {
             responseCode: responseCode ?? 'SUCCESS');
         developer.log(
             'Notification $notificationId marked as read successfully',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
       } else {
         setFailureResponse(key, result,
             statusCode: statusCode ?? 500, responseCode: 'INVALID_RESPONSE');
@@ -184,8 +184,8 @@ class GluttexImplNotification extends NotificationService {
       return notification;
     } catch (e, stacktrace) {
       developer.log('Error marking notification $notificationId as read: $e',
-          name: 'GluttexImplNotification');
-      developer.log('Stacktrace: $stacktrace', name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_MARKING_READ');
       return null;
@@ -208,7 +208,7 @@ class GluttexImplNotification extends NotificationService {
           '${AppConstants.apiBaseUrl}${AppConstants.readAllNotificationsEndpoint}';
       developer.log(
           'Marking all notifications as read for user $userId at: $url',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final result = await storageService.update(
         url,
@@ -222,12 +222,12 @@ class GluttexImplNotification extends NotificationService {
       final responseCode = storageService.getResponseCode(key);
 
       developer.log('Mark all as read result for user $userId: $result',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       if (result == null) {
         developer.log(
             'Failed to mark all notifications as read for user $userId: null response',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
         setFailureResponse(key, null,
             statusCode: statusCode ?? 500,
             responseCode: 'MARK_ALL_READ_FAILED');
@@ -247,14 +247,14 @@ class GluttexImplNotification extends NotificationService {
           responseCode: responseCode ?? 'SUCCESS');
       developer.log(
           'Marked $markedCount notifications as read for user $userId',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       return markedCount;
     } catch (e, stacktrace) {
       developer.log(
           'Error marking all notifications as read for user $userId: $e',
-          name: 'GluttexImplNotification');
-      developer.log('Stacktrace: $stacktrace', name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_MARKING_ALL_READ');
       return 0;
@@ -276,7 +276,7 @@ class GluttexImplNotification extends NotificationService {
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.deleteNotificationEndpoint}/$notificationId';
       developer.log('Deleting notification $notificationId at: $url',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final result = await storageService.delete(
         url,
@@ -288,7 +288,7 @@ class GluttexImplNotification extends NotificationService {
       final responseCode = storageService.getResponseCode(key);
 
       developer.log('Delete notification result for $notificationId: $result',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final isSuccess = result == 200 || result == 204;
 
@@ -296,19 +296,19 @@ class GluttexImplNotification extends NotificationService {
         setSuccessResponse(key, true,
             statusCode: result, responseCode: 'SUCCESS');
         developer.log('Notification $notificationId deleted successfully',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
       } else {
         setFailureResponse(key, false,
             statusCode: result, responseCode: 'DELETE_FAILED');
         developer.log('Failed to delete notification $notificationId',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
       }
 
       return isSuccess;
     } catch (e, stacktrace) {
       developer.log('Error deleting notification $notificationId: $e',
-          name: 'GluttexImplNotification');
-      developer.log('Stacktrace: $stacktrace', name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_DELETING_NOTIFICATION');
       return false;
@@ -330,7 +330,7 @@ class GluttexImplNotification extends NotificationService {
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.deleteAllNotificationsEndpoint}/$userId/all';
       developer.log('Deleting all notifications for user $userId at: $url',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final result = await storageService.delete(
         url,
@@ -342,7 +342,7 @@ class GluttexImplNotification extends NotificationService {
       final responseCode = storageService.getResponseCode(key);
 
       developer.log('Delete all notifications result for user $userId: $result',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       int deletedCount = 0;
 
@@ -356,20 +356,20 @@ class GluttexImplNotification extends NotificationService {
         setSuccessResponse(key, deletedCount,
             statusCode: statusCode ?? 200, responseCode: 'SUCCESS');
         developer.log('Deleted $deletedCount notifications for user $userId',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
       } else {
         setFailureResponse(key, deletedCount,
             statusCode: statusCode ?? 404,
             responseCode: 'NO_NOTIFICATIONS_TO_DELETE');
         developer.log('No notifications to delete for user $userId',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
       }
 
       return deletedCount;
     } catch (e, stacktrace) {
       developer.log('Error deleting all notifications for user $userId: $e',
-          name: 'GluttexImplNotification');
-      developer.log('Stacktrace: $stacktrace', name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_DELETING_ALL_NOTIFICATIONS');
       return 0;
@@ -391,7 +391,7 @@ class GluttexImplNotification extends NotificationService {
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.unreadCountEndpoint}/$userId/unread-count';
       developer.log('Getting unread count for user $userId at: $url',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final responseData = await storageService.getAll(url, callerKey: key);
 
@@ -400,7 +400,7 @@ class GluttexImplNotification extends NotificationService {
 
       if (responseData == null) {
         developer.log('No response for unread count for user $userId',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
         setFailureResponse(key, null,
             statusCode: statusCode ?? 404, responseCode: 'NO_COUNT');
         return 0;
@@ -416,7 +416,7 @@ class GluttexImplNotification extends NotificationService {
       }
 
       developer.log('User $userId has $unreadCount unread notifications',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
       setSuccessResponse(key, unreadCount,
           statusCode: statusCode ?? 200,
           responseCode: responseCode ?? 'SUCCESS');
@@ -424,8 +424,8 @@ class GluttexImplNotification extends NotificationService {
       return unreadCount;
     } catch (e, stacktrace) {
       developer.log('Error getting unread count for user $userId: $e',
-          name: 'GluttexImplNotification');
-      developer.log('Stacktrace: $stacktrace', name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_GETTING_UNREAD_COUNT');
       return 0;
@@ -456,7 +456,7 @@ class GluttexImplNotification extends NotificationService {
       };
 
       developer.log('Sending invitation to user $userId with role $roleName',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final result = await storageService.insert(
         url,
@@ -469,7 +469,7 @@ class GluttexImplNotification extends NotificationService {
 
       if (result == null) {
         developer.log('Failed to send invitation to user $userId',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
         setFailureResponse(key, null,
             statusCode: statusCode ?? 500,
             responseCode: 'SEND_INVITATION_FAILED');
@@ -487,14 +487,14 @@ class GluttexImplNotification extends NotificationService {
             statusCode: statusCode ?? 200,
             responseCode: responseCode ?? 'SUCCESS');
         developer.log('Invitation sent to user $userId successfully',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
       }
 
       return notification;
     } catch (e, stacktrace) {
       developer.log('Error sending invitation to user $userId: $e',
-          name: 'GluttexImplNotification');
-      developer.log('Stacktrace: $stacktrace', name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_SENDING_INVITATION');
       return null;
@@ -520,7 +520,7 @@ class GluttexImplNotification extends NotificationService {
       final body = {'notifications': notificationsData};
 
       developer.log('Bulk creating ${notificationsData.length} notifications',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       final result = await storageService.insert(
         url,
@@ -533,7 +533,7 @@ class GluttexImplNotification extends NotificationService {
 
       if (result == null) {
         developer.log('Failed to bulk create notifications',
-            name: 'GluttexImplNotification');
+            name: 'NotificationImpl');
         setFailureResponse(key, null,
             statusCode: statusCode ?? 500, responseCode: 'BULK_CREATE_FAILED');
         return [];
@@ -559,13 +559,13 @@ class GluttexImplNotification extends NotificationService {
           responseCode: responseCode ?? 'SUCCESS');
       developer.log(
           'Successfully created ${notifications.length} notifications',
-          name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
 
       return notifications;
     } catch (e, stacktrace) {
       developer.log('Error bulk creating notifications: $e',
-          name: 'GluttexImplNotification');
-      developer.log('Stacktrace: $stacktrace', name: 'GluttexImplNotification');
+          name: 'NotificationImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'NotificationImpl');
       setFailureResponse(key, e.toString(),
           statusCode: 500, responseCode: 'ERROR_BULK_CREATING_NOTIFICATIONS');
       return [];

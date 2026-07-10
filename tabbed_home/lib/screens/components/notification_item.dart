@@ -504,7 +504,7 @@ class NotificationItem extends StatelessWidget {
     }
 
     // For other actions, use the NotificationActionHandler
-    NotificationActionHandler.handle(context, action);
+    // NotificationActionHandler.handle(context, action);
 
     // Mark as read after action
     if (!notification.isRead) {
