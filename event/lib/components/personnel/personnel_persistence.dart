@@ -92,5 +92,20 @@ class PersonnelPersistence {
     }
   }
 
+  Future<void> updateSuppliers(int userId, List<int> supplierIds) async {
+    _accessibleSuppliers[userId] = List.from(supplierIds);
+    await save();
+    // _logInfo('Updated suppliers for user $userId: $supplierIds');
+  }
+
+  /// Clear all persisted data
+  Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_KEY);
+    _accessibleSuppliers.clear();
+    _currentUserId = null;
+    // _logInfo('Cleared all persisted accessible suppliers');
+  }
+
   Map<int, List<int>> get all => Map.unmodifiable(_accessibleSuppliers);
 }

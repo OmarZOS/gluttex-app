@@ -60,14 +60,14 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     final userRules = widget.personnelNotifier.getRulesForUser(widget.userId);
 
     for (final rule in userRules) {
-      if (!rule.isActiveStatus) continue;
+      if (!rule.isActive) continue;
 
-      final ruleCode = rule.management_rule_code ?? 0;
+      final ruleCode = rule.managementRuleCode ?? 0;
       final hasPrivilege = _checkPrivilege(ruleCode, 'orders_manage') ||
           _checkPrivilege(ruleCode, 'orders_view');
 
       if (hasPrivilege) {
-        final supplierId = rule.productProvider?.id_product_provider;
+        final supplierId = rule.productProvider?.idProductProvider;
         if (supplierId != null) {
           setState(() => _selectedSupplierId = supplierId);
           _loadSupplierProducts(supplierId);
@@ -123,17 +123,17 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     final supplierIds = <int>{};
 
     for (final rule in userRules) {
-      if (!rule.isActiveStatus) continue;
+      if (!rule.isActive) continue;
 
-      final ruleCode = rule.management_rule_code ?? 0;
+      final ruleCode = rule.managementRuleCode ?? 0;
       final hasPrivilege = _checkPrivilege(ruleCode, 'orders_manage') ||
           _checkPrivilege(ruleCode, 'orders_view');
 
       if (hasPrivilege) {
         final supplier = rule.productProvider;
         if (supplier != null &&
-            !supplierIds.contains(supplier.id_product_provider)) {
-          supplierIds.add(supplier.id_product_provider);
+            !supplierIds.contains(supplier.idProductProvider)) {
+          supplierIds.add(supplier.idProductProvider);
           suppliers.add(supplier);
         }
       }

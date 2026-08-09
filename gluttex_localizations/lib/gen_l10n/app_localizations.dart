@@ -112,7 +112,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorOccurred.
   ///
   /// In en, this message translates to:
-  /// **'An error occurred. Please try again later.'**
+  /// **'Error'**
   String get errorOccurred;
 
   /// No description provided for @noProductsFound.
@@ -4672,7 +4672,7 @@ abstract class AppLocalizations {
   /// No description provided for @contactAdminOrJoinTeam.
   ///
   /// In en, this message translates to:
-  /// **'Contact your administrator or join a business team.'**
+  /// **'Contact your administrator or join a business team to get access.'**
   String get contactAdminOrJoinTeam;
 
   /// No description provided for @checkAccessStatus.
@@ -4696,7 +4696,7 @@ abstract class AppLocalizations {
   /// No description provided for @noPendingInvitations.
   ///
   /// In en, this message translates to:
-  /// **'No pending invitations'**
+  /// **'No Pending Invitations'**
   String get noPendingInvitations;
 
   /// No description provided for @unknownBusiness.
@@ -4732,7 +4732,7 @@ abstract class AppLocalizations {
   /// No description provided for @invitationDeclined.
   ///
   /// In en, this message translates to:
-  /// **'Invitation declined.'**
+  /// **'Invitation declined'**
   String get invitationDeclined;
 
   /// No description provided for @noRoleAssigned.
@@ -4966,7 +4966,7 @@ abstract class AppLocalizations {
   /// No description provided for @accessRefreshed.
   ///
   /// In en, this message translates to:
-  /// **'Refreshed access'**
+  /// **'Access privileges refreshed'**
   String get accessRefreshed;
 
   /// No description provided for @manageSuppliers.
@@ -11176,8 +11176,176 @@ abstract class AppLocalizations {
   /// No description provided for @returnBack.
   ///
   /// In en, this message translates to:
-  /// **'Return to previous screen'**
+  /// **'Return'**
   String get returnBack;
+
+  /// No description provided for @youHaveNoPendingInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any pending invitations at the moment.'**
+  String get youHaveNoPendingInvitations;
+
+  /// No description provided for @contactAdminForAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact your administrator to request access.'**
+  String get contactAdminForAccess;
+
+  /// No description provided for @invitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations'**
+  String get invitations;
+
+  /// No description provided for @activeAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Assignments'**
+  String get activeAssignments;
+
+  /// No description provided for @noActiveAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'No Active Assignments'**
+  String get noActiveAssignments;
+
+  /// No description provided for @noActiveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any active assignments.'**
+  String get noActiveDescription;
+
+  /// No description provided for @noInvitationsOrAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'No Invitations or Assignments'**
+  String get noInvitationsOrAssignments;
+
+  /// No description provided for @noInvitationsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any pending invitations or active assignments.'**
+  String get noInvitationsDescription;
+
+  /// No description provided for @noPendingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any pending invitations.'**
+  String get noPendingDescription;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @loadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loadingData;
+
+  /// No description provided for @loadingInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading invitations...'**
+  String get loadingInvitations;
+
+  /// No description provided for @pendingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pendingStatus;
+
+  /// No description provided for @activeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeStatus;
+
+  /// No description provided for @rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rejected;
+
+  /// No description provided for @expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get expired;
+
+  /// No description provided for @roleCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Role Code'**
+  String get roleCode;
+
+  /// No description provided for @expiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry'**
+  String get expiry;
+
+  /// No description provided for @noExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'No expiry'**
+  String get noExpiry;
+
+  /// No description provided for @expiredDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get expiredDate;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @inDays.
+  ///
+  /// In en, this message translates to:
+  /// **'In {days} days'**
+  String inDays(Object days);
+
+  /// No description provided for @actionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed'**
+  String get actionFailed;
+
+  /// No description provided for @noInvitationsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No invitations found'**
+  String get noInvitationsFound;
+
+  /// No description provided for @userNotAuthenticated.
+  ///
+  /// In en, this message translates to:
+  /// **'User not authenticated'**
+  String get userNotAuthenticated;
+
+  /// No description provided for @failedToLoadInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load invitations'**
+  String get failedToLoadInvitations;
+
+  /// No description provided for @markAllAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark All as Read'**
+  String get markAllAsRead;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get viewAll;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

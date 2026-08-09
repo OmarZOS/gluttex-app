@@ -158,14 +158,14 @@ class Supplier {
       // Safely parse image
       final providerImages = json['provider_image'];
       if (providerImages != null && providerImages is List) {
-        for (final image in providerImages.reversed) {
+        for (final image in providerImages) {
           if (image is Map<String, dynamic>) {
             final id = image["id_provider_image"];
             final url = image["provider_image_url"];
             if (id != null && url != null && url is String) {
               imageId = id is int ? id : int.tryParse(id.toString());
               imageUrl = url;
-              break; // Use the last valid image
+              break; // Use the first image
             }
           }
         }
@@ -182,7 +182,17 @@ class Supplier {
             (orgData["provider_organisation_desc"] ?? "").toString();
       }
 
-      // Safely parse address
+      // Safely parse details
+      final detailsData = json['product_provider_details'];
+      String providerName = "";
+      String providerContactInfo = "";
+      if (detailsData != null && detailsData is Map<String, dynamic>) {
+        providerName = (detailsData["provider_name"] ?? "").toString();
+        providerContactInfo =
+            (detailsData["provider_contact_info"] ?? "").toString();
+      }
+
+      // Safely parse address from location
       int locationAddressId = 0;
       String addressStreet = "";
       String addressCity = "";
@@ -208,17 +218,15 @@ class Supplier {
               : "";
 
       return Supplier(
-        idProviderDetails: _parseInt(json['idprovider_details_id']),
+        idProviderDetails: _parseInt(json['product_provider_details_id']),
         idProductProvider: _parseInt(json['id_product_provider']),
         idProviderOrganisation: _parseInt(json['product_provider_org_id']),
         providerOrganisationName: organisationName,
         providerOrganisationDesc: organisationDesc,
         productProviderDetailsId:
             _parseInt(json['product_provider_details_id']),
-        providerName:
-            _getString(json['product_provider_details']?['provider_name']),
-        providerContactInfo: _getString(
-            json['product_provider_details']?['provider_contact_info']),
+        providerName: providerName,
+        providerContactInfo: providerContactInfo,
         productProviderOwnerId: _parseInt(json['product_provider_owner']),
         locationLatitude: latitude,
         locationLongitude: longitude,
@@ -238,7 +246,6 @@ class Supplier {
       return Supplier.empty();
     }
   }
-
   factory Supplier.fromSearchJson(Map<String, dynamic> json) {
     try {
       Map<String, dynamic> provider = {};

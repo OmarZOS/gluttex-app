@@ -91,14 +91,14 @@ class PendingTabContent extends StatelessWidget {
               return SupplierUserCard(
                 user: user,
                 supplierId: supplierId,
-                ruleCode: pendingRule?.management_rule_code ?? 0,
+                ruleCode: pendingRule?.managementRuleCode ?? 0,
                 isPending: true,
                 onManagePrivileges: () => onShowPrivilegeDialog(user, true),
                 onRemove: () =>
-                    onShowRemoveDialog(pendingRule?.id_management_rule, user),
+                    onShowRemoveDialog(pendingRule?.idManagementRule, user),
                 // onResendInvite: () => onResendInvitation(user),
                 onCancelInvite: () =>
-                    onCancelInvitation(user, pendingRule?.id_management_rule),
+                    onCancelInvitation(user, pendingRule?.idManagementRule),
               );
             },
           ),

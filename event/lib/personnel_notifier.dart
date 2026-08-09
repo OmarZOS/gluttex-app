@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:event/TraceableNotifier.dart';
 import 'package:event/components/personnel/personnel_cache.dart';
 import 'package:event/components/personnel/personnel_crud.dart';
@@ -34,6 +35,7 @@ class PersonnelNotifier extends TraceableNotifier {
         _storageService = storageService ?? AppLocator.get<StorageService>() {
     _initComponents();
     _loadPersistedData();
+    _logInfo('PersonnelNotifier initialized');
   }
 
   void _initComponents() {
@@ -62,18 +64,44 @@ class PersonnelNotifier extends TraceableNotifier {
 
   Future<void> _loadPersistedData() async {
     await _persistence.load();
+    _logInfo('Persisted data loaded');
   }
 
   @override
   void dispose() {
     _search.dispose();
     super.dispose();
+    _logInfo('PersonnelNotifier disposed');
   }
 
   void _notify() {
     if (!_state.isLoading) {
       notifyListeners();
     }
+  }
+
+  // ============ LOGGING HELPERS ============
+
+  void _logInfo(String message) {
+    log(message, name: 'PersonnelNotifier', level: 0);
+  }
+
+  void _logWarning(String message) {
+    log(message, name: 'PersonnelNotifier', level: 1);
+  }
+
+  void _logError(String message, {Object? error, StackTrace? stackTrace}) {
+    log(
+      message,
+      name: 'PersonnelNotifier',
+      error: error,
+      stackTrace: stackTrace,
+      level: 1000,
+    );
+  }
+
+  void _logDebug(String message) {
+    log(message, name: 'PersonnelNotifier', level: 0);
   }
 
   // ============ PUBLIC GETTERS ============
@@ -97,11 +125,65 @@ class PersonnelNotifier extends TraceableNotifier {
 
   // ============ USER CONTEXT ============
 
+  Future<void> updatePersistedAccessibleSuppliers(
+    int userId,
+    List<int> supplierIds,
+  ) async {
+    _logInfo(
+        'Updating persisted accessible suppliers for user $userId: $supplierIds');
+
+    // Update persistence
+    await _persistence.updateSuppliers(userId, supplierIds);
+
+    _logInfo('Persisted accessible suppliers updated for user $userId');
+  }
+
+  /// Add a supplier to persisted accessible suppliers for a user
+  Future<void> addPersistedAccessibleSupplier(
+    int userId,
+    int supplierId,
+  ) async {
+    _logInfo(
+        'Adding persisted accessible supplier for user $userId: $supplierId');
+    await _persistence.addSupplier(userId, supplierId);
+  }
+
+  /// Remove a supplier from persisted accessible suppliers for a user
+  Future<void> removePersistedAccessibleSupplier(
+    int userId,
+    int supplierId,
+  ) async {
+    _logInfo(
+        'Removing persisted accessible supplier for user $userId: $supplierId');
+    await _persistence.removeSupplier(userId, supplierId);
+  }
+
+  /// Get accessible suppliers for a user from persistence
+  List<int> getPersistedAccessibleSuppliers(int userId) {
+    final suppliers = _persistence.getAccessibleSuppliers(userId);
+    _logDebug('Retrieved persisted suppliers for user $userId: $suppliers');
+    return suppliers;
+  }
+
+  /// Clear all persisted accessible suppliers
+  Future<void> clearPersistedAccessibleSuppliers() async {
+    _logInfo('Clearing all persisted accessible suppliers');
+    await _persistence.clearAll();
+    _notify();
+  }
+
+  /// Get all persisted accessible suppliers
+  Map<int, List<int>> getAllPersistedAccessibleSuppliers() {
+    return Map.unmodifiable(_persistence.all);
+  }
+
   void setCurrentUserId(int userId) {
+    _logInfo('Setting current user ID: $userId');
     _persistence.setCurrentUser(userId);
   }
 
   Future<void> clearPersistedData() async {
+    _logInfo('Clearing persisted data');
     await _persistence.clear();
     _cache.clearAll();
     _notify();
@@ -110,52 +192,82 @@ class PersonnelNotifier extends TraceableNotifier {
   // ============ ACCESSIBLE SUPPLIERS ============
 
   List<int> getAccessibleSupplierIds(int userId) {
-    final persisted = _persistence.getAccessibleSuppliers(userId);
-    if (persisted.isNotEmpty) return persisted;
+    _logDebug('Getting accessible supplier IDs for user: $userId');
 
+    // First, check if we have rules loaded
     final rules = _rules.getRulesForUser(userId);
-    final supplierIds = rules
-        .map((rule) => rule.productProvider?.id_product_provider)
-        .where((id) => id != null && id > 0)
-        .cast<int>()
-        .toSet()
-        .toList();
+    _logDebug('Found ${rules.length} rules for user $userId');
 
-    if (supplierIds.isNotEmpty) {
-      _persistence.addSupplier(userId, supplierIds.first);
-      for (int i = 1; i < supplierIds.length; i++) {
-        _persistence.addSupplier(userId, supplierIds[i]);
+    // If we have rules, extract supplier IDs from them
+    if (rules.isNotEmpty) {
+      final supplierIds = rules
+          .map((rule) => rule.productProvider?.idProductProvider)
+          .where((id) => id != null && id > 0)
+          .cast<int>()
+          .toSet()
+          .toList();
+
+      if (supplierIds.isNotEmpty) {
+        _logInfo(
+            'Extracted ${supplierIds.length} supplier IDs from rules: $supplierIds');
+        // Update persistence with these IDs
+        _persistence.addSupplier(userId, supplierIds.first);
+        for (int i = 1; i < supplierIds.length; i++) {
+          _persistence.addSupplier(userId, supplierIds[i]);
+        }
+        return supplierIds;
+      } else {
+        _logWarning('Rules exist but no supplier IDs found for user $userId');
       }
     }
 
-    return supplierIds;
-  }
+    // Fallback to persisted data
+    final persisted = _persistence.getAccessibleSuppliers(userId);
+    if (persisted.isNotEmpty) {
+      _logInfo(
+          'Returning ${persisted.length} persisted supplier IDs for user $userId: $persisted');
+      return persisted;
+    }
 
-  List<int> getPersistedAccessibleSuppliers(int userId) {
-    return _persistence.getAccessibleSuppliers(userId);
+    _logWarning('No accessible suppliers found for user $userId');
+    return [];
   }
 
   // ============ RULES & PRIVILEGES ============
 
   List<ManagementRule> getRulesForUser(int userId, {int supplierId = 0}) {
-    return _rules.getRulesForUser(userId, supplierId: supplierId);
+    final rules = _rules.getRulesForUser(userId, supplierId: supplierId);
+    _logDebug(
+        'Retrieved ${rules.length} rules for user $userId${supplierId > 0 ? ', supplier $supplierId' : ''}');
+    return rules;
   }
 
   List<ManagementRule> getPendingRulesForUser(int userId,
       {int supplierId = 0}) {
-    return _rules.getPendingRulesForUser(userId, supplierId: supplierId);
+    final rules = _rules.getPendingRulesForUser(userId, supplierId: supplierId);
+    _logDebug(
+        'Retrieved ${rules.length} pending rules for user $userId${supplierId > 0 ? ', supplier $supplierId' : ''}');
+    return rules;
   }
 
   bool hasPrivilege(int userId, int supplierId, String privilegeId) {
-    return _rules.hasPrivilege(userId, supplierId, privilegeId);
+    final result = _rules.hasPrivilege(userId, supplierId, privilegeId);
+    _logDebug(
+        'Privilege check for user $userId, supplier $supplierId, privilege $privilegeId: $result');
+    return result;
   }
 
   bool hasAnyAccessToSupplier(int userId, int supplierId) {
-    return _rules.hasAnyAccessToSupplier(userId, supplierId);
+    final result = _rules.hasAnyAccessToSupplier(userId, supplierId);
+    _logDebug('Access check for user $userId, supplier $supplierId: $result');
+    return result;
   }
 
   bool hasPendingRulesForSupplier(int userId, int supplierId) {
-    return _rules.hasPendingRulesForSupplier(userId, supplierId);
+    final result = _rules.hasPendingRulesForSupplier(userId, supplierId);
+    _logDebug(
+        'Pending rules check for user $userId, supplier $supplierId: $result');
+    return result;
   }
 
   ManagementRule? getRuleForUser({
@@ -163,18 +275,29 @@ class PersonnelNotifier extends TraceableNotifier {
     int ruleId = 0,
     int supplierId = 0,
   }) {
-    return _rules.getRuleForUser(
+    final rule = _rules.getRuleForUser(
       userId: userId,
       ruleId: ruleId,
       supplierId: supplierId,
     );
+    if (rule != null) {
+      _logDebug(
+          'Found rule for user $userId${ruleId > 0 ? ", rule $ruleId" : ""}: ${rule.idManagementRule}');
+    } else {
+      _logDebug(
+          'No rule found for user $userId${ruleId > 0 ? ", rule $ruleId" : ""}');
+    }
+    return rule;
   }
 
   Map<String, int> getSupplierStats(int supplierId) {
-    return _rules.getSupplierStats(supplierId);
+    final stats = _rules.getSupplierStats(supplierId);
+    _logDebug('Retrieved stats for supplier $supplierId: $stats');
+    return stats;
   }
 
   void syncRuleState(ManagementRule updatedRule) {
+    _logInfo('Syncing rule state for rule ${updatedRule.idManagementRule}');
     _rules.syncRuleState(updatedRule);
     _notify();
   }
@@ -198,22 +321,27 @@ class PersonnelNotifier extends TraceableNotifier {
       }
     }
 
+    _logDebug(
+        'Retrieved ${allUsers.length} personnel for supplier $supplierId${includePending ? ' (including pending)' : ''}');
     return allUsers;
   }
 
   List<AppUser> _getActiveUsersForSupplier(int supplierId) {
     if (supplierId == 0) {
-      return _cache.activeRules.keys
+      final users = _cache.activeRules.keys
           .map((userId) => _cache.getUser(userId))
           .whereType<AppUser>()
           .toList();
+      _logDebug('Retrieved ${users.length} active users across all suppliers');
+      return users;
     }
 
     final userIds = _cache.getActiveUserIdsForSupplier(supplierId);
-    return userIds
-        .map((id) => _cache.getUser(id))
-        .whereType<AppUser>()
-        .toList();
+    final users =
+        userIds.map((id) => _cache.getUser(id)).whereType<AppUser>().toList();
+    _logDebug(
+        'Retrieved ${users.length} active users for supplier $supplierId');
+    return users;
   }
 
   List<AppUser> _getPendingUsersForSupplier(int supplierId) {
@@ -224,7 +352,7 @@ class PersonnelNotifier extends TraceableNotifier {
       final rules = entry.value;
 
       final hasSupplierRule = rules.any((rule) {
-        final providerId = rule.productProvider?.id_product_provider;
+        final providerId = rule.productProvider?.idProductProvider;
         return providerId == supplierId || supplierId == 0;
       });
 
@@ -234,6 +362,8 @@ class PersonnelNotifier extends TraceableNotifier {
       }
     }
 
+    _logDebug(
+        'Retrieved ${pendingUsers.length} pending users for supplier $supplierId');
     return pendingUsers;
   }
 
@@ -248,19 +378,25 @@ class PersonnelNotifier extends TraceableNotifier {
     final key = callerKey ??
         _generateKey('getCustomerDisplayInfo', id: customerId.toString());
 
+    _logInfo('Getting customer info for ID: $customerId, type: $customerType');
+
     try {
       if (customerType == 'user') {
         final user = await _userService.getAppUser(customerId.toString());
         if (user != null) {
           _storeSuccess(key, user, responseCode: 'USER_FOUND');
+          _logInfo('Found user customer: ${user.appUserName}');
           return Customer.fromUser(user);
         }
+        _logWarning('User not found for ID: $customerId');
       } else if (customerType == 'person' && personId != null) {
         final person = await _userService.getPerson(personId.toString());
         if (person != null) {
           _storeSuccess(key, person, responseCode: 'PERSON_FOUND');
+          _logInfo('Found person customer: ${person.fullName}');
           return Customer.fromPerson(person);
         }
+        _logWarning('Person not found for ID: $personId');
       } else {
         final customer = Customer.fromJson({
           'name': 'Customer #$customerId',
@@ -268,15 +404,18 @@ class PersonnelNotifier extends TraceableNotifier {
           'email': '',
         });
         _storeSuccess(key, customer, responseCode: 'DEFAULT_CUSTOMER');
+        _logInfo('Created default customer for ID: $customerId');
         return customer;
       }
 
       _storeFailure(key, null,
           statusCode: 404, responseCode: 'CUSTOMER_NOT_FOUND');
+      _logWarning(
+          'Customer not found for ID: $customerId, type: $customerType');
       return null;
     } catch (e) {
       _storeFailure(key, e.toString(), responseCode: 'CUSTOMER_FETCH_ERROR');
-      debugPrint('Error fetching customer info: $e');
+      _logError('Error fetching customer info', error: e);
       return null;
     }
   }
@@ -291,6 +430,9 @@ class PersonnelNotifier extends TraceableNotifier {
     bool fromQR = false,
     String? callerKey,
   }) async {
+    _logInfo(
+        'Adding team member: user $userId, supplier $supplierId, org $orgId, privilege $privilege${fromQR ? ' (from QR)' : ''}');
+
     final result = await _crud.addTeamMember(
       userId,
       supplierId: supplierId,
@@ -299,6 +441,8 @@ class PersonnelNotifier extends TraceableNotifier {
       fromQR: fromQR,
       callerKey: callerKey,
     );
+
+    _logInfo('Team member added: $result');
     _notify();
     return result;
   }
@@ -311,6 +455,9 @@ class PersonnelNotifier extends TraceableNotifier {
     required int privilege,
     String? callerKey,
   }) async {
+    _logInfo(
+        'Updating team member privileges: rule $ruleId, user $userId, supplier $supplierId, privilege $privilege');
+
     final result = await _crud.updatePrivileges(
       ruleId: ruleId,
       userId: userId,
@@ -319,6 +466,8 @@ class PersonnelNotifier extends TraceableNotifier {
       privilege: privilege,
       callerKey: callerKey,
     );
+
+    _logInfo('Team member privileges updated: $result');
     _notify();
     return result;
   }
@@ -329,12 +478,16 @@ class PersonnelNotifier extends TraceableNotifier {
     int supplierId, {
     String? callerKey,
   }) async {
+    _logInfo('Removing user $userId from supplier $supplierId (rule $ruleId)');
+
     final result = await _crud.removeUserFromSupplier(
       ruleId,
       userId,
       supplierId,
       callerKey: callerKey,
     );
+
+    _logInfo('User removed from supplier: $result');
     _notify();
     return result;
   }
@@ -342,16 +495,22 @@ class PersonnelNotifier extends TraceableNotifier {
   // ============ SEARCH ============
 
   void clearSearch({int supplierId = 0}) {
+    _logDebug(
+        'Clearing search${supplierId > 0 ? ' for supplier $supplierId' : ''}');
     _search.clear(supplierId: supplierId);
     _notify();
   }
 
   Future<void> searchPersonnel(String query, {int supplierId = 0}) async {
+    _logDebug(
+        'Searching personnel for query: "$query"${supplierId > 0 ? ', supplier $supplierId' : ''}');
     await _search.search(query, supplierId: supplierId);
     _notify();
   }
 
   // ============ LOADING ============
+
+  // In personnel_notifier.dart, update loadPersonnel:
 
   Future<void> loadPersonnel({
     int userId = 0,
@@ -362,10 +521,17 @@ class PersonnelNotifier extends TraceableNotifier {
   }) async {
     final key = callerKey ?? _generateKey('loadPersonnel');
 
-    if (_state.isLoading && !reset) return;
+    _logInfo(
+        'Loading personnel - userId: $userId, reset: $reset, supplierId: $supplierId, includePending: $includePending');
+
+    if (_state.isLoading && !reset) {
+      _logWarning('Already loading personnel, skipping request');
+      return;
+    }
 
     if (reset) {
       _state.resetPagination();
+      _logDebug('Pagination reset');
     }
 
     _state.setLoading(true);
@@ -381,29 +547,32 @@ class PersonnelNotifier extends TraceableNotifier {
 
       if (rules == null || rules.isEmpty) {
         _state.hasMore = false;
+        _logInfo('No more rules to load');
       } else {
-        for (final rule in rules) {
-          final ruleUserId = rule.appUser?.idAppUser;
-          if (ruleUserId == null) continue;
-          _rules.syncRuleState(rule);
-        }
+        _logInfo('Loaded ${rules.length} rules');
+
+        // Use batch sync for better performance
+        _rules.syncRulesBatch(rules);
+
         _state.currentPage++;
       }
 
       _state.setError(null);
       _storeSuccess(key, _state.personnel, responseCode: 'PERSONNEL_LOADED');
-    } catch (e) {
+      _logInfo(
+          'Personnel loaded successfully, total: ${_state.personnel.length}');
+    } catch (e, stackTrace) {
       _state.setError('Failed to load personnel: ${e.toString()}');
       _storeFailure(key, e.toString(), responseCode: 'LOAD_PERSONNEL_ERROR');
+      _logError('Failed to load personnel', error: e, stackTrace: stackTrace);
     } finally {
       _state.setLoading(false);
       _notify();
     }
-  }
-
-  // ============ CACHE MANAGEMENT ============
+  } // ============ CACHE MANAGEMENT ============
 
   void clearAllCache() {
+    _logInfo('Clearing all cache');
     _cache.clearAll();
     _state.reset();
     _notify();
@@ -411,7 +580,7 @@ class PersonnelNotifier extends TraceableNotifier {
 
   void logCacheStats() {
     final stats = _cache.getStats();
-    debugPrint('''
+    _logInfo('''
     PersonnelNotifier Cache Stats:
     - Users: ${stats['users']}
     - Privileges: ${stats['privileges']}
@@ -437,6 +606,7 @@ class PersonnelNotifier extends TraceableNotifier {
       {int? statusCode, String? responseCode}) {
     _storageService.setSuccessResponse(key, data,
         statusCode: statusCode ?? 200, responseCode: responseCode);
+    _logDebug('Stored success response for key: $key');
   }
 
   void _storeFailure(String key, data,
@@ -446,36 +616,43 @@ class PersonnelNotifier extends TraceableNotifier {
         statusCode: statusCode ?? 500,
         errorCode: responseCode,
         message: data.toString());
+    _logDebug('Stored failure response for key: $key');
   }
 
   // ============ RESET ============
 
   void reset() {
+    _logInfo('Resetting PersonnelNotifier');
     _state.reset();
     _cache.clearAll();
     _notify();
   }
+
   // ============ INVITATION MANAGEMENT ============
 
   Future<bool> answerInvitation({
     required int ruleId,
     required int answer,
     String? callerKey,
+    String? token,
   }) async {
     final key =
         callerKey ?? _generateKey('answerInvitation', id: ruleId.toString());
 
+    _logInfo(
+        'Answering invitation - ruleId: $ruleId, answer: ${answer == 0 ? 'ACCEPT' : 'REJECT'}');
+
     try {
-      // Delegate to crud
       final result = await _crud.answerInvitation(
-        ruleId: ruleId,
-        answer: answer,
-        callerKey: key,
-      );
+          ruleId: ruleId, answer: answer, callerKey: key, token: token);
+
+      _logInfo('Invitation answered successfully: $result');
       _notify();
       return result;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _storeFailure(key, e.toString(), responseCode: 'ANSWER_INVITATION_ERROR');
+      _logError('Failed to answer invitation',
+          error: e, stackTrace: stackTrace);
       return false;
     }
   }

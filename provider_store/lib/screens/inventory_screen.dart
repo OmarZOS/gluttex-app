@@ -87,8 +87,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   bool _checkInventoryAccess() {
     return widget.userRules.any((rule) {
-      if (!rule.isActiveStatus) return false;
-      final ruleCode = rule.management_rule_code ?? 0;
+      if (!rule.isActive) return false;
+      final ruleCode = rule.managementRuleCode ?? 0;
       return RoleBitMapper.hasPrivilege(ruleCode, 'inventory_view') ||
           RoleBitMapper.hasPrivilege(ruleCode, 'inventory_manage');
     });
@@ -102,15 +102,15 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     // If not, fall back to finding first accessible supplier
     for (final rule in widget.userRules) {
-      if (!rule.isActiveStatus) continue;
+      if (!rule.isActive) continue;
 
-      final ruleCode = rule.management_rule_code ?? 0;
+      final ruleCode = rule.managementRuleCode ?? 0;
       final hasRequiredPrivilege = widget._canManage
           ? RoleBitMapper.hasPrivilege(ruleCode, 'inventory_manage')
           : RoleBitMapper.hasPrivilege(ruleCode, 'inventory_view');
 
       if (hasRequiredPrivilege) {
-        return rule.productProvider?.id_product_provider;
+        return rule.productProvider?.idProductProvider;
       }
     }
     return null;
@@ -131,9 +131,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
     final supplierIds = <int>{};
 
     for (final rule in widget.userRules) {
-      if (!rule.isActiveStatus) continue;
+      if (!rule.isActive) continue;
 
-      final ruleCode = rule.management_rule_code ?? 0;
+      final ruleCode = rule.managementRuleCode ?? 0;
       final hasRequiredPrivilege = widget._canManage
           ? RoleBitMapper.hasPrivilege(ruleCode, 'inventory_manage')
           : RoleBitMapper.hasPrivilege(ruleCode, 'inventory_view');
@@ -141,8 +141,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
       if (hasRequiredPrivilege) {
         final supplier = rule.productProvider;
         if (supplier != null &&
-            !supplierIds.contains(supplier.id_product_provider)) {
-          supplierIds.add(supplier.id_product_provider);
+            !supplierIds.contains(supplier.idProductProvider)) {
+          supplierIds.add(supplier.idProductProvider);
           accessibleSuppliers.add(supplier);
         }
       }

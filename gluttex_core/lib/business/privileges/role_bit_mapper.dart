@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class PrivilegeItem {
   final String id;
   final String category;
@@ -153,6 +155,8 @@ class RoleBitMapper {
   /// Check if a specific privilege is active in the bitmask
   static bool hasPrivilege(int bitmask, String privilegeId) {
     final privilege = PrivilegeManager.getPrivilege(privilegeId);
+
+    log("Checking for ${privilegeId}");
     if (privilege == null) return false;
 
     return _isBitSet(bitmask, privilege.bitPosition);

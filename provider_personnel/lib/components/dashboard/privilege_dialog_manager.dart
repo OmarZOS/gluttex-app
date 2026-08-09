@@ -33,7 +33,7 @@ class PrivilegeDialogManager {
       );
 
       if (rule != null) {
-        existingPrivileges = rule.management_rule_code;
+        existingPrivileges = rule.managementRuleCode;
       }
     }
 
@@ -92,7 +92,7 @@ class PrivilegeDialogManager {
       }
 
       final success = await personnelNotifier.updateTeamMemberPrivileges(
-        ruleId: rule.id_management_rule ?? 0,
+        ruleId: rule.idManagementRule ?? 0,
         userId: user.idAppUser ?? 0,
         supplierId: supplierId,
         orgId: orgId,

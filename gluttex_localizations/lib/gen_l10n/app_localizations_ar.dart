@@ -15,7 +15,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appName => 'غلوتيكس';
 
   @override
-  String get errorOccurred => 'حدث خطأ. يرجى المحاولة لاحقًا.';
+  String get errorOccurred => 'خطأ';
 
   @override
   String get noProductsFound => 'لا توجد منتجات لعرضها.';
@@ -2376,13 +2376,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseLoginToAccessDashboard => 'يرجى تسجيل الدخول للوصول إلى لوحة التحكم.';
 
   @override
-  String get needBusinessAssignment => 'تحتاج إلى تعيينك إلى عمل للوصول إلى ميزات الإدارة.';
+  String get needBusinessAssignment => 'يجب أن تكون مرتبطًا بشركة للوصول إلى ميزات الإدارة.';
 
   @override
-  String get contactAdminOrJoinTeam => 'اتصل بمسؤولك أو انضم إلى فريق عمل.';
+  String get contactAdminOrJoinTeam => 'اتصل بالمسؤول أو انضم إلى فريق الشركة للحصول على الوصول.';
 
   @override
-  String get checkAccessStatus => 'فحص حالة الوصول';
+  String get checkAccessStatus => 'التحقق من حالة الوصول';
 
   @override
   String get viewPendingInvitations => 'عرض الدعوات المعلقة';
@@ -2409,7 +2409,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invitationAccepted => 'تم قبول الدعوة!';
 
   @override
-  String get invitationDeclined => 'تم رفض الدعوة.';
+  String get invitationDeclined => 'تم رفض الدعوة';
 
   @override
   String get noRoleAssigned => 'لم يتم تعيين دور';
@@ -2472,7 +2472,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paid => 'مدفوع';
 
   @override
-  String get pending => 'قيد الانتظار';
+  String get pending => 'معلقة';
 
   @override
   String get cancelled => 'ملغي';
@@ -2526,7 +2526,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get currencySymbol => 'د.ج';
 
   @override
-  String get accessRefreshed => 'تم تديد الصلاحيات';
+  String get accessRefreshed => 'تم تحديث صلاحيات الوصول';
 
   @override
   String get manageSuppliers => 'إدارة الموردين';
@@ -5694,5 +5694,91 @@ class AppLocalizationsAr extends AppLocalizations {
   String get amountMustBeGreaterThanZero => 'الكمية يجب أن تكون أكبر من الصفر';
 
   @override
-  String get returnBack => 'رجوع للصفحة السابقة';
+  String get returnBack => 'رجوع';
+
+  @override
+  String get youHaveNoPendingInvitations => 'ليس لديك أي دعوات معلقة في الوقت الحالي.';
+
+  @override
+  String get contactAdminForAccess => 'اتصل بالمسؤول لطلب الوصول.';
+
+  @override
+  String get invitations => 'الدعوات';
+
+  @override
+  String get activeAssignments => 'التعيينات النشطة';
+
+  @override
+  String get noActiveAssignments => 'لا توجد تعيينات نشطة';
+
+  @override
+  String get noActiveDescription => 'ليس لديك أي تعيينات نشطة.';
+
+  @override
+  String get noInvitationsOrAssignments => 'لا توجد دعوات أو تعيينات';
+
+  @override
+  String get noInvitationsDescription => 'ليس لديك أي دعوات معلقة أو تعيينات نشطة.';
+
+  @override
+  String get noPendingDescription => 'ليس لديك أي دعوات معلقة.';
+
+  @override
+  String get refresh => 'تحديث';
+
+  @override
+  String get loadingData => 'جاري تحميل البيانات...';
+
+  @override
+  String get loadingInvitations => 'جاري تحميل الدعوات...';
+
+  @override
+  String get pendingStatus => 'معلقة';
+
+  @override
+  String get activeStatus => 'نشط';
+
+  @override
+  String get rejected => 'مرفوض';
+
+  @override
+  String get expired => 'منتهي الصلاحية';
+
+  @override
+  String get roleCode => 'رمز الدور';
+
+  @override
+  String get expiry => 'تاريخ الانتهاء';
+
+  @override
+  String get noExpiry => 'لا يوجد تاريخ انتهاء';
+
+  @override
+  String get expiredDate => 'منتهي الصلاحية';
+
+  @override
+  String get tomorrow => 'غداً';
+
+  @override
+  String inDays(Object days) {
+    return 'خلال $days أيام';
+  }
+
+  @override
+  String get actionFailed => 'فشل الإجراء';
+
+  @override
+  String get noInvitationsFound => 'لم يتم العثور على دعوات';
+
+  @override
+  String get userNotAuthenticated => 'المستخدم غير موثق';
+
+  @override
+  String get failedToLoadInvitations => 'فشل تحميل الدعوات';
+
+  @override
+  String get markAllAsRead => 'تحديد الكل كمقروء';
+
+  @override
+  String get viewAll => 'عرض الكل';
 }

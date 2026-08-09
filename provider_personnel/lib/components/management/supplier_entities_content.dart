@@ -1,358 +1,157 @@
+// supplier_entities_content.dart
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:event/user_change_notifier.dart';
+import 'package:provider_personnel/components/management/supplier_empty_state.dart';
+import 'package:provider_personnel/components/management/supplier_loading_shimmer.dart';
+import 'package:provider/provider.dart';
 import 'package:provider_personnel/components/supplier_card.dart';
 import 'package:ui/components/supplier/supplier_screen.dart';
-import 'package:provider/provider.dart';
-import 'supplier_entities_controller.dart';
 
-class SupplierEntitiesContent extends StatefulWidget {
-  final SupplierEntitiesController controller;
-  final SupplierEntitiesState state;
+class SupplierEntitiesContent extends StatelessWidget {
+  final String searchQuery;
+  final int? selectedCategoryId;
+  final bool showAllSuppliers;
 
   const SupplierEntitiesContent({
-    super.key,
-    required this.controller,
-    required this.state,
-  });
-
-  @override
-  State<SupplierEntitiesContent> createState() =>
-      _SupplierEntitiesContentState();
-}
-
-class _SupplierEntitiesContentState extends State<SupplierEntitiesContent>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  int _initialTabIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _determineInitialTab();
-  }
-
-  void _determineInitialTab() {
-    final supplierNotifier = context.read<SupplierChangeNotifier>();
-    final personnelNotifier = context.read<PersonnelNotifier>();
-    final userNotifier = context.read<AppUserNotifier>();
-    final userId = userNotifier.appUser?.idAppUser;
-
-    if (userId == null) return;
-
-    final ownedSuppliers = widget.controller.filterOwnedSuppliers(
-      supplierNotifier.suppliers
-          .where((s) => s.productProviderOwnerId == userId)
-          .toList(),
-      widget.state.searchQuery,
-      widget.state.selectedCategoryId,
-    );
-
-    final managedRules = widget.controller.filterManagedRules(
-      personnelNotifier
-          .getRulesForUser(userId)
-          .where((r) => r.isActiveStatus)
-          .toList(),
-      widget.state.searchQuery,
-      widget.state.selectedCategoryId,
-    );
-
-    // Select first non-empty tab, default to owned (0)
-    final newIndex = ownedSuppliers.isNotEmpty
-        ? 0
-        : managedRules.isNotEmpty
-            ? 1
-            : 0;
-
-    if (newIndex != _initialTabIndex) {
-      _initialTabIndex = newIndex;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_tabController.index != _initialTabIndex) {
-          _tabController.animateTo(_initialTabIndex);
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+    Key? key,
+    this.searchQuery = '',
+    this.selectedCategoryId,
+    this.showAllSuppliers = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    return Consumer2<PersonnelNotifier, SupplierChangeNotifier>(
+      builder: (context, personnelNotifier, supplierNotifier, child) {
+        final userId = context.read<AppUserNotifier>().appUser?.idAppUser ?? 0;
 
-    return Consumer3<SupplierChangeNotifier, PersonnelNotifier,
-        AppUserNotifier>(
-      builder: (context, supplierNotifier, personnelNotifier, userNotifier, _) {
-        final userId = userNotifier.appUser?.idAppUser;
-        if (userId == null) return const SliverFillRemaining(child: SizedBox());
-
-        final ownedSuppliers = widget.controller.filterOwnedSuppliers(
-          supplierNotifier.suppliers
-              .where((s) => s.productProviderOwnerId == userId)
-              .toList(),
-          widget.state.searchQuery,
-          widget.state.selectedCategoryId,
-        );
-
-        final managedRules = widget.controller.filterManagedRules(
-          personnelNotifier
-              .getRulesForUser(userId)
-              .where((r) => r.isActiveStatus)
-              .toList(),
-          widget.state.searchQuery,
-          widget.state.selectedCategoryId,
-        );
-
-        if (ownedSuppliers.isEmpty && managedRules.isEmpty) {
-          return _buildEmptyState(context, localizations);
+        if (userId == 0) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
 
-        return SliverFillRemaining(
-          child: Column(
-            children: [
-              _buildTabBar(
-                  context, ownedSuppliers, managedRules, localizations),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildTabContent(
-                      context,
-                      ownedSuppliers,
-                      isOwned: true,
-                      localizations: localizations,
-                    ),
-                    _buildTabContent(
-                      context,
-                      managedRules,
-                      isOwned: false,
-                      localizations: localizations,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        // Get all management rules for this user
+        final allRules = personnelNotifier.getRulesForUser(userId);
+
+        // Get owned suppliers
+        final ownedSuppliers = supplierNotifier.suppliers
+            .where((s) => s.productProviderOwnerId == userId)
+            .toList();
+
+        if (personnelNotifier.isLoading && allRules.isEmpty) {
+          return const SliverToBoxAdapter(child: SupplierLoadingShimmer());
+        }
+
+        // Filter rules based on status
+        List<ManagementRule> filteredRules = allRules;
+
+        if (!showAllSuppliers) {
+          // Show only active rules if not showing all
+          filteredRules = filteredRules
+              .where((rule) => rule.isActive && !rule.isPending)
+              .toList();
+        }
+
+        // Apply search and category filters
+        final displayRules = filteredRules.where((rule) {
+          final productProvider = rule.productProvider;
+          if (productProvider == null) return false;
+
+          final providerName =
+              productProvider.productProviderDetails.providerName ?? '';
+          final organisationName =
+              rule.providerOrganisation?.providerOrganisationName ?? '';
+
+          final query = searchQuery.toLowerCase().trim();
+          final matchesSearch = query.isEmpty ||
+              providerName.toLowerCase().contains(query) ||
+              organisationName.toLowerCase().contains(query);
+
+          final matchesCategory = selectedCategoryId == null ||
+              selectedCategoryId == 0 ||
+              productProvider.productProviderTypeId == selectedCategoryId;
+
+          return matchesSearch && matchesCategory;
+        }).toList();
+
+        // If no rules but has owned suppliers, show them
+        if (displayRules.isEmpty &&
+            ownedSuppliers.isNotEmpty &&
+            !showAllSuppliers) {
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final supplier = ownedSuppliers[index];
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                  child: SupplierCard(
+                    managementRule: _createRuleFromSupplier(supplier),
+                    supplier: supplier,
+                    onTap: () {
+                      showSupplierDetails(context, supplier);
+                    },
+                  ),
+                );
+              },
+              childCount: ownedSuppliers.length,
+            ),
+          );
+        }
+
+        if (displayRules.isEmpty) {
+          return SliverToBoxAdapter(
+            child: SupplierEmptyState(
+              searchQuery: searchQuery,
+            ),
+          );
+        }
+
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final rule = displayRules[index];
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: SupplierCard(managementRule: rule),
+              );
+            },
+            childCount: displayRules.length,
           ),
         );
       },
     );
   }
 
-  Widget _buildTabBar(
-    BuildContext context,
-    List<Supplier> ownedSuppliers,
-    List<ManagementRule> managedRules,
-    AppLocalizations localizations,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(50),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-          width: 1.5,
+  ManagementRule _createRuleFromSupplier(Supplier supplier) {
+    return ManagementRule(
+      idManagementRule: -1,
+      ruleRefOrg: supplier.idProviderOrganisation,
+      ruleRefProvider: supplier.idProductProvider,
+      ruleRefUser: supplier.productProviderOwnerId,
+      managementRuleCode: 0xFF,
+      managementRuleStatus: 'ACTIVE',
+      managementRuleExpiry: null,
+      productProvider: ProductProvider(
+        productProviderTypeId: supplier.productProviderTypeId,
+        productProviderLocationId: supplier.idLocation ?? 0,
+        productProviderOrgId: supplier.idProviderOrganisation,
+        idProductProvider: supplier.idProductProvider,
+        productProviderDetailsId: supplier.idProductProvider,
+        productProviderOwner: supplier.productProviderOwnerId,
+        productProviderDetails: ProductProviderDetails(
+          providerName: supplier.providerName,
+          idproviderDetailsId: supplier.idProductProvider,
+          providerContactInfo: supplier.locationName ?? '',
         ),
       ),
-      padding: const EdgeInsets.all(4),
-      child: TabBar(
-        controller: _tabController,
-        indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          color: colorScheme.primary,
-        ),
-        indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Colors.transparent,
-        splashFactory: NoSplash.splashFactory,
-        labelColor: colorScheme.onPrimary,
-        unselectedLabelColor: colorScheme.onSurfaceVariant,
-        labelStyle: theme.textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-          fontSize: 13,
-        ),
-        tabs: [
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.business_rounded, size: 18),
-                const SizedBox(width: 6),
-                Text('${localizations.ownedText} (${ownedSuppliers.length})'),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.people_alt_rounded, size: 18),
-                const SizedBox(width: 6),
-                Text('${localizations.managedText} (${managedRules.length})'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabContent(
-    BuildContext context,
-    List<dynamic> items, {
-    required bool isOwned,
-    required AppLocalizations localizations,
-  }) {
-    if (items.isEmpty) {
-      return _buildEmptyTab(context, isOwned, localizations);
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: items.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        return isOwned
-            ? _buildOwnedSupplierCard(context, items[index] as Supplier)
-            : SupplierCard(managementRule: items[index] as ManagementRule);
-      },
-    );
-  }
-
-  Widget _buildOwnedSupplierCard(BuildContext context, Supplier supplier) {
-    final rule = ManagementRule(
-      id_management_rule: -1,
-      management_rule_code: 0xFF,
-      productProvider: _createProductProvider(supplier),
-      ruleStatus: 'ACTIVE',
-      isActive: true,
-    );
-
-    return SupplierCard(
-      managementRule: rule,
-      onTap: () => showSupplierDetails(context, supplier),
-    );
-  }
-
-  ProductProvider _createProductProvider(Supplier supplier) {
-    return ProductProvider(
-      product_provider_type_id: supplier.productProviderTypeId,
-      product_provider_location_id: supplier.idLocation ?? 0,
-      product_provider_org_id: supplier.idProviderOrganisation,
-      id_product_provider: supplier.idProductProvider,
-      product_provider_details_id: supplier.idProductProvider,
-      product_provider_owner: supplier.productProviderOwnerId,
-      product_provider_details: ProductProviderDetails(
-        provider_name: supplier.providerName,
-        idprovider_details_id: supplier.idProductProvider,
-        provider_contact_info: supplier.locationName ?? '',
-      ),
-    );
-  }
-
-  Widget _buildEmptyTab(
-    BuildContext context,
-    bool isOwned,
-    AppLocalizations localizations,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isOwned ? Icons.business_outlined : Icons.people_outline,
-              size: 64,
-              color: colorScheme.onSurfaceVariant.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isOwned
-                  ? localizations.noOwnedBusinessesTitle
-                  : localizations.noManagedBusinessesTitle,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isOwned
-                  ? localizations.noOwnedBusinessesDescription
-                  : localizations.noManagedBusinessesDescription,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(
-    BuildContext context,
-    AppLocalizations localizations,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return SliverFillRemaining(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.business,
-                size: 64,
-                color: colorScheme.onSurfaceVariant.withOpacity(0.3),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                widget.state.searchQuery.isEmpty
-                    ? localizations.noBusinessesTitle
-                    : localizations.noResultsTitle,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.state.searchQuery.isEmpty
-                    ? localizations.noBusinessesDescription
-                    : localizations.adjustSearchFiltersText,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+      providerOrganisation: ProviderOrganisation(
+        idproviderOrganisation: supplier.idProviderOrganisation,
+        providerOrganisationName: supplier.providerName,
+        // providerOrganisationDesc: supplier.providerDescription,
       ),
     );
   }

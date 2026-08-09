@@ -1,4 +1,5 @@
 import 'package:app_constants/app_routes.dart';
+import 'package:event/supplier_change_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
@@ -20,17 +21,18 @@ import 'package:provider_store/screens/deliveries_screen.dart';
 import 'package:provider_store/screens/selling_screen.dart';
 import 'package:provider_store/screens/services_screen.dart';
 import 'package:product_catalog/screens/orders_screen.dart';
-// import 'package:product_catalog/screens/orders_screen.dart';
 import 'package:provider/provider.dart';
 import 'dashboard_item.dart';
 
 class DashboardBody extends StatelessWidget {
   final int selectedIndex;
   final List<DashboardItem> items;
+  final int selectedSupplierId;
 
   const DashboardBody({
     required this.selectedIndex,
     required this.items,
+    this.selectedSupplierId = 0,
   });
 
   @override
@@ -45,49 +47,62 @@ class DashboardBody extends StatelessWidget {
   }
 
   Widget _buildScreen(BuildContext context, DashboardItem item) {
-    final _personnelNotifier = context.read<PersonnelNotifier>();
-    final _userNotifier = context.read<AppUserNotifier>();
+    final personnelNotifier = context.read<PersonnelNotifier>();
+    final userNotifier = context.read<AppUserNotifier>();
+    final supplierNotifier = context.read<SupplierChangeNotifier>();
 
-    final userId = _userNotifier.appUser?.idAppUser ?? 0;
-    final accessibleSuppliers =
-        _personnelNotifier.getAccessibleSupplierIds(userId);
-    final userRules = _personnelNotifier.getRulesForUser(userId);
+    final userId = userNotifier.appUser?.idAppUser ?? 0;
+
+    // Use selectedSupplierId if provided, otherwise get all accessible suppliers
+    final supplierIds = selectedSupplierId > 0
+        ? [selectedSupplierId]
+        : personnelNotifier.getAccessibleSupplierIds(userId);
+
+    final userRules = personnelNotifier.getRulesForUser(userId);
     final suppliers = _getSuppliersFromRules(userRules);
 
     switch (item.type) {
       case DashboardScreenType.inventory:
         return Consumer<ProductNotifier>(
-            builder: (context, productNotifier, child) => InventoryScreen(
-                  privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
-                  userId: userId,
-                  accessibleSuppliers: accessibleSuppliers,
-                  userRules: userRules,
-                  suppliers: suppliers,
-                  products: productNotifier.products,
-                  isLoading: productNotifier.isLoading,
-                  searchQuery: productNotifier.currentSearchQuery,
-                  currentProviderId: productNotifier.currentProviderId,
-                  onSupplierChanged: (supplierId) {
-                    productNotifier.fetchProducts(providerId: supplierId);
-                  },
-                  onSearchChanged: productNotifier.searchProducts,
-                  onProductTap: (productId) {},
-                  onRefresh: () => {},
-                  onAddProduct: () =>
-                      {Navigator.pushNamed(context, AppRoutes.productCreate)},
-                ));
+          builder: (context, productNotifier, child) => InventoryScreen(
+            privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
+            userId: userId,
+            accessibleSuppliers: supplierIds,
+            userRules: userRules,
+            suppliers: suppliers,
+            products: productNotifier.products,
+            isLoading: productNotifier.isLoading,
+            searchQuery: productNotifier.currentSearchQuery,
+            currentProviderId: selectedSupplierId > 0
+                ? selectedSupplierId
+                : productNotifier.currentProviderId,
+            onSupplierChanged: (supplierId) {
+              productNotifier.fetchProducts(providerId: supplierId);
+            },
+            onSearchChanged: productNotifier.searchProducts,
+            onProductTap: (productId) {},
+            onRefresh: () => productNotifier.fetchProducts(reset: true),
+            onAddProduct: () =>
+                Navigator.pushNamed(context, AppRoutes.productCreate),
+          ),
+        );
+
       case DashboardScreenType.orders:
         return Consumer<OrderChangeNotifier>(
-            builder: (context, cartNotifier, child) => DeliveryTabbedView(
-                // privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
-                // userId: userId,
-                // accessibleSuppliers: accessibleSuppliers,
-                // personnelNotifier: _personnelNotifier,
-                ));
+          builder: (context, orderNotifier, child) => DeliveryTabbedView(
+              // selectedSupplierId: selectedSupplierId,
+              // other props...
+              ),
+        );
+
       case DashboardScreenType.operations:
         return Consumer<PersonnelNotifier>(
-            builder: (context, personnelNotifier, child) =>
-                BusinessOperationsScreen());
+          builder: (context, personnelNotifier, child) =>
+              BusinessOperationsScreen(
+                  // selectedSupplierId: selectedSupplierId,
+                  ),
+        );
+
       case DashboardScreenType.pos:
         return Consumer3<ServiceNotifier, PersonnelNotifier,
             CartChangeNotifier>(
@@ -96,7 +111,8 @@ class DashboardBody extends StatelessWidget {
               SellingPointScreen(
             serviceNotifier: serviceNotifier,
             userId: userId,
-            accessibleSuppliers: accessibleSuppliers,
+            accessibleSuppliers: supplierIds,
+            // selectedSupplierId: selectedSupplierId,
             personnelNotifier: personnelNotifier,
             productNotifier: context.read<ProductNotifier>(),
             cartNotifier: cartNotifier,
@@ -104,6 +120,7 @@ class DashboardBody extends StatelessWidget {
             onSearchChanged: () {},
           ),
         );
+
       case DashboardScreenType.finance:
         return Consumer3<ProductNotifier, CartChangeNotifier,
             FinanceChangeNotifier>(
@@ -111,10 +128,31 @@ class DashboardBody extends StatelessWidget {
                   financeChangeNotifier, child) =>
               FinanceScreen(
             financeNotifier: financeChangeNotifier,
+            // selectedSupplierId: selectedSupplierId,
           ),
         );
+
       case DashboardScreenType.suppliersPersonnel:
-        return const SupplierEntitiesScreen();
+        return Consumer2<PersonnelNotifier, SupplierChangeNotifier>(
+          builder: (context, personnelNotifier, supplierNotifier, child) {
+            final currentUserId =
+                context.read<AppUserNotifier>().appUser?.idAppUser ?? 0;
+            final accessibleSuppliers = selectedSupplierId > 0
+                ? [selectedSupplierId]
+                : personnelNotifier.getAccessibleSupplierIds(currentUserId);
+            final userRules = personnelNotifier.getRulesForUser(currentUserId);
+            final suppliers = _getSuppliersFromRules(userRules);
+
+            return SupplierEntitiesScreen(
+              userId: currentUserId,
+              accessibleSuppliers: accessibleSuppliers,
+              // selectedSupplierId: selectedSupplierId,
+              userRules: userRules,
+              suppliers: suppliers,
+            );
+          },
+        );
+
       case DashboardScreenType.services:
         return Consumer2<PersonnelNotifier, ServiceNotifier>(
           builder: (context, personnelNotifier, serviceNotifier, child) {
@@ -122,12 +160,14 @@ class DashboardBody extends StatelessWidget {
             final suppliers = _getSuppliersFromRules(userRules);
 
             return ServicesScreen(
-                privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
-                userId: userId,
-                accessibleSuppliers: accessibleSuppliers,
-                userRules: userRules,
-                personnelNotifier: personnelNotifier,
-                serviceNotifier: serviceNotifier);
+              privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
+              userId: userId,
+              accessibleSuppliers: supplierIds,
+              // selectedSupplierId: selectedSupplierId,
+              userRules: userRules,
+              personnelNotifier: personnelNotifier,
+              serviceNotifier: serviceNotifier,
+            );
           },
         );
     }
@@ -140,8 +180,8 @@ class DashboardBody extends StatelessWidget {
     for (final rule in rules) {
       final supplier = rule.productProvider;
       if (supplier != null &&
-          !supplierIds.contains(supplier.id_product_provider)) {
-        supplierIds.add(supplier.id_product_provider);
+          !supplierIds.contains(supplier.idProductProvider)) {
+        supplierIds.add(supplier.idProductProvider);
         suppliers.add(supplier);
       }
     }

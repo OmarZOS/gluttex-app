@@ -1,25 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
+import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:provider_personnel/personnel_management_screen.dart';
 
 class SupplierCard extends StatelessWidget {
-  final ManagementRule managementRule;
+  final ManagementRule? managementRule;
+  final Supplier? supplier;
   final VoidCallback? onTap;
 
   const SupplierCard({
     super.key,
-    required this.managementRule,
+    this.managementRule,
+    this.supplier,
     this.onTap,
   });
 
+  // Helper to get supplier name
+  String get _supplierName {
+    if (supplier != null) {
+      return supplier!.providerName;
+    }
+    if (managementRule?.productProvider?.productProviderDetails.providerName !=
+        null) {
+      return managementRule!
+          .productProvider!.productProviderDetails.providerName!;
+    }
+    return 'Unknown Supplier';
+  }
+
+  // Helper to get supplier ID
+  int get _supplierId {
+    if (supplier != null) {
+      return supplier!.idProductProvider;
+    }
+    if (managementRule?.productProvider?.idProductProvider != null) {
+      return managementRule!.productProvider!.idProductProvider;
+    }
+    return 0;
+  }
+
+  // Helper to get organisation ID
+  int get _orgId {
+    if (supplier != null) {
+      return supplier!.idProviderOrganisation;
+    }
+    if (managementRule?.productProvider?.productProviderOrgId != null) {
+      return managementRule!.productProvider!.productProviderOrgId;
+    }
+    return 0;
+  }
+
+  // Helper to get provider type ID
+  int get _providerTypeId {
+    if (supplier != null) {
+      return supplier!.productProviderTypeId;
+    }
+    if (managementRule?.productProvider?.productProviderTypeId != null) {
+      return managementRule!.productProvider!.productProviderTypeId;
+    }
+    return 0;
+  }
+
+  // Helper to get contact info
+  String get _contactInfo {
+    if (supplier?.locationName != null && supplier!.locationName!.isNotEmpty) {
+      return supplier!.locationName!;
+    }
+    if (managementRule
+            ?.productProvider?.productProviderDetails.providerContactInfo !=
+        null) {
+      return managementRule!
+          .productProvider!.productProviderDetails.providerContactInfo!;
+    }
+    return '';
+  }
+
+  // Helper to get status
+  bool get _isActive {
+    if (managementRule != null) {
+      return managementRule!.isActive;
+    }
+    return true; // Owned suppliers are always active
+  }
+
+  bool get _isPending {
+    if (managementRule != null) {
+      return managementRule!.isPending;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final productProvider = managementRule.productProvider;
-    final providerDetails = productProvider?.product_provider_details;
+    // Validate that we have either a management rule or a supplier
+    if (managementRule == null && supplier == null) {
+      return const SizedBox.shrink();
+    }
 
-    if (productProvider == null || providerDetails == null) {
+    // If we have a supplier but no rule, use the supplier data
+    // If we have a rule, use the rule data
+    final hasValidData = (supplier != null) ||
+        (managementRule?.productProvider != null &&
+            managementRule!.productProvider!.productProviderDetails != null);
+
+    if (!hasValidData) {
       return const SizedBox.shrink();
     }
 
@@ -57,7 +143,6 @@ class SupplierCard extends StatelessWidget {
 
   Widget _buildSupplierLogo(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final productProvider = managementRule.productProvider!;
 
     return Stack(
       children: [
@@ -65,25 +150,46 @@ class SupplierCard extends StatelessWidget {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
+            color: _isActive
+                ? colorScheme.primaryContainer
+                : colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: productProvider.product_provider_type_id == 0
+          child: _providerTypeId == 0
               ? Icon(
-                  _getCategoryIcon(productProvider.product_provider_type_id),
-                  color: colorScheme.onPrimaryContainer,
+                  _getCategoryIcon(_providerTypeId),
+                  color: _isActive
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSurfaceVariant,
                   size: 28,
                 )
               : SvgPicture.asset(
-                  'assets/icons/${productProvider.product_provider_type_id + 1}.svg',
+                  'assets/icons/${_providerTypeId + 1}.svg',
                   package: "provider_geo",
                   width: 20,
                   height: 20,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: _isActive
+                      ? colorScheme.onSurface
+                      : colorScheme.onSurfaceVariant,
                 ),
         ),
-
-        // Status Badge
+        // Status indicator dot
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: _isActive ? Colors.green : Colors.orange,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: colorScheme.surface,
+                width: 2,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -91,8 +197,6 @@ class SupplierCard extends StatelessWidget {
   Widget _buildSupplierInfo(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final providerDetails =
-        managementRule.productProvider!.product_provider_details;
     final localizations = AppLocalizations.of(context)!;
     final categories = localizations.providerCategoryTextList.split(",");
 
@@ -101,7 +205,7 @@ class SupplierCard extends StatelessWidget {
       children: [
         // Supplier Name
         Text(
-          providerDetails.provider_name,
+          _supplierName,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -112,7 +216,7 @@ class SupplierCard extends StatelessWidget {
         const SizedBox(height: 4),
 
         // Contact/Location Info
-        if (providerDetails.provider_contact_info.isNotEmpty)
+        if (_contactInfo.isNotEmpty)
           Row(
             children: [
               Icon(
@@ -123,7 +227,7 @@ class SupplierCard extends StatelessWidget {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  providerDetails.provider_contact_info,
+                  _contactInfo,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -139,6 +243,22 @@ class SupplierCard extends StatelessWidget {
         // Status and Category Row
         Row(
           children: [
+            // Status Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _getStatusColor(context).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                _getStatusText(context),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: _getStatusColor(context),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
             // Category Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -147,18 +267,15 @@ class SupplierCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                categories[
-                    managementRule.productProvider!.product_provider_type_id],
+                _providerTypeId < categories.length
+                    ? categories[_providerTypeId]
+                    : 'General',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-
-            const Spacer(),
-
-            // Privilege Indicator
           ],
         ),
       ],
@@ -173,16 +290,14 @@ class SupplierCard extends StatelessWidget {
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: managementRule.isActiveStatus
+          color: _isActive
               ? colorScheme.primaryContainer
               : colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
-          managementRule.isActiveStatus
-              ? Icons.people_alt_rounded
-              : Icons.pending_actions_rounded,
-          color: managementRule.isActiveStatus
+          _isActive ? Icons.people_alt_rounded : Icons.pending_actions_rounded,
+          color: _isActive
               ? colorScheme.onPrimaryContainer
               : colorScheme.onSurfaceVariant,
           size: 20,
@@ -194,14 +309,24 @@ class SupplierCard extends StatelessWidget {
   Color _getStatusColor(BuildContext context) {
     final theme = Theme.of(context);
 
-    if (managementRule.isActiveStatus) {
+    if (_isActive) {
       return theme.colorScheme.primary;
-    } else if (managementRule.isPending) {
+    } else if (_isPending) {
       return theme.colorScheme.secondary;
-    } else if (managementRule.isRejected) {
-      return theme.colorScheme.error;
     } else {
-      return theme.colorScheme.onSurfaceVariant;
+      return theme.colorScheme.error;
+    }
+  }
+
+  String _getStatusText(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    if (_isActive) {
+      return localizations.activeStatus ?? 'Active';
+    } else if (_isPending) {
+      return localizations.pendingStatus ?? 'Pending';
+    } else {
+      return localizations.status_inactive ?? 'Inactive';
     }
   }
 
@@ -220,16 +345,26 @@ class SupplierCard extends StatelessWidget {
   }
 
   void _navigateToPersonnelManagement(BuildContext context) {
-    final productProvider = managementRule.productProvider;
-    if (productProvider == null) return;
+    final id = _supplierId;
+    final orgId = _orgId;
+
+    if (id == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot navigate: Invalid supplier ID'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PersonnelManagementScreen(
-          supplierName: productProvider.product_provider_details.provider_name,
-          orgId: productProvider.product_provider_org_id,
-          supplierId: productProvider.id_product_provider,
+          supplierName: _supplierName,
+          orgId: orgId,
+          supplierId: id,
         ),
       ),
     );

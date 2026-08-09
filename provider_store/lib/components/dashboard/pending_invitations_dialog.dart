@@ -72,14 +72,14 @@ class PendingInvitationItem extends StatelessWidget {
     final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context);
     final supplierName =
-        rule.productProvider?.product_provider_details.provider_name ??
+        rule.productProvider?.productProviderDetails.providerName ??
             localizations?.unknownBusiness ??
             'Unknown Business';
     // final privilegeIds = RoleBitMapper.numberToPrivilegeIds(
     //   rule.management_rule_code ?? 0,
     // );
     final accessSummary = PrivilegeUIManager.getAccessLevelSummary(
-      rule.management_rule_code,
+      rule.managementRuleCode,
       context: context,
     );
 
@@ -141,7 +141,7 @@ class PendingInvitationItem extends StatelessWidget {
 
   Future<void> _answerInvitation(BuildContext context, bool accept) async {
     final success = await personnelNotifier.answerInvitation(
-      ruleId: rule.id_management_rule ?? 0,
+      ruleId: rule.idManagementRule ?? 0,
       answer: accept ? 0 : 1,
     );
 

@@ -2493,7 +2493,65 @@
   "manageIngredients": "إدارة المكونات",
   "pleaseEnterAmount": "الرجاء إدخال الكمية",
   "amountMustBeGreaterThanZero": "الكمية يجب أن تكون أكبر من الصفر",
-  "returnBack": "رجوع للصفحة السابقة"
+  "returnBack": "رجوع للصفحة السابقة",
+
+    "accessRequired": "الوصول مطلوب",
+  "needBusinessAssignment": "يجب أن تكون مرتبطًا بشركة للوصول إلى ميزات الإدارة.",
+  "contactAdminOrJoinTeam": "اتصل بالمسؤول أو انضم إلى فريق الشركة للحصول على الوصول.",
+  "returnBack": "رجوع",
+  "checkAccessStatus": "التحقق من حالة الوصول",
+  "viewPendingInvitations": "عرض الدعوات المعلقة",
+  "accessRefreshed": "تم تحديث صلاحيات الوصول",
+  "noPendingInvitations": "لا توجد دعوات معلقة",
+  "youHaveNoPendingInvitations": "ليس لديك أي دعوات معلقة في الوقت الحالي.",
+  "contactAdminForAccess": "اتصل بالمسؤول لطلب الوصول.",
+  
+  "invitations": "الدعوات",
+  "pending": "معلقة",
+  "active": "نشط",
+  "accept": "قبول",
+  "decline": "رفض",
+  "pendingInvitations": "الدعوات المعلقة",
+  "activeAssignments": "التعيينات النشطة",
+  "noActiveAssignments": "لا توجد تعيينات نشطة",
+  "noActiveDescription": "ليس لديك أي تعيينات نشطة.",
+  "noInvitationsOrAssignments": "لا توجد دعوات أو تعيينات",
+  "noInvitationsDescription": "ليس لديك أي دعوات معلقة أو تعيينات نشطة.",
+  "noPendingDescription": "ليس لديك أي دعوات معلقة.",
+  
+  "refresh": "تحديث",
+  "refreshData": "تحديث البيانات",
+  "retry": "إعادة المحاولة",
+  "loading": "جاري التحميل...",
+  "loadingData": "جاري تحميل البيانات...",
+  "loadingInvitations": "جاري تحميل الدعوات...",
+  "errorOccurred": "خطأ",
+  
+  "status": "الحالة",
+  "pendingStatus": "معلقة",
+  "activeStatus": "نشط",
+  "rejected": "مرفوض",
+  "expired": "منتهي الصلاحية",
+  
+  "role": "الدور",
+  "roleCode": "رمز الدور",
+  "expiry": "تاريخ الانتهاء",
+  "noExpiry": "لا يوجد تاريخ انتهاء",
+  "expiredDate": "منتهي الصلاحية",
+  "today": "اليوم",
+  "tomorrow": "غداً",
+  "inDays": "خلال {days} أيام",
+  
+  "invitationAccepted": "تم قبول الدعوة!",
+  "invitationDeclined": "تم رفض الدعوة",
+  "actionFailed": "فشل الإجراء",
+  "noInvitationsFound": "لم يتم العثور على دعوات",
+  
+  "userNotAuthenticated": "المستخدم غير موثق",
+  "failedToLoadInvitations": "فشل تحميل الدعوات",
+  
+  "markAllAsRead": "تحديد الكل كمقروء",
+  "viewAll": "عرض الكل"
   
 
 

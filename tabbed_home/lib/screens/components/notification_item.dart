@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_core/app/ManagementRule.dart';
+// import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Notifications/GluttexNotification.dart';
 import 'package:gluttex_core/app/Notifications/Notifications/RoleInvitation.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
@@ -818,11 +818,11 @@ class NotificationItem extends StatelessWidget {
 
       // Find the specific rule
       final targetedRule = privileges
-          ?.where((item) => item.id_management_rule == invitation.ruleId)
+          ?.where((item) => item.idManagementRule == invitation.ruleId)
           .firstOrNull;
 
-      final ruleStatus =
-          targetedRule?.ruleStatus?.toUpperCase() ?? RuleStates.pending;
+      final ruleStatus = targetedRule?.managementRuleStatus?.toUpperCase() ??
+          RuleStates.pending;
       final isPending = ruleStatus == RuleStates.pending;
       final isActive = ruleStatus == RuleStates.active;
 

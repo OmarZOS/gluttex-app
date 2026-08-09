@@ -15,7 +15,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'Gluttex';
 
   @override
-  String get errorOccurred => 'An error occurred. Please try again later.';
+  String get errorOccurred => 'Error';
 
   @override
   String get noProductsFound => 'No products to display.';
@@ -2379,7 +2379,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get needBusinessAssignment => 'You need to be assigned to a business to access management features.';
 
   @override
-  String get contactAdminOrJoinTeam => 'Contact your administrator or join a business team.';
+  String get contactAdminOrJoinTeam => 'Contact your administrator or join a business team to get access.';
 
   @override
   String get checkAccessStatus => 'Check Access Status';
@@ -2391,7 +2391,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pendingInvitations => 'Pending Invitations';
 
   @override
-  String get noPendingInvitations => 'No pending invitations';
+  String get noPendingInvitations => 'No Pending Invitations';
 
   @override
   String get unknownBusiness => 'Unknown Business';
@@ -2409,7 +2409,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invitationAccepted => 'Invitation accepted!';
 
   @override
-  String get invitationDeclined => 'Invitation declined.';
+  String get invitationDeclined => 'Invitation declined';
 
   @override
   String get noRoleAssigned => 'No role assigned';
@@ -2526,7 +2526,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currencySymbol => 'DZD';
 
   @override
-  String get accessRefreshed => 'Refreshed access';
+  String get accessRefreshed => 'Access privileges refreshed';
 
   @override
   String get manageSuppliers => 'Manage Suppliers';
@@ -5675,5 +5675,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amountMustBeGreaterThanZero => 'Amount must be positive';
 
   @override
-  String get returnBack => 'Return to previous screen';
+  String get returnBack => 'Return';
+
+  @override
+  String get youHaveNoPendingInvitations => 'You don\'t have any pending invitations at the moment.';
+
+  @override
+  String get contactAdminForAccess => 'Contact your administrator to request access.';
+
+  @override
+  String get invitations => 'Invitations';
+
+  @override
+  String get activeAssignments => 'Active Assignments';
+
+  @override
+  String get noActiveAssignments => 'No Active Assignments';
+
+  @override
+  String get noActiveDescription => 'You don\'t have any active assignments.';
+
+  @override
+  String get noInvitationsOrAssignments => 'No Invitations or Assignments';
+
+  @override
+  String get noInvitationsDescription => 'You don\'t have any pending invitations or active assignments.';
+
+  @override
+  String get noPendingDescription => 'You don\'t have any pending invitations.';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get loadingData => 'Loading...';
+
+  @override
+  String get loadingInvitations => 'Loading invitations...';
+
+  @override
+  String get pendingStatus => 'Pending';
+
+  @override
+  String get activeStatus => 'Active';
+
+  @override
+  String get rejected => 'Rejected';
+
+  @override
+  String get expired => 'Expired';
+
+  @override
+  String get roleCode => 'Role Code';
+
+  @override
+  String get expiry => 'Expiry';
+
+  @override
+  String get noExpiry => 'No expiry';
+
+  @override
+  String get expiredDate => 'Expired';
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String inDays(Object days) {
+    return 'In $days days';
+  }
+
+  @override
+  String get actionFailed => 'Action failed';
+
+  @override
+  String get noInvitationsFound => 'No invitations found';
+
+  @override
+  String get userNotAuthenticated => 'User not authenticated';
+
+  @override
+  String get failedToLoadInvitations => 'Failed to load invitations';
+
+  @override
+  String get markAllAsRead => 'Mark All as Read';
+
+  @override
+  String get viewAll => 'View All';
 }

@@ -100,8 +100,8 @@ class _SupplierChipsRow extends StatelessWidget {
               padding: const EdgeInsets.only(right: 8),
               child: _SupplierChip(
                 supplier: supplier,
-                isSelected: supplier.id_product_provider == selectedId,
-                onSelect: () => onSelect(supplier.id_product_provider),
+                isSelected: supplier.idProductProvider == selectedId,
+                onSelect: () => onSelect(supplier.idProductProvider),
               ),
             );
           }).toList(),
@@ -258,10 +258,10 @@ class _SupplierChip extends StatelessWidget {
   }
 
   String _getSupplierName(ProductProvider supplier) {
-    final name = supplier.product_provider_details.provider_name;
-    if (name.length > 15) {
-      return '${name.substring(0, 13)}...';
+    final name = supplier.productProviderDetails.providerName;
+    if ((name?.length ?? 0) > 15) {
+      return '${name?.substring(0, 13)}...';
     }
-    return name;
+    return name ?? "";
   }
 }

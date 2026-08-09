@@ -1,3 +1,5 @@
+// supplier_entities_controller.dart (ChangeNotifier version)
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
@@ -33,12 +35,11 @@ class SupplierEntitiesState {
   }
 }
 
-class SupplierEntitiesController {
-  final ValueNotifier<SupplierEntitiesState> _state =
-      ValueNotifier(SupplierEntitiesState());
+class SupplierEntitiesController extends ChangeNotifier {
+  SupplierEntitiesState _state = SupplierEntitiesState();
   final TextEditingController _searchController = TextEditingController();
 
-  ValueListenable<SupplierEntitiesState> get state => _state;
+  SupplierEntitiesState get state => _state;
 
   void initializeData(BuildContext context) {
     final supplierNotifier = context.read<SupplierChangeNotifier>();
@@ -51,26 +52,34 @@ class SupplierEntitiesController {
     personnelNotifier.loadPersonnel(supplierId: 0, includePending: true);
 
     _searchController.addListener(() {
-      _state.value = _state.value.copyWith(
+      _state = _state.copyWith(
         searchQuery: _searchController.text.trim(),
       );
+      notifyListeners();
     });
   }
 
   void updateCategory(int? categoryId) {
-    _state.value = _state.value.copyWith(selectedCategoryId: categoryId);
+    _state = _state.copyWith(selectedCategoryId: categoryId);
+    notifyListeners();
   }
 
-  void toggleShowAll(bool value) {
-    _state.value = _state.value.copyWith(showAllSuppliers: value);
+  void toggleShowAll(bool showAll) {
+    _state = _state.copyWith(showAllSuppliers: showAll);
+    notifyListeners();
+  }
+
+  void updateSearchQuery(String query) {
+    _state = _state.copyWith(searchQuery: query);
+    notifyListeners();
   }
 
   Widget buildAppBar(BuildContext context) {
     return SupplierAppBar(
-      searchQuery: _state.value.searchQuery,
-      selectedCategoryId: _state.value.selectedCategoryId,
+      searchQuery: _state.searchQuery,
+      selectedCategoryId: _state.selectedCategoryId,
       onCategoryChanged: updateCategory,
-      showAllSuppliers: _state.value.showAllSuppliers,
+      showAllSuppliers: _state.showAllSuppliers,
       onShowAllChanged: toggleShowAll,
     );
   }
@@ -78,10 +87,12 @@ class SupplierEntitiesController {
   Widget buildSearchFilter(BuildContext context) {
     return SupplierSearchFilter(
       searchController: _searchController,
-      searchQuery: _state.value.searchQuery,
-      onSearchChanged: (value) =>
-          _state.value = _state.value.copyWith(searchQuery: value),
-      selectedCategoryId: _state.value.selectedCategoryId,
+      searchQuery: _state.searchQuery,
+      onSearchChanged: (query) {
+        _state = _state.copyWith(searchQuery: query);
+        notifyListeners();
+      },
+      selectedCategoryId: _state.selectedCategoryId,
       onCategoryChanged: updateCategory,
     );
   }
@@ -114,14 +125,18 @@ class SupplierEntitiesController {
       final productProvider = rule.productProvider;
       if (productProvider == null) return false;
 
+      final providerName =
+          productProvider.productProviderDetails.providerName ?? '';
+      final organisationName =
+          rule.providerOrganisation?.providerOrganisationName ?? '';
+
       final matchesSearch = searchQuery.isEmpty ||
-          productProvider.product_provider_details.provider_name
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase());
+          providerName.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          organisationName.toLowerCase().contains(searchQuery.toLowerCase());
 
       final matchesCategory = selectedCategoryId == null ||
           selectedCategoryId == 0 ||
-          productProvider.product_provider_type_id == selectedCategoryId;
+          productProvider.productProviderTypeId == selectedCategoryId;
 
       return matchesSearch && matchesCategory;
     }).toList();
@@ -139,10 +154,12 @@ class SupplierEntitiesController {
   }
 
   void _addNewBusiness() {
-    print('Add new business');
+    // Navigate to add business screen
   }
 
+  @override
   void dispose() {
     _searchController.dispose();
+    super.dispose();
   }
 }

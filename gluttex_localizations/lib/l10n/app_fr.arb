@@ -2542,6 +2542,64 @@
 
       "pleaseEnterAmount": "Veuillez entrer la quantité",
    "amountMustBeGreaterThanZero": "La quantité doit être positive",
-   "returnBack": "Retour à la page précédente"
+   "returnBack": "Retour à la page précédente",
+
+     "accessRequired": "Accès Requis",
+  "needBusinessAssignment": "Vous devez être assigné à une entreprise pour accéder aux fonctionnalités de gestion.",
+  "contactAdminOrJoinTeam": "Contactez votre administrateur ou rejoignez une équipe d'entreprise pour obtenir l'accès.",
+  "returnBack": "Retour",
+  "checkAccessStatus": "Vérifier le statut d'accès",
+  "viewPendingInvitations": "Voir les invitations en attente",
+  "accessRefreshed": "Privilèges d'accès actualisés",
+  "noPendingInvitations": "Aucune invitation en attente",
+  "youHaveNoPendingInvitations": "Vous n'avez aucune invitation en attente pour le moment.",
+  "contactAdminForAccess": "Contactez votre administrateur pour demander l'accès.",
+  
+  "invitations": "Invitations",
+  "pending": "En attente",
+  "active": "Actif",
+  "accept": "Accepter",
+  "decline": "Refuser",
+  "pendingInvitations": "Invitations en attente",
+  "activeAssignments": "Attributions actives",
+  "noActiveAssignments": "Aucune attribution active",
+  "noActiveDescription": "Vous n'avez aucune attribution active.",
+  "noInvitationsOrAssignments": "Aucune invitation ou attribution",
+  "noInvitationsDescription": "Vous n'avez aucune invitation en attente ou attribution active.",
+  "noPendingDescription": "Vous n'avez aucune invitation en attente.",
+  
+  "refresh": "Actualiser",
+  "refreshData": "Actualiser les données",
+  "retry": "Réessayer",
+  "loading": "Chargement...",
+  "loadingData": "Chargement des données...",
+  "loadingInvitations": "Chargement des invitations...",
+  "errorOccurred": "Erreur",
+  
+  "status": "Statut",
+  "pendingStatus": "En attente",
+  "activeStatus": "Actif",
+  "rejected": "Rejeté",
+  "expired": "Expiré",
+  
+  "role": "Rôle",
+  "roleCode": "Code de rôle",
+  "expiry": "Expiration",
+  "noExpiry": "Pas d'expiration",
+  "expiredDate": "Expiré",
+  "today": "Aujourd'hui",
+  "tomorrow": "Demain",
+  "inDays": "Dans {days} jours",
+  
+  "invitationAccepted": "Invitation acceptée !",
+  "invitationDeclined": "Invitation refusée",
+  "actionFailed": "Action échouée",
+  "noInvitationsFound": "Aucune invitation trouvée",
+  
+  "userNotAuthenticated": "Utilisateur non authentifié",
+  "failedToLoadInvitations": "Échec du chargement des invitations",
+  
+  "markAllAsRead": "Tout marquer comme lu",
+  "viewAll": "Voir tout"
 
 }

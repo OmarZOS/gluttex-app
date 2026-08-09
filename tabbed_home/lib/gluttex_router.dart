@@ -135,8 +135,8 @@ class AppRouter {
 
               // case AppRoutes.dashboardPage:
               //   return const SupplierDashboardScreen();
-              case AppRoutes.supplierEntitiesPage:
-                return const SupplierEntitiesScreen();
+              // case AppRoutes.supplierEntitiesPage:
+              //   return const SupplierEntitiesScreen();
 
               case AppRoutes.productDetails:
                 return const ProductDetailsScreen();

@@ -139,7 +139,7 @@ class PersonnelCrud {
     // Remove rule from cache
     final privileges = _cache.getPrivileges(userId);
     if (privileges != null) {
-      privileges.removeWhere((r) => r.id_management_rule == ruleId);
+      privileges.removeWhere((r) => r.idManagementRule == ruleId);
       if (privileges.isEmpty) {
         _cache.privileges.remove(userId);
       }
@@ -172,9 +172,9 @@ class PersonnelCrud {
     final userSuppliers = <int>{};
 
     for (final rule in rules) {
-      final providerId = rule.productProvider?.id_product_provider;
+      final providerId = rule.productProvider?.idProductProvider;
       final isPending =
-          (rule.ruleStatus ?? "").toUpperCase() == RuleStates.pending;
+          (rule.managementRuleStatus ?? "").toUpperCase() == RuleStates.pending;
 
       if (isPending) {
         pending.add(rule);
@@ -219,6 +219,7 @@ class PersonnelCrud {
     required int ruleId,
     required int answer,
     String? callerKey,
+    String? token,
   }) async {
     final key =
         callerKey ?? _generateKey('answerInvitation', id: ruleId.toString());
@@ -233,12 +234,12 @@ class PersonnelCrud {
 
     try {
       final result = await _storageService.update(
-        "${AppConstants.apiBaseUrl}${AppConstants.answerStaffInvitationEndpoint}",
-        ruleId.toString(),
-        {"accept": answer == 0},
-        {},
-        callerKey: key,
-      );
+          "${AppConstants.apiBaseUrl}${AppConstants.answerStaffInvitationEndpoint}",
+          ruleId.toString(),
+          {"accept": answer == 0},
+          {},
+          callerKey: key,
+          token: token);
 
       final statusCode = _storageService.getStatusCode(key);
       final responseCode = _storageService.getResponseCode(key);
@@ -258,7 +259,7 @@ class PersonnelCrud {
       }
 
       final (targetRule, targetUserId) = findResult;
-      final supplierId = targetRule.productProvider?.id_product_provider;
+      final supplierId = targetRule.productProvider?.idProductProvider;
       final pendingList = _cache.getPendingRules(targetUserId);
 
       if (pendingList == null) {
@@ -268,8 +269,8 @@ class PersonnelCrud {
       }
 
       final index = pendingList.indexWhere((r) =>
-          r.id_management_rule == ruleId &&
-          r.productProvider?.id_product_provider == supplierId);
+          r.idManagementRule == ruleId &&
+          r.productProvider?.idProductProvider == supplierId);
 
       if (index == -1) {
         _storeFailure(key, null,
@@ -302,7 +303,7 @@ class PersonnelCrud {
   (ManagementRule, int)? _findRuleAndUserId(int ruleId) {
     for (final entry in _cache.privileges.entries) {
       for (final rule in entry.value) {
-        if (rule.id_management_rule == ruleId) {
+        if (rule.idManagementRule == ruleId) {
           return (rule, entry.key);
         }
       }
@@ -318,7 +319,7 @@ class PersonnelCrud {
     int? supplierId,
   ) async {
     final updatedRule =
-        pendingList[index].copyWith(ruleStatus: RuleStates.active);
+        pendingList[index].copyWith(managementRuleStatus: RuleStates.active);
 
     pendingList.removeAt(index);
     if (pendingList.isEmpty) _cache.pendingRules.remove(targetUserId);
@@ -328,8 +329,8 @@ class PersonnelCrud {
 
     // Update master list
     final allRules = _cache.privileges[targetUserId]!;
-    final allIndex = allRules.indexWhere(
-        (r) => r.id_management_rule == targetRule.id_management_rule);
+    final allIndex = allRules
+        .indexWhere((r) => r.idManagementRule == targetRule.idManagementRule);
     if (allIndex != -1) {
       allRules[allIndex] = updatedRule;
     }
@@ -340,7 +341,7 @@ class PersonnelCrud {
     }
 
     debugPrint(
-        "Rule ${targetRule.id_management_rule} ACCEPTED → moved to ACTIVE");
+        "Rule ${targetRule.idManagementRule} ACCEPTED → moved to ACTIVE");
   }
 
   void _rejectInvitation(
@@ -353,7 +354,7 @@ class PersonnelCrud {
     if (pendingList.isEmpty) _cache.pendingRules.remove(targetUserId);
 
     _cache.privileges[targetUserId]!
-        .removeWhere((r) => r.id_management_rule == ruleId);
+        .removeWhere((r) => r.idManagementRule == ruleId);
 
     if (_cache.privileges[targetUserId]!.isEmpty) {
       _cache.privileges.remove(targetUserId);

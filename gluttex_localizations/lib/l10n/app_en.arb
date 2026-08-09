@@ -2445,7 +2445,65 @@
    "manageIngredients" : "Manage Ingredients",
    "pleaseEnterAmount": "Please enter amount",
    "amountMustBeGreaterThanZero": "Amount must be positive",
-   "returnBack": "Return to previous screen"
+   "returnBack": "Return to previous screen",
+
+     "accessRequired": "Access Required",
+  "needBusinessAssignment": "You need to be assigned to a business to access management features.",
+  "contactAdminOrJoinTeam": "Contact your administrator or join a business team to get access.",
+  "returnBack": "Return",
+  "checkAccessStatus": "Check Access Status",
+  "viewPendingInvitations": "View Pending Invitations",
+  "accessRefreshed": "Access privileges refreshed",
+  "noPendingInvitations": "No Pending Invitations",
+  "youHaveNoPendingInvitations": "You don't have any pending invitations at the moment.",
+  "contactAdminForAccess": "Contact your administrator to request access.",
+  
+  "invitations": "Invitations",
+  "pending": "Pending",
+  "active": "Active",
+  "accept": "Accept",
+  "decline": "Decline",
+  "pendingInvitations": "Pending Invitations",
+  "activeAssignments": "Active Assignments",
+  "noActiveAssignments": "No Active Assignments",
+  "noActiveDescription": "You don't have any active assignments.",
+  "noInvitationsOrAssignments": "No Invitations or Assignments",
+  "noInvitationsDescription": "You don't have any pending invitations or active assignments.",
+  "noPendingDescription": "You don't have any pending invitations.",
+  
+  "refresh": "Refresh",
+  "refreshData": "Refresh Data",
+  "retry": "Retry",
+  "loading": "Loading...",
+  "loadingData": "Loading...",
+  "loadingInvitations": "Loading invitations...",
+  "errorOccurred": "Error",
+  
+  "status": "Status",
+  "pendingStatus": "Pending",
+  "activeStatus": "Active",
+  "rejected": "Rejected",
+  "expired": "Expired",
+  
+  "role": "Role",
+  "roleCode": "Role Code",
+  "expiry": "Expiry",
+  "noExpiry": "No expiry",
+  "expiredDate": "Expired",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "inDays": "In {days} days",
+  
+  "invitationAccepted": "Invitation accepted!",
+  "invitationDeclined": "Invitation declined",
+  "actionFailed": "Action failed",
+  "noInvitationsFound": "No invitations found",
+  
+  "userNotAuthenticated": "User not authenticated",
+  "failedToLoadInvitations": "Failed to load invitations",
+  
+  "markAllAsRead": "Mark All as Read",
+  "viewAll": "View All"
 
 
 }

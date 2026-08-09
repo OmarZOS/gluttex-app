@@ -76,15 +76,15 @@ class OrderUIManager {
     final userRules = personnelNotifier.getRulesForUser(userId);
 
     for (final rule in userRules) {
-      if (!rule.isActiveStatus) continue;
+      if (!rule.isActive) continue;
 
-      final ruleCode = rule.management_rule_code ?? 0;
+      final ruleCode = rule.managementRuleCode ?? 0;
       final hasPrivilege = canManage
           ? _checkPrivilege(ruleCode, 'orders_manage')
           : _checkPrivilege(ruleCode, 'orders_view');
 
       if (hasPrivilege) {
-        final supplierId = rule.productProvider?.id_product_provider;
+        final supplierId = rule.productProvider?.idProductProvider;
         if (supplierId != null) {
           selectedSupplierId = supplierId;
 
@@ -126,9 +126,9 @@ class OrderUIManager {
     final supplierIds = <int>{};
 
     for (final rule in userRules) {
-      if (!rule.isActiveStatus) continue;
+      if (!rule.isActive) continue;
 
-      final ruleCode = rule.management_rule_code ?? 0;
+      final ruleCode = rule.managementRuleCode ?? 0;
       final hasPrivilege = canManage
           ? _checkPrivilege(ruleCode, 'orders_manage')
           : _checkPrivilege(ruleCode, 'orders_view');
@@ -136,8 +136,8 @@ class OrderUIManager {
       if (hasPrivilege) {
         final supplier = rule.productProvider;
         if (supplier != null &&
-            !supplierIds.contains(supplier.id_product_provider)) {
-          supplierIds.add(supplier.id_product_provider);
+            !supplierIds.contains(supplier.idProductProvider)) {
+          supplierIds.add(supplier.idProductProvider);
           suppliers.add(supplier);
         }
       }

@@ -38,7 +38,7 @@ class SupplierListContent extends StatelessWidget {
 
         if (showActiveOnly) {
           filteredRules = filteredRules
-              .where((rule) => rule.isActiveStatus && !rule.isPending)
+              .where((rule) => rule.isActive && !rule.isPending)
               .toList();
         } else if (showPendingOnly) {
           filteredRules =
@@ -52,9 +52,6 @@ class SupplierListContent extends StatelessWidget {
           return SliverToBoxAdapter(
             child: SupplierEmptyState(
               searchQuery: searchQuery,
-              // hasRules: allRules.isNotEmpty,
-              // isFiltered: filteredRules.length != allRules.length,
-              // showPendingOnly: showPendingOnly,
             ),
           );
         }
@@ -74,26 +71,29 @@ class SupplierListContent extends StatelessWidget {
 
   bool _filterRule(ManagementRule rule) {
     final productProvider = rule.productProvider;
-    final providerDetails = productProvider?.product_provider_details;
+    final providerDetails = productProvider?.productProviderDetails;
 
     if (productProvider == null || providerDetails == null) {
       return false; // Skip rules without provider info
     }
 
-    // Search filter
-    final matchesSearch = searchQuery.isEmpty ||
-            providerDetails.provider_name
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()) ||
-            rule.providerOrganisation!.provider_organisation_desc
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()) ??
-        false;
+    // Search filter - check provider name and organisation name
+    final providerName = providerDetails.providerName ?? '';
+    final organisationName =
+        rule.providerOrganisation?.providerOrganisationName ?? '';
+    final organisationDesc =
+        rule.providerOrganisation?.providerOrganisationDesc ?? '';
+
+    final query = searchQuery.toLowerCase().trim();
+    final matchesSearch = query.isEmpty ||
+        providerName.toLowerCase().contains(query) ||
+        organisationName.toLowerCase().contains(query) ||
+        organisationDesc.toLowerCase().contains(query);
 
     // Category filter
     final matchesCategory = selectedCategoryId == null ||
         selectedCategoryId == 0 || // "All" category
-        productProvider.product_provider_type_id == selectedCategoryId;
+        productProvider.productProviderTypeId == selectedCategoryId;
 
     return matchesSearch && matchesCategory;
   }

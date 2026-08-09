@@ -452,7 +452,6 @@ class StorageServiceImpl extends StorageService<FormData> {
     final url = '$destination/$id';
     _logRequest('PUT', url,
         data: data, params: parameters, callerKey: key, token: token);
-
     try {
       final options = _applyToken(
         Options(

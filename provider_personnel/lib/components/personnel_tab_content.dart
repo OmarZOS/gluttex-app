@@ -98,15 +98,15 @@ class PersonnelTabContent extends StatelessWidget {
                 user: user,
                 supplierId: supplierId,
                 isPending: isPending,
-                ruleCode: rule?.management_rule_code ?? 0,
+                ruleCode: rule?.managementRuleCode ?? 0,
                 onManagePrivileges: () => onShowPrivilegeDialog(
-                    user, isPending, rule?.id_management_rule),
+                    user, isPending, rule?.idManagementRule),
                 onRemove: () =>
-                    onShowRemoveDialog(rule?.id_management_rule, user),
+                    onShowRemoveDialog(rule?.idManagementRule, user),
                 // onResendInvite:
                 //     isPending ? () => onResendInvitation(user) : null,
                 onCancelInvite: isPending
-                    ? () => onCancelInvitation(user, rule?.id_management_rule)
+                    ? () => onCancelInvitation(user, rule?.idManagementRule)
                     : null,
               );
             },

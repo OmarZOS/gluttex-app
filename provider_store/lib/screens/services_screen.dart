@@ -155,12 +155,12 @@ class ServicesScreen extends StatelessWidget {
     final supplierIds = <int>{};
 
     for (final rule in userRules) {
-      if (!rule.isActiveStatus) continue;
+      if (!rule.isActive) continue;
 
       final supplier = rule.productProvider;
       if (supplier != null &&
-          !supplierIds.contains(supplier.id_product_provider)) {
-        supplierIds.add(supplier.id_product_provider);
+          !supplierIds.contains(supplier.idProductProvider)) {
+        supplierIds.add(supplier.idProductProvider);
         suppliers.add(supplier);
       }
     }

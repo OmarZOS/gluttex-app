@@ -276,13 +276,33 @@ class SupplierChangeNotifier extends ChangeNotifier {
   // ============ HELPERS ============
 
   void _addSuppliers(List<Supplier> newSuppliers) {
-    final existing = _state.suppliers.map((s) => s.idProductProvider).toSet();
+    debugPrint('📦 _addSuppliers called with ${newSuppliers.length} suppliers');
+
+    final existingIds =
+        _state.suppliers.map((s) => s.idProductProvider).toSet();
+    debugPrint('📦 Existing supplier IDs: $existingIds');
+
+    int addedCount = 0;
     for (final supplier in newSuppliers) {
-      if (!existing.contains(supplier.idProductProvider)) {
-        _state.suppliers.add(supplier);
-        _cache.cacheSupplier(supplier);
+      if (supplier.idProductProvider == 0) {
+        debugPrint('⚠️ Skipping supplier with ID 0: ${supplier.providerName}');
+        continue;
       }
+      if (existingIds.contains(supplier.idProductProvider)) {
+        debugPrint('⚠️ Supplier ${supplier.idProductProvider} already exists');
+        continue;
+      }
+
+      _state.suppliers.add(supplier);
+      _cache.cacheSupplier(supplier);
+      existingIds.add(supplier.idProductProvider);
+      addedCount++;
+      debugPrint(
+          '✅ Added supplier: ${supplier.idProductProvider} - ${supplier.providerName}');
     }
+
+    debugPrint(
+        '📦 Added $addedCount new suppliers, total: ${_state.suppliers.length}');
   }
 
   void _updateSupplierInList(Supplier supplier) {

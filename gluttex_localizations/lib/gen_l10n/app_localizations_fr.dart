@@ -15,7 +15,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appName => 'Gluttex';
 
   @override
-  String get errorOccurred => 'Une erreur s\'est produite. Veuillez réessayer plus tard.';
+  String get errorOccurred => 'Erreur';
 
   @override
   String get noProductsFound => 'Aucun produit à afficher.';
@@ -2379,16 +2379,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get needBusinessAssignment => 'Vous devez être assigné à une entreprise pour accéder aux fonctionnalités de gestion.';
 
   @override
-  String get contactAdminOrJoinTeam => 'Contactez votre administrateur ou rejoignez une équipe d\'entreprise.';
+  String get contactAdminOrJoinTeam => 'Contactez votre administrateur ou rejoignez une équipe d\'entreprise pour obtenir l\'accès.';
 
   @override
-  String get checkAccessStatus => 'Vérifier le Statut d\'Accès';
+  String get checkAccessStatus => 'Vérifier le statut d\'accès';
 
   @override
-  String get viewPendingInvitations => 'Voir les Invitations en Attente';
+  String get viewPendingInvitations => 'Voir les invitations en attente';
 
   @override
-  String get pendingInvitations => 'Invitations en Attente';
+  String get pendingInvitations => 'Invitations en attente';
 
   @override
   String get noPendingInvitations => 'Aucune invitation en attente';
@@ -2406,10 +2406,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get decline => 'Refuser';
 
   @override
-  String get invitationAccepted => 'Invitation acceptée!';
+  String get invitationAccepted => 'Invitation acceptée !';
 
   @override
-  String get invitationDeclined => 'Invitation refusée.';
+  String get invitationDeclined => 'Invitation refusée';
 
   @override
   String get noRoleAssigned => 'Aucun rôle attribué';
@@ -2472,7 +2472,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paid => 'Payé';
 
   @override
-  String get pending => 'En Attente';
+  String get pending => 'En attente';
 
   @override
   String get cancelled => 'Annulé';
@@ -2526,7 +2526,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get currencySymbol => 'DA';
 
   @override
-  String get accessRefreshed => 'Accès rafraichi';
+  String get accessRefreshed => 'Privilèges d\'accès actualisés';
 
   @override
   String get manageSuppliers => 'Gérer Les Fournisseurs';
@@ -3682,7 +3682,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get saveReport => 'Sauvegarder le Rapport';
 
   @override
-  String get refreshData => 'Actualiser les Données';
+  String get refreshData => 'Actualiser les données';
 
   @override
   String get dataExportedSuccessfully => 'Données exportées avec succès';
@@ -5675,5 +5675,91 @@ class AppLocalizationsFr extends AppLocalizations {
   String get amountMustBeGreaterThanZero => 'La quantité doit être positive';
 
   @override
-  String get returnBack => 'Retour à la page précédente';
+  String get returnBack => 'Retour';
+
+  @override
+  String get youHaveNoPendingInvitations => 'Vous n\'avez aucune invitation en attente pour le moment.';
+
+  @override
+  String get contactAdminForAccess => 'Contactez votre administrateur pour demander l\'accès.';
+
+  @override
+  String get invitations => 'Invitations';
+
+  @override
+  String get activeAssignments => 'Attributions actives';
+
+  @override
+  String get noActiveAssignments => 'Aucune attribution active';
+
+  @override
+  String get noActiveDescription => 'Vous n\'avez aucune attribution active.';
+
+  @override
+  String get noInvitationsOrAssignments => 'Aucune invitation ou attribution';
+
+  @override
+  String get noInvitationsDescription => 'Vous n\'avez aucune invitation en attente ou attribution active.';
+
+  @override
+  String get noPendingDescription => 'Vous n\'avez aucune invitation en attente.';
+
+  @override
+  String get refresh => 'Actualiser';
+
+  @override
+  String get loadingData => 'Chargement des données...';
+
+  @override
+  String get loadingInvitations => 'Chargement des invitations...';
+
+  @override
+  String get pendingStatus => 'En attente';
+
+  @override
+  String get activeStatus => 'Actif';
+
+  @override
+  String get rejected => 'Rejeté';
+
+  @override
+  String get expired => 'Expiré';
+
+  @override
+  String get roleCode => 'Code de rôle';
+
+  @override
+  String get expiry => 'Expiration';
+
+  @override
+  String get noExpiry => 'Pas d\'expiration';
+
+  @override
+  String get expiredDate => 'Expiré';
+
+  @override
+  String get tomorrow => 'Demain';
+
+  @override
+  String inDays(Object days) {
+    return 'Dans $days jours';
+  }
+
+  @override
+  String get actionFailed => 'Action échouée';
+
+  @override
+  String get noInvitationsFound => 'Aucune invitation trouvée';
+
+  @override
+  String get userNotAuthenticated => 'Utilisateur non authentifié';
+
+  @override
+  String get failedToLoadInvitations => 'Échec du chargement des invitations';
+
+  @override
+  String get markAllAsRead => 'Tout marquer comme lu';
+
+  @override
+  String get viewAll => 'Voir tout';
 }

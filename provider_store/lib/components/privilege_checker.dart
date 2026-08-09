@@ -28,12 +28,12 @@ class PrivilegeChecker extends StatelessWidget {
 
         final userRules = personnelNotifier
             .getRulesForUser(currentUser.idAppUser ?? 0)
-            .where((r) => r.isActiveStatus)
+            .where((r) => r.isActive)
             .toList();
 
         final hasAccess = userRules.any((rule) =>
-            rule.productProvider?.id_product_provider == supplierId &&
-            (rule.management_rule_code & requiredPrivilege) != 0);
+            rule.productProvider?.idProductProvider == supplierId &&
+            (rule.managementRuleCode & requiredPrivilege) != 0);
 
         if (!hasAccess) {
           return noAccessChild ?? _buildNoAccessWidget(context);
