@@ -96,51 +96,88 @@ class AppUserNotifier extends ChangeNotifier {
       debugPrint('   User Data: ${userData != null ? "YES" : "NO"}');
       debugPrint('   Is Authenticated: $isAuthenticated');
 
-      if (isAuthenticated && token != null && userData != null) {
+      // Store tokens first if they exist
+      if (token != null) {
         _state.token = token;
+      }
+      if (refreshToken != null) {
         _state.refreshToken = refreshToken;
-        _state.isAuthenticated = true;
+      }
 
-        // Parse user data
+      // Restore expiry
+      if (expiry != null && expiry.isNotEmpty) {
+        _state.tokenExpiry = DateTime.tryParse(expiry);
+      }
+
+      // Parse user data - but preserve existing user if parsing fails
+      if (userData != null && userData.isNotEmpty) {
         final user = _persistence.parseUserData(userData);
         if (user != null) {
           _state.setUser(user);
           debugPrint('✅ User restored: ${user.appUserName}');
         } else {
-          debugPrint('⚠️ Failed to parse user data');
-          await _persistence.clear();
-          _state.clearUser();
-          _state.clearTokens();
+          debugPrint(
+              '⚠️ Failed to parse user data, but preserving existing user if any');
+          // Only clear if we don't already have a user
+          if (_state.appUser == null) {
+            await _persistence.clear();
+            _state.clearUser();
+            _state.clearTokens();
+          }
         }
+      }
 
-        // Restore expiry
-        if (expiry != null && expiry.isNotEmpty) {
-          _state.tokenExpiry = DateTime.tryParse(expiry);
-        }
+      // Set initial auth state
+      if (token != null && _state.appUser != null) {
+        _state.isAuthenticated = true;
 
         // Check token validity
-        if (_state.appUser != null) {
-          if (_state.tokenExpiry != null &&
-              DateTime.now().isAfter(_state.tokenExpiry!)) {
-            debugPrint('⚠️ Token expired, refreshing...');
-            final refreshed = await _token.refresh(callerKey: key);
-            if (!refreshed) {
-              debugPrint('❌ Token refresh failed');
-              await _persistence.clear();
-              _state.clearUser();
-              _state.clearTokens();
+        if (_state.tokenExpiry != null &&
+            DateTime.now().isAfter(_state.tokenExpiry!)) {
+          debugPrint('⚠️ Token expired, refreshing...');
+          final refreshed = await _token.refresh(callerKey: key);
+          if (!refreshed) {
+            debugPrint('❌ Token refresh failed');
+            await _persistence.clear();
+            _state.clearUser();
+            _state.clearTokens();
+            _state.isAuthenticated = false;
+          } else {
+            debugPrint('✅ Token refreshed successfully');
+            // Ensure user is still set after refresh
+            if (_state.appUser != null) {
+              _response.storeSuccess(key, _state.appUser,
+                  statusCode: 200, responseCode: 'AUTH_RESTORED');
+              debugPrint(
+                  '✅ Auth state restored: ${_state.appUser?.appUserName}');
             }
-          } else if (_state.needsTokenRefresh) {
-            debugPrint('🔄 Token needs refresh...');
-            await _token.refresh(callerKey: key);
           }
-
-          _response.storeSuccess(key, _state.appUser,
-              statusCode: 200, responseCode: 'AUTH_RESTORED');
-          debugPrint('✅ Auth state restored: ${_state.appUser?.appUserName}');
+        } else if (_state.needsTokenRefresh) {
+          debugPrint('🔄 Token needs refresh (expires soon), refreshing...');
+          final refreshed = await _token.refresh(callerKey: key);
+          if (!refreshed) {
+            debugPrint(
+                '⚠️ Token refresh failed, but continuing with existing token');
+          } else {
+            debugPrint('✅ Token refreshed successfully');
+          }
+          // Even if refresh fails, keep the user if token is still valid
+          if (_state.appUser != null) {
+            _response.storeSuccess(key, _state.appUser,
+                statusCode: 200, responseCode: 'AUTH_RESTORED');
+            debugPrint('✅ Auth state restored: ${_state.appUser?.appUserName}');
+          }
+        } else {
+          // Token is valid
+          if (_state.appUser != null) {
+            _response.storeSuccess(key, _state.appUser,
+                statusCode: 200, responseCode: 'AUTH_RESTORED');
+            debugPrint('✅ Auth state restored: ${_state.appUser?.appUserName}');
+            debugPrint('   Token valid until: $_state.tokenExpiry');
+          }
         }
       } else {
-        debugPrint('ℹ️ No auth state found');
+        debugPrint('ℹ️ No valid auth state found');
         _response.storeSuccess(key, null,
             statusCode: 200, responseCode: 'NO_AUTH_FOUND');
       }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
+import 'package:provider_store/components/dashboard/dashboard_content.dart';
 
 class DashboardItem {
   final DashboardScreenType type;
@@ -16,6 +17,7 @@ class DashboardItem {
     required this.label,
     required this.index,
     this.privilegeLevel,
+    required SupplierAccessType supplierAccessType,
   });
 
   bool get showFloatingAction => type != DashboardScreenType.suppliersPersonnel;

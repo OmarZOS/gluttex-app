@@ -30,12 +30,12 @@ abstract class SupplierService extends TraceableService {
   }
 
   Future<List<Supplier>> getAllSuppliers(
-      int owner_id, int org_id, int offset, int itemsPerPage) async {
+      int ownerId, int orgId, int offset, int itemsPerPage) async {
     throw UnimplementedError();
   }
 
   Future<List<Organisation>> getAllOrganisations(
-      int owner_id, int org_id, int offset, int itemsPerPage) async {
+      int ownerId, int orgId, int offset, int itemsPerPage) async {
     throw UnimplementedError();
   }
 

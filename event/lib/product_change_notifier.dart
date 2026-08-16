@@ -11,8 +11,6 @@ import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
 import 'package:locator/locator.dart';
 
-// Import all components
-
 class ProductNotifier extends ChangeNotifier {
   final ProductService _service = AppLocator.get<ProductService>();
 
@@ -36,9 +34,10 @@ class ProductNotifier extends ChangeNotifier {
   int get currentUserId => _state.currentUserId;
   int get itemsPerPage => _state.itemsPerPage;
 
+  // FIXED: Use addPostFrameCallback to avoid setState during build
   set productCategories(List<String> value) {
     _state.categories = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   void _initComponents() {
@@ -73,9 +72,19 @@ class ProductNotifier extends ChangeNotifier {
     super.dispose();
   }
 
+  // FIXED: Safe notification that avoids setState during build
+  void _safeNotify() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_state.isLoading && hasListeners) {
+        notifyListeners();
+      }
+    });
+  }
+
   void _notify() {
     if (!_state.isLoading) {
-      notifyListeners();
+      // Use safe notification to avoid build-time updates
+      _safeNotify();
     }
   }
 

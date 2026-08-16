@@ -446,23 +446,22 @@ class SupplierServiceImpl extends SupplierService {
 
   @override
   Future<List<Supplier>> getAllSuppliers(
-    int owner_id,
-    int org_id,
+    int ownerId,
+    int orgId,
     int offset,
     int itemsPerPage, {
     String? callerKey,
   }) async {
     final key = callerKey ??
         _getCallerKey('getAllSuppliers',
-            suffix: '${owner_id}_${org_id}_${offset}_$itemsPerPage');
+            suffix: '${ownerId}_${orgId}_${offset}_$itemsPerPage');
 
     try {
       final storageService = AppLocator.get<StorageService>();
-
       // Build URL with query parameters
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getAllSuppliersEndpoint}'
-          '?owner_id=$owner_id&org_id=$org_id&offset=$offset&limit=$itemsPerPage';
+          '?owner_id=$ownerId&org_id=$orgId&offset=$offset&limit=$itemsPerPage';
 
       developer.log('Getting all suppliers from: $url',
           name: 'SupplierServiceImpl');
@@ -511,15 +510,15 @@ class SupplierServiceImpl extends SupplierService {
 
   @override
   Future<List<Organisation>> getAllOrganisations(
-    int owner_id,
-    int org_id,
+    int ownerId,
+    int orgId,
     int offset,
-    int limit, {
+    int itemsPerPage, {
     String? callerKey,
   }) async {
     final key = callerKey ??
         _getCallerKey('getAllOrganisations',
-            suffix: '${owner_id}_${org_id}_${offset}_$limit');
+            suffix: '${ownerId}_${orgId}_${offset}_$itemsPerPage');
 
     try {
       final storageService = AppLocator.get<StorageService>();
@@ -527,9 +526,9 @@ class SupplierServiceImpl extends SupplierService {
       // Build URL with query parameters
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getOrganisationsEndpoint}'
-          '?offset=$offset&limit=$limit';
+          '?offset=$offset&limit=$itemsPerPage';
 
-      if (owner_id > 0) {
+      if (ownerId > 0) {
         // Add owner filter if needed
       }
 

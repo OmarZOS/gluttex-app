@@ -29,6 +29,9 @@ class SupplierChangeNotifier extends ChangeNotifier {
   late final SupplierLocation _location;
   late final SupplierOrganisation _organisation;
 
+  // Track pending individual fetches
+  final Map<int, Future<Supplier?>> _pendingFetches = {};
+
   SupplierChangeNotifier() {
     _initComponents();
     _loadPersistedData();
@@ -92,7 +95,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
     _persistence.setCurrentUser(userId);
   }
 
-  // ============ SUPPLIER OPERATIONS (DELEGATED) ============
+  // ============ SUPPLIER OPERATIONS ============
 
   Future<void> fetchSuppliers({
     bool reset = false,
@@ -102,32 +105,38 @@ class SupplierChangeNotifier extends ChangeNotifier {
   }) async {
     if (_state.isLoading || (!reset && !_state.hasMoreSuppliers)) return;
 
-    final cacheKey =
-        'suppliers_${ownerId ?? 0}_${organisationId ?? 0}_${_state.suppliersPage}';
-
-    if (!forceRefresh && !reset) {
-      final cached = _cache.getList(cacheKey);
-      if (cached != null && cached.isNotEmpty) {
-        _addSuppliers(cached);
-        return;
-      }
-    }
-
     if (reset) {
       _state.suppliers.clear();
       _state.suppliersPage = 0;
       _state.hasMoreSuppliers = true;
     }
 
+    final cacheKey =
+        'suppliers_${ownerId ?? 0}_${organisationId ?? 0}_${_state.suppliersPage}';
+
+    if (!forceRefresh) {
+      final cached = _cache.getList(cacheKey);
+
+      if (cached != null) {
+        _addSuppliers(cached);
+        _state.hasMoreSuppliers = cached.length >= SupplierState.itemsPerPage;
+        return;
+      }
+    }
+
     _state.isLoading = true;
 
     try {
+      // IMPORTANT: Make the API call with the actual ownerId
       final results = await _service.getAllSuppliers(
         ownerId ?? 0,
         organisationId ?? 0,
         _state.suppliersPage * SupplierState.itemsPerPage,
         SupplierState.itemsPerPage,
       );
+
+      debugPrint(
+          '📡 API returned ${results.length} suppliers for ownerId: $ownerId');
 
       if (!reset) {
         _cache.cacheList(cacheKey, results);
@@ -136,31 +145,188 @@ class SupplierChangeNotifier extends ChangeNotifier {
       _addSuppliers(results);
       _state.hasMoreSuppliers = results.length >= SupplierState.itemsPerPage;
       if (_state.hasMoreSuppliers) _state.suppliersPage++;
+
+      debugPrint('📦 Fetched ${results.length} suppliers (ownerId: $ownerId)');
+    } catch (e) {
+      debugPrint('❌ Error fetching suppliers: $e');
     } finally {
       _state.isLoading = false;
       notifyListeners();
     }
   }
 
+  /// Fetch suppliers owned by a specific user
+  Future<List<Supplier>> fetchOwnedSuppliers(
+    int userId, {
+    bool forceRefresh = false,
+  }) async {
+    debugPrint('👑 Fetching owned suppliers for user: $userId');
+
+    // Use a unique cache key for owned suppliers
+    final ownedCacheKey = 'owned_suppliers_$userId';
+
+    // Check cache first (unless forceRefresh)
+    if (!forceRefresh) {
+      final cached = _cache.getList(ownedCacheKey);
+      if (cached != null && cached.isNotEmpty) {
+        debugPrint(
+            '📦 Using cached owned suppliers for user $userId: ${cached.length}');
+        // Add to state if not already there
+        for (final supplier in cached) {
+          _upsertSupplier(supplier);
+        }
+        return cached;
+      }
+    }
+
+    // Fetch owned suppliers directly from API
+    try {
+      final results = await _service.getAllSuppliers(
+        userId, // owner_id
+        0, // org_id
+        0, // offset
+        100, // limit - enough for owned suppliers
+      );
+
+      debugPrint(
+          '📡 API returned ${results.length} owned suppliers for user $userId');
+
+      // Cache the results
+      _cache.cacheList(ownedCacheKey, results);
+
+      // Add to state (using upsert to avoid duplicates)
+      for (final supplier in results) {
+        _upsertSupplier(supplier);
+      }
+
+      return results;
+    } catch (e) {
+      debugPrint('❌ Error fetching owned suppliers: $e');
+      return [];
+    }
+  }
+
+  /// Upsert a supplier (add if not exists, update if exists)
+  void _upsertSupplier(Supplier supplier) {
+    final index = _state.suppliers
+        .indexWhere((s) => s.idProductProvider == supplier.idProductProvider);
+
+    if (index >= 0) {
+      _state.suppliers[index] = supplier;
+    } else {
+      _state.suppliers.add(supplier);
+    }
+
+    _cache.cacheSupplier(supplier);
+  }
+
+  /// Get a supplier by ID - tries cache first, then fetches individually
   Future<Supplier?> getSupplierById(int id, {bool forceRefresh = false}) async {
+    // Check cache first
     if (!forceRefresh) {
       final cached = _cache.getSupplier(id);
-      if (cached != null && cached.idProductProvider != 0) return cached;
+      if (cached != null && cached.idProductProvider != 0) {
+        debugPrint('📦 Supplier $id found in cache');
+        return cached;
+      }
     }
 
-    _state.isLoading = true;
+    // Check if there's already a pending fetch for this ID
+    if (_pendingFetches.containsKey(id)) {
+      debugPrint('⏳ Supplier $id fetch already in progress, waiting...');
+      return _pendingFetches[id];
+    }
+
+    // Start fetching
+    debugPrint('🔄 Fetching supplier $id individually...');
+    final future = _fetchSupplierById(id);
+    _pendingFetches[id] = future;
 
     try {
-      final supplier = await _service.getSupplier(id.toString());
-      if (supplier != null && supplier.idProductProvider != 0) {
-        _cache.cacheSupplier(supplier);
-        _updateSupplierInList(supplier);
-      }
+      final supplier = await future;
       return supplier;
     } finally {
-      _state.isLoading = false;
-      notifyListeners();
+      _pendingFetches.remove(id);
     }
+  }
+
+  /// Internal method to fetch a single supplier by ID
+  Future<Supplier?> _fetchSupplierById(int id) async {
+    try {
+      final supplier = await _service.getSupplier(id.toString());
+
+      if (supplier == null || supplier.idProductProvider == 0) {
+        return null;
+      }
+
+      _upsertSupplier(supplier);
+      return supplier;
+    } catch (e) {
+      debugPrint('Failed to fetch supplier $id: $e');
+      return null;
+    }
+  }
+
+  /// Get multiple suppliers by IDs - batch fetch
+  Future<List<Supplier>> getSuppliersByIds(List<int> ids,
+      {bool forceRefresh = false}) async {
+    if (ids.isEmpty) return [];
+
+    final uniqueIds = ids.toSet().toList();
+    final results = <Supplier>[];
+    final missingIds = <int>[];
+
+    // Check cache first
+    for (final id in uniqueIds) {
+      if (!forceRefresh) {
+        final cached = _cache.getSupplier(id);
+        if (cached != null && cached.idProductProvider != 0) {
+          results.add(cached);
+        } else {
+          missingIds.add(id);
+        }
+      } else {
+        missingIds.add(id);
+      }
+    }
+
+    // Fetch missing IDs
+    if (missingIds.isNotEmpty) {
+      debugPrint('🔄 Fetching ${missingIds.length} missing suppliers...');
+      final fetchFutures =
+          missingIds.map((id) => getSupplierById(id, forceRefresh: true));
+      final fetched = await Future.wait(fetchFutures);
+      results.addAll(fetched.whereType<Supplier>());
+    }
+
+    return results;
+  }
+
+  /// Get suppliers owned by a specific user (filtered locally)
+  /// Get suppliers owned by a specific user - ensures fresh data
+  Future<List<Supplier>> getSuppliersOwnedBy(
+    int userId, {
+    bool forceRefresh = false,
+  }) async {
+    // Always fetch fresh to ensure accuracy
+    await fetchSuppliers(
+      ownerId: userId,
+      reset: true,
+      forceRefresh: forceRefresh,
+    );
+
+    return List.unmodifiable(
+      _state.suppliers.where(
+        (s) => s.productProviderOwnerId == userId,
+      ),
+    );
+  }
+
+  /// Get suppliers for a specific organisation (filtered locally)
+  List<Supplier> getSuppliersForOrganisation(int organisationId) {
+    return _state.suppliers
+        .where((s) => s.idProviderOrganisation == organisationId)
+        .toList();
   }
 
   Future<Supplier> createOrUpdateSupplier(Supplier supplier, String token) =>
@@ -175,7 +341,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
         return result;
       });
 
-  // ============ SEARCH OPERATIONS (DELEGATED) ============
+  // ============ SEARCH OPERATIONS ============
 
   Future<void> searchSuppliers(String query) =>
       _search.search(query).then((_) => notifyListeners());
@@ -199,7 +365,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ============ LOCATION OPERATIONS (DELEGATED) ============
+  // ============ LOCATION OPERATIONS ============
 
   Future<Position?> getCurrentLocation() =>
       _location.getCurrentLocation().then((pos) {
@@ -207,7 +373,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
         return pos;
       });
 
-  // ============ ORGANISATION OPERATIONS (DELEGATED) ============
+  // ============ ORGANISATION OPERATIONS ============
 
   Future<void> fetchOrganisations({bool reset = false}) =>
       _organisation.fetch(reset: reset).then((_) => notifyListeners());
@@ -236,7 +402,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
         return result;
       });
 
-  // ============ CACHE MANAGEMENT (DELEGATED) ============
+  // ============ CACHE MANAGEMENT ============
 
   void enableCaching(bool enable) {
     _cache.enable(enable);
@@ -245,14 +411,19 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
   void invalidateCache({int? supplierId, String? listKey}) {
     _cache.invalidate(supplierId: supplierId, listKey: listKey);
+    // Clear pending fetches for invalidated supplier
+    if (supplierId != null) {
+      _pendingFetches.remove(supplierId);
+    }
   }
 
   void refreshAllCaches() {
     _cache.clearAll();
+    _pendingFetches.clear();
     notifyListeners();
   }
 
-  // ============ PERSISTENCE OPERATIONS (DELEGATED) ============
+  // ============ PERSISTENCE OPERATIONS ============
 
   Future<void> clearPersistedData() =>
       _persistence.clearAll().then((_) => notifyListeners());
@@ -276,41 +447,22 @@ class SupplierChangeNotifier extends ChangeNotifier {
   // ============ HELPERS ============
 
   void _addSuppliers(List<Supplier> newSuppliers) {
+    if (newSuppliers.isEmpty) {
+      debugPrint('⚠️ _addSuppliers called with empty list');
+      return;
+    }
+
     debugPrint('📦 _addSuppliers called with ${newSuppliers.length} suppliers');
 
-    final existingIds =
-        _state.suppliers.map((s) => s.idProductProvider).toSet();
-    debugPrint('📦 Existing supplier IDs: $existingIds');
-
-    int addedCount = 0;
     for (final supplier in newSuppliers) {
       if (supplier.idProductProvider == 0) {
         debugPrint('⚠️ Skipping supplier with ID 0: ${supplier.providerName}');
         continue;
       }
-      if (existingIds.contains(supplier.idProductProvider)) {
-        debugPrint('⚠️ Supplier ${supplier.idProductProvider} already exists');
-        continue;
-      }
-
-      _state.suppliers.add(supplier);
-      _cache.cacheSupplier(supplier);
-      existingIds.add(supplier.idProductProvider);
-      addedCount++;
-      debugPrint(
-          '✅ Added supplier: ${supplier.idProductProvider} - ${supplier.providerName}');
+      _upsertSupplier(supplier);
     }
 
-    debugPrint(
-        '📦 Added $addedCount new suppliers, total: ${_state.suppliers.length}');
-  }
-
-  void _updateSupplierInList(Supplier supplier) {
-    final index = _state.suppliers
-        .indexWhere((s) => s.idProductProvider == supplier.idProductProvider);
-    if (index != -1) {
-      _state.suppliers[index] = supplier;
-    }
+    debugPrint('📦 Total suppliers: ${_state.suppliers.length}');
   }
 
   // ============ STATE RESET ============
@@ -318,6 +470,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
   void reset() {
     _state.reset();
     _cache.clearAll();
+    _pendingFetches.clear();
     notifyListeners();
   }
 

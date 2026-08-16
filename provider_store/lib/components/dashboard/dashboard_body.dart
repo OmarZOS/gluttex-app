@@ -30,6 +30,7 @@ class DashboardBody extends StatelessWidget {
   final int selectedSupplierId;
 
   const DashboardBody({
+    super.key,
     required this.selectedIndex,
     required this.items,
     this.selectedSupplierId = 0,
@@ -61,6 +62,17 @@ class DashboardBody extends StatelessWidget {
     final userRules = personnelNotifier.getRulesForUser(userId);
     final suppliers = _getSuppliersFromRules(userRules);
 
+    // Get the selected supplier name if available
+    if (selectedSupplierId > 0) {
+      try {
+        final supplier = supplierNotifier.suppliers.firstWhere(
+          (s) => s.idProductProvider == selectedSupplierId,
+        );
+      } catch (e) {
+        // Supplier not found
+      }
+    }
+
     switch (item.type) {
       case DashboardScreenType.inventory:
         return Consumer<ProductNotifier>(
@@ -72,15 +84,24 @@ class DashboardBody extends StatelessWidget {
             suppliers: suppliers,
             products: productNotifier.products,
             isLoading: productNotifier.isLoading,
-            searchQuery: productNotifier.currentSearchQuery,
+            searchQuery: productNotifier.currentSearchQuery ?? '',
             currentProviderId: selectedSupplierId > 0
                 ? selectedSupplierId
-                : productNotifier.currentProviderId,
+                : productNotifier.currentProviderId ?? 0,
             onSupplierChanged: (supplierId) {
               productNotifier.fetchProducts(providerId: supplierId);
             },
-            onSearchChanged: productNotifier.searchProducts,
-            onProductTap: (productId) {},
+            onSearchChanged: (query) {
+              productNotifier.searchProducts(query);
+            },
+            onProductTap: (productId) {
+              // Navigate to product details
+              Navigator.pushNamed(
+                context,
+                AppRoutes.productDetails,
+                arguments: {'productId': productId},
+              );
+            },
             onRefresh: () => productNotifier.fetchProducts(reset: true),
             onAddProduct: () =>
                 Navigator.pushNamed(context, AppRoutes.productCreate),
@@ -89,18 +110,13 @@ class DashboardBody extends StatelessWidget {
 
       case DashboardScreenType.orders:
         return Consumer<OrderChangeNotifier>(
-          builder: (context, orderNotifier, child) => DeliveryTabbedView(
-              // selectedSupplierId: selectedSupplierId,
-              // other props...
-              ),
+          builder: (context, orderNotifier, child) => DeliveryTabbedView(),
         );
 
       case DashboardScreenType.operations:
         return Consumer<PersonnelNotifier>(
           builder: (context, personnelNotifier, child) =>
-              BusinessOperationsScreen(
-                  // selectedSupplierId: selectedSupplierId,
-                  ),
+              BusinessOperationsScreen(),
         );
 
       case DashboardScreenType.pos:
@@ -112,12 +128,15 @@ class DashboardBody extends StatelessWidget {
             serviceNotifier: serviceNotifier,
             userId: userId,
             accessibleSuppliers: supplierIds,
-            // selectedSupplierId: selectedSupplierId,
             personnelNotifier: personnelNotifier,
             productNotifier: context.read<ProductNotifier>(),
             cartNotifier: cartNotifier,
-            onScanBarcode: () {},
-            onSearchChanged: () {},
+            onScanBarcode: () {
+              // Handle barcode scan
+            },
+            onSearchChanged: () {
+              // Handle search
+            },
           ),
         );
 
@@ -128,7 +147,6 @@ class DashboardBody extends StatelessWidget {
                   financeChangeNotifier, child) =>
               FinanceScreen(
             financeNotifier: financeChangeNotifier,
-            // selectedSupplierId: selectedSupplierId,
           ),
         );
 
@@ -146,7 +164,6 @@ class DashboardBody extends StatelessWidget {
             return SupplierEntitiesScreen(
               userId: currentUserId,
               accessibleSuppliers: accessibleSuppliers,
-              // selectedSupplierId: selectedSupplierId,
               userRules: userRules,
               suppliers: suppliers,
             );
@@ -163,7 +180,6 @@ class DashboardBody extends StatelessWidget {
               privilegeLevel: item.privilegeLevel ?? PrivilegeLevel.view,
               userId: userId,
               accessibleSuppliers: supplierIds,
-              // selectedSupplierId: selectedSupplierId,
               userRules: userRules,
               personnelNotifier: personnelNotifier,
               serviceNotifier: serviceNotifier,
@@ -174,15 +190,23 @@ class DashboardBody extends StatelessWidget {
   }
 
   List<ProductProvider> _getSuppliersFromRules(List<ManagementRule> rules) {
+    if (rules.isEmpty) return [];
+
     final suppliers = <ProductProvider>[];
     final supplierIds = <int>{};
 
     for (final rule in rules) {
-      final supplier = rule.productProvider;
-      if (supplier != null &&
-          !supplierIds.contains(supplier.idProductProvider)) {
-        supplierIds.add(supplier.idProductProvider);
-        suppliers.add(supplier);
+      try {
+        final supplier = rule.productProvider;
+        if (supplier != null &&
+            supplier.idProductProvider != null &&
+            !supplierIds.contains(supplier.idProductProvider)) {
+          supplierIds.add(supplier.idProductProvider);
+          suppliers.add(supplier);
+        }
+      } catch (e) {
+        // Skip invalid rules
+        continue;
       }
     }
 

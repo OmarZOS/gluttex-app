@@ -37,22 +37,39 @@ class AuthTokenManager {
       final result = await _authService.refreshTokenNow(_state.refreshToken!);
 
       if (result != null && result['access_token'] != null) {
+        // Preserve user data while updating tokens
+        final user = _state.appUser;
+
         _state.setTokens(
           result['access_token'],
           result['refresh_token'] ?? _state.refreshToken!,
           result['expires_in'] ?? 3600,
         );
+
+        // Restore user data if it was cleared
+        if (user != null && _state.appUser == null) {
+          _state.setUser(user);
+        }
+
         await _saveAuthData();
         debugPrint('✅ Token refreshed successfully');
         _state.setRefreshing(false);
         return true;
       } else {
-        await _clearAuth();
+        // Don't clear auth on refresh failure - keep existing tokens
+        debugPrint(
+            '❌ Token refresh failed - response invalid, but keeping existing auth');
         _state.setRefreshing(false);
         return false;
       }
     } catch (e) {
       debugPrint('❌ Token refresh error: $e');
+      // Don't clear auth on network errors - keep existing tokens
+      // Only clear if it's an auth error (401, 403)
+      if (e.toString().contains('401') || e.toString().contains('403')) {
+        debugPrint('⚠️ Auth error detected, clearing auth state');
+        await _clearAuth();
+      }
       _state.setRefreshing(false);
       return false;
     }

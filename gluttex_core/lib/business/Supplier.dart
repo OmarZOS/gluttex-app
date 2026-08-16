@@ -349,9 +349,7 @@ class Supplier {
         providerContactInfo: _getString(
           json['provider_contact_info'] ?? provider['provider_contact_info'],
         ),
-        productProviderOwnerId: _parseInt(
-          provider['product_provider_owner'] ?? json['product_provider_owner'],
-        ),
+        productProviderOwnerId: _parseInt(json['product_provider_owner']),
         locationLatitude: latitude ?? 0.0,
         locationLongitude: longitude ?? 0.0,
         productProviderTypeId: _parseInt(

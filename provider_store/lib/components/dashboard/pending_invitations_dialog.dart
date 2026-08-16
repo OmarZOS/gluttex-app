@@ -1,9 +1,11 @@
+import 'package:event/user_change_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:provider_personnel/components/privilege_ui.dart';
+import 'package:provider/provider.dart';
 
 class PendingInvitationsDialog extends StatelessWidget {
   final List<ManagementRule> pendingRules;
@@ -143,6 +145,7 @@ class PendingInvitationItem extends StatelessWidget {
     final success = await personnelNotifier.answerInvitation(
       ruleId: rule.idManagementRule ?? 0,
       answer: accept ? 0 : 1,
+      token: Provider.of<AppUserNotifier>(context, listen: false).token ?? '',
     );
 
     if (success && context.mounted) {

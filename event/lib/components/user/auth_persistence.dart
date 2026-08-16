@@ -80,7 +80,19 @@ class AuthPersistence {
 
     try {
       final json = jsonDecode(userData);
-      return AppUser.fromPersistedJson(json);
+
+      // Try both formats
+      try {
+        return AppUser.fromPersistedJson(json);
+      } catch (e) {
+        debugPrint('⚠️ Failed to parse as persisted JSON: $e');
+        try {
+          return AppUser.fromJson(json);
+        } catch (e2) {
+          debugPrint('⚠️ Failed to parse as API JSON: $e2');
+          return null;
+        }
+      }
     } catch (e) {
       debugPrint('❌ Error parsing user data: $e');
       return null;
