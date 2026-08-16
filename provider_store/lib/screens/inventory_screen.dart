@@ -8,7 +8,6 @@ import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:provider_store/components/inventory/inventory_app_bar.dart';
 import 'package:provider_store/components/inventory/product_list.dart';
 import 'package:provider_store/components/inventory/search_bar.dart';
-import 'package:provider_store/components/selling_point/selling_point_supplier.dart';
 
 class InventoryScreen extends StatefulWidget {
   final PrivilegeLevel privilegeLevel;
@@ -52,7 +51,6 @@ class InventoryScreen extends StatefulWidget {
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
-  late int? _selectedSupplierId;
   late List<Product> _filteredProducts;
   late bool _hasInventoryAccess;
 
@@ -71,17 +69,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   bool _shouldRebuild(InventoryScreen oldWidget) {
-    return oldWidget.userId != widget.userId ||
-        oldWidget.userRules != widget.userRules ||
-        oldWidget.products != widget.products ||
+    return oldWidget.products != widget.products ||
         oldWidget.searchQuery != widget.searchQuery ||
-        oldWidget.currentProviderId != widget.currentProviderId ||
-        oldWidget.privilegeLevel != widget.privilegeLevel;
+        oldWidget.privilegeLevel != widget.privilegeLevel ||
+        oldWidget.currentProviderId != widget.currentProviderId;
   }
 
   void _initializeData() {
     _hasInventoryAccess = _checkInventoryAccess();
-    _selectedSupplierId = _getSelectedSupplierId();
     _filteredProducts = _filterProducts();
   }
 
@@ -94,61 +89,28 @@ class _InventoryScreenState extends State<InventoryScreen> {
     });
   }
 
-  int? _getSelectedSupplierId() {
-    // First, check if there's a currentProviderId from parent
-    if (widget.currentProviderId != null) {
-      return widget.currentProviderId;
-    }
-
-    // If not, fall back to finding first accessible supplier
-    for (final rule in widget.userRules) {
-      if (!rule.isActive) continue;
-
-      final ruleCode = rule.managementRuleCode ?? 0;
-      final hasRequiredPrivilege = widget._canManage
-          ? RoleBitMapper.hasPrivilege(ruleCode, 'inventory_manage')
-          : RoleBitMapper.hasPrivilege(ruleCode, 'inventory_view');
-
-      if (hasRequiredPrivilege) {
-        return rule.productProvider?.idProductProvider;
-      }
-    }
-    return null;
-  }
-
   List<Product> _filterProducts() {
-    if (widget.searchQuery.isEmpty) return widget.products;
+    // 👇 CRITICAL: Filter products by selected supplier ID first
+    List<Product> products = widget.products;
 
-    return widget.products
-        .where((product) => product.product_name!
-            .toLowerCase()
-            .contains(widget.searchQuery.toLowerCase()))
-        .toList();
-  }
-
-  List<ProductProvider> _getAccessibleSuppliers() {
-    final accessibleSuppliers = <ProductProvider>[];
-    final supplierIds = <int>{};
-
-    for (final rule in widget.userRules) {
-      if (!rule.isActive) continue;
-
-      final ruleCode = rule.managementRuleCode ?? 0;
-      final hasRequiredPrivilege = widget._canManage
-          ? RoleBitMapper.hasPrivilege(ruleCode, 'inventory_manage')
-          : RoleBitMapper.hasPrivilege(ruleCode, 'inventory_view');
-
-      if (hasRequiredPrivilege) {
-        final supplier = rule.productProvider;
-        if (supplier != null &&
-            !supplierIds.contains(supplier.idProductProvider)) {
-          supplierIds.add(supplier.idProductProvider);
-          accessibleSuppliers.add(supplier);
-        }
-      }
+    // Filter by supplier ID
+    if (widget.currentProviderId != null && widget.currentProviderId! > 0) {
+      products = products.where((product) {
+        return product.product_provider_id == widget.currentProviderId;
+      }).toList();
     }
 
-    return accessibleSuppliers;
+    // Then filter by search query
+    if (widget.searchQuery.isNotEmpty) {
+      products = products.where((product) {
+        return product.product_name != null &&
+            product.product_name!
+                .toLowerCase()
+                .contains(widget.searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    return products;
   }
 
   @override
@@ -157,11 +119,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
       return _buildNoAccessState(context);
     }
 
-    if (_selectedSupplierId == null) {
+    if (widget.currentProviderId == null || widget.currentProviderId == 0) {
       return _buildNoSupplierSelected(context);
     }
-
-    final accessibleSuppliers = _getAccessibleSuppliers();
 
     return Scaffold(
       body: SafeArea(
@@ -170,28 +130,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
             InventoryAppBar(
               onRefresh: widget.onRefresh,
               privilegeLevel: widget.privilegeLevel,
-              hasSupplierSelected: _selectedSupplierId != null,
-            ),
-            SupplierSelector(
-              accessibleSuppliers: accessibleSuppliers,
-              selectedSupplierId: _selectedSupplierId,
-              // allSuppliers: accessibleSuppliers,
-              onSupplierChanged: (supplierId) {
-                if (supplierId != null) {
-                  widget.onSupplierChanged(supplierId);
-                }
-              },
-              // filterPrivilege:
-              //     widget._canManage ? 'inventory_manage' : 'inventory_view',
-              // userRules: widget.userRules,
+              hasSupplierSelected: widget.currentProviderId != null,
             ),
             const SizedBox(height: 8),
-            if (_hasInventoryAccess && _selectedSupplierId != null)
-              InventorySearchBar(
-                searchQuery: widget.searchQuery,
-                onSearchChanged: widget.onSearchChanged,
-                isEnabled: widget._canView,
-              ),
+            InventorySearchBar(
+              searchQuery: widget.searchQuery,
+              onSearchChanged: widget.onSearchChanged,
+              isEnabled: widget._canView,
+            ),
             const SizedBox(height: 8),
             Expanded(
               child: _buildProductList(context),
@@ -213,7 +159,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
 
     return ProductList(
-      selectedSupplierId: _selectedSupplierId!,
+      selectedSupplierId: widget.currentProviderId!,
       searchQuery: widget.searchQuery,
       products: _filteredProducts,
       isLoading: widget.isLoading,
@@ -372,7 +318,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   Widget? _buildAddProductButton(BuildContext context) {
-    if (!widget._canManage || _selectedSupplierId == null) return null;
+    if (!widget._canManage || widget.currentProviderId == null) return null;
 
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);

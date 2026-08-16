@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:app_constants/app_routes.dart';
@@ -21,27 +22,40 @@ class RecipeCatalogScreen extends StatefulWidget {
 class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  late List<String> _categories = [];
-  late RecipeNotifier notifier;
+
+  late RecipeNotifier _recipeNotifier;
+  late AppUserNotifier _userNotifier;
+
+  List<String> _categories = [];
   int _selectedCategoryId = 0;
   bool _isSearching = false;
   bool _initialized = false;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
     _scrollController.addListener(_scrollListener);
+  }
 
-    // Get reference to notifier
-    notifier = Provider.of<RecipeNotifier>(context, listen: false);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    // Use addPostFrameCallback to avoid calling during build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _initializeData();
-      }
-    });
+    // Get notifiers from parent
+    _recipeNotifier = context.read<RecipeNotifier>();
+    _userNotifier = context.read<AppUserNotifier>();
+
+    // Initialize once
+    if (!_initialized && mounted) {
+      _initialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _initializeData();
+        }
+      });
+    }
   }
 
   void _initializeData() {
@@ -49,44 +63,45 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
     _initializeCategories();
 
     // Fetch initial data
-    notifier.fetchRecipes(categoryId: _selectedCategoryId);
+    _recipeNotifier.fetchRecipes(categoryId: _selectedCategoryId);
 
-    if (notifier.recipeIngredients.isEmpty) {
+    if (_recipeNotifier.recipeIngredients.isEmpty) {
       log("Fetching ingredients");
-      notifier.fetchIngredients();
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Only initialize once, and not during build
-    if (!_initialized && mounted) {
-      _initialized = true;
-      // Don't call fetch here, just initialize categories if needed
-      _categories = _getCategories();
-      notifier.recipeCategories = _categories.skip(1).toList();
+      _recipeNotifier.fetchIngredients();
     }
   }
 
   List<String> _getCategories() {
-    final categs =
-        AppLocalizations.of(context)!.recipeCategoryTextList.split(",");
-    return [AppLocalizations.of(context)!.allText, ...categs];
+    final loc = AppLocalizations.of(context)!;
+    final categs = loc.recipeCategoryTextList.split(",");
+    return [loc.allText, ...categs];
   }
 
   void _initializeCategories() {
-    final categs =
-        AppLocalizations.of(context)!.recipeCategoryTextList.split(",");
+    final loc = AppLocalizations.of(context)!;
+    final categs = loc.recipeCategoryTextList.split(",");
     setState(() {
-      _categories = [AppLocalizations.of(context)!.allText, ...categs];
+      _categories = [loc.allText, ...categs];
     });
-    notifier.recipeCategories = categs;
+    _recipeNotifier.recipeCategories = categs;
   }
 
   void _onSearchChanged() {
-    // Use a debouncer to avoid too many API calls
-    _filterRecipesBySearch();
+    _debounceTimer?.cancel();
+    final query = _searchController.text.trim();
+
+    if (query.isEmpty) {
+      _recipeNotifier.fetchRecipes(
+          categoryId: _selectedCategoryId, reset: true);
+      return;
+    }
+
+    // Debounce search
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      if (query.length >= 2) {
+        _recipeNotifier.fetchRecipes(searchQuery: query, reset: true);
+      }
+    });
   }
 
   void _selectCategory(int index) {
@@ -95,24 +110,27 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
     setState(() {
       _selectedCategoryId = index;
     });
-    // Use reset=true to clear existing recipes when changing category
-    notifier.fetchRecipes(categoryId: _selectedCategoryId, reset: true);
+    _recipeNotifier.fetchRecipes(categoryId: index, reset: true);
   }
 
   void _scrollListener() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200 &&
-        !notifier.isLoading) {
-      notifier.fetchRecipes(categoryId: _selectedCategoryId);
+        !_recipeNotifier.isLoading) {
+      _recipeNotifier.fetchRecipes(categoryId: _selectedCategoryId);
     }
   }
 
   Future<void> _refreshRecipes() async {
-    await notifier.fetchRecipes(categoryId: _selectedCategoryId, reset: true);
+    await _recipeNotifier.fetchRecipes(
+      categoryId: _selectedCategoryId,
+      reset: true,
+    );
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _scrollController.removeListener(_scrollListener);
@@ -124,58 +142,40 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      floatingActionButton: Consumer<AppUserNotifier>(
-        builder: (context, userNotifier, child) {
-          if (!userNotifier.isCookingRecipe) return Container();
-          return FloatingActionButton(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(Icons.post_add),
-            onPressed: () => Navigator.pushNamed(
-              context,
-              AppRoutes.recipeCreate,
-              arguments: {"recipe": Recipe.empty()},
-            ),
-          );
-        },
-      ),
-      appBar: _buildAppBar(context, colorScheme),
-      body: Consumer<RecipeNotifier>(
-        builder: (context, recipeNotifier, child) {
-          // Only filter recipes if we have categories
-          final recipes = _categories.isEmpty
-              ? recipeNotifier.recipes
-              : recipeNotifier.filterRecipesByCategory(_selectedCategoryId);
+      floatingActionButton: _buildFAB(colorScheme),
+      appBar: _buildAppBar(colorScheme, loc),
+      body: _buildBody(theme, colorScheme, loc),
+    );
+  }
 
-          return Column(
-            children: [
-              if (_categories.isNotEmpty) _buildCategoryChips(colorScheme),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AppConstants.kDefaultPaddin),
-                  child: _buildRecipeList(recipeNotifier, recipes),
-                ),
-              ),
-            ],
-          );
-        },
+  Widget _buildFAB(ColorScheme colorScheme) {
+    if (!_userNotifier.isCookingRecipe) return const SizedBox.shrink();
+
+    return FloatingActionButton(
+      backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Icon(Icons.post_add),
+      onPressed: () => Navigator.pushNamed(
+        context,
+        AppRoutes.recipeCreate,
+        arguments: {"recipe": Recipe.empty()},
       ),
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, ColorScheme colorScheme) {
+  AppBar _buildAppBar(ColorScheme colorScheme, AppLocalizations loc) {
     return AppBar(
       elevation: 0,
       title: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Theme.of(context).dividerColor,
@@ -185,19 +185,18 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
         child: TextField(
           controller: _searchController,
           textInputAction: TextInputAction.search,
-          onSubmitted: (_) => _filterRecipesBySearch(),
+          onSubmitted: (_) => _onSearchChanged(),
           decoration: InputDecoration(
-            hintText: AppLocalizations.of(context)?.searchTxt,
-            prefixIcon: Icon(Icons.search_outlined,
-                color: Theme.of(context).colorScheme.onSurface),
+            hintText: loc.searchTxt,
+            prefixIcon:
+                Icon(Icons.search_outlined, color: colorScheme.onSurface),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
                     icon: Icon(Icons.clear,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.onSurface),
+                        size: 18, color: colorScheme.onSurface),
                     onPressed: () {
                       _searchController.clear();
-                      _filterRecipesBySearch();
+                      _onSearchChanged();
                     },
                   )
                 : null,
@@ -207,6 +206,27 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
+    );
+  }
+
+  Widget _buildBody(
+      ThemeData theme, ColorScheme colorScheme, AppLocalizations loc) {
+    final recipes = _categories.isEmpty
+        ? _recipeNotifier.recipes
+        : _recipeNotifier.filterRecipesByCategory(_selectedCategoryId);
+
+    return Column(
+      children: [
+        if (_categories.isNotEmpty) _buildCategoryChips(colorScheme),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.kDefaultPaddin,
+            ),
+            child: _buildRecipeList(theme, colorScheme, loc, recipes),
+          ),
+        ),
+      ],
     );
   }
 
@@ -268,23 +288,19 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
     );
   }
 
-  void _filterRecipesBySearch() {
-    final query = _searchController.text.trim();
-    // Don't search if query is too short
-    if (query.isNotEmpty && query.length < 2) return;
-
-    // Use a debouncer to avoid too many API calls
-    notifier.fetchRecipes(searchQuery: query, reset: true);
-  }
-
-  Widget _buildRecipeList(RecipeNotifier recipeNotifier, List<Recipe> recipes) {
+  Widget _buildRecipeList(
+    ThemeData theme,
+    ColorScheme colorScheme,
+    AppLocalizations loc,
+    List<Recipe> recipes,
+  ) {
     // Loading state for initial load
-    if (recipes.isEmpty && recipeNotifier.isLoading) {
+    if (recipes.isEmpty && _recipeNotifier.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     // Empty state
-    if (recipes.isEmpty && !recipeNotifier.isLoading) {
+    if (recipes.isEmpty && !_recipeNotifier.isLoading) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -292,19 +308,16 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
             Icon(
               Icons.menu_book_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+              color: colorScheme.onSurface.withOpacity(0.3),
             ),
             const SizedBox(height: 16),
             Text(
               _searchController.text.isEmpty
-                  ? AppLocalizations.of(context)!.noRecipesFound
-                  : AppLocalizations.of(context)!.notFoundError,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.5),
-                  ),
+                  ? loc.noRecipesFound
+                  : loc.notFoundError,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.5),
+              ),
             ),
           ],
         ),
@@ -313,7 +326,7 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
 
     return RefreshIndicator(
       onRefresh: _refreshRecipes,
-      color: Theme.of(context).colorScheme.primary,
+      color: colorScheme.primary,
       child: CustomScrollView(
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),
@@ -331,9 +344,8 @@ class _RecipeCatalogScreenState extends State<RecipeCatalogScreen> {
               childCount: recipes.length,
             ),
           ),
-
           // Show bottom loader only when we already have data and are loading more
-          if (recipeNotifier.isLoading && recipes.isNotEmpty)
+          if (_recipeNotifier.isLoading && recipes.isNotEmpty)
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(16.0),

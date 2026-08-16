@@ -510,8 +510,7 @@ class PersonnelNotifier extends TraceableNotifier {
 
   // ============ LOADING ============
 
-  // In personnel_notifier.dart, update loadPersonnel:
-
+  /// Load personnel with proper user caching
   Future<void> loadPersonnel({
     int userId = 0,
     bool reset = false,
@@ -551,9 +550,39 @@ class PersonnelNotifier extends TraceableNotifier {
       } else {
         _logInfo('Loaded ${rules.length} rules');
 
+        // 👇 CRITICAL FIX: Extract and cache users from rules
+        final users = _extractUsersFromRules(rules);
+        _logInfo('Extracted ${users.length} users from rules');
+
+        // Cache users
+        for (final user in users) {
+          if (user.idAppUser != null && user.idAppUser! > 0) {
+            _cache.cacheUser(user);
+            _logDebug(
+                'Cached user: ${user.displayName} (ID: ${user.idAppUser})');
+          }
+        }
+
+        // Also cache users from pending rules if included
+        if (includePending) {
+          final pendingRules = rules.where((r) => r.isPending).toList();
+          if (pendingRules.isNotEmpty) {
+            final pendingUsers = _extractUsersFromRules(pendingRules);
+            for (final user in pendingUsers) {
+              if (user.idAppUser != null && user.idAppUser! > 0) {
+                _cache.cacheUser(user);
+                _logDebug(
+                    'Cached pending user: ${user.displayName} (ID: ${user.idAppUser})');
+              }
+            }
+          }
+        }
+
         // Use batch sync for better performance
         _rules.syncRulesBatch(rules);
 
+        // Update personnel list
+        _state.personnel.addAll(users);
         _state.currentPage++;
       }
 
@@ -569,7 +598,27 @@ class PersonnelNotifier extends TraceableNotifier {
       _state.setLoading(false);
       _notify();
     }
-  } // ============ CACHE MANAGEMENT ============
+  }
+
+  /// Extract AppUser objects from ManagementRule list
+  List<AppUser> _extractUsersFromRules(List<ManagementRule> rules) {
+    final users = <AppUser>[];
+    final seenUserIds = <int>{};
+
+    for (final rule in rules) {
+      final user = rule.appUser;
+      if (user != null && user.idAppUser != null && user.idAppUser! > 0) {
+        if (!seenUserIds.contains(user.idAppUser)) {
+          seenUserIds.add(user.idAppUser!);
+          users.add(user);
+        }
+      }
+    }
+
+    return users;
+  }
+
+  // ============ CACHE MANAGEMENT ============
 
   void clearAllCache() {
     _logInfo('Clearing all cache');

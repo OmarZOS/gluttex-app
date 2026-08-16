@@ -3,7 +3,7 @@ import 'dart:developer';
 class Person {
   final int id_person;
   final int person_details_id;
-  final String? person_blood_type; // Changed from person_blood_type_id
+  final String? person_blood_type;
   final int? person_location_id;
   final PersonDetails person_details;
   final DateTime? created_at;
@@ -12,34 +12,23 @@ class Person {
   const Person({
     required this.id_person,
     required this.person_details_id,
-    this.person_blood_type, // Changed
+    this.person_blood_type,
     this.person_location_id,
     required this.person_details,
     this.created_at,
     this.updated_at,
   });
 
-  // Get full name
   String get fullName =>
       '${person_details.person_first_name ?? ''} ${person_details.person_last_name ?? ''}'
           .trim();
 
-  // Get first name
   String? get firstName => person_details.person_first_name;
-
-  // Get last name
   String? get lastName => person_details.person_last_name;
-
-  // Get gender
   String? get gender => person_details.person_gender;
-
-  // Get nationality
   String? get nationality => person_details.person_country_code;
-
-  // Get birth date
   DateTime? get birthDate => person_details.person_birth_date;
 
-  // Get age (if birth date is available)
   int? get age {
     if (person_details.person_birth_date == null) return null;
     final now = DateTime.now();
@@ -52,34 +41,75 @@ class Person {
     return age;
   }
 
-  // Check if person is adult (18+ years)
   bool get isAdult {
     final currentAge = age;
     return currentAge != null && currentAge >= 18;
   }
 
+  /// Robust fromJson that handles both direct and nested structures
   factory Person.fromJson(Map<String, dynamic> json) {
-    // Parse person_details from nested structure
-    final personDetailsJson =
-        json['person_details'] as Map<String, dynamic>? ?? {};
+    try {
+      // Handle different JSON structures
+      Map<String, dynamic> detailsJson;
 
-    return Person(
-      id_person: (json['id_person'] as num?)?.toInt() ?? 0,
-      person_details_id: (json['person_details_id'] as num?)?.toInt() ?? 0,
-      person_blood_type:
-          json['person_blood_type'] as String?, // Direct string from JSON
-      person_location_id: (json['person_location_id'] as num?)?.toInt(),
-      person_details: PersonDetails.fromJson(personDetailsJson),
-      created_at: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'] as String)
-          : null,
-      updated_at: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'] as String)
-          : null,
-    );
+      // Check if person_details exists as a nested object
+      if (json['person_details'] is Map<String, dynamic>) {
+        detailsJson = json['person_details'] as Map<String, dynamic>;
+      } else {
+        // If no person_details, try to use the json itself as details
+        // (for cases where data is already flattened)
+        detailsJson = json;
+      }
+
+      // Get blood type - could be at root or in person_details
+      String? bloodType = json['person_blood_type'] as String?;
+      if (bloodType == null && detailsJson['person_blood_type'] != null) {
+        bloodType = detailsJson['person_blood_type'] as String?;
+      }
+
+      // Get location_id - could be at root or in person_details
+      int? locationId = (json['person_location_id'] as num?)?.toInt();
+      if (locationId == null && detailsJson['person_location_id'] != null) {
+        locationId = (detailsJson['person_location_id'] as num?)?.toInt();
+      }
+
+      // Get person_details_id - could be at root or in person_details
+      int detailsId = (json['person_details_id'] as num?)?.toInt() ?? 0;
+      if (detailsId == 0 && detailsJson['person_details_id'] != null) {
+        detailsId = (detailsJson['person_details_id'] as num?)?.toInt() ?? 0;
+      }
+
+      // Get id_person
+      int idPerson = (json['id_person'] as num?)?.toInt() ?? 0;
+      if (idPerson == 0 && detailsJson['id_person'] != null) {
+        idPerson = (detailsJson['id_person'] as num?)?.toInt() ?? 0;
+      }
+
+      return Person(
+        id_person: idPerson,
+        person_details_id: detailsId,
+        person_blood_type: bloodType,
+        person_location_id: locationId,
+        person_details: PersonDetails.fromJson(detailsJson),
+        created_at: json['created_at'] != null
+            ? DateTime.tryParse(json['created_at'] as String)
+            : detailsJson['created_at'] != null
+                ? DateTime.tryParse(detailsJson['created_at'] as String)
+                : null,
+        updated_at: json['updated_at'] != null
+            ? DateTime.tryParse(json['updated_at'] as String)
+            : detailsJson['updated_at'] != null
+                ? DateTime.tryParse(detailsJson['updated_at'] as String)
+                : null,
+      );
+    } catch (e, stackTrace) {
+      log('Error parsing Person from JSON: $e',
+          name: 'Person', error: e, stackTrace: stackTrace);
+      log('JSON: $json', name: 'Person');
+      return Person.empty();
+    }
   }
 
-  // Convert to JSON
   Map<String, dynamic> toJson() {
     return {
       'id_person': id_person,
@@ -92,7 +122,6 @@ class Person {
     };
   }
 
-  // Copy with method
   Person copyWith({
     int? id_person,
     int? person_details_id,
@@ -113,7 +142,6 @@ class Person {
     );
   }
 
-  // Empty person factory
   factory Person.empty() {
     return Person(
       id_person: 0,
@@ -126,19 +154,14 @@ class Person {
     );
   }
 
-  // Check if person is empty (has only ID 0)
   bool get isEmpty => id_person == 0;
-
-  // Check if person has basic information
   bool get hasBasicInfo => person_details.hasName;
 
-  // Get display name (full name or "Unknown Person")
   String get displayName {
     if (hasBasicInfo) return fullName;
     return 'Unknown Person #$id_person';
   }
 
-  // Get initials for avatar
   String get initials {
     if (!hasBasicInfo) return '?';
     final firstInitial = person_details.person_first_name?.isNotEmpty == true
@@ -150,7 +173,6 @@ class Person {
     return (firstInitial + lastInitial).toUpperCase();
   }
 
-  // Get gender icon
   String get genderIcon {
     switch (person_details.person_gender?.toLowerCase()) {
       case 'male':
@@ -162,7 +184,6 @@ class Person {
     }
   }
 
-  // Get formatted birth date
   String? get formattedBirthDate {
     if (person_details.person_birth_date == null) return null;
     return '${person_details.person_birth_date!.day}/${person_details.person_birth_date!.month}/${person_details.person_birth_date!.year}';
@@ -189,7 +210,7 @@ class PersonDetails {
   final String person_first_name;
   final DateTime? person_birth_date;
   final String person_gender;
-  final String person_country_code; // Changed from person_nationality
+  final String person_country_code;
   final String? person_email;
   final String? person_phone;
   final String? person_address;
@@ -206,7 +227,7 @@ class PersonDetails {
     required this.person_first_name,
     this.person_birth_date,
     required this.person_gender,
-    required this.person_country_code, // Changed
+    required this.person_country_code,
     this.person_email,
     this.person_phone,
     this.person_address,
@@ -218,17 +239,11 @@ class PersonDetails {
     this.updated_at,
   });
 
-  // Check if has name
   bool get hasName =>
       person_first_name.isNotEmpty || person_last_name.isNotEmpty;
-
-  // Get full name
   String get fullName => '$person_first_name $person_last_name'.trim();
-
-  // Get nationality (alias for person_country_code)
   String? get person_nationality => person_country_code;
 
-  // Get formatted phone number
   String? get formattedPhone {
     if (person_phone == null || person_phone!.isEmpty) return null;
     if (person_phone!.length == 10) {
@@ -237,20 +252,16 @@ class PersonDetails {
     return person_phone;
   }
 
-  // Get address line
   String? get addressLine {
     if (person_address == null && person_city == null && person_country == null)
       return null;
-
     final parts = <String>[];
     if (person_address != null) parts.add(person_address!);
     if (person_city != null) parts.add(person_city!);
     if (person_country != null) parts.add(person_country!);
-
     return parts.join(', ');
   }
 
-  // Factory constructor from JSON
   factory PersonDetails.fromJson(Map<String, dynamic> json) {
     return PersonDetails(
       id_person_details: (json['id_person_details'] as num?)?.toInt() ?? 0,
@@ -260,8 +271,7 @@ class PersonDetails {
           ? DateTime.tryParse(json['person_birth_date'] as String)
           : null,
       person_gender: json['person_gender'] as String? ?? '',
-      person_country_code:
-          json['person_country_code'] as String? ?? '', // Changed key
+      person_country_code: json['person_country_code'] as String? ?? '',
       person_email: json['person_email'] as String?,
       person_phone: json['person_phone'] as String?,
       person_address: json['person_address'] as String?,
@@ -278,7 +288,6 @@ class PersonDetails {
     );
   }
 
-  // Convert to JSON
   Map<String, dynamic> toJson() {
     return {
       'id_person_details': id_person_details,
@@ -286,7 +295,7 @@ class PersonDetails {
       'person_first_name': person_first_name,
       'person_birth_date': person_birth_date?.toIso8601String(),
       'person_gender': person_gender,
-      'person_country_code': person_country_code, // Changed key
+      'person_country_code': person_country_code,
       'person_email': person_email,
       'person_phone': person_phone,
       'person_address': person_address,
@@ -299,7 +308,6 @@ class PersonDetails {
     };
   }
 
-  // Copy with method
   PersonDetails copyWith({
     int? id_person_details,
     String? person_last_name,
@@ -336,7 +344,6 @@ class PersonDetails {
     );
   }
 
-  // Empty details factory
   factory PersonDetails.empty() {
     return PersonDetails(
       id_person_details: 0,
@@ -363,12 +370,9 @@ class PersonDetails {
   }
 }
 
-// Helper extensions for easier usage
 extension PersonExtensions on Person {
-  // Check if person matches search query
   bool matchesQuery(String query) {
     if (query.isEmpty) return true;
-
     final searchQuery = query.toLowerCase();
     return fullName.toLowerCase().contains(searchQuery) ||
         person_details.person_email?.toLowerCase().contains(searchQuery) ==
@@ -378,13 +382,8 @@ extension PersonExtensions on Person {
   }
 }
 
-// Helper class for person search results
 class PersonSearchResult {
   final Person person;
   final double score;
-
-  const PersonSearchResult({
-    required this.person,
-    required this.score,
-  });
+  const PersonSearchResult({required this.person, required this.score});
 }

@@ -12,9 +12,11 @@ class PersonnelSearch {
   final PersonnelCache _cache;
   final PersonnelState _state;
   Timer? _debounceTimer;
+  String? _lastSearchQuery;
+  int? _lastSupplierId;
 
   static const _itemsPerPage = 50;
-  static const _debounceDelayMs = 300;
+  static const _debounceDelayMs = 500;
 
   PersonnelSearch({
     required AppUserService userService,
@@ -24,28 +26,64 @@ class PersonnelSearch {
         _cache = cache,
         _state = state;
 
-  void dispose() => _debounceTimer?.cancel();
+  void dispose() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+  }
+
+  void cancelDebounce() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+  }
 
   void clear({int supplierId = 0}) {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+
+    _lastSearchQuery = null;
+    _lastSupplierId = null;
+
     _state.setSearchQuery('');
     _state.searchResults = [];
     _state.personSearchResults = [];
     _state.setError(null);
-    _state.personnel.clear();
-    _state.personnel.addAll(_getActiveUsersForSupplier(supplierId));
+    _state.setLoading(false);
+    _state.hasSearched = false;
   }
 
   Future<void> search(String query, {int supplierId = 0}) async {
     final trimmed = query.trim();
     _state.setSearchQuery(trimmed);
+    _state.hasSearched = trimmed.isNotEmpty;
 
     _debounceTimer?.cancel();
 
     if (trimmed.isEmpty) {
       _state.searchResults = [];
       _state.personSearchResults = [];
+      _state.setLoading(false);
+      _state.setError(null);
+      _lastSearchQuery = null;
+      _lastSupplierId = null;
       return;
     }
+
+    _lastSearchQuery = trimmed;
+    _lastSupplierId = supplierId;
+
+    // Check cache first
+    final cached = _cache.getSearchResults(trimmed, supplierId: supplierId);
+    if (cached != null && cached.isValid()) {
+      log('📦 Using cached search results for: "$trimmed" (${cached.totalCount} results)',
+          name: 'PersonnelSearch');
+      _updateSearchResults(cached.users, cached.people);
+      return;
+    }
+
+    _state.setLoading(true);
+    _state.searchResults = [];
+    _state.personSearchResults = [];
+    _state.setError(null);
 
     _debounceTimer = Timer(
       const Duration(milliseconds: _debounceDelayMs),
@@ -54,47 +92,92 @@ class PersonnelSearch {
   }
 
   Future<void> _performSearch(String query, int supplierId) async {
-    _state.setLoading(true);
-    _state.searchResults = [];
-    _state.personSearchResults = [];
+    if (_lastSearchQuery != query || _lastSupplierId != supplierId) {
+      log('⏭️ Skipping outdated search for: "$query"', name: 'PersonnelSearch');
+      return;
+    }
 
     try {
-      await Future.wait([
+      log('🔍 Performing search for: "$query" (supplier: $supplierId)',
+          name: 'PersonnelSearch');
+
+      final results = await Future.wait([
         _searchAppUsers(query, supplierId),
         _searchPeople(query, supplierId),
       ]);
+
+      final users = results[0] as List<AppUser>? ?? [];
+      final people = results[1] as List<Person>? ?? [];
+
+      // Cache users individually
+      _cache.cacheUsersBatch(users);
+
+      // Update state
+      _updateSearchResults(users, people);
+
+      // Cache results
+      _cache.cacheSearchResults(
+        query,
+        users: users,
+        people: people,
+        supplierId: supplierId,
+      );
+
       _state.setError(null);
-    } catch (e) {
+
+      log('✅ Search completed: ${users.length} users, ${people.length} people',
+          name: 'PersonnelSearch');
+    } catch (e, stackTrace) {
+      log('❌ Search failed: $e',
+          name: 'PersonnelSearch', error: e, stackTrace: stackTrace);
       _state.setError('Search failed: ${e.toString()}');
+      _state.searchResults = [];
+      _state.personSearchResults = [];
     } finally {
       _state.setLoading(false);
     }
   }
 
-  Future<void> _searchAppUsers(String query, int supplierId) async {
+  void _updateSearchResults(List<AppUser> users, List<Person> people) {
+    _state.searchResults = users;
+    _state.personSearchResults = people;
+  }
+
+  Future<List<AppUser>?> _searchAppUsers(String query, int supplierId) async {
     try {
-      final results =
-          await _userService.searchAppUsers(query, 0, _itemsPerPage);
+      final results = await _userService.searchAppUsers(
+        query,
+        0,
+        _itemsPerPage,
+      );
+
+      // Cache users from results
       if (results != null) {
-        _state.searchResults = results;
+        _cache.cacheUsersBatch(results);
       }
+
+      return results;
     } catch (e) {
-      debugPrint('Error searching app users: $e');
+      log('Error searching app users: $e', name: 'PersonnelSearch');
+      return [];
     }
   }
 
-  Future<void> _searchPeople(String query, int supplierId) async {
+  Future<List<Person>?> _searchPeople(String query, int supplierId) async {
     try {
-      final results = await _userService.searchPeople(query, 0, _itemsPerPage);
-      if (results != null) {
-        _state.personSearchResults = results;
-      }
+      final results = await _userService.searchPeople(
+        query,
+        0,
+        _itemsPerPage,
+      );
+      return results;
     } catch (e) {
-      debugPrint('Error searching people: $e');
+      log('Error searching people: $e', name: 'PersonnelSearch');
+      return [];
     }
   }
 
-  List<AppUser> _getActiveUsersForSupplier(int supplierId) {
+  List<AppUser> getActiveUsersForSupplier(int supplierId) {
     if (supplierId == 0) {
       return _cache.activeRules.keys
           .map((userId) => _cache.getUser(userId))

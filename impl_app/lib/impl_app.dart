@@ -240,7 +240,7 @@ class AppUserServiceImpl extends AppUserService {
         _getCallerKey('updateManagementRule', id: ruleId.toString());
     try {
       final result = await _storageService.update(
-        '${AppConstants.apiBaseUrl}${AppConstants.updateStaffEndpoint}/$ruleId',
+        '${AppConstants.apiBaseUrl}${AppConstants.updateStaffEndpoint}',
         ruleId.toString(),
         {},
         {
@@ -274,7 +274,7 @@ class AppUserServiceImpl extends AppUserService {
         _getCallerKey('deleteManagementRule', id: ruleId.toString());
     try {
       final result = await _storageService.delete(
-        '${AppConstants.apiBaseUrl}${AppConstants.deleteStaffEndpoint}/$ruleId',
+        '${AppConstants.apiBaseUrl}${AppConstants.deleteStaffEndpoint}',
         ruleId.toString(),
         callerKey: key,
       );
@@ -332,21 +332,43 @@ class AppUserServiceImpl extends AppUserService {
         _storeSuccess(key, [], responseCode: 'EMPTY');
         return [];
       }
+
       List<Person> people = [];
-      if (data is List) {
-        people = data
-            .map((j) => Person.fromJson(j as Map<String, dynamic>))
-            .toList();
-      } else if (data is Map && data['data'] is List) {
-        people = (data['data'] as List)
-            .map((j) => Person.fromJson(j as Map<String, dynamic>))
-            .toList();
+      try {
+        if (data is List) {
+          for (final item in data) {
+            try {
+              final person = Person.fromJson(item as Map<String, dynamic>);
+              people.add(person);
+            } catch (e) {
+              log('Error parsing person: $e', name: 'AppUserServiceImpl');
+              // Continue to next item
+            }
+          }
+        } else if (data is Map && data['data'] is List) {
+          for (final item in data['data'] as List) {
+            try {
+              final person = Person.fromJson(item as Map<String, dynamic>);
+              people.add(person);
+            } catch (e) {
+              log('Error parsing person: $e', name: 'AppUserServiceImpl');
+              // Continue to next item
+            }
+          }
+        }
+      } catch (e) {
+        log('Error processing search results: $e', name: 'AppUserServiceImpl');
+        return [];
       }
+
       _storeSuccess(key, people);
+      log('✅ Found ${people.length} people for query: "$query"',
+          name: 'AppUserServiceImpl');
       return people;
     } catch (e) {
       _storeFailure(key, e.toString(),
           errorCode: e is GluttexException ? e.message : 'ERROR');
+      log('❌ Search people failed: $e', name: 'AppUserServiceImpl');
       return [];
     }
   }

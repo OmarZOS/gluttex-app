@@ -582,7 +582,7 @@ class DashboardContentState extends State<DashboardContent> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  data.name,
+                  data.supplier.providerName,
                   overflow: TextOverflow.ellipsis,
                   style: tt.bodySmall?.copyWith(
                     color: isSelected ? cs.primary : cs.onSurface,
@@ -636,7 +636,9 @@ class DashboardContentState extends State<DashboardContent> {
       ),
       child: Center(
         child: Text(
-          data.name.isNotEmpty ? data.name[0].toUpperCase() : 'S',
+          data.supplier.providerName.isNotEmpty
+              ? data.supplier.providerName[0].toUpperCase()
+              : 'S',
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,

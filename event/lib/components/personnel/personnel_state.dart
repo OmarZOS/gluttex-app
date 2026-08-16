@@ -1,3 +1,5 @@
+// In personnel_state.dart
+
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Person.dart';
@@ -15,11 +17,15 @@ class PersonnelState {
   int currentPage = 0;
   bool hasMore = true;
   bool isRebuildingState = false;
+  bool hasSearched = false; // Track if a search has been performed
 
   // Statistics
   int get totalCount {
-    // This would need to be calculated based on actual data
     return personnel.length;
+  }
+
+  int get searchResultCount {
+    return searchResults.length + personSearchResults.length;
   }
 
   void reset() {
@@ -31,6 +37,7 @@ class PersonnelState {
     error = null;
     currentPage = 0;
     hasMore = true;
+    hasSearched = false;
   }
 
   void resetPagination() {

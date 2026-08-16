@@ -30,6 +30,7 @@ class SearchInviteDialog extends StatefulWidget {
 class _SearchInviteDialogState extends State<SearchInviteDialog> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -37,10 +38,27 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     _searchController.addListener(_onSearchChanged);
   }
 
-  void _onSearchChanged() {
-    if (_debounceTimer?.isActive ?? false) {
-      _debounceTimer?.cancel();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Load initial data once
+    if (!_isInitialized) {
+      _isInitialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final notifier = context.read<PersonnelNotifier>();
+        // Load personnel for this supplier to check existing members
+        notifier.loadPersonnel(
+          supplierId: widget.supplierId ?? 0,
+          reset: true,
+          includePending: true,
+        );
+      });
     }
+  }
+
+  void _onSearchChanged() {
+    _debounceTimer?.cancel();
 
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
       final query = _searchController.text.trim();
@@ -49,10 +67,9 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       if (query.isEmpty) {
         notifier.clearSearch(supplierId: widget.supplierId ?? 0);
       } else if (query.length >= 2) {
-        final userId = context.read<AppUserNotifier>().appUser!.idAppUser ?? 0;
+        // 👇 FIXED: Pass supplierId to filter results
         notifier.searchPersonnel(
           query,
-          // userId,
           supplierId: widget.supplierId ?? 0,
         );
       }
@@ -88,131 +105,122 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
   }
 
   Widget _buildHeader() {
-    return Consumer<PersonnelNotifier>(
-      builder: (context, notifier, child) {
-        final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Search & Invite',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Find users to add to ${widget.supplierName}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: colorScheme.onPrimaryContainer.withOpacity(0.8),
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Search & Invite',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
                 ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: colorScheme.onPrimaryContainer.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 20,
-                      color: colorScheme.onPrimaryContainer,
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  'Find users to add to ${widget.supplierName}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: colorScheme.onPrimaryContainer.withOpacity(0.8),
                   ),
                 ),
               ],
             ),
-          ),
-        );
-      },
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: colorScheme.onPrimaryContainer.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.close,
+                  size: 20,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildSearchBar() {
-    return Consumer<PersonnelNotifier>(
-      builder: (context, notifier, child) {
-        final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search by name, username, or role...',
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 18,
-                      ),
-                    ),
-                    style: const TextStyle(fontSize: 16),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by name, username, or role...',
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
                   ),
                 ),
-                if (notifier.isLoading)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          colorScheme.primary,
-                        ),
-                      ),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+            if (context.watch<PersonnelNotifier>().isLoading)
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      colorScheme.primary,
                     ),
                   ),
-              ],
-            ),
-          ),
-        );
-      },
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildContent(PersonnelNotifier notifier) {
-    // FIXED: Check searchQuery instead of personnel for search state
     final hasSearchQuery = notifier.searchQuery.isNotEmpty;
 
     if (notifier.isLoading && notifier.searchResults.isEmpty) {
@@ -338,7 +346,6 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
   }
 
   Widget _buildResults(PersonnelNotifier notifier) {
-    // FIXED: Use searchResults instead of personnel
     final searchResults = notifier.searchResults;
     final hasSearchQuery = notifier.searchQuery.isNotEmpty;
 
@@ -377,9 +384,10 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    // Check if user is already in the team
-    final isUserInTeam = _isUserAlreadyInTeam(user.idAppUser ?? 0, notifier);
+    // 👇 FIXED: Check if user is already in the team properly
+    final isUserInTeam = _isUserInTeam(user.idAppUser ?? 0, notifier);
     final isPending = _isUserPending(user.idAppUser ?? 0, notifier);
+    final canInvite = !isUserInTeam || (isUserInTeam && isPending);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -387,12 +395,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: isUserInTeam && !isPending
-              ? () {
-                  // Show info that user is already in the team
-                  _showAlreadyInTeamDialog(user);
-                }
-              : () => _showPrivilegeDialog(user, isUserInTeam, isPending),
+          onTap: () => _handleUserTap(user, isUserInTeam, isPending),
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -489,8 +492,8 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                           ],
                         ),
                       const SizedBox(height: 4),
-                      _buildUserRole(
-                          user.appUserType.toString(), colorScheme, textTheme),
+                      _buildUserRole(user.appUserType?.value ?? 'guest',
+                          colorScheme, textTheme),
                     ],
                   ),
                 ),
@@ -599,7 +602,8 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       Colors.purple,
       Colors.teal,
     ];
-    final color = colors[user.idAppUser! % colors.length];
+    final color =
+        colors[user.idAppUser != null ? user.idAppUser! % colors.length : 0];
     final initials = _getUserInitials(user);
 
     return Container(
@@ -698,7 +702,9 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     );
   }
 
-  bool _isUserAlreadyInTeam(int userId, PersonnelNotifier notifier) {
+  // ============ HELPER METHODS ============
+
+  bool _isUserInTeam(int userId, PersonnelNotifier notifier) {
     // Check if user is in the team (active or pending)
     final users = notifier.getPersonnelForSupplier(
       widget.supplierId ?? 0,
@@ -713,34 +719,41 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     return notifier.hasPendingRulesForSupplier(userId, widget.supplierId ?? 0);
   }
 
-  Future<void> _showPrivilegeDialog(
-      AppUser user, bool isUserInTeam, bool isPending) async {
+  void _handleUserTap(AppUser user, bool isUserInTeam, bool isPending) {
+    // If user is already in the team (active), show info
+    if (isUserInTeam && !isPending) {
+      _showAlreadyInTeamDialog(user);
+      return;
+    }
+
+    // If user has a pending invitation, show info
     if (isUserInTeam && isPending) {
-      // User is pending - show appropriate message
       _showPendingUserDialog(user);
       return;
     }
 
-    // Get existing privileges if user is already in the team
+    // Otherwise, show privilege dialog to invite
+    _showPrivilegeDialog(user);
+  }
+
+  Future<void> _showPrivilegeDialog(AppUser user) async {
+    // 👇 FIXED: Get existing privileges if user has any
     int? existingPrivileges;
-    if (isUserInTeam) {
+
+    try {
       final notifier = context.read<PersonnelNotifier>();
 
-      // First ensure data is loaded
-      await notifier.loadPersonnel(
-        userId: user.idAppUser ?? 0,
-        supplierId: widget.supplierId ?? 0,
-      );
-
-      // Then get the rule synchronously from cache
+      // Get the rule for this user and supplier
       final rule = notifier.getRuleForUser(
         userId: user.idAppUser ?? 0,
         supplierId: widget.supplierId ?? 0,
       );
 
       if (rule != null) {
-        // existingPrivileges = rule.management_rule_code ?? 0;
+        // existingPrivileges = rule.managementRuleCode ?? 0;
       }
+    } catch (e) {
+      // Rule not found, that's fine
     }
 
     final int? privilegesBitmask = await showDialog<int>(
@@ -782,7 +795,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       builder: (context) => AlertDialog(
         title: const Text('Pending Invitation'),
         content: Text(
-          '${user.personFirstName} ${user.personLastName} has a pending invitation for ${widget.supplierName}. Please wait for them to accept or resend the invitation from the pending tab.',
+          '${user.personFirstName} ${user.personLastName} has a pending invitation for ${widget.supplierName}. Please wait for them to accept or manage the invitation from the pending tab.',
         ),
         actions: [
           TextButton(
@@ -812,11 +825,11 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     switch (role.toLowerCase()) {
       case 'admin':
         return colorScheme.error;
-      case 'manager':
+      case 'provider':
         return colorScheme.primary;
-      case 'recipe_catalog':
+      case 'manager':
         return colorScheme.secondary;
-      case 'supplier':
+      case 'customer':
         return colorScheme.tertiary;
       case 'staff':
         return Colors.orange;
@@ -829,12 +842,12 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     switch (role.toLowerCase()) {
       case 'admin':
         return Icons.security_rounded;
+      case 'provider':
+        return Icons.business_rounded;
       case 'manager':
         return Icons.manage_accounts_rounded;
-      case 'recipe_catalog':
-        return Icons.restaurant_menu_rounded;
-      case 'supplier':
-        return Icons.inventory_2_rounded;
+      case 'customer':
+        return Icons.person_rounded;
       case 'staff':
         return Icons.badge_rounded;
       default:
