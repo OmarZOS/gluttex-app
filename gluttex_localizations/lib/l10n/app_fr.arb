@@ -2600,6 +2600,11 @@
   "failedToLoadInvitations": "Échec du chargement des invitations",
   
   "markAllAsRead": "Tout marquer comme lu",
-  "viewAll": "Voir tout"
+  "viewAll": "Voir tout",
+  "inStock": "En stock: {stock}",
+  "addProductsToGetStarted": "Ajouter des produits pour commencer",
+  "addServicesToGetStarted": "Ajouter des services pour commencer",
+  "selected": "Sélectionné: {count}",
+  "available": "Disponible: {count}"
 
 }

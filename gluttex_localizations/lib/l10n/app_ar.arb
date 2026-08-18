@@ -2551,9 +2551,13 @@
   "failedToLoadInvitations": "فشل تحميل الدعوات",
   
   "markAllAsRead": "تحديد الكل كمقروء",
-  "viewAll": "عرض الكل"
-  
-
+  "viewAll": "عرض الكل",
+  "inStock": "في المخزن: {stock}",
+  "addProductsToGetStarted": "إضافة منتجات للبدء",
+  "addServicesToGetStarted": "إضافة خدمات للبدء",
+  "currencyCode": "دج",
+  "selected": "محدد: {count}",
+  "available": "متاح: {count}"
 
 
 }

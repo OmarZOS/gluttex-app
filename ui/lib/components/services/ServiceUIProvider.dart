@@ -602,9 +602,9 @@ class ServiceUIProvider {
   String _getLocalizedDescription(String key, AppLocalizations l10n) {
     switch (key) {
       case 'blood_testing':
-        return l10n.serviceDescBloodTesting;
+        return "l10n.serviceDescBloodTesting";
       case 'diagnostic_imaging':
-        return l10n.serviceDescDiagnosticImaging;
+        return "l10n.serviceDescDiagnosticImaging";
       // 其他描述...
       default:
         return getServiceConfig(

@@ -5863,18 +5863,6 @@ abstract class AppLocalizations {
   /// **'General Medical Service'**
   String get serviceGeneralMedical;
 
-  /// No description provided for @serviceDescBloodTesting.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete blood count, cholesterol, glucose, and other blood tests'**
-  String get serviceDescBloodTesting;
-
-  /// No description provided for @serviceDescDiagnosticImaging.
-  ///
-  /// In en, this message translates to:
-  /// **'X-rays, MRIs, CT scans, and ultrasound services'**
-  String get serviceDescDiagnosticImaging;
-
   /// No description provided for @supplierCategoryRestaurant.
   ///
   /// In en, this message translates to:
@@ -11346,6 +11334,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View All'**
   String get viewAll;
+
+  /// No description provided for @inStock.
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock: {stock}'**
+  String inStock(Object stock);
+
+  /// No description provided for @addProductsToGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Add products to get started'**
+  String get addProductsToGetStarted;
+
+  /// No description provided for @addServicesToGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Add services to get started'**
+  String get addServicesToGetStarted;
+
+  /// No description provided for @selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected: {count}'**
+  String selected(Object count);
+
+  /// No description provided for @available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available: {count}'**
+  String available(Object count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

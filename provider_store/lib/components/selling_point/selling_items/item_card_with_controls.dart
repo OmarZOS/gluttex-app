@@ -8,325 +8,178 @@ import 'package:provider_store/components/selling_point/config_sheet/service_con
 import 'package:provider/provider.dart';
 
 class ItemCardWithConfiguration extends StatelessWidget {
-  final dynamic item; // Product or ProvidedService
+  final dynamic item;
   final bool isProduct;
+  final int quantity;
+  final VoidCallback onAddToCart;
+  final VoidCallback onRemoveFromCart;
+  final VoidCallback onConfigure;
 
   const ItemCardWithConfiguration({
     super.key,
     required this.item,
     required this.isProduct,
+    required this.quantity,
+    required this.onAddToCart,
+    required this.onRemoveFromCart,
+    required this.onConfigure,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CartChangeNotifier>(
-      builder: (context, cartNotifier, child) {
-        int currentQuantity = 0;
+    final colorScheme = Theme.of(context).colorScheme;
+    final hasQuantity = quantity > 0;
 
-        if (isProduct) {
-          final product = item as Product;
-          final cartItem = cartNotifier.getProductCartItem(product);
-          currentQuantity = cartItem?.quantity ?? 0;
-        } else {
-          final service = item as ProvidedService;
-          final cartItem = cartNotifier.getServiceCartItem(service);
-          currentQuantity = cartItem?.quantity ?? 0;
-        }
-
-        final colorScheme = Theme.of(context).colorScheme;
-        final color = colorScheme.primary;
-
-        return AspectRatio(
-          aspectRatio: 0.75,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+    return AspectRatio(
+      aspectRatio: 0.75,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            child: Stack(
-              children: [
-                // Main content - Clickable
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _addToCartDirectly(context, cartNotifier),
-                    borderRadius: BorderRadius.circular(16),
-                    child: _ItemContent(
-                      item: item,
-                      isProduct: isProduct,
-                      hasQuantityInCart: currentQuantity > 0,
-                    ),
-                  ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Main content - Clickable to add to cart
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onAddToCart,
+                borderRadius: BorderRadius.circular(16),
+                child: _ItemContent(
+                  item: item,
+                  isProduct: isProduct,
+                  quantity: quantity,
+                  onRemove: onRemoveFromCart,
                 ),
-
-                // Configuration button - Positioned top right
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: () => _showConfigurationSheet(context, cartNotifier),
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: color.withOpacity(0.3),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.settings_rounded,
-                        size: 16,
-                        color: color,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Quantity badge - Positioned top left
-                if (currentQuantity > 0)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.shadow.withOpacity(0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          currentQuantity.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            height: 1.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // Quantity controls overlay (when quantity > 0)
-                if (currentQuantity > 0)
-                  Positioned(
-                    bottom: 8,
-                    left: 8,
-                    right: 8,
-                    child: _QuantityControls(
-                      currentQuantity: currentQuantity,
-                      onAdd: () => _addToCartDirectly(context, cartNotifier),
-                      onRemove: () => _removeFromCart(context, cartNotifier),
-                    ),
-                  ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+
+            // Configuration button - Positioned top right
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: onConfigure,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: colorScheme.primary.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.settings_rounded,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ),
+            ),
+
+            // Quantity badge - Positioned top left
+            if (hasQuantity)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.shadow.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      quantity.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        height: 1.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // Quantity controls overlay (when quantity > 0)
+            if (hasQuantity)
+              Positioned(
+                bottom: 8,
+                left: 8,
+                right: 8,
+                child: _QuantityControls(
+                  currentQuantity: quantity,
+                  onAdd: onAddToCart,
+                  onRemove: onRemoveFromCart,
+                ),
+              ),
+          ],
+        ),
+      ),
     );
-  }
-
-  void _addToCartDirectly(
-      BuildContext context, CartChangeNotifier cartNotifier) {
-    if (isProduct) {
-      final product = item as Product;
-      final cartItem = cartNotifier.getProductCartItem(product);
-
-      if (cartItem != null) {
-        // Increment quantity by 1
-        cartNotifier.updateQuantity(
-          product: product,
-          newQuantity: cartItem.quantity + 1,
-        );
-      } else {
-        // Add with default config (quantity = 1)
-        cartNotifier.addItem(product, 1);
-      }
-    } else {
-      final service = item as ProvidedService;
-      final cartItem = cartNotifier.getServiceCartItem(service);
-
-      if (cartItem != null) {
-        // Increment quantity by 1
-        cartNotifier.updateQuantity(
-          service: service,
-          newQuantity: cartItem.quantity + 1,
-        );
-      } else {
-        // Add with default config (quantity = 1, no scheduling)
-        cartNotifier.addService(
-          service,
-          quantity: 1,
-          scheduledDate: null,
-          scheduledTime: null,
-        );
-      }
-    }
-  }
-
-  void _removeFromCart(BuildContext context, CartChangeNotifier cartNotifier) {
-    if (isProduct) {
-      final product = item as Product;
-      final cartItem = cartNotifier.getProductCartItem(product);
-      if (cartItem != null && cartItem.quantity > 1) {
-        cartNotifier.updateQuantity(
-          product: product,
-          newQuantity: cartItem.quantity - 1,
-        );
-      } else if (cartItem != null) {
-        cartNotifier.removeItem(product: product);
-      }
-    } else {
-      final service = item as ProvidedService;
-      final cartItem = cartNotifier.getServiceCartItem(service);
-      if (cartItem != null && cartItem.quantity > 1) {
-        cartNotifier.updateQuantity(
-          service: service,
-          newQuantity: cartItem.quantity - 1,
-        );
-      } else if (cartItem != null) {
-        cartNotifier.removeItem(service: service);
-      }
-    }
-  }
-
-  void _showConfigurationSheet(
-      BuildContext context, CartChangeNotifier cartNotifier) {
-    if (isProduct) {
-      final product = item as Product;
-      final cartItem = cartNotifier.getProductCartItem(product);
-
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => ProductConfigurationSheet(
-          product: product,
-          cartNotifier: cartNotifier,
-          currentQuantity: cartItem?.quantity,
-        ),
-      );
-    } else {
-      final service = item as ProvidedService;
-      final cartItem = cartNotifier.getServiceCartItem(service);
-
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => ServiceConfigurationSheet(
-          service: service,
-          initialQuantity: cartItem?.quantity ?? 1,
-          onSave: (
-              {required quantity,
-              scheduledDate,
-              scheduledTime,
-              notes,
-              parameters}) {
-            if (cartItem != null) {
-              // Update existing service in cart
-              cartNotifier.updateQuantity(
-                service: service,
-                newQuantity: quantity,
-              );
-              cartNotifier.updateServiceScheduling(
-                service: service,
-                scheduledDate: scheduledDate,
-                scheduledTime: scheduledTime,
-              );
-            } else {
-              // Add new service to cart
-              cartNotifier.addService(
-                service,
-                quantity: quantity,
-                scheduledDate: scheduledDate,
-                scheduledTime: scheduledTime,
-              );
-            }
-          },
-        ),
-      );
-    }
   }
 }
 
 class _ItemContent extends StatelessWidget {
   final dynamic item;
   final bool isProduct;
-  final bool hasQuantityInCart;
+  final int quantity;
+  final VoidCallback onRemove;
 
   const _ItemContent({
     required this.item,
     required this.isProduct,
-    required this.hasQuantityInCart,
+    required this.quantity,
+    required this.onRemove,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hasControls = hasQuantityInCart;
+    final hasQuantity = quantity > 0;
     final loc = AppLocalizations.of(context)!;
 
     if (isProduct) {
       final product = item as Product;
-      final id = product.id_product ?? 0;
       final price = product.product_price ?? 0;
       final stock = product.product_quantity ?? 0;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Product image
-          AspectRatio(
-            aspectRatio: 5 / 3,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.inventory_2_rounded,
-                  size: 48,
-                  color: colorScheme.primary,
-                ),
-              ),
-            ),
+          _buildImageSection(
+            context,
+            icon: Icons.inventory_2_rounded,
+            colorScheme: colorScheme,
           ),
-
-          // Product info
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
-                  12,
-                  12,
-                  12,
-                  hasControls
-                      ? 48
-                      : 12), // Extra bottom padding when controls are visible
+                12,
+                12,
+                12,
+                hasQuantity ? 48 : 12,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -356,7 +209,7 @@ class _ItemContent extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            loc.price(price.toStringAsFixed(2)),
+                            '${price.toStringAsFixed(2)} ${loc.currencySymbol ?? 'DA'}',
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: colorScheme.primary,
@@ -364,49 +217,18 @@ class _ItemContent extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            loc.stock(stock),
+                            stock > 0 ? loc.inStock(stock) : loc.outOfStock,
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: stock > 0 ? Colors.green : Colors.red,
                             ),
                           ),
                         ],
                       ),
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: hasQuantityInCart
-                              ? colorScheme.tertiary
-                              : colorScheme.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: hasQuantityInCart
-                            ? IconButton(
-                                icon: Icon(Icons.delete),
-                                color: hasQuantityInCart
-                                    ? colorScheme.onTertiary
-                                    : colorScheme.onPrimary,
-                                iconSize: 18,
-                                onPressed: () {
-                                  context
-                                      .read<CartChangeNotifier>()
-                                      .removeItem(product: item as Product);
-                                  // .cart
-                                  // .removeItem(productId: id);
-                                },
-                              )
-                            : Icon(
-                                Icons.add,
-                                size: 18,
-                                color: Colors.white,
-                              ),
+                      _buildActionButton(
+                        context,
+                        hasQuantity: hasQuantity,
+                        colorScheme: colorScheme,
+                        onRemove: onRemove,
                       ),
                     ],
                   ),
@@ -422,37 +244,19 @@ class _ItemContent extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Service icon
-          AspectRatio(
-            aspectRatio: 5 / 3,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.handyman,
-                  size: 48,
-                  color: colorScheme.primary,
-                ),
-              ),
-            ),
+          _buildImageSection(
+            context,
+            icon: Icons.handyman_rounded,
+            colorScheme: colorScheme,
           ),
-
-          // Service info
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
-                  12,
-                  12,
-                  12,
-                  hasControls
-                      ? 48
-                      : 12), // Extra bottom padding when controls are visible
+                12,
+                12,
+                12,
+                hasQuantity ? 48 : 12,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -484,7 +288,7 @@ class _ItemContent extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            loc.price(service.finalPrice.toStringAsFixed(2)),
+                            '${service.finalPrice.toStringAsFixed(2)} ${loc.currencySymbol ?? 'DA'}',
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: colorScheme.primary,
@@ -509,40 +313,11 @@ class _ItemContent extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // if (!hasQuantityInCart)
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: hasQuantityInCart
-                              ? colorScheme.tertiary
-                              : colorScheme.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: hasQuantityInCart
-                            ? IconButton(
-                                icon: Icon(Icons.delete),
-                                color: hasQuantityInCart
-                                    ? colorScheme.onTertiary
-                                    : colorScheme.onPrimary,
-                                iconSize: 18,
-                                onPressed: () {
-                                  context.read<CartChangeNotifier>().removeItem(
-                                      service: item as ProvidedService);
-                                },
-                              )
-                            : Icon(
-                                Icons.add,
-                                size: 18,
-                                color: Colors.white,
-                              ),
+                      _buildActionButton(
+                        context,
+                        hasQuantity: hasQuantity,
+                        colorScheme: colorScheme,
+                        onRemove: onRemove,
                       ),
                     ],
                   ),
@@ -553,6 +328,70 @@ class _ItemContent extends StatelessWidget {
         ],
       );
     }
+  }
+
+  Widget _buildImageSection(
+    BuildContext context, {
+    required IconData icon,
+    required ColorScheme colorScheme,
+  }) {
+    return AspectRatio(
+      aspectRatio: 5 / 3,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.primary.withOpacity(0.1),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+          ),
+        ),
+        child: Center(
+          child: Icon(
+            icon,
+            size: 48,
+            color: colorScheme.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+    BuildContext context, {
+    required bool hasQuantity,
+    required ColorScheme colorScheme,
+    required VoidCallback onRemove,
+  }) {
+    final cartNotifier = context.read<CartChangeNotifier>();
+
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: hasQuantity ? colorScheme.tertiary : colorScheme.primary,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: hasQuantity
+          ? IconButton(
+              icon: const Icon(Icons.remove_shopping_cart_rounded, size: 16),
+              color: colorScheme.onTertiary,
+              onPressed: onRemove,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            )
+          : const Icon(
+              Icons.add_rounded,
+              size: 18,
+              color: Colors.white,
+            ),
+    );
   }
 }
 
@@ -587,9 +426,9 @@ class _QuantityControls extends StatelessWidget {
       child: Row(
         children: [
           _QuantityButton(
-            icon: Icons.remove,
+            icon: Icons.remove_rounded,
             onTap: onRemove,
-            isActive: true,
+            isActive: currentQuantity > 0,
             colorScheme: colorScheme,
           ),
           Expanded(
@@ -605,7 +444,7 @@ class _QuantityControls extends StatelessWidget {
             ),
           ),
           _QuantityButton(
-            icon: Icons.add,
+            icon: Icons.add_rounded,
             onTap: onAdd,
             isActive: true,
             colorScheme: colorScheme,
@@ -634,7 +473,7 @@ class _QuantityButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: isActive ? onTap : null,
         borderRadius: BorderRadius.circular(50),
         child: Container(
           width: 32,

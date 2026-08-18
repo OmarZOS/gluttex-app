@@ -1082,8 +1082,6 @@
   
   "serviceGeneralMedical": "General Medical Service",
   
-  "serviceDescBloodTesting": "Complete blood count, cholesterol, glucose, and other blood tests",
-  "serviceDescDiagnosticImaging": "X-rays, MRIs, CT scans, and ultrasound services",
 
     "supplierCategoryRestaurant": "Restaurant",
   "supplierCategoryBakery": "Bakery",
@@ -2503,7 +2501,12 @@
   "failedToLoadInvitations": "Failed to load invitations",
   
   "markAllAsRead": "Mark All as Read",
-  "viewAll": "View All"
+  "viewAll": "View All",
+  "inStock": "In Stock: {stock}",
+  "addProductsToGetStarted": "Add products to get started",
+  "addServicesToGetStarted": "Add services to get started",
+  "selected": "Selected: {count}",
+  "available": "Available: {count}"
 
 
 }

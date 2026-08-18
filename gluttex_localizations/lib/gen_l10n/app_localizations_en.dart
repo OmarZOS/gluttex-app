@@ -2978,12 +2978,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serviceGeneralMedical => 'General Medical Service';
 
   @override
-  String get serviceDescBloodTesting => 'Complete blood count, cholesterol, glucose, and other blood tests';
-
-  @override
-  String get serviceDescDiagnosticImaging => 'X-rays, MRIs, CT scans, and ultrasound services';
-
-  @override
   String get supplierCategoryRestaurant => 'Restaurant';
 
   @override
@@ -5762,4 +5756,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewAll => 'View All';
+
+  @override
+  String inStock(Object stock) {
+    return 'In Stock: $stock';
+  }
+
+  @override
+  String get addProductsToGetStarted => 'Add products to get started';
+
+  @override
+  String get addServicesToGetStarted => 'Add services to get started';
+
+  @override
+  String selected(Object count) {
+    return 'Selected: $count';
+  }
+
+  @override
+  String available(Object count) {
+    return 'Available: $count';
+  }
 }

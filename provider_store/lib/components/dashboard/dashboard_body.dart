@@ -98,6 +98,7 @@ class DashboardBody extends StatelessWidget {
           context,
           userId,
           supplierIds,
+          selectedSupplierId, // 👈 Pass the selected supplier ID
         );
 
       case DashboardScreenType.finance:
@@ -198,26 +199,25 @@ class DashboardBody extends StatelessWidget {
     BuildContext context,
     int userId,
     List<int> supplierIds,
+    int selectedSupplierId, // 👈 Add this parameter
   ) {
     return Consumer3<ServiceNotifier, PersonnelNotifier, CartChangeNotifier>(
       builder:
           (context, serviceNotifier, personnelNotifier, cartNotifier, child) {
         return SellingPointScreen(
-          serviceNotifier: serviceNotifier,
           userId: userId,
+          selectedSupplierId: selectedSupplierId, // 👈 Pass it here
           accessibleSuppliers: supplierIds,
           personnelNotifier: personnelNotifier,
           productNotifier: context.read<ProductNotifier>(),
+          serviceNotifier: serviceNotifier,
           cartNotifier: cartNotifier,
-          onScanBarcode: () {
-            // 👇 FIXED: Implement barcode scanning
-            _handleBarcodeScan(context);
+          onScanBarcode: () => _handleBarcodeScan(context),
+          onSearchChanged: (query) => _handleSearch(context, query),
+          onSupplierChanged: (supplierId) {
+            // Update the selected supplier in the parent
+            // This would need to be passed as a callback from Dashboard
           },
-          onSearchChanged: () {},
-          // onSearchChanged: (query) {
-          //   // 👇 FIXED: Implement search
-          //   _handleSearch(context, query);
-          // },
         );
       },
     );

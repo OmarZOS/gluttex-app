@@ -2978,12 +2978,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get serviceGeneralMedical => 'خدمة طبية عامة';
 
   @override
-  String get serviceDescBloodTesting => 'Complete blood count, cholesterol, glucose, and other blood tests';
-
-  @override
-  String get serviceDescDiagnosticImaging => 'X-rays, MRIs, CT scans, and ultrasound services';
-
-  @override
   String get supplierCategoryRestaurant => 'مطعم';
 
   @override
@@ -3611,7 +3605,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get income => 'دخل';
 
   @override
-  String get currencyCode => 'USD';
+  String get currencyCode => 'دج';
 
   @override
   String get lastWeek => 'الأسبوع الماضي';
@@ -5781,4 +5775,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get viewAll => 'عرض الكل';
+
+  @override
+  String inStock(Object stock) {
+    return 'في المخزن: $stock';
+  }
+
+  @override
+  String get addProductsToGetStarted => 'إضافة منتجات للبدء';
+
+  @override
+  String get addServicesToGetStarted => 'إضافة خدمات للبدء';
+
+  @override
+  String selected(Object count) {
+    return 'محدد: $count';
+  }
+
+  @override
+  String available(Object count) {
+    return 'متاح: $count';
+  }
 }

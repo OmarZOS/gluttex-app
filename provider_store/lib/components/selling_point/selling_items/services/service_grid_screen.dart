@@ -5,51 +5,81 @@ import 'package:event/service_change_notifier.dart';
 import 'package:provider_store/components/selling_point/selling_items/item_card_with_controls.dart';
 import 'package:provider/provider.dart';
 import 'package:event/cart_change_notifier.dart';
+import 'package:provider_store/components/selling_point/selling_items/services/service_grid.dart';
 
 class ServiceGridSliver extends StatelessWidget {
-  const ServiceGridSliver({super.key});
+  final List<ProvidedService> services;
+  final bool isLoading;
+  final CartChangeNotifier cartNotifier;
+  final Function(ProvidedService) onAddToCart;
+  final Function(ProvidedService) onRemoveFromCart;
+  final Function(ProvidedService) onConfigure;
+
+  const ServiceGridSliver({
+    super.key,
+    required this.services,
+    required this.isLoading,
+    required this.cartNotifier,
+    required this.onAddToCart,
+    required this.onRemoveFromCart,
+    required this.onConfigure,
+  });
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final serviceNotifier = context.watch<ServiceNotifier>();
-    final cartNotifier = context.watch<CartChangeNotifier>();
-    final services = serviceNotifier.services;
-    final isLoading = serviceNotifier.isLoading;
+    final selectedServiceIds = _getSelectedServiceIds();
 
-    // Get selected service IDs from cart
-    final selectedServiceIds = cartNotifier.serviceItems
-        .map((item) => item.service?.id)
-        .where((id) => id != null)
-        .toSet();
-
-    if (isLoading) {
-      return _LoadingState(localizations: localizations);
+    if (isLoading && services.isEmpty) {
+      return SliverFillRemaining(
+        child: _LoadingState(localizations: localizations),
+      );
     }
 
     if (services.isEmpty) {
-      return _EmptyState(localizations: localizations);
+      return SliverFillRemaining(
+        child: _EmptyState(localizations: localizations),
+      );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return SliverList(
+      delegate: SliverChildListDelegate([
         // Header with selection count
-        _ServicesHeader(selectedCount: selectedServiceIds.length),
-        const SizedBox(height: 16),
-        _ServicesGrid(
-          services: services,
-          selectedServiceIds: selectedServiceIds,
+        _ServicesHeader(
+          selectedCount: selectedServiceIds.length,
+          totalCount: services.length,
         ),
-      ],
+        const SizedBox(height: 8),
+        // Services Grid
+        ServiceGrid(
+          services: services,
+          cartNotifier: cartNotifier,
+          onAddToCart: onAddToCart,
+          onRemoveFromCart: onRemoveFromCart,
+          onConfigure: onConfigure,
+        ),
+      ]),
     );
+  }
+
+  Set<int> _getSelectedServiceIds() {
+    return cartNotifier.cartItems
+        .where((item) => item.service?.id != null)
+        .map((item) => item.service!.id)
+        .toSet();
   }
 }
 
+// ==================== HEADER ====================
+
 class _ServicesHeader extends StatelessWidget {
   final int selectedCount;
+  final int totalCount;
 
-  const _ServicesHeader({required this.selectedCount});
+  const _ServicesHeader({
+    required this.selectedCount,
+    required this.totalCount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,383 +87,138 @@ class _ServicesHeader extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final localizations = AppLocalizations.of(context)!;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.primary.withOpacity(0.08),
-            colorScheme.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Icon with selection count badge
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [colorScheme.primary, colorScheme.primaryContainer],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.medical_services_rounded,
-                  color: colorScheme.onPrimary,
-                  size: 28,
-                ),
-              ),
-
-              // Selection badge
-              if (selectedCount > 0)
-                Positioned(
-                  top: -4,
-                  right: -4,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.tertiary,
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: colorScheme.surface,
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      selectedCount.toString(),
-                      style: TextStyle(
-                        color: colorScheme.onTertiary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.08),
+              colorScheme.surface,
             ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colorScheme.primary.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Icon with selection count badge
+            Stack(
+              clipBehavior: Clip.none,
               children: [
-                Text(
-                  localizations.services,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: colorScheme.onSurface,
-                    fontSize: 28,
-                    letterSpacing: -0.5,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colorScheme.primary,
+                        colorScheme.primaryContainer
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.medical_services_rounded,
+                    color: colorScheme.onPrimary,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  selectedCount > 0
-                      ? localizations.nServicesSelected(selectedCount)
-                      : localizations.browseAndSelectServices,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: selectedCount > 0
-                        ? colorScheme.tertiary
-                        : colorScheme.onSurfaceVariant,
-                    height: 1.4,
-                    fontWeight: selectedCount > 0 ? FontWeight.w600 : null,
+                if (selectedCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.tertiary,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: colorScheme.surface,
+                          width: 2,
+                        ),
+                      ),
+                      child: Text(
+                        selectedCount.toString(),
+                        style: TextStyle(
+                          color: colorScheme.onTertiary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ServicesGrid extends StatelessWidget {
-  final List<ProvidedService> services;
-  final Set<int?> selectedServiceIds;
-
-  const _ServicesGrid({
-    required this.services,
-    required this.selectedServiceIds,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cartNotifier = context.read<CartChangeNotifier>();
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = 2;
-        final spacing = 16.0;
-        final padding = 20.0;
-        final availableWidth = constraints.maxWidth - (padding * 2);
-        final itemWidth =
-            (availableWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Wrap(
-            spacing: spacing,
-            runSpacing: spacing,
-            children: services.map((service) {
-              return SizedBox(
-                width: itemWidth,
-                child: ItemCardWithConfiguration(
-                  item: service,
-                  isProduct: false,
-                  // cartNotifier: cartNotifier,
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
-}
-
-// Enhanced ItemCardWithControls to show quantity badge
-class ServiceCardWithBadges extends StatelessWidget {
-  final ProvidedService service;
-  final CartChangeNotifier cartNotifier;
-
-  const ServiceCardWithBadges({
-    super.key,
-    required this.service,
-    required this.cartNotifier,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cartItem = cartNotifier.getServiceCartItem(service);
-    final isInCart = cartItem != null;
-    final quantity = cartItem?.quantity ?? 0;
-    final loc = AppLocalizations.of(context)!;
-
-    return Stack(
-      children: [
-        ItemCardWithConfiguration(
-          item: service,
-          isProduct: false,
-          // cartNotifier: cartNotifier,
-          // isProduct: false,
-        ),
-
-        // Quantity badge if service is in cart
-        if (isInCart && quantity > 0)
-          Positioned(
-            top: 8,
-            left: 8,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.tertiary,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-                border: Border.all(
-                  color: Colors.white,
-                  width: 2,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.shopping_cart_checkout,
-                    size: 12,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 4),
                   Text(
-                    quantity.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                    localizations.services,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    selectedCount > 0
+                        ? localizations.selected(selectedCount)
+                        : localizations.browseAndSelectServices,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: selectedCount > 0
+                          ? colorScheme.tertiary
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight: selectedCount > 0 ? FontWeight.w600 : null,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-
-        // Duration badge
-        Positioned(
-          bottom: 8,
-          left: 8,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 5,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              service.durationFormatted ?? '0min',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+            // Total count badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
               ),
-            ),
-          ),
-        ),
-
-        // Price badge
-        Positioned(
-          bottom: 8,
-          right: 8,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 5,
-            ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.green.shade600,
-                  Colors.green.shade800,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+              child: Text(
+                localizations.available(totalCount),
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
                 ),
-              ],
-            ),
-            child: Text(
-              loc.price(service.finalPrice.toStringAsFixed(2)),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// Alternative: Badge only on selection
-class ServiceSelectionBadge extends StatelessWidget {
-  final bool isSelected;
-  final int? quantity;
-
-  const ServiceSelectionBadge({
-    super.key,
-    required this.isSelected,
-    this.quantity,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isSelected) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.secondary,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.check_circle,
-            size: 14,
-            color: Colors.white,
-          ),
-          if (quantity != null && quantity! > 1) ...[
-            const SizedBox(width: 4),
-            Text(
-              '×$quantity',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
               ),
             ),
           ],
-          const SizedBox(width: 4),
-          Text(
-            'IN CART',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.8,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-// Loading and Empty states remain the same
+// ==================== LOADING STATE ====================
+
 class _LoadingState extends StatelessWidget {
   final AppLocalizations localizations;
 
@@ -455,7 +240,7 @@ class _LoadingState extends StatelessWidget {
               strokeWidth: 3,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Text(
             localizations.loadingServices,
             style: TextStyle(
@@ -478,6 +263,8 @@ class _LoadingState extends StatelessWidget {
   }
 }
 
+// ==================== EMPTY STATE ====================
+
 class _EmptyState extends StatelessWidget {
   final AppLocalizations localizations;
 
@@ -489,13 +276,13 @@ class _EmptyState extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 120,
-              height: 120,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: colorScheme.primary.withOpacity(0.05),
@@ -510,56 +297,27 @@ class _EmptyState extends StatelessWidget {
                 color: colorScheme.primary.withOpacity(0.4),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Text(
               localizations.noServicesAvailable,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: colorScheme.onSurface,
-                letterSpacing: -0.3,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 localizations.servicesWillAppearHere,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: () {
-                // TODO: Navigate to service creation or refresh
-              },
-              icon: Icon(
-                Icons.refresh_rounded,
-                size: 18,
-                color: colorScheme.onPrimary,
-              ),
-              label: Text(
-                localizations.refreshServices,
-                style: TextStyle(
-                  color: colorScheme.onPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
               ),
             ),
           ],
@@ -568,9 +326,3 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
-
-// Update your localization strings:
-// Add to your AppLocalizations:
-// String get nServicesSelected(int count) => '$count services selected';
-// String get inCart => 'IN CART';
-// String get selected => 'SELECTED';

@@ -42,7 +42,8 @@ class ProductGrid extends StatelessWidget {
         return ItemCardWithConfiguration(
           item: products[index],
           // cartNotifier: cartNotifier,
-          isProduct: true,
+          isProduct: true, quantity: 0, onAddToCart: () {},
+          onRemoveFromCart: () {}, onConfigure: () {},
         );
       },
     );
