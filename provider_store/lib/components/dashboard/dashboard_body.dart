@@ -141,7 +141,7 @@ class DashboardBody extends StatelessWidget {
         accessibleSuppliers: supplierIds,
         userRules: userRules,
         suppliers: suppliers,
-        products: productNotifier.products,
+        products: List<Product>.from(productNotifier.products),
         isLoading: productNotifier.isLoading,
         searchQuery: productNotifier.currentSearchQuery ?? '',
         currentProviderId: selectedSupplierId > 0

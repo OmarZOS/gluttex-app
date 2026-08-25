@@ -340,10 +340,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
-    final backgroundColor = isDarkMode
-        ? AppConstants.backgroundDarkColor
-        : AppConstants.backgroundColor;
+    final backgroundColor = Theme.of(context).colorScheme.surfaceVariant;
 
     return Scaffold(
       appBar: _buildAppBar(theme, backgroundColor),
@@ -401,9 +398,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final appUser = context.watch<AppUserNotifier>().appUser;
     final displayName =
         '${appUser?.personFirstName} ${appUser?.personLastName}'.trim();
-    final backgroundColor = Theme.of(context).brightness == Brightness.light
-        ? AppConstants.backgroundColor
-        : AppConstants.backgroundDarkColor;
+    final backgroundColor = Theme.of(context).colorScheme.surfaceVariant;
 
     return [
       _buildNavigationItem(

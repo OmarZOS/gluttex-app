@@ -222,6 +222,11 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                   userLocation: supplierNotifier.currentLocation,
                   suppliers: supplierNotifier.suppliers,
                   onSupplierTap: (supplier) {
+                    // Update global selection so dashboards and other
+                    // listeners react to this tap.
+                    Provider.of<SupplierChangeNotifier>(context, listen: false)
+                        .selectSupplier(supplier.idProductProvider);
+
                     _focusOnLocation(
                       supplier.locationLatitude,
                       supplier.locationLongitude,

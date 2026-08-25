@@ -55,6 +55,7 @@ class ProductFetch {
     String query = "",
     bool reset = false,
   }) async {
+    log('ProductFetch.fetchProducts called: providerId=$providerId reset=$reset query="$query" currentProviderId=${_state.currentProviderId}');
     if (_state.isLoading) return;
 
     final paramsChanged = reset ||
@@ -112,6 +113,7 @@ class ProductFetch {
       } else {
         _state.hasMoreProducts = false;
       }
+      log('ProductFetch.fetchProducts result: fetched=${fetched?.length ?? 0} total=${_state.products.length} hasMore=${_state.hasMoreProducts}');
     } catch (e) {
       log("Failed to fetch products: $e");
       rethrow;

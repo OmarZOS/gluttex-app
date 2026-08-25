@@ -1,4 +1,6 @@
 import 'package:app_constants/app_routes.dart';
+import 'package:event/product_change_notifier.dart';
+import 'package:event/service_change_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:app_constants/app_constants.dart';
@@ -15,6 +17,7 @@ import 'dashboard_body.dart';
 import 'dashboard_bottom_nav.dart';
 import 'dashboard_fab.dart';
 import 'no_access_screen.dart';
+import 'pending_invitations_dialog.dart';
 import 'package:provider/provider.dart';
 
 class DashboardContent extends StatefulWidget {
@@ -48,7 +51,37 @@ class DashboardContentState extends State<DashboardContent> {
   @override
   void initState() {
     super.initState();
+    // Listen for global supplier selection changes
+    widget.supplierNotifier.addListener(_onSupplierSelectionChanged);
+
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+  }
+
+  void _onSupplierSelectionChanged() {
+    final id = widget.supplierNotifier.selectedSupplierId ?? 0;
+    if (!mounted) return;
+    if (id != _selectedSupplierId) {
+      setState(() {
+        _selectedSupplierId = id;
+        _selectedIndex = 0;
+      });
+      // Ensure product and service notifiers load data for the new supplier
+      try {
+        final productNotifier = context.read<ProductNotifier>();
+        final serviceNotifier = context.read<ServiceNotifier>();
+
+        if (id > 0) {
+          productNotifier.fetchProducts(providerId: id, reset: true);
+          serviceNotifier.fetchServices(providerId: id, reset: true);
+        } else {
+          // cleared selection: load unfiltered lists
+          productNotifier.fetchProducts(reset: true);
+          serviceNotifier.fetchServices(reset: true);
+        }
+      } catch (_) {
+        // Providers might not be available in some contexts; ignore
+      }
+    }
   }
 
   // ==================== DATA LOADING ====================
@@ -57,6 +90,9 @@ class DashboardContentState extends State<DashboardContent> {
     setState(() => _isLoading = true);
 
     try {
+      // Ensure we have suppliers loaded for the dashboard
+      await widget.supplierNotifier.fetchSuppliers(reset: true);
+
       final userId = widget.currentUser.idAppUser ?? 0;
       if (userId == 0) {
         setState(() => _isLoading = false);
@@ -185,6 +221,9 @@ class DashboardContentState extends State<DashboardContent> {
           filtered.where((s) => s.accessType == SupplierAccessType.owner);
       _selectedSupplierId =
           owned.isNotEmpty ? owned.first.id : filtered.first.id;
+      // Sync the default selection with the global supplier notifier so
+      // other parts of the app (maps, lists, dashboards) are aware.
+      widget.supplierNotifier.selectSupplier(_selectedSupplierId);
     }
   }
 
@@ -336,6 +375,12 @@ class DashboardContentState extends State<DashboardContent> {
     );
   }
 
+  @override
+  void dispose() {
+    widget.supplierNotifier.removeListener(_onSupplierSelectionChanged);
+    super.dispose();
+  }
+
   Widget _buildLoading() => Scaffold(
         body: Center(
           child: Column(
@@ -402,6 +447,60 @@ class DashboardContentState extends State<DashboardContent> {
               ],
             ),
           ),
+          // Pending invitations button
+          Builder(builder: (context) {
+            final userId = widget.currentUser.idAppUser ?? 0;
+            final pending =
+                widget.personnelNotifier.getPendingRulesForUser(userId);
+            final pendingCount = pending.length;
+
+            return IconButton(
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(Icons.mail_outline,
+                      size: 20, color: cs.onSurfaceVariant),
+                  if (pendingCount > 0)
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.error,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints:
+                            const BoxConstraints(minWidth: 16, minHeight: 16),
+                        child: Center(
+                          child: Text(
+                            pendingCount > 9 ? '9+' : pendingCount.toString(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.onError,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => PendingInvitationsDialog(
+                    pendingRules: pending,
+                    personnelNotifier: widget.personnelNotifier,
+                  ),
+                );
+              },
+              tooltip: 'Pending invitations',
+            );
+          }),
+
           IconButton(
             icon: Icon(Icons.refresh_rounded,
                 size: 20, color: cs.onSurfaceVariant),
@@ -486,6 +585,8 @@ class DashboardContentState extends State<DashboardContent> {
             _selectedSupplierId = 0;
           }
           _selectedIndex = 0;
+          // Propagate selection to global notifier
+          widget.supplierNotifier.selectSupplier(_selectedSupplierId);
         }),
       ),
     );
@@ -560,6 +661,8 @@ class DashboardContentState extends State<DashboardContent> {
         onChanged: (id) => setState(() {
           _selectedSupplierId = id ?? 0;
           _selectedIndex = 0;
+          // Propagate selection to global notifier
+          widget.supplierNotifier.selectSupplier(_selectedSupplierId);
         }),
       ),
     );

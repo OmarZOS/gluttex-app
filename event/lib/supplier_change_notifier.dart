@@ -16,6 +16,19 @@ import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SupplierChangeNotifier extends ChangeNotifier {
+  // Currently selected supplier id (nullable). Other widgets can listen
+  // to changes via this notifier and react (e.g., dashboards).
+  int? _selectedSupplierId;
+
+  /// Get or null if no supplier selected
+  int? get selectedSupplierId => _selectedSupplierId;
+
+  /// Select a supplier (or null to clear selection)
+  void selectSupplier(int? supplierId) {
+    if (_selectedSupplierId == supplierId) return;
+    _selectedSupplierId = supplierId;
+    notifyListeners();
+  }
   // Dependencies
   final SupplierService _service = AppLocator.get<SupplierService>();
   final StorageService _storage = AppLocator.get<StorageService>();

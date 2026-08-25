@@ -64,6 +64,23 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     });
   }
 
+  @override
+  void didUpdateWidget(covariant SellingPointScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the selected supplier changed, reload supplier-specific data
+    final oldId = oldWidget.selectedSupplierId ?? 0;
+    final newId = widget.selectedSupplierId ?? 0;
+    if (oldId != newId) {
+      if (newId > 0) {
+        _loadSupplierData(newId);
+      } else {
+        // Selection cleared: reload unfiltered lists
+        widget.productNotifier.fetchProducts(reset: true);
+        widget.serviceNotifier.fetchServices(reset: true);
+      }
+    }
+  }
+
   void _onSearchChanged() {
     final query = _searchController.text.trim();
     setState(() {
@@ -73,8 +90,9 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
   }
 
   void _loadSupplierData(int supplierId) {
-    widget.productNotifier.fetchProducts(providerId: supplierId);
-    widget.serviceNotifier.fetchServices(providerId: supplierId);
+    // Force a reset so pagination and cached results are cleared when switching suppliers
+    widget.productNotifier.fetchProducts(providerId: supplierId, reset: true);
+    widget.serviceNotifier.fetchServices(providerId: supplierId, reset: true);
   }
 
   List<Product> get _filteredProducts {

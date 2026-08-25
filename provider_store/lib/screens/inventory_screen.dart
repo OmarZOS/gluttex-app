@@ -1,3 +1,5 @@
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
@@ -69,7 +71,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   bool _shouldRebuild(InventoryScreen oldWidget) {
-    return oldWidget.products != widget.products ||
+    // Compare list contents (not just identity) to detect in-place mutations
+    final productsChanged = !listEquals(oldWidget.products, widget.products);
+    return productsChanged ||
         oldWidget.searchQuery != widget.searchQuery ||
         oldWidget.privilegeLevel != widget.privilegeLevel ||
         oldWidget.currentProviderId != widget.currentProviderId;
@@ -78,6 +82,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
   void _initializeData() {
     _hasInventoryAccess = _checkInventoryAccess();
     _filteredProducts = _filterProducts();
+    log('InventoryScreen._initializeData: currentProviderId=${widget.currentProviderId} products=${widget.products.length} filtered=${_filteredProducts.length}');
   }
 
   bool _checkInventoryAccess() {

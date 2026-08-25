@@ -7,6 +7,8 @@ import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:provider_geo/components/location_filter.dart';
 import 'package:ui/components/supplier/supplier_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:event/supplier_change_notifier.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class PanelContent extends StatefulWidget {
@@ -236,7 +238,12 @@ class _PanelContentState extends State<PanelContent> {
         title: _buildSupplierTitle(supplier, category, theme),
         subtitle: _buildSupplierSubtitle(supplier, theme),
         trailing: _buildLocationButton(supplier, theme),
-        onTap: () => showSupplierDetails(context, supplier),
+        onTap: () {
+          // Update global selected supplier so other parts of the app can react
+          Provider.of<SupplierChangeNotifier>(context, listen: false)
+              .selectSupplier(supplier.idProductProvider);
+          showSupplierDetails(context, supplier);
+        },
       ),
     );
   }
