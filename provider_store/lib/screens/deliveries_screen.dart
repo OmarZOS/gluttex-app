@@ -397,7 +397,10 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => NewDeliverySheet(notifier: _notifier),
+      builder: (context) => NewDeliverySheet(
+        notifier: _notifier,
+        providerId: widget.selectedSupplierId,
+      ),
     );
   }
 }

@@ -82,8 +82,8 @@ class DeliveryServiceImpl extends DeliveryService {
     final key = callerKey ?? _getCallerKey('getDelivery', id: id);
     try {
       // GET /api/v1/business/deliveries/{delivery_id}
-      final url =
-          '${AppConstants.apiBaseUrl}${AppConstants.getDeliveryDetailsEndpoint}/$id';
+      const url =
+          '${AppConstants.apiBaseUrl}${AppConstants.getDeliveryDetailsEndpoint}';
       _log('Fetching delivery $id from: $url');
       final data = await _storageService.get(
         url,

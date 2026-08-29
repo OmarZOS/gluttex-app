@@ -1,4 +1,150 @@
 import 'dart:convert';
+import 'package:gluttex_core/business/Supplier.dart';
+
+// ============================================================================
+// DELIVERY ADDRESS CLASS
+// ============================================================================
+
+class DeliveryAddress {
+  final int idAddress;
+  final String? addressCity;
+  final String? addressStreet;
+  final String? addressPostalCode;
+  final String? addressCountry;
+
+  DeliveryAddress({
+    required this.idAddress,
+    this.addressCity,
+    this.addressStreet,
+    this.addressPostalCode,
+    this.addressCountry,
+  });
+
+  factory DeliveryAddress.fromJson(Map<String, dynamic> json) {
+    return DeliveryAddress(
+      idAddress: json['id_address'] as int? ?? 0,
+      addressCity: json['address_city'] as String?,
+      addressStreet: json['address_street'] as String?,
+      addressPostalCode: json['address_postal_code'] as String?,
+      addressCountry: json['address_country'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id_address': idAddress,
+      if (addressCity != null) 'address_city': addressCity,
+      if (addressStreet != null) 'address_street': addressStreet,
+      if (addressPostalCode != null) 'address_postal_code': addressPostalCode,
+      if (addressCountry != null) 'address_country': addressCountry,
+    };
+  }
+
+  String get fullAddress {
+    final parts = <String>[];
+    if (addressStreet != null && addressStreet!.isNotEmpty)
+      parts.add(addressStreet!);
+    if (addressCity != null && addressCity!.isNotEmpty) parts.add(addressCity!);
+    if (addressPostalCode != null && addressPostalCode!.isNotEmpty)
+      parts.add(addressPostalCode!);
+    if (addressCountry != null && addressCountry!.isNotEmpty)
+      parts.add(addressCountry!);
+    return parts.join(', ');
+  }
+
+  @override
+  String toString() => fullAddress;
+}
+
+// ============================================================================
+// DELIVERY INVOICE CLASS
+// ============================================================================
+
+class DeliveryInvoice {
+  final int invoiceId;
+  final double? invoiceTotalAmount;
+  final String? invoiceStatus;
+  final String? invoiceDueDate;
+  final DateTime? invoiceCreatedAt;
+  final String? invoiceType;
+  final String? invoiceNumber;
+  final String? invoiceIssueDate;
+  final String? invoiceNotes;
+  final DateTime? invoiceUpdatedAt;
+  final int? invoiceTaxApplied;
+  final List<dynamic>? cart;
+  final List<dynamic>? placedOrder;
+
+  DeliveryInvoice({
+    required this.invoiceId,
+    this.invoiceTotalAmount,
+    this.invoiceStatus,
+    this.invoiceDueDate,
+    this.invoiceCreatedAt,
+    this.invoiceType,
+    this.invoiceNumber,
+    this.invoiceIssueDate,
+    this.invoiceNotes,
+    this.invoiceUpdatedAt,
+    this.invoiceTaxApplied,
+    this.cart,
+    this.placedOrder,
+  });
+
+  factory DeliveryInvoice.fromJson(Map<String, dynamic> json) {
+    return DeliveryInvoice(
+      invoiceId: json['invoice_id'] as int? ?? 0,
+      invoiceTotalAmount: (json['invoice_total_amount'] as num?)?.toDouble(),
+      invoiceStatus: json['invoice_status'] as String?,
+      invoiceDueDate: json['invoice_due_date'] as String?,
+      invoiceCreatedAt: _safeDateTime(json['invoice_created_at']),
+      invoiceType: json['invoice_type'] as String?,
+      invoiceNumber: json['invoice_number'] as String?,
+      invoiceIssueDate: json['invoice_issue_date'] as String?,
+      invoiceNotes: json['invoice_notes'] as String?,
+      invoiceUpdatedAt: _safeDateTime(json['invoice_updated_at']),
+      invoiceTaxApplied: json['invoice_tax_applied'] as int?,
+      cart: json['cart'] as List?,
+      placedOrder: json['placed_order'] as List?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'invoice_id': invoiceId,
+      if (invoiceTotalAmount != null)
+        'invoice_total_amount': invoiceTotalAmount,
+      if (invoiceStatus != null) 'invoice_status': invoiceStatus,
+      if (invoiceDueDate != null) 'invoice_due_date': invoiceDueDate,
+      if (invoiceCreatedAt != null)
+        'invoice_created_at': invoiceCreatedAt!.toIso8601String(),
+      if (invoiceType != null) 'invoice_type': invoiceType,
+      if (invoiceNumber != null) 'invoice_number': invoiceNumber,
+      if (invoiceIssueDate != null) 'invoice_issue_date': invoiceIssueDate,
+      if (invoiceNotes != null) 'invoice_notes': invoiceNotes,
+      if (invoiceUpdatedAt != null)
+        'invoice_updated_at': invoiceUpdatedAt!.toIso8601String(),
+      if (invoiceTaxApplied != null) 'invoice_tax_applied': invoiceTaxApplied,
+      if (cart != null) 'cart': cart,
+      if (placedOrder != null) 'placed_order': placedOrder,
+    };
+  }
+
+  String get formattedTotal {
+    return 'DA ${(invoiceTotalAmount ?? 0).toStringAsFixed(2)}';
+  }
+
+  static DateTime? _safeDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
+}
+
+// ============================================================================
+// DELIVERY CLASS
+// ============================================================================
 
 class Delivery {
   int id_delivery;
@@ -23,7 +169,9 @@ class Delivery {
   int? delivery_source_id;
   DateTime? delivery_created_at;
   DateTime? delivery_updated_at;
-  ProductProvider? delivery_provider; // Changed to typed ProductProvider
+  Supplier? delivery_provider;
+  DeliveryAddress? delivery_address;
+  DeliveryInvoice? invoice;
   Map<String, dynamic>? delivery_broker;
 
   Delivery({
@@ -50,42 +198,37 @@ class Delivery {
     this.delivery_created_at,
     this.delivery_updated_at,
     this.delivery_provider,
+    this.delivery_address,
+    this.invoice,
     this.delivery_broker,
   });
 
   // ==================== FACTORY CONSTRUCTORS ====================
 
-  /// Parse from API response
   factory Delivery.fromJson(Map<String, dynamic> json) {
-    // Parse delivery_provider if present - it's already a ProductProvider object
-    ProductProvider? provider;
+    // Parse delivery_provider using existing Supplier.fromJson
+    Supplier? provider;
     if (json['delivery_provider'] != null) {
       try {
         final providerData = json['delivery_provider'] as Map<String, dynamic>;
-        provider = ProductProvider.fromJson(providerData);
-      } catch (e) {
-        // If parsing fails, try to create from available fields
-        try {
-          final providerData =
-              json['delivery_provider'] as Map<String, dynamic>;
-          provider = ProductProvider(
-            idProductProvider: providerData['id_product_provider'] as int?,
-            productProviderOwner:
-                providerData['product_provider_owner'] as int?,
-            productProviderLocationId:
-                providerData['product_provider_location_id'] as int?,
-            productProviderDetailsId:
-                providerData['product_provider_details_id'] as int?,
-            productProviderTypeId:
-                providerData['product_provider_type_id'] as int?,
-            productProviderOrgId:
-                providerData['product_provider_org_id'] as int?,
-            displayName: providerData['provider_organisation_name'] as String?,
-          );
-        } catch (_) {
-          // Failed to parse, keep null
-        }
-      }
+        provider = Supplier.fromJson(providerData);
+      } catch (_) {}
+    }
+
+    // Parse delivery_address
+    DeliveryAddress? address;
+    if (json['delivery_address'] != null) {
+      try {
+        address = DeliveryAddress.fromJson(json['delivery_address']);
+      } catch (_) {}
+    }
+
+    // Parse invoice
+    DeliveryInvoice? invoice;
+    if (json['invoice'] != null) {
+      try {
+        invoice = DeliveryInvoice.fromJson(json['invoice']);
+      } catch (_) {}
     }
 
     // Get provider ID from the provider object if available
@@ -121,7 +264,34 @@ class Delivery {
       delivery_created_at: _safeDateTime(json['delivery_created_at']),
       delivery_updated_at: _safeDateTime(json['delivery_updated_at']),
       delivery_provider: provider,
+      delivery_address: address,
+      invoice: invoice,
       delivery_broker: json['delivery_broker'] as Map<String, dynamic>?,
+    );
+  }
+
+  factory Delivery.fromDeliveryData(DeliveryData data) {
+    return Delivery(
+      id_delivery: data.idDelivery,
+      recipient_person: data.recipientPerson,
+      recipient_provider: data.recipientProvider,
+      delivery_package_count: data.deliveryPackageCount,
+      delivery_total_weight: data.deliveryTotalWeight,
+      delivery_cargo_dimensions: data.deliveryCargoDimensions,
+      delivery_goods_description: data.deliveryGoodsDescription,
+      hs_code: data.hsCode,
+      delivery_merchant_name: data.deliveryMerchantName,
+      delivery_shipping_method: data.deliveryShippingMethod,
+      delivery_special_instructions: data.deliverySpecialInstructions,
+      delivery_status: data.deliveryStatus,
+      delivery_address_id: data.deliveryAddressId,
+      delivery_current_address_id: data.deliveryCurrentAddressId,
+      delivery_fee: data.deliveryFee,
+      delivery_invoice_ref: data.deliveryInvoiceRef,
+      delivery_provider_id: data.deliveryProviderId,
+      delivery_broker_id: data.deliveryBrokerId,
+      delivery_source_type: data.deliverySourceType,
+      delivery_source_id: data.deliverySourceId,
     );
   }
 
@@ -154,42 +324,8 @@ class Delivery {
   static DateTime? _safeDateTime(dynamic value) {
     if (value == null) return null;
     if (value is DateTime) return value;
-    if (value is String) {
-      try {
-        return DateTime.tryParse(value);
-      } catch (_) {
-        return null;
-      }
-    }
+    if (value is String) return DateTime.tryParse(value);
     return null;
-  }
-
-  /// Convert DeliveryData to Delivery
-  factory Delivery.fromDeliveryData(DeliveryData data) {
-    return Delivery(
-      id_delivery: data.idDelivery,
-      recipient_person: data.recipientPerson,
-      recipient_provider: data.recipientProvider,
-      delivery_package_count: data.deliveryPackageCount,
-      delivery_total_weight: data.deliveryTotalWeight,
-      delivery_cargo_dimensions: data.deliveryCargoDimensions,
-      delivery_goods_description: data.deliveryGoodsDescription,
-      hs_code: data.hsCode,
-      delivery_merchant_name: data.deliveryMerchantName,
-      delivery_shipping_method: data.deliveryShippingMethod,
-      delivery_special_instructions: data.deliverySpecialInstructions,
-      delivery_status: data.deliveryStatus,
-      delivery_address_id: data.deliveryAddressId,
-      delivery_current_address_id: data.deliveryCurrentAddressId,
-      delivery_fee: data.deliveryFee,
-      delivery_invoice_ref: data.deliveryInvoiceRef,
-      delivery_provider_id: data.deliveryProviderId,
-      delivery_broker_id: data.deliveryBrokerId,
-      delivery_source_type: data.deliverySourceType,
-      delivery_source_id: data.deliverySourceId,
-      // Note: delivery_provider (ProductProvider) and delivery_broker are not in DeliveryData
-      // They would need to be set separately if needed
-    );
   }
 
   // ==================== TO JSON ====================
@@ -233,6 +369,9 @@ class Delivery {
         'delivery_updated_at': delivery_updated_at!.toIso8601String(),
       if (delivery_provider != null)
         'delivery_provider': delivery_provider!.toJson(),
+      if (delivery_address != null)
+        'delivery_address': delivery_address!.toJson(),
+      if (invoice != null) 'invoice': invoice!.toJson(),
       if (delivery_broker != null) 'delivery_broker': delivery_broker,
     };
   }
@@ -262,7 +401,9 @@ class Delivery {
     int? delivery_source_id,
     DateTime? delivery_created_at,
     DateTime? delivery_updated_at,
-    ProductProvider? delivery_provider,
+    Supplier? delivery_provider,
+    DeliveryAddress? delivery_address,
+    DeliveryInvoice? invoice,
     Map<String, dynamic>? delivery_broker,
   }) {
     return Delivery(
@@ -297,26 +438,25 @@ class Delivery {
       delivery_created_at: delivery_created_at ?? this.delivery_created_at,
       delivery_updated_at: delivery_updated_at ?? this.delivery_updated_at,
       delivery_provider: delivery_provider ?? this.delivery_provider,
+      delivery_address: delivery_address ?? this.delivery_address,
+      invoice: invoice ?? this.invoice,
       delivery_broker: delivery_broker ?? this.delivery_broker,
     );
   }
 
-  // ==================== PROVIDER HELPERS ====================
+  // ==================== GETTERS ====================
 
-  int? get providerId {
-    if (delivery_provider_id != null && delivery_provider_id! > 0) {
-      return delivery_provider_id;
-    }
-    return delivery_provider?.idProductProvider;
-  }
+  int? get providerId =>
+      delivery_provider?.idProductProvider ?? delivery_provider_id;
+  String? get providerName =>
+      delivery_provider?.displayName ?? delivery_provider?.providerName;
+  int? get providerOrgId => delivery_provider?.idProviderOrganisation;
+  String? get providerAddress => delivery_provider?.fullAddress;
+  String? get providerOrganisationName =>
+      delivery_provider?.providerOrganisationName;
 
-  String? get providerName {
-    return delivery_provider?.displayName;
-  }
-
-  int? get providerOrgId {
-    return delivery_provider?.productProviderOrgId;
-  }
+  String get addressFull => delivery_address?.fullAddress ?? 'No address';
+  String get invoiceTotal => invoice?.formattedTotal ?? 'DA 0.00';
 
   // ==================== STATUS HELPERS ====================
 
@@ -380,7 +520,7 @@ class Delivery {
 
   String get formattedFee {
     final fee = delivery_fee ?? 0.0;
-    return '${fee.toStringAsFixed(2)} DA';
+    return 'DA ${fee.toStringAsFixed(2)}';
   }
 
   String get formattedPackageCount {
@@ -416,56 +556,9 @@ class Delivery {
   @override
   int get hashCode => id_delivery.hashCode;
 }
-// ============================================================================
-// PRODUCT PROVIDER CLASS (if not already defined)
-// ============================================================================
-
-class ProductProvider {
-  final int? idProductProvider;
-  final int? productProviderOwner;
-  final int? productProviderLocationId;
-  final int? productProviderDetailsId;
-  final int? productProviderTypeId;
-  final int? productProviderOrgId;
-  final String? displayName;
-
-  ProductProvider({
-    this.idProductProvider,
-    this.productProviderOwner,
-    this.productProviderLocationId,
-    this.productProviderDetailsId,
-    this.productProviderTypeId,
-    this.productProviderOrgId,
-    this.displayName,
-  });
-
-  factory ProductProvider.fromJson(Map<String, dynamic> json) {
-    return ProductProvider(
-      idProductProvider: json['id_product_provider'] as int?,
-      productProviderOwner: json['product_provider_owner'] as int?,
-      productProviderLocationId: json['product_provider_location_id'] as int?,
-      productProviderDetailsId: json['product_provider_details_id'] as int?,
-      productProviderTypeId: json['product_provider_type_id'] as int?,
-      productProviderOrgId: json['product_provider_org_id'] as int?,
-      displayName: json['provider_organisation_name'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id_product_provider': idProductProvider,
-      'product_provider_owner': productProviderOwner,
-      'product_provider_location_id': productProviderLocationId,
-      'product_provider_details_id': productProviderDetailsId,
-      'product_provider_type_id': productProviderTypeId,
-      'product_provider_org_id': productProviderOrgId,
-      'provider_organisation_name': displayName,
-    };
-  }
-}
 
 // ============================================================================
-// LEGACY DELIVERY DATA CLASS (RETROCOMPATIBILITY)
+// DELIVERY DATA CLASS (LEGACY SUPPORT)
 // ============================================================================
 
 class DeliveryData {
@@ -564,6 +657,7 @@ class DeliveryData {
       deliverySourceId: json['delivery_source_id'] as int?,
     );
   }
+
   DeliveryData copyWith({
     int? idDelivery,
     int? recipientPerson,
