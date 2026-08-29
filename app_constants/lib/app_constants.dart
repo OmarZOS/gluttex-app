@@ -188,11 +188,11 @@ class AppConstants {
   static const String getCartSummaryEndpoint = '/business/carts/summary';
 
   // ==================== Delivery Endpoints ====================
-  static const String addDeliveryEndpoint = '/business/deliveries';
-  static const String getAllDeliveriesEndpoint = '/business/deliveries';
-  static const String getDeliveryDetailsEndpoint = '/business/deliveries';
-  static const String updateDeliveryEndpoint = '/business/deliveries';
-  static const String deleteDeliveryEndpoint = '/business/deliveries';
+  static const String addDeliveryEndpoint = '/business/delivery';
+  static const String getAllDeliveriesEndpoint = '/business/delivery';
+  static const String getDeliveryDetailsEndpoint = '/business/delivery';
+  static const String updateDeliveryEndpoint = '/business/delivery';
+  static const String deleteDeliveryEndpoint = '/business/delivery';
   static const String updateDeliveryStatusEndpoint =
       '/business/deliveries/status';
   static const String updateDeliveryAddressEndpoint =

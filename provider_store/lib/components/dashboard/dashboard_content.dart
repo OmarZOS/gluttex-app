@@ -1,4 +1,5 @@
 import 'package:app_constants/app_routes.dart';
+import 'package:event/delivery_change_notifier.dart';
 import 'package:event/product_change_notifier.dart';
 import 'package:event/service_change_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
@@ -51,9 +52,7 @@ class DashboardContentState extends State<DashboardContent> {
   @override
   void initState() {
     super.initState();
-    // Listen for global supplier selection changes
     widget.supplierNotifier.addListener(_onSupplierSelectionChanged);
-
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
@@ -61,26 +60,45 @@ class DashboardContentState extends State<DashboardContent> {
     final id = widget.supplierNotifier.selectedSupplierId ?? 0;
     if (!mounted) return;
     if (id != _selectedSupplierId) {
-      setState(() {
-        _selectedSupplierId = id;
-        _selectedIndex = 0;
+      // ✅ Use addPostFrameCallback to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _selectedSupplierId = id;
+          _selectedIndex = 0;
+        });
+        _loadDataForSupplier(id);
       });
-      // Ensure product and service notifiers load data for the new supplier
-      try {
-        final productNotifier = context.read<ProductNotifier>();
-        final serviceNotifier = context.read<ServiceNotifier>();
+    }
+  }
 
-        if (id > 0) {
-          productNotifier.fetchProducts(providerId: id, reset: true);
-          serviceNotifier.fetchServices(providerId: id, reset: true);
-        } else {
-          // cleared selection: load unfiltered lists
-          productNotifier.fetchProducts(reset: true);
-          serviceNotifier.fetchServices(reset: true);
-        }
-      } catch (_) {
-        // Providers might not be available in some contexts; ignore
+  Future<void> _loadDataForSupplier(int supplierId) async {
+    try {
+      final productNotifier = context.read<ProductNotifier>();
+      final serviceNotifier = context.read<ServiceNotifier>();
+      final deliveryNotifier = context.read<DeliveryChangeNotifier>();
+
+      if (supplierId > 0) {
+        // Load products for the selected supplier
+        await productNotifier.fetchProducts(
+            providerId: supplierId, reset: true);
+        await serviceNotifier.fetchServices(
+            providerId: supplierId, reset: true);
+
+        // ✅ FIX: Set filters and fetch deliveries
+        deliveryNotifier.setFilters(providerId: supplierId);
+        await deliveryNotifier.fetchFirstPage();
+
+        debugPrint('✅ Loaded data for supplier: $supplierId');
+        debugPrint('   Deliveries: ${deliveryNotifier.deliveries.length}');
+      } else {
+        await productNotifier.fetchProducts(reset: true);
+        await serviceNotifier.fetchServices(reset: true);
+        deliveryNotifier.clearFilters();
+        await deliveryNotifier.fetchFirstPage();
       }
+    } catch (e) {
+      debugPrint('❌ Error loading data for supplier $supplierId: $e');
     }
   }
 
@@ -90,9 +108,6 @@ class DashboardContentState extends State<DashboardContent> {
     setState(() => _isLoading = true);
 
     try {
-      // Ensure we have suppliers loaded for the dashboard
-      await widget.supplierNotifier.fetchSuppliers(reset: true);
-
       final userId = widget.currentUser.idAppUser ?? 0;
       if (userId == 0) {
         setState(() => _isLoading = false);
@@ -112,6 +127,12 @@ class DashboardContentState extends State<DashboardContent> {
 
       // Auto-select defaults
       _autoSelectDefaults();
+
+      // Load data for the selected supplier
+      if (_selectedSupplierId > 0) {
+        // ✅ Use await to ensure data is loaded
+        await _loadDataForSupplier(_selectedSupplierId);
+      }
 
       debugPrint(
           '📊 Loaded: ${_availableSuppliers.length} suppliers, ${_organisations.length} orgs');
@@ -167,7 +188,6 @@ class DashboardContentState extends State<DashboardContent> {
             .add(SupplierData.fromSupplier(s, SupplierAccessType.managed));
         addedIds.add(id);
       } catch (_) {
-        // Fetch individually if not in list
         final s = await widget.supplierNotifier.getSupplierById(id);
         if (s != null && s.idProductProvider != 0) {
           final accessType = s.productProviderOwnerId == userId
@@ -216,14 +236,16 @@ class DashboardContentState extends State<DashboardContent> {
 
     final filtered = _getSuppliersForOrg(_selectedOrgId);
     if (filtered.isNotEmpty) {
-      // Prefer owned suppliers first
       final owned =
           filtered.where((s) => s.accessType == SupplierAccessType.owner);
       _selectedSupplierId =
           owned.isNotEmpty ? owned.first.id : filtered.first.id;
-      // Sync the default selection with the global supplier notifier so
-      // other parts of the app (maps, lists, dashboards) are aware.
-      widget.supplierNotifier.selectSupplier(_selectedSupplierId);
+
+      try {
+        widget.supplierNotifier.selectSupplier(_selectedSupplierId);
+      } catch (_) {
+        // Method might not exist
+      }
     }
   }
 
@@ -447,60 +469,7 @@ class DashboardContentState extends State<DashboardContent> {
               ],
             ),
           ),
-          // Pending invitations button
-          Builder(builder: (context) {
-            final userId = widget.currentUser.idAppUser ?? 0;
-            final pending =
-                widget.personnelNotifier.getPendingRulesForUser(userId);
-            final pendingCount = pending.length;
-
-            return IconButton(
-              icon: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(Icons.mail_outline,
-                      size: 20, color: cs.onSurfaceVariant),
-                  if (pendingCount > 0)
-                    Positioned(
-                      right: -6,
-                      top: -6,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.error,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints:
-                            const BoxConstraints(minWidth: 16, minHeight: 16),
-                        child: Center(
-                          child: Text(
-                            pendingCount > 9 ? '9+' : pendingCount.toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.onError,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => PendingInvitationsDialog(
-                    pendingRules: pending,
-                    personnelNotifier: widget.personnelNotifier,
-                  ),
-                );
-              },
-              tooltip: 'Pending invitations',
-            );
-          }),
-
+          _buildPendingInvitationsButton(cs),
           IconButton(
             icon: Icon(Icons.refresh_rounded,
                 size: 20, color: cs.onSurfaceVariant),
@@ -509,6 +478,53 @@ class DashboardContentState extends State<DashboardContent> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPendingInvitationsButton(ColorScheme cs) {
+    final userId = widget.currentUser.idAppUser ?? 0;
+    final pending = widget.personnelNotifier.getPendingRulesForUser(userId);
+    final pendingCount = pending.length;
+
+    return IconButton(
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(Icons.mail_outline, size: 20, color: cs.onSurfaceVariant),
+          if (pendingCount > 0)
+            Positioned(
+              right: -6,
+              top: -6,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.error,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                child: Center(
+                  child: Text(
+                    pendingCount > 9 ? '9+' : pendingCount.toString(),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onError,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (ctx) => PendingInvitationsDialog(
+            pendingRules: pending,
+            personnelNotifier: widget.personnelNotifier,
+          ),
+        );
+      },
+      tooltip: 'Pending invitations',
     );
   }
 
@@ -549,11 +565,9 @@ class DashboardContentState extends State<DashboardContent> {
             value: o.id_provider_organisation,
             child: Row(
               children: [
-                Icon(
-                  Icons.business,
-                  size: 14,
-                  color: isSelected ? cs.primary : cs.onSurfaceVariant,
-                ),
+                Icon(Icons.business,
+                    size: 14,
+                    color: isSelected ? cs.primary : cs.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -576,7 +590,6 @@ class DashboardContentState extends State<DashboardContent> {
           _selectedOrgId = id ?? 0;
           final filtered = _getSuppliersForOrg(_selectedOrgId);
           if (filtered.isNotEmpty) {
-            // Prefer owned suppliers
             final owned =
                 filtered.where((s) => s.accessType == SupplierAccessType.owner);
             _selectedSupplierId =
@@ -585,8 +598,9 @@ class DashboardContentState extends State<DashboardContent> {
             _selectedSupplierId = 0;
           }
           _selectedIndex = 0;
-          // Propagate selection to global notifier
-          widget.supplierNotifier.selectSupplier(_selectedSupplierId);
+          try {
+            widget.supplierNotifier.selectSupplier(_selectedSupplierId);
+          } catch (_) {}
         }),
       ),
     );
@@ -615,7 +629,6 @@ class DashboardContentState extends State<DashboardContent> {
       );
     }
 
-    // Group suppliers by access type
     final owned = suppliers
         .where((s) => s.accessType == SupplierAccessType.owner)
         .toList();
@@ -635,7 +648,6 @@ class DashboardContentState extends State<DashboardContent> {
         dropdownColor: cs.surface,
         borderRadius: BorderRadius.circular(8),
         items: [
-          // Owned suppliers section
           if (owned.isNotEmpty) ...[
             const DropdownMenuItem<int>(
               value: null,
@@ -644,7 +656,6 @@ class DashboardContentState extends State<DashboardContent> {
             ),
             ...owned.map((data) => _buildSupplierMenuItem(data, cs, tt)),
           ],
-          // Managed suppliers section
           if (managed.isNotEmpty) ...[
             if (owned.isNotEmpty)
               const DropdownMenuItem<int>(
@@ -661,8 +672,9 @@ class DashboardContentState extends State<DashboardContent> {
         onChanged: (id) => setState(() {
           _selectedSupplierId = id ?? 0;
           _selectedIndex = 0;
-          // Propagate selection to global notifier
-          widget.supplierNotifier.selectSupplier(_selectedSupplierId);
+          try {
+            widget.supplierNotifier.selectSupplier(_selectedSupplierId);
+          } catch (_) {}
         }),
       ),
     );

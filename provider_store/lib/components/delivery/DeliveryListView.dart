@@ -5,10 +5,18 @@ import 'package:provider/provider.dart';
 
 class DeliveryListView extends StatefulWidget {
   final String status;
+  final int selectedSupplierId;
+  final DeliveryChangeNotifier? notifier;
+  final bool isLoading;
+  final Future<void> Function()? onRefresh;
 
   const DeliveryListView({
     super.key,
     required this.status,
+    this.selectedSupplierId = 0,
+    this.notifier,
+    this.isLoading = false,
+    this.onRefresh,
   });
 
   @override
@@ -16,26 +24,47 @@ class DeliveryListView extends StatefulWidget {
 }
 
 class _DeliveryListViewState extends State<DeliveryListView> {
+  late DeliveryChangeNotifier _notifier;
+  bool _initialized = false;
+
   @override
   void initState() {
     super.initState();
+    _notifier = widget.notifier ?? context.read<DeliveryChangeNotifier>();
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier =
-          Provider.of<DeliveryChangeNotifier>(context, listen: false);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.notifier == null) {
+      _notifier = context.read<DeliveryChangeNotifier>();
+    }
 
-      if (notifier.deliveries.isEmpty) {
-        notifier.fetchFirstPage();
-      }
-    });
+    // ✅ Only load if not initialized and deliveries are empty
+    if (!_initialized && _notifier.deliveries.isEmpty) {
+      _initialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (widget.selectedSupplierId > 0) {
+          _notifier.fetchDeliveries(
+              providerId: widget.selectedSupplierId, reset: true);
+        } else {
+          _notifier.fetchFirstPage();
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final notifier = context.watch<DeliveryChangeNotifier>();
-    final deliveries = notifier.getDeliveriesByStatus(widget.status);
+    final notifier = widget.notifier != null
+        ? _notifier
+        : context.watch<DeliveryChangeNotifier>();
 
-    if (notifier.isLoading && deliveries.isEmpty) {
+    final deliveries = notifier.getDeliveriesByStatus(widget.status);
+    final isLoading = widget.isLoading || notifier.isLoading;
+
+    // Show loading only if we're loading AND have no data
+    if (isLoading && deliveries.isEmpty) {
       return const _LoadingShimmer();
     }
 
@@ -43,17 +72,26 @@ class _DeliveryListViewState extends State<DeliveryListView> {
       return _EmptyState(status: widget.status);
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: deliveries.length,
-      itemBuilder: (context, index) {
-        final delivery = deliveries[index];
-
-        return DeliveryCard(
-          delivery: delivery,
-          status: widget.status,
-        );
+    return RefreshIndicator.adaptive(
+      onRefresh: () async {
+        if (widget.onRefresh != null) {
+          await widget.onRefresh!();
+        } else {
+          await notifier.refreshDeliveries();
+        }
       },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: deliveries.length,
+        itemBuilder: (context, index) {
+          final delivery = deliveries[index];
+          return DeliveryCard(
+            delivery: delivery,
+            // status: widget.status,
+            notifier: notifier,
+          );
+        },
+      ),
     );
   }
 }

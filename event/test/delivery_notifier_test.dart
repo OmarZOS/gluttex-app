@@ -4,7 +4,6 @@ import 'package:gluttex_core/business/services/DeliveryService.dart';
 import 'package:event/delivery_change_notifier.dart';
 import 'package:locator/locator.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:collection/collection.dart';
 
 // Create a proper mock class
 class MockDeliveryService extends Mock implements DeliveryService {}
@@ -114,6 +113,39 @@ void main() {
       await firstFetch;
 
       verify(() => service.getAllDeliveries(0, 10)).called(1);
+    });
+  });
+
+  group('provider-aware loading', () {
+    test('tracks current provider and loads filtered deliveries', () async {
+      final deliveries = [
+        makeDelivery(1, status: 'PENDING'),
+      ];
+
+      when(() => service.getAllDeliveries(0, 10, providerId: 42))
+          .thenAnswer((_) async => deliveries);
+
+      await notifier.fetchDeliveries(providerId: 42, reset: true);
+
+      expect(notifier.currentProviderId, 42);
+      expect(notifier.providerId, 42);
+      expect(notifier.deliveries.length, 1);
+      verify(() => service.getAllDeliveries(0, 10, providerId: 42)).called(1);
+    });
+
+    test('uses selected supplier when filters are set', () async {
+      final deliveries = [
+        makeDelivery(1, status: 'DELIVERED'),
+      ];
+
+      when(() => service.getAllDeliveries(0, 10, providerId: 7))
+          .thenAnswer((_) async => deliveries);
+
+      notifier.setFilters(providerId: 7);
+      await notifier.fetchFirstPage();
+
+      expect(notifier.currentProviderId, 7);
+      expect(notifier.deliveries.first.delivery_status, 'DELIVERED');
     });
   });
 

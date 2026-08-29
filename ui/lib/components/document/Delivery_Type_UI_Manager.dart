@@ -121,7 +121,7 @@ class DeliveryUIManager {
     await Future.delayed(delay);
 
     final basePrice = 5.0;
-    final weightMultiplier = deliveryData.deliveryTotalWeight * 0.5;
+    final weightMultiplier = (deliveryData.deliveryTotalWeight ?? 0) * 0.5;
     final shippingMultiplier = switch (deliveryData.deliveryShippingMethod) {
       'express' => 1.5,
       'overnight' => 2.0,
@@ -1222,7 +1222,9 @@ class DeliveryUIManager {
                                     hint: 'e.g., 1, 2, 3',
                                     keyboardType: TextInputType.number,
                                     initialValue:
-                                        deliveryData.deliveryPackageCount > 0
+                                        (deliveryData.deliveryPackageCount ??
+                                                    0) >
+                                                0
                                             ? deliveryData.deliveryPackageCount
                                                 .toString()
                                             : '',
@@ -1261,7 +1263,9 @@ class DeliveryUIManager {
                                     hint: 'e.g., 5.5',
                                     keyboardType: TextInputType.number,
                                     initialValue:
-                                        deliveryData.deliveryTotalWeight > 0
+                                        (deliveryData.deliveryTotalWeight ??
+                                                    0) >
+                                                0
                                             ? deliveryData.deliveryTotalWeight
                                                 .toString()
                                             : '',

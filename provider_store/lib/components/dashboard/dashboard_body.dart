@@ -1,14 +1,12 @@
 import 'package:app_constants/app_routes.dart';
+import 'package:event/delivery_change_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
-import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:event/cart_change_notifier.dart';
 import 'package:event/finance_change_notifier.dart';
-import 'package:event/order_change_notifier.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:event/product_change_notifier.dart';
 import 'package:event/service_change_notifier.dart';
@@ -20,7 +18,6 @@ import 'package:provider_store/screens/inventory_screen.dart';
 import 'package:provider_store/screens/deliveries_screen.dart';
 import 'package:provider_store/screens/selling_screen.dart';
 import 'package:provider_store/screens/services_screen.dart';
-import 'package:product_catalog/screens/orders_screen.dart';
 import 'package:provider/provider.dart';
 import 'dashboard_item.dart';
 
@@ -39,8 +36,6 @@ class DashboardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final index = selectedIndex.clamp(0, items.length - 1);
-    final item = items[index];
-
     return IndexedStack(
       index: index,
       children: items.map((item) => _buildScreen(context, item)).toList(),
@@ -50,7 +45,6 @@ class DashboardBody extends StatelessWidget {
   Widget _buildScreen(BuildContext context, DashboardItem item) {
     final personnelNotifier = context.read<PersonnelNotifier>();
     final userNotifier = context.read<AppUserNotifier>();
-    final supplierNotifier = context.read<SupplierChangeNotifier>();
 
     final userId = userNotifier.appUser?.idAppUser ?? 0;
 
@@ -61,19 +55,6 @@ class DashboardBody extends StatelessWidget {
 
     final userRules = personnelNotifier.getRulesForUser(userId);
     final suppliers = _getSuppliersFromRules(userRules);
-
-    // 👇 FIXED: Get selected supplier name properly
-    String selectedSupplierName = '';
-    if (selectedSupplierId > 0) {
-      try {
-        final supplier = supplierNotifier.suppliers.firstWhere(
-          (s) => s.idProductProvider == selectedSupplierId,
-        );
-        selectedSupplierName = supplier.displayName;
-      } catch (e) {
-        selectedSupplierName = 'Selected Supplier';
-      }
-    }
 
     // 👇 FIXED: Switch with proper parameter passing
     switch (item.type) {
@@ -88,7 +69,15 @@ class DashboardBody extends StatelessWidget {
         );
 
       case DashboardScreenType.orders:
-        return _buildOrdersScreen(context);
+        return _buildOrdersScreen(
+          context,
+          item.privilegeLevel ?? PrivilegeLevel.view,
+          userId,
+          supplierIds,
+          userRules,
+          suppliers,
+          selectedSupplierId,
+        );
 
       case DashboardScreenType.operations:
         return _buildOperationsScreen(context);
@@ -143,10 +132,10 @@ class DashboardBody extends StatelessWidget {
         suppliers: suppliers,
         products: List<Product>.from(productNotifier.products),
         isLoading: productNotifier.isLoading,
-        searchQuery: productNotifier.currentSearchQuery ?? '',
+        searchQuery: productNotifier.currentSearchQuery,
         currentProviderId: selectedSupplierId > 0
             ? selectedSupplierId
-            : (productNotifier.currentProviderId ?? 0),
+            : productNotifier.currentProviderId,
         onSupplierChanged: (supplierId) {
           productNotifier.fetchProducts(providerId: supplierId);
         },
@@ -167,18 +156,23 @@ class DashboardBody extends StatelessWidget {
     );
   }
 
-  Widget _buildOrdersScreen(BuildContext context) {
-    return Consumer<OrderChangeNotifier>(
-      builder: (context, orderNotifier, child) {
-        // 👇 FIXED: Pass required parameters
-        return DeliveryTabbedView(
-            // Add required parameters here
-            // Example:
-            // orders: orderNotifier.orders,
-            // isLoading: orderNotifier.isLoading,
-            // onRefresh: () => orderNotifier.fetchOrders(),
-            );
-      },
+  Widget _buildOrdersScreen(
+    BuildContext context,
+    PrivilegeLevel privilegeLevel,
+    int userId,
+    List<int> supplierIds,
+    List<ManagementRule> userRules,
+    List<ProductProvider> suppliers,
+    int selectedSupplierId,
+  ) {
+    return Consumer<DeliveryChangeNotifier>(
+      builder: (context, deliveryNotifier, child) => DeliveryTabbedView(
+        notifier: deliveryNotifier,
+        selectedSupplierId: selectedSupplierId,
+        isLoading: deliveryNotifier.isLoading,
+        onRefresh: () => deliveryNotifier.refreshDeliveries(),
+        onSearch: (query) => deliveryNotifier.searchDeliveries(query),
+      ),
     );
   }
 
@@ -291,8 +285,7 @@ class DashboardBody extends StatelessWidget {
     for (final rule in rules) {
       final supplier = rule.productProvider;
       if (supplier != null &&
-          supplier.idProductProvider != null &&
-          supplier.idProductProvider! > 0 &&
+          supplier.idProductProvider > 0 &&
           !supplierIds.contains(supplier.idProductProvider)) {
         supplierIds.add(supplier.idProductProvider);
         suppliers.add(supplier);

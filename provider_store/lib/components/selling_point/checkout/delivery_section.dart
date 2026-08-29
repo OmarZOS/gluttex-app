@@ -101,9 +101,9 @@ class _DeliverySectionState extends State<DeliverySection>
   }
 
   void _parseExistingDimensions() {
-    if (_deliveryData.deliveryCargoDimensions.isNotEmpty) {
+    if (_deliveryData.deliveryCargoDimensions?.isNotEmpty == true) {
       final dimensions = DeliveryUIManager.parseDimensions(
-        _deliveryData.deliveryCargoDimensions,
+        _deliveryData.deliveryCargoDimensions ?? "",
       );
       if (dimensions != null) {
         // Use a post-frame callback to avoid setState during build
@@ -122,76 +122,77 @@ class _DeliverySectionState extends State<DeliverySection>
   }
 
   void _updateDimensions() {
-    final length = _lengthController.text.trim();
-    final width = _widthController.text.trim();
-    final height = _heightController.text.trim();
+    final dimensions = _buildDimensions();
+    _deliveryData = _deliveryData.copyWith(
+      deliveryCargoDimensions: dimensions ?? '',
+    );
 
-    if (length.isNotEmpty && width.isNotEmpty && height.isNotEmpty) {
-      final dimensions = DeliveryUIManager.formatDimensions(
-        DimensionData(
-          length: double.tryParse(length) ?? 0.0,
-          width: double.tryParse(width) ?? 0.0,
-          height: double.tryParse(height) ?? 0.0,
-          unit: _selectedUnit,
-        ),
-      );
+    if (mounted) setState(() {});
+    _notifyDataChanged();
 
-      if (mounted) {
-        setState(() {
-          _deliveryData = _deliveryData.copyWith(
-            deliveryCargoDimensions: dimensions,
-          );
-        });
-      }
-      _notifyDataChanged();
-      _estimatePrice();
-    } else {
-      if (mounted) {
-        setState(() {
-          _deliveryData = _deliveryData.copyWith(
-            deliveryCargoDimensions: '',
-          );
-        });
-      }
-      _notifyDataChanged();
-    }
+    if (dimensions != null) _estimatePrice();
   }
 
-  void _estimatePrice() async {
-    if (_deliveryData.deliveryAddressId == 0 ||
-        _deliveryData.deliveryTotalWeight == 0) {
-      return;
-    }
+  String? _buildDimensions() {
+    final l = _parseDouble(_lengthController.text);
+    final w = _parseDouble(_widthController.text);
+    final h = _parseDouble(_heightController.text);
 
-    if (mounted) {
-      setState(() {
-        _isLoadingPrice = true;
-      });
-    }
+    if (l == null || w == null || h == null) return null;
+
+    return DeliveryUIManager.formatDimensions(
+      DimensionData(length: l, width: w, height: h, unit: _selectedUnit),
+    );
+  }
+
+  double? _parseDouble(String value) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty ? double.tryParse(trimmed) : null;
+  }
+
+// ============================================================================
+// PRICE ESTIMATION
+// ============================================================================
+
+  void _estimatePrice() async {
+    if (!_canEstimatePrice()) return;
+
+    _setLoading(true);
 
     try {
-      final estimatedPrice = await DeliveryUIManager.estimateDeliveryPrice(
+      final price = await DeliveryUIManager.estimateDeliveryPrice(
         deliveryData: _deliveryData,
       );
 
       if (mounted) {
-        setState(() {
-          _estimatedPrice = estimatedPrice;
-          _deliveryData = _deliveryData.copyWith(
-            deliveryFee: estimatedPrice,
-          );
-          _isLoadingPrice = false;
-        });
+        _updateWithPrice(price);
       }
-
-      _notifyDataChanged();
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingPrice = false;
-        });
-      }
+    } catch (_) {
+      _setLoading(false);
     }
+  }
+
+  bool _canEstimatePrice() {
+    return (_deliveryData.deliveryAddressId ?? 0) > 0 &&
+        (_deliveryData.deliveryTotalWeight ?? 0) > 0;
+  }
+
+  void _setLoading(bool loading) {
+    if (mounted) {
+      setState(() => _isLoadingPrice = loading);
+    }
+  }
+
+  void _updateWithPrice(double price) {
+    if (!mounted) return;
+
+    setState(() {
+      _estimatedPrice = price;
+      _deliveryData = _deliveryData.copyWith(deliveryFee: price);
+      _isLoadingPrice = false;
+    });
+
+    _notifyDataChanged();
   }
 
   void _notifyDataChanged() {
