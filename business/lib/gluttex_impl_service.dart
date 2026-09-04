@@ -36,19 +36,69 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
         message: message);
   }
 
+  Future<List<dynamic>> _getList(String url, String key) async {
+    final response = await _storageService.getAll(url, callerKey: key);
+    if (response is List) return response;
+    if (response is Map && response['data'] is List) {
+      return response['data'] as List;
+    }
+    return [];
+  }
+
+  @override
+  Future<List<ProvidedServiceCategory>> getServiceCategories(
+      {String? callerKey}) async {
+    final key = callerKey ?? _getCallerKey('getServiceCategories');
+    try {
+      final data = await _getList(
+          '${AppConstants.apiBaseUrl}${AppConstants.getServiceCategoriesEndpoint}',
+          key);
+      final categories = data
+          .map((item) =>
+              ProvidedServiceCategory.fromJson(item as Map<String, dynamic>))
+          .toList();
+      _storeSuccess(key, categories);
+      return categories;
+    } catch (e) {
+      _storeFailure(key, e.toString(), errorCode: 'CATEGORY_LOAD_FAILED');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<StaffRole>> getStaffRolesByCategory(int categoryId,
+      {String? callerKey}) async {
+    final key = callerKey ??
+        _getCallerKey('getStaffRolesByCategory', id: categoryId.toString());
+    try {
+      final data = await _getList(
+          '${AppConstants.apiBaseUrl}${AppConstants.getServiceCategoryRolesEndpoint}/$categoryId/roles',
+          key);
+      final roles = data
+          .map((item) => StaffRole.fromJson(item as Map<String, dynamic>))
+          .toList();
+      _storeSuccess(key, roles);
+      return roles;
+    } catch (e) {
+      _storeFailure(key, e.toString(), errorCode: 'ROLE_LOAD_FAILED');
+      return [];
+    }
+  }
+
   // ==================== CREATE ====================
 
   @override
   Future<ProvidedService?> addProvidedService(ProvidedService service,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = callerKey ??
         _getCallerKey('addProvidedService', suffix: service.name ?? 'unnamed');
     try {
       // POST /api/v1/business/services
       final result = await _storageService.insert(
-        '${AppConstants.apiBaseUrl}/api/v1/business/services',
+        '${AppConstants.apiBaseUrl}/business/services',
         service.toJson(),
         callerKey: key,
+        token: token,
       );
 
       if (result == null) {
@@ -180,7 +230,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
 
   @override
   Future<ProvidedService?> updateProvidedService(ProvidedService updatedService,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = callerKey ??
         _getCallerKey('updateProvidedService',
             id: updatedService.id?.toString() ?? 'unknown');
@@ -192,6 +242,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
         {}, // No query params needed
         updatedService.toJson(),
         callerKey: key,
+        token: token,
       );
 
       if (result == null) {
@@ -213,7 +264,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
 
   @override
   Future<int?> deleteProvidedService(String serviceId,
-      {bool forceDelete = false, String? callerKey}) async {
+      {bool forceDelete = false, String? callerKey, String? token}) async {
     final key =
         callerKey ?? _getCallerKey('deleteProvidedService', id: serviceId);
     try {
@@ -230,6 +281,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
         url,
         serviceId,
         callerKey: key,
+        token: token,
       );
 
       // 204 means success

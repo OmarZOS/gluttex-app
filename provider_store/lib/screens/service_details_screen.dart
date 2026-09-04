@@ -9,10 +9,12 @@ import 'package:provider_store/components/service/details/service_requirements_s
 class ServiceDetailsScreen extends StatefulWidget {
   final ProvidedService initialService;
   final Future<ProvidedService>? detailedServiceFuture;
+  final VoidCallback? onEditPressed;
   const ServiceDetailsScreen({
     super.key,
     required this.initialService,
     this.detailedServiceFuture,
+    this.onEditPressed,
   });
 
   @override
@@ -56,7 +58,6 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -68,6 +69,7 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
               ServiceDetailsHeader(
                 service: _service,
                 onBackPressed: () => Navigator.pop(context),
+                onEditPressed: widget.onEditPressed,
               ),
               SliverToBoxAdapter(
                 child: Padding(
@@ -98,23 +100,6 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                 ),
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  void _handleEditService() {
-    // TODO: Navigate to edit screen
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Service'),
-        content: const Text('Edit functionality will be implemented soon.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
         ],
       ),
     );

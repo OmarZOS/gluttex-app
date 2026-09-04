@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Delivery.dart';
 import 'package:event/delivery_change_notifier.dart';
-import 'package:provider/provider.dart';
 import 'package:provider_store/components/orders/details/delivery_details_screen.dart';
 
 // ============================================================================
@@ -11,13 +10,13 @@ import 'package:provider_store/components/orders/details/delivery_details_screen
 
 class DeliveryCard extends StatelessWidget {
   final Delivery delivery;
-  final DeliveryChangeNotifier? notifier;
+  final DeliveryChangeNotifier notifier;
   final VoidCallback? onTap;
 
   const DeliveryCard({
     super.key,
     required this.delivery,
-    this.notifier,
+    required this.notifier,
     this.onTap,
   });
 
@@ -50,9 +49,7 @@ class DeliveryCard extends StatelessWidget {
   }
 
   Future<void> _navigateToDetails(BuildContext context) async {
-    final actualNotifier = notifier ?? context.read<DeliveryChangeNotifier>();
-
-    final fetchedDelivery = await actualNotifier.getDeliveryById(
+    final fetchedDelivery = await notifier.getDeliveryById(
       delivery.id_delivery,
       forceRefresh: true,
     );
@@ -74,7 +71,7 @@ class DeliveryCard extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => DeliveryDetailScreen(
           delivery: fetchedDelivery,
-          notifier: actualNotifier,
+          notifier: notifier,
         ),
       ),
     );

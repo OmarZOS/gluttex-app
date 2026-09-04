@@ -1,67 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:event/delivery_change_notifier.dart';
 import 'package:provider_store/components/delivery/DeliveryCard.dart';
-import 'package:provider/provider.dart';
 
-class DeliveryListView extends StatefulWidget {
+class DeliveryListView extends StatelessWidget {
   final String status;
-  final int selectedSupplierId;
-  final DeliveryChangeNotifier? notifier;
-  final bool isLoading;
-  final Future<void> Function()? onRefresh;
+  final DeliveryChangeNotifier notifier;
 
   const DeliveryListView({
     super.key,
     required this.status,
-    this.selectedSupplierId = 0,
-    this.notifier,
-    this.isLoading = false,
-    this.onRefresh,
+    required this.notifier,
   });
 
   @override
-  State<DeliveryListView> createState() => _DeliveryListViewState();
-}
-
-class _DeliveryListViewState extends State<DeliveryListView> {
-  late DeliveryChangeNotifier _notifier;
-  bool _initialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _notifier = widget.notifier ?? context.read<DeliveryChangeNotifier>();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (widget.notifier == null) {
-      _notifier = context.read<DeliveryChangeNotifier>();
-    }
-
-    // ✅ Only load if not initialized and deliveries are empty
-    if (!_initialized && _notifier.deliveries.isEmpty) {
-      _initialized = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (widget.selectedSupplierId > 0) {
-          _notifier.fetchDeliveries(
-              providerId: widget.selectedSupplierId, reset: true);
-        } else {
-          _notifier.fetchFirstPage();
-        }
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final notifier = widget.notifier != null
-        ? _notifier
-        : context.watch<DeliveryChangeNotifier>();
-
-    final deliveries = notifier.getDeliveriesByStatus(widget.status);
-    final isLoading = widget.isLoading || notifier.isLoading;
+    final deliveries = notifier.getDeliveriesByStatus(status);
+    final isLoading = notifier.isLoading;
 
     // Show loading only if we're loading AND have no data
     if (isLoading && deliveries.isEmpty) {
@@ -69,17 +23,11 @@ class _DeliveryListViewState extends State<DeliveryListView> {
     }
 
     if (deliveries.isEmpty) {
-      return _EmptyState(status: widget.status);
+      return _EmptyState(status: status);
     }
 
     return RefreshIndicator.adaptive(
-      onRefresh: () async {
-        if (widget.onRefresh != null) {
-          await widget.onRefresh!();
-        } else {
-          await notifier.refreshDeliveries();
-        }
-      },
+      onRefresh: notifier.refreshDeliveries,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: deliveries.length,

@@ -319,15 +319,15 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
       children: [
         DeliveryListView(
           status: 'PENDING',
-          selectedSupplierId: widget.selectedSupplierId,
+          notifier: _notifier,
         ),
         DeliveryListView(
           status: 'DELIVERED',
-          selectedSupplierId: widget.selectedSupplierId,
+          notifier: _notifier,
         ),
         DeliveryListView(
           status: 'CANCELLED',
-          selectedSupplierId: widget.selectedSupplierId,
+          notifier: _notifier,
         ),
       ],
     );

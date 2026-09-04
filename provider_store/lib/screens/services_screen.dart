@@ -78,7 +78,15 @@ class ServicesScreen extends StatelessWidget {
   }
 
   void _handleAddService(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.serviceForm);
+    Navigator.pushNamed(
+      context,
+      AppRoutes.serviceForm,
+      arguments: {
+        'providerId': accessibleSuppliers.length == 1
+            ? accessibleSuppliers.first
+            : (serviceNotifier.currentProviderId ?? 0),
+      },
+    );
   }
 
   SliverAppBar _buildAppBar(BuildContext context, AppLocalizations? loc) {
@@ -190,9 +198,12 @@ class ServicesScreen extends StatelessWidget {
                 service: service,
                 canManage: canManage,
                 onTap: () => _handleServiceTap(context, service),
-                onEdit: canManage ? () => _handleEditService(service) : null,
-                onDelete:
-                    canManage ? () => _handleDeleteService(service) : null,
+                onEdit: canManage
+                    ? () => _handleEditService(context, service)
+                    : null,
+                onDelete: canManage
+                    ? () => _handleDeleteService(context, service)
+                    : null,
               ),
             );
           },
@@ -201,13 +212,60 @@ class ServicesScreen extends StatelessWidget {
     );
   }
 
-  void _handleEditService(ProvidedService service) {
-    // TODO: Implement edit service
+  Future<void> _handleEditService(
+      BuildContext context, ProvidedService service) async {
+    await Navigator.pushNamed(
+      context,
+      AppRoutes.serviceForm,
+      arguments: {
+        'service': service,
+      },
+    );
   }
 
-  void _handleDeleteService(ProvidedService service) {
-    // TODO: Implement delete service with confirmation
+  Future<void> _handleDeleteService(
+      BuildContext context, ProvidedService service) async {
+    final localizations = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations?.delete ?? 'Delete service?'),
+        content: Text(
+          '${localizations?.deleteDocumentConfirmation ?? 'This action cannot be undone.'}\n\n${service.name}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(localizations?.cancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(localizations?.delete ?? 'Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+    final statusCode = await serviceNotifier.deleteService(service.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          statusCode == 200 || statusCode == 204
+              ? (localizations?.deleteSuccess ?? 'Service deleted')
+              : (localizations?.deleteFailure ?? 'Failed to delete service'),
+        ),
+        backgroundColor: statusCode == 200 || statusCode == 204
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.error,
+      ),
+    );
   }
+
   void _handleServiceTap(BuildContext context, ProvidedService service) {
     Navigator.push(
       context,
@@ -215,6 +273,7 @@ class ServicesScreen extends StatelessWidget {
         builder: (context) => ServiceDetailsScreenLoader(
           serviceId: service.id,
           listService: service, // Pass the service from the list
+          canManage: canManage,
         ),
       ),
     );
@@ -225,11 +284,13 @@ class ServicesScreen extends StatelessWidget {
 class ServiceDetailsScreenLoader extends StatefulWidget {
   final int serviceId;
   final ProvidedService listService;
+  final bool canManage;
 
   const ServiceDetailsScreenLoader({
     super.key,
     required this.serviceId,
     required this.listService,
+    required this.canManage,
   });
 
   @override
@@ -393,12 +454,31 @@ class _ServiceDetailsScreenLoaderState
         if (snapshot.hasData) {
           // Show the detailed service
           final detailedService = snapshot.data!;
-          return ServiceDetailsScreen(initialService: detailedService);
+          return ServiceDetailsScreen(
+            initialService: detailedService,
+            onEditPressed: widget.canManage
+                ? () => _openEditForm(context, detailedService)
+                : null,
+          );
         }
 
         // Fallback - shouldn't happen, but show basic service screen
-        return ServiceDetailsScreen(initialService: widget.listService);
+        return ServiceDetailsScreen(
+          initialService: widget.listService,
+          onEditPressed: widget.canManage
+              ? () => _openEditForm(context, widget.listService)
+              : null,
+        );
       },
+    );
+  }
+
+  Future<void> _openEditForm(
+      BuildContext context, ProvidedService service) async {
+    await Navigator.pushNamed(
+      context,
+      AppRoutes.serviceForm,
+      arguments: {'service': service},
     );
   }
 }

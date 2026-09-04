@@ -221,6 +221,10 @@ class AppConstants {
       '/business/services/requirements';
   static const String getServiceStaffRequirementsEndpoint =
       '/business/services/staff-requirements';
+  static const String getServiceCategoriesEndpoint =
+      '/business/services/categories';
+  static const String getServiceCategoryRolesEndpoint =
+      '/business/services/category';
 
   // ==================== Financial Endpoints ====================
   static const String postPaymentEndpoint = '/business/payments';

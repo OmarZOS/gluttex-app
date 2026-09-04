@@ -1,16 +1,15 @@
 import 'package:event/delivery_change_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Delivery.dart';
-import 'package:provider/provider.dart';
 
 class NewDeliverySheet extends StatefulWidget {
-  final DeliveryChangeNotifier? notifier;
+  final DeliveryChangeNotifier notifier;
   final int providerId;
   final Delivery? delivery;
 
   const NewDeliverySheet({
     super.key,
-    this.notifier,
+    required this.notifier,
     this.providerId = 0,
     this.delivery,
   });
@@ -52,7 +51,7 @@ class _NewDeliverySheetState extends State<NewDeliverySheet> {
   @override
   void initState() {
     super.initState();
-    _notifier = widget.notifier ?? context.read<DeliveryChangeNotifier>();
+    _notifier = widget.notifier;
     final delivery = widget.delivery;
     if (delivery == null) {
       _packages.add(_PackageInput());

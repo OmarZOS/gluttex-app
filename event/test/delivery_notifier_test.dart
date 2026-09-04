@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gluttex_core/business/Delivery.dart';
 import 'package:gluttex_core/business/services/DeliveryService.dart';
 import 'package:event/delivery_change_notifier.dart';
-import 'package:locator/locator.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Create a proper mock class
@@ -29,8 +28,7 @@ Delivery makeDelivery(
 
 void main() {
   late DeliveryChangeNotifier notifier;
-  late MockDeliveryService service = MockDeliveryService();
-  AppLocator.registerSingletonService<DeliveryService>(service);
+  late MockDeliveryService service;
 
   setUpAll(() {
     // Register fallback value for Delivery
@@ -38,7 +36,8 @@ void main() {
   });
 
   setUp(() {
-    notifier = DeliveryChangeNotifier();
+    service = MockDeliveryService();
+    notifier = DeliveryChangeNotifier(service: service, autoFetch: false);
 
     // Reset any previous interactions
     reset(service);
@@ -141,8 +140,7 @@ void main() {
       when(() => service.getAllDeliveries(0, 10, providerId: 7))
           .thenAnswer((_) async => deliveries);
 
-      notifier.setFilters(providerId: 7);
-      await notifier.fetchFirstPage();
+      await notifier.setFilters(providerId: 7);
 
       expect(notifier.currentProviderId, 7);
       expect(notifier.deliveries.first.delivery_status, 'DELIVERED');

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Delivery.dart';
 import 'package:gluttex_core/business/services/DeliveryService.dart';
 import 'package:collection/collection.dart';
-import 'package:locator/locator.dart';
 
 // ============================================================================
 // COMPONENT IMPORTS (would be in separate files)
@@ -286,8 +285,9 @@ class DeliveryFetch {
 // ============================================================================
 
 class DeliveryChangeNotifier extends ChangeNotifier {
-  final DeliveryService _service = AppLocator.get<DeliveryService>();
+  final DeliveryService _service;
   bool _fetchInProgress = false;
+  Map<String, dynamic>? _activeFetch;
   Map<String, dynamic>? _pendingFetch;
 
   // Components
@@ -296,12 +296,15 @@ class DeliveryChangeNotifier extends ChangeNotifier {
   late final DeliveryCrud _crud;
   late final DeliveryFetch _fetch;
 
-  DeliveryChangeNotifier() {
+  DeliveryChangeNotifier(
+      {required DeliveryService service, bool autoFetch = true})
+      : _service = service {
     _initComponents();
-    // Auto-fetch on initialization
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetch.fetchDeliveries(reset: true);
-    });
+    if (autoFetch) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fetch.fetchDeliveries(reset: true);
+      });
+    }
   }
 
   void _initComponents() {
@@ -326,11 +329,9 @@ class DeliveryChangeNotifier extends ChangeNotifier {
 
   // ============ SAFE NOTIFICATION ============
   void _safeNotify() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_state.isLoading && hasListeners) {
-        notifyListeners();
-      }
-    });
+    if (!_state.isLoading && hasListeners) {
+      notifyListeners();
+    }
   }
 
   void _notify() {
@@ -391,11 +392,12 @@ class DeliveryChangeNotifier extends ChangeNotifier {
   }
 
   // ============ FILTER OPERATIONS ============
-  void setFilters({int providerId = 0, int orderId = 0, int brokerId = 0}) {
+  Future<void> setFilters(
+      {int providerId = 0, int orderId = 0, int brokerId = 0}) {
     _state.providerId = providerId;
     _state.orderId = orderId;
     _state.brokerId = brokerId;
-    fetchDeliveries(
+    return fetchDeliveries(
       providerId: providerId,
       orderId: orderId,
       brokerId: brokerId,
@@ -427,13 +429,17 @@ class DeliveryChangeNotifier extends ChangeNotifier {
         '🚚 Delivery fetch requested (providerId: $providerId, orderId: $orderId, brokerId: $brokerId, query: "$query", reset: $reset)');
 
     if (_fetchInProgress) {
-      _pendingFetch = {
+      final pendingFetch = {
         'providerId': providerId,
         'orderId': orderId,
         'brokerId': brokerId,
         'query': query,
         'reset': reset,
       };
+      if (!_requestsMatch(_activeFetch, pendingFetch) &&
+          !_requestsMatch(_pendingFetch, pendingFetch)) {
+        _pendingFetch = pendingFetch;
+      }
       debugPrint(
           '⏳ Queued delivery fetch (providerId: $providerId, orderId: $orderId, brokerId: $brokerId)');
       return;
@@ -451,6 +457,7 @@ class DeliveryChangeNotifier extends ChangeNotifier {
               'reset': reset,
             };
         _pendingFetch = null;
+        _activeFetch = request;
 
         debugPrint(
             '🔄 Executing delivery fetch (providerId: ${request['providerId']}, orderId: ${request['orderId']}, brokerId: ${request['brokerId']}, reset: ${request['reset']})');
@@ -466,8 +473,19 @@ class DeliveryChangeNotifier extends ChangeNotifier {
       } while (_pendingFetch != null);
     } finally {
       _fetchInProgress = false;
+      _activeFetch = null;
       debugPrint('✅ Delivery fetch cycle finished');
     }
+  }
+
+  bool _requestsMatch(
+      Map<String, dynamic>? first, Map<String, dynamic> second) {
+    if (first == null) return false;
+    return first['providerId'] == second['providerId'] &&
+        first['orderId'] == second['orderId'] &&
+        first['brokerId'] == second['brokerId'] &&
+        first['query'] == second['query'] &&
+        first['reset'] == second['reset'];
   }
 
   Future<void> fetchFirstPage() async {

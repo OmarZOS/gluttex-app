@@ -53,6 +53,35 @@ class ServiceNotifier extends TraceableNotifier {
   String get searchQuery => _searchQuery;
   int? get currentProviderId => _currentProviderId;
 
+  Future<List<ProvidedServiceCategory>> fetchServiceCategories(
+      {String? callerKey}) async {
+    final key = callerKey ?? getCallerKey('fetchServiceCategories');
+    try {
+      final categories =
+          await _serviceManager.getServiceCategories(callerKey: key);
+      storeSuccess(key, categories);
+      return categories;
+    } catch (e) {
+      storeFailure(key, e.toString(), errorCode: 'CATEGORY_LOAD_FAILED');
+      return [];
+    }
+  }
+
+  Future<List<StaffRole>> fetchStaffRolesByCategory(int categoryId,
+      {String? callerKey}) async {
+    final key = callerKey ??
+        getCallerKey('fetchStaffRolesByCategory', id: categoryId.toString());
+    try {
+      final roles = await _serviceManager.getStaffRolesByCategory(categoryId,
+          callerKey: key);
+      storeSuccess(key, roles);
+      return roles;
+    } catch (e) {
+      storeFailure(key, e.toString(), errorCode: 'ROLE_LOAD_FAILED');
+      return [];
+    }
+  }
+
   // INTERNAL HELPERS
   void _setLoading(bool value) {
     _isLoading = value;
@@ -259,7 +288,7 @@ class ServiceNotifier extends TraceableNotifier {
   // 🟢 ADD SERVICE
   // ------------------------------------------------------------
   Future<ProvidedService?> addService(ProvidedService service,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = callerKey ??
         getCallerKey('addService', suffix: service.name ?? 'unnamed');
 
@@ -269,6 +298,7 @@ class ServiceNotifier extends TraceableNotifier {
       final created = await _serviceManager.addProvidedService(
         service,
         callerKey: key,
+        token: token,
       );
 
       if (created != null) {
@@ -293,7 +323,7 @@ class ServiceNotifier extends TraceableNotifier {
   // 🟡 UPDATE SERVICE
   // ------------------------------------------------------------
   Future<ProvidedService?> updateService(ProvidedService service,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     final key = callerKey ??
         getCallerKey('updateService', id: service.id?.toString() ?? 'unknown');
 
@@ -303,6 +333,7 @@ class ServiceNotifier extends TraceableNotifier {
       final updated = await _serviceManager.updateProvidedService(
         service,
         callerKey: key,
+        token: token,
       );
 
       if (updated != null) {
@@ -329,7 +360,7 @@ class ServiceNotifier extends TraceableNotifier {
   // ------------------------------------------------------------
   // 🔴 DELETE SERVICE
   // ------------------------------------------------------------
-  Future<int?> deleteService(int id, {String? callerKey}) async {
+  Future<int?> deleteService(int id, {String? callerKey, String? token}) async {
     final key = callerKey ?? getCallerKey('deleteService', id: id.toString());
 
     _setLoading(true);
@@ -338,6 +369,7 @@ class ServiceNotifier extends TraceableNotifier {
       final result = await _serviceManager.deleteProvidedService(
         id.toString(),
         callerKey: key,
+        token: token,
       );
 
       if (result != null && (result == 200 || result == 204)) {

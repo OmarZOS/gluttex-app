@@ -3,6 +3,16 @@ import 'package:gluttex_core/business/finance/ProvidedService.dart';
 
 // ServiceManagementService.dart
 abstract class ProvidedServiceManagementService extends TraceableService {
+  Future<List<ProvidedServiceCategory>> getServiceCategories(
+      {String? callerKey}) async {
+    return [];
+  }
+
+  Future<List<StaffRole>> getStaffRolesByCategory(int categoryId,
+      {String? callerKey}) async {
+    return [];
+  }
+
   Future<List<ProvidedService>?>? getAllProvidedServices(int offset, int limit,
       {int serviceId = 0,
       int categoryId = 0,
@@ -19,17 +29,17 @@ abstract class ProvidedServiceManagementService extends TraceableService {
   }
 
   Future<ProvidedService?> addProvidedService(ProvidedService Service,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 
   Future<ProvidedService?> updateProvidedService(ProvidedService updatedService,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 
   Future<int?> deleteProvidedService(String serviceId,
-      {String? callerKey}) async {
+      {String? callerKey, String? token}) async {
     return null;
   }
 }

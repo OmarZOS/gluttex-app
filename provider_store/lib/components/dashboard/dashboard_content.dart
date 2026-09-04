@@ -792,7 +792,11 @@ class DashboardContentState extends State<DashboardContent> {
         Navigator.pushNamed(context, AppRoutes.productCreate);
         break;
       case DashboardScreenType.services:
-        Navigator.pushNamed(context, AppRoutes.serviceForm);
+        Navigator.pushNamed(
+          context,
+          AppRoutes.serviceForm,
+          arguments: {'providerId': _selectedSupplierId},
+        );
         break;
       default:
         _showDefaultAction(context, type);

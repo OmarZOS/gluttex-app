@@ -119,7 +119,11 @@ class AppRouter {
                   const SuppliersMapScreen(),
                 );
               case AppRoutes.serviceForm:
-                return const ProvidedServiceFormScreen();
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  const ProvidedServiceFormScreen(),
+                  const HomePage(),
+                );
               case AppRoutes.storeManage:
                 return const DashboardScreen();
               case AppRoutes.login:

@@ -8,6 +8,7 @@ import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:event/product_change_notifier.dart';
 import 'package:event/service_change_notifier.dart';
+import 'package:event/user_change_notifier.dart';
 import 'package:provider_store/components/service/form/ProductSelectorDialog.dart';
 import 'package:ui/Services/ResponseHandler.dart';
 import 'package:provider/provider.dart';
@@ -710,6 +711,10 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
   DateTime? _createdAt;
   DateTime? _updatedAt;
   bool _initialized = false;
+  List<ProvidedServiceCategory> _serviceCategories = [];
+  List<StaffRole> _staffRoles = [];
+  bool _isLoadingCategories = false;
+  bool _isLoadingRoles = false;
 
   // Section states
   bool _basicInfoExpanded = true;
@@ -784,14 +789,44 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
         _resourceRequirements.addAll(service.resourceRequirements);
         _staffRequirements.addAll(service.staffRequirements);
       } else {
-        _providerId = 0;
+        _providerId = args is Map<String, dynamic>
+            ? (args['providerId'] as int? ?? 0)
+            : 0;
       }
 
       _updateCompletionStates();
+      _loadCategories();
+      if (_categoryId > 0) _loadStaffRoles(_categoryId);
       _log('Form data loaded successfully');
     } catch (e, stackTrace) {
       _logError('Error loading form data', e, stackTrace);
     }
+  }
+
+  Future<void> _loadCategories() async {
+    if (_isLoadingCategories) return;
+    setState(() => _isLoadingCategories = true);
+    final notifier = Provider.of<ServiceNotifier>(context, listen: false);
+    final categories = await notifier.fetchServiceCategories();
+    if (!mounted) return;
+    setState(() {
+      _serviceCategories = categories;
+      _isLoadingCategories = false;
+    });
+  }
+
+  Future<void> _loadStaffRoles(int categoryId) async {
+    setState(() {
+      _isLoadingRoles = true;
+      _staffRoles = [];
+    });
+    final notifier = Provider.of<ServiceNotifier>(context, listen: false);
+    final roles = await notifier.fetchStaffRolesByCategory(categoryId);
+    if (!mounted || categoryId != _categoryId) return;
+    setState(() {
+      _staffRoles = roles;
+      _isLoadingRoles = false;
+    });
   }
 
   @override
@@ -819,7 +854,15 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
 
       _pricingCompleted = _basePrice > 0 && _finalPrice > 0;
 
-      _pricingConfigCompleted = _ageGroup.isNotEmpty ||
+      _pricingConfigCompleted = _ageGroup.isEmpty &&
+              _sampleType.isEmpty &&
+              !_specialistConsultation &&
+              !_governmentFunded &&
+              !_consultationIncluded &&
+              !_digitalImaging &&
+              _materialOptions.isEmpty &&
+              _includes.isEmpty ||
+          _ageGroup.isNotEmpty ||
           _sampleType.isNotEmpty ||
           _specialistConsultation ||
           _governmentFunded ||
@@ -828,9 +871,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
           _materialOptions.isNotEmpty ||
           _includes.isNotEmpty;
 
-      _resourcesCompleted = _resourceRequirements.isNotEmpty;
-      _staffCompleted = _staffRequirements.isNotEmpty;
-      _costSummaryCompleted = _finalPrice > 0 && _totalCost > 0;
+      _resourcesCompleted = true;
+      _staffCompleted = true;
+      _costSummaryCompleted = _finalPrice > 0;
     });
   }
 
@@ -872,6 +915,16 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
 
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      final validationError = _businessValidationError;
+      if (validationError != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(validationError)),
+          );
+        }
+        return;
+      }
 
       setState(() => _isSubmitting = true);
 
@@ -915,6 +968,8 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
       try {
         final serviceNotifier =
             Provider.of<ServiceNotifier>(context, listen: false);
+        final authToken =
+            Provider.of<AppUserNotifier>(context, listen: false).token;
 
         bool success = false;
 
@@ -923,6 +978,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
           final updated = await serviceNotifier.updateService(
             service,
             callerKey: _currentOperationKey,
+            token: authToken,
           );
           success = updated != null;
         } else {
@@ -930,6 +986,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
           final created = await serviceNotifier.addService(
             service,
             callerKey: _currentOperationKey,
+            token: authToken,
           );
           success = created != null;
         }
@@ -992,6 +1049,47 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
         }
       }
     }
+  }
+
+  String? get _businessValidationError {
+    if (_providerId <= 0) return 'A valid provider is required';
+    if (_categoryId <= 0) return 'A valid category is required';
+    if (_actualDuration <= 0) return 'Duration must be greater than zero';
+    if (_basePrice <= 0) return 'Base price must be greater than zero';
+    if (_finalPrice <= 0) return 'Final price must be greater than zero';
+    if (_finalPrice > _basePrice) {
+      return 'Final price cannot be greater than the base price';
+    }
+    return null;
+  }
+
+  Widget _buildCategoryField(ColorScheme colors) {
+    return DropdownButtonFormField<int>(
+      value: _serviceCategories.any((category) => category.id == _categoryId)
+          ? _categoryId
+          : null,
+      decoration: InputDecoration(
+        labelText: 'Category',
+        border: OutlineInputBorder(),
+        helperText: _isLoadingCategories ? 'Loading categories...' : null,
+      ),
+      items: _serviceCategories
+          .map((category) => DropdownMenuItem<int>(
+                value: category.id,
+                child: Text(category.name),
+              ))
+          .toList(),
+      validator: (value) => value == null ? 'Select a category' : null,
+      onChanged: (value) {
+        if (value == null) return;
+        setState(() {
+          _categoryId = value;
+          _staffRequirements.clear();
+        });
+        _loadStaffRoles(value);
+        _updateCompletionStates();
+      },
+    );
   }
 
   void _setSubmitting(bool submitting) {
@@ -1286,45 +1384,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                         },
                       ),
                       const SizedBox(height: AppDesignSystem.smallSpacing),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: FormInputField(
-                              label: 'Category ID',
-                              initialValue:
-                                  _categoryId > 0 ? _categoryId.toString() : '',
-                              hintText: 'Enter category ID',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              onSaved: (val) {
-                                _categoryId = int.tryParse(val ?? '') ?? 0;
-                                _updateCompletionStates();
-                              },
-                              onChanged: (_) => _updateCompletionStates(),
-                            ),
-                          ),
-                          const SizedBox(width: AppDesignSystem.smallSpacing),
-                          Expanded(
-                            child: FormInputField(
-                              label: 'Provider ID',
-                              initialValue:
-                                  _providerId > 0 ? _providerId.toString() : '',
-                              hintText: 'Enter provider ID',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              onSaved: (val) {
-                                _providerId = int.tryParse(val ?? '') ?? 0;
-                                _updateCompletionStates();
-                              },
-                              onChanged: (_) => _updateCompletionStates(),
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildCategoryField(colors),
                       const SizedBox(height: AppDesignSystem.smallSpacing),
                       FormInputField(
                         label: 'Duration (minutes)',
@@ -1337,6 +1397,13 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         suffixText: 'min',
+                        isRequired: true,
+                        validator: (value) {
+                          final duration = int.tryParse(value ?? '');
+                          return duration == null || duration <= 0
+                              ? 'Enter a valid duration'
+                              : null;
+                        },
                         onSaved: (val) {
                           _actualDuration = int.tryParse(val ?? '') ?? 0;
                           _updateCompletionStates();
@@ -1622,7 +1689,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           final req = entry.value;
                           return RequirementCard(
                             title:
-                                '${req.role} (${req.minCount}-${req.maxCount})',
+                                '${_roleName(req.role)} (${req.minCount}-${req.maxCount})',
                             subtitle:
                                 '${req.allocatedHours}h × DZD ${req.hourlyRate.toStringAsFixed(2)}/h ≈ DZD ${(req.hourlyRate * req.allocatedHours * ((req.minCount + req.maxCount) / 2)).toStringAsFixed(2)}',
                             onEdit: () => _showStaffDialog(
@@ -1680,6 +1747,11 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
         ],
       ),
     );
+  }
+
+  String _roleName(int roleId) {
+    final matches = _staffRoles.where((role) => role.id == roleId);
+    return matches.isEmpty ? 'Role #$roleId' : matches.first.name;
   }
 
   void _showResourceDialog({ServiceResourceRequirement? existing, int? index}) {
@@ -2019,7 +2091,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
     final _formKey = GlobalKey<FormState>();
 
     // Controllers for form fields
-    final roleController = TextEditingController(text: existing?.role ?? '');
+    int? selectedRoleId = existing?.role;
     final minCountController = TextEditingController(
       text: existing?.minCount.toString() ?? '1',
     );
@@ -2037,309 +2109,324 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-              isEditing ? 'Edit Staff Requirement' : 'Add Staff Requirement'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Role
-                  TextFormField(
-                    controller: roleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Role',
-                      hintText: 'e.g., Technician, Nurse, Doctor',
-                      border: OutlineInputBorder(),
+        return StatefulBuilder(
+          builder: (context, setStateDialog) => AlertDialog(
+            title: Text(
+                isEditing ? 'Edit Staff Requirement' : 'Add Staff Requirement'),
+            content: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<int>(
+                      value:
+                          _staffRoles.any((role) => role.id == selectedRoleId)
+                              ? selectedRoleId
+                              : null,
+                      decoration: InputDecoration(
+                        labelText: 'Role',
+                        border: const OutlineInputBorder(),
+                        helperText: _isLoadingRoles ? 'Loading roles...' : null,
+                      ),
+                      items: _staffRoles
+                          .map((role) => DropdownMenuItem<int>(
+                                value: role.id,
+                                child: Text(role.name),
+                              ))
+                          .toList(),
+                      validator: (value) =>
+                          value == null ? 'Select a role' : null,
+                      onChanged: (value) =>
+                          setStateDialog(() => selectedRoleId = value),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a role';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  // Min Count
-                  TextFormField(
-                    controller: minCountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Minimum Staff Count',
-                      hintText: 'Minimum number of staff needed',
-                      border: OutlineInputBorder(),
+                    // Min Count
+                    TextFormField(
+                      controller: minCountController,
+                      decoration: const InputDecoration(
+                        labelText: 'Minimum Staff Count',
+                        hintText: 'Minimum number of staff needed',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter minimum count';
+                        }
+                        final count = int.tryParse(value);
+                        if (count == null || count < 0) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
                     ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter minimum count';
-                      }
-                      final count = int.tryParse(value);
-                      if (count == null || count < 0) {
-                        return 'Please enter a valid number';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  // Max Count
-                  TextFormField(
-                    controller: maxCountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Maximum Staff Count',
-                      hintText: 'Maximum number of staff needed',
-                      border: OutlineInputBorder(),
+                    // Max Count
+                    TextFormField(
+                      controller: maxCountController,
+                      decoration: const InputDecoration(
+                        labelText: 'Maximum Staff Count',
+                        hintText: 'Maximum number of staff needed',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter maximum count';
+                        }
+                        final count = int.tryParse(value);
+                        if (count == null || count < 0) {
+                          return 'Please enter a valid number';
+                        }
+                        final min = int.tryParse(minCountController.text) ?? 0;
+                        if (count < min) {
+                          return 'Maximum must be greater than or equal to minimum';
+                        }
+                        return null;
+                      },
                     ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter maximum count';
-                      }
-                      final count = int.tryParse(value);
-                      if (count == null || count < 0) {
-                        return 'Please enter a valid number';
-                      }
-                      final min = int.tryParse(minCountController.text) ?? 0;
-                      if (count < min) {
-                        return 'Maximum must be greater than or equal to minimum';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  // Allocated Hours
-                  TextFormField(
-                    controller: allocatedHoursController,
-                    decoration: const InputDecoration(
-                      labelText: 'Allocated Hours',
-                      hintText: 'Hours allocated per staff member',
-                      border: OutlineInputBorder(),
-                      suffixText: 'hours',
+                    // Allocated Hours
+                    TextFormField(
+                      controller: allocatedHoursController,
+                      decoration: const InputDecoration(
+                        labelText: 'Allocated Hours',
+                        hintText: 'Hours allocated per staff member',
+                        border: OutlineInputBorder(),
+                        suffixText: 'hours',
+                      ),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d*$')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter allocated hours';
+                        }
+                        final hours = double.tryParse(value);
+                        if (hours == null || hours < 0) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
                     ),
-                    keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*$')),
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter allocated hours';
-                      }
-                      final hours = double.tryParse(value);
-                      if (hours == null || hours < 0) {
-                        return 'Please enter a valid number';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  // Hourly Rate
-                  TextFormField(
-                    controller: hourlyRateController,
-                    decoration: const InputDecoration(
-                      labelText: 'Hourly Rate',
-                      hintText: 'Rate per hour',
-                      border: OutlineInputBorder(),
-                      prefixText: 'DZD ',
+                    // Hourly Rate
+                    TextFormField(
+                      controller: hourlyRateController,
+                      decoration: const InputDecoration(
+                        labelText: 'Hourly Rate',
+                        hintText: 'Rate per hour',
+                        border: OutlineInputBorder(),
+                        prefixText: 'DZD ',
+                      ),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d*$')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter hourly rate';
+                        }
+                        final rate = double.tryParse(value);
+                        if (rate == null || rate < 0) {
+                          return 'Please enter a valid rate';
+                        }
+                        return null;
+                      },
                     ),
-                    keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*$')),
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter hourly rate';
-                      }
-                      final rate = double.tryParse(value);
-                      if (rate == null || rate < 0) {
-                        return 'Please enter a valid rate';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  // Notes (optional)
-                  TextFormField(
-                    controller: notesController,
-                    decoration: const InputDecoration(
-                      labelText: 'Notes (Optional)',
-                      hintText: 'Any additional notes',
-                      border: OutlineInputBorder(),
+                    // Notes (optional)
+                    TextFormField(
+                      controller: notesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Notes (Optional)',
+                        hintText: 'Any additional notes',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 2,
                     ),
-                    maxLines: 2,
-                  ),
 
-                  // Preview cost calculation
-                  if (minCountController.text.isNotEmpty &&
-                      maxCountController.text.isNotEmpty &&
-                      allocatedHoursController.text.isNotEmpty &&
-                      hourlyRateController.text.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primaryContainer
-                            .withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                    // Preview cost calculation
+                    if (minCountController.text.isNotEmpty &&
+                        maxCountController.text.isNotEmpty &&
+                        allocatedHoursController.text.isNotEmpty &&
+                        hourlyRateController.text.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
                           color: Theme.of(context)
                               .colorScheme
-                              .primary
-                              .withOpacity(0.2),
+                              .primaryContainer
+                              .withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Min Cost:',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                Text(
+                                  'DZD ${_calculateStaffCost(
+                                    int.tryParse(minCountController.text) ?? 0,
+                                    double.tryParse(
+                                            allocatedHoursController.text) ??
+                                        0,
+                                    double.tryParse(
+                                            hourlyRateController.text) ??
+                                        0,
+                                  ).toStringAsFixed(2)}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Max Cost:',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                Text(
+                                  'DZD ${_calculateStaffCost(
+                                    int.tryParse(maxCountController.text) ?? 0,
+                                    double.tryParse(
+                                            allocatedHoursController.text) ??
+                                        0,
+                                    double.tryParse(
+                                            hourlyRateController.text) ??
+                                        0,
+                                  ).toStringAsFixed(2)}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const Divider(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Average Cost:',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                Text(
+                                  'DZD ${_calculateStaffCost(
+                                    ((int.tryParse(minCountController.text) ??
+                                                0) +
+                                            (int.tryParse(
+                                                    maxCountController.text) ??
+                                                0)) ~/
+                                        2,
+                                    double.tryParse(
+                                            allocatedHoursController.text) ??
+                                        0,
+                                    double.tryParse(
+                                            hourlyRateController.text) ??
+                                        0,
+                                  ).toStringAsFixed(2)}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Min Cost:',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              Text(
-                                'DZD ${_calculateStaffCost(
-                                  int.tryParse(minCountController.text) ?? 0,
-                                  double.tryParse(
-                                          allocatedHoursController.text) ??
-                                      0,
-                                  double.tryParse(hourlyRateController.text) ??
-                                      0,
-                                ).toStringAsFixed(2)}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Max Cost:',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              Text(
-                                'DZD ${_calculateStaffCost(
-                                  int.tryParse(maxCountController.text) ?? 0,
-                                  double.tryParse(
-                                          allocatedHoursController.text) ??
-                                      0,
-                                  double.tryParse(hourlyRateController.text) ??
-                                      0,
-                                ).toStringAsFixed(2)}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Average Cost:',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                              Text(
-                                'DZD ${_calculateStaffCost(
-                                  ((int.tryParse(minCountController.text) ??
-                                              0) +
-                                          (int.tryParse(
-                                                  maxCountController.text) ??
-                                              0)) ~/
-                                      2,
-                                  double.tryParse(
-                                          allocatedHoursController.text) ??
-                                      0,
-                                  double.tryParse(hourlyRateController.text) ??
-                                      0,
-                                ).toStringAsFixed(2)}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    final staffRequirement = ServiceStaffRequirement(
+                      id: existing?.id ?? 0,
+                      serviceId: _id, // Current service ID
+                      minCount: int.parse(minCountController.text),
+                      maxCount: int.parse(maxCountController.text),
+                      role: selectedRoleId!,
+                      allocatedHours:
+                          double.parse(allocatedHoursController.text),
+                      hourlyRate: double.parse(hourlyRateController.text),
+                      notes: notesController.text.isNotEmpty
+                          ? notesController.text
+                          : null,
+                      createdAt: existing?.createdAt ?? DateTime.now(),
+                      updatedAt: DateTime.now(),
+                    );
+
+                    setState(() {
+                      if (isEditing && index != null) {
+                        _staffRequirements[index] = staffRequirement;
+                      } else {
+                        _staffRequirements.add(staffRequirement);
+                      }
+                      _updateCompletionStates();
+                    });
+
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(isEditing ? 'Update' : 'Add'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  final staffRequirement = ServiceStaffRequirement(
-                    id: existing?.id ?? 0,
-                    serviceId: _id, // Current service ID
-                    minCount: int.parse(minCountController.text),
-                    maxCount: int.parse(maxCountController.text),
-                    role: roleController.text,
-                    allocatedHours: double.parse(allocatedHoursController.text),
-                    hourlyRate: double.parse(hourlyRateController.text),
-                    notes: notesController.text.isNotEmpty
-                        ? notesController.text
-                        : null,
-                    createdAt: existing?.createdAt ?? DateTime.now(),
-                    updatedAt: DateTime.now(),
-                  );
-
-                  setState(() {
-                    if (isEditing && index != null) {
-                      _staffRequirements[index] = staffRequirement;
-                    } else {
-                      _staffRequirements.add(staffRequirement);
-                    }
-                    _updateCompletionStates();
-                  });
-
-                  Navigator.pop(context);
-                }
-              },
-              child: Text(isEditing ? 'Update' : 'Add'),
-            ),
-          ],
         );
       },
     );

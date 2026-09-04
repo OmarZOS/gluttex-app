@@ -85,7 +85,7 @@ class ServiceRequirementsSection extends StatelessWidget {
                   (staff) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: RequirementCard.staff(
-                      role: staff.role,
+                      role: staff.role.toString(),
                       minCount: staff.minCount,
                       maxCount: staff.maxCount,
                       allocatedHours: staff.allocatedHours,

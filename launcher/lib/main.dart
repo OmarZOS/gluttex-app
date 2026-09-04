@@ -111,7 +111,8 @@ class GluttexApp extends StatelessWidget {
         ChangeNotifierProvider<AssistantNotifier>(
             create: (_) => AssistantNotifier()),
         ChangeNotifierProvider<DeliveryChangeNotifier>(
-            create: (_) => DeliveryChangeNotifier()),
+            create: (_) => DeliveryChangeNotifier(
+                service: AppLocator.get<DeliveryService>())),
         ChangeNotifierProvider<SupplierChangeNotifier>(
             create: (_) => SupplierChangeNotifier()),
         ChangeNotifierProvider<SupplierDashboardProvider>(

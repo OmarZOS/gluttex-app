@@ -1,5 +1,39 @@
 import 'dart:convert';
 
+class ProvidedServiceCategory {
+  final int id;
+  final String name;
+
+  const ProvidedServiceCategory({required this.id, required this.name});
+
+  factory ProvidedServiceCategory.fromJson(Map<String, dynamic> json) {
+    return ProvidedServiceCategory(
+      id: (json['provided_service_category_id'] as num).toInt(),
+      name: json['provided_service_category_name'] as String,
+    );
+  }
+}
+
+class StaffRole {
+  final int id;
+  final int categoryId;
+  final String name;
+
+  const StaffRole({
+    required this.id,
+    required this.categoryId,
+    required this.name,
+  });
+
+  factory StaffRole.fromJson(Map<String, dynamic> json) {
+    return StaffRole(
+      id: (json['id_staff_role'] as num).toInt(),
+      categoryId: (json['staff_role_service_category_ref'] as num).toInt(),
+      name: json['staff_role_name'] as String,
+    );
+  }
+}
+
 class ProvidedService {
   final int id;
   final String name;
@@ -306,7 +340,7 @@ class ServiceStaffRequirement {
   final int serviceId;
   final int minCount;
   final int maxCount;
-  final String role;
+  final int role;
   final double allocatedHours;
   final double hourlyRate;
   final String? notes;
@@ -344,7 +378,7 @@ class ServiceStaffRequirement {
       serviceId: json['service_staff_requirement_service_id'] as int,
       minCount: json['service_staff_requirement_min_count'] as int,
       maxCount: json['service_staff_requirement_max_count'] as int,
-      role: json['service_staff_requirement_role'] as String,
+      role: (json['service_staff_requirement_role'] as num).toInt(),
       allocatedHours:
           (json['service_staff_requirement_allocated_hours'] as num).toDouble(),
       hourlyRate:
