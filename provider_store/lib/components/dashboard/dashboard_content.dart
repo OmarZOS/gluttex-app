@@ -4,7 +4,6 @@ import 'package:event/product_change_notifier.dart';
 import 'package:event/service_change_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/business/Organisation.dart';
 import 'package:gluttex_core/business/Supplier.dart';
@@ -79,11 +78,28 @@ class DashboardContentState extends State<DashboardContent> {
       final deliveryNotifier = context.read<DeliveryChangeNotifier>();
 
       if (supplierId > 0) {
-        // Load products for the selected supplier
-        await productNotifier.fetchProducts(
-            providerId: supplierId, reset: true);
-        await serviceNotifier.fetchServices(
-            providerId: supplierId, reset: true);
+        // Start both loads together so a product parsing/API error cannot
+        // prevent services from being requested.
+        final productLoad = productNotifier.fetchProducts(
+          providerId: supplierId,
+          reset: true,
+        );
+        final serviceLoad = serviceNotifier.fetchServices(
+          providerId: supplierId,
+          reset: true,
+        );
+
+        try {
+          await productLoad;
+        } catch (e) {
+          debugPrint('❌ Product load failed for supplier $supplierId: $e');
+        }
+
+        try {
+          await serviceLoad;
+        } catch (e) {
+          debugPrint('❌ Service load failed for supplier $supplierId: $e');
+        }
 
         // ✅ FIX: Set filters and fetch deliveries
         deliveryNotifier.setFilters(providerId: supplierId);
@@ -92,8 +108,21 @@ class DashboardContentState extends State<DashboardContent> {
         debugPrint('✅ Loaded data for supplier: $supplierId');
         debugPrint('   Deliveries: ${deliveryNotifier.deliveries.length}');
       } else {
-        await productNotifier.fetchProducts(reset: true);
-        await serviceNotifier.fetchServices(reset: true);
+        final productLoad = productNotifier.fetchProducts(reset: true);
+        final serviceLoad = serviceNotifier.fetchServices(reset: true);
+
+        try {
+          await productLoad;
+        } catch (e) {
+          debugPrint('❌ Product load failed without supplier: $e');
+        }
+
+        try {
+          await serviceLoad;
+        } catch (e) {
+          debugPrint('❌ Service load failed without supplier: $e');
+        }
+
         deliveryNotifier.clearFilters();
         await deliveryNotifier.fetchFirstPage();
       }
@@ -120,7 +149,7 @@ class DashboardContentState extends State<DashboardContent> {
       await _loadSuppliers(userId);
 
       // Build available suppliers list
-      _buildAvailableSuppliers(userId);
+      await _buildAvailableSuppliers(userId);
 
       // Build organisations
       _buildOrganisations();

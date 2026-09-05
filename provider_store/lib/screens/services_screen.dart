@@ -1,14 +1,12 @@
 import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:event/service_change_notifier.dart';
 import 'package:provider_store/components/selling_point/selling_point_supplier.dart';
-import 'package:provider_store/components/service/details/service_details_header.dart';
 import 'package:provider_store/components/service/service_card.dart';
 import 'package:provider_store/components/service/service_search_bar.dart';
 import 'package:provider_store/components/service/services_empty_state.dart';
@@ -16,7 +14,7 @@ import 'package:provider_store/components/service/services_loading_state.dart';
 import 'package:provider_store/screens/service_details_screen.dart';
 import 'package:provider/provider.dart';
 
-class ServicesScreen extends StatelessWidget {
+class ServicesScreen extends StatefulWidget {
   final PrivilegeLevel privilegeLevel;
   final int userId;
   final List<int> accessibleSuppliers;
@@ -27,6 +25,52 @@ class ServicesScreen extends StatelessWidget {
 
   const ServicesScreen({
     super.key,
+    required this.privilegeLevel,
+    required this.userId,
+    required this.accessibleSuppliers,
+    required this.userRules,
+    required this.personnelNotifier,
+    required this.serviceNotifier,
+    required this.selectedSupplierId,
+  });
+
+  bool get canManage => privilegeLevel == PrivilegeLevel.manage;
+  bool get hasMultipleSuppliers => accessibleSuppliers.length > 1;
+
+  @override
+  State<ServicesScreen> createState() => _ServicesScreenState();
+}
+
+class _ServicesScreenState extends State<ServicesScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _ServicesContent(
+      privilegeLevel: widget.privilegeLevel,
+      userId: widget.userId,
+      accessibleSuppliers: widget.accessibleSuppliers,
+      userRules: widget.userRules,
+      personnelNotifier: widget.personnelNotifier,
+      serviceNotifier: widget.serviceNotifier,
+      selectedSupplierId: widget.selectedSupplierId,
+    );
+  }
+}
+
+class _ServicesContent extends StatelessWidget {
+  final PrivilegeLevel privilegeLevel;
+  final int userId;
+  final List<int> accessibleSuppliers;
+  final List<ManagementRule> userRules;
+  final PersonnelNotifier personnelNotifier;
+  final ServiceNotifier serviceNotifier;
+  final int selectedSupplierId;
+
+  const _ServicesContent({
     required this.privilegeLevel,
     required this.userId,
     required this.accessibleSuppliers,
@@ -112,15 +156,11 @@ class ServicesScreen extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 4),
-            Consumer<ServiceNotifier>(
-              builder: (context, notifier, _) {
-                return Text(
-                  '${notifier.services.length} ${loc?.servicesAvailable ?? 'available'}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                );
-              },
+            Text(
+              '${serviceNotifier.services.length} ${loc?.servicesAvailable ?? 'available'}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ),
@@ -179,36 +219,30 @@ class ServicesScreen extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    return Consumer<ServiceNotifier>(
-      builder: (context, notifier, _) {
-        if (notifier.isLoading) {
-          return const SliverFillRemaining(child: ServicesLoadingState());
-        }
+    if (serviceNotifier.isLoading) {
+      return const SliverFillRemaining(child: ServicesLoadingState());
+    }
 
-        if (notifier.services.isEmpty) {
-          return SliverFillRemaining(child: ServicesEmptyState());
-        }
+    if (serviceNotifier.services.isEmpty) {
+      return SliverFillRemaining(child: ServicesEmptyState());
+    }
 
-        return SliverList.separated(
-          itemCount: notifier.services.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            final service = notifier.services[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ServiceCard(
-                service: service,
-                canManage: canManage,
-                onTap: () => _handleServiceTap(context, service),
-                onEdit: canManage
-                    ? () => _handleEditService(context, service)
-                    : null,
-                onDelete: canManage
-                    ? () => _handleDeleteService(context, service)
-                    : null,
-              ),
-            );
-          },
+    return SliverList.separated(
+      itemCount: serviceNotifier.services.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final service = serviceNotifier.services[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: ServiceCard(
+            service: service,
+            canManage: canManage,
+            onTap: () => _handleServiceTap(context, service),
+            onEdit:
+                canManage ? () => _handleEditService(context, service) : null,
+            onDelete:
+                canManage ? () => _handleDeleteService(context, service) : null,
+          ),
         );
       },
     );

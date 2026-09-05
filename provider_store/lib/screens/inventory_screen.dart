@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/Product.dart';
-import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_core/business/privileges/Privileges.dart';
 import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:provider_store/components/inventory/inventory_app_bar.dart';
@@ -60,14 +59,28 @@ class _InventoryScreenState extends State<InventoryScreen> {
   void initState() {
     super.initState();
     _initializeData();
+    _loadSelectedSupplierProducts();
   }
 
   @override
   void didUpdateWidget(InventoryScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentProviderId != widget.currentProviderId) {
+      _loadSelectedSupplierProducts();
+    }
     if (_shouldRebuild(oldWidget)) {
       _initializeData();
     }
+  }
+
+  void _loadSelectedSupplierProducts() {
+    final providerId = widget.currentProviderId;
+    if (providerId == null || providerId <= 0) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onRefresh();
+    });
   }
 
   bool _shouldRebuild(InventoryScreen oldWidget) {
@@ -88,22 +101,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
   bool _checkInventoryAccess() {
     return widget.userRules.any((rule) {
       if (!rule.isActive) return false;
-      final ruleCode = rule.managementRuleCode ?? 0;
+      final ruleCode = rule.managementRuleCode;
       return RoleBitMapper.hasPrivilege(ruleCode, 'inventory_view') ||
           RoleBitMapper.hasPrivilege(ruleCode, 'inventory_manage');
     });
   }
 
   List<Product> _filterProducts() {
-    // 👇 CRITICAL: Filter products by selected supplier ID first
     List<Product> products = widget.products;
-
-    // Filter by supplier ID
-    if (widget.currentProviderId != null && widget.currentProviderId! > 0) {
-      products = products.where((product) {
-        return product.product_provider_id == widget.currentProviderId;
-      }).toList();
-    }
 
     // Then filter by search query
     if (widget.searchQuery.isNotEmpty) {

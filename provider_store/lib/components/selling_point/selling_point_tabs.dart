@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:event/product_change_notifier.dart';
-import 'package:event/service_change_notifier.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:provider_store/components/selling_point/selling_items/item_card_with_controls.dart';
 import 'package:provider_store/components/selling_point/selling_items/tab_selector.dart';
-import 'package:provider/provider.dart';
 import 'package:event/cart_change_notifier.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 
-class SellingItemTabs extends StatelessWidget {
+class SellingItemTabs extends StatefulWidget {
   final List<Product> products;
   final List<ProvidedService> services;
   final bool isLoading;
@@ -36,36 +33,70 @@ class SellingItemTabs extends StatelessWidget {
   });
 
   @override
+  State<SellingItemTabs> createState() => _SellingItemTabsState();
+}
+
+class _SellingItemTabsState extends State<SellingItemTabs>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+  int _selectedTab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabChanged);
+  }
+
+  void _handleTabChanged() {
+    if (_tabController.indexIsChanging ||
+        _selectedTab == _tabController.index) {
+      return;
+    }
+    setState(() => _selectedTab = _tabController.index);
+  }
+
+  void _selectTab(int index) {
+    if (_selectedTab == index) return;
+    setState(() => _selectedTab = index);
+    _tabController.animateTo(index);
+  }
+
+  @override
+  void dispose() {
+    _tabController
+      ..removeListener(_handleTabChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          TabSelector(
-            selectedTab: 0,
-            onTabChanged: (index) {
-              // Tab changed - DefaultTabController handles this
-            },
+    return Column(
+      children: [
+        TabSelector(
+          selectedTab: _selectedTab,
+          onTabChanged: _selectTab,
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildProductGrid(context),
+              _buildServiceGrid(context),
+            ],
           ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildProductGrid(context),
-                _buildServiceGrid(context),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildProductGrid(BuildContext context) {
-    if (isLoading && products.isEmpty) {
+    if (widget.isLoading && widget.products.isEmpty) {
       return _buildLoadingState(context);
     }
 
-    if (products.isEmpty) {
+    if (widget.products.isEmpty) {
       return _buildEmptyState(context, isProduct: true);
     }
 
@@ -77,29 +108,29 @@ class SellingItemTabs extends StatelessWidget {
         mainAxisSpacing: 12,
         childAspectRatio: 0.85,
       ),
-      itemCount: products.length,
+      itemCount: widget.products.length,
       itemBuilder: (context, index) {
-        final product = products[index];
+        final product = widget.products[index];
         final quantity = _getProductQuantity(product.id_product ?? 0);
 
         return ItemCardWithConfiguration(
           item: product,
           isProduct: true,
           quantity: quantity,
-          onAddToCart: () => onAddToCart(product),
-          onRemoveFromCart: () => onRemoveFromCart(product),
-          onConfigure: () => onConfigureProduct(product),
+          onAddToCart: () => widget.onAddToCart(product),
+          onRemoveFromCart: () => widget.onRemoveFromCart(product),
+          onConfigure: () => widget.onConfigureProduct(product),
         );
       },
     );
   }
 
   Widget _buildServiceGrid(BuildContext context) {
-    if (isLoading && services.isEmpty) {
+    if (widget.isLoading && widget.services.isEmpty) {
       return _buildLoadingState(context);
     }
 
-    if (services.isEmpty) {
+    if (widget.services.isEmpty) {
       return _buildEmptyState(context, isProduct: false);
     }
 
@@ -111,31 +142,31 @@ class SellingItemTabs extends StatelessWidget {
         mainAxisSpacing: 12,
         childAspectRatio: 0.85,
       ),
-      itemCount: services.length,
+      itemCount: widget.services.length,
       itemBuilder: (context, index) {
-        final service = services[index];
+        final service = widget.services[index];
         final quantity = _getServiceQuantity(service.id);
 
         return ItemCardWithConfiguration(
           item: service,
           isProduct: false,
           quantity: quantity,
-          onAddToCart: () => onAddServiceToCart(service),
-          onRemoveFromCart: () => onRemoveServiceFromCart(service),
-          onConfigure: () => onConfigureService(service),
+          onAddToCart: () => widget.onAddServiceToCart(service),
+          onRemoveFromCart: () => widget.onRemoveServiceFromCart(service),
+          onConfigure: () => widget.onConfigureService(service),
         );
       },
     );
   }
 
   int _getProductQuantity(int productId) {
-    return cartNotifier.cartItems
+    return widget.cartNotifier.cartItems
         .where((item) => (item.product?.id_product ?? 0) == productId)
         .fold(0, (sum, item) => sum + item.quantity);
   }
 
   int _getServiceQuantity(int serviceId) {
-    return cartNotifier.cartItems
+    return widget.cartNotifier.cartItems
         .where((item) => (item.service?.id ?? 0) == serviceId)
         .fold(0, (sum, item) => sum + item.quantity);
   }

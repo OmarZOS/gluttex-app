@@ -301,8 +301,19 @@ class StorageServiceImpl extends StorageService<FormData> {
 
     try {
       final options = _applyToken(Options(), token);
+      developer.log(
+        'GET All sending to Dio: $destination',
+        name: 'StorageService',
+      );
       final response = await _dio.get(destination,
           queryParameters: params, options: options);
+
+      developer.log(
+        'GET All response: status=${response.statusCode} '
+        'type=${response.data.runtimeType} '
+        'isList=${response.data is List} isMap=${response.data is Map}',
+        name: 'StorageService',
+      );
 
       if (response.statusCode == 200) {
         setSuccessResponse(key, response.data,
@@ -319,6 +330,11 @@ class StorageServiceImpl extends StorageService<FormData> {
         );
         throw Exception(AppConstants.notFoundError);
       } else {
+        developer.log(
+          'GET All rejected: status=${response.statusCode} '
+          'data=${response.data}',
+          name: 'StorageService',
+        );
         setFailureResponse(
           key,
           data: AppConstants.getFailure,
@@ -331,6 +347,11 @@ class StorageServiceImpl extends StorageService<FormData> {
       }
     } on DioException catch (e) {
       developer.log('GET All Error: ${e.message}', name: 'StorageService');
+      developer.log(
+        'GET All Dio response: status=${e.response?.statusCode} '
+        'data=${e.response?.data}',
+        name: 'StorageService',
+      );
       final gluttexException = _createGluttexException(e);
       setFailureResponse(
         key,

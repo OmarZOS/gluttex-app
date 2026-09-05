@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/Product.dart';
-import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
+import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:event/cart_change_notifier.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:event/product_change_notifier.dart';
 import 'package:event/service_change_notifier.dart';
+import 'package:provider_store/components/selling_point/config_sheet/product_configuration_sheet.dart';
+import 'package:provider_store/components/selling_point/config_sheet/service_configuration_sheet.dart';
 import 'package:provider_store/components/selling_point/selling_point_app_bar.dart';
-import 'package:provider_store/components/selling_point/selling_point_cart.dart';
 import 'package:provider_store/components/selling_point/selling_point_tabs.dart';
-import 'package:provider_store/components/selling_point/selling_point_supplier.dart';
-import 'package:provider/provider.dart';
 
 import '../components/selling_point/cart_summary/cart_summary_screen.dart';
 
@@ -90,6 +88,10 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
   }
 
   void _loadSupplierData(int supplierId) {
+    developer.log(
+      'Loading POS products and services for providerId=$supplierId',
+      name: 'SellingPointScreen',
+    );
     // Force a reset so pagination and cached results are cleared when switching suppliers
     widget.productNotifier.fetchProducts(providerId: supplierId, reset: true);
     widget.serviceNotifier.fetchServices(providerId: supplierId, reset: true);
@@ -145,17 +147,77 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
                 onAddToCart: (product) {
                   widget.cartNotifier.addProduct(product);
                 },
-                onAddServiceToCart: (ProvidedService) {},
-                onRemoveFromCart: (Product) {},
-                onRemoveServiceFromCart: (ProvidedService) {},
-                onConfigureProduct: (Product) {},
-                onConfigureService: (ProvidedService) {},
+                onAddServiceToCart: (service) {
+                  widget.cartNotifier.addService(service);
+                },
+                onRemoveFromCart: (product) {
+                  widget.cartNotifier.removeItem(product: product);
+                },
+                onRemoveServiceFromCart: (service) {
+                  widget.cartNotifier.removeItem(service: service);
+                },
+                onConfigureProduct: _showProductConfiguration,
+                onConfigureService: _showServiceConfiguration,
               ),
             ),
           ],
         ),
       ),
       floatingActionButton: _buildCartFAB(context),
+    );
+  }
+
+  void _showProductConfiguration(Product product) {
+    final currentQuantity =
+        widget.cartNotifier.getProductCartItem(product)?.quantity ?? 1;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ProductConfigurationSheet(
+        product: product,
+        cartNotifier: widget.cartNotifier,
+        currentQuantity: currentQuantity,
+      ),
+    );
+  }
+
+  void _showServiceConfiguration(ProvidedService service) {
+    final currentItem = widget.cartNotifier.getServiceCartItem(service);
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ServiceConfigurationSheet(
+        service: service,
+        initialQuantity: currentItem?.quantity ?? 1,
+        initialScheduledDate: currentItem?.scheduledDate,
+        initialScheduledTime: currentItem?.scheduledTime,
+        initialNotes: currentItem?.scheduledTime,
+        onSave: ({
+          required int quantity,
+          String? scheduledDate,
+          String? scheduledTime,
+          String? notes,
+          Map<String, dynamic>? parameters,
+        }) {
+          if (currentItem == null) {
+            widget.cartNotifier.addService(service, quantity: quantity);
+          } else {
+            widget.cartNotifier.updateQuantity(
+              service: service,
+              newQuantity: quantity,
+            );
+          }
+          widget.cartNotifier.updateServiceScheduling(
+            service: service,
+            scheduledDate: scheduledDate,
+            scheduledTime: scheduledTime,
+          );
+        },
+      ),
     );
   }
 

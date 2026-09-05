@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:event/TraceableNotifier.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
@@ -12,6 +14,7 @@ class ServiceNotifier extends TraceableNotifier {
 
   final List<ProvidedService> _services = [];
   bool _isLoading = false;
+  bool _notificationScheduled = false;
   bool _hasMore = true;
 
   bool _isFetchingDetails = false;
@@ -20,7 +23,7 @@ class ServiceNotifier extends TraceableNotifier {
   String _searchQuery = '';
   int? _currentProviderId;
   int _page = 0;
-  final int _pageSize = 20;
+  final int _pageSize = 100;
 
   Timer? _debounce;
   int _requestToken = 0;
@@ -40,8 +43,8 @@ class ServiceNotifier extends TraceableNotifier {
 
     // Actually filter based on search query
     return services.where((service) {
-      final name = service.name?.toLowerCase() ?? '';
-      final description = service.description?.toLowerCase() ?? '';
+      final name = service.name.toLowerCase();
+      final description = service.description.toLowerCase();
       final query = _searchQuery.toLowerCase();
 
       return name.contains(query) || description.contains(query);
@@ -85,7 +88,16 @@ class ServiceNotifier extends TraceableNotifier {
   // INTERNAL HELPERS
   void _setLoading(bool value) {
     _isLoading = value;
-    notifyListeners();
+    _notifySafely();
+  }
+
+  void _notifySafely() {
+    if (!hasListeners || _notificationScheduled) return;
+    _notificationScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _notificationScheduled = false;
+      if (hasListeners) notifyListeners();
+    });
   }
 
   void _resetPagination() {
@@ -106,11 +118,33 @@ class ServiceNotifier extends TraceableNotifier {
     bool reset = false,
     String? callerKey,
   }) async {
+    debugPrint(
+      '[SERVICES] fetchServices ENTER '
+      'providerId=$providerId currentProviderId=$_currentProviderId '
+      'reset=$reset page=$_page query="$query"',
+    );
+
     final key = callerKey ??
         getCallerKey('fetchServices',
             suffix: 'provider_${providerId}_page_$_page');
 
-    if (_isLoading) return;
+    developer.log(
+      'fetchServices requested: providerId=$providerId '
+      'currentProviderId=$_currentProviderId reset=$reset '
+      'page=$_page query="$query"',
+      name: 'ServiceNotifier',
+    );
+
+    if (_isLoading) {
+      debugPrint(
+        '[SERVICES] fetchServices SKIPPED: already loading '
+        'currentProviderId=$_currentProviderId',
+      );
+      developer.log(
+          'fetchServices skipped because a request is already loading',
+          name: 'ServiceNotifier');
+      return;
+    }
 
     // Handle supplier switching
     if (providerId != 0 && providerId != _currentProviderId) {
@@ -130,18 +164,35 @@ class ServiceNotifier extends TraceableNotifier {
       _resetPagination();
     }
 
+    final effectiveProviderId =
+        (providerId != 0 ? providerId : _currentProviderId) ?? 0;
+    debugPrint(
+      '[SERVICES] fetchServices BEFORE_API '
+      'providerId=$effectiveProviderId offset=${_page * _pageSize} '
+      'limit=$_pageSize reset=$reset',
+    );
+    developer.log(
+      'fetchServices starting: providerId=$effectiveProviderId '
+      'offset=${_page * _pageSize} limit=$_pageSize reset=$reset',
+      name: 'ServiceNotifier',
+    );
+
     _setLoading(true);
 
     final int token = ++_requestToken;
     try {
       final offset = _page * _pageSize;
 
+      debugPrint(
+        '[SERVICES] CALLING_API providerId=$effectiveProviderId '
+        'offset=$offset limit=$_pageSize',
+      );
       final list = await _serviceManager.getAllProvidedServices(
         offset,
         _pageSize,
         serviceId: serviceId,
         categoryId: categoryId,
-        providerId: (providerId != 0 ? providerId : _currentProviderId) ?? 0,
+        providerId: effectiveProviderId,
         userId: userId,
         query: _searchQuery.isNotEmpty ? _searchQuery : "",
         callerKey: key,
@@ -165,6 +216,17 @@ class ServiceNotifier extends TraceableNotifier {
         storeSuccess(key, [], responseCode: 'EMPTY');
       }
 
+      developer.log(
+        'fetchServices completed: providerId=$effectiveProviderId '
+        'received=${list?.length ?? 0} total=${_services.length} '
+        'hasMore=$_hasMore',
+        name: 'ServiceNotifier',
+      );
+      debugPrint(
+        '[SERVICES] API_RESULT providerId=$effectiveProviderId '
+        'received=${list?.length ?? 0} total=${_services.length}',
+      );
+
       if ((list?.length ?? 0) < _pageSize) {
         _hasMore = false;
       } else {
@@ -173,6 +235,14 @@ class ServiceNotifier extends TraceableNotifier {
 
       notifyListeners();
     } catch (e) {
+      debugPrint(
+        '[SERVICES] API_ERROR providerId=$effectiveProviderId error=$e',
+      );
+      developer.log(
+        'fetchServices failed: providerId=$effectiveProviderId error=$e',
+        name: 'ServiceNotifier',
+        error: e,
+      );
       storeFailure(key, e.toString(),
           errorCode: e is GluttexException ? e.message : 'ERROR');
       logError('Error fetching services', error: e);
@@ -181,6 +251,11 @@ class ServiceNotifier extends TraceableNotifier {
       if (token == _requestToken) {
         _setLoading(false);
       }
+      debugPrint(
+        '[SERVICES] fetchServices EXIT '
+        'providerId=$effectiveProviderId isLoading=$_isLoading '
+        'total=${_services.length}',
+      );
     }
   }
 
@@ -289,8 +364,7 @@ class ServiceNotifier extends TraceableNotifier {
   // ------------------------------------------------------------
   Future<ProvidedService?> addService(ProvidedService service,
       {String? callerKey, String? token}) async {
-    final key = callerKey ??
-        getCallerKey('addService', suffix: service.name ?? 'unnamed');
+    final key = callerKey ?? getCallerKey('addService', suffix: service.name);
 
     _setLoading(true);
 
@@ -324,8 +398,8 @@ class ServiceNotifier extends TraceableNotifier {
   // ------------------------------------------------------------
   Future<ProvidedService?> updateService(ProvidedService service,
       {String? callerKey, String? token}) async {
-    final key = callerKey ??
-        getCallerKey('updateService', id: service.id?.toString() ?? 'unknown');
+    final key =
+        callerKey ?? getCallerKey('updateService', id: service.id.toString());
 
     _setLoading(true);
 

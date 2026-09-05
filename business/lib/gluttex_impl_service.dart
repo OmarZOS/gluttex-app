@@ -160,38 +160,73 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
     final key = callerKey ??
         _getCallerKey('getAllProvidedServices',
             suffix: 'offset_$offset-limit_$limit');
+    String? requestUrl;
+    log(
+      '[SERVICE_FETCH] ENTER providerId=$providerId categoryId=$categoryId '
+      'serviceId=$serviceId userId=$userId offset=$offset limit=$limit '
+      'query="$query" key=$key',
+      name: 'ProvidedServiceManagementImpl',
+    );
     try {
       // GET /api/v1/business/services
       // Query params: category_id, provider_id, active_only, offset, limit
 
       // If there's a search query, use search endpoint
       if (query.isNotEmpty && query.length >= 2) {
+        log(
+          '[SERVICE_FETCH] SEARCH_BRANCH query="$query" '
+          'offset=$offset limit=$limit',
+          name: 'ProvidedServiceManagementImpl',
+        );
         return await _searchServicesByToken(query, offset, limit,
             callerKey: key);
       }
 
       // Build query parameters
-      final queryParams = <String, dynamic>{
-        'offset': offset,
-        'limit': limit,
+      final queryParams = <String, String>{
+        'category_id': categoryId.toString(),
+        'provider_id': providerId.toString(),
+        'active_only': 'false',
+        'offset': offset.toString(),
+        'limit': limit.toString(),
       };
-
-      if (categoryId > 0) queryParams['category_id'] = categoryId;
-      if (providerId > 0) queryParams['provider_id'] = providerId;
-      if (serviceId > 0) queryParams['service_id'] = serviceId;
-      // active_only is optional - defaults to false in API
+      if (serviceId > 0) {
+        queryParams['service_id'] = serviceId.toString();
+      }
 
       final queryString = Uri(queryParameters: queryParams).query;
+      final url = '${AppConstants.apiBaseUrl}/business/services?$queryString';
+      requestUrl = url;
+
+      log(
+        '[SERVICE_FETCH] BEFORE_STORAGE_GET_ALL params=$queryParams url=$url',
+        name: 'ProvidedServiceManagementImpl',
+      );
 
       final responseData = await _storageService.getAll(
-        '${AppConstants.apiBaseUrl}/api/v1/business/services?$queryString',
+        url,
         callerKey: key,
       );
 
-      if (responseData == null || responseData.isEmpty) {
+      final isEmptyResponse = responseData == null ||
+          (responseData is Iterable && responseData.isEmpty) ||
+          (responseData is Map && responseData.isEmpty) ||
+          (responseData is String && responseData.isEmpty);
+      if (isEmptyResponse) {
+        log(
+          '[SERVICE_FETCH] EMPTY_RESPONSE type=${responseData.runtimeType}',
+          name: 'ProvidedServiceManagementImpl',
+        );
         _storeSuccess(key, [], responseCode: 'EMPTY');
         return [];
       }
+
+      log(
+        '[SERVICE_FETCH] RAW_RESPONSE type=${responseData.runtimeType} '
+        'isList=${responseData is List} '
+        'isMap=${responseData is Map}',
+        name: 'ProvidedServiceManagementImpl',
+      );
 
       // Handle response format - could be list or object with data field
       List<dynamic> dataList;
@@ -203,13 +238,23 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
         dataList = [];
       }
 
+      log(
+        '[SERVICE_FETCH] DATA_LIST_COUNT count=${dataList.length}',
+        name: 'ProvidedServiceManagementImpl',
+      );
+
       final List<ProvidedService> services = dataList
           .map((data) {
             try {
               return ProvidedService.fromJson(data as Map<String, dynamic>);
             } catch (e) {
-              log('Invalid service data ignored: $e',
-                  name: 'ProvidedServiceManagementImpl');
+              final dataShape =
+                  data is Map ? data.keys.toList() : data.runtimeType;
+              log(
+                'Invalid service data ignored for providerId=$providerId: '
+                '$e shape=$dataShape',
+                name: 'ProvidedServiceManagementImpl',
+              );
               return null;
             }
           })
@@ -217,12 +262,23 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
           .cast<ProvidedService>()
           .toList();
 
+      log(
+        '[SERVICE_FETCH] PARSED providerId=$providerId '
+        'received=${services.length}',
+        name: 'ProvidedServiceManagementImpl',
+      );
+
       _storeSuccess(key, services);
       return services;
     } catch (e) {
+      log(
+        '[SERVICE_FETCH] ERROR providerId=$providerId url=$requestUrl error=$e',
+        name: 'ProvidedServiceManagementImpl',
+        error: e,
+      );
       _storeFailure(key, e.toString(),
           errorCode: e is GluttexException ? e.message : 'ERROR');
-      return [];
+      rethrow;
     }
   }
 

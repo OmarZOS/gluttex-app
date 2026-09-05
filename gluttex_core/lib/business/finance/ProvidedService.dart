@@ -129,8 +129,95 @@ class ProvidedService {
   }
 
   factory ProvidedService.fromJson(Map<String, dynamic> json) {
-    // Parse requirements if they exist
+    // Parse the flat JSON structure from API
+    final int id = (json['provided_service_id'] as num).toInt();
+    final String name = json['provided_service_name'] as String;
+    final String description = json['provided_service_description'] as String;
+    final int categoryId =
+        (json['provided_service_category_id'] as num).toInt();
+    final int productProviderId =
+        (json['provided_service_product_provider_id'] as num).toInt();
+    final double basePrice =
+        (json['provided_service_base_price'] as num).toDouble();
+    final double finalPrice =
+        (json['provided_service_final_price'] as num).toDouble();
+
+    // Handle actualDuration (could be int or double)
+    final int actualDuration;
+    final actualDurationValue = json['provided_service_actual_duration'];
+    if (actualDurationValue is num) {
+      actualDuration = actualDurationValue.toInt();
+    } else {
+      actualDuration = 0;
+    }
+
+    // Handle isActive (could be 1/0 or true/false)
+    final bool isActive;
+    final isActiveValue = json['provided_service_is_active'];
+    if (isActiveValue is bool) {
+      isActive = isActiveValue;
+    } else if (isActiveValue is num) {
+      isActive = isActiveValue == 1;
+    } else {
+      isActive = false;
+    }
+
+    // Handle pricing config (JSON string or Map)
+    final pricingConfigValue = json['provided_service_pricing_config'];
+    ProvidedServicePricingConfig pricingConfig;
+
+    if (pricingConfigValue is String) {
+      try {
+        final parsed = jsonDecode(pricingConfigValue) as Map<String, dynamic>;
+        pricingConfig = ProvidedServicePricingConfig.fromJson(parsed);
+      } catch (e) {
+        pricingConfig = ProvidedServicePricingConfig();
+      }
+    } else if (pricingConfigValue is Map<String, dynamic>) {
+      pricingConfig = ProvidedServicePricingConfig.fromJson(pricingConfigValue);
+    } else {
+      pricingConfig = ProvidedServicePricingConfig();
+    }
+
+    // Handle dates
+    DateTime createdAt;
+    try {
+      createdAt = DateTime.parse(json['provided_service_created_at'] as String);
+    } catch (e) {
+      createdAt = DateTime.now();
+    }
+
+    DateTime updatedAt;
+    try {
+      updatedAt = DateTime.parse(json['provided_service_updated_at'] as String);
+    } catch (e) {
+      updatedAt = DateTime.now();
+    }
+
+    DateTime? deletedAt;
+    if (json['provided_service_deleted_at'] != null &&
+        json['provided_service_deleted_at'] is String) {
+      try {
+        deletedAt =
+            DateTime.parse(json['provided_service_deleted_at'] as String);
+      } catch (e) {
+        deletedAt = null;
+      }
+    } else {
+      deletedAt = null;
+    }
+
+    // Parse resource requirements if they exist (nested)
     final List<ServiceResourceRequirement> resourceRequirements = [];
+    if (json['requirements'] != null) {
+      final resourcesJson = json['requirements'] as List;
+      resourceRequirements.addAll(
+        resourcesJson.map(
+          (resourceJson) => ServiceResourceRequirement.fromJson(resourceJson),
+        ),
+      );
+    }
+    // Also check for the old field name
     if (json['service_resource_requirement'] != null) {
       final resourcesJson = json['service_resource_requirement'] as List;
       resourceRequirements.addAll(
@@ -140,7 +227,17 @@ class ProvidedService {
       );
     }
 
+    // Parse staff requirements if they exist (nested)
     final List<ServiceStaffRequirement> staffRequirements = [];
+    if (json['staff_requirements'] != null) {
+      final staffJson = json['staff_requirements'] as List;
+      staffRequirements.addAll(
+        staffJson.map(
+          (staffJson) => ServiceStaffRequirement.fromJson(staffJson),
+        ),
+      );
+    }
+    // Also check for the old field name
     if (json['service_staff_requirement'] != null) {
       final staffJson = json['service_staff_requirement'] as List;
       staffRequirements.addAll(
@@ -150,53 +247,20 @@ class ProvidedService {
       );
     }
 
-    // Handle pricing config (could be string or map)
-    final pricingConfigJson = json['provided_service_pricing_config'];
-    ProvidedServicePricingConfig pricingConfig;
-
-    if (pricingConfigJson is String) {
-      // Parse JSON string
-      try {
-        final parsed = jsonDecode(pricingConfigJson) as Map<String, dynamic>;
-        pricingConfig = ProvidedServicePricingConfig.fromJson(parsed);
-      } catch (e) {
-        // If parsing fails, create empty config
-        pricingConfig = ProvidedServicePricingConfig();
-      }
-    } else if (pricingConfigJson is Map<String, dynamic>) {
-      pricingConfig = ProvidedServicePricingConfig.fromJson(pricingConfigJson);
-    } else {
-      pricingConfig = ProvidedServicePricingConfig();
-    }
-
-    // Convert actualDuration from double to int
-    final actualDurationValue = json['provided_service_actual_duration'];
-    final int actualDuration;
-
-    if (actualDurationValue is double) {
-      actualDuration = actualDurationValue.toInt();
-    } else if (actualDurationValue is int) {
-      actualDuration = actualDurationValue;
-    } else {
-      actualDuration = 0; // default
-    }
-
     return ProvidedService(
-      id: json['provided_service_id'] as int,
-      name: json['provided_service_name'] as String,
-      description: json['provided_service_description'] as String,
-      categoryId: json['provided_service_category_id'] as int,
-      productProviderId: json['provided_service_product_provider_id'] as int,
-      basePrice: (json['provided_service_base_price'] as num).toDouble(),
-      finalPrice: (json['provided_service_final_price'] as num).toDouble(),
-      actualDuration: actualDuration, // Use converted value
+      id: id,
+      name: name,
+      description: description,
+      categoryId: categoryId,
+      productProviderId: productProviderId,
+      basePrice: basePrice,
+      finalPrice: finalPrice,
+      actualDuration: actualDuration,
       pricingConfig: pricingConfig,
-      isActive: json['provided_service_is_active'] == 1,
-      createdAt: DateTime.parse(json['provided_service_created_at'] as String),
-      updatedAt: DateTime.parse(json['provided_service_updated_at'] as String),
-      deletedAt: json['provided_service_deleted_at'] != null
-          ? DateTime.parse(json['provided_service_deleted_at'] as String)
-          : null,
+      isActive: isActive,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      deletedAt: deletedAt,
       resourceRequirements: resourceRequirements,
       staffRequirements: staffRequirements,
     );
