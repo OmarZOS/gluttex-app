@@ -10,6 +10,8 @@ import 'package:gluttex_core/mediation/StorageService.dart';
 
 class StorageServiceImpl extends StorageService<FormData> {
   final Dio _dio;
+  Future<bool> Function()? _tokenRefreshHandler;
+  Future<bool>? _refreshInFlight;
 
   StorageServiceImpl({Dio? dio})
       : _dio = dio ??
@@ -17,7 +19,56 @@ class StorageServiceImpl extends StorageService<FormData> {
               connectTimeout: const Duration(seconds: 7),
               receiveTimeout: const Duration(seconds: 7),
               sendTimeout: const Duration(seconds: 7),
-            ));
+            )) {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (error, handler) async {
+          final request = error.requestOptions;
+          final shouldRefresh = error.response?.statusCode == 401 &&
+              request.extra['authRefreshRetried'] != true &&
+              !_isAuthenticationRequest(request.path) &&
+              _tokenRefreshHandler != null;
+
+          if (!shouldRefresh) {
+            handler.next(error);
+            return;
+          }
+
+          request.extra['authRefreshRetried'] = true;
+          try {
+            _refreshInFlight ??= _tokenRefreshHandler!();
+            final refreshed = await _refreshInFlight;
+            _refreshInFlight = null;
+
+            if (refreshed == true) {
+              final token = getAuthToken();
+              if (token != null && token.isNotEmpty) {
+                request.headers['Authorization'] =
+                    token.startsWith('Bearer ') ? token : 'Bearer $token';
+              }
+              handler.resolve(await _dio.fetch(request));
+              return;
+            }
+          } catch (_) {
+            _refreshInFlight = null;
+          }
+
+          handler.next(error);
+        },
+      ),
+    );
+  }
+
+  @override
+  void setTokenRefreshHandler(Future<bool> Function() handler) {
+    _tokenRefreshHandler = handler;
+  }
+
+  bool _isAuthenticationRequest(String path) {
+    return path.contains(AppConstants.loginEndpoint) ||
+        path.contains(AppConstants.refreshTokenEndpoint) ||
+        path.contains(AppConstants.signUpEndpoint);
+  }
 
   // Helper to add token to request headers
   Options _applyToken(Options options, String? token) {

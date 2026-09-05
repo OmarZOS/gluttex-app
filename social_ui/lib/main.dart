@@ -71,6 +71,9 @@ Future<void> main() async {
   GoogleLoginManager.initialize();
 
   final appUserNotifier = AppUserNotifier();
+  AppLocator.get<StorageService>().setTokenRefreshHandler(
+    () => appUserNotifier.refreshTokenNow(callerKey: 'automatic_token_refresh'),
+  );
   await appUserNotifier.initializeAuthState();
 
   runApp(GluttexApp(localeProvider, appUserNotifier));

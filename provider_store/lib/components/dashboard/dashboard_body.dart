@@ -109,6 +109,8 @@ class DashboardBody extends StatelessWidget {
           userId,
           supplierIds,
           userRules,
+          selectedSupplierId:
+              selectedSupplierId, // 👈 Pass the selected supplier ID
         );
     }
   }
@@ -254,22 +256,22 @@ class DashboardBody extends StatelessWidget {
   }
 
   Widget _buildServicesScreen(
-    BuildContext context,
-    PrivilegeLevel privilegeLevel,
-    int userId,
-    List<int> supplierIds,
-    List<ManagementRule> userRules,
-  ) {
+      BuildContext context,
+      PrivilegeLevel privilegeLevel,
+      int userId,
+      List<int> supplierIds,
+      List<ManagementRule> userRules,
+      {required int selectedSupplierId}) {
     return Consumer2<PersonnelNotifier, ServiceNotifier>(
       builder: (context, personnelNotifier, serviceNotifier, child) {
         return ServicesScreen(
-          privilegeLevel: privilegeLevel,
-          userId: userId,
-          accessibleSuppliers: supplierIds,
-          userRules: userRules,
-          personnelNotifier: personnelNotifier,
-          serviceNotifier: serviceNotifier,
-        );
+            privilegeLevel: privilegeLevel,
+            userId: userId,
+            accessibleSuppliers: supplierIds,
+            userRules: userRules,
+            personnelNotifier: personnelNotifier,
+            serviceNotifier: serviceNotifier,
+            selectedSupplierId: selectedSupplierId);
       },
     );
   }

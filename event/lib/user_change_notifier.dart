@@ -201,6 +201,9 @@ class AppUserNotifier extends ChangeNotifier {
 
   Future<bool> refreshTokenNow({String? callerKey}) =>
       _token.refresh(callerKey: callerKey).then((result) {
+        if (result && _state.token != null) {
+          _storageService.setAuthToken(_state.token!);
+        }
         _notify();
         return result;
       });

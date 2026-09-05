@@ -23,6 +23,7 @@ class ServicesScreen extends StatelessWidget {
   final List<ManagementRule> userRules;
   final PersonnelNotifier personnelNotifier;
   final ServiceNotifier serviceNotifier;
+  final int selectedSupplierId;
 
   const ServicesScreen({
     super.key,
@@ -32,6 +33,7 @@ class ServicesScreen extends StatelessWidget {
     required this.userRules,
     required this.personnelNotifier,
     required this.serviceNotifier,
+    required this.selectedSupplierId,
   });
 
   bool get canManage => privilegeLevel == PrivilegeLevel.manage;
@@ -214,10 +216,17 @@ class ServicesScreen extends StatelessWidget {
 
   Future<void> _handleEditService(
       BuildContext context, ProvidedService service) async {
+    final resolvedProviderId = service.productProviderId > 0
+        ? service.productProviderId
+        : (selectedSupplierId > 0
+            ? selectedSupplierId
+            : (serviceNotifier.currentProviderId ?? 0));
+
     await Navigator.pushNamed(
       context,
       AppRoutes.serviceForm,
       arguments: {
+        'providerId': resolvedProviderId,
         'service': service,
       },
     );
@@ -271,10 +280,10 @@ class ServicesScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => ServiceDetailsScreenLoader(
-          serviceId: service.id,
-          listService: service, // Pass the service from the list
-          canManage: canManage,
-        ),
+            serviceId: service.id,
+            listService: service, // Pass the service from the list
+            canManage: canManage,
+            selectedSupplierId: selectedSupplierId),
       ),
     );
   }
@@ -285,12 +294,14 @@ class ServiceDetailsScreenLoader extends StatefulWidget {
   final int serviceId;
   final ProvidedService listService;
   final bool canManage;
+  final int selectedSupplierId;
 
   const ServiceDetailsScreenLoader({
     super.key,
     required this.serviceId,
     required this.listService,
     required this.canManage,
+    required this.selectedSupplierId,
   });
 
   @override
@@ -475,10 +486,18 @@ class _ServiceDetailsScreenLoaderState
 
   Future<void> _openEditForm(
       BuildContext context, ProvidedService service) async {
+    final resolvedProviderId = service.productProviderId > 0
+        ? service.productProviderId
+        : (widget.selectedSupplierId > 0
+            ? widget.selectedSupplierId
+            : (Provider.of<ServiceNotifier>(context, listen: false)
+                    .currentProviderId ??
+                0));
+
     await Navigator.pushNamed(
       context,
       AppRoutes.serviceForm,
-      arguments: {'service': service},
+      arguments: {'providerId': resolvedProviderId, 'service': service},
     );
   }
 }

@@ -756,6 +756,12 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
       final route = ModalRoute.of(context);
       final args = route?.settings.arguments;
       ProvidedService? service;
+      final routeProviderId =
+          args is Map<String, dynamic> ? (args['providerId'] as int? ?? 0) : 0;
+      final currentProviderId =
+          Provider.of<ServiceNotifier>(context, listen: false)
+                  .currentProviderId ??
+              0;
 
       if (args is Map<String, dynamic>) {
         service = args["service"] as ProvidedService?;
@@ -766,7 +772,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
         _serviceName = service.name;
         _serviceDescription = service.description;
         _categoryId = service.categoryId;
-        _providerId = service.productProviderId;
+        _providerId = service.productProviderId > 0
+            ? service.productProviderId
+            : (routeProviderId > 0 ? routeProviderId : currentProviderId);
         _basePrice = service.basePrice;
         _finalPrice = service.finalPrice;
         _actualDuration = service.actualDuration;
@@ -789,9 +797,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
         _resourceRequirements.addAll(service.resourceRequirements);
         _staffRequirements.addAll(service.staffRequirements);
       } else {
-        _providerId = args is Map<String, dynamic>
-            ? (args['providerId'] as int? ?? 0)
-            : 0;
+        _providerId = routeProviderId > 0 ? routeProviderId : currentProviderId;
       }
 
       _updateCompletionStates();

@@ -21,10 +21,10 @@ class ProductCatalogScreen extends StatefulWidget {
   const ProductCatalogScreen({Key? key}) : super(key: key);
 
   @override
-  _ProductCatalogScreenState createState() => _ProductCatalogScreenState();
+  ProductCatalogScreenState createState() => ProductCatalogScreenState();
 }
 
-class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
+class ProductCatalogScreenState extends State<ProductCatalogScreen> {
   final TextEditingController _searchController = TextEditingController();
   late List<String> _categories = [];
   int _selectedCategoryId = 0;
@@ -44,7 +44,7 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
 
     // Initial fetch with cache support
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _productNotifier.fetchProducts();
+      _productNotifier.fetchProducts(reset: true);
     });
   }
 

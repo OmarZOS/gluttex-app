@@ -204,23 +204,24 @@ class ProvidedService {
 
   Map<String, dynamic> toJson() {
     return {
-      'provided_service_id': id,
-      'provided_service_name': name,
-      'provided_service_description': description,
-      'provided_service_category_id': categoryId,
       'provided_service_product_provider_id': productProviderId,
-      'provided_service_base_price': basePrice,
-      'provided_service_final_price': finalPrice,
-      'provided_service_actual_duration': actualDuration,
-      'provided_service_pricing_config': pricingConfig.toJson(),
-      'provided_service_is_active': isActive ? 1 : 0,
-      'provided_service_created_at': createdAt.toIso8601String(),
-      'provided_service_updated_at': updatedAt.toIso8601String(),
-      'provided_service_deleted_at': deletedAt?.toIso8601String(),
-      'service_resource_requirement':
-          resourceRequirements.map((r) => r.toJson()).toList(),
-      'service_staff_requirement':
-          staffRequirements.map((s) => s.toJson()).toList(),
+      'service': {
+        'provided_service_id': id,
+        'provided_service_name': name,
+        'provided_service_description': description,
+        'provided_service_category_id': categoryId,
+        'provided_service_product_provider_id': productProviderId,
+        'provided_service_base_price': basePrice,
+        'provided_service_final_price': finalPrice,
+        'provided_service_actual_duration': actualDuration,
+        'provided_service_pricing_config': pricingConfig.toJsonString(),
+        'provided_service_is_active': isActive ? 1 : 0,
+        'provided_service_created_at': createdAt.toIso8601String(),
+        'provided_service_updated_at': updatedAt.toIso8601String(),
+        'provided_service_deleted_at': deletedAt?.toIso8601String(),
+      },
+      'requirements': resourceRequirements.map((r) => r.toJson()).toList(),
+      'staff_requirements': staffRequirements.map((s) => s.toJson()).toList(),
     };
   }
 
@@ -475,6 +476,10 @@ class ProvidedServicePricingConfig {
     }
 
     return json;
+  }
+
+  String toJsonString() {
+    return jsonEncode(toJson());
   }
 
   @override

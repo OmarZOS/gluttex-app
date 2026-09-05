@@ -25,7 +25,6 @@ class ProductNotifier extends ChangeNotifier {
 
   ProductNotifier() {
     _initComponents();
-    _fetch.fetchProducts();
   }
 
   String get currentSearchQuery => _state.currentSearchQuery;

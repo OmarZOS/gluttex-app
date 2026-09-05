@@ -89,6 +89,9 @@ abstract class StorageService<T> {
     return providedToken ?? _authToken;
   }
 
+  /// Register the app-level callback used to renew an expired access token.
+  void setTokenRefreshHandler(Future<bool> Function() handler);
+
   // ==================== Response Storage Methods ====================
 
   /// Store a successful response for a caller key

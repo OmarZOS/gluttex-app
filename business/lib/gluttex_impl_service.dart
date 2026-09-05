@@ -126,7 +126,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
     try {
       // GET /api/v1/business/services/{service_id}
       final data = await _storageService.get(
-        '${AppConstants.apiBaseUrl}/api/v1/business/services/$idService',
+        '${AppConstants.apiBaseUrl}/business/services',
         idService,
         callerKey: key,
       );
@@ -237,7 +237,7 @@ class ProvidedServiceManagementImpl extends ProvidedServiceManagementService {
     try {
       // PUT /api/v1/business/services/{service_id}
       final result = await _storageService.update(
-        '${AppConstants.apiBaseUrl}/api/v1/business/services/${updatedService.id}',
+        '${AppConstants.apiBaseUrl}/business/services',
         updatedService.id?.toString() ?? '',
         {}, // No query params needed
         updatedService.toJson(),
