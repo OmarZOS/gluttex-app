@@ -328,6 +328,30 @@ class ProductCatalogScreenState extends State<ProductCatalogScreen> {
 
   Widget _buildProductGrid(
       List<Product> products, ProductNotifier productNotifier) {
+    // ✅ Show loading indicator when loading and no products
+    if (productNotifier.isLoading && products.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context)?.loadingProducts ??
+                  "Loading products...",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // ✅ Show empty state only when NOT loading and products are empty
     if (products.isEmpty && !productNotifier.isLoading) {
       return Center(
         child: Column(
@@ -354,8 +378,9 @@ class ProductCatalogScreenState extends State<ProductCatalogScreen> {
                   _searchController.clear();
                   _filterProducts();
                 },
-                child: Text(AppLocalizations.of(context)?.clearSearch ??
-                    "Clear search"),
+                child: Text(
+                  AppLocalizations.of(context)?.clearSearch ?? "Clear search",
+                ),
               ),
             ],
           ],
@@ -363,6 +388,7 @@ class ProductCatalogScreenState extends State<ProductCatalogScreen> {
       );
     }
 
+    // ✅ Show products with loading indicator at bottom for pagination
     return Column(
       children: [
         Expanded(
@@ -387,6 +413,7 @@ class ProductCatalogScreenState extends State<ProductCatalogScreen> {
             },
           ),
         ),
+        // ✅ Show loading indicator at bottom when loading more
         if (productNotifier.isLoading && products.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),

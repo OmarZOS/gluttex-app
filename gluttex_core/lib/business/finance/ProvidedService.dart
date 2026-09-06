@@ -18,11 +18,15 @@ class StaffRole {
   final int id;
   final int categoryId;
   final String name;
+  final String? iconUrl;
+  final String? description;
 
   const StaffRole({
     required this.id,
     required this.categoryId,
     required this.name,
+    this.iconUrl,
+    this.description,
   });
 
   factory StaffRole.fromJson(Map<String, dynamic> json) {
@@ -30,6 +34,8 @@ class StaffRole {
       id: (json['id_staff_role'] as num).toInt(),
       categoryId: (json['staff_role_service_category_ref'] as num).toInt(),
       name: json['staff_role_name'] as String,
+      iconUrl: json['staff_role_icon_url'] as String?,
+      description: json['staff_role_description'] as String?,
     );
   }
 }

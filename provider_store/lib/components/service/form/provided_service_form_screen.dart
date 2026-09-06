@@ -1,3 +1,4 @@
+// service_form_screen.dart
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
@@ -10,665 +11,27 @@ import 'package:event/product_change_notifier.dart';
 import 'package:event/service_change_notifier.dart';
 import 'package:event/user_change_notifier.dart';
 import 'package:provider_store/components/service/form/ProductSelectorDialog.dart';
+import 'package:provider_store/components/service/form/cost_summary_card.dart';
+import 'package:provider_store/components/service/form/form_section_header.dart';
 import 'package:ui/Services/ResponseHandler.dart';
 import 'package:provider/provider.dart';
 
-// ====================== DESIGN SYSTEM CONSTANTS ======================
-class AppDesignSystem {
-  static const double cardBorderRadius = 16.0;
-  static const double inputBorderRadius = 12.0;
-  static const double chipBorderRadius = 20.0;
-  static const double sectionSpacing = 24.0;
-  static const double elementSpacing = 12.0;
-  static const double smallSpacing = 8.0;
+// Import the new components
+import 'form_section_header.dart';
+import 'form_input_field.dart';
+import 'empty_state.dart';
+import 'cost_summary_card.dart';
+import 'discount_indicator.dart';
+import 'progress_section.dart';
+import 'resource_dialog.dart';
+import 'staff_dialog.dart';
+import 'form_price_field.dart';
+import 'form_checkbox_option.dart';
+import 'form_chip_input.dart';
+import 'requirement_card.dart';
+import 'category_dropdown.dart';
+import 'role_dropdown.dart';
 
-  static const EdgeInsets cardPadding = EdgeInsets.all(16.0);
-  static const EdgeInsets inputPadding = EdgeInsets.symmetric(
-    horizontal: 16.0,
-    vertical: 14.0,
-  );
-  static const EdgeInsets sectionPadding = EdgeInsets.all(16.0);
-
-  static const Duration expandDuration = Duration(milliseconds: 300);
-  static const Curve expandCurve = Curves.easeInOut;
-}
-
-// ====================== REUSABLE COMPONENTS ======================
-class FormSectionHeader extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final bool isExpanded;
-  final bool isCompleted;
-  final bool isOptional;
-  final VoidCallback onTap;
-  final ColorScheme colors;
-
-  const FormSectionHeader({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.isExpanded,
-    required this.isCompleted,
-    required this.isOptional,
-    required this.onTap,
-    required this.colors,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Color backgroundColor;
-    Color iconColor;
-    Color textColor;
-    IconData headerIcon;
-
-    if (isCompleted) {
-      backgroundColor = colors.primaryContainer.withOpacity(0.15);
-      iconColor = colors.primary;
-      textColor = colors.primary;
-      headerIcon = Icons.check_circle;
-    } else if (isExpanded) {
-      backgroundColor = colors.surfaceVariant;
-      iconColor = colors.secondary;
-      textColor = colors.onSurface;
-      headerIcon = icon;
-    } else {
-      backgroundColor = colors.surfaceVariant.withOpacity(0.5);
-      iconColor = colors.onSurfaceVariant;
-      textColor = colors.onSurfaceVariant;
-      headerIcon = icon;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppDesignSystem.smallSpacing),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(AppDesignSystem.cardBorderRadius),
-        border: Border.all(
-          color: isCompleted
-              ? colors.primary.withOpacity(0.2)
-              : colors.outline.withOpacity(0.1),
-          width: isCompleted ? 2 : 1,
-        ),
-        boxShadow: [
-          if (isExpanded)
-            BoxShadow(
-              color: colors.shadow.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppDesignSystem.cardBorderRadius),
-          child: Padding(
-            padding: AppDesignSystem.sectionPadding,
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? colors.primary.withOpacity(0.1)
-                        : colors.surfaceVariant,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: iconColor.withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Icon(
-                    headerIcon,
-                    size: 20,
-                    color: iconColor,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: textColor,
-                              ),
-                            ),
-                          ),
-                          if (isOptional)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colors.surfaceVariant,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'Optional',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: colors.onSurfaceVariant,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (isCompleted)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            'Completed',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colors.primary.withOpacity(0.8),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                AnimatedRotation(
-                  turns: isExpanded ? 0 : -0.25,
-                  duration: AppDesignSystem.expandDuration,
-                  curve: AppDesignSystem.expandCurve,
-                  child: Icon(
-                    Icons.arrow_right,
-                    size: 24,
-                    color:
-                        isCompleted ? colors.primary : colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class FormInputField extends StatelessWidget {
-  final String label;
-  final String? initialValue;
-  final String? hintText;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? suffixText;
-  final int? maxLines;
-  final bool isRequired;
-  final String? Function(String?)? validator;
-  final Function(String?)? onSaved;
-  final Function(String)? onChanged;
-
-  const FormInputField({
-    super.key,
-    required this.label,
-    this.initialValue,
-    this.hintText,
-    this.keyboardType,
-    this.inputFormatters,
-    this.suffixText,
-    this.maxLines = 1,
-    this.isRequired = false,
-    this.validator,
-    this.onSaved,
-    this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8, left: 4),
-          child: Row(
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.onSurface,
-                ),
-              ),
-              if (isRequired)
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Text(
-                    '*',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.error,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: colors.surfaceVariant,
-            borderRadius:
-                BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-            border: Border.all(
-              color: colors.outline.withOpacity(0.2),
-              width: 1,
-            ),
-          ),
-          child: TextFormField(
-            initialValue: initialValue,
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurfaceVariant.withOpacity(0.6),
-              ),
-              border: InputBorder.none,
-              contentPadding: AppDesignSystem.inputPadding,
-              suffixText: suffixText,
-              suffixStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-              floatingLabelBehavior: FloatingLabelBehavior.never,
-            ),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurface,
-            ),
-            keyboardType: keyboardType,
-            inputFormatters: inputFormatters,
-            maxLines: maxLines,
-            validator: validator,
-            onSaved: onSaved,
-            onChanged: onChanged,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class FormPriceField extends StatelessWidget {
-  final String label;
-  final double? value;
-  final bool isRequired;
-  final Function(double) onSaved;
-
-  const FormPriceField({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.isRequired,
-    required this.onSaved,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final loc = AppLocalizations.of(context)!;
-
-    return FormInputField(
-      label: label,
-      initialValue:
-          value != null && value! > 0 ? value!.toStringAsFixed(2) : '',
-      hintText: '0.00',
-      keyboardType: TextInputType.numberWithOptions(decimal: true),
-      isRequired: isRequired,
-      suffixText: 'DZD',
-      validator: (val) {
-        if (isRequired && (val == null || val.isEmpty)) {
-          return 'This field is required';
-        }
-        if (val != null && val.isNotEmpty) {
-          final parsed = double.tryParse(val);
-          if (parsed == null || parsed < 0) {
-            return 'Please enter a valid price';
-          }
-        }
-        return null;
-      },
-      onSaved: (val) => onSaved(double.tryParse(val ?? '') ?? 0.0),
-    );
-  }
-}
-
-class FormCheckboxOption extends StatelessWidget {
-  final String label;
-  final bool value;
-  final ValueChanged<bool?> onChanged;
-
-  const FormCheckboxOption({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-        border: Border.all(
-          color: value
-              ? colors.primary.withOpacity(0.3)
-              : colors.outline.withOpacity(0.2),
-          width: value ? 1.5 : 1,
-        ),
-      ),
-      child: CheckboxListTile(
-        title: Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colors.onSurface,
-            fontWeight: value ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
-        value: value,
-        onChanged: onChanged,
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-        dense: true,
-        activeColor: colors.primary,
-        checkColor: colors.onPrimary,
-        shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-        ),
-      ),
-    );
-  }
-}
-
-class FormChipInput extends StatefulWidget {
-  final String label;
-  final List<String> items;
-  final Function(String) onAdd;
-  final Function(int) onRemove;
-
-  const FormChipInput({
-    super.key,
-    required this.label,
-    required this.items,
-    required this.onAdd,
-    required this.onRemove,
-  });
-
-  @override
-  State<FormChipInput> createState() => _FormChipInputState();
-}
-
-class _FormChipInputState extends State<FormChipInput> {
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.onSurface,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colors.surfaceVariant,
-                  borderRadius:
-                      BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-                  border: Border.all(
-                    color: colors.outline.withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
-                child: TextField(
-                  controller: _controller,
-                  decoration: InputDecoration(
-                    hintText: 'Type and press enter...',
-                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.onSurfaceVariant.withOpacity(0.6),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.onSurface,
-                  ),
-                  onSubmitted: (value) {
-                    if (value.trim().isNotEmpty) {
-                      widget.onAdd(value.trim());
-                      _controller.clear();
-                    }
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: colors.primary,
-                borderRadius:
-                    BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-              ),
-              child: IconButton(
-                onPressed: () {
-                  final value = _controller.text.trim();
-                  if (value.isNotEmpty) {
-                    widget.onAdd(value);
-                    _controller.clear();
-                  }
-                },
-                icon: Icon(Icons.add, color: colors.onPrimary),
-                splashRadius: 20,
-              ),
-            ),
-          ],
-        ),
-        if (widget.items.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: widget.items.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              return Container(
-                decoration: BoxDecoration(
-                  color: colors.primaryContainer,
-                  borderRadius:
-                      BorderRadius.circular(AppDesignSystem.chipBorderRadius),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        item,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.onPrimaryContainer,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: () => widget.onRemove(index),
-                        child: Icon(
-                          Icons.close,
-                          size: 16,
-                          color: colors.onPrimaryContainer.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class RequirementCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const RequirementCard({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppDesignSystem.smallSpacing),
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant,
-        borderRadius: BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-        border: Border.all(
-          color: colors.outline.withOpacity(0.1),
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          title: Text(
-            title,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: colors.onSurface,
-            ),
-          ),
-          subtitle: Text(
-            subtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: onEdit,
-                icon: Icon(Icons.edit, size: 20, color: colors.primary),
-                splashRadius: 20,
-              ),
-              IconButton(
-                onPressed: onDelete,
-                icon: Icon(Icons.delete, size: 20, color: colors.error),
-                splashRadius: 20,
-              ),
-            ],
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class EmptyState extends StatelessWidget {
-  final String message;
-  final IconData icon;
-
-  const EmptyState({
-    super.key,
-    required this.message,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      padding: AppDesignSystem.cardPadding,
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(AppDesignSystem.cardBorderRadius),
-        border: Border.all(
-          color: colors.outline.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 48,
-            color: colors.onSurfaceVariant.withOpacity(0.4),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ====================== MAIN FORM SCREEN ======================
 class ProvidedServiceFormScreen extends StatefulWidget {
   const ProvidedServiceFormScreen({super.key});
 
@@ -677,7 +40,11 @@ class ProvidedServiceFormScreen extends StatefulWidget {
       _ProvidedServiceFormScreenState();
 }
 
-class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
+class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
 
@@ -693,6 +60,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
   final List<ServiceResourceRequirement> _resourceRequirements = [];
   final List<ServiceStaffRequirement> _staffRequirements = [];
 
+  // Pricing config
   String _recommendedAge = '';
   String _recommendedFrequency = '';
   String _ageGroup = '';
@@ -735,6 +103,10 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
   // Submission state
   bool _isSubmitting = false;
   String? _currentOperationKey;
+
+  // UI state
+  bool _showDiscountWarning = false;
+  bool _showProfitWarning = false;
 
   @override
   void initState() {
@@ -850,7 +222,8 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
         name: 'ProvidedServiceForm', error: error, stackTrace: stackTrace);
   }
 
-  // Completion checking
+  // ===================== COMPLETION CHECKING =====================
+
   void _updateCompletionStates() {
     setState(() {
       _basicInfoCompleted = _serviceName.isNotEmpty &&
@@ -860,15 +233,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
 
       _pricingCompleted = _basePrice > 0 && _finalPrice > 0;
 
-      _pricingConfigCompleted = _ageGroup.isEmpty &&
-              _sampleType.isEmpty &&
-              !_specialistConsultation &&
-              !_governmentFunded &&
-              !_consultationIncluded &&
-              !_digitalImaging &&
-              _materialOptions.isEmpty &&
-              _includes.isEmpty ||
-          _ageGroup.isNotEmpty ||
+      _pricingConfigCompleted = _ageGroup.isNotEmpty ||
           _sampleType.isNotEmpty ||
           _specialistConsultation ||
           _governmentFunded ||
@@ -880,10 +245,15 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
       _resourcesCompleted = true;
       _staffCompleted = true;
       _costSummaryCompleted = _finalPrice > 0;
+
+      // Update warnings
+      _showDiscountWarning = _basePrice > 0 && _finalPrice > _basePrice;
+      _showProfitWarning = _finalPrice > 0 && _finalPrice < _totalCost;
     });
   }
 
-  // Calculations
+  // ===================== CALCULATIONS =====================
+
   double get _totalResourceCost {
     return _resourceRequirements.fold(
       0.0,
@@ -915,7 +285,22 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
     return ((_basePrice - _finalPrice) / _basePrice * 100);
   }
 
-  // Form submission with ResponseHandler
+  // ===================== BUSINESS VALIDATION =====================
+
+  String? get _businessValidationError {
+    if (_providerId <= 0) return 'A valid provider is required';
+    if (_categoryId <= 0) return 'A valid category is required';
+    if (_actualDuration <= 0) return 'Duration must be greater than zero';
+    if (_basePrice <= 0) return 'Base price must be greater than zero';
+    if (_finalPrice <= 0) return 'Final price must be greater than zero';
+    if (_finalPrice > _basePrice) {
+      return 'Final price cannot be greater than the base price';
+    }
+    return null;
+  }
+
+  // ===================== SUBMISSION =====================
+
   Future<void> _submitForm() async {
     if (_isSubmitting) return;
 
@@ -934,7 +319,6 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
 
       setState(() => _isSubmitting = true);
 
-      // Generate unique key for this operation
       _currentOperationKey = _updatePage
           ? 'update_service_${DateTime.now().millisecondsSinceEpoch}'
           : 'create_service_${DateTime.now().millisecondsSinceEpoch}';
@@ -980,7 +364,6 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
         bool success = false;
 
         if (_updatePage) {
-          // Update existing service
           final updated = await serviceNotifier.updateService(
             service,
             callerKey: _currentOperationKey,
@@ -988,7 +371,6 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
           );
           success = updated != null;
         } else {
-          // Create new service
           final created = await serviceNotifier.addService(
             service,
             callerKey: _currentOperationKey,
@@ -1000,10 +382,8 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
         if (!mounted) return;
 
         if (success) {
-          // Get the response from the notifier
           final response = serviceNotifier.getResponse(_currentOperationKey!);
 
-          // Show success message using ResponseHandler
           ResponseHandler.handleResponse(
             context: context,
             statusCode: response?.statusCode ?? 200,
@@ -1013,14 +393,12 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                 : AppLocalizations.of(context)!.putSuccess,
           );
 
-          // Navigate back after a short delay
           Future.delayed(const Duration(milliseconds: 500), () {
             if (mounted) {
               Navigator.pop(context, true);
             }
           });
         } else {
-          // Get the error response from the notifier
           final response = serviceNotifier.getResponse(_currentOperationKey!);
 
           ResponseHandler.handleResponse(
@@ -1057,270 +435,18 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
     }
   }
 
-  String? get _businessValidationError {
-    if (_providerId <= 0) return 'A valid provider is required';
-    if (_categoryId <= 0) return 'A valid category is required';
-    if (_actualDuration <= 0) return 'Duration must be greater than zero';
-    if (_basePrice <= 0) return 'Base price must be greater than zero';
-    if (_finalPrice <= 0) return 'Final price must be greater than zero';
-    if (_finalPrice > _basePrice) {
-      return 'Final price cannot be greater than the base price';
-    }
-    return null;
+  // ===================== UI HELPERS =====================
+
+  String _roleName(int roleId) {
+    final matches = _staffRoles.where((role) => role.id == roleId);
+    return matches.isEmpty ? 'Role #$roleId' : matches.first.name;
   }
 
-  Widget _buildCategoryField(ColorScheme colors) {
-    return DropdownButtonFormField<int>(
-      value: _serviceCategories.any((category) => category.id == _categoryId)
-          ? _categoryId
-          : null,
-      decoration: InputDecoration(
-        labelText: 'Category',
-        border: OutlineInputBorder(),
-        helperText: _isLoadingCategories ? 'Loading categories...' : null,
-      ),
-      items: _serviceCategories
-          .map((category) => DropdownMenuItem<int>(
-                value: category.id,
-                child: Text(category.name),
-              ))
-          .toList(),
-      validator: (value) => value == null ? 'Select a category' : null,
-      onChanged: (value) {
-        if (value == null) return;
-        setState(() {
-          _categoryId = value;
-          _staffRequirements.clear();
-        });
-        _loadStaffRoles(value);
-        _updateCompletionStates();
-      },
-    );
-  }
-
-  void _setSubmitting(bool submitting) {
-    if (mounted) {
-      setState(() {
-        _isSubmitting = submitting;
-      });
-    }
-  }
-
-  Widget _buildProgressSection() {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    final totalSections = 6;
-    final completedSections = [
-      _basicInfoCompleted,
-      _pricingCompleted,
-      _pricingConfigCompleted,
-      _resourcesCompleted,
-      _staffCompleted,
-      _costSummaryCompleted,
-    ].where((completed) => completed).length;
-    final progress = completedSections / totalSections;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        border: Border(
-          top: BorderSide(color: colors.outline.withOpacity(0.1)),
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Progress: ${(progress * 100).toInt()}%',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                '$completedSections/$totalSections',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: colors.surfaceVariant,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              progress == 1.0 ? colors.primary : colors.secondary,
-            ),
-            minHeight: 4,
-            borderRadius: BorderRadius.circular(2),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _isSubmitting ? null : _submitForm,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: progress == 1.0
-                    ? colors.primary
-                    : colors.primary.withOpacity(0.7),
-                foregroundColor: colors.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-                ),
-                elevation: 0,
-              ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          progress == 1.0 ? Icons.check_circle : Icons.save,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _updatePage ? 'Update Service' : 'Create Service',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCostSummary() {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      padding: AppDesignSystem.cardPadding,
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant,
-        borderRadius: BorderRadius.circular(AppDesignSystem.cardBorderRadius),
-      ),
-      child: Column(
-        children: [
-          _buildCostRow(
-            label: 'Resource Cost',
-            value: _totalResourceCost,
-            color: colors.onSurfaceVariant,
-          ),
-          const SizedBox(height: AppDesignSystem.smallSpacing),
-          _buildCostRow(
-            label: 'Staff Cost',
-            value: _totalStaffCost,
-            color: colors.onSurfaceVariant,
-          ),
-          const SizedBox(height: AppDesignSystem.smallSpacing),
-          Divider(color: colors.outline.withOpacity(0.3)),
-          const SizedBox(height: AppDesignSystem.smallSpacing),
-          _buildCostRow(
-            label: 'Total Cost',
-            value: _totalCost,
-            color: colors.onSurface,
-            isBold: true,
-          ),
-          if (_finalPrice > 0) ...[
-            const SizedBox(height: 16),
-            _buildCostRow(
-              label: 'Final Price',
-              value: _finalPrice,
-              color: colors.primary,
-              isBold: true,
-            ),
-            const SizedBox(height: AppDesignSystem.smallSpacing),
-            Container(
-              padding: AppDesignSystem.cardPadding,
-              decoration: BoxDecoration(
-                color: _profitMargin >= 20
-                    ? colors.primaryContainer.withOpacity(0.2)
-                    : _profitMargin >= 10
-                        ? colors.secondaryContainer.withOpacity(0.2)
-                        : colors.errorContainer.withOpacity(0.2),
-                borderRadius:
-                    BorderRadius.circular(AppDesignSystem.inputBorderRadius),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Profit Margin',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    '${_profitMargin.toStringAsFixed(1)}%',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: _profitMargin >= 20
-                          ? colors.primary
-                          : _profitMargin >= 10
-                              ? colors.secondary
-                              : colors.error,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCostRow({
-    required String label,
-    required double value,
-    required Color color,
-    bool isBold = false,
-  }) {
-    final theme = Theme.of(context);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
-            color: color,
-          ),
-        ),
-        Text(
-          'DZD ${value.toStringAsFixed(2)}',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
+  // ===================== BUILD =====================
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -1347,7 +473,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // Basic Information
+                    // ==================== BASIC INFO ====================
                     FormSectionHeader(
                       title: 'Basic Information',
                       icon: Icons.info_outline,
@@ -1357,10 +483,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                       onTap: () => setState(
                         () => _basicInfoExpanded = !_basicInfoExpanded,
                       ),
-                      colors: colors,
                     ),
                     if (_basicInfoExpanded) ...[
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      const SizedBox(height: 12),
                       FormInputField(
                         label: 'Service Name',
                         initialValue: _serviceName,
@@ -1378,7 +503,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                         },
                         onChanged: (_) => _updateCompletionStates(),
                       ),
-                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      const SizedBox(height: 12),
                       FormInputField(
                         label: 'Description',
                         initialValue: _serviceDescription,
@@ -1389,9 +514,22 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           _updateCompletionStates();
                         },
                       ),
-                      const SizedBox(height: AppDesignSystem.smallSpacing),
-                      _buildCategoryField(colors),
-                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      const SizedBox(height: 12),
+                      CategoryDropdown(
+                        categories: _serviceCategories,
+                        selectedCategoryId: _categoryId,
+                        isLoading: _isLoadingCategories,
+                        onChanged: (value) {
+                          if (value == null) return;
+                          setState(() {
+                            _categoryId = value;
+                            _staffRequirements.clear();
+                          });
+                          _loadStaffRoles(value);
+                          _updateCompletionStates();
+                        },
+                      ),
+                      const SizedBox(height: 12),
                       FormInputField(
                         label: 'Duration (minutes)',
                         initialValue: _actualDuration > 0
@@ -1416,10 +554,10 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                         },
                         onChanged: (_) => _updateCompletionStates(),
                       ),
-                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                      const SizedBox(height: 24),
                     ],
 
-                    // Pricing
+                    // ==================== PRICING ====================
                     FormSectionHeader(
                       title: 'Pricing',
                       icon: Icons.attach_money,
@@ -1429,10 +567,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                       onTap: () => setState(
                         () => _pricingExpanded = !_pricingExpanded,
                       ),
-                      colors: colors,
                     ),
                     if (_pricingExpanded) ...[
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      const SizedBox(height: 12),
                       FormPriceField(
                         label: 'Base Price',
                         value: _basePrice,
@@ -1441,8 +578,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           _basePrice = val;
                           _updateCompletionStates();
                         },
+                        onChanged: (_) => _updateCompletionStates(),
                       ),
-                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      const SizedBox(height: 12),
                       FormPriceField(
                         label: 'Final Price',
                         value: _finalPrice,
@@ -1451,56 +589,21 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           _finalPrice = val;
                           _updateCompletionStates();
                         },
+                        onChanged: (_) => _updateCompletionStates(),
                       ),
-                      if (_basePrice > 0 && _finalPrice > 0) ...[
-                        const SizedBox(height: AppDesignSystem.smallSpacing),
-                        Container(
-                          padding: AppDesignSystem.cardPadding,
-                          decoration: BoxDecoration(
-                            color: _discountPercentage > 0
-                                ? colors.primaryContainer.withOpacity(0.15)
-                                : colors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(
-                                AppDesignSystem.inputBorderRadius),
-                            border: Border.all(
-                              color: _discountPercentage > 0
-                                  ? colors.primary.withOpacity(0.2)
-                                  : colors.outline.withOpacity(0.2),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                _discountPercentage > 0
-                                    ? Icons.discount
-                                    : Icons.price_check,
-                                color: _discountPercentage > 0
-                                    ? colors.primary
-                                    : colors.onSurfaceVariant,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  _discountPercentage > 0
-                                      ? '${_discountPercentage.toStringAsFixed(1)}% discount applied'
-                                      : 'No discount',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: _discountPercentage > 0
-                                        ? colors.primary
-                                        : colors.onSurfaceVariant,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                      if (_basePrice > 0 || _finalPrice > 0) ...[
+                        const SizedBox(height: 12),
+                        DiscountIndicator(
+                          basePrice: _basePrice,
+                          finalPrice: _finalPrice,
+                          discountPercentage: _discountPercentage,
+                          showWarning: _showDiscountWarning,
                         ),
                       ],
-                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                      const SizedBox(height: 24),
                     ],
 
-                    // Pricing Configuration
+                    // ==================== PRICING CONFIG ====================
                     FormSectionHeader(
                       title: 'Pricing Configuration',
                       icon: Icons.settings,
@@ -1510,10 +613,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                       onTap: () => setState(
                         () => _pricingConfigExpanded = !_pricingConfigExpanded,
                       ),
-                      colors: colors,
                     ),
                     if (_pricingConfigExpanded) ...[
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
@@ -1527,7 +629,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                               },
                             ),
                           ),
-                          const SizedBox(width: AppDesignSystem.smallSpacing),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: FormInputField(
                               label: 'Sample Type',
@@ -1541,7 +643,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      const SizedBox(height: 12),
                       Column(
                         children: [
                           FormCheckboxOption(
@@ -1553,7 +655,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                               _updateCompletionStates();
                             },
                           ),
-                          const SizedBox(height: AppDesignSystem.smallSpacing),
+                          const SizedBox(height: 8),
                           FormCheckboxOption(
                             label: 'Government Funded',
                             value: _governmentFunded,
@@ -1562,7 +664,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                               _updateCompletionStates();
                             },
                           ),
-                          const SizedBox(height: AppDesignSystem.smallSpacing),
+                          const SizedBox(height: 8),
                           FormCheckboxOption(
                             label: 'Consultation Included',
                             value: _consultationIncluded,
@@ -1572,7 +674,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                               _updateCompletionStates();
                             },
                           ),
-                          const SizedBox(height: AppDesignSystem.smallSpacing),
+                          const SizedBox(height: 8),
                           FormCheckboxOption(
                             label: 'Digital Imaging',
                             value: _digitalImaging,
@@ -1583,7 +685,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      const SizedBox(height: 12),
                       FormChipInput(
                         label: 'Material Options',
                         items: _materialOptions,
@@ -1598,7 +700,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           _updateCompletionStates();
                         },
                       ),
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      const SizedBox(height: 12),
                       FormChipInput(
                         label: 'Includes',
                         items: _includes,
@@ -1613,10 +715,10 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           _updateCompletionStates();
                         },
                       ),
-                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                      const SizedBox(height: 24),
                     ],
 
-                    // Resource Requirements
+                    // ==================== RESOURCES ====================
                     FormSectionHeader(
                       title: 'Resource Requirements',
                       icon: Icons.inventory,
@@ -1626,12 +728,11 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                       onTap: () => setState(
                         () => _resourcesExpanded = !_resourcesExpanded,
                       ),
-                      colors: colors,
                     ),
                     if (_resourcesExpanded) ...[
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      const SizedBox(height: 12),
                       if (_resourceRequirements.isEmpty)
-                        EmptyState(
+                        const EmptyState(
                           message: 'No resources added yet',
                           icon: Icons.inventory_2_outlined,
                         )
@@ -1653,7 +754,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                             }),
                           );
                         }).toList(),
-                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      const SizedBox(height: 12),
                       Align(
                         alignment: Alignment.centerRight,
                         child: FloatingActionButton.small(
@@ -1661,16 +762,15 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           backgroundColor: colors.primary,
                           foregroundColor: colors.onPrimary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                AppDesignSystem.inputBorderRadius),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(Icons.add, size: 20),
                         ),
                       ),
-                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                      const SizedBox(height: 24),
                     ],
 
-                    // Staff Requirements
+                    // ==================== STAFF ====================
                     FormSectionHeader(
                       title: 'Staff Requirements',
                       icon: Icons.people,
@@ -1680,12 +780,11 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                       onTap: () => setState(
                         () => _staffExpanded = !_staffExpanded,
                       ),
-                      colors: colors,
                     ),
                     if (_staffExpanded) ...[
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
+                      const SizedBox(height: 12),
                       if (_staffRequirements.isEmpty)
-                        EmptyState(
+                        const EmptyState(
                           message: 'No staff added yet',
                           icon: Icons.people_outline,
                         )
@@ -1708,7 +807,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                             }),
                           );
                         }).toList(),
-                      const SizedBox(height: AppDesignSystem.smallSpacing),
+                      const SizedBox(height: 12),
                       Align(
                         alignment: Alignment.centerRight,
                         child: FloatingActionButton.small(
@@ -1716,16 +815,15 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                           backgroundColor: colors.primary,
                           foregroundColor: colors.onPrimary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                AppDesignSystem.inputBorderRadius),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(Icons.add, size: 20),
                         ),
                       ),
-                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                      const SizedBox(height: 24),
                     ],
 
-                    // Cost Summary
+                    // ==================== COST SUMMARY ====================
                     FormSectionHeader(
                       title: 'Cost Summary',
                       icon: Icons.calculate,
@@ -1735,12 +833,18 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
                       onTap: () => setState(
                         () => _costSummaryExpanded = !_costSummaryExpanded,
                       ),
-                      colors: colors,
                     ),
                     if (_costSummaryExpanded) ...[
-                      const SizedBox(height: AppDesignSystem.elementSpacing),
-                      _buildCostSummary(),
-                      const SizedBox(height: AppDesignSystem.sectionSpacing),
+                      const SizedBox(height: 12),
+                      CostSummaryCard(
+                        resourceCost: _totalResourceCost,
+                        staffCost: _totalStaffCost,
+                        totalCost: _totalCost,
+                        finalPrice: _finalPrice,
+                        profitMargin: _profitMargin,
+                        showWarning: _showProfitWarning,
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ],
                 ),
@@ -1748,697 +852,70 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen> {
             ),
           ),
 
-          // Progress and Save Button
-          _buildProgressSection(),
+          // Progress Bar and Submit Button
+          ProgressSection(
+            completedSections: [
+              _basicInfoCompleted,
+              _pricingCompleted,
+              _pricingConfigCompleted,
+              _resourcesCompleted,
+              _staffCompleted,
+              _costSummaryCompleted,
+            ],
+            isSubmitting: _isSubmitting,
+            isUpdate: _updatePage,
+            totalSections: 6,
+            onSubmit: _submitForm,
+          ),
         ],
       ),
     );
   }
 
-  String _roleName(int roleId) {
-    final matches = _staffRoles.where((role) => role.id == roleId);
-    return matches.isEmpty ? 'Role #$roleId' : matches.first.name;
-  }
+  // ===================== DIALOG METHODS =====================
 
   void _showResourceDialog({ServiceResourceRequirement? existing, int? index}) {
-    final isEditing = existing != null;
-    final _formKey = GlobalKey<FormState>();
-
-    final nameController = TextEditingController(text: existing?.name ?? '');
-    final typeController = TextEditingController(text: existing?.type ?? '');
-    final quantityController = TextEditingController(
-      text: existing?.quantity.toString() ?? '1',
-    );
-    final costPerUnitController = TextEditingController(
-      text: existing?.costPerUnit.toStringAsFixed(2) ?? '0.00',
-    );
-    final notesController = TextEditingController(text: existing?.notes ?? '');
-    bool isConsumable = existing?.isConsumable ?? false;
-    int? productRef = existing?.productRef;
-    String? selectedProductName;
-
-    if (productRef != null && productRef > 0) {
-      try {
-        final productNotifier =
-            Provider.of<ProductNotifier>(context, listen: false);
-        final product = productNotifier.getProductByIdSync(productRef);
-        if (product != null) {
-          selectedProductName = product.product_name;
-        }
-      } catch (e) {}
-    }
-
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: Text(isEditing
-                  ? 'Edit Resource Requirement'
-                  : 'Add Resource Requirement'),
-              content: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Resource Name',
-                          hintText: 'e.g., Equipment, Materials, Supplies',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a resource name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: typeController,
-                        decoration: const InputDecoration(
-                          labelText: 'Resource Type',
-                          hintText: 'e.g., Equipment, Consumable, Software',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a resource type';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      InkWell(
-                        onTap: () async {
-                          final selectedProduct =
-                              await ProductSelectorDialog.show(
-                            context,
-                            supplierId: _providerId > 0 ? _providerId : null,
-                            selectedProductId: productRef,
-                          );
-
-                          if (selectedProduct != null && mounted) {
-                            setStateDialog(() {
-                              productRef = selectedProduct.id_product;
-                              selectedProductName =
-                                  selectedProduct.product_name;
-                              if (nameController.text.isEmpty) {
-                                nameController.text =
-                                    selectedProduct.product_name ?? '';
-                              }
-                              if (costPerUnitController.text.isEmpty ||
-                                  costPerUnitController.text == '0.00') {
-                                costPerUnitController.text =
-                                    (selectedProduct.product_price ?? 0)
-                                        .toStringAsFixed(2);
-                              }
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .outline
-                                  .withOpacity(0.2),
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.inventory_2_outlined,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Product Reference',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                    Text(
-                                      selectedProductName ??
-                                          (productRef != null &&
-                                                  (productRef ?? 0) > 0
-                                              ? 'Product ID: $productRef'
-                                              : 'Select a product (optional)'),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: selectedProductName != null
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurfaceVariant
-                                                    .withOpacity(0.6),
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: quantityController,
-                        decoration: const InputDecoration(
-                          labelText: 'Quantity',
-                          hintText: 'Number of units needed',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType:
-                            TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d*$')),
-                        ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter quantity';
-                          }
-                          final qty = double.tryParse(value);
-                          if (qty == null || qty < 0) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: costPerUnitController,
-                        decoration: const InputDecoration(
-                          labelText: 'Cost Per Unit',
-                          hintText: 'Cost per unit',
-                          border: OutlineInputBorder(),
-                          prefixText: 'DZD ',
-                        ),
-                        keyboardType:
-                            TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d*$')),
-                        ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter cost per unit';
-                          }
-                          final cost = double.tryParse(value);
-                          if (cost == null || cost < 0) {
-                            return 'Please enter a valid cost';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      CheckboxListTile(
-                        title: const Text('Is Consumable'),
-                        value: isConsumable,
-                        onChanged: (value) {
-                          setStateDialog(() {
-                            isConsumable = value ?? false;
-                          });
-                        },
-                        controlAffinity: ListTileControlAffinity.leading,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: notesController,
-                        decoration: const InputDecoration(
-                          labelText: 'Notes (Optional)',
-                          hintText: 'Any additional notes',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 2,
-                      ),
-                      if (quantityController.text.isNotEmpty &&
-                          costPerUnitController.text.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.2),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Total Cost:',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w500),
-                              ),
-                              Text(
-                                'DZD ${(double.tryParse(quantityController.text) ?? 0) * (double.tryParse(costPerUnitController.text) ?? 0)}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      final resourceRequirement = ServiceResourceRequirement(
-                        id: existing?.id ?? 0,
-                        name: nameController.text,
-                        type: typeController.text,
-                        quantity: double.parse(quantityController.text),
-                        isConsumable: isConsumable,
-                        productRef: productRef,
-                        serviceId: _id,
-                        costPerUnit: double.parse(costPerUnitController.text),
-                        notes: notesController.text.isNotEmpty
-                            ? notesController.text
-                            : null,
-                        createdAt: existing?.createdAt ?? DateTime.now(),
-                        updatedAt: DateTime.now(),
-                      );
-
-                      setState(() {
-                        if (isEditing && index != null) {
-                          _resourceRequirements[index] = resourceRequirement;
-                        } else {
-                          _resourceRequirements.add(resourceRequirement);
-                        }
-                        _updateCompletionStates();
-                      });
-
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: Text(isEditing ? 'Update' : 'Add'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (context) => ResourceRequirementDialog(
+        existing: existing,
+        index: index,
+        providerId: _providerId,
+        serviceId: _id,
+        onSave: (requirement, isEdit, editIndex) {
+          setState(() {
+            if (isEdit && editIndex != null) {
+              _resourceRequirements[editIndex] = requirement;
+            } else {
+              _resourceRequirements.add(requirement);
+            }
+            _updateCompletionStates();
+          });
+        },
+      ),
     );
   }
 
   void _showStaffDialog({ServiceStaffRequirement? existing, int? index}) {
-    final isEditing = existing != null;
-    final _formKey = GlobalKey<FormState>();
-
-    // Controllers for form fields
-    int? selectedRoleId = existing?.role;
-    final minCountController = TextEditingController(
-      text: existing?.minCount.toString() ?? '1',
-    );
-    final maxCountController = TextEditingController(
-      text: existing?.maxCount.toString() ?? '1',
-    );
-    final allocatedHoursController = TextEditingController(
-      text: existing?.allocatedHours.toString() ?? '1.0',
-    );
-    final hourlyRateController = TextEditingController(
-      text: existing?.hourlyRate.toStringAsFixed(2) ?? '0.00',
-    );
-    final notesController = TextEditingController(text: existing?.notes ?? '');
-
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) => AlertDialog(
-            title: Text(
-                isEditing ? 'Edit Staff Requirement' : 'Add Staff Requirement'),
-            content: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DropdownButtonFormField<int>(
-                      value:
-                          _staffRoles.any((role) => role.id == selectedRoleId)
-                              ? selectedRoleId
-                              : null,
-                      decoration: InputDecoration(
-                        labelText: 'Role',
-                        border: const OutlineInputBorder(),
-                        helperText: _isLoadingRoles ? 'Loading roles...' : null,
-                      ),
-                      items: _staffRoles
-                          .map((role) => DropdownMenuItem<int>(
-                                value: role.id,
-                                child: Text(role.name),
-                              ))
-                          .toList(),
-                      validator: (value) =>
-                          value == null ? 'Select a role' : null,
-                      onChanged: (value) =>
-                          setStateDialog(() => selectedRoleId = value),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Min Count
-                    TextFormField(
-                      controller: minCountController,
-                      decoration: const InputDecoration(
-                        labelText: 'Minimum Staff Count',
-                        hintText: 'Minimum number of staff needed',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter minimum count';
-                        }
-                        final count = int.tryParse(value);
-                        if (count == null || count < 0) {
-                          return 'Please enter a valid number';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Max Count
-                    TextFormField(
-                      controller: maxCountController,
-                      decoration: const InputDecoration(
-                        labelText: 'Maximum Staff Count',
-                        hintText: 'Maximum number of staff needed',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter maximum count';
-                        }
-                        final count = int.tryParse(value);
-                        if (count == null || count < 0) {
-                          return 'Please enter a valid number';
-                        }
-                        final min = int.tryParse(minCountController.text) ?? 0;
-                        if (count < min) {
-                          return 'Maximum must be greater than or equal to minimum';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Allocated Hours
-                    TextFormField(
-                      controller: allocatedHoursController,
-                      decoration: const InputDecoration(
-                        labelText: 'Allocated Hours',
-                        hintText: 'Hours allocated per staff member',
-                        border: OutlineInputBorder(),
-                        suffixText: 'hours',
-                      ),
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d*$')),
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter allocated hours';
-                        }
-                        final hours = double.tryParse(value);
-                        if (hours == null || hours < 0) {
-                          return 'Please enter a valid number';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Hourly Rate
-                    TextFormField(
-                      controller: hourlyRateController,
-                      decoration: const InputDecoration(
-                        labelText: 'Hourly Rate',
-                        hintText: 'Rate per hour',
-                        border: OutlineInputBorder(),
-                        prefixText: 'DZD ',
-                      ),
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d*$')),
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter hourly rate';
-                        }
-                        final rate = double.tryParse(value);
-                        if (rate == null || rate < 0) {
-                          return 'Please enter a valid rate';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Notes (optional)
-                    TextFormField(
-                      controller: notesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Notes (Optional)',
-                        hintText: 'Any additional notes',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 2,
-                    ),
-
-                    // Preview cost calculation
-                    if (minCountController.text.isNotEmpty &&
-                        maxCountController.text.isNotEmpty &&
-                        allocatedHoursController.text.isNotEmpty &&
-                        hourlyRateController.text.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
-                              .withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.2),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Min Cost:',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                Text(
-                                  'DZD ${_calculateStaffCost(
-                                    int.tryParse(minCountController.text) ?? 0,
-                                    double.tryParse(
-                                            allocatedHoursController.text) ??
-                                        0,
-                                    double.tryParse(
-                                            hourlyRateController.text) ??
-                                        0,
-                                  ).toStringAsFixed(2)}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Max Cost:',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                Text(
-                                  'DZD ${_calculateStaffCost(
-                                    int.tryParse(maxCountController.text) ?? 0,
-                                    double.tryParse(
-                                            allocatedHoursController.text) ??
-                                        0,
-                                    double.tryParse(
-                                            hourlyRateController.text) ??
-                                        0,
-                                  ).toStringAsFixed(2)}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const Divider(),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Average Cost:',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                Text(
-                                  'DZD ${_calculateStaffCost(
-                                    ((int.tryParse(minCountController.text) ??
-                                                0) +
-                                            (int.tryParse(
-                                                    maxCountController.text) ??
-                                                0)) ~/
-                                        2,
-                                    double.tryParse(
-                                            allocatedHoursController.text) ??
-                                        0,
-                                    double.tryParse(
-                                            hourlyRateController.text) ??
-                                        0,
-                                  ).toStringAsFixed(2)}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final staffRequirement = ServiceStaffRequirement(
-                      id: existing?.id ?? 0,
-                      serviceId: _id, // Current service ID
-                      minCount: int.parse(minCountController.text),
-                      maxCount: int.parse(maxCountController.text),
-                      role: selectedRoleId!,
-                      allocatedHours:
-                          double.parse(allocatedHoursController.text),
-                      hourlyRate: double.parse(hourlyRateController.text),
-                      notes: notesController.text.isNotEmpty
-                          ? notesController.text
-                          : null,
-                      createdAt: existing?.createdAt ?? DateTime.now(),
-                      updatedAt: DateTime.now(),
-                    );
-
-                    setState(() {
-                      if (isEditing && index != null) {
-                        _staffRequirements[index] = staffRequirement;
-                      } else {
-                        _staffRequirements.add(staffRequirement);
-                      }
-                      _updateCompletionStates();
-                    });
-
-                    Navigator.pop(context);
-                  }
-                },
-                child: Text(isEditing ? 'Update' : 'Add'),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (context) => StaffRequirementDialog(
+        existing: existing,
+        index: index,
+        serviceId: _id,
+        staffRoles: _staffRoles,
+        isLoadingRoles: _isLoadingRoles,
+        onSave: (requirement, isEdit, editIndex) {
+          setState(() {
+            if (isEdit && editIndex != null) {
+              _staffRequirements[editIndex] = requirement;
+            } else {
+              _staffRequirements.add(requirement);
+            }
+            _updateCompletionStates();
+          });
+        },
+      ),
     );
-  }
-
-  double _calculateStaffCost(int count, double hours, double rate) {
-    return hours * rate * count;
   }
 }
