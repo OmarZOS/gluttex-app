@@ -260,6 +260,70 @@ class SupplierServiceImpl extends SupplierService {
   }
 
   @override
+  Future<List<Supplier>?> getSuppliersByIds(List<int> ids) async {
+    if (ids.isEmpty) {
+      developer.log('No supplier IDs provided', name: 'SupplierServiceImpl');
+      return Future.value([]);
+    }
+
+    final key = _getCallerKey('getSuppliersByIds', suffix: ids.join('_'));
+
+    try {
+      final storageService = AppLocator.get<StorageService>();
+
+      final url =
+          '${AppConstants.apiBaseUrl}${AppConstants.getSuppliersByIdsEndpoint}';
+      developer.log('Fetching suppliers by IDs from: $url',
+          name: 'SupplierServiceImpl');
+
+      final responseData = await storageService.insert(
+        url,
+        {'provider_ids': ids},
+        callerKey: key,
+      );
+
+      final statusCode = storageService.getStatusCode(key);
+      final responseCode = storageService.getResponseCode(key);
+
+      if (responseData == null) {
+        developer.log('No suppliers found for provided IDs',
+            name: 'SupplierServiceImpl');
+        setFailureResponse(key, null,
+            statusCode: statusCode ?? 404, responseCode: 'NO_SUPPLIERS_FOUND');
+        return [];
+      }
+
+      List<Supplier> suppliers = [];
+
+      if (responseData is List) {
+        suppliers = responseData
+            .map((data) => Supplier.fromJson(data as Map<String, dynamic>))
+            .toList();
+      } else if (responseData is Map && responseData.containsKey('data')) {
+        final dataList = responseData['data'];
+        if (dataList is List) {
+          suppliers = dataList
+              .map((data) => Supplier.fromJson(data as Map<String, dynamic>))
+              .toList();
+        }
+      }
+
+      developer.log('Found ${suppliers.length} suppliers for provided IDs',
+          name: 'SupplierServiceImpl');
+      setSuccessResponse(key, suppliers,
+          statusCode: statusCode ?? 200, responseCode: 'SUCCESS');
+      return suppliers;
+    } catch (e, stacktrace) {
+      developer.log('Error fetching suppliers by IDs: $e',
+          name: 'SupplierServiceImpl');
+      developer.log('Stacktrace: $stacktrace', name: 'SupplierServiceImpl');
+      setFailureResponse(key, e.toString(),
+          statusCode: 500, responseCode: 'ERROR_FETCHING_SUPPLIERS_BY_IDS');
+      return null;
+    }
+  }
+
+  @override
   Future<Supplier?> getSupplier(String id, {String? callerKey}) async {
     final key = callerKey ?? _getCallerKey('getSupplier', id: id);
 

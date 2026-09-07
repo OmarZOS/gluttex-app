@@ -151,6 +151,7 @@ class AppConstants {
   static const String updateSupplierEndpoint = '/suppliers';
   static const String deleteSupplierEndpoint = '/suppliers';
   static const String getAllSuppliersEndpoint = '/suppliers';
+  static const String getSuppliersByIdsEndpoint = '/suppliers/ids';
   static const String supplierEndpoint = '/suppliers';
   static const String getSupplierCategoriesEndpoint = '/supplier-types';
   static const String getSupplierSearchByTokenEndpoint =

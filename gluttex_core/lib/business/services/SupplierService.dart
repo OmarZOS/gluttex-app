@@ -10,6 +10,10 @@ abstract class SupplierService extends TraceableService {
     throw UnimplementedError();
   }
 
+  Future<List<Supplier>?> getSuppliersByIds(List<int> ids) async {
+    throw UnimplementedError();
+  }
+
   Future<List<Supplier>> searchSuppliersByToken(
       String token, int offset, int itemsPerPage) {
     throw UnimplementedError();

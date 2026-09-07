@@ -191,46 +191,20 @@ class PersonnelNotifier extends TraceableNotifier {
 
   // ============ ACCESSIBLE SUPPLIERS ============
 
+  /// Get accessible supplier IDs for a user
   List<int> getAccessibleSupplierIds(int userId) {
-    _logDebug('Getting accessible supplier IDs for user: $userId');
-
-    // First, check if we have rules loaded
+    // Only return IDs from rules, NOT suppliers
     final rules = _rules.getRulesForUser(userId);
-    _logDebug('Found ${rules.length} rules for user $userId');
+    return rules
+        .map((rule) => rule.productProvider?.idProductProvider)
+        .where((id) => id != null && id > 0)
+        .cast<int>()
+        .toList();
+  }
 
-    // If we have rules, extract supplier IDs from them
-    if (rules.isNotEmpty) {
-      final supplierIds = rules
-          .map((rule) => rule.productProvider?.idProductProvider)
-          .where((id) => id != null && id > 0)
-          .cast<int>()
-          .toSet()
-          .toList();
-
-      if (supplierIds.isNotEmpty) {
-        _logInfo(
-            'Extracted ${supplierIds.length} supplier IDs from rules: $supplierIds');
-        // Update persistence with these IDs
-        _persistence.addSupplier(userId, supplierIds.first);
-        for (int i = 1; i < supplierIds.length; i++) {
-          _persistence.addSupplier(userId, supplierIds[i]);
-        }
-        return supplierIds;
-      } else {
-        _logWarning('Rules exist but no supplier IDs found for user $userId');
-      }
-    }
-
-    // Fallback to persisted data
-    final persisted = _persistence.getAccessibleSuppliers(userId);
-    if (persisted.isNotEmpty) {
-      _logInfo(
-          'Returning ${persisted.length} persisted supplier IDs for user $userId: $persisted');
-      return persisted;
-    }
-
-    _logWarning('No accessible suppliers found for user $userId');
-    return [];
+  /// Check if a user has access to a supplier
+  bool hasAccessToSupplier(int userId, int supplierId) {
+    return _rules.hasAnyAccessToSupplier(userId, supplierId);
   }
 
   // ============ RULES & PRIVILEGES ============

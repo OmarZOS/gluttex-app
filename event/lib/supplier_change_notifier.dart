@@ -29,6 +29,7 @@ class SupplierChangeNotifier extends ChangeNotifier {
     _selectedSupplierId = supplierId;
     notifyListeners();
   }
+
   // Dependencies
   final SupplierService _service = AppLocator.get<SupplierService>();
   final StorageService _storage = AppLocator.get<StorageService>();
@@ -173,50 +174,76 @@ class SupplierChangeNotifier extends ChangeNotifier {
     int userId, {
     bool forceRefresh = false,
   }) async {
-    debugPrint('👑 Fetching owned suppliers for user: $userId');
+    debugPrint('👑 [DEBUG] fetchOwnedSuppliers called for user: $userId');
+    debugPrint('👑 [DEBUG] forceRefresh: $forceRefresh');
 
-    // Use a unique cache key for owned suppliers
     final ownedCacheKey = 'owned_suppliers_$userId';
 
-    // Check cache first (unless forceRefresh)
     if (!forceRefresh) {
       final cached = _cache.getList(ownedCacheKey);
       if (cached != null && cached.isNotEmpty) {
-        debugPrint(
-            '📦 Using cached owned suppliers for user $userId: ${cached.length}');
-        // Add to state if not already there
+        debugPrint('📦 [DEBUG] Using cached owned suppliers: ${cached.length}');
         for (final supplier in cached) {
-          _upsertSupplier(supplier);
+          _upsertSupplier(supplier); // ✅ This adds to _state.suppliers
         }
         return cached;
       }
     }
 
-    // Fetch owned suppliers directly from API
     try {
+      debugPrint(
+          '🌐 [DEBUG] Calling API for owned suppliers (userId: $userId)');
       final results = await _service.getAllSuppliers(
         userId, // owner_id
         0, // org_id
         0, // offset
-        100, // limit - enough for owned suppliers
+        100, // limit
       );
 
-      debugPrint(
-          '📡 API returned ${results.length} owned suppliers for user $userId');
+      debugPrint('📡 [DEBUG] API returned ${results.length} owned suppliers');
 
-      // Cache the results
-      _cache.cacheList(ownedCacheKey, results);
-
-      // Add to state (using upsert to avoid duplicates)
-      for (final supplier in results) {
-        _upsertSupplier(supplier);
+      for (final s in results) {
+        debugPrint(
+            '   - ${s.idProductProvider}: ${s.providerName} (owner: ${s.productProviderOwnerId})');
       }
 
+      _cache.cacheList(ownedCacheKey, results);
+
+      // ✅ CRITICAL: Add to main suppliers list
+      for (final supplier in results) {
+        _upsertSupplier(supplier); // ✅ This is already happening!
+      }
+
+      debugPrint(
+          '📦 [DEBUG] Suppliers after upsert: ${_state.suppliers.length}');
       return results;
     } catch (e) {
-      debugPrint('❌ Error fetching owned suppliers: $e');
+      debugPrint('❌ [DEBUG] Error fetching owned suppliers: $e');
       return [];
     }
+  }
+
+  /// Get owned suppliers with guaranteed fresh data
+  Future<List<Supplier>> getOwnedSuppliersFresh(int userId) async {
+    debugPrint('🔍 [DEBUG] getOwnedSuppliersFresh called for user: $userId');
+
+    // Fetch fresh data
+    final results = await fetchOwnedSuppliers(userId, forceRefresh: true);
+    debugPrint(
+        '🔍 [DEBUG] fetchOwnedSuppliers returned ${results.length} suppliers');
+
+    // Return the results
+    return results;
+  }
+
+  /// Get owned suppliers from current state (may be stale)
+  List<Supplier> getOwnedSuppliersFromState(int userId) {
+    final owned = _state.suppliers
+        .where((s) => s.productProviderOwnerId == userId)
+        .toList();
+    debugPrint(
+        '🔍 [DEBUG] getOwnedSuppliersFromState: ${owned.length} suppliers');
+    return owned;
   }
 
   /// Upsert a supplier (add if not exists, update if exists)
@@ -280,9 +307,14 @@ class SupplierChangeNotifier extends ChangeNotifier {
     }
   }
 
+  List<Supplier> getSuppliersOwnedByUser(int userId) {
+    return _state.suppliers
+        .where((s) => s.productProviderOwnerId == userId)
+        .toList();
+  }
+
   /// Get multiple suppliers by IDs - batch fetch
-  Future<List<Supplier>> getSuppliersByIds(List<int> ids,
-      {bool forceRefresh = false}) async {
+  Future<List<Supplier>> getSuppliersByIds(List<int> ids) async {
     if (ids.isEmpty) return [];
 
     final uniqueIds = ids.toSet().toList();
@@ -291,25 +323,34 @@ class SupplierChangeNotifier extends ChangeNotifier {
 
     // Check cache first
     for (final id in uniqueIds) {
-      if (!forceRefresh) {
-        final cached = _cache.getSupplier(id);
-        if (cached != null && cached.idProductProvider != 0) {
-          results.add(cached);
-        } else {
-          missingIds.add(id);
-        }
+      final cached = _cache.getSupplier(id);
+      if (cached != null && cached.idProductProvider != 0) {
+        results.add(cached);
       } else {
         missingIds.add(id);
       }
     }
 
-    // Fetch missing IDs
+    // Fetch missing in batch (if API supports batch)
     if (missingIds.isNotEmpty) {
-      debugPrint('🔄 Fetching ${missingIds.length} missing suppliers...');
-      final fetchFutures =
-          missingIds.map((id) => getSupplierById(id, forceRefresh: true));
-      final fetched = await Future.wait(fetchFutures);
-      results.addAll(fetched.whereType<Supplier>());
+      try {
+        // Option 1: If API supports batch
+        final fetched = await _service.getSuppliersByIds(missingIds);
+        for (final supplier in fetched ?? []) {
+          _upsertSupplier(supplier);
+          results.add(supplier);
+        }
+      } catch (e) {
+        // Option 2: Fallback to individual fetches (but limited)
+        debugPrint('Batch fetch failed, falling back to individual fetches');
+        for (final id in missingIds.take(20)) {
+          // Limit to 20
+          final supplier = await getSupplierById(id);
+          if (supplier != null) {
+            results.add(supplier);
+          }
+        }
+      }
     }
 
     return results;
