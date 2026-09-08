@@ -4696,7 +4696,7 @@ abstract class AppLocalizations {
   /// No description provided for @noPendingInvitations.
   ///
   /// In en, this message translates to:
-  /// **'No Pending Invitations'**
+  /// **'No pending invitations'**
   String get noPendingInvitations;
 
   /// No description provided for @unknownBusiness.
@@ -11598,6 +11598,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to cancel invitation'**
   String get failedToCancelInvitation;
+
+  /// No description provided for @activePrivileges.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Privileges'**
+  String get activePrivileges;
+
+  /// No description provided for @pendingPrivileges.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Privileges'**
+  String get pendingPrivileges;
+
+  /// No description provided for @expiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires on'**
+  String get expiresOn;
+
+  /// No description provided for @manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// Label indicating user has management permissions
+  ///
+  /// In en, this message translates to:
+  /// **'Can Manage'**
+  String get canManage;
+
+  /// Label indicating user has view permissions
+  ///
+  /// In en, this message translates to:
+  /// **'Can View'**
+  String get canView;
+
+  /// No description provided for @invitationAcceptedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation accepted successfully'**
+  String get invitationAcceptedSuccessfully;
+
+  /// No description provided for @invitationDeclinedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation declined successfully'**
+  String get invitationDeclinedSuccessfully;
+
+  /// No description provided for @failedToProcessInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to process invitation'**
+  String get failedToProcessInvitation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

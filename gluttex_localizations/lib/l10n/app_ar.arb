@@ -2770,7 +2770,66 @@
   "noPendingInvitation": "لا توجد دعوة معلقة",
   "areYouSureYouWantToCancelTheInvitationFor": "هل أنت متأكد من رغبتك في إلغاء الدعوة لـ",
   "invitationCancelledSuccessfully": "تم إلغاء الدعوة بنجاح",
-  "failedToCancelInvitation": "فشل إلغاء الدعوة"
+  "failedToCancelInvitation": "فشل إلغاء الدعوة",
+
+    "activePrivileges": "الصلاحيات النشطة",
+  "@activePrivileges": {
+    "description": "عنوان قسم الصلاحيات النشطة"
+  },
+  "pendingPrivileges": "الصلاحيات المعلقة",
+  "@pendingPrivileges": {
+    "description": "عنوان قسم الصلاحيات المعلقة"
+  },
+  "active": "نشط",
+  "@active": {
+    "description": "حالة الصلاحيات النشطة"
+  },
+  "expiresOn": "تنتهي في",
+  "@expiresOn": {
+    "description": "تسمية تاريخ الانتهاء"
+  },
+  "manage": "إدارة",
+  "@manage": {
+    "description": "زر لإدارة الصلاحيات"
+  },
+  "privilegesFor": "صلاحيات",
+  "@privilegesFor": {
+    "description": "عنوان حوار الصلاحيات"
+  },
+
+  "canManage": "يمكنه الإدارة",
+  "@canManage": {
+    "description": "تسمية تشير إلى أن المستخدم لديه صلاحيات إدارة"
+  },
+  "canView": "يمكنه العرض",
+  "@canView": {
+    "description": "تسمية تشير إلى أن المستخدم لديه صلاحيات عرض"
+  },
+
+    "accept": "قبول",
+  "@accept": {
+    "description": "زر لقبول الدعوة"
+  },
+  "decline": "رفض",
+  "@decline": {
+    "description": "زر لرفض الدعوة"
+  },
+  "invitationAcceptedSuccessfully": "تم قبول الدعوة بنجاح",
+  "@invitationAcceptedSuccessfully": {
+    "description": "رسالة نجاح عند قبول الدعوة"
+  },
+  "invitationDeclinedSuccessfully": "تم رفض الدعوة بنجاح",
+  "@invitationDeclinedSuccessfully": {
+    "description": "رسالة نجاح عند رفض الدعوة"
+  },
+  "failedToProcessInvitation": "فشل معالجة الدعوة",
+  "@failedToProcessInvitation": {
+    "description": "رسالة خطأ عند فشل معالجة الدعوة"
+  },
+  "noPendingInvitations": "لا توجد دعوات معلقة",
+  "@noPendingInvitations": {
+    "description": "رسالة عند عدم وجود دعوات معلقة"
+  }
 
 
 }

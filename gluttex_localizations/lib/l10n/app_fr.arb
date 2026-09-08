@@ -2818,7 +2818,67 @@
   "noPendingInvitation": "Aucune invitation en attente trouvée",
   "areYouSureYouWantToCancelTheInvitationFor": "Êtes-vous sûr de vouloir annuler l'invitation pour",
   "invitationCancelledSuccessfully": "Invitation annulée avec succès",
-  "failedToCancelInvitation": "Échec de l'annulation de l'invitation"
+  "failedToCancelInvitation": "Échec de l'annulation de l'invitation",
+
+    "activePrivileges": "Privilèges actifs",
+  "@activePrivileges": {
+    "description": "Title for active privileges section"
+  },
+  "pendingPrivileges": "Privilèges en attente",
+  "@pendingPrivileges": {
+    "description": "Title for pending privileges section"
+  },
+  "active": "Actif",
+  "@active": {
+    "description": "Status label for active privileges"
+  },
+  "expiresOn": "Expire le",
+  "@expiresOn": {
+    "description": "Label for expiry date"
+  },
+  "manage": "Gérer",
+  "@manage": {
+    "description": "Button label to manage privileges"
+  },
+  "privilegesFor": "Privilèges pour",
+  "@privilegesFor": {
+    "description": "Dialog title for privileges"
+  },
+
+    "canManage": "Peut gérer",
+  "@canManage": {
+    "description": "Étiquette indiquant que l'utilisateur a des autorisations de gestion"
+  },
+  "canView": "Peut voir",
+  "@canView": {
+    "description": "Étiquette indiquant que l'utilisateur a des autorisations de visualisation"
+  },
+
+    "accept": "Accepter",
+  "@accept": {
+    "description": "Button label to accept an invitation"
+  },
+  "decline": "Refuser",
+  "@decline": {
+    "description": "Button label to decline an invitation"
+  },
+  "invitationAcceptedSuccessfully": "Invitation acceptée avec succès",
+  "@invitationAcceptedSuccessfully": {
+    "description": "Success message when invitation is accepted"
+  },
+  "invitationDeclinedSuccessfully": "Invitation refusée avec succès",
+  "@invitationDeclinedSuccessfully": {
+    "description": "Success message when invitation is declined"
+  },
+  "failedToProcessInvitation": "Échec du traitement de l'invitation",
+  "@failedToProcessInvitation": {
+    "description": "Error message when invitation processing fails"
+  },
+  "noPendingInvitations": "Aucune invitation en attente",
+  "@noPendingInvitations": {
+    "description": "Message when there are no pending invitations"
+  }
+
 
 
 }

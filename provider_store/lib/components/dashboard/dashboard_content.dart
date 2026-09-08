@@ -161,24 +161,31 @@ class DashboardContentState extends State<DashboardContent> {
     try {
       widget.supplierNotifier.setCurrentUserId(userId);
 
-      if (widget.supplierNotifier.suppliers.isEmpty) {
-        final suppliersWithAccess =
-            await _accessManager.getAccessibleSuppliersWithAccessType(
-          userId,
-          forceRefresh: true,
-        );
-        _buildSupplierList(suppliersWithAccess);
-      } else {
-        final suppliersWithAccess =
-            _accessManager.getAccessibleSuppliersWithAccessTypeSync(userId);
-        _buildSupplierList(suppliersWithAccess);
-      }
+      await widget.supplierNotifier.fetchOwnedSuppliers(
+        userId,
+        forceRefresh: true,
+      );
+
+      final suppliersWithAccess =
+          _accessManager.getAccessibleSuppliersWithAccessTypeSync(userId);
+
+      _buildSupplierList(suppliersWithAccess);
 
       debugPrint('📊 Loaded ${_availableSuppliers.length} suppliers');
     } catch (e) {
-      debugPrint('❌ Error: $e');
+      debugPrint('❌ Error loading data: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load suppliers: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

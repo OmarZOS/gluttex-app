@@ -8,6 +8,7 @@ import 'package:event/supplier_change_notifier.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:provider_personnel/components/supplier_card.dart';
 
 class SupplierEntitiesScreen extends StatefulWidget {
   final int userId;
@@ -35,12 +36,12 @@ class SupplierEntitiesScreen extends StatefulWidget {
   State<SupplierEntitiesScreen> createState() => _SupplierEntitiesScreenState();
 }
 
-class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
+class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
+    with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _filterType = 'all';
   bool _isLoading = false;
-  bool _dataLoaded = false;
 
   // ============================================================
   // COMPUTED GETTERS
@@ -51,15 +52,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
       return widget.accessManager
           .getAccessibleSuppliersWithAccessTypeSync(widget.userId);
     }
-
-    return widget.suppliersWithAccess
-        .where((supplier) =>
-            supplier.isOwner ||
-            widget.personnelNotifier
-                .hasPrivilege(widget.userId, supplier.id, 'personnel_view') ||
-            widget.personnelNotifier
-                .hasPrivilege(widget.userId, supplier.id, 'personnel_manage'))
-        .toList();
+    return widget.suppliersWithAccess;
   }
 
   List<AccessibleSupplier> get _owned =>
@@ -68,47 +61,16 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   List<AccessibleSupplier> get _managed =>
       _visibleSuppliers.where((s) => s.isManaged).toList();
 
-  // ✅ SIMPLIFIED: Get pending rules directly from the notifier
+  // ✅ FIXED: Get pending rules directly from the notifier
   List<ManagementRule> get _pendingRules {
     return widget.personnelNotifier.getPendingRulesForUser(widget.userId);
   }
 
-  // ✅ Get pending suppliers from pending rules
-  List<AccessibleSupplier> get _pendingSuppliers {
-    final pendingRules = _pendingRules;
-    if (pendingRules.isEmpty) return [];
-
-    final pendingSuppliers = <AccessibleSupplier>[];
-    final addedIds = <int>{};
-
-    for (final rule in pendingRules) {
-      final provider = rule.productProvider;
-      if (provider == null) continue;
-
-      final supplierId = provider.idProductProvider;
-      if (addedIds.contains(supplierId)) continue;
-
-      // Try to find the supplier in the suppliers list
-      final supplier = widget.suppliers.firstWhere(
-        (s) => s.idProductProvider == supplierId,
-        orElse: () => provider as Supplier,
-      );
-
-      // Determine if it's owned or managed
-      final isOwned = supplier.productProviderOwnerId == widget.userId;
-
-      pendingSuppliers.add(AccessibleSupplier(
-        supplier: supplier,
-        accessType:
-            isOwned ? SupplierAccessType.owner : SupplierAccessType.managed,
-      ));
-      addedIds.add(supplierId);
-    }
-
-    return pendingSuppliers;
+  // ✅ FIXED: Build pending suppliers from pending rules
+  List<ManagementRule> get _pendingSuppliersWithRules {
+    return _pendingRules.where((r) => r.productProvider != null).toList();
   }
 
-  // ✅ Get pending count directly
   int get _pendingCount => _pendingRules.length;
 
   List<AccessibleSupplier> get _filtered {
@@ -122,8 +84,8 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
         suppliers = _managed;
         break;
       case 'pending':
-        suppliers = _pendingSuppliers;
-        break;
+        // ✅ Return empty list - we'll handle pending separately
+        return [];
       default:
         break;
     }
@@ -145,6 +107,9 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   // ============================================================
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
     _searchController.addListener(() {
@@ -152,8 +117,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if ((widget.suppliersWithAccess.isEmpty || widget.suppliers.isEmpty) &&
-          widget.userId > 0) {
+      if (_visibleSuppliers.isEmpty && widget.userId > 0) {
         _loadData();
       }
     });
@@ -174,17 +138,17 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await widget.supplierNotifier.fetchOwnedSuppliers(
-        widget.userId,
-        forceRefresh: true,
-      );
-      await widget.personnelNotifier.loadPersonnel(
-        userId: widget.userId,
-        reset: true,
-        includePending: true,
-      );
-
-      setState(() => _dataLoaded = true);
+      await Future.wait([
+        widget.supplierNotifier.fetchOwnedSuppliers(
+          widget.userId,
+          forceRefresh: true,
+        ),
+        widget.personnelNotifier.loadPersonnel(
+          userId: widget.userId,
+          reset: true,
+          includePending: true,
+        ),
+      ]);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -197,7 +161,6 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
         );
       }
     } catch (e) {
-      debugPrint('Error loading data: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -211,9 +174,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     }
   }
 
-  Future<void> _refresh() async {
-    await _loadData();
-  }
+  Future<void> _refresh() async => _loadData();
 
   // ============================================================
   // BUILD
@@ -221,36 +182,31 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final filtered = _filtered;
-    final visibleSuppliers = _visibleSuppliers;
+    final visibleCount = _visibleSuppliers.length;
     final pendingCount = _pendingCount;
+    final isPendingFilter = _filterType == 'pending';
 
-    if (_isLoading && visibleSuppliers.isEmpty) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator.adaptive(),
-              const SizedBox(height: 16),
-              Text(l10n?.loading ?? 'Loading...'),
-            ],
-          ),
-        ),
-      );
+    if (_isLoading && visibleCount == 0 && pendingCount == 0) {
+      return _buildLoading(l10n);
     }
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(l10n, cs, visibleSuppliers),
+            _buildHeader(l10n, cs, visibleCount, pendingCount),
             _buildSearch(l10n, cs),
-            _buildStats(l10n, cs, visibleSuppliers, pendingCount),
+            _buildStats(l10n, cs, visibleCount, pendingCount),
             _buildFilters(l10n, cs),
-            Expanded(child: _buildList(l10n, filtered)),
+            Expanded(
+              child: isPendingFilter
+                  ? _buildPendingList(l10n, cs)
+                  : _buildList(l10n, filtered),
+            ),
           ],
         ),
       ),
@@ -262,14 +218,19 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   // HEADER
   // ============================================================
 
-  Widget _buildHeader(AppLocalizations? l10n, ColorScheme cs,
-          List<AccessibleSupplier> visibleSuppliers) =>
+  Widget _buildHeader(
+    AppLocalizations? l10n,
+    ColorScheme cs,
+    int count,
+    int pending,
+  ) =>
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: cs.primary,
-          borderRadius:
-              const BorderRadius.vertical(bottom: Radius.circular(16)),
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
         ),
         child: Row(
           children: [
@@ -292,7 +253,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                     ),
                   ),
                   Text(
-                    '${visibleSuppliers.length} ${l10n?.accessible ?? 'accessible'}',
+                    '$count ${l10n?.accessible ?? 'accessible'}${pending > 0 ? ' • $pending ${l10n?.pending ?? 'pending'}' : ''}',
                     style: TextStyle(
                       color: cs.onPrimary.withOpacity(0.8),
                       fontSize: 13,
@@ -313,6 +274,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                     )
                   : Icon(Icons.refresh, color: cs.onPrimary),
               onPressed: _isLoading ? null : _refresh,
+              tooltip: l10n?.refresh ?? 'Refresh',
             ),
           ],
         ),
@@ -360,25 +322,28 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   // STATS
   // ============================================================
 
-  Widget _buildStats(AppLocalizations? l10n, ColorScheme cs,
-      List<AccessibleSupplier> visibleSuppliers, int pendingCount) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _chip(l10n?.total ?? 'Total', visibleSuppliers.length, cs.primary),
-          const SizedBox(width: 8),
-          _chip(l10n?.owned ?? 'Owned', _owned.length, Colors.blue),
-          const SizedBox(width: 8),
-          _chip(l10n?.managed ?? 'Managed', _managed.length, Colors.green),
-          if (pendingCount > 0) ...[
+  Widget _buildStats(
+    AppLocalizations? l10n,
+    ColorScheme cs,
+    int total,
+    int pending,
+  ) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            _chip(l10n?.total ?? 'Total', total, cs.primary),
             const SizedBox(width: 8),
-            _chip(l10n?.pending ?? 'Pending', pendingCount, Colors.orange),
+            _chip(l10n?.owned ?? 'Owned', _owned.length, Colors.blue),
+            const SizedBox(width: 8),
+            _chip(l10n?.managed ?? 'Managed', _managed.length, Colors.green),
+            if (pending > 0) ...[
+              const SizedBox(width: 8),
+              _chip(l10n?.pending ?? 'Pending', pending, Colors.orange),
+            ],
           ],
-        ],
-      ),
-    );
-  }
+        ),
+      );
 
   Widget _chip(String label, int count, Color color) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -450,6 +415,221 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   }
 
   // ============================================================
+  // PENDING LIST
+  // ============================================================
+
+  Widget _buildPendingList(AppLocalizations? l10n, ColorScheme cs) {
+    final pendingRules = _pendingSuppliersWithRules;
+
+    if (pendingRules.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_rounded, size: 64, color: Colors.grey.shade400),
+            const SizedBox(height: 16),
+            Text(
+              l10n?.noPendingInvitations ?? 'No pending invitations',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: pendingRules.length,
+      itemBuilder: (_, i) => _buildPendingCard(l10n, cs, pendingRules[i]),
+    );
+  }
+
+  Widget _buildPendingCard(
+    AppLocalizations? l10n,
+    ColorScheme cs,
+    ManagementRule rule,
+  ) {
+    final supplier = rule.productProvider!;
+    final isPending = rule.isPending;
+    final createdAt = rule.createdAt;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.orange.withOpacity(0.3), width: 1.5),
+      ),
+      elevation: 2,
+      shadowColor: Colors.orange.withOpacity(0.1),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Avatar
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.orange.withOpacity(0.1),
+                  ),
+                  child: Center(
+                    child: Text(
+                      supplier.providerName.isNotEmpty
+                          ? supplier.providerName[0].toUpperCase()
+                          : 'S',
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        supplier.providerName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.orange.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Text(
+                              l10n?.pending ?? 'Pending',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.orange,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (createdAt != null)
+                            Text(
+                              _formatDate(createdAt.toIso8601String()),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // ✅ Accept/Refuse Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _handleInvitation(rule, true),
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                    label: Text(l10n?.decline ?? 'Decline'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: BorderSide(color: Colors.red.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _handleInvitation(rule, false),
+                    icon: const Icon(Icons.check_rounded, size: 18),
+                    label: Text(l10n?.accept ?? 'Accept'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // INVITATION ACTIONS
+  // ============================================================
+
+  Future<void> _handleInvitation(ManagementRule rule, bool isDecline) async {
+    final l10n = AppLocalizations.of(context);
+    final answer = isDecline ? 1 : 0;
+
+    try {
+      final success = await widget.personnelNotifier.answerInvitation(
+        ruleId: rule.idManagementRule,
+        answer: answer,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? (isDecline
+                      ? l10n?.invitationDeclinedSuccessfully ??
+                          'Invitation declined successfully'
+                      : l10n?.invitationAcceptedSuccessfully ??
+                          'Invitation accepted successfully')
+                  : l10n?.failedToProcessInvitation ??
+                      'Failed to process invitation',
+            ),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
+        );
+        if (success) _refresh();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n?.error}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // ============================================================
   // LIST
   // ============================================================
 
@@ -465,13 +645,10 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
             Text(
               _searchQuery.isNotEmpty
                   ? l10n?.noResults ?? 'No results found'
-                  : (widget.suppliersWithAccess.isEmpty && widget.userId > 0
-                      ? l10n?.loading ?? 'Loading...'
-                      : l10n?.noBusinesses ?? 'No businesses'),
+                  : l10n?.noBusinesses ?? 'No businesses',
               style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
             ),
-            if (_searchQuery.isNotEmpty) ...[
-              const SizedBox(height: 12),
+            if (_searchQuery.isNotEmpty)
               OutlinedButton.icon(
                 onPressed: () {
                   _searchController.clear();
@@ -480,15 +657,6 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                 icon: const Icon(Icons.clear, size: 18),
                 label: Text(l10n?.clearSearch ?? 'Clear search'),
               ),
-            ],
-            if (widget.suppliersWithAccess.isEmpty && widget.userId > 0) ...[
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: _loadData,
-                icon: const Icon(Icons.refresh),
-                label: Text(l10n?.refresh ?? 'Refresh'),
-              ),
-            ],
           ],
         ),
       );
@@ -497,167 +665,297 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: suppliers.length,
-      itemBuilder: (_, i) => _buildCard(l10n, suppliers[i]),
+      itemBuilder: (_, i) => _buildSupplierCard(l10n, suppliers[i]),
     );
   }
 
   // ============================================================
-  // CARD
+  // SUPPLIER CARD
   // ============================================================
 
-  Widget _buildCard(AppLocalizations? l10n, AccessibleSupplier data) {
+  Widget _buildSupplierCard(AppLocalizations? l10n, AccessibleSupplier data) {
     final s = data.supplier;
-    final isOwner = data.isOwner;
-    final isPending = widget.userRules.any(
-      (r) =>
-          r.productProvider?.idProductProvider == s.idProductProvider &&
-          r.isPending,
+    final rule = widget.userRules.firstWhere(
+      (r) => r.productProvider?.idProductProvider == s.idProductProvider,
+      orElse: () => ManagementRule.empty(),
     );
-    final cs = Theme.of(context).colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isPending
-            ? BorderSide(color: Colors.orange, width: 2)
-            : BorderSide.none,
-      ),
-      elevation: isPending ? 3 : 1,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: CircleAvatar(
-          backgroundColor: isOwner ? cs.primary : cs.secondaryContainer,
-          radius: 20,
-          child: Text(
-            s.providerName.isNotEmpty ? s.providerName[0].toUpperCase() : 'S',
-            style: TextStyle(
-              color: isOwner ? cs.onPrimary : cs.onSecondaryContainer,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+    final hasManage = widget.personnelNotifier.hasPrivilege(
+      widget.userId,
+      s.idProductProvider,
+      'personnel_manage',
+    );
+    final hasView = widget.personnelNotifier.hasPrivilege(
+      widget.userId,
+      s.idProductProvider,
+      'personnel_view',
+    );
+
+    Widget? trailing;
+    if (hasManage) {
+      trailing = _permissionChip(l10n?.canManage ?? 'Can Manage', Colors.green);
+    } else if (hasView) {
+      trailing = _permissionChip(l10n?.canView ?? 'Can View', Colors.blue);
+    }
+
+    return SupplierCard(
+      managementRule: rule.idManagementRule != 0 ? rule : null,
+      supplier: s,
+      onTap: () => _showPrivilegesDialog(context, s),
+      trailing: trailing,
+      statusColor: data.isOwner
+          ? Colors.blue
+          : (rule.isPending ? Colors.orange : Colors.green),
+      statusText: data.isOwner
+          ? (l10n?.owner ?? 'Owner')
+          : (rule.isPending
+              ? (l10n?.pending ?? 'Pending')
+              : (l10n?.managed ?? 'Managed')),
+    );
+  }
+
+  Widget _permissionChip(String label, Color color) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
             ),
+          ],
+        ),
+      );
+
+  // ============================================================
+  // PRIVILEGES DIALOG
+  // ============================================================
+
+  void _showPrivilegesDialog(BuildContext context, Supplier supplier) {
+    final rules = widget.userRules
+        .where(
+          (r) =>
+              r.productProvider?.idProductProvider ==
+              supplier.idProductProvider,
+        )
+        .toList();
+
+    if (rules.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)?.noPrivileges ??
+                'No privileges assigned.',
           ),
+          backgroundColor: Colors.grey,
+        ),
+      );
+      return;
+    }
+
+    final active = rules.where((r) => r.isActive).toList();
+    final pending = rules.where((r) => r.isPending).toList();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
         title: Row(
           children: [
+            CircleAvatar(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              child: Text(
+                supplier.providerName.isNotEmpty
+                    ? supplier.providerName[0].toUpperCase()
+                    : 'S',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
-                s.providerName,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                supplier.providerName,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (isOwner)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: cs.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.star_rounded, size: 14, color: cs.primary),
-                    const SizedBox(width: 2),
-                    Text(
-                      l10n?.owner ?? 'Owner',
-                      style: TextStyle(
-                          fontSize: 10,
-                          color: cs.primary,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              ),
-            if (isPending)
-              Container(
-                margin: const EdgeInsets.only(left: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  l10n?.pending ?? 'Pending',
-                  style: const TextStyle(
-                      fontSize: 10,
-                      color: Colors.orange,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
           ],
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (s.providerOrganisationName.isNotEmpty)
-              Text(
-                s.providerOrganisationName,
-                style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
-              ),
-            if (isPending)
-              Text(
-                'Invitation pending...',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.orange,
-                  fontStyle: FontStyle.italic,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (active.isNotEmpty) ...[
+                _privilegeSection(
+                  AppLocalizations.of(context)?.activePrivileges ??
+                      'Active Privileges',
+                  active,
+                  true,
                 ),
-              ),
-          ],
+                const SizedBox(height: 12),
+              ],
+              if (pending.isNotEmpty) ...[
+                _privilegeSection(
+                  AppLocalizations.of(context)?.pendingPrivileges ??
+                      'Pending Privileges',
+                  pending,
+                  false,
+                ),
+              ],
+              if (rules.isEmpty)
+                Text(
+                  AppLocalizations.of(context)?.noPrivileges ??
+                      'No privileges assigned.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+            ],
+          ),
         ),
-        trailing: PopupMenuButton(
-          icon: Icon(Icons.more_vert, color: cs.onSurfaceVariant),
-          itemBuilder: (_) => [
-            PopupMenuItem(
-                value: 'view',
-                child: Text(l10n?.viewDetails ?? 'View Details')),
-            if (isOwner)
-              PopupMenuItem(value: 'edit', child: Text(l10n?.edit ?? 'Edit')),
-            if (!isOwner && !isPending)
-              PopupMenuItem(
-                  value: 'manage',
-                  child: Text(l10n?.manageAccess ?? 'Manage Access')),
-            if (isPending)
-              PopupMenuItem(
-                  value: 'cancel_invitation',
-                  child: Text(l10n?.cancelInvitation ?? 'Cancel Invitation')),
-            PopupMenuItem(
-                value: 'privileges',
-                child: Text(l10n?.privileges ?? 'Privileges')),
-          ],
-          onSelected: (v) => _handleAction(context, v, s),
-        ),
-        onTap: () => _navigateToSupplierManage(context, s),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)?.close ?? 'Close'),
+          ),
+          if (active.isNotEmpty || pending.isNotEmpty)
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                _navigateToSupplierManage(context, supplier);
+              },
+              icon: const Icon(Icons.edit_outlined, size: 18),
+              label: Text(AppLocalizations.of(context)?.manage ?? 'Manage'),
+            ),
+        ],
       ),
     );
   }
 
-  // ============================================================
-  // ACTIONS
-  // ============================================================
+  Widget _privilegeSection(
+          String title, List<ManagementRule> rules, bool active) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: active ? Colors.green : Colors.orange,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...rules.map((r) => _privilegeTile(r, active)),
+        ],
+      );
 
-  void _handleAction(BuildContext context, String value, Supplier supplier) {
-    switch (value) {
-      case 'view':
-        _navigateToSupplierManage(context, supplier);
-        break;
-      case 'edit':
-        _navigateToSupplierManage(context, supplier);
-        break;
-      case 'manage':
-        _navigateToSupplierManage(context, supplier);
-        break;
-      case 'privileges':
-        _showPrivileges(context, supplier);
-        break;
-      case 'cancel_invitation':
-        _cancelInvitation(context, supplier);
-        break;
-      default:
-        break;
-    }
+  Widget _privilegeTile(ManagementRule rule, bool active) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: (active ? Colors.green : Colors.orange).withOpacity(0.05),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: (active ? Colors.green : Colors.orange).withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            active ? Icons.check_circle_rounded : Icons.access_time_rounded,
+            color: active ? Colors.green : Colors.orange,
+            size: 18,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _getPrivilegeDisplay(rule.managementRuleCode),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurface,
+                  ),
+                ),
+                if (rule.managementRuleExpiry != null)
+                  Text(
+                    'Expires: ${_formatDate(rule.managementRuleExpiry!)}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: (active ? Colors.green : Colors.orange).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              active ? 'Active' : 'Pending',
+              style: TextStyle(
+                fontSize: 9,
+                color: active ? Colors.green : Colors.orange,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
+
+  String _getPrivilegeDisplay(int code) {
+    const map = {
+      1: 'Admin',
+      2: 'Manage Personnel',
+      3: 'View Personnel',
+      4: 'Manage Inventory',
+      5: 'View Inventory',
+      6: 'Manage Services',
+      7: 'View Services',
+      8: 'Manage Orders',
+      9: 'View Orders',
+      10: 'Manage Finance',
+      11: 'View Finance',
+      12: 'Manage Operations',
+      13: 'View Operations',
+      14: 'Manage POS',
+      15: 'View POS',
+    };
+    return map[code] ?? 'Privilege $code';
+  }
+
+  // ============================================================
+  // NAVIGATION
+  // ============================================================
 
   void _navigateToSupplierManage(BuildContext context, Supplier supplier) {
     Navigator.pushNamed(
@@ -671,129 +969,31 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     );
   }
 
-  void _cancelInvitation(BuildContext context, Supplier supplier) {
-    final rule = widget.userRules.firstWhere(
-      (r) =>
-          r.productProvider?.idProductProvider == supplier.idProductProvider &&
-          r.isPending,
-      orElse: () => ManagementRule.empty(),
-    );
+  // ============================================================
+  // HELPERS
+  // ============================================================
 
-    if (rule.idManagementRule == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)?.noPendingInvitation ??
-              'No pending invitation found'),
-          backgroundColor: Colors.red,
+  Widget _buildLoading(AppLocalizations? l10n) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator.adaptive(),
+              const SizedBox(height: 16),
+              Text(l10n?.loading ?? 'Loading...'),
+            ],
+          ),
         ),
       );
-      return;
+
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return dateString;
     }
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(AppLocalizations.of(context)?.cancelInvitation ??
-            'Cancel Invitation'),
-        content: Text(
-          '${AppLocalizations.of(context)?.areYouSureYouWantToCancelTheInvitationFor ?? 'Are you sure you want to cancel the invitation for'} ${supplier.providerName}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success =
-                  await widget.personnelNotifier.removeUserFromSupplier(
-                rule.idManagementRule,
-                widget.userId,
-                supplier.idProductProvider,
-              );
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success
-                          ? (AppLocalizations.of(context)
-                                  ?.invitationCancelledSuccessfully ??
-                              'Invitation cancelled successfully')
-                          : (AppLocalizations.of(context)
-                                  ?.failedToCancelInvitation ??
-                              'Failed to cancel invitation'),
-                    ),
-                    backgroundColor: success ? Colors.green : Colors.red,
-                  ),
-                );
-                if (success) _refresh();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(AppLocalizations.of(context)?.cancelInvitation ??
-                'Cancel Invitation'),
-          ),
-        ],
-      ),
-    );
   }
-
-  void _showPrivileges(BuildContext context, Supplier supplier) {
-    final rules = widget.userRules
-        .where(
-          (r) =>
-              r.productProvider?.idProductProvider ==
-              supplier.idProductProvider,
-        )
-        .toList();
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(
-            '${AppLocalizations.of(context)?.privilegesFor} ${supplier.providerName}'),
-        content: rules.isEmpty
-            ? Text(AppLocalizations.of(context)?.noPrivileges ??
-                'No privileges assigned.')
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: rules
-                    .map((r) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              Icon(
-                                r.isActive
-                                    ? Icons.check_circle_rounded
-                                    : Icons.pending_rounded,
-                                color:
-                                    r.isActive ? Colors.green : Colors.orange,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(r.managementRuleCode.toString()),
-                            ],
-                          ),
-                        ))
-                    .toList(),
-              ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)?.close ?? 'Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ============================================================
-  // FAB
-  // ============================================================
 
   Widget _buildFab(AppLocalizations? l10n, ColorScheme cs) =>
       FloatingActionButton.extended(

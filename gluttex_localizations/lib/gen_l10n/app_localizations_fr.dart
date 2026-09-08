@@ -5896,4 +5896,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get failedToCancelInvitation => 'Échec de l\'annulation de l\'invitation';
+
+  @override
+  String get activePrivileges => 'Privilèges actifs';
+
+  @override
+  String get pendingPrivileges => 'Privilèges en attente';
+
+  @override
+  String get expiresOn => 'Expire le';
+
+  @override
+  String get manage => 'Gérer';
+
+  @override
+  String get canManage => 'Peut gérer';
+
+  @override
+  String get canView => 'Peut voir';
+
+  @override
+  String get invitationAcceptedSuccessfully => 'Invitation acceptée avec succès';
+
+  @override
+  String get invitationDeclinedSuccessfully => 'Invitation refusée avec succès';
+
+  @override
+  String get failedToProcessInvitation => 'Échec du traitement de l\'invitation';
 }

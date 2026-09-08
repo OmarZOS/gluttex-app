@@ -9,12 +9,18 @@ class SupplierCard extends StatelessWidget {
   final ManagementRule? managementRule;
   final Supplier? supplier;
   final VoidCallback? onTap;
+  final Widget? trailing;
+  final Color? statusColor;
+  final String? statusText;
 
   const SupplierCard({
     super.key,
     this.managementRule,
     this.supplier,
     this.onTap,
+    this.trailing,
+    this.statusColor,
+    this.statusText,
   });
 
   // Helper to get supplier name
@@ -22,10 +28,8 @@ class SupplierCard extends StatelessWidget {
     if (supplier != null) {
       return supplier!.providerName;
     }
-    if (managementRule?.productProvider?.productProviderDetails.providerName !=
-        null) {
-      return managementRule!
-          .productProvider!.productProviderDetails.providerName!;
+    if (managementRule?.productProvider?.providerName != null) {
+      return managementRule!.productProvider!.providerName!;
     }
     return 'Unknown Supplier';
   }
@@ -46,8 +50,8 @@ class SupplierCard extends StatelessWidget {
     if (supplier != null) {
       return supplier!.idProviderOrganisation;
     }
-    if (managementRule?.productProvider?.productProviderOrgId != null) {
-      return managementRule!.productProvider!.productProviderOrgId;
+    if (managementRule?.productProvider?.idProviderOrganisation != null) {
+      return managementRule!.productProvider!.idProviderOrganisation;
     }
     return 0;
   }
@@ -68,11 +72,8 @@ class SupplierCard extends StatelessWidget {
     if (supplier?.locationName != null && supplier!.locationName!.isNotEmpty) {
       return supplier!.locationName!;
     }
-    if (managementRule
-            ?.productProvider?.productProviderDetails.providerContactInfo !=
-        null) {
-      return managementRule!
-          .productProvider!.productProviderDetails.providerContactInfo!;
+    if (managementRule?.productProvider?.providerContactInfo != null) {
+      return managementRule!.productProvider!.providerContactInfo!;
     }
     return '';
   }
@@ -103,7 +104,7 @@ class SupplierCard extends StatelessWidget {
     // If we have a rule, use the rule data
     final hasValidData = (supplier != null) ||
         (managementRule?.productProvider != null &&
-            managementRule!.productProvider!.productProviderDetails != null);
+            managementRule!.productProvider!.providerName != null);
 
     if (!hasValidData) {
       return const SizedBox.shrink();
@@ -132,8 +133,8 @@ class SupplierCard extends StatelessWidget {
               // Supplier Info
               Expanded(child: _buildSupplierInfo(context)),
 
-              // Action Button
-              _buildActionButton(context),
+              // ✅ Custom Trailing Widget (passable)
+              if (trailing != null) trailing!,
             ],
           ),
         ),
@@ -181,7 +182,7 @@ class SupplierCard extends StatelessWidget {
             width: 14,
             height: 14,
             decoration: BoxDecoration(
-              color: _isActive ? Colors.green : Colors.orange,
+              color: statusColor ?? (_isActive ? Colors.green : Colors.orange),
               shape: BoxShape.circle,
               border: Border.all(
                 color: colorScheme.surface,
@@ -251,9 +252,9 @@ class SupplierCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                _getStatusText(context),
+                statusText ?? _getStatusText(context),
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: _getStatusColor(context),
+                  color: statusColor ?? _getStatusColor(context),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -282,32 +283,12 @@ class SupplierCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return IconButton(
-      onPressed: () => _navigateToPersonnelManagement(context),
-      icon: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: _isActive
-              ? colorScheme.primaryContainer
-              : colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(
-          _isActive ? Icons.people_alt_rounded : Icons.pending_actions_rounded,
-          color: _isActive
-              ? colorScheme.onPrimaryContainer
-              : colorScheme.onSurfaceVariant,
-          size: 20,
-        ),
-      ),
-    );
-  }
-
   Color _getStatusColor(BuildContext context) {
     final theme = Theme.of(context);
+
+    if (statusColor != null) {
+      return statusColor!;
+    }
 
     if (_isActive) {
       return theme.colorScheme.primary;

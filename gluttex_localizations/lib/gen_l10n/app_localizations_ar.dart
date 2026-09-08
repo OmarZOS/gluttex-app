@@ -5915,4 +5915,31 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get failedToCancelInvitation => 'فشل إلغاء الدعوة';
+
+  @override
+  String get activePrivileges => 'الصلاحيات النشطة';
+
+  @override
+  String get pendingPrivileges => 'الصلاحيات المعلقة';
+
+  @override
+  String get expiresOn => 'تنتهي في';
+
+  @override
+  String get manage => 'إدارة';
+
+  @override
+  String get canManage => 'يمكنه الإدارة';
+
+  @override
+  String get canView => 'يمكنه العرض';
+
+  @override
+  String get invitationAcceptedSuccessfully => 'تم قبول الدعوة بنجاح';
+
+  @override
+  String get invitationDeclinedSuccessfully => 'تم رفض الدعوة بنجاح';
+
+  @override
+  String get failedToProcessInvitation => 'فشل معالجة الدعوة';
 }

@@ -2391,7 +2391,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pendingInvitations => 'Pending invitations';
 
   @override
-  String get noPendingInvitations => 'No Pending Invitations';
+  String get noPendingInvitations => 'No pending invitations';
 
   @override
   String get unknownBusiness => 'Unknown Business';
@@ -5896,4 +5896,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToCancelInvitation => 'Failed to cancel invitation';
+
+  @override
+  String get activePrivileges => 'Active Privileges';
+
+  @override
+  String get pendingPrivileges => 'Pending Privileges';
+
+  @override
+  String get expiresOn => 'Expires on';
+
+  @override
+  String get manage => 'Manage';
+
+  @override
+  String get canManage => 'Can Manage';
+
+  @override
+  String get canView => 'Can View';
+
+  @override
+  String get invitationAcceptedSuccessfully => 'Invitation accepted successfully';
+
+  @override
+  String get invitationDeclinedSuccessfully => 'Invitation declined successfully';
+
+  @override
+  String get failedToProcessInvitation => 'Failed to process invitation';
 }

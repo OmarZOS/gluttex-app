@@ -2679,6 +2679,28 @@
   "noPendingInvitation": "No pending invitation found",
   "areYouSureYouWantToCancelTheInvitationFor": "Are you sure you want to cancel the invitation for",
   "invitationCancelledSuccessfully": "Invitation cancelled successfully",
-  "failedToCancelInvitation": "Failed to cancel invitation"
+  "failedToCancelInvitation": "Failed to cancel invitation",
+
+  "activePrivileges": "Active Privileges",
+  "pendingPrivileges": "Pending Privileges",
+  "active": "Active",
+  "expiresOn": "Expires on",
+  "manage": "Manage",
+
+    "canManage": "Can Manage",
+  "@canManage": {
+    "description": "Label indicating user has management permissions"
+  },
+  "canView": "Can View",
+  "@canView": {
+    "description": "Label indicating user has view permissions"
+  },
+
+   "accept": "Accept",
+  "decline": "Decline",
+  "invitationAcceptedSuccessfully": "Invitation accepted successfully",
+  "invitationDeclinedSuccessfully": "Invitation declined successfully",
+  "failedToProcessInvitation": "Failed to process invitation",
+  "noPendingInvitations": "No pending invitations"
 
 }
