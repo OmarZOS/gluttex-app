@@ -5897,4 +5897,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noSuppliersInOrganisation => 'لا يوجد موردون في هذه المؤسسة';
+
+  @override
+  String get back => 'رجوع';
+
+  @override
+  String get cancelInvitation => 'إلغاء الدعوة';
+
+  @override
+  String get noPendingInvitation => 'لا توجد دعوة معلقة';
+
+  @override
+  String get areYouSureYouWantToCancelTheInvitationFor => 'هل أنت متأكد من رغبتك في إلغاء الدعوة لـ';
+
+  @override
+  String get invitationCancelledSuccessfully => 'تم إلغاء الدعوة بنجاح';
+
+  @override
+  String get failedToCancelInvitation => 'فشل إلغاء الدعوة';
 }

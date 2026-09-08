@@ -2763,7 +2763,14 @@
   "noAccessDescription": "ليس لديك صلاحية الوصول إلى هذا القسم.",
   "@noAccessDescription": {
     "description": "وصف شاشة رفض الوصول"
-  }
+  },
+
+    "back": "رجوع",
+  "cancelInvitation": "إلغاء الدعوة",
+  "noPendingInvitation": "لا توجد دعوة معلقة",
+  "areYouSureYouWantToCancelTheInvitationFor": "هل أنت متأكد من رغبتك في إلغاء الدعوة لـ",
+  "invitationCancelledSuccessfully": "تم إلغاء الدعوة بنجاح",
+  "failedToCancelInvitation": "فشل إلغاء الدعوة"
 
 
 }

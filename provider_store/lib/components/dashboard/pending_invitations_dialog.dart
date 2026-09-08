@@ -73,10 +73,9 @@ class PendingInvitationItem extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context);
-    final supplierName =
-        rule.productProvider?.productProviderDetails.providerName ??
-            localizations?.unknownBusiness ??
-            'Unknown Business';
+    final supplierName = rule.productProvider?.providerName ??
+        localizations?.unknownBusiness ??
+        'Unknown Business';
     // final privilegeIds = RoleBitMapper.numberToPrivilegeIds(
     //   rule.management_rule_code ?? 0,
     // );

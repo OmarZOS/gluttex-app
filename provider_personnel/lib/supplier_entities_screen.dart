@@ -40,19 +40,27 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   String _searchQuery = '';
   String _filterType = 'all';
   bool _isLoading = false;
+  bool _dataLoaded = false;
 
   // ============================================================
   // COMPUTED GETTERS
   // ============================================================
 
-  List<AccessibleSupplier> get _visibleSuppliers => widget.suppliersWithAccess
-      .where((supplier) =>
-          supplier.isOwner ||
-          widget.personnelNotifier
-              .hasPrivilege(widget.userId, supplier.id, 'personnel_view') ||
-          widget.personnelNotifier
-              .hasPrivilege(widget.userId, supplier.id, 'personnel_manage'))
-      .toList();
+  List<AccessibleSupplier> get _visibleSuppliers {
+    if (widget.suppliersWithAccess.isEmpty && widget.userId > 0) {
+      return widget.accessManager
+          .getAccessibleSuppliersWithAccessTypeSync(widget.userId);
+    }
+
+    return widget.suppliersWithAccess
+        .where((supplier) =>
+            supplier.isOwner ||
+            widget.personnelNotifier
+                .hasPrivilege(widget.userId, supplier.id, 'personnel_view') ||
+            widget.personnelNotifier
+                .hasPrivilege(widget.userId, supplier.id, 'personnel_manage'))
+        .toList();
+  }
 
   List<AccessibleSupplier> get _owned =>
       _visibleSuppliers.where((s) => s.isOwner).toList();
@@ -60,18 +68,48 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   List<AccessibleSupplier> get _managed =>
       _visibleSuppliers.where((s) => s.isManaged).toList();
 
-  List<AccessibleSupplier> get _pending {
-    final pendingIds = widget.userRules
-        .where((r) => r.isPending)
-        .map((r) => r.productProvider?.idProductProvider)
-        .where((id) => id != null && id > 0)
-        .cast<int>()
-        .toSet();
-
-    return _visibleSuppliers
-        .where((s) => pendingIds.contains(s.supplier.idProductProvider))
-        .toList();
+  // ✅ SIMPLIFIED: Get pending rules directly from the notifier
+  List<ManagementRule> get _pendingRules {
+    return widget.personnelNotifier.getPendingRulesForUser(widget.userId);
   }
+
+  // ✅ Get pending suppliers from pending rules
+  List<AccessibleSupplier> get _pendingSuppliers {
+    final pendingRules = _pendingRules;
+    if (pendingRules.isEmpty) return [];
+
+    final pendingSuppliers = <AccessibleSupplier>[];
+    final addedIds = <int>{};
+
+    for (final rule in pendingRules) {
+      final provider = rule.productProvider;
+      if (provider == null) continue;
+
+      final supplierId = provider.idProductProvider;
+      if (addedIds.contains(supplierId)) continue;
+
+      // Try to find the supplier in the suppliers list
+      final supplier = widget.suppliers.firstWhere(
+        (s) => s.idProductProvider == supplierId,
+        orElse: () => provider as Supplier,
+      );
+
+      // Determine if it's owned or managed
+      final isOwned = supplier.productProviderOwnerId == widget.userId;
+
+      pendingSuppliers.add(AccessibleSupplier(
+        supplier: supplier,
+        accessType:
+            isOwned ? SupplierAccessType.owner : SupplierAccessType.managed,
+      ));
+      addedIds.add(supplierId);
+    }
+
+    return pendingSuppliers;
+  }
+
+  // ✅ Get pending count directly
+  int get _pendingCount => _pendingRules.length;
 
   List<AccessibleSupplier> get _filtered {
     var suppliers = _visibleSuppliers;
@@ -84,7 +122,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
         suppliers = _managed;
         break;
       case 'pending':
-        suppliers = _pending;
+        suppliers = _pendingSuppliers;
         break;
       default:
         break;
@@ -93,8 +131,8 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       suppliers = suppliers.where((s) {
-        final name = s.supplier.providerName.toLowerCase();
-        final org = s.supplier.providerOrganisationName.toLowerCase();
+        final name = s.supplier.providerName?.toLowerCase() ?? '';
+        final org = s.supplier.providerOrganisationName?.toLowerCase() ?? '';
         return name.contains(q) || org.contains(q);
       }).toList();
     }
@@ -112,6 +150,13 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text.trim());
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if ((widget.suppliersWithAccess.isEmpty || widget.suppliers.isEmpty) &&
+          widget.userId > 0) {
+        _loadData();
+      }
+    });
   }
 
   @override
@@ -121,10 +166,10 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   }
 
   // ============================================================
-  // REFRESH
+  // DATA LOADING
   // ============================================================
 
-  Future<void> _refresh() async {
+  Future<void> _loadData() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
 
@@ -139,6 +184,8 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
         includePending: true,
       );
 
+      setState(() => _dataLoaded = true);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -150,6 +197,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
         );
       }
     } catch (e) {
+      debugPrint('Error loading data: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -163,6 +211,10 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     }
   }
 
+  Future<void> _refresh() async {
+    await _loadData();
+  }
+
   // ============================================================
   // BUILD
   // ============================================================
@@ -172,14 +224,31 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final filtered = _filtered;
+    final visibleSuppliers = _visibleSuppliers;
+    final pendingCount = _pendingCount;
+
+    if (_isLoading && visibleSuppliers.isEmpty) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator.adaptive(),
+              const SizedBox(height: 16),
+              Text(l10n?.loading ?? 'Loading...'),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(l10n, cs),
+            _buildHeader(l10n, cs, visibleSuppliers),
             _buildSearch(l10n, cs),
-            _buildStats(l10n, cs),
+            _buildStats(l10n, cs, visibleSuppliers, pendingCount),
             _buildFilters(l10n, cs),
             Expanded(child: _buildList(l10n, filtered)),
           ],
@@ -193,7 +262,9 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   // HEADER
   // ============================================================
 
-  Widget _buildHeader(AppLocalizations? l10n, ColorScheme cs) => Container(
+  Widget _buildHeader(AppLocalizations? l10n, ColorScheme cs,
+          List<AccessibleSupplier> visibleSuppliers) =>
+      Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: cs.primary,
@@ -202,6 +273,12 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
         ),
         child: Row(
           children: [
+            IconButton(
+              icon: Icon(Icons.arrow_back_rounded, color: cs.onPrimary),
+              onPressed: () => Navigator.pop(context),
+              tooltip: l10n?.back ?? 'Back',
+            ),
+            const SizedBox(width: 4),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,7 +292,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                     ),
                   ),
                   Text(
-                    '${_visibleSuppliers.length} ${l10n?.accessible ?? 'accessible'}',
+                    '${visibleSuppliers.length} ${l10n?.accessible ?? 'accessible'}',
                     style: TextStyle(
                       color: cs.onPrimary.withOpacity(0.8),
                       fontSize: 13,
@@ -283,22 +360,25 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   // STATS
   // ============================================================
 
-  Widget _buildStats(AppLocalizations? l10n, ColorScheme cs) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            _chip(l10n?.total ?? 'Total', _visibleSuppliers.length, cs.primary),
+  Widget _buildStats(AppLocalizations? l10n, ColorScheme cs,
+      List<AccessibleSupplier> visibleSuppliers, int pendingCount) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          _chip(l10n?.total ?? 'Total', visibleSuppliers.length, cs.primary),
+          const SizedBox(width: 8),
+          _chip(l10n?.owned ?? 'Owned', _owned.length, Colors.blue),
+          const SizedBox(width: 8),
+          _chip(l10n?.managed ?? 'Managed', _managed.length, Colors.green),
+          if (pendingCount > 0) ...[
             const SizedBox(width: 8),
-            _chip(l10n?.owned ?? 'Owned', _owned.length, Colors.blue),
-            const SizedBox(width: 8),
-            _chip(l10n?.managed ?? 'Managed', _managed.length, Colors.green),
-            if (_pending.isNotEmpty) ...[
-              const SizedBox(width: 8),
-              _chip(l10n?.pending ?? 'Pending', _pending.length, Colors.orange),
-            ],
+            _chip(l10n?.pending ?? 'Pending', pendingCount, Colors.orange),
           ],
-        ),
-      );
+        ],
+      ),
+    );
+  }
 
   Widget _chip(String label, int count, Color color) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -385,7 +465,9 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
             Text(
               _searchQuery.isNotEmpty
                   ? l10n?.noResults ?? 'No results found'
-                  : l10n?.noBusinesses ?? 'No businesses',
+                  : (widget.suppliersWithAccess.isEmpty && widget.userId > 0
+                      ? l10n?.loading ?? 'Loading...'
+                      : l10n?.noBusinesses ?? 'No businesses'),
               style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
             ),
             if (_searchQuery.isNotEmpty) ...[
@@ -397,6 +479,14 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                 },
                 icon: const Icon(Icons.clear, size: 18),
                 label: Text(l10n?.clearSearch ?? 'Clear search'),
+              ),
+            ],
+            if (widget.suppliersWithAccess.isEmpty && widget.userId > 0) ...[
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: _loadData,
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n?.refresh ?? 'Refresh'),
               ),
             ],
           ],
@@ -497,12 +587,25 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
               ),
           ],
         ),
-        subtitle: s.providerOrganisationName.isNotEmpty
-            ? Text(
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (s.providerOrganisationName.isNotEmpty)
+              Text(
                 s.providerOrganisationName,
                 style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
-              )
-            : null,
+              ),
+            if (isPending)
+              Text(
+                'Invitation pending...',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.orange,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+          ],
+        ),
         trailing: PopupMenuButton(
           icon: Icon(Icons.more_vert, color: cs.onSurfaceVariant),
           itemBuilder: (_) => [
@@ -511,10 +614,14 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
                 child: Text(l10n?.viewDetails ?? 'View Details')),
             if (isOwner)
               PopupMenuItem(value: 'edit', child: Text(l10n?.edit ?? 'Edit')),
-            if (!isOwner)
+            if (!isOwner && !isPending)
               PopupMenuItem(
                   value: 'manage',
                   child: Text(l10n?.manageAccess ?? 'Manage Access')),
+            if (isPending)
+              PopupMenuItem(
+                  value: 'cancel_invitation',
+                  child: Text(l10n?.cancelInvitation ?? 'Cancel Invitation')),
             PopupMenuItem(
                 value: 'privileges',
                 child: Text(l10n?.privileges ?? 'Privileges')),
@@ -544,12 +651,14 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
       case 'privileges':
         _showPrivileges(context, supplier);
         break;
+      case 'cancel_invitation':
+        _cancelInvitation(context, supplier);
+        break;
       default:
         break;
     }
   }
 
-  // ✅ FIXED: Navigate to PersonnelManagementScreen via AppRoutes.supplierManage
   void _navigateToSupplierManage(BuildContext context, Supplier supplier) {
     Navigator.pushNamed(
       context,
@@ -559,6 +668,77 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
         'orgId': supplier.idProviderOrganisation,
         'supplierId': supplier.idProductProvider,
       },
+    );
+  }
+
+  void _cancelInvitation(BuildContext context, Supplier supplier) {
+    final rule = widget.userRules.firstWhere(
+      (r) =>
+          r.productProvider?.idProductProvider == supplier.idProductProvider &&
+          r.isPending,
+      orElse: () => ManagementRule.empty(),
+    );
+
+    if (rule.idManagementRule == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.noPendingInvitation ??
+              'No pending invitation found'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(AppLocalizations.of(context)?.cancelInvitation ??
+            'Cancel Invitation'),
+        content: Text(
+          '${AppLocalizations.of(context)?.areYouSureYouWantToCancelTheInvitationFor ?? 'Are you sure you want to cancel the invitation for'} ${supplier.providerName}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success =
+                  await widget.personnelNotifier.removeUserFromSupplier(
+                rule.idManagementRule,
+                widget.userId,
+                supplier.idProductProvider,
+              );
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? (AppLocalizations.of(context)
+                                  ?.invitationCancelledSuccessfully ??
+                              'Invitation cancelled successfully')
+                          : (AppLocalizations.of(context)
+                                  ?.failedToCancelInvitation ??
+                              'Failed to cancel invitation'),
+                    ),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+                if (success) _refresh();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(AppLocalizations.of(context)?.cancelInvitation ??
+                'Cancel Invitation'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -618,7 +798,6 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen> {
   Widget _buildFab(AppLocalizations? l10n, ColorScheme cs) =>
       FloatingActionButton.extended(
         onPressed: () {
-          // ✅ FIXED: Navigate to add supplier/organisation
           Navigator.pushNamed(
             context,
             AppRoutes.supplierManage,

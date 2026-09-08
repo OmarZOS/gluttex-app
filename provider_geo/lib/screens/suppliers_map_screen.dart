@@ -197,16 +197,16 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
         ],
         verticalButtons: [
           SpeedDialButton(
-            icon: Icon(FontAwesomeIcons.peopleGroup,
+            icon: Icon(FontAwesomeIcons.moneyBill1Wave,
                 color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.personnel_manage_title,
+            label: AppLocalizations.of(context)?.businesses,
             backgroundColor: Theme.of(context).colorScheme.primary,
             onTap: _navigateToSupplierEntities,
           ),
           SpeedDialButton(
-            icon: Icon(FontAwesomeIcons.moneyBill1Wave,
+            icon: Icon(FontAwesomeIcons.store,
                 color: Theme.of(context).colorScheme.onPrimary),
-            label: AppLocalizations.of(context)?.businesses,
+            label: AppLocalizations.of(context)?.manageSuppliers,
             backgroundColor: Theme.of(context).colorScheme.primary,
             onTap: _navigateToStoreManage,
           ),

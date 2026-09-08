@@ -1,4 +1,5 @@
 import 'package:gluttex_core/app/AppUser.dart';
+import 'package:gluttex_core/business/Supplier.dart';
 
 class ManagementRule {
   final int idManagementRule;
@@ -13,7 +14,7 @@ class ManagementRule {
 
   // Relationships
   final ProviderOrganisation? providerOrganisation;
-  final ProductProvider? productProvider;
+  final Supplier? productProvider;
   final AppUser? appUser;
   final List<RoleInvitation>? roleInvitations;
 
@@ -32,6 +33,24 @@ class ManagementRule {
     this.appUser,
     this.roleInvitations,
   });
+
+  factory ManagementRule.empty() {
+    return ManagementRule(
+      idManagementRule: 0,
+      ruleRefOrg: null,
+      ruleRefProvider: null,
+      ruleRefUser: null,
+      managementRuleCode: 0,
+      managementRuleStatus: null,
+      managementRuleExpiry: null,
+      createdAt: null,
+      updatedAt: null,
+      providerOrganisation: null,
+      productProvider: null,
+      appUser: null,
+      roleInvitations: null,
+    );
+  }
 
   factory ManagementRule.fromJson(Map<String, dynamic> json) {
     return ManagementRule(
@@ -52,7 +71,7 @@ class ManagementRule {
           ? ProviderOrganisation.fromJson(json['provider_organisation'])
           : null,
       productProvider: json['product_provider'] != null
-          ? ProductProvider.fromJson(json['product_provider'])
+          ? Supplier.fromJson(json['product_provider'])
           : null,
       appUser:
           json['app_user'] != null ? AppUser.fromJson(json['app_user']) : null,
@@ -126,7 +145,7 @@ class ManagementRule {
   }
 
   String get displayName {
-    final providerName = productProvider?.productProviderDetails.providerName;
+    final providerName = productProvider?.providerName;
     final orgName = providerOrganisation?.providerOrganisationName;
     if (providerName != null && providerName.isNotEmpty) {
       return providerName;
@@ -143,8 +162,7 @@ class ManagementRule {
   }
 
   String get providerName {
-    return productProvider?.productProviderDetails.providerName ??
-        'Unknown Provider';
+    return productProvider?.providerName ?? 'Unknown Provider';
   }
 
   DateTime? get expiryDate {
@@ -202,7 +220,7 @@ class ManagementRule {
     DateTime? createdAt,
     DateTime? updatedAt,
     ProviderOrganisation? providerOrganisation,
-    ProductProvider? productProvider,
+    Supplier? productProvider,
     AppUser? appUser,
     List<RoleInvitation>? roleInvitations,
   }) {
@@ -257,7 +275,7 @@ class ManagementRule {
   @override
   String toString() {
     return 'ManagementRule(id: $idManagementRule, code: $managementRuleCode, '
-        'status: $managementRuleStatus, provider: ${productProvider?.productProviderDetails.providerName}, '
+        'status: $managementRuleStatus, provider: ${productProvider?.providerName}, '
         'user: ${appUser?.appUserName})';
   }
 }

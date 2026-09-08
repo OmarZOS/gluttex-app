@@ -2811,7 +2811,14 @@
   "noAccessDescription": "Vous n'avez pas accès à cette section.",
   "@noAccessDescription": {
     "description": "Description de l'écran d'accès refusé"
-  }
+  },
+
+  "back": "Retour",
+  "cancelInvitation": "Annuler l'invitation",
+  "noPendingInvitation": "Aucune invitation en attente trouvée",
+  "areYouSureYouWantToCancelTheInvitationFor": "Êtes-vous sûr de vouloir annuler l'invitation pour",
+  "invitationCancelledSuccessfully": "Invitation annulée avec succès",
+  "failedToCancelInvitation": "Échec de l'annulation de l'invitation"
 
 
 }

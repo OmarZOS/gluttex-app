@@ -5878,4 +5878,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noSuppliersInOrganisation => 'No suppliers in this organisation';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get cancelInvitation => 'Cancel Invitation';
+
+  @override
+  String get noPendingInvitation => 'No pending invitation found';
+
+  @override
+  String get areYouSureYouWantToCancelTheInvitationFor => 'Are you sure you want to cancel the invitation for';
+
+  @override
+  String get invitationCancelledSuccessfully => 'Invitation cancelled successfully';
+
+  @override
+  String get failedToCancelInvitation => 'Failed to cancel invitation';
 }

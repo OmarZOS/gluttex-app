@@ -1,5 +1,6 @@
 import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/finance/ProvidedService.dart';
@@ -200,8 +201,8 @@ class _ServicesContent extends StatelessWidget {
     );
   }
 
-  List<ProductProvider> _getAccessibleSuppliers() {
-    final suppliers = <ProductProvider>[];
+  List<Supplier> _getAccessibleSuppliers() {
+    final suppliers = <Supplier>[];
     final supplierIds = <int>{};
 
     for (final rule in userRules) {

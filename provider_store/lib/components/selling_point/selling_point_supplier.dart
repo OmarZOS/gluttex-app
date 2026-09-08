@@ -5,7 +5,7 @@ import 'package:gluttex_core/business/Supplier.dart';
 
 class SupplierSelector extends StatelessWidget {
   final int? selectedSupplierId;
-  final List<ProductProvider> accessibleSuppliers;
+  final List<Supplier> accessibleSuppliers;
   final ValueChanged<int?> onSupplierChanged;
 
   const SupplierSelector({
@@ -74,7 +74,7 @@ class SupplierSelector extends StatelessWidget {
 }
 
 class _SupplierChipsRow extends StatelessWidget {
-  final List<ProductProvider> suppliers;
+  final List<Supplier> suppliers;
   final int? selectedId;
   final ValueChanged<int?> onSelect;
 
@@ -175,7 +175,7 @@ class _AllChip extends StatelessWidget {
 }
 
 class _SupplierChip extends StatelessWidget {
-  final ProductProvider supplier;
+  final Supplier supplier;
   final bool isSelected;
   final VoidCallback onSelect;
 
@@ -257,8 +257,8 @@ class _SupplierChip extends StatelessWidget {
     );
   }
 
-  String _getSupplierName(ProductProvider supplier) {
-    final name = supplier.productProviderDetails.providerName;
+  String _getSupplierName(Supplier supplier) {
+    final name = supplier.providerName;
     if ((name?.length ?? 0) > 15) {
       return '${name?.substring(0, 13)}...';
     }

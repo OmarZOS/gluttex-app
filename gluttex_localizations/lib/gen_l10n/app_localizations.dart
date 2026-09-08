@@ -11562,6 +11562,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No suppliers in this organisation'**
   String get noSuppliersInOrganisation;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @cancelInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Invitation'**
+  String get cancelInvitation;
+
+  /// No description provided for @noPendingInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending invitation found'**
+  String get noPendingInvitation;
+
+  /// No description provided for @areYouSureYouWantToCancelTheInvitationFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel the invitation for'**
+  String get areYouSureYouWantToCancelTheInvitationFor;
+
+  /// No description provided for @invitationCancelledSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation cancelled successfully'**
+  String get invitationCancelledSuccessfully;
+
+  /// No description provided for @failedToCancelInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to cancel invitation'**
+  String get failedToCancelInvitation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

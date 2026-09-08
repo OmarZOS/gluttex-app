@@ -2672,6 +2672,13 @@
   "createNewInvoice": "Create New Invoice",
   "@createNewInvoice": {
     "description": "FAB action for creating new invoice"
-  }
+  },
+
+  "back": "Back",
+  "cancelInvitation": "Cancel Invitation",
+  "noPendingInvitation": "No pending invitation found",
+  "areYouSureYouWantToCancelTheInvitationFor": "Are you sure you want to cancel the invitation for",
+  "invitationCancelledSuccessfully": "Invitation cancelled successfully",
+  "failedToCancelInvitation": "Failed to cancel invitation"
 
 }
