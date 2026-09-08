@@ -2355,16 +2355,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loading => 'Chargement...';
 
   @override
-  String get addProduct => 'Ajouter un Produit';
+  String get addProduct => 'Ajouter un produit';
 
   @override
-  String get createNewOrder => 'Créer une Commande';
+  String get createNewOrder => 'Créer une nouvelle commande';
 
   @override
   String get openCart => 'Ouvrir le Panier';
 
   @override
-  String get createNewInvoice => 'Créer une Facture';
+  String get createNewInvoice => 'Créer une nouvelle facture';
 
   @override
   String get add => 'Ajouter';
@@ -3556,7 +3556,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get viewOnly => 'Visualisation Seulement';
 
   @override
-  String get manageAccess => 'Accès Gestion';
+  String get manageAccess => 'Gérer l\'accès';
 
   @override
   String get togglePrivilegeTooltip => 'Basculer privilège';
@@ -4012,7 +4012,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addNewCustomer => 'Ajouter un Nouveau Client';
 
   @override
-  String get searching => 'Recherche en cours...';
+  String get searching => 'Recherche...';
 
   @override
   String get noCustomersFound => 'Aucun client trouvé';
@@ -5777,4 +5777,105 @@ class AppLocalizationsFr extends AppLocalizations {
   String available(Object count) {
     return 'Disponible: $count';
   }
+
+  @override
+  String get accessible => 'accessibles';
+
+  @override
+  String get searchBusinesses => 'Rechercher des entreprises...';
+
+  @override
+  String get owned => 'Possédées';
+
+  @override
+  String get managed => 'Géré';
+
+  @override
+  String get noResults => 'Aucun résultat trouvé';
+
+  @override
+  String get noBusinesses => 'Aucune entreprise';
+
+  @override
+  String get owner => 'Propriétaire';
+
+  @override
+  String get privilegesFor => 'Privilèges pour';
+
+  @override
+  String get noPrivileges => 'Aucun privilège assigné.';
+
+  @override
+  String get addBusiness => 'Ajouter une entreprise';
+
+  @override
+  String get refreshSuccess => 'Données actualisées avec succès';
+
+  @override
+  String get error => 'Erreur';
+
+  @override
+  String get searchAndInvite => 'Rechercher et inviter';
+
+  @override
+  String findUsersToAddTo(String supplierName) {
+    return 'Trouver des utilisateurs à ajouter à $supplierName';
+  }
+
+  @override
+  String get searchByNameUsernameOrRole => 'Rechercher par nom, nom d\'utilisateur ou rôle...';
+
+  @override
+  String get searchForUsers => 'Rechercher des utilisateurs';
+
+  @override
+  String get enterNameUsernameOrRole => 'Entrez un nom, nom d\'utilisateur ou rôle pour trouver des personnes';
+
+  @override
+  String get currentTeam => 'Équipe actuelle';
+
+  @override
+  String get noUsersFound => 'Aucun utilisateur trouvé';
+
+  @override
+  String get tryAdjustingSearchTerms => 'Essayez d\'ajuster vos termes de recherche';
+
+  @override
+  String get results => 'Résultats';
+
+  @override
+  String get team => 'Équipe';
+
+  @override
+  String get userAlreadyInTeam => 'Utilisateur déjà dans l\'équipe';
+
+  @override
+  String get isAlreadyActiveMemberOf => 'est déjà un membre actif de';
+
+  @override
+  String get pendingInvitation => 'Invitation en attente';
+
+  @override
+  String get hasPendingInvitationFor => 'a une invitation en attente pour';
+
+  @override
+  String get admin => 'Administrateur';
+
+  @override
+  String get provider => 'Fournisseur';
+
+  @override
+  String get manager => 'Gestionnaire';
+
+  @override
+  String get staff => 'Personnel';
+
+  @override
+  String get loadingDashboard => 'Chargement du tableau de bord...';
+
+  @override
+  String get noOrganisationsAvailable => 'Aucune organisation disponible.';
+
+  @override
+  String get noSuppliersInOrganisation => 'Aucun fournisseur dans cette organisation';
 }

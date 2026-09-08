@@ -2605,6 +2605,213 @@
   "addProductsToGetStarted": "Ajouter des produits pour commencer",
   "addServicesToGetStarted": "Ajouter des services pour commencer",
   "selected": "Sélectionné: {count}",
-  "available": "Disponible: {count}"
+  "available": "Disponible: {count}",
+    "businesses": "Entreprises",
+  "@businesses": {
+    "description": "Titre de l'écran des entreprises"
+  },
+  "accessible": "accessibles",
+  "@accessible": {
+    "description": "Étiquette montrant le nombre d'entreprises accessibles"
+  },
+  "searchBusinesses": "Rechercher des entreprises...",
+  "@searchBusinesses": {
+    "description": "Texte d'aide pour le champ de recherche"
+  },
+  "total": "Total",
+  "@total": {
+    "description": "Étiquette pour le nombre total"
+  },
+  "owned": "Possédées",
+  "@owned": {
+    "description": "Étiquette pour les entreprises possédées"
+  },
+  "managed": "Gérées",
+  "@managed": {
+    "description": "Étiquette pour les entreprises gérées"
+  },
+  "pending": "En attente",
+  "@pending": {
+    "description": "Étiquette pour les invitations en attente"
+  },
+  "pendingInvitations": "Invitations en attente",
+  "@pendingInvitations": {
+    "description": "Étiquette pour le filtre des invitations en attente"
+  },
+  "all": "Tous",
+  "@all": {
+    "description": "Option de filtre pour toutes les entreprises"
+  },
+  "noResults": "Aucun résultat trouvé",
+  "@noResults": {
+    "description": "Message lorsque la recherche ne donne aucun résultat"
+  },
+  "noBusinesses": "Aucune entreprise",
+  "@noBusinesses": {
+    "description": "Message lorsqu'aucune entreprise n'est disponible"
+  },
+  "clearSearch": "Effacer la recherche",
+  "@clearSearch": {
+    "description": "Bouton pour effacer le champ de recherche"
+  },
+  "owner": "Propriétaire",
+  "@owner": {
+    "description": "Étiquette pour le badge propriétaire"
+  },
+  "viewDetails": "Voir les détails",
+  "@viewDetails": {
+    "description": "Option de menu pour voir les détails de l'entreprise"
+  },
+  "edit": "Modifier",
+  "@edit": {
+    "description": "Option de menu pour modifier l'entreprise"
+  },
+  "manageAccess": "Gérer l'accès",
+  "@manageAccess": {
+    "description": "Option de menu pour gérer l'accès"
+  },
+  "privileges": "Privilèges",
+  "@privileges": {
+    "description": "Option de menu pour voir les privilèges"
+  },
+  "privilegesFor": "Privilèges pour",
+  "@privilegesFor": {
+    "description": "Titre du dialogue pour les privilèges"
+  },
+  "noPrivileges": "Aucun privilège assigné.",
+  "@noPrivileges": {
+    "description": "Message lorsqu'aucun privilège n'est assigné"
+  },
+  "close": "Fermer",
+  "@close": {
+    "description": "Bouton pour fermer le dialogue"
+  },
+  "addBusiness": "Ajouter une entreprise",
+  "@addBusiness": {
+    "description": "Étiquette du FAB pour ajouter une entreprise"
+  },
+  "add": "Ajouter",
+  "@add": {
+    "description": "Étiquette courte du FAB"
+  },
+  "refreshSuccess": "Données actualisées avec succès",
+  "@refreshSuccess": {
+    "description": "Message de succès après l'actualisation"
+  },
+  "error": "Erreur",
+  "@error": {
+    "description": "Préfixe d'erreur pour les messages d'erreur"
+  },
+
+    "searchAndInvite": "Rechercher et inviter",
+  "findUsersToAddTo": "Trouver des utilisateurs à ajouter à {supplierName}",
+  "searchByNameUsernameOrRole": "Rechercher par nom, nom d'utilisateur ou rôle...",
+  "searchForUsers": "Rechercher des utilisateurs",
+  "enterNameUsernameOrRole": "Entrez un nom, nom d'utilisateur ou rôle pour trouver des personnes",
+  "currentTeam": "Équipe actuelle",
+  "searching": "Recherche...",
+  "noUsersFound": "Aucun utilisateur trouvé",
+  "tryAdjustingSearchTerms": "Essayez d'ajuster vos termes de recherche",
+  "clearSearch": "Effacer la recherche",
+  "results": "Résultats",
+  "team": "Équipe",
+  "pending": "En attente",
+  "userAlreadyInTeam": "Utilisateur déjà dans l'équipe",
+  "isAlreadyActiveMemberOf": "est déjà un membre actif de",
+  "pendingInvitation": "Invitation en attente",
+  "hasPendingInvitationFor": "a une invitation en attente pour",
+  "ok": "OK",
+  "admin": "Administrateur",
+  "provider": "Fournisseur",
+  "manager": "Gestionnaire",
+  "customer": "Client",
+  "staff": "Personnel",
+  "user": "Utilisateur",
+
+    "loadingDashboard": "Chargement du tableau de bord...",
+  "@loadingDashboard": {
+    "description": "Texte de chargement pour le tableau de bord"
+  },
+  "noOrganisationsAvailable": "Aucune organisation disponible.",
+  "@noOrganisationsAvailable": {
+    "description": "Message lorsqu'aucune organisation n'est disponible"
+  },
+  "noSuppliersInOrganisation": "Aucun fournisseur dans cette organisation",
+  "@noSuppliersInOrganisation": {
+    "description": "Message lorsqu'aucun fournisseur n'est dans une organisation"
+  },
+  "owner": "Propriétaire",
+  "@owner": {
+    "description": "Étiquette pour le badge propriétaire"
+  },
+  "managed": "Géré",
+  "@managed": {
+    "description": "Étiquette pour le badge géré"
+  },
+  "refresh": "Actualiser",
+  "@refresh": {
+    "description": "Info-bulle pour le bouton d'actualisation"
+  },
+  "pendingInvitations": "Invitations en attente",
+  "@pendingInvitations": {
+    "description": "Info-bulle pour le bouton des invitations en attente"
+  },
+  "createNewOrder": "Créer une nouvelle commande",
+  "@createNewOrder": {
+    "description": "Action FAB pour créer une nouvelle commande"
+  },
+  "createNewInvoice": "Créer une nouvelle facture",
+  "@createNewInvoice": {
+    "description": "Action FAB pour créer une nouvelle facture"
+  },
+  "personnel": "Personnel",
+  "@personnel": {
+    "description": "Étiquette pour l'onglet Personnel"
+  },
+  "inventory": "Inventaire",
+  "@inventory": {
+    "description": "Étiquette pour l'onglet Inventaire"
+  },
+  "services": "Services",
+  "@services": {
+    "description": "Étiquette pour l'onglet Services"
+  },
+  "seller": "Vendeur",
+  "@seller": {
+    "description": "Étiquette pour l'onglet Vendeur"
+  },
+  "orders": "Commandes",
+  "@orders": {
+    "description": "Étiquette pour l'onglet Commandes"
+  },
+  "operations": "Opérations",
+  "@operations": {
+    "description": "Étiquette pour l'onglet Opérations"
+  },
+  "finance": "Finances",
+  "@finance": {
+    "description": "Étiquette pour l'onglet Finances"
+  },
+  "addProduct": "Ajouter un produit",
+  "@addProduct": {
+    "description": "Action FAB pour ajouter un produit"
+  },
+  "addService": "Ajouter un service",
+  "@addService": {
+    "description": "Action FAB pour ajouter un service"
+  },
+  "addMember": "Ajouter un membre",
+  "@addMember": {
+    "description": "Action FAB pour ajouter un membre"
+  },
+  "noAccess": "Accès refusé",
+  "@noAccess": {
+    "description": "Titre de l'écran d'accès refusé"
+  },
+  "noAccessDescription": "Vous n'avez pas accès à cette section.",
+  "@noAccessDescription": {
+    "description": "Description de l'écran d'accès refusé"
+  }
+
 
 }

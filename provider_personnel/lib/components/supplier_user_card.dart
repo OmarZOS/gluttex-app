@@ -1,8 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
-import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:provider_personnel/components/privilege_ui.dart';
 
@@ -15,6 +13,7 @@ class SupplierUserCard extends StatelessWidget {
   final VoidCallback onRemove;
   final VoidCallback? onCancelInvite;
   final bool isCompact;
+  final bool showActions;
 
   const SupplierUserCard({
     super.key,
@@ -26,6 +25,7 @@ class SupplierUserCard extends StatelessWidget {
     required this.onRemove,
     this.onCancelInvite,
     this.isCompact = false,
+    this.showActions = true,
   });
 
   @override
@@ -360,7 +360,7 @@ class SupplierUserCard extends StatelessWidget {
             }).toList(),
           ),
         ),
-        if (isPending) //&& onCancelInvite != null
+        if (showActions && isPending) //&& onCancelInvite != null
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: Material(
@@ -407,7 +407,7 @@ class SupplierUserCard extends StatelessWidget {
               ),
             ),
           ),
-        if (!isPending)
+        if (showActions && !isPending)
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: Material(
@@ -502,10 +502,7 @@ class SupplierUserCard extends StatelessWidget {
     if (privilegeIds.isNotEmpty) {
       final privilege = PrivilegeUIManager.getPrivilege(privilegeIds.first);
       if (privilege != null) {
-        // final context = navigatorKey.currentContext;
-        if (context != null) {
-          return privilege.roleName(context);
-        }
+        return privilege.roleName(context);
       }
     }
     return '';

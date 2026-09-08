@@ -2506,7 +2506,172 @@
   "addProductsToGetStarted": "Add products to get started",
   "addServicesToGetStarted": "Add services to get started",
   "selected": "Selected: {count}",
-  "available": "Available: {count}"
+  "available": "Available: {count}",
+  "businesses": "Businesses",
+  "@businesses": {
+    "description": "Title for the businesses screen"
+  },
+  "accessible": "accessible",
+  "@accessible": {
+    "description": "Label showing count of accessible businesses"
+  },
+  "searchBusinesses": "Search businesses...",
+  "@searchBusinesses": {
+    "description": "Hint text for search field"
+  },
+  "total": "Total",
+  "@total": {
+    "description": "Label for total count"
+  },
+  "owned": "Owned",
+  "@owned": {
+    "description": "Label for owned businesses"
+  },
+  "managed": "Managed",
+  "@managed": {
+    "description": "Label for managed businesses"
+  },
+  "pending": "Pending",
+  "@pending": {
+    "description": "Label for pending invitations"
+  },
+  "pendingInvitations": "Pending Invitations",
+  "@pendingInvitations": {
+    "description": "Label for pending invitations filter"
+  },
+  "all": "All",
+  "@all": {
+    "description": "Filter option for all businesses"
+  },
+  "noResults": "No results found",
+  "@noResults": {
+    "description": "Message when search returns no results"
+  },
+  "noBusinesses": "No businesses",
+  "@noBusinesses": {
+    "description": "Message when no businesses are available"
+  },
+  "clearSearch": "Clear search",
+  "@clearSearch": {
+    "description": "Button to clear search field"
+  },
+  "owner": "Owner",
+  "@owner": {
+    "description": "Label for owner badge"
+  },
+  "viewDetails": "View Details",
+  "@viewDetails": {
+    "description": "Menu option to view business details"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Menu option to edit business"
+  },
+  "manageAccess": "Manage Access",
+  "@manageAccess": {
+    "description": "Menu option to manage access"
+  },
+  "privileges": "Privileges",
+  "@privileges": {
+    "description": "Menu option to view privileges"
+  },
+  "privilegesFor": "Privileges for",
+  "@privilegesFor": {
+    "description": "Dialog title for privileges"
+  },
+  "noPrivileges": "No privileges assigned.",
+  "@noPrivileges": {
+    "description": "Message when no privileges are assigned"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Button to close dialog"
+  },
+  "addBusiness": "Add Business",
+  "@addBusiness": {
+    "description": "FAB label to add business"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "FAB short label"
+  },
+  "refreshSuccess": "Data refreshed successfully",
+  "@refreshSuccess": {
+    "description": "Success message after refresh"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error prefix for error messages"
+  },
 
+    "searchAndInvite": "Search & Invite",
+  "findUsersToAddTo": "Find users to add to {supplierName}",
+  "@findUsersToAddTo": {
+    "description": "Subtitle for search dialog",
+    "placeholders": {
+      "supplierName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchByNameUsernameOrRole": "Search by name, username, or role...",
+  "searchForUsers": "Search for users",
+  "enterNameUsernameOrRole": "Enter a name, username, or role to find people",
+  "currentTeam": "Current Team",
+  "searching": "Searching...",
+  "noUsersFound": "No users found",
+  "tryAdjustingSearchTerms": "Try adjusting your search terms",
+  "clearSearch": "Clear Search",
+  "results": "Results",
+  "team": "Team",
+  "pending": "Pending",
+  "userAlreadyInTeam": "User Already in Team",
+  "isAlreadyActiveMemberOf": "is already an active member of",
+  "pendingInvitation": "Pending Invitation",
+  "hasPendingInvitationFor": "has a pending invitation for",
+  "ok": "OK",
+  "admin": "Admin",
+  "provider": "Provider",
+  "manager": "Manager",
+  "customer": "Customer",
+  "staff": "Staff",
+  "user": "User",
+
+    "loadingDashboard": "Loading dashboard...",
+  "@loadingDashboard": {
+    "description": "Loading text for dashboard"
+  },
+  "noOrganisationsAvailable": "No organisations available.",
+  "@noOrganisationsAvailable": {
+    "description": "Message when no organisations are available"
+  },
+  "noSuppliersInOrganisation": "No suppliers in this organisation",
+  "@noSuppliersInOrganisation": {
+    "description": "Message when no suppliers in an organisation"
+  },
+  "owner": "Owner",
+  "@owner": {
+    "description": "Label for owner badge"
+  },
+  "managed": "Managed",
+  "@managed": {
+    "description": "Label for managed badge"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Tooltip for refresh button"
+  },
+  "pendingInvitations": "Pending invitations",
+  "@pendingInvitations": {
+    "description": "Tooltip for pending invitations button"
+  },
+  "createNewOrder": "Create New Order",
+  "@createNewOrder": {
+    "description": "FAB action for creating new order"
+  },
+  "createNewInvoice": "Create New Invoice",
+  "@createNewInvoice": {
+    "description": "FAB action for creating new invoice"
+  }
 
 }

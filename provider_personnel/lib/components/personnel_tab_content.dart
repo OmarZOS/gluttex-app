@@ -11,6 +11,7 @@ class PersonnelTabContent extends StatelessWidget {
   final Function onShowPrivilegeDialog;
   final Function onShowRemoveDialog;
   final Function onCancelInvitation;
+  final bool canManage;
 
   const PersonnelTabContent({
     super.key,
@@ -20,6 +21,7 @@ class PersonnelTabContent extends StatelessWidget {
     required this.onShowPrivilegeDialog,
     required this.onShowRemoveDialog,
     required this.onCancelInvitation,
+    this.canManage = true,
   });
 
   @override
@@ -106,8 +108,11 @@ class PersonnelTabContent extends StatelessWidget {
                 // onResendInvite:
                 //     isPending ? () => onResendInvitation(user) : null,
                 onCancelInvite: isPending
-                    ? () => onCancelInvitation(user, rule?.idManagementRule)
+                    ? canManage
+                        ? () => onCancelInvitation(user, rule?.idManagementRule)
+                        : null
                     : null,
+                showActions: canManage,
               );
             },
           ),

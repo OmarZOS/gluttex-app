@@ -1,20 +1,22 @@
 import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/app/ManagementRule.dart';
+import 'package:gluttex_core/business/Supplier.dart';
 import 'package:recipe_catalog/screens/ingredient_management_screen.dart';
 import 'package:recipe_catalog/screens/recipe_catalog_screen.dart';
 import 'package:recipe_catalog/screens/recipe_form_screen.dart';
-import 'package:app_constants/app_constants.dart';
-import 'package:event/cart_change_notifier.dart';
 import 'package:event/order_change_notifier.dart';
 import 'package:tabbed_home/screens/app_user_update_form_screen.dart';
 import 'package:tabbed_home/screens/home_screen.dart';
 import 'package:event/user_change_notifier.dart';
+import 'package:event/personnel_notifier.dart';
+import 'package:event/supplier_change_notifier.dart';
+import 'package:event/extensions/personnel_access_manager.dart';
 import 'package:provider_geo/screens/supplier_form_page.dart';
 import 'package:provider_geo/screens/suppliers_map_screen.dart';
 import 'package:login/screens/login_screen.dart';
 import 'package:login/screens/registration_screen.dart';
 import 'package:provider_personnel/personnel_management_screen.dart';
-// import 'package:provider_personnel/supplier_dashboard_screen.dart';
 import 'package:provider_personnel/supplier_entities_screen.dart';
 import 'package:scanner/screens/qr_scanner.dart';
 import 'package:scanner/screens/barcode_scanner.dart';
@@ -26,9 +28,7 @@ import 'package:product_catalog/screens/orders_screen.dart';
 import 'package:product_catalog/screens/product_catalog_screen.dart';
 import 'package:product_catalog/screens/product_form_screen.dart';
 import 'package:product_catalog/screens/product_screen.dart';
-// import 'package:product_catalog/screens/product_form_screen.dart';
 import 'package:provider/provider.dart';
-
 import 'screens/image_upload_screen.dart';
 
 class AppRouter {
@@ -38,10 +38,8 @@ class AppRouter {
     debugPrint('Route arguments: ${settings.arguments}');
 
     return MaterialPageRoute(
-      settings:
-          settings, // Important: This preserves the route name in the stack
+      settings: settings,
       builder: (context) {
-        // Use Consumer to get the latest appUser state
         return Consumer<AppUserNotifier>(
           builder: (context, authProvider, child) {
             final appUser = authProvider.appUser;
@@ -56,12 +54,14 @@ class AppRouter {
               case AppRoutes.home:
                 return _buildGuardedRoute(
                     isAuthenticated, const HomePage(), const LoginScreen());
+
               case AppRoutes.productCreate:
                 return _buildGuardedRoute(
                   isAuthenticated,
                   const ProductFormScreen(),
                   const ProductCatalogScreen(),
                 );
+
               case AppRoutes.productScanPage:
                 return _buildGuardedRoute(
                   isAuthenticated,
@@ -70,6 +70,7 @@ class AppRouter {
                   ),
                   const ProductCatalogScreen(),
                 );
+
               case AppRoutes.QRScanPage:
                 return _buildGuardedRoute(
                   isAuthenticated,
@@ -78,12 +79,14 @@ class AppRouter {
                   ),
                   const ProductCatalogScreen(),
                 );
+
               case AppRoutes.productCapturePage:
                 return _buildGuardedRoute(
                   isAuthenticated,
                   const ProductCaptureScreen(),
                   const ProductCatalogScreen(),
                 );
+
               case AppRoutes.recipeCreate:
                 debugPrint('Creating RecipeFormScreen route');
                 return _buildGuardedRoute(
@@ -91,9 +94,11 @@ class AppRouter {
                   const RecipeFormScreen(),
                   const RecipeCatalogScreen(),
                 );
+
               case AppRoutes.cartPage:
                 return _buildGuardedRoute(
                     isAuthenticated, const CartScreen(), const HomePage());
+
               case AppRoutes.providerCreate:
                 return _buildGuardedRoute(
                   isAuthenticated,
@@ -109,56 +114,116 @@ class AppRouter {
                 );
 
               case AppRoutes.supplierManage:
+                final supplierId = args?['supplierId'] as int? ?? 0;
+                final currentUserId = appUser?.idAppUser ?? 0;
+                final personnelNotifier = context.read<PersonnelNotifier>();
+                final supplierNotifier = context.read<SupplierChangeNotifier>();
+                final accessManager = PersonnelAccessManager(
+                  personnelNotifier: personnelNotifier,
+                  supplierNotifier: supplierNotifier,
+                );
+                final accessType = currentUserId > 0 && supplierId > 0
+                    ? accessManager.getAccessType(currentUserId, supplierId)
+                    : SupplierAccessType.none;
+                final canView = supplierId == 0 ||
+                    accessType == SupplierAccessType.owner ||
+                    personnelNotifier.hasPrivilege(
+                        currentUserId, supplierId, 'personnel_view') ||
+                    personnelNotifier.hasPrivilege(
+                        currentUserId, supplierId, 'personnel_manage');
+                final canManage = supplierId == 0 ||
+                    accessType == SupplierAccessType.owner ||
+                    personnelNotifier.hasPrivilege(
+                        currentUserId, supplierId, 'personnel_manage');
                 return _buildGuardedRoute(
-                  isAuthenticated,
+                  isAuthenticated && canView,
                   PersonnelManagementScreen(
                     supplierName: args?['supplierName'],
                     orgId: args?['orgId'],
-                    supplierId: args?['supplierId'],
+                    supplierId: supplierId,
+                    canManagePersonnel: canManage,
                   ),
                   const SuppliersMapScreen(),
                 );
+
+              // ✅ NEW: Supplier Entities Screen
+              case AppRoutes.supplierEntitiesPage:
+                final userId =
+                    args?['userId'] as int? ?? appUser?.idAppUser ?? 0;
+                final accessibleSuppliers =
+                    args?['accessibleSuppliers'] as List<int>? ?? [];
+                final userRules =
+                    args?['userRules'] as List<ManagementRule>? ?? [];
+                final suppliers = args?['suppliers'] as List<Supplier>? ?? [];
+                final suppliersWithAccess =
+                    args?['suppliersWithAccess'] as List<AccessibleSupplier>? ??
+                        [];
+
+                final personnelNotifier = context.read<PersonnelNotifier>();
+                final supplierNotifier = context.read<SupplierChangeNotifier>();
+                final accessManager = PersonnelAccessManager(
+                  personnelNotifier: personnelNotifier,
+                  supplierNotifier: supplierNotifier,
+                );
+
+                return _buildGuardedRoute(
+                  isAuthenticated,
+                  SupplierEntitiesScreen(
+                    key: ValueKey(
+                        'personnel_${userId}_${accessibleSuppliers.length}'),
+                    userId: userId,
+                    accessibleSuppliers: accessibleSuppliers,
+                    userRules: userRules,
+                    suppliers: suppliers,
+                    suppliersWithAccess: suppliersWithAccess,
+                    personnelNotifier: personnelNotifier,
+                    supplierNotifier: supplierNotifier,
+                    accessManager: accessManager,
+                  ),
+                  const LoginScreen(),
+                );
+
               case AppRoutes.serviceForm:
                 return _buildGuardedRoute(
                   isAuthenticated,
                   const ProvidedServiceFormScreen(),
                   const HomePage(),
                 );
+
               case AppRoutes.storeManage:
                 return const DashboardScreen();
+
               case AppRoutes.login:
-                // If already authenticated, redirect to home
                 if (isAuthenticated) {
                   return const HomePage();
                 }
                 return const LoginScreen();
+
               case AppRoutes.registration:
                 return const RegistrationForm();
+
               case AppRoutes.imageUpload:
                 return const UploadImagePage();
 
-              // case AppRoutes.dashboardPage:
-              //   return const SupplierDashboardScreen();
-              // case AppRoutes.supplierEntitiesPage:
-              //   return const SupplierEntitiesScreen();
-
               case AppRoutes.productDetails:
                 return const ProductDetailsScreen();
+
               case AppRoutes.userEdit:
                 return _buildGuardedRoute(
                   isAuthenticated,
                   const AppUserEditFormScreen(),
                   const LoginScreen(),
                 );
+
               case AppRoutes.ordersPage:
                 return _buildGuardedRoute(
                   isAuthenticated,
                   OrdersScreen(
-                    cartChangeNotifier:
-                        Provider.of<OrderChangeNotifier>(context),
+                    cartChangeNotifier: context.read<OrderChangeNotifier>(),
                   ),
                   const LoginScreen(),
                 );
+
               default:
                 return _buildGuardedRoute(
                   isAuthenticated,
@@ -177,13 +242,14 @@ class AppRouter {
     Widget authorizedScreen,
     Widget unauthorizedScreen,
   ) {
-    // Add key to help with debugging
     return isAuthenticated
         ? SizedBox(
             key: Key('authorized_${authorizedScreen.runtimeType}'),
-            child: authorizedScreen)
+            child: authorizedScreen,
+          )
         : SizedBox(
             key: Key('unauthorized_${unauthorizedScreen.runtimeType}'),
-            child: unauthorizedScreen);
+            child: unauthorizedScreen,
+          );
   }
 }

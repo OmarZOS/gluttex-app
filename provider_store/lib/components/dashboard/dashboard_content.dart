@@ -161,26 +161,17 @@ class DashboardContentState extends State<DashboardContent> {
     try {
       widget.supplierNotifier.setCurrentUserId(userId);
 
-      // The access manager is the single source of truth for this list.
-      final suppliersWithAccess =
-          await _accessManager.getAccessibleSuppliersWithAccessType(
-        userId,
-        forceRefresh: true,
-      );
-
-      // Build list
-      _availableSuppliers
-        ..clear()
-        ..addAll(suppliersWithAccess.map(SupplierData.fromAccessible));
-
-      _selectedSupplierId = 0;
-      _selectedOrgId = 0;
-
-      _buildOrganisations();
-      _autoSelectDefaults();
-
-      if (_selectedSupplierId > 0) {
-        await _loadDataForSupplier(_selectedSupplierId);
+      if (widget.supplierNotifier.suppliers.isEmpty) {
+        final suppliersWithAccess =
+            await _accessManager.getAccessibleSuppliersWithAccessType(
+          userId,
+          forceRefresh: true,
+        );
+        _buildSupplierList(suppliersWithAccess);
+      } else {
+        final suppliersWithAccess =
+            _accessManager.getAccessibleSuppliersWithAccessTypeSync(userId);
+        _buildSupplierList(suppliersWithAccess);
       }
 
       debugPrint('📊 Loaded ${_availableSuppliers.length} suppliers');
@@ -188,6 +179,22 @@ class DashboardContentState extends State<DashboardContent> {
       debugPrint('❌ Error: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _buildSupplierList(List<AccessibleSupplier> suppliersWithAccess) {
+    _availableSuppliers
+      ..clear()
+      ..addAll(suppliersWithAccess.map(SupplierData.fromAccessible));
+
+    _selectedSupplierId = 0;
+    _selectedOrgId = 0;
+
+    _buildOrganisations();
+    _autoSelectDefaults();
+
+    if (_selectedSupplierId > 0) {
+      _loadDataForSupplier(_selectedSupplierId);
     }
   }
 
@@ -268,8 +275,8 @@ class DashboardContentState extends State<DashboardContent> {
     final isOwner = data.accessType == SupplierAccessType.owner;
 
     const modules = [
-      _Module(DashboardScreenType.suppliersPersonnel, Icons.business_rounded,
-          'Businesses', []),
+      _Module(DashboardScreenType.suppliersPersonnel, Icons.people_rounded,
+          'Personnel', ['personnel_manage', 'personnel_view']),
       _Module(DashboardScreenType.inventory, Icons.inventory_2_rounded,
           'Inventory', ['inventory_manage', 'inventory_view']),
       _Module(DashboardScreenType.services, Icons.handyman_sharp, 'Services',
@@ -332,19 +339,24 @@ class DashboardContentState extends State<DashboardContent> {
   // UI HELPERS
   // ============================================================
 
-  Widget _buildLoading() => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator.adaptive(),
-              const SizedBox(height: 16),
-              Text('Loading dashboard...',
-                  style: Theme.of(context).textTheme.bodyMedium),
-            ],
-          ),
+  Widget _buildLoading() {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator.adaptive(),
+            const SizedBox(height: 16),
+            Text(
+              l10n?.loadingDashboard ?? 'Loading dashboard...',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildNoAccess() => NoAccessScreen(
         currentUser: widget.currentUser,
@@ -364,6 +376,7 @@ class DashboardContentState extends State<DashboardContent> {
 
   Widget _buildSelector() {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     if (_organisations.isEmpty) {
       return _buildSelectorBar(
@@ -373,7 +386,7 @@ class DashboardContentState extends State<DashboardContent> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'No organisations available.',
+                l10n?.noOrganisationsAvailable ?? 'No organisations available.',
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -404,7 +417,7 @@ class DashboardContentState extends State<DashboardContent> {
             icon: Icon(Icons.refresh_rounded,
                 size: 20, color: cs.onSurfaceVariant),
             onPressed: _loadData,
-            tooltip: 'Refresh',
+            tooltip: l10n?.refresh ?? 'Refresh',
           ),
         ],
       ),
@@ -427,6 +440,7 @@ class DashboardContentState extends State<DashboardContent> {
   Widget _buildOrganisationDropdown() {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context);
 
     return DropdownButtonHideUnderline(
       child: DropdownButton<int>(
@@ -486,6 +500,7 @@ class DashboardContentState extends State<DashboardContent> {
   Widget _buildSupplierDropdown() {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context);
     final suppliers =
         _availableSuppliers.where((s) => s.orgId == _selectedOrgId).toList();
 
@@ -498,7 +513,8 @@ class DashboardContentState extends State<DashboardContent> {
             const SizedBox(width: 4),
             Expanded(
               child: Text(
-                'No suppliers in this organisation',
+                l10n?.noSuppliersInOrganisation ??
+                    'No suppliers in this organisation',
                 style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
               ),
             ),
@@ -552,6 +568,7 @@ class DashboardContentState extends State<DashboardContent> {
       SupplierData data, ColorScheme cs, TextTheme tt) {
     final isSelected = data.id == _selectedSupplierId;
     final isOwner = data.accessType == SupplierAccessType.owner;
+    final l10n = AppLocalizations.of(context);
 
     return DropdownMenuItem<int>(
       value: data.id,
@@ -583,7 +600,9 @@ class DashboardContentState extends State<DashboardContent> {
                         color: isOwner ? cs.primary : cs.onSurfaceVariant),
                     const SizedBox(width: 2),
                     Text(
-                      isOwner ? 'Owner' : 'Managed',
+                      isOwner
+                          ? (l10n?.owner ?? 'Owner')
+                          : (l10n?.managed ?? 'Managed'),
                       style: tt.labelSmall?.copyWith(
                         color: isOwner ? cs.primary : cs.onSurfaceVariant,
                         fontSize: 9,
@@ -634,6 +653,7 @@ class DashboardContentState extends State<DashboardContent> {
     final userId = widget.currentUser.idAppUser ?? 0;
     final pending = widget.personnelNotifier.getPendingRulesForUser(userId);
     final count = pending.length;
+    final l10n = AppLocalizations.of(context);
 
     return IconButton(
       icon: Stack(
@@ -668,6 +688,7 @@ class DashboardContentState extends State<DashboardContent> {
           personnelNotifier: widget.personnelNotifier,
         ),
       ),
+      tooltip: l10n?.pendingInvitations ?? 'Pending invitations',
     );
   }
 

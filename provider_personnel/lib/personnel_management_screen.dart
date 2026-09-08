@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:app_constants/app_routes.dart';
+import 'package:event/extensions/personnel_access_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:event/user_change_notifier.dart';
@@ -25,12 +25,22 @@ class PersonnelManagementScreen extends StatefulWidget {
   final String supplierName;
   final int supplierId;
   final int orgId;
+  final bool canManagePersonnel;
+  final int userId;
+  final List<int> accessibleSuppliers;
+  final List<ManagementRule> userRules;
+  final PersonnelAccessManager? accessManager;
 
   const PersonnelManagementScreen({
     super.key,
     required this.supplierName,
     required this.orgId,
     required this.supplierId,
+    this.canManagePersonnel = true,
+    this.userId = 0,
+    this.accessibleSuppliers = const [],
+    this.userRules = const [],
+    this.accessManager,
   });
 
   @override
@@ -65,7 +75,6 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     if (!_initialized) {
       _initialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Do your work here
         _personnelNotifier = context.read<PersonnelNotifier>();
         _userNotifier = context.read<AppUserNotifier>();
 
@@ -154,7 +163,9 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
           ],
         ),
       ),
-      floatingActionButton: _buildFAB(colorScheme, localizations),
+      floatingActionButton: widget.canManagePersonnel
+          ? _buildFAB(colorScheme, localizations)
+          : null,
     );
   }
 
@@ -250,6 +261,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
           onShowPrivilegeDialog: _showPrivilegeDialog,
           onShowRemoveDialog: _showRemoveDialog,
           onCancelInvitation: _cancelInvitation,
+          canManage: widget.canManagePersonnel,
         ),
         PersonnelTabContent(
           supplierId: widget.supplierId,
@@ -258,6 +270,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
           onShowPrivilegeDialog: _showPrivilegeDialog,
           onShowRemoveDialog: _showRemoveDialog,
           onCancelInvitation: _cancelInvitation,
+          canManage: widget.canManagePersonnel,
         ),
         PendingTabContent(
           supplierId: widget.supplierId,
@@ -267,6 +280,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
           onShowRemoveDialog: _showRemoveDialog,
           onCancelInvitation: _cancelInvitation,
           onShowAddOptions: _showAddOptions,
+          canManage: widget.canManagePersonnel,
         ),
       ],
     );
@@ -357,6 +371,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
             : 'Failed to add user',
         success,
       );
+      if (success) _refreshData();
     }
   }
 

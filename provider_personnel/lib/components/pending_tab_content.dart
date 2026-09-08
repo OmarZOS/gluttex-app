@@ -11,6 +11,7 @@ class PendingTabContent extends StatelessWidget {
   final Function onShowRemoveDialog;
   final Function onCancelInvitation;
   final VoidCallback onShowAddOptions;
+  final bool canManage;
 
   const PendingTabContent({
     required this.supplierId,
@@ -20,6 +21,7 @@ class PendingTabContent extends StatelessWidget {
     required this.onShowRemoveDialog,
     required this.onCancelInvitation,
     required this.onShowAddOptions,
+    this.canManage = true,
   });
 
   @override
@@ -64,7 +66,7 @@ class PendingTabContent extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
-                    onPressed: onShowAddOptions,
+                    onPressed: canManage ? onShowAddOptions : null,
                     icon: const Icon(Icons.person_add),
                     label: const Text('Invite New Member'),
                   ),
@@ -97,8 +99,11 @@ class PendingTabContent extends StatelessWidget {
                 onRemove: () =>
                     onShowRemoveDialog(pendingRule?.idManagementRule, user),
                 // onResendInvite: () => onResendInvitation(user),
-                onCancelInvite: () =>
-                    onCancelInvitation(user, pendingRule?.idManagementRule),
+                onCancelInvite: canManage
+                    ? () =>
+                        onCancelInvitation(user, pendingRule?.idManagementRule)
+                    : null,
+                showActions: canManage,
               );
             },
           ),

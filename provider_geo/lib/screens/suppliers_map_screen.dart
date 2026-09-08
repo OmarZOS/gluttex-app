@@ -8,12 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:app_constants/app_constants.dart';
+import 'package:event/extensions/personnel_access_manager.dart';
+import 'package:event/personnel_notifier.dart';
+import 'package:event/supplier_change_notifier.dart';
 import 'package:event/user_change_notifier.dart';
 import 'package:provider_geo/screens/supplier_form_page.dart';
 import 'package:ui/components/floating_buttons.dart';
 import 'package:ui/components/supplier/supplier_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:event/supplier_change_notifier.dart';
 import 'package:provider_geo/screens/map_locations_screen.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +51,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
 
   void onDeleteLocationFilter() {
     Provider.of<SupplierChangeNotifier>(context, listen: false).fetchSuppliers(
-      reset: true, // 👈 ensures fresh search each time
+      reset: true,
     );
     setState(() {
       _selectedLocation = null;
@@ -92,9 +94,7 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
       longitude: location["longitude"],
       latitude: location["latitude"],
       radiusKm: location["radius_km"],
-      // offset: 0,
-      // itemsPerPage: 20,
-      reset: true, // 👈 ensures fresh search each time
+      reset: true,
     );
     _panelController.open();
   }
@@ -105,125 +105,172 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
     _panelController.open();
   }
 
+  // ============================================================
+  // ✅ FIX: Get dashboard data for speed dial navigation
+  // ============================================================
+
+  Future<Map<String, dynamic>> _getDashboardData() async {
+    final personnelNotifier = context.read<PersonnelNotifier>();
+    final supplierNotifier = context.read<SupplierChangeNotifier>();
+    final userNotifier = context.read<AppUserNotifier>();
+
+    final userId = userNotifier.appUser?.idAppUser ?? 0;
+
+    final accessManager = PersonnelAccessManager(
+      personnelNotifier: personnelNotifier,
+      supplierNotifier: supplierNotifier,
+    );
+
+    final userRules = personnelNotifier.getRulesForUser(userId);
+    final suppliersWithAccess =
+        await accessManager.getAccessibleSuppliersWithAccessType(
+      userId,
+      forceRefresh: false,
+    );
+    final suppliers = suppliersWithAccess.map((s) => s.supplier).toList();
+    final supplierIds = suppliersWithAccess.map((s) => s.id).toList();
+
+    return {
+      'userId': userId,
+      'supplierIds': supplierIds,
+      'userRules': userRules,
+      'suppliers': suppliers,
+      'suppliersWithAccess': suppliersWithAccess,
+    };
+  }
+
+  // ============================================================
+  // ✅ FIX: Navigate to SupplierEntitiesScreen with arguments
+  // ============================================================
+
+  Future<void> _navigateToSupplierEntities() async {
+    final data = await _getDashboardData();
+
+    if (!mounted) return;
+
+    Navigator.pushNamed(
+      context,
+      AppRoutes.supplierEntitiesPage,
+      arguments: {
+        'userId': data['userId'],
+        'accessibleSuppliers': data['supplierIds'],
+        'userRules': data['userRules'],
+        'suppliers': data['suppliers'],
+        'suppliersWithAccess': data['suppliersWithAccess'],
+      },
+    );
+  }
+
+  // ============================================================
+  // ✅ FIX: Navigate to Store Manage
+  // ============================================================
+
+  void _navigateToStoreManage() {
+    Navigator.pushNamed(context, AppRoutes.storeManage);
+  }
+
+  // ============================================================
+  // ✅ FIX: Navigate to Provider Create
+  // ============================================================
+
+  void _navigateToProviderCreate() {
+    Navigator.pushNamed(context, AppRoutes.providerCreate);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-        floatingActionButton: CustomSpeedDial(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          horizontalButtons: [
-            SpeedDialButton(
-              icon: Icon(Icons.add_business,
-                  color: Theme.of(context).colorScheme.onPrimary),
-              label: AppLocalizations.of(context)?.addSupplierTxt,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.providerCreate,
-                );
-              },
-            ),
-          ],
-          verticalButtons: [
-            // SpeedDialButton(
-            //   icon: Icon(FontAwesomeIcons.peopleGroup,
-            //       color: Theme.of(context).colorScheme.onPrimary),
-            //   label: AppLocalizations.of(context)?.personnel_manage_title,
-            //   backgroundColor: Theme.of(context).colorScheme.primary,
-            //   onTap: () {
-            //     Navigator.pushNamed(context, AppRoutes.supplierEntitiesPage);
-            //   },
-            // ),
-
-            SpeedDialButton(
-              icon: Icon(FontAwesomeIcons.moneyBill1Wave,
-                  color: Theme.of(context).colorScheme.onPrimary),
-              label: AppLocalizations.of(context)?.businesses,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.storeManage);
-              },
-            ),
-            // SpeedDialButton(
-            //   icon: Icon(Icons.dashboard,
-            //       color: Theme.of(context).colorScheme.onPrimary),
-            //   label: AppLocalizations.of(context)?.cartText,
-            //   backgroundColor: Theme.of(context).colorScheme.primary,
-            //   onTap: () {
-            //     Navigator.pushNamed(
-            //       context,
-            //       AppRoutes.dashboardPage,
-            //     );
-            //   },
-            // ),
-          ],
-        ),
-        appBar: AppBar(
-          title: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).dividerColor,
-                width: 1,
-              ),
-            ),
-            child: TextField(
-              controller: _searchController,
-              textInputAction: TextInputAction.search,
-              onChanged: _handleSearch,
-              decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)?.searchTxt,
-                prefixIcon: Icon(Icons.search_outlined,
-                    color: Theme.of(context).colorScheme.onSurface),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10),
-              ),
-              style: Theme.of(context).textTheme.bodyMedium,
+      floatingActionButton: CustomSpeedDial(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        horizontalButtons: [
+          SpeedDialButton(
+            icon: Icon(Icons.add_business,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.addSupplierTxt,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: _navigateToProviderCreate,
+          ),
+        ],
+        verticalButtons: [
+          SpeedDialButton(
+            icon: Icon(FontAwesomeIcons.peopleGroup,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.personnel_manage_title,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: _navigateToSupplierEntities,
+          ),
+          SpeedDialButton(
+            icon: Icon(FontAwesomeIcons.moneyBill1Wave,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: AppLocalizations.of(context)?.businesses,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onTap: _navigateToStoreManage,
+          ),
+        ],
+      ),
+      appBar: AppBar(
+        title: Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).dividerColor,
+              width: 1,
             ),
           ),
+          child: TextField(
+            controller: _searchController,
+            textInputAction: TextInputAction.search,
+            onChanged: _handleSearch,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)?.searchTxt,
+              prefixIcon: Icon(Icons.search_outlined,
+                  color: Theme.of(context).colorScheme.onSurface),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+            ),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
-        body: Stack(
-          children: [
-            if (kIsWeb || defaultTargetPlatform == TargetPlatform.linux)
-              Container(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.map_outlined,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      loc.mapNotAvailableText,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
-              )
-            else
-              Consumer<SupplierChangeNotifier>(
-                  builder: (context, supplierNotifier, child) {
+      ),
+      body: Stack(
+        children: [
+          if (kIsWeb || defaultTargetPlatform == TargetPlatform.linux)
+            Container(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.map_outlined,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    loc.mapNotAvailableText,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            )
+          else
+            Consumer<SupplierChangeNotifier>(
+              builder: (context, supplierNotifier, child) {
                 return MapScreen(
                   onMapCreated: (controller) => _mapController = controller,
                   userLocation: supplierNotifier.currentLocation,
                   suppliers: supplierNotifier.suppliers,
                   onSupplierTap: (supplier) {
-                    // Update global selection so dashboards and other
-                    // listeners react to this tap.
                     Provider.of<SupplierChangeNotifier>(context, listen: false)
                         .selectSupplier(supplier.idProductProvider);
 
@@ -236,39 +283,39 @@ class _SuppliersMapScreenState extends State<SuppliersMapScreen> {
                     });
                   },
                 );
-              }),
-
-            // Sliding Panel with optimized rebuilds
-            SlidingUpPanel(
-              controller: _panelController,
-              minHeight: 80,
-              maxHeight: MediaQuery.of(context).size.height * 0.6,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
-              backdropEnabled: true,
-              backdropOpacity: 0.2,
-              backdropColor: Theme.of(context).colorScheme.onSurface,
-              panelBuilder: (scrollController) {
-                // Use a separate consumer to prevent entire panel rebuilds
-                return Consumer<SupplierChangeNotifier>(
-                  builder: (context, supplierNotifier, child) {
-                    return PanelContent(
-                      suppliers: supplierNotifier.suppliers,
-                      isLoading: supplierNotifier.isLoading,
-                      scrollController: scrollController,
-                      focusOnLocation: _focusOnLocation,
-                      selectedLocation: _selectedLocation,
-                      onDeleteLocationFilter: onDeleteLocationFilter,
-                      applyLocationFilter: _applyLocationFilter,
-                    );
-                  },
-                );
               },
-              color: Theme.of(context).colorScheme.surface,
-              collapsed: _buildCollapsedPanel(context),
             ),
-          ],
-        ));
+
+          // Sliding Panel with optimized rebuilds
+          SlidingUpPanel(
+            controller: _panelController,
+            minHeight: 80,
+            maxHeight: MediaQuery.of(context).size.height * 0.6,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            backdropEnabled: true,
+            backdropOpacity: 0.2,
+            backdropColor: Theme.of(context).colorScheme.onSurface,
+            panelBuilder: (scrollController) {
+              return Consumer<SupplierChangeNotifier>(
+                builder: (context, supplierNotifier, child) {
+                  return PanelContent(
+                    suppliers: supplierNotifier.suppliers,
+                    isLoading: supplierNotifier.isLoading,
+                    scrollController: scrollController,
+                    focusOnLocation: _focusOnLocation,
+                    selectedLocation: _selectedLocation,
+                    onDeleteLocationFilter: onDeleteLocationFilter,
+                    applyLocationFilter: _applyLocationFilter,
+                  );
+                },
+              );
+            },
+            color: Theme.of(context).colorScheme.surface,
+            collapsed: _buildCollapsedPanel(context),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildCollapsedPanel(BuildContext context) {

@@ -2358,13 +2358,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addProduct => 'Add Product';
 
   @override
-  String get createNewOrder => 'Create Order';
+  String get createNewOrder => 'Create New Order';
 
   @override
   String get openCart => 'Open Cart';
 
   @override
-  String get createNewInvoice => 'Create Invoice';
+  String get createNewInvoice => 'Create New Invoice';
 
   @override
   String get add => 'Add';
@@ -2388,7 +2388,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewPendingInvitations => 'View Pending Invitations';
 
   @override
-  String get pendingInvitations => 'Pending Invitations';
+  String get pendingInvitations => 'Pending invitations';
 
   @override
   String get noPendingInvitations => 'No Pending Invitations';
@@ -5777,4 +5777,105 @@ class AppLocalizationsEn extends AppLocalizations {
   String available(Object count) {
     return 'Available: $count';
   }
+
+  @override
+  String get accessible => 'accessible';
+
+  @override
+  String get searchBusinesses => 'Search businesses...';
+
+  @override
+  String get owned => 'Owned';
+
+  @override
+  String get managed => 'Managed';
+
+  @override
+  String get noResults => 'No results found';
+
+  @override
+  String get noBusinesses => 'No businesses';
+
+  @override
+  String get owner => 'Owner';
+
+  @override
+  String get privilegesFor => 'Privileges for';
+
+  @override
+  String get noPrivileges => 'No privileges assigned.';
+
+  @override
+  String get addBusiness => 'Add Business';
+
+  @override
+  String get refreshSuccess => 'Data refreshed successfully';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get searchAndInvite => 'Search & Invite';
+
+  @override
+  String findUsersToAddTo(String supplierName) {
+    return 'Find users to add to $supplierName';
+  }
+
+  @override
+  String get searchByNameUsernameOrRole => 'Search by name, username, or role...';
+
+  @override
+  String get searchForUsers => 'Search for users';
+
+  @override
+  String get enterNameUsernameOrRole => 'Enter a name, username, or role to find people';
+
+  @override
+  String get currentTeam => 'Current Team';
+
+  @override
+  String get noUsersFound => 'No users found';
+
+  @override
+  String get tryAdjustingSearchTerms => 'Try adjusting your search terms';
+
+  @override
+  String get results => 'Results';
+
+  @override
+  String get team => 'Team';
+
+  @override
+  String get userAlreadyInTeam => 'User Already in Team';
+
+  @override
+  String get isAlreadyActiveMemberOf => 'is already an active member of';
+
+  @override
+  String get pendingInvitation => 'Pending Invitation';
+
+  @override
+  String get hasPendingInvitationFor => 'has a pending invitation for';
+
+  @override
+  String get admin => 'Admin';
+
+  @override
+  String get provider => 'Provider';
+
+  @override
+  String get manager => 'Manager';
+
+  @override
+  String get staff => 'Staff';
+
+  @override
+  String get loadingDashboard => 'Loading dashboard...';
+
+  @override
+  String get noOrganisationsAvailable => 'No organisations available.';
+
+  @override
+  String get noSuppliersInOrganisation => 'No suppliers in this organisation';
 }

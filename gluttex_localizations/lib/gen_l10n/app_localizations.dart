@@ -3037,7 +3037,7 @@ abstract class AppLocalizations {
   /// **'Terms of Use'**
   String get termsOfUse;
 
-  /// No description provided for @close.
+  /// Button to close dialog
   ///
   /// In en, this message translates to:
   /// **'Close'**
@@ -3433,7 +3433,7 @@ abstract class AppLocalizations {
   /// **'Your Order Stats'**
   String get yourOrderStats;
 
-  /// No description provided for @viewDetails.
+  /// Menu option to view business details
   ///
   /// In en, this message translates to:
   /// **'View Details'**
@@ -4591,7 +4591,7 @@ abstract class AppLocalizations {
   /// **'to cart'**
   String get toCart;
 
-  /// No description provided for @businesses.
+  /// Title for the businesses screen
   ///
   /// In en, this message translates to:
   /// **'Businesses'**
@@ -4627,10 +4627,10 @@ abstract class AppLocalizations {
   /// **'Add Product'**
   String get addProduct;
 
-  /// No description provided for @createNewOrder.
+  /// FAB action for creating new order
   ///
   /// In en, this message translates to:
-  /// **'Create Order'**
+  /// **'Create New Order'**
   String get createNewOrder;
 
   /// No description provided for @openCart.
@@ -4639,13 +4639,13 @@ abstract class AppLocalizations {
   /// **'Open Cart'**
   String get openCart;
 
-  /// No description provided for @createNewInvoice.
+  /// FAB action for creating new invoice
   ///
   /// In en, this message translates to:
-  /// **'Create Invoice'**
+  /// **'Create New Invoice'**
   String get createNewInvoice;
 
-  /// No description provided for @add.
+  /// FAB short label
   ///
   /// In en, this message translates to:
   /// **'Add'**
@@ -4687,10 +4687,10 @@ abstract class AppLocalizations {
   /// **'View Pending Invitations'**
   String get viewPendingInvitations;
 
-  /// No description provided for @pendingInvitations.
+  /// Tooltip for pending invitations button
   ///
   /// In en, this message translates to:
-  /// **'Pending Invitations'**
+  /// **'Pending invitations'**
   String get pendingInvitations;
 
   /// No description provided for @noPendingInvitations.
@@ -4855,7 +4855,7 @@ abstract class AppLocalizations {
   /// **'Paid'**
   String get paid;
 
-  /// No description provided for @pending.
+  /// Label for pending invitations
   ///
   /// In en, this message translates to:
   /// **'Pending'**
@@ -5053,7 +5053,7 @@ abstract class AppLocalizations {
   /// **'Inactive'**
   String get status_inactive;
 
-  /// No description provided for @edit.
+  /// Menu option to edit business
   ///
   /// In en, this message translates to:
   /// **'Edit'**
@@ -5257,7 +5257,7 @@ abstract class AppLocalizations {
   /// **'Source'**
   String get source;
 
-  /// No description provided for @all.
+  /// Filter option for all businesses
   ///
   /// In en, this message translates to:
   /// **'All'**
@@ -5467,7 +5467,7 @@ abstract class AppLocalizations {
   /// **'Subtotal'**
   String get subtotal;
 
-  /// No description provided for @total.
+  /// Label for total count
   ///
   /// In en, this message translates to:
   /// **'Total'**
@@ -6949,7 +6949,7 @@ abstract class AppLocalizations {
   /// **'Permission Score'**
   String get permissionScore;
 
-  /// No description provided for @privileges.
+  /// Menu option to view privileges
   ///
   /// In en, this message translates to:
   /// **'Privileges'**
@@ -6997,7 +6997,7 @@ abstract class AppLocalizations {
   /// **'View Only'**
   String get viewOnly;
 
-  /// No description provided for @manageAccess.
+  /// Menu option to manage access
   ///
   /// In en, this message translates to:
   /// **'Manage Access'**
@@ -7873,7 +7873,7 @@ abstract class AppLocalizations {
   /// **'Try adjusting your search terms'**
   String get adjustSearchTerms;
 
-  /// No description provided for @clearSearch.
+  /// Button to clear search field
   ///
   /// In en, this message translates to:
   /// **'Clear Search'**
@@ -11221,7 +11221,7 @@ abstract class AppLocalizations {
   /// **'You don\'t have any pending invitations.'**
   String get noPendingDescription;
 
-  /// No description provided for @refresh.
+  /// Tooltip for refresh button
   ///
   /// In en, this message translates to:
   /// **'Refresh'**
@@ -11364,6 +11364,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available: {count}'**
   String available(Object count);
+
+  /// Label showing count of accessible businesses
+  ///
+  /// In en, this message translates to:
+  /// **'accessible'**
+  String get accessible;
+
+  /// Hint text for search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search businesses...'**
+  String get searchBusinesses;
+
+  /// Label for owned businesses
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get owned;
+
+  /// Label for managed badge
+  ///
+  /// In en, this message translates to:
+  /// **'Managed'**
+  String get managed;
+
+  /// Message when search returns no results
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResults;
+
+  /// Message when no businesses are available
+  ///
+  /// In en, this message translates to:
+  /// **'No businesses'**
+  String get noBusinesses;
+
+  /// Label for owner badge
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get owner;
+
+  /// Dialog title for privileges
+  ///
+  /// In en, this message translates to:
+  /// **'Privileges for'**
+  String get privilegesFor;
+
+  /// Message when no privileges are assigned
+  ///
+  /// In en, this message translates to:
+  /// **'No privileges assigned.'**
+  String get noPrivileges;
+
+  /// FAB label to add business
+  ///
+  /// In en, this message translates to:
+  /// **'Add Business'**
+  String get addBusiness;
+
+  /// Success message after refresh
+  ///
+  /// In en, this message translates to:
+  /// **'Data refreshed successfully'**
+  String get refreshSuccess;
+
+  /// Error prefix for error messages
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @searchAndInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Search & Invite'**
+  String get searchAndInvite;
+
+  /// Subtitle for search dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Find users to add to {supplierName}'**
+  String findUsersToAddTo(String supplierName);
+
+  /// No description provided for @searchByNameUsernameOrRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, username, or role...'**
+  String get searchByNameUsernameOrRole;
+
+  /// No description provided for @searchForUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for users'**
+  String get searchForUsers;
+
+  /// No description provided for @enterNameUsernameOrRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name, username, or role to find people'**
+  String get enterNameUsernameOrRole;
+
+  /// No description provided for @currentTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Team'**
+  String get currentTeam;
+
+  /// No description provided for @noUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get noUsersFound;
+
+  /// No description provided for @tryAdjustingSearchTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search terms'**
+  String get tryAdjustingSearchTerms;
+
+  /// No description provided for @results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get results;
+
+  /// No description provided for @team.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get team;
+
+  /// No description provided for @userAlreadyInTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'User Already in Team'**
+  String get userAlreadyInTeam;
+
+  /// No description provided for @isAlreadyActiveMemberOf.
+  ///
+  /// In en, this message translates to:
+  /// **'is already an active member of'**
+  String get isAlreadyActiveMemberOf;
+
+  /// No description provided for @pendingInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Invitation'**
+  String get pendingInvitation;
+
+  /// No description provided for @hasPendingInvitationFor.
+  ///
+  /// In en, this message translates to:
+  /// **'has a pending invitation for'**
+  String get hasPendingInvitationFor;
+
+  /// No description provided for @admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get admin;
+
+  /// No description provided for @provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get provider;
+
+  /// No description provided for @manager.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager'**
+  String get manager;
+
+  /// No description provided for @staff.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get staff;
+
+  /// Loading text for dashboard
+  ///
+  /// In en, this message translates to:
+  /// **'Loading dashboard...'**
+  String get loadingDashboard;
+
+  /// Message when no organisations are available
+  ///
+  /// In en, this message translates to:
+  /// **'No organisations available.'**
+  String get noOrganisationsAvailable;
+
+  /// Message when no suppliers in an organisation
+  ///
+  /// In en, this message translates to:
+  /// **'No suppliers in this organisation'**
+  String get noSuppliersInOrganisation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

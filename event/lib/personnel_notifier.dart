@@ -6,8 +6,6 @@ import 'package:event/components/personnel/personnel_persistence.dart';
 import 'package:event/components/personnel/personnel_rules.dart';
 import 'package:event/components/personnel/personnel_search.dart';
 import 'package:event/components/personnel/personnel_state.dart';
-import 'package:flutter/material.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/app/Person.dart';
@@ -478,7 +476,9 @@ class PersonnelNotifier extends TraceableNotifier {
   Future<void> searchPersonnel(String query, {int supplierId = 0}) async {
     _logDebug(
         'Searching personnel for query: "$query"${supplierId > 0 ? ', supplier $supplierId' : ''}');
-    await _search.search(query, supplierId: supplierId);
+    final searchFuture = _search.search(query, supplierId: supplierId);
+    _notify();
+    await searchFuture;
     _notify();
   }
 

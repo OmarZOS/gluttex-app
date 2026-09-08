@@ -2340,7 +2340,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get toCart => 'إلى السلة';
 
   @override
-  String get businesses => 'الأعمال';
+  String get businesses => 'الشركات';
 
   @override
   String get inventory => 'المخزون';
@@ -2358,13 +2358,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addProduct => 'إضافة منتج';
 
   @override
-  String get createNewOrder => 'إنشاء طلب';
+  String get createNewOrder => 'إنشاء طلب جديد';
 
   @override
   String get openCart => 'فتح السلة';
 
   @override
-  String get createNewInvoice => 'إنشاء فاتورة';
+  String get createNewInvoice => 'إنشاء فاتورة جديدة';
 
   @override
   String get add => 'إضافة';
@@ -2388,7 +2388,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewPendingInvitations => 'عرض الدعوات المعلقة';
 
   @override
-  String get pendingInvitations => 'الدعوات المعلقة';
+  String get pendingInvitations => 'دعوات معلقة';
 
   @override
   String get noPendingInvitations => 'لا توجد دعوات معلقة';
@@ -2472,7 +2472,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paid => 'مدفوع';
 
   @override
-  String get pending => 'معلقة';
+  String get pending => 'قيد الانتظار';
 
   @override
   String get cancelled => 'ملغي';
@@ -3566,7 +3566,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewOnly => 'عرض فقط';
 
   @override
-  String get manageAccess => 'وصول للإدارة';
+  String get manageAccess => 'إدارة الصلاحيات';
 
   @override
   String get togglePrivilegeTooltip => 'تبديل الصلاحية';
@@ -3950,7 +3950,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get done => 'تم';
 
   @override
-  String get customer => 'العميل';
+  String get customer => 'عميل';
 
   @override
   String get searchCustomers => 'ابحث عن عملاء...';
@@ -5796,4 +5796,105 @@ class AppLocalizationsAr extends AppLocalizations {
   String available(Object count) {
     return 'متاح: $count';
   }
+
+  @override
+  String get accessible => 'متاحة';
+
+  @override
+  String get searchBusinesses => 'البحث عن شركات...';
+
+  @override
+  String get owned => 'مملوكة';
+
+  @override
+  String get managed => 'مدار';
+
+  @override
+  String get noResults => 'لا توجد نتائج';
+
+  @override
+  String get noBusinesses => 'لا توجد شركات';
+
+  @override
+  String get owner => 'مالك';
+
+  @override
+  String get privilegesFor => 'صلاحيات';
+
+  @override
+  String get noPrivileges => 'لا توجد صلاحيات مخصصة.';
+
+  @override
+  String get addBusiness => 'إضافة شركة';
+
+  @override
+  String get refreshSuccess => 'تم تحديث البيانات بنجاح';
+
+  @override
+  String get error => 'خطأ';
+
+  @override
+  String get searchAndInvite => 'البحث والدعوة';
+
+  @override
+  String findUsersToAddTo(String supplierName) {
+    return 'ابحث عن مستخدمين لإضافتهم إلى $supplierName';
+  }
+
+  @override
+  String get searchByNameUsernameOrRole => 'البحث بالاسم أو اسم المستخدم أو الدور...';
+
+  @override
+  String get searchForUsers => 'البحث عن مستخدمين';
+
+  @override
+  String get enterNameUsernameOrRole => 'أدخل اسمًا أو اسم مستخدم أو دورًا للعثور على أشخاص';
+
+  @override
+  String get currentTeam => 'الفريق الحالي';
+
+  @override
+  String get noUsersFound => 'لم يتم العثور على مستخدمين';
+
+  @override
+  String get tryAdjustingSearchTerms => 'حاول تعديل مصطلحات البحث الخاصة بك';
+
+  @override
+  String get results => 'النتائج';
+
+  @override
+  String get team => 'الفريق';
+
+  @override
+  String get userAlreadyInTeam => 'المستخدم موجود بالفعل في الفريق';
+
+  @override
+  String get isAlreadyActiveMemberOf => 'هو بالفعل عضو نشط في';
+
+  @override
+  String get pendingInvitation => 'دعوة معلقة';
+
+  @override
+  String get hasPendingInvitationFor => 'لديه دعوة معلقة لـ';
+
+  @override
+  String get admin => 'مدير';
+
+  @override
+  String get provider => 'مزود';
+
+  @override
+  String get manager => 'مدير';
+
+  @override
+  String get staff => 'موظف';
+
+  @override
+  String get loadingDashboard => 'جاري تحميل لوحة التحكم...';
+
+  @override
+  String get noOrganisationsAvailable => 'لا توجد مؤسسات متاحة.';
+
+  @override
+  String get noSuppliersInOrganisation => 'لا يوجد موردون في هذه المؤسسة';
 }

@@ -2557,7 +2557,213 @@
   "addServicesToGetStarted": "إضافة خدمات للبدء",
   "currencyCode": "دج",
   "selected": "محدد: {count}",
-  "available": "متاح: {count}"
+  "available": "متاح: {count}",
+    "businesses": "الشركات",
+  "@businesses": {
+    "description": "عنوان شاشة الشركات"
+  },
+  "accessible": "متاحة",
+  "@accessible": {
+    "description": "تسمية تظهر عدد الشركات المتاحة"
+  },
+  "searchBusinesses": "البحث عن شركات...",
+  "@searchBusinesses": {
+    "description": "نص تلميح لحقل البحث"
+  },
+  "total": "الإجمالي",
+  "@total": {
+    "description": "تسمية للعدد الإجمالي"
+  },
+  "owned": "مملوكة",
+  "@owned": {
+    "description": "تسمية للشركات المملوكة"
+  },
+  "managed": "مدارة",
+  "@managed": {
+    "description": "تسمية للشركات المدارة"
+  },
+  "pending": "قيد الانتظار",
+  "@pending": {
+    "description": "تسمية للدعوات المعلقة"
+  },
+  "pendingInvitations": "الدعوات المعلقة",
+  "@pendingInvitations": {
+    "description": "تسمية لفلتر الدعوات المعلقة"
+  },
+  "all": "الكل",
+  "@all": {
+    "description": "خيار فلتر لجميع الشركات"
+  },
+  "noResults": "لا توجد نتائج",
+  "@noResults": {
+    "description": "رسالة عندما لا يعود البحث بأي نتائج"
+  },
+  "noBusinesses": "لا توجد شركات",
+  "@noBusinesses": {
+    "description": "رسالة عندما لا توجد شركات متاحة"
+  },
+  "clearSearch": "مسح البحث",
+  "@clearSearch": {
+    "description": "زر لمسح حقل البحث"
+  },
+  "owner": "مالك",
+  "@owner": {
+    "description": "تسمية لشارة المالك"
+  },
+  "viewDetails": "عرض التفاصيل",
+  "@viewDetails": {
+    "description": "خيار قائمة لعرض تفاصيل الشركة"
+  },
+  "edit": "تعديل",
+  "@edit": {
+    "description": "خيار قائمة لتعديل الشركة"
+  },
+  "manageAccess": "إدارة الصلاحيات",
+  "@manageAccess": {
+    "description": "خيار قائمة لإدارة الصلاحيات"
+  },
+  "privileges": "الصلاحيات",
+  "@privileges": {
+    "description": "خيار قائمة لعرض الصلاحيات"
+  },
+  "privilegesFor": "صلاحيات",
+  "@privilegesFor": {
+    "description": "عنوان حوار الصلاحيات"
+  },
+  "noPrivileges": "لا توجد صلاحيات مخصصة.",
+  "@noPrivileges": {
+    "description": "رسالة عندما لا توجد صلاحيات مخصصة"
+  },
+  "close": "إغلاق",
+  "@close": {
+    "description": "زر لإغلاق الحوار"
+  },
+  "addBusiness": "إضافة شركة",
+  "@addBusiness": {
+    "description": "تسمية زر الإضافة للشركات"
+  },
+  "add": "إضافة",
+  "@add": {
+    "description": "تسمية قصيرة لزر الإضافة"
+  },
+  "refreshSuccess": "تم تحديث البيانات بنجاح",
+  "@refreshSuccess": {
+    "description": "رسالة نجاح بعد التحديث"
+  },
+  "error": "خطأ",
+  "@error": {
+    "description": "بادئة الخطأ لرسائل الخطأ"
+  },
+
+    "searchAndInvite": "البحث والدعوة",
+  "findUsersToAddTo": "ابحث عن مستخدمين لإضافتهم إلى {supplierName}",
+  "searchByNameUsernameOrRole": "البحث بالاسم أو اسم المستخدم أو الدور...",
+  "searchForUsers": "البحث عن مستخدمين",
+  "enterNameUsernameOrRole": "أدخل اسمًا أو اسم مستخدم أو دورًا للعثور على أشخاص",
+  "currentTeam": "الفريق الحالي",
+  "searching": "جاري البحث...",
+  "noUsersFound": "لم يتم العثور على مستخدمين",
+  "tryAdjustingSearchTerms": "حاول تعديل مصطلحات البحث الخاصة بك",
+  "clearSearch": "مسح البحث",
+  "results": "النتائج",
+  "team": "الفريق",
+  "pending": "قيد الانتظار",
+  "userAlreadyInTeam": "المستخدم موجود بالفعل في الفريق",
+  "isAlreadyActiveMemberOf": "هو بالفعل عضو نشط في",
+  "pendingInvitation": "دعوة معلقة",
+  "hasPendingInvitationFor": "لديه دعوة معلقة لـ",
+  "ok": "موافق",
+  "admin": "مدير",
+  "provider": "مزود",
+  "manager": "مدير",
+  "customer": "عميل",
+  "staff": "موظف",
+  "user": "مستخدم",
+
+    "loadingDashboard": "جاري تحميل لوحة التحكم...",
+  "@loadingDashboard": {
+    "description": "نص التحميل للوحة التحكم"
+  },
+  "noOrganisationsAvailable": "لا توجد مؤسسات متاحة.",
+  "@noOrganisationsAvailable": {
+    "description": "رسالة عند عدم توفر مؤسسات"
+  },
+  "noSuppliersInOrganisation": "لا يوجد موردون في هذه المؤسسة",
+  "@noSuppliersInOrganisation": {
+    "description": "رسالة عند عدم وجود موردين في مؤسسة"
+  },
+  "owner": "مالك",
+  "@owner": {
+    "description": "تسمية لشارة المالك"
+  },
+  "managed": "مدار",
+  "@managed": {
+    "description": "تسمية لشارة المدار"
+  },
+  "refresh": "تحديث",
+  "@refresh": {
+    "description": "تلميح لزر التحديث"
+  },
+  "pendingInvitations": "دعوات معلقة",
+  "@pendingInvitations": {
+    "description": "تلميح لزر الدعوات المعلقة"
+  },
+  "createNewOrder": "إنشاء طلب جديد",
+  "@createNewOrder": {
+    "description": "إجراء زر الإضافة لإنشاء طلب جديد"
+  },
+  "createNewInvoice": "إنشاء فاتورة جديدة",
+  "@createNewInvoice": {
+    "description": "إجراء زر الإضافة لإنشاء فاتورة جديدة"
+  },
+  "personnel": "الموظفين",
+  "@personnel": {
+    "description": "تسمية لعلامة تبويب الموظفين"
+  },
+  "inventory": "المخزون",
+  "@inventory": {
+    "description": "تسمية لعلامة تبويب المخزون"
+  },
+  "services": "الخدمات",
+  "@services": {
+    "description": "تسمية لعلامة تبويب الخدمات"
+  },
+  "seller": "البائع",
+  "@seller": {
+    "description": "تسمية لعلامة تبويب البائع"
+  },
+  "orders": "الطلبات",
+  "@orders": {
+    "description": "تسمية لعلامة تبويب الطلبات"
+  },
+  "operations": "العمليات",
+  "@operations": {
+    "description": "تسمية لعلامة تبويب العمليات"
+  },
+  "finance": "المالية",
+  "@finance": {
+    "description": "تسمية لعلامة تبويب المالية"
+  },
+  "addProduct": "إضافة منتج",
+  "@addProduct": {
+    "description": "إجراء زر الإضافة لإضافة منتج"
+  },
+  "addService": "إضافة خدمة",
+  "@addService": {
+    "description": "إجراء زر الإضافة لإضافة خدمة"
+  },
+  "addMember": "إضافة عضو",
+  "@addMember": {
+    "description": "إجراء زر الإضافة لإضافة عضو"
+  },
+  "noAccess": "تم رفض الوصول",
+  "@noAccess": {
+    "description": "عنوان شاشة رفض الوصول"
+  },
+  "noAccessDescription": "ليس لديك صلاحية الوصول إلى هذا القسم.",
+  "@noAccessDescription": {
+    "description": "وصف شاشة رفض الوصول"
+  }
 
 
 }
