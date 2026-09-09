@@ -237,7 +237,7 @@ class AppConstants {
   static const String createFeeEndpoint = '/business/fees';
   static const String getFeesEndpoint = '/business/fees';
   static const String getFeeByIdEndpoint = '/business/fees';
-  static const String getFinancialDocsEndpoint = '/business/finance'; // Adjust
+  static const String getFinancialDocsEndpoint = '/invoices'; // Adjust
 
   // ==================== Business Operations Endpoints ====================
   static const String getBusinessOperationsEndpoint = '/business/operations';

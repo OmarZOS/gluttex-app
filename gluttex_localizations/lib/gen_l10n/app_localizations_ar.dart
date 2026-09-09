@@ -5942,4 +5942,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get failedToProcessInvitation => 'فشل معالجة الدعوة';
+
+  @override
+  String get documents => 'مستندات';
+
+  @override
+  String get search => 'بحث';
+
+  @override
+  String get addDocument => 'إضافة مستند';
+
+  @override
+  String get searchDocuments => 'البحث في المستندات';
+
+  @override
+  String get searchByNumberOrCustomer => 'البحث بالرقم أو العميل';
+
+  @override
+  String get payRemaining => 'دفع المتبقي';
 }

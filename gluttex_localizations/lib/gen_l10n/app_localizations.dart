@@ -11652,6 +11652,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to process invitation'**
   String get failedToProcessInvitation;
+
+  /// No description provided for @documents.
+  ///
+  /// In en, this message translates to:
+  /// **'documents'**
+  String get documents;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @addDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Document'**
+  String get addDocument;
+
+  /// No description provided for @searchDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Documents'**
+  String get searchDocuments;
+
+  /// No description provided for @searchByNumberOrCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by number or customer'**
+  String get searchByNumberOrCustomer;
+
+  /// No description provided for @payRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Remaining'**
+  String get payRemaining;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

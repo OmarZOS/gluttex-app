@@ -2701,6 +2701,14 @@
   "invitationAcceptedSuccessfully": "Invitation accepted successfully",
   "invitationDeclinedSuccessfully": "Invitation declined successfully",
   "failedToProcessInvitation": "Failed to process invitation",
-  "noPendingInvitations": "No pending invitations"
+  "noPendingInvitations": "No pending invitations",
+
+  "documents": "documents",
+  "search": "Search",
+  "addDocument": "Add Document",
+  "searchDocuments": "Search Documents",
+  "searchByNumberOrCustomer": "Search by number or customer",
+  "payRemaining": "Pay Remaining"
+
 
 }

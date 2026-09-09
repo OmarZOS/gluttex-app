@@ -1,16 +1,26 @@
 // financial_document.dart
+import 'package:flutter/material.dart';
+
+/// Represents a financial document (invoice, receipt, deposit, etc.)
 class FinancialDocument {
-  final String documentType; // 'invoice', 'deposit', 'pending_cart', 'receipt'
+  // ==================== CORE FIELDS ====================
+
+  final String documentType;
   final int documentId;
   final String documentNumber;
   final int sourceId;
-  final String
-      sourceType; // 'cart_based', 'order_based', 'invoice_based', 'direct_invoice'
+  final String sourceType;
+
+  // ==================== PARTY FIELDS ====================
+
   final int supplierId;
   final int customerId;
-  final String customerType; // 'user', 'person', 'unknown'
+  final String customerType;
   final int customerPersonId;
   final int sellerId;
+
+  // ==================== FINANCIAL FIELDS ====================
+
   final double documentAmount;
   final DateTime issueDate;
   final DateTime? dueDate;
@@ -18,12 +28,26 @@ class FinancialDocument {
   final double totalDeposited;
   final double additionalFees;
   final double outstandingBalance;
+
+  // ==================== STATUS FIELDS ====================
+
   final String documentStatus;
   final String paymentStatus;
   final int daysIssued;
-  // final int daysOverdue;
+
+  // ==================== TIMESTAMPS ====================
+
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  // ==================== RELATED DATA ====================
+
+  final List<dynamic> payments;
+  final List<dynamic> deliveries;
+  final List<dynamic> placedOrders;
+  final List<dynamic> additionalFeesList;
+
+  // ==================== CONSTRUCTOR ====================
 
   FinancialDocument({
     required this.documentType,
@@ -46,101 +70,199 @@ class FinancialDocument {
     required this.documentStatus,
     required this.paymentStatus,
     required this.daysIssued,
-    // required this.daysOverdue,
     required this.createdAt,
     required this.updatedAt,
+    this.payments = const [],
+    this.deliveries = const [],
+    this.placedOrders = const [],
+    this.additionalFeesList = const [],
   });
 
-  int get daysUntilDue {
-    if (dueDate == null) return 0;
-    final now = DateTime.now();
-    final difference = dueDate!.difference(now);
-    return difference.inDays;
-  }
+  // ==================== FACTORY FROM JSON ====================
 
-// Getter for days overdue (0 if not overdue, positive if overdue)
-  int get daysOverdue {
-    if (dueDate == null) return 0;
-    final now = DateTime.now();
-    if (dueDate!.isBefore(now)) {
-      return now.difference(dueDate!).inDays;
-    }
-    return 0;
-  }
-
-  // Factory constructor from JSON
   factory FinancialDocument.fromJson(Map<String, dynamic> json) {
-    // Your data appears to be in array format, so we need to map indices to fields
-    // Based on your data: 'receipt', '1', 'RCPT-20251229-0001', '1', 'cart_based', '2', '1', 'user', '1', '4', '17.9700', '2025-12-29 11:51:33', '2025-12-29 11:51:33', '17.9700', '0.0000', '0.0000', '0.0000', 'completed', 'paid', 'cash', '0', '0', '2025-12-29 11:51:33', '0'
+    // Extract invoice data
+    final invoiceId = json['invoice_id'] as int? ?? 0;
+    final totalAmount = _parseDouble(json['invoice_total_amount']);
+    final status = json['invoice_status'] as String? ?? 'unpaid';
+    final dueDate = _parseDate(json['invoice_due_date']);
+    final createdAt =
+        _parseDateTime(json['invoice_created_at']) ?? DateTime.now();
+    final updatedAt =
+        _parseDateTime(json['invoice_updated_at']) ?? DateTime.now();
+    final invoiceType = json['invoice_type'] as String? ?? 'invoice';
+    final invoiceNumber = json['invoice_number'] as String? ?? '';
+    final issueDate = _parseDate(json['invoice_issue_date']) ?? DateTime.now();
+    final taxApplied = json['invoice_tax_applied'] as int? ?? 0;
 
-    // Let's assume the fields are in order, we need to map them properly
-    final issueDateStr =
-        json['issue_date'] ?? json[11] ?? DateTime.now().toString();
-    final createdAtStr =
-        json['invoice_created_at'] ?? json[13] ?? DateTime.now().toString();
-    final updatedAtStr =
-        json['invoice_updated_at'] ?? json[22] ?? DateTime.now().toString();
+    // Extract related data
+    final cartData = json['cart'] as List? ?? [];
+    final payments = json['payment'] as List? ?? [];
+    final deliveries = json['delivery'] as List? ?? [];
+    final placedOrders = json['placed_order'] as List? ?? [];
+    final additionalFees = json['additional_fee'] as List? ?? [];
 
-    // Parse amounts safely
-    final documentAmount = double.tryParse(
-            (json['document_amount'] ?? json[10] ?? '0').toString()) ??
-        0.0;
-    final totalDeposited = double.tryParse(
-            (json['total_deposited'] ?? json[14] ?? '0').toString()) ??
-        0.0;
-    final totalPaid =
-        double.tryParse((json['total_paid'] ?? json[13] ?? '0').toString()) ??
-            0.0;
-    final additionalFees = double.tryParse(
-            (json['additional_fees'] ?? json[15] ?? '0').toString()) ??
-        0.0;
+    // Extract cart data
+    int cartId = 0;
+    int providerId = 0;
+    int clientId = 0;
+    int sellerId = 0;
+    String cartStatus = '';
 
-    final outstanding = documentAmount - totalDeposited - totalPaid;
+    if (cartData.isNotEmpty) {
+      final cart = cartData[0] as Map<String, dynamic>;
+      cartId = cart['cart_id'] as int? ?? 0;
+      providerId = cart['cart_product_provider_id'] as int? ?? 0;
+      clientId = cart['cart_client_user'] as int? ?? 0;
+      sellerId = cart['cart_selling_user'] as int? ?? 0;
+      cartStatus = cart['cart_status'] as String? ?? '';
+    }
+
+    // Calculate totals from payments
+    double totalPaid = 0.0;
+    double totalDeposited = 0.0;
+    String paymentStatus = 'unpaid';
+
+    for (final payment in payments) {
+      final amount = _parseDouble(payment['payment_amount']);
+      final status = payment['payment_status'] as String? ?? 'pending';
+
+      if (status == 'completed' || status == 'paid') {
+        totalPaid += amount;
+      } else if (status == 'deposit' || status == 'deposited') {
+        totalDeposited += amount;
+      }
+    }
+
+    // Determine payment status
+    final totalReceived = totalPaid + totalDeposited;
+    if (totalReceived >= totalAmount && totalAmount > 0) {
+      paymentStatus = 'paid';
+    } else if (totalReceived > 0) {
+      paymentStatus = 'partially_paid';
+    } else {
+      paymentStatus = status; // Use invoice status as fallback
+    }
+
+    // Calculate outstanding balance
+    final outstanding = (totalAmount - totalReceived).clamp(0.0, totalAmount);
+
+    // Determine document type
+    final docType = _determineDocumentType(invoiceType, cartStatus);
+
+    // Determine source type
+    final sourceType = _determineSourceType(cartData, placedOrders);
+
+    // Calculate days issued
+    final daysIssued =
+        issueDate != null ? DateTime.now().difference(issueDate).inDays : 0;
 
     return FinancialDocument(
-      documentType:
-          json['document_type']?.toString() ?? json[0]?.toString() ?? '',
-      documentId:
-          int.tryParse((json['document_id'] ?? json[1] ?? '0').toString()) ?? 0,
+      documentType: docType,
+      documentId: invoiceId,
       documentNumber:
-          json['document_number']?.toString() ?? json[2]?.toString() ?? '',
-      sourceId:
-          int.tryParse((json['source_id'] ?? json[3] ?? '0').toString()) ?? 0,
-      sourceType: json['source_type']?.toString() ?? json[4]?.toString() ?? '',
-      supplierId:
-          int.tryParse((json['supplier_id'] ?? json[5] ?? '0').toString()) ?? 0,
-      customerId:
-          int.tryParse((json['customer_id'] ?? json[6] ?? '0').toString()) ?? 0,
-      customerType: (json['customer_type'] ?? json[7] ?? 'unknown')
-          .toString()
-          .toLowerCase(),
-      customerPersonId: int.tryParse(
-              (json['customer_person_id'] ?? json[8] ?? '0').toString()) ??
-          0,
-      sellerId:
-          int.tryParse((json['seller_id'] ?? json[9] ?? '0').toString()) ?? 0,
-      documentAmount: documentAmount,
-      issueDate: DateTime.tryParse(issueDateStr.toString()) ?? DateTime.now(),
-      dueDate: json['due_date'] != null
-          ? DateTime.tryParse(json['due_date'].toString())
-          : null,
+          invoiceNumber.isNotEmpty ? invoiceNumber : 'INV-$invoiceId',
+      sourceId: cartId,
+      sourceType: sourceType,
+      supplierId: providerId,
+      customerId: clientId,
+      customerType: 'user',
+      customerPersonId: 0,
+      sellerId: sellerId,
+      documentAmount: totalAmount,
+      issueDate: issueDate,
+      dueDate: dueDate,
       totalPaid: totalPaid,
       totalDeposited: totalDeposited,
-      additionalFees: additionalFees,
+      additionalFees: 0.0,
       outstandingBalance: outstanding,
-      documentStatus:
-          json['document_status']?.toString() ?? json[18]?.toString() ?? '',
-      paymentStatus:
-          json['payment_status']?.toString() ?? json[19]?.toString() ?? '',
-      daysIssued:
-          int.tryParse((json['days_issued'] ?? json[21] ?? '0').toString()) ??
-              0,
-      createdAt: DateTime.tryParse(createdAtStr.toString()) ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(updatedAtStr.toString()) ?? DateTime.now(),
+      documentStatus: status,
+      paymentStatus: paymentStatus,
+      daysIssued: daysIssued,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      payments: payments,
+      deliveries: deliveries,
+      placedOrders: placedOrders,
+      additionalFeesList: additionalFees,
     );
   }
 
-  // Convert to JSON
+  // ==================== HELPER METHODS ====================
+
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) {
+      try {
+        // Handle date-only strings like "2026-09-09"
+        if (value.length == 10 && value.contains('-')) {
+          final parts = value.split('-');
+          if (parts.length == 3) {
+            return DateTime(
+              int.parse(parts[0]),
+              int.parse(parts[1]),
+              int.parse(parts[2]),
+            );
+          }
+        }
+        return DateTime.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  static String _determineDocumentType(String invoiceType, String cartStatus) {
+    if (invoiceType == 'invoice') {
+      if (cartStatus == 'pending') {
+        return 'pending_cart';
+      }
+      return 'invoice';
+    }
+    if (invoiceType == 'deposit') {
+      return 'deposit';
+    }
+    if (invoiceType == 'receipt') {
+      return 'receipt';
+    }
+    return 'invoice';
+  }
+
+  static String _determineSourceType(List cartData, List placedOrders) {
+    if (cartData.isNotEmpty) {
+      return 'cart_based';
+    }
+    if (placedOrders.isNotEmpty) {
+      return 'order_based';
+    }
+    return 'invoice_based';
+  }
+
+  // ==================== CONVERT TO JSON ====================
+
   Map<String, dynamic> toJson() {
     return {
       'document_type': documentType,
@@ -163,62 +285,62 @@ class FinancialDocument {
       'document_status': documentStatus,
       'payment_status': paymentStatus,
       'days_issued': daysIssued,
-      'days_overdue': daysOverdue,
-      'invoice_created_at': createdAt.toIso8601String(),
-      'invoice_updated_at': updatedAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
     };
   }
 
-  // Helper getters
-  bool get isInvoice => documentType == 'invoice';
+  // ==================== GETTERS ====================
+
+  int get daysUntilDue {
+    if (dueDate == null) return 0;
+    final now = DateTime.now();
+    final difference = dueDate!.difference(now);
+    return difference.inDays;
+  }
+
+  int get daysOverdue {
+    if (dueDate == null) return 0;
+    final now = DateTime.now();
+    if (dueDate!.isBefore(now)) {
+      return now.difference(dueDate!).inDays;
+    }
+    return 0;
+  }
+
+  double get totalReceived => totalPaid + totalDeposited;
+
+  double get paymentPercentage {
+    if (documentAmount == 0) return 0;
+    return (totalReceived / documentAmount * 100).clamp(0, 100);
+  }
+
+  bool get isPaid => paymentStatus == 'paid' || outstandingBalance <= 0.01;
+  bool get isUnpaid => paymentStatus == 'unpaid' && outstandingBalance > 0.01;
+  bool get isPartiallyPaid =>
+      paymentStatus == 'partially_paid' && outstandingBalance > 0.01;
+  bool get isFullyPaid => isPaid;
+  bool get isCanceled => documentStatus == 'canceled';
+  bool get isOverdue => daysOverdue > 0 && !isPaid;
+
+  bool get isInvoice =>
+      documentType == 'invoice' || documentType == 'cart_with_invoice';
   bool get isDeposit => documentType == 'deposit';
   bool get isPendingCart => documentType == 'pending_cart';
   bool get isReceipt => documentType == 'receipt';
 
   bool get isCartBased => sourceType == 'cart_based';
   bool get isOrderBased => sourceType == 'order_based';
+  bool get isInvoiceBased => sourceType == 'invoice_based';
 
-  bool get isCustomerUser => customerType == 'user';
-  bool get isCustomerPerson => customerType == 'person';
+  // ==================== DISPLAY HELPERS ====================
 
-  bool get isPaid => paymentStatus.contains('paid') || outstandingBalance <= 0;
-  bool get isUnpaid => paymentStatus.contains('unpaid');
-  bool get isPartiallyPaid => paymentStatus.contains('partially_paid');
-  bool get isFullyPaid => paymentStatus.contains('fully_paid');
-  bool get isCanceled => documentStatus == 'canceled';
-
-  bool get isOverdue => daysOverdue > 0 && totalReceived < documentAmount;
-
-  // Calculate total received amount
-  double get totalReceived => totalPaid + totalDeposited;
-
-  // Calculate payment percentage
-  double get paymentPercentage {
-    if (documentAmount == 0) return 0;
-    return (totalReceived / documentAmount * 100).clamp(0, 100);
-  }
-
-  // Get formatted amount with currency symbol
-  // String get formattedAmount => 'DZD${documentAmount.toStringAsFixed(2)}';
-  // String get formattedOutstanding =>
-  // 'DZD${outstandingBalance.toStringAsFixed(2)}';
-  // String get formattedReceived => 'DZD${totalReceived.toStringAsFixed(2)}';
-
-  // Get due date formatted
-  String get formattedDueDate {
-    if (dueDate == null) return 'No due date';
-    final now = DateTime.now();
-    if (dueDate!.isBefore(now)) {
-      return 'Overdue ${daysOverdue} days';
-    }
-    return 'Due in ${dueDate!.difference(now).inDays} days';
-  }
-
-  // Get document type display name
   String get displayType {
     switch (documentType) {
       case 'invoice':
         return 'Invoice';
+      case 'cart_with_invoice':
+        return 'Cart Invoice';
       case 'deposit':
         return 'Deposit';
       case 'pending_cart':
@@ -230,164 +352,189 @@ class FinancialDocument {
     }
   }
 
-  // Get payment status display name
   String get displayPaymentStatus {
-    switch (paymentStatus) {
-      case 'fully_paid':
-        return 'Paid';
-      case 'partially_paid':
-        return 'Partial';
-      case 'unpaid':
-        return 'Unpaid';
-      case 'canceled':
-        return 'Canceled';
-      case 'deposit_received':
-        return 'Deposit';
-      case 'deposit_covers_full':
-        return 'Deposit Covers';
-      case 'deposit_partial':
-        return 'Partial Deposit';
-      default:
-        return paymentStatus;
-    }
+    if (isPaid) return 'Paid';
+    if (isPartiallyPaid) return 'Partial';
+    if (isOverdue) return 'Overdue';
+    if (isCanceled) return 'Canceled';
+    return 'Unpaid';
   }
+
+  String get formattedDueDate {
+    if (dueDate == null) return 'No due date';
+    if (isOverdue) {
+      return 'Overdue $daysOverdue days';
+    }
+    return 'Due in $daysUntilDue days';
+  }
+
+  Color get statusColor {
+    if (isPaid) return Colors.green;
+    if (isOverdue) return Colors.red;
+    if (isPartiallyPaid) return Colors.orange;
+    if (isCanceled) return Colors.grey;
+    return Colors.blue;
+  }
+
+  // ==================== COPY WITH ====================
+
+  FinancialDocument copyWith({
+    String? documentType,
+    int? documentId,
+    String? documentNumber,
+    int? sourceId,
+    String? sourceType,
+    int? supplierId,
+    int? customerId,
+    String? customerType,
+    int? customerPersonId,
+    int? sellerId,
+    double? documentAmount,
+    DateTime? issueDate,
+    DateTime? dueDate,
+    double? totalPaid,
+    double? totalDeposited,
+    double? additionalFees,
+    double? outstandingBalance,
+    String? documentStatus,
+    String? paymentStatus,
+    int? daysIssued,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    List<dynamic>? payments,
+    List<dynamic>? deliveries,
+    List<dynamic>? placedOrders,
+    List<dynamic>? additionalFeesList,
+  }) {
+    return FinancialDocument(
+      documentType: documentType ?? this.documentType,
+      documentId: documentId ?? this.documentId,
+      documentNumber: documentNumber ?? this.documentNumber,
+      sourceId: sourceId ?? this.sourceId,
+      sourceType: sourceType ?? this.sourceType,
+      supplierId: supplierId ?? this.supplierId,
+      customerId: customerId ?? this.customerId,
+      customerType: customerType ?? this.customerType,
+      customerPersonId: customerPersonId ?? this.customerPersonId,
+      sellerId: sellerId ?? this.sellerId,
+      documentAmount: documentAmount ?? this.documentAmount,
+      issueDate: issueDate ?? this.issueDate,
+      dueDate: dueDate ?? this.dueDate,
+      totalPaid: totalPaid ?? this.totalPaid,
+      totalDeposited: totalDeposited ?? this.totalDeposited,
+      additionalFees: additionalFees ?? this.additionalFees,
+      outstandingBalance: outstandingBalance ?? this.outstandingBalance,
+      documentStatus: documentStatus ?? this.documentStatus,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      daysIssued: daysIssued ?? this.daysIssued,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      payments: payments ?? this.payments,
+      deliveries: deliveries ?? this.deliveries,
+      placedOrders: placedOrders ?? this.placedOrders,
+      additionalFeesList: additionalFeesList ?? this.additionalFeesList,
+    );
+  }
+
+  // ==================== OVERRIDES ====================
+
+  @override
+  String toString() {
+    return 'FinancialDocument(documentId: $documentId, type: $documentType, amount: $documentAmount, status: $paymentStatus)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is FinancialDocument && other.documentId == documentId;
+  }
+
+  @override
+  int get hashCode => documentId.hashCode;
 }
 
-// Payment Class
+// ==================== PAYMENT CLASS ====================
+
 class Payment {
-  int paymentId;
-  int paymentInvoiceId;
-  double paymentAmount;
-  String paymentMethod;
-  String paymentStatus;
-  String paymentReference;
-  String paymentNotes;
+  final int id;
+  final int invoiceId;
+  final double amount;
+  final String method;
+  final String status;
+  final String reference;
+  final String notes;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final String? type;
 
   Payment({
-    required this.paymentId,
-    required this.paymentInvoiceId,
-    required this.paymentAmount,
-    required this.paymentMethod,
-    required this.paymentStatus,
-    required this.paymentReference,
-    required this.paymentNotes,
+    required this.id,
+    required this.invoiceId,
+    required this.amount,
+    required this.method,
+    required this.status,
+    required this.reference,
+    required this.notes,
+    required this.createdAt,
+    this.updatedAt,
+    this.type,
   });
+
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
 
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
-      paymentId: json['payment_id'] ?? 0,
-      paymentInvoiceId: json['payment_invoice_id'] ?? 0,
-      paymentAmount: (json['payment_amount'] as num?)?.toDouble() ?? 0.0,
-      paymentMethod: json['payment_method'] ?? '',
-      paymentStatus: json['payment_status'] ?? '',
-      paymentReference: json['payment_reference'] ?? '',
-      paymentNotes: json['payment_notes'] ?? '',
+      id: json['payment_id'] as int? ?? 0,
+      invoiceId: json['payment_invoice_id'] as int? ?? 0,
+      amount: _parseDouble(json['payment_amount']),
+      method: json['payment_method'] as String? ?? '',
+      status: json['payment_status'] as String? ?? '',
+      reference: json['payment_reference'] as String? ?? '',
+      notes: json['payment_notes'] as String? ?? '',
+      createdAt: _parseDateTime(json['payment_created_at']) ?? DateTime.now(),
+      updatedAt: _parseDateTime(json['payment_updated_at']),
+      type: json['payment_type'] as String?,
     );
+  }
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'payment_id': paymentId,
-      'payment_invoice_id': paymentInvoiceId,
-      'payment_amount': paymentAmount,
-      'payment_method': paymentMethod,
-      'payment_status': paymentStatus,
-      'payment_reference': paymentReference,
-      'payment_notes': paymentNotes,
+      'payment_id': id,
+      'payment_invoice_id': invoiceId,
+      'payment_amount': amount,
+      'payment_method': method,
+      'payment_status': status,
+      'payment_reference': reference,
+      'payment_notes': notes,
+      'payment_created_at': createdAt.toIso8601String(),
+      if (updatedAt != null) 'payment_updated_at': updatedAt!.toIso8601String(),
+      if (type != null) 'payment_type': type,
     };
   }
 
-  factory Payment.create({
-    required double amount,
-    required String method,
-    int invoiceId = 0,
-    String status = 'pending',
-    String reference = '',
-    String notes = '',
-  }) {
-    return Payment(
-      paymentId: 0, // Will be set by server
-      paymentInvoiceId: invoiceId,
-      paymentAmount: amount,
-      paymentMethod: method,
-      paymentStatus: status,
-      paymentReference: reference,
-      paymentNotes: notes,
-    );
-  }
+  bool get isCompleted => status == 'completed' || status == 'paid';
+  bool get isPending => status == 'pending';
+  bool get isFailed => status == 'failed' || status == 'cancelled';
 }
 
-// Deposit Class
-class Deposit {
-  int depositId;
-  double depositAmount;
-  String depositMethod;
-  int depositCartId;
-  int depositInvoiceId;
-  String depositReference;
-  String depositNotes;
-  int depositReceiptId;
-
-  Deposit({
-    required this.depositId,
-    required this.depositAmount,
-    required this.depositMethod,
-    required this.depositCartId,
-    required this.depositInvoiceId,
-    required this.depositReference,
-    required this.depositNotes,
-    required this.depositReceiptId,
-  });
-
-  factory Deposit.fromJson(Map<String, dynamic> json) {
-    return Deposit(
-      depositId: json['deposit_id'] ?? 0,
-      depositAmount: (json['deposit_amount'] as num?)?.toDouble() ?? 0.0,
-      depositMethod: json['deposit_method'] ?? '',
-      depositCartId: json['deposit_cart_id'] ?? 0,
-      depositInvoiceId: json['deposit_invoice_id'] ?? 0,
-      depositReference: json['deposit_reference'] ?? '',
-      depositNotes: json['deposit_notes'] ?? '',
-      depositReceiptId: json['deposit_receipt_id'] ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'deposit_id': depositId,
-      'deposit_amount': depositAmount,
-      'deposit_method': depositMethod,
-      'deposit_cart_id': depositCartId,
-      'deposit_invoice_id': depositInvoiceId,
-      'deposit_reference': depositReference,
-      'deposit_notes': depositNotes,
-      'deposit_receipt_id': depositReceiptId,
-    };
-  }
-
-  factory Deposit.create({
-    required double amount,
-    required String method,
-    int cartId = 0,
-    int invoiceId = 0,
-    String reference = '',
-    String notes = '',
-    int receiptId = 0,
-  }) {
-    return Deposit(
-      depositId: 0, // Will be set by server
-      depositAmount: amount,
-      depositMethod: method,
-      depositCartId: cartId,
-      depositInvoiceId: invoiceId,
-      depositReference: reference,
-      depositNotes: notes,
-      depositReceiptId: receiptId,
-    );
-  }
-}
-
-// Additional Fee Class
 class AdditionalFee {
   int additionalFeeId;
   int additionalFeePaymentId;
@@ -455,40 +602,5 @@ class AdditionalFee {
       additionalFeeUserId: userId,
       additionalFeeOnProviderId: onProviderId,
     );
-  }
-}
-
-// Payment Request Wrapper (to match your existing code)
-class PaymentRequest {
-  final String type;
-  final double amount;
-  final String notes;
-  final int? documentId;
-  final String? date;
-
-  PaymentRequest({
-    required this.type,
-    required this.amount,
-    required this.notes,
-    this.documentId,
-    this.date,
-  });
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {
-      'type': type,
-      'amount': amount,
-      'notes': notes,
-    };
-
-    if (documentId != null) {
-      data['document_id'] = documentId;
-    }
-
-    if (date != null) {
-      data['date'] = date;
-    }
-
-    return data;
   }
 }

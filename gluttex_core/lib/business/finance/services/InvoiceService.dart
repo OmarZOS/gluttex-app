@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:gluttex_core/app/TraceableService.dart';
+
 import '../../finance/FinancialDocument.dart';
 
 // FinanceDocervice.dart
-abstract class InvoiceService {
+abstract class InvoiceService extends TraceableService {
   Future<List<FinancialDocument>?>? getAllFinanceDocs(int offset, int limit,
       {int supplierId = 0,
       int personId = 0,

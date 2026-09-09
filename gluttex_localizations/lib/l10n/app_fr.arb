@@ -2877,7 +2877,14 @@
   "noPendingInvitations": "Aucune invitation en attente",
   "@noPendingInvitations": {
     "description": "Message when there are no pending invitations"
-  }
+  },
+
+    "documents": "documents",
+  "search": "Rechercher",
+  "addDocument": "Ajouter un document",
+  "searchDocuments": "Rechercher des documents",
+  "searchByNumberOrCustomer": "Rechercher par numéro ou client",
+  "payRemaining": "Payer le reste"
 
 
 

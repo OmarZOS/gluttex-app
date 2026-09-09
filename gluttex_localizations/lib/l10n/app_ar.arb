@@ -2829,7 +2829,13 @@
   "noPendingInvitations": "لا توجد دعوات معلقة",
   "@noPendingInvitations": {
     "description": "رسالة عند عدم وجود دعوات معلقة"
-  }
+  },
+    "documents": "مستندات",
+  "search": "بحث",
+  "addDocument": "إضافة مستند",
+  "searchDocuments": "البحث في المستندات",
+  "searchByNumberOrCustomer": "البحث بالرقم أو العميل",
+  "payRemaining": "دفع المتبقي"
 
 
 }

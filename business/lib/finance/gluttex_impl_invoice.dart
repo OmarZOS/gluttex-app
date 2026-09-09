@@ -2,62 +2,119 @@ library business;
 
 import 'dart:developer' as developer;
 import 'package:app_constants/app_constants.dart';
+import 'package:gluttex_core/app/ApiResponse.dart';
 import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_core/business/finance/services/InvoiceService.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:locator/locator.dart';
 
-class InvoiceServiceImpl implements InvoiceService {
+// Import the TraceableService
+
+class InvoiceServiceImpl extends InvoiceService {
+  // ==================== Constants ====================
+
+  static const String _tag = 'InvoiceServiceImpl';
+
+  // Caller key constants for traceability
+  static const String ADD_DOCUMENT = 'add_financial_document';
+  static const String DELETE_DOCUMENT = 'delete_financial_document';
+  static const String GET_ALL_DOCS = 'get_all_financial_docs';
+  static const String GET_DOCUMENT = 'get_financial_document';
+  static const String UPDATE_DOCUMENT = 'update_financial_document';
+  static const String GET_PAYMENTS = 'get_payments';
+  static const String GET_DEPOSITS = 'get_deposits';
+  static const String GET_FEES = 'get_fees';
+
+  // ==================== Helper Methods ====================
+
+  String _generateCallerKey(String method, {String? id, String? suffix}) {
+    final parts = [method];
+    if (id != null && id.isNotEmpty) parts.add(id);
+    if (suffix != null && suffix.isNotEmpty) parts.add(suffix);
+    return parts.join('_');
+  }
+
+  void _log(String message,
+      {String level = 'info', dynamic error, StackTrace? stacktrace}) {
+    if (error != null) {
+      developer.log('[$level] $message',
+          name: _tag, error: error, stackTrace: stacktrace);
+    } else {
+      developer.log('[$level] $message', name: _tag);
+    }
+  }
+
+  // ==================== Core Methods ====================
+
   @override
   Future<FinancialDocument?> addFinancialDocument(
       dynamic financialDocument) async {
+    final callerKey = _generateCallerKey(ADD_DOCUMENT,
+        suffix: DateTime.now().millisecondsSinceEpoch.toString());
+
     try {
       final storageService = AppLocator.get<StorageService>();
-
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.postPaymentEndpoint}';
-      developer.log('Adding financial document at: $url',
-          name: 'InvoiceServiceImpl');
-      developer.log('Financial document data: $financialDocument',
-          name: 'InvoiceServiceImpl');
+
+      _log('Adding financial document at: $url');
+      _log('Financial document data: $financialDocument');
 
       final result = await storageService.insert(url, financialDocument);
 
       if (result == null) {
-        developer.log('Failed to add financial document: null response',
-            name: 'InvoiceServiceImpl');
+        _log('Failed to add financial document: null response');
+        setFailureResponse(callerKey, null,
+            statusCode: 500, responseCode: 'NULL_RESPONSE');
         return null;
       }
 
-      developer.log('Financial document added successfully',
-          name: 'InvoiceServiceImpl');
-      return FinancialDocument.fromJson(result as Map<String, dynamic>);
+      final document =
+          FinancialDocument.fromJson(result as Map<String, dynamic>);
+      _log('Financial document added successfully: ${document.documentId}');
+
+      setSuccessResponse(callerKey, document,
+          statusCode: 201, responseCode: 'SUCCESS');
+      return document;
     } catch (e, stacktrace) {
-      developer.log('Error adding financial document: $e',
-          name: 'InvoiceServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'InvoiceServiceImpl');
+      _log('Error adding financial document: $e',
+          level: 'error', error: e, stacktrace: stacktrace);
+      setFailureResponse(callerKey, null,
+          statusCode: 500, responseCode: 'EXCEPTION');
       return null;
     }
   }
 
   @override
   Future<int?> deleteFinancialDocument(String financialDocumentId) async {
+    final callerKey =
+        _generateCallerKey(DELETE_DOCUMENT, id: financialDocumentId);
+
     try {
       final storageService = AppLocator.get<StorageService>();
-
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}/$financialDocumentId';
-      developer.log('Deleting financial document at: $url',
-          name: 'InvoiceServiceImpl');
+
+      _log('Deleting financial document at: $url');
 
       final result = await storageService.delete(url, financialDocumentId);
 
-      developer.log('Delete result: $result', name: 'InvoiceServiceImpl');
+      if (result != null && result > 0) {
+        _log('Financial document $financialDocumentId deleted successfully');
+        setSuccessResponse(callerKey, result,
+            statusCode: 200, responseCode: 'SUCCESS');
+      } else {
+        _log('Failed to delete financial document $financialDocumentId');
+        setFailureResponse(callerKey, result,
+            statusCode: 404, responseCode: 'NOT_FOUND');
+      }
+
       return result;
     } catch (e, stacktrace) {
-      developer.log('Error deleting financial document: $e',
-          name: 'InvoiceServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'InvoiceServiceImpl');
+      _log('Error deleting financial document: $e',
+          level: 'error', error: e, stacktrace: stacktrace);
+      setFailureResponse(callerKey, null,
+          statusCode: 500, responseCode: 'EXCEPTION');
       return null;
     }
   }
@@ -75,10 +132,15 @@ class InvoiceServiceImpl implements InvoiceService {
     int depositId = 0,
     int invoiceId = 0,
   }) async {
+    final callerKey = _generateCallerKey(
+      GET_ALL_DOCS,
+      suffix: 'offset_${offset}_limit_${limit}',
+    );
+
     try {
       final storageService = AppLocator.get<StorageService>();
 
-      // Build URL with query parameters (using GET endpoint)
+      // Build URL with query parameters
       final queryParams = <String, dynamic>{
         'offset': offset,
         'limit': limit,
@@ -95,73 +157,30 @@ class InvoiceServiceImpl implements InvoiceService {
 
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getFinancialDocsEndpoint}';
-      developer.log('Getting financial documents from: $url',
-          name: 'InvoiceServiceImpl');
-      developer.log('Query params: $queryParams', name: 'InvoiceServiceImpl');
+      _log('Getting financial documents from: $url');
+      _log('Query params: $queryParams');
 
       final responseData =
           await storageService.getAll(url, params: queryParams);
 
       if (responseData == null) {
-        developer.log('No financial documents found',
-            name: 'InvoiceServiceImpl');
+        _log('No financial documents found');
+        setSuccessResponse(callerKey, [],
+            statusCode: 200, responseCode: 'EMPTY');
         return [];
       }
 
-      List<FinancialDocument> financialDocuments = [];
+      final documents = _parseFinancialDocuments(responseData);
+      _log('Found ${documents.length} financial documents');
 
-      // Handle different response formats
-      if (responseData is List) {
-        financialDocuments = responseData
-            .map((data) {
-              try {
-                return FinancialDocument.fromJson(data as Map<String, dynamic>);
-              } catch (e) {
-                developer.log('Error parsing financial document: $e',
-                    name: 'InvoiceServiceImpl');
-                return null;
-              }
-            })
-            .where((doc) => doc != null)
-            .cast<FinancialDocument>()
-            .toList();
-      } else if (responseData is Map && responseData.containsKey('data')) {
-        final dataList = responseData['data'];
-        if (dataList is List) {
-          financialDocuments = dataList
-              .map((data) {
-                try {
-                  return FinancialDocument.fromJson(
-                      data as Map<String, dynamic>);
-                } catch (e) {
-                  developer.log('Error parsing financial document: $e',
-                      name: 'InvoiceServiceImpl');
-                  return null;
-                }
-              })
-              .where((doc) => doc != null)
-              .cast<FinancialDocument>()
-              .toList();
-        }
-      } else if (responseData is Map) {
-        // Single document returned
-        try {
-          final doc =
-              FinancialDocument.fromJson(responseData as Map<String, dynamic>);
-          financialDocuments = [doc];
-        } catch (e) {
-          developer.log('Error parsing financial document: $e',
-              name: 'InvoiceServiceImpl');
-        }
-      }
-
-      developer.log('Found ${financialDocuments.length} financial documents',
-          name: 'InvoiceServiceImpl');
-      return financialDocuments;
+      setSuccessResponse(callerKey, documents,
+          statusCode: 200, responseCode: 'SUCCESS');
+      return documents;
     } catch (e, stacktrace) {
-      developer.log('Error getting financial documents: $e',
-          name: 'InvoiceServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'InvoiceServiceImpl');
+      _log('Error getting financial documents: $e',
+          level: 'error', error: e, stacktrace: stacktrace);
+      setFailureResponse(callerKey, null,
+          statusCode: 500, responseCode: 'EXCEPTION');
       return [];
     }
   }
@@ -169,13 +188,14 @@ class InvoiceServiceImpl implements InvoiceService {
   @override
   Future<FinancialDocument?> getFinancialDocument(
       String idFinancialDocument) async {
+    final callerKey = _generateCallerKey(GET_DOCUMENT, id: idFinancialDocument);
+
     try {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}/$idFinancialDocument';
-      developer.log('Getting financial document from: $url',
-          name: 'InvoiceServiceImpl');
+      _log('Getting financial document from: $url');
 
       final responseData = await storageService.get(
         '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}',
@@ -183,26 +203,39 @@ class InvoiceServiceImpl implements InvoiceService {
       );
 
       if (responseData == null) {
-        developer.log('Financial document not found: $idFinancialDocument',
-            name: 'InvoiceServiceImpl');
+        _log('Financial document not found: $idFinancialDocument');
+        setFailureResponse(callerKey, null,
+            statusCode: 404, responseCode: 'NOT_FOUND');
         return null;
       }
 
+      FinancialDocument? document;
+
       // Handle different response formats
       if (responseData is Map) {
-        return FinancialDocument.fromJson(responseData as Map<String, dynamic>);
+        document =
+            FinancialDocument.fromJson(responseData as Map<String, dynamic>);
       } else if (responseData is List && responseData.isNotEmpty) {
-        return FinancialDocument.fromJson(
-            responseData[0] as Map<String, dynamic>);
+        document =
+            FinancialDocument.fromJson(responseData[0] as Map<String, dynamic>);
       }
 
-      developer.log('Unexpected response format: ${responseData.runtimeType}',
-          name: 'InvoiceServiceImpl');
-      return null;
+      if (document != null) {
+        _log('Financial document found: ${document.documentId}');
+        setSuccessResponse(callerKey, document,
+            statusCode: 200, responseCode: 'SUCCESS');
+      } else {
+        _log('Unexpected response format: ${responseData.runtimeType}');
+        setFailureResponse(callerKey, null,
+            statusCode: 500, responseCode: 'INVALID_FORMAT');
+      }
+
+      return document;
     } catch (e, stacktrace) {
-      developer.log('Error getting financial document: $e',
-          name: 'InvoiceServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'InvoiceServiceImpl');
+      _log('Error getting financial document: $e',
+          level: 'error', error: e, stacktrace: stacktrace);
+      setFailureResponse(callerKey, null,
+          statusCode: 500, responseCode: 'EXCEPTION');
       return null;
     }
   }
@@ -210,15 +243,16 @@ class InvoiceServiceImpl implements InvoiceService {
   @override
   Future<FinancialDocument?> updateFinancialDocument(
       FinancialDocument updatedFinancialDocument) async {
+    final callerKey = _generateCallerKey(UPDATE_DOCUMENT,
+        id: updatedFinancialDocument.documentId.toString());
+
     try {
       final storageService = AppLocator.get<StorageService>();
 
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}/${updatedFinancialDocument.documentId}';
-      developer.log('Updating financial document at: $url',
-          name: 'InvoiceServiceImpl');
-      developer.log('Update data: ${updatedFinancialDocument.toJson()}',
-          name: 'InvoiceServiceImpl');
+      _log('Updating financial document at: $url');
+      _log('Update data: ${updatedFinancialDocument.toJson()}');
 
       final result = await storageService.update(
         url,
@@ -228,18 +262,24 @@ class InvoiceServiceImpl implements InvoiceService {
       );
 
       if (result == null) {
-        developer.log('Failed to update financial document: null response',
-            name: 'InvoiceServiceImpl');
+        _log('Failed to update financial document: null response');
+        setFailureResponse(callerKey, null,
+            statusCode: 500, responseCode: 'NULL_RESPONSE');
         return null;
       }
 
-      developer.log('Financial document updated successfully',
-          name: 'InvoiceServiceImpl');
-      return FinancialDocument.fromJson(result as Map<String, dynamic>);
+      final document =
+          FinancialDocument.fromJson(result as Map<String, dynamic>);
+      _log('Financial document updated successfully: ${document.documentId}');
+
+      setSuccessResponse(callerKey, document,
+          statusCode: 200, responseCode: 'SUCCESS');
+      return document;
     } catch (e, stacktrace) {
-      developer.log('Error updating financial document: $e',
-          name: 'InvoiceServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'InvoiceServiceImpl');
+      _log('Error updating financial document: $e',
+          level: 'error', error: e, stacktrace: stacktrace);
+      setFailureResponse(callerKey, null,
+          statusCode: 500, responseCode: 'EXCEPTION');
       return null;
     }
   }
@@ -252,6 +292,11 @@ class InvoiceServiceImpl implements InvoiceService {
     int limit = 100,
     int? invoiceId,
   }) async {
+    final callerKey = _generateCallerKey(
+      GET_PAYMENTS,
+      suffix: 'offset_${offset}_limit_${limit}',
+    );
+
     try {
       final storageService = AppLocator.get<StorageService>();
 
@@ -263,17 +308,29 @@ class InvoiceServiceImpl implements InvoiceService {
 
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getPaymentsEndpoint}';
-      developer.log('Getting payments from: $url', name: 'InvoiceServiceImpl');
+      _log('Getting payments from: $url');
 
       final responseData =
           await storageService.getAll(url, params: queryParams);
 
-      if (responseData == null) return [];
+      if (responseData == null) {
+        _log('No payments found');
+        setSuccessResponse(callerKey, [],
+            statusCode: 200, responseCode: 'EMPTY');
+        return [];
+      }
 
-      return _parseFinancialDocuments(responseData);
+      final documents = _parseFinancialDocuments(responseData);
+      _log('Found ${documents.length} payments');
+
+      setSuccessResponse(callerKey, documents,
+          statusCode: 200, responseCode: 'SUCCESS');
+      return documents;
     } catch (e, stacktrace) {
-      developer.log('Error getting payments: $e', name: 'InvoiceServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'InvoiceServiceImpl');
+      _log('Error getting payments: $e',
+          level: 'error', error: e, stacktrace: stacktrace);
+      setFailureResponse(callerKey, null,
+          statusCode: 500, responseCode: 'EXCEPTION');
       return [];
     }
   }
@@ -284,6 +341,11 @@ class InvoiceServiceImpl implements InvoiceService {
     int limit = 100,
     int? cartId,
   }) async {
+    final callerKey = _generateCallerKey(
+      GET_DEPOSITS,
+      suffix: 'offset_${offset}_limit_${limit}',
+    );
+
     try {
       final storageService = AppLocator.get<StorageService>();
 
@@ -295,17 +357,29 @@ class InvoiceServiceImpl implements InvoiceService {
 
       final url =
           '${AppConstants.apiBaseUrl}${AppConstants.getDepositsEndpoint}';
-      developer.log('Getting deposits from: $url', name: 'InvoiceServiceImpl');
+      _log('Getting deposits from: $url');
 
       final responseData =
           await storageService.getAll(url, params: queryParams);
 
-      if (responseData == null) return [];
+      if (responseData == null) {
+        _log('No deposits found');
+        setSuccessResponse(callerKey, [],
+            statusCode: 200, responseCode: 'EMPTY');
+        return [];
+      }
 
-      return _parseFinancialDocuments(responseData);
+      final documents = _parseFinancialDocuments(responseData);
+      _log('Found ${documents.length} deposits');
+
+      setSuccessResponse(callerKey, documents,
+          statusCode: 200, responseCode: 'SUCCESS');
+      return documents;
     } catch (e, stacktrace) {
-      developer.log('Error getting deposits: $e', name: 'InvoiceServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'InvoiceServiceImpl');
+      _log('Error getting deposits: $e',
+          level: 'error', error: e, stacktrace: stacktrace);
+      setFailureResponse(callerKey, null,
+          statusCode: 500, responseCode: 'EXCEPTION');
       return [];
     }
   }
@@ -317,6 +391,11 @@ class InvoiceServiceImpl implements InvoiceService {
     int? providerId,
     int? userId,
   }) async {
+    final callerKey = _generateCallerKey(
+      GET_FEES,
+      suffix: 'offset_${offset}_limit_${limit}',
+    );
+
     try {
       final storageService = AppLocator.get<StorageService>();
 
@@ -328,58 +407,109 @@ class InvoiceServiceImpl implements InvoiceService {
       if (userId != null) queryParams['user_id'] = userId;
 
       final url = '${AppConstants.apiBaseUrl}${AppConstants.getFeesEndpoint}';
-      developer.log('Getting fees from: $url', name: 'InvoiceServiceImpl');
+      _log('Getting fees from: $url');
 
       final responseData =
           await storageService.getAll(url, params: queryParams);
 
-      if (responseData == null) return [];
+      if (responseData == null) {
+        _log('No fees found');
+        setSuccessResponse(callerKey, [],
+            statusCode: 200, responseCode: 'EMPTY');
+        return [];
+      }
 
-      return _parseFinancialDocuments(responseData);
+      final documents = _parseFinancialDocuments(responseData);
+      _log('Found ${documents.length} fees');
+
+      setSuccessResponse(callerKey, documents,
+          statusCode: 200, responseCode: 'SUCCESS');
+      return documents;
     } catch (e, stacktrace) {
-      developer.log('Error getting fees: $e', name: 'InvoiceServiceImpl');
-      developer.log('Stacktrace: $stacktrace', name: 'InvoiceServiceImpl');
+      _log('Error getting fees: $e',
+          level: 'error', error: e, stacktrace: stacktrace);
+      setFailureResponse(callerKey, null,
+          statusCode: 500, responseCode: 'EXCEPTION');
       return [];
     }
   }
+
+  // ==================== Helper Methods ====================
 
   /// Helper method to parse financial documents from response
   List<FinancialDocument> _parseFinancialDocuments(dynamic responseData) {
     List<FinancialDocument> documents = [];
 
-    if (responseData is List) {
-      documents = responseData
-          .map((data) {
-            try {
-              return FinancialDocument.fromJson(data as Map<String, dynamic>);
-            } catch (e) {
-              developer.log('Error parsing financial document: $e',
-                  name: 'InvoiceServiceImpl');
-              return null;
-            }
-          })
-          .where((doc) => doc != null)
-          .cast<FinancialDocument>()
-          .toList();
-    } else if (responseData is Map && responseData.containsKey('data')) {
-      final dataList = responseData['data'];
-      if (dataList is List) {
-        documents = dataList
+    try {
+      if (responseData is List) {
+        documents = responseData
             .map((data) {
               try {
                 return FinancialDocument.fromJson(data as Map<String, dynamic>);
               } catch (e) {
-                developer.log('Error parsing financial document: $e',
-                    name: 'InvoiceServiceImpl');
+                _log('Error parsing financial document: $e', level: 'warning');
                 return null;
               }
             })
             .where((doc) => doc != null)
             .cast<FinancialDocument>()
             .toList();
+      } else if (responseData is Map && responseData.containsKey('data')) {
+        final dataList = responseData['data'];
+        if (dataList is List) {
+          documents = dataList
+              .map((data) {
+                try {
+                  return FinancialDocument.fromJson(
+                      data as Map<String, dynamic>);
+                } catch (e) {
+                  _log('Error parsing financial document: $e',
+                      level: 'warning');
+                  return null;
+                }
+              })
+              .where((doc) => doc != null)
+              .cast<FinancialDocument>()
+              .toList();
+        }
+      } else if (responseData is Map) {
+        // Single document
+        try {
+          final doc =
+              FinancialDocument.fromJson(responseData as Map<String, dynamic>);
+          documents = [doc];
+        } catch (e) {
+          _log('Error parsing financial document: $e', level: 'warning');
+        }
       }
+    } catch (e) {
+      _log('Error parsing financial documents: $e', level: 'error');
     }
 
     return documents;
+  }
+
+  // ==================== Traceability Helper Methods ====================
+
+  /// Get the response for the last add operation
+  TraceableResponse? getLastAddResponse() {
+    return getResponse(ADD_DOCUMENT);
+  }
+
+  /// Get the response for a specific delete operation
+  TraceableResponse? getDeleteResponse(String documentId) {
+    final key = _generateCallerKey(DELETE_DOCUMENT, id: documentId);
+    return getResponse(key);
+  }
+
+  /// Get the response for a specific get operation
+  TraceableResponse? getDocumentResponse(String documentId) {
+    final key = _generateCallerKey(GET_DOCUMENT, id: documentId);
+    return getResponse(key);
+  }
+
+  /// Check if the last add was successful
+  bool wasLastAddSuccessful() {
+    return isSuccess(ADD_DOCUMENT);
   }
 }

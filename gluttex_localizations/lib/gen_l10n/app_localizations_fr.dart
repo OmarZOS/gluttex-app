@@ -5923,4 +5923,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get failedToProcessInvitation => 'Échec du traitement de l\'invitation';
+
+  @override
+  String get documents => 'documents';
+
+  @override
+  String get search => 'Rechercher';
+
+  @override
+  String get addDocument => 'Ajouter un document';
+
+  @override
+  String get searchDocuments => 'Rechercher des documents';
+
+  @override
+  String get searchByNumberOrCustomer => 'Rechercher par numéro ou client';
+
+  @override
+  String get payRemaining => 'Payer le reste';
 }
