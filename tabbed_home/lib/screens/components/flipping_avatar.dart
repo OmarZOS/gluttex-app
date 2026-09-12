@@ -1,214 +1,46 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+/// A circular avatar that flips to reveal a QR code.
+///
+/// Tap the avatar (or the small button) to flip between:
+///   Front — user profile image (or a placeholder icon)
+///   Back  — QR code containing [qrData]
 class FlippingAvatar extends StatefulWidget {
   final String? imageUrl;
   final String qrData;
   final double size;
-  final Color borderColor;
-  final Color backgroundColor;
+  final Color? borderColor;
+  final Color? backgroundColor;
 
   const FlippingAvatar({
-    Key? key,
+    super.key,
     required this.imageUrl,
     required this.qrData,
     this.size = 100,
-    this.borderColor = Colors.blue,
-    this.backgroundColor = Colors.white,
-  }) : super(key: key);
+    this.borderColor,
+    this.backgroundColor,
+  });
 
   @override
   State<FlippingAvatar> createState() => _FlippingAvatarState();
 }
 
 class _FlippingAvatarState extends State<FlippingAvatar>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-  bool _showFront = true;
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _flip;
 
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
       vsync: this,
+      duration: const Duration(milliseconds: 600),
     );
-
-    _animation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-  }
-
-  void _toggle() {
-    if (_showFront) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
-    setState(() {
-      _showFront = !_showFront;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _toggle,
-      child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: Stack(
-            children: [
-              AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return Transform(
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001) // Perspective
-                      ..rotateY(
-                          _animation.value * 3.14159), // 180 degrees in radians
-                    alignment: Alignment.center,
-                    child: _showFront ? _buildFrontFace() : _buildBackFace(),
-                  );
-                },
-              ),
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: GestureDetector(
-                  onTap: _toggle,
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      _showFront ? Icons.qr_code_2 : Icons.person,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ),
-              )
-            ],
-          )),
-    );
-  }
-
-  Widget _buildFrontFace() {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: widget.borderColor,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: CircleAvatar(
-        radius: widget.size,
-        backgroundColor: widget.backgroundColor,
-        child: widget.imageUrl != null
-            ? ClipOval(
-                child: Image.network(
-                  widget.imageUrl!,
-                  width: widget.size * 2,
-                  height: widget.size * 2,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return _buildPlaceholder();
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      width: widget.size * 2,
-                      height: widget.size * 2,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              )
-            : _buildPlaceholder(),
-      ),
-    );
-  }
-
-  Widget _buildBackFace() {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: widget.borderColor,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: CircleAvatar(
-        radius: widget.size,
-        backgroundColor: widget.backgroundColor,
-        child: Padding(
-          padding: EdgeInsets.all(widget.size * 0.1),
-          child: QrImageView(
-            data: widget.qrData,
-            version: QrVersions.auto,
-            size: widget.size * 1.5,
-            eyeStyle: const QrEyeStyle(
-              eyeShape: QrEyeShape.square,
-              color: Colors.black,
-            ),
-            dataModuleStyle: const QrDataModuleStyle(
-              dataModuleShape: QrDataModuleShape.square,
-              color: Colors.black,
-            ),
-            // Add a scan animation overlay
-            // embeddedImage: const AssetImage('assets/images/scan_icon.png'),
-            embeddedImageStyle: QrEmbeddedImageStyle(
-              size: Size(widget.size * 0.3, widget.size * 0.3),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder() {
-    return Icon(
-      Icons.person,
-      size: widget.size * 0.8,
-      color: Colors.grey[600],
+    _flip = Tween<double>(begin: 0, end: math.pi).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
 
@@ -216,5 +48,223 @@ class _FlippingAvatarState extends State<FlippingAvatar>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _toggle() {
+    if (_controller.isAnimating) return;
+    if (_controller.value < 0.5) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  /// True when the back face should be visible.
+  bool get _isBackFaceVisible => _controller.value > 0.5;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final diameter = widget.size * 2;
+
+    return GestureDetector(
+      onTap: _toggle,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: SizedBox(
+          width: diameter,
+          height: diameter,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              AnimatedBuilder(
+                animation: _flip,
+                builder: (context, _) {
+                  final angle = _flip.value;
+                  final isBack = angle > math.pi / 2;
+
+                  return Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(angle),
+                    child: isBack
+                        // Counter-rotate the back face so its content isn't mirrored.
+                        ? Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()..rotateY(math.pi),
+                            child: _buildBackFace(context, scheme),
+                          )
+                        : _buildFrontFace(context, scheme),
+                  );
+                },
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: _FlipButton(
+                  isFrontVisible: !_isBackFaceVisible,
+                  onTap: _toggle,
+                  scheme: scheme,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==================== FACES ====================
+
+  Widget _buildFrontFace(BuildContext context, ColorScheme scheme) {
+    return _Face(
+      size: widget.size,
+      borderColor: widget.borderColor ?? scheme.primary,
+      backgroundColor: widget.backgroundColor ?? scheme.surfaceContainerHighest,
+      child: _buildAvatarContent(context, scheme),
+    );
+  }
+
+  Widget _buildBackFace(BuildContext context, ColorScheme scheme) {
+    return _Face(
+      size: widget.size,
+      borderColor: widget.borderColor ?? scheme.primary,
+      backgroundColor: widget.backgroundColor ?? scheme.surface,
+      child: Padding(
+        padding: EdgeInsets.all(widget.size * 0.15),
+        child: QrImageView(
+          data: widget.qrData,
+          version: QrVersions.auto,
+          backgroundColor: Colors.transparent,
+          eyeStyle: QrEyeStyle(
+            eyeShape: QrEyeShape.square,
+            color: scheme.onSurface,
+          ),
+          dataModuleStyle: QrDataModuleStyle(
+            dataModuleShape: QrDataModuleShape.square,
+            color: scheme.onSurface,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatarContent(BuildContext context, ColorScheme scheme) {
+    final url = widget.imageUrl;
+    if (url == null || url.isEmpty) {
+      return Icon(
+        Icons.person_rounded,
+        size: widget.size * 0.9,
+        color: scheme.onSurfaceVariant,
+      );
+    }
+
+    return ClipOval(
+      child: Image.network(
+        url,
+        width: widget.size * 2,
+        height: widget.size * 2,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Center(
+            child: SizedBox(
+              width: widget.size * 0.4,
+              height: widget.size * 0.4,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                value: progress.expectedTotalBytes != null
+                    ? progress.cumulativeBytesLoaded /
+                        progress.expectedTotalBytes!
+                    : null,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (_, __, ___) => Icon(
+          Icons.person_rounded,
+          size: widget.size * 0.9,
+          color: scheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+// ==================== SHARED CIRCULAR FRAME ====================
+
+/// The circular border + shadow + background shared by both faces.
+/// Eliminates duplication between front and back.
+class _Face extends StatelessWidget {
+  final double size;
+  final Color borderColor;
+  final Color backgroundColor;
+  final Widget child;
+
+  const _Face({
+    required this.size,
+    required this.borderColor,
+    required this.backgroundColor,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size * 2,
+      height: size * 2,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: backgroundColor,
+        border: Border.all(color: borderColor, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Center(child: child),
+    );
+  }
+}
+
+// ==================== FLIP BUTTON ====================
+
+/// Small floating action button that sits on the avatar's corner.
+class _FlipButton extends StatelessWidget {
+  final bool isFrontVisible;
+  final VoidCallback onTap;
+  final ColorScheme scheme;
+
+  const _FlipButton({
+    required this.isFrontVisible,
+    required this.onTap,
+    required this.scheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: scheme.primary,
+      shape: const CircleBorder(),
+      elevation: 3,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Icon(
+            isFrontVisible ? Icons.qr_code_2_rounded : Icons.person_rounded,
+            color: scheme.onPrimary,
+            size: 22,
+          ),
+        ),
+      ),
+    );
   }
 }

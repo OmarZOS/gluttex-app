@@ -1,10 +1,8 @@
 import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:tabbed_home/screens/PasswordChangeScreen.dart';
 import 'package:tabbed_home/screens/PdfViewerScreen.dart';
-import 'package:tabbed_home/screens/app_user_update_form_screen.dart';
 import 'package:event/user_change_notifier.dart';
 import 'package:event/preferenceChangeNotifier.dart';
 import 'package:health/screens/informations_screen.dart';
@@ -15,213 +13,248 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.settingsTitle),
-        elevation: 0,
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.only(top: 16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _SettingsSection(
-                  title: AppLocalizations.of(context)!.appearanceText,
-                  children: [
-                    Consumer<LocaleProvider>(
-                      builder: (context, localeProvider, child) =>
-                          _LanguageTile(localeProvider: localeProvider),
-                    ),
-                    const SizedBox(height: 8),
-                    _ThemeModeTile(),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Consumer<AppUserNotifier>(
-                  builder: (context, authProvider, child) {
-                    return _SettingsSection(
-                      title: AppLocalizations.of(context)!.accountText,
-                      children: [
-                        if (authProvider.isAuthenticated)
-                          Column(
-                            children: [
-                              _ProfileUpdateTile(),
-                              const SizedBox(height: 8),
-                              _PasswordUpdateTile(),
-                              const SizedBox(height: 8),
-                            ],
-                          ),
-                        _LegalDocumentsTile(),
-                        const SizedBox(height: 8),
-                        _AboutTile(),
-                        const SizedBox(height: 8),
-                        _LogOutTile(
-                          () => _handleLogout(context, authProvider),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ]),
+      appBar: AppBar(title: Text(loc.settingsTitle)),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        children: [
+          _Section(
+            title: loc.appearanceText,
+            children: const [
+              _LanguageTile(),
+              _ThemeModeTile(),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Consumer<AppUserNotifier>(
+            builder: (context, auth, _) => _Section(
+              title: loc.accountText,
+              children: [
+                if (auth.isAuthenticated) ...[
+                  _ProfileUpdateTile(),
+                  _PasswordUpdateTile(),
+                ],
+                const _LegalDocumentsTile(),
+                const _AboutTile(),
+                _AuthActionTile(auth: auth),
+              ],
             ),
           ),
         ],
       ),
     );
   }
-
-  void _handleLogout(BuildContext context, AppUserNotifier authProvider) {
-    if (authProvider.isAuthenticated) {
-      // Show confirmation dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.loggingOutText),
-            content: Text(AppLocalizations.of(context)!.logoutConsentText),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancelTxt),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close dialog
-                  _performLogout(context, authProvider);
-                },
-                child: Text(AppLocalizations.of(context)!.logoutText),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      // User is not logged in - navigate to login
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.login,
-        (route) => false,
-      );
-    }
-  }
-
-  void _performLogout(BuildContext context, AppUserNotifier authProvider) {
-    // Close settings screen first
-    Navigator.pop(context);
-
-    // Sign out from auth provider
-    authProvider.signOut();
-
-    // Navigate to login screen and remove all routes
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      AppRoutes.login,
-      (route) => false,
-    );
-
-    // Optional: Show logout success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.logoutText),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 }
 
-class _SettingsSection extends StatelessWidget {
+// ==================== SECTION ====================
+
+/// Groups related tiles under a labeled, rounded card.
+class _Section extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _SettingsSection({
-    required this.title,
-    required this.children,
-  });
+  const _Section({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          padding: const EdgeInsets.fromLTRB(28, 0, 28, 8),
           child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+            title.toUpperCase(),
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.primary,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
           ),
         ),
         Card(
           margin: const EdgeInsets.symmetric(horizontal: 16),
+          elevation: 0,
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(20),
           ),
-          child: Column(children: children),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: _interleaveDividers(children),
+          ),
         ),
       ],
     );
   }
+
+  /// Inserts thin dividers between tiles, respecting the section's horizontal inset.
+  List<Widget> _interleaveDividers(List<Widget> items) {
+    if (items.length <= 1) return items;
+
+    return [
+      for (var i = 0; i < items.length; i++) ...[
+        items[i],
+        if (i < items.length - 1)
+          const Divider(
+            height: 1,
+            indent: 72,
+            endIndent: 16,
+            thickness: 0.5,
+          ),
+      ],
+    ];
+  }
 }
 
-class _LanguageTile extends StatelessWidget {
-  final LocaleProvider localeProvider;
+// ==================== TILE PRIMITIVE ====================
 
-  const _LanguageTile({required this.localeProvider});
+/// A consistent, well-spaced settings tile with a colored leading icon.
+///
+/// Every settings row uses this so spacing, icon sizing, and colors
+/// stay uniform across the entire screen.
+class _SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final Color? iconColor;
+  final Color? titleColor;
+
+  const _SettingsTile({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+    this.iconColor,
+    this.titleColor,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final effectiveIconColor = iconColor ?? scheme.primary;
+
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-          shape: BoxShape.circle,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: _LeadingIcon(icon: icon, color: effectiveIconColor),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: titleColor ?? scheme.onSurface,
         ),
-        child: const Icon(Icons.language),
       ),
-      title: Text(AppLocalizations.of(context)!.languageText),
-      // subtitle: Text(
-      //   AppLocalizations.of(context)!
-      //       .currentLanguage(localeProvider.languagePreference ?? ""),
-      //   style: Theme.of(context).textTheme.bodySmall,
-      // ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => _showLanguageDialog(context),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle!,
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            )
+          : null,
+      trailing: trailing ??
+          (onTap != null
+              ? Icon(Icons.chevron_right_rounded,
+                  color: scheme.onSurfaceVariant)
+              : null),
+      onTap: onTap,
+    );
+  }
+}
+
+/// Rounded tinted square behind a settings icon — replaces the old circle
+/// pattern for a more modern Material 3 feel.
+class _LeadingIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+
+  const _LeadingIcon({required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, color: color, size: 20),
+    );
+  }
+}
+
+// ==================== INDIVIDUAL TILES ====================
+
+class _LanguageTile extends StatelessWidget {
+  const _LanguageTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final provider = context.watch<LocaleProvider>();
+    final current = _languageName(provider.languagePreference);
+
+    return _SettingsTile(
+      icon: Icons.translate_rounded,
+      title: loc.languageText,
+      subtitle: current,
+      onTap: () => _showLanguageSheet(context, provider),
     );
   }
 
-  void _showLanguageDialog(BuildContext context) {
-    showDialog(
+  String _languageName(String? code) {
+    switch (code) {
+      case 'en':
+        return 'English';
+      case 'fr':
+        return 'Français';
+      case 'ar':
+        return 'العربية';
+      default:
+        return 'English';
+    }
+  }
+
+  void _showLanguageSheet(BuildContext context, LocaleProvider provider) {
+    final loc = AppLocalizations.of(context)!;
+
+    showModalBottomSheet(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.selectLanguageText),
-          content: Column(
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _LanguageOption(
-                language: 'English',
-                locale: const Locale('en'),
-                localeProvider: localeProvider,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                child: Text(
+                  loc.selectLanguageText,
+                  style: Theme.of(sheetContext).textTheme.titleLarge,
+                ),
               ),
-              const Divider(height: 1),
               _LanguageOption(
-                language: 'Français',
-                locale: const Locale('fr'),
-                localeProvider: localeProvider,
+                label: 'English',
+                code: 'en',
+                provider: provider,
               ),
-              const Divider(height: 1),
               _LanguageOption(
-                language: 'العربية',
-                locale: const Locale('ar'),
-                localeProvider: localeProvider,
+                label: 'Français',
+                code: 'fr',
+                provider: provider,
               ),
+              _LanguageOption(
+                label: 'العربية',
+                code: 'ar',
+                provider: provider,
+              ),
+              const SizedBox(height: 8),
             ],
           ),
         );
@@ -231,284 +264,270 @@ class _LanguageTile extends StatelessWidget {
 }
 
 class _LanguageOption extends StatelessWidget {
-  final String language;
-  final Locale locale;
-  final LocaleProvider localeProvider;
+  final String label;
+  final String code;
+  final LocaleProvider provider;
 
   const _LanguageOption({
-    required this.language,
-    required this.locale,
-    required this.localeProvider,
+    required this.label,
+    required this.code,
+    required this.provider,
   });
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isSelected = provider.languagePreference == code;
+
     return ListTile(
-      title: Text(language),
-      trailing: localeProvider.languagePreference == locale.languageCode
-          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+      title: Text(
+        label,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          color: isSelected ? scheme.primary : scheme.onSurface,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle_rounded, color: scheme.primary)
           : null,
       onTap: () async {
-        await localeProvider.setLanguagePreference(locale.languageCode);
-        localeProvider.setLocale(locale);
-        Navigator.pop(context);
+        await provider.setLanguagePreference(code);
+        provider.setLocale(Locale(code));
+        if (context.mounted) Navigator.pop(context);
       },
     );
   }
 }
 
 class _ThemeModeTile extends StatelessWidget {
+  const _ThemeModeTile();
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<LocaleProvider>(
-      builder: (context, localeProvider, _) {
-        final isDarkMode = localeProvider.isDarkMode ??
-            MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final loc = AppLocalizations.of(context)!;
+    final provider = context.watch<LocaleProvider>();
+    final isDark = provider.isDarkMode ??
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
 
-        return ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isDarkMode ? Icons.dark_mode : Icons.light_mode,
-            ),
-          ),
-          title: Text(AppLocalizations.of(context)!.darkModeText),
-          trailing: Switch.adaptive(
-            value: isDarkMode,
-            onChanged: (value) => localeProvider.toggleTheme(),
-            activeColor: Theme.of(context).colorScheme.primary,
-          ),
-        );
-      },
+    return _SettingsTile(
+      icon: isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+      title: loc.darkModeText,
+      trailing: Switch.adaptive(
+        value: isDark,
+        onChanged: (_) => provider.toggleTheme(),
+      ),
     );
   }
 }
 
 class _ProfileUpdateTile extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    AppUserNotifier notifier =
-        Provider.of<AppUserNotifier>(context, listen: false);
-    return ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.person),
-        ),
-        title: Text(AppLocalizations.of(context)!.profileUpdateText),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => Navigator.pushNamed(
-              context,
-              AppRoutes.userEdit,
-              arguments: {"user": notifier.appUser},
-            ));
-  }
-}
+  const _ProfileUpdateTile();
 
-class _PasswordUpdateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.lock),
-      ),
-      title: Text(AppLocalizations.of(context)!.passwordUpdateText),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => Navigator.push(
+    final loc = AppLocalizations.of(context)!;
+    final user = context.read<AppUserNotifier>().appUser;
+
+    return _SettingsTile(
+      icon: Icons.person_outline_rounded,
+      title: loc.profileUpdateText,
+      onTap: () => Navigator.pushNamed(
         context,
-        MaterialPageRoute(
-          builder: (context) => const PasswordChangeScreen(),
-        ),
+        AppRoutes.userEdit,
+        arguments: {'user': user},
       ),
     );
   }
 }
 
-class _LogOutTile extends StatelessWidget {
-  final VoidCallback onLogout;
-
-  const _LogOutTile(this.onLogout);
+class _PasswordUpdateTile extends StatelessWidget {
+  const _PasswordUpdateTile();
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppUserNotifier>(
-      builder: (context, authProvider, child) {
-        return ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              authProvider.isAuthenticated ? Icons.logout : Icons.login,
-            ),
-          ),
-          title: Text(
-            authProvider.isAuthenticated
-                ? AppLocalizations.of(context)!.logoutText
-                : AppLocalizations.of(context)!.loginText,
-          ),
-          onTap: onLogout,
-        );
-      },
+    final loc = AppLocalizations.of(context)!;
+
+    return _SettingsTile(
+      icon: Icons.lock_outline_rounded,
+      title: loc.passwordUpdateText,
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PasswordChangeScreen()),
+      ),
     );
   }
 }
 
 class _LegalDocumentsTile extends StatelessWidget {
+  const _LegalDocumentsTile();
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.description),
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      title: Text(AppLocalizations.of(context)!.legalDocumentsTitle),
-      onTap: () => _showLegalDocumentsDialog(context),
+    final loc = AppLocalizations.of(context)!;
+
+    return _SettingsTile(
+      icon: Icons.gavel_rounded,
+      title: loc.legalDocumentsTitle,
+      onTap: () => _showDocumentsSheet(context),
     );
   }
 
-  void _showLegalDocumentsDialog(BuildContext context) {
-    showDialog(
+  void _showDocumentsSheet(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.legalDocumentsTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildDocumentOption(
-              context,
-              icon: Icons.privacy_tip,
-              title: AppLocalizations.of(context)!.privacyPolicy,
-              onTap: () => _openPdfViewer(
-                context,
-                screenTitle: AppLocalizations.of(context)!.privacyPolicy,
-                title: AppLocalizations.of(context)!.privacyPolicy,
-                docType: "policy",
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+                child: Text(
+                  loc.legalDocumentsTitle,
+                  style: Theme.of(sheetContext).textTheme.titleLarge,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _buildDocumentOption(
-              context,
-              icon: Icons.assignment,
-              title: AppLocalizations.of(context)!.termsOfUse,
-              onTap: () => _openPdfViewer(context,
-                  title: AppLocalizations.of(context)!.termsOfUse,
-                  docType: 'terms',
-                  screenTitle: AppLocalizations.of(context)!.termsOfUse
-                  // assetPath: 'assets/documents/terms_of_use.pdf',
-                  ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            child: Text(AppLocalizations.of(context)!.close),
-            onPressed: () => Navigator.pop(context),
+              _SettingsTile(
+                icon: Icons.privacy_tip_outlined,
+                title: loc.privacyPolicy,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _openPdf(context,
+                      docType: 'policy', title: loc.privacyPolicy);
+                },
+              ),
+              _SettingsTile(
+                icon: Icons.description_outlined,
+                title: loc.termsOfUse,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _openPdf(context, docType: 'terms', title: loc.termsOfUse);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildDocumentOption(
+  void _openPdf(
     BuildContext context, {
-    required IconData icon,
+    required String docType,
     required String title,
-    required VoidCallback onTap,
   }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-
-  void _openPdfViewer(BuildContext context,
-      {required String title,
-      required String docType,
-      required String screenTitle}) {
-    final locale = Localizations.localeOf(context).languageCode; //
-
-    final pdfPath = 'assets/docs/${docType}_${locale}.pdf';
-
+    final locale = Localizations.localeOf(context).languageCode;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PdfViewerScreen(
-          assetPath: pdfPath, // Must match pubspec.yaml
-          screenTitle: screenTitle,
+        builder: (_) => PdfViewerScreen(
+          assetPath: 'assets/docs/${docType}_$locale.pdf',
+          screenTitle: title,
         ),
       ),
-    );
-  }
-}
-
-void _showLegalDocumentsDialog(BuildContext context) {
-  _showLegalDocumentsDialog(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.profileUpdateText),
-      ),
-      body: Center(child: Text(AppLocalizations.of(context)!.comingSoon)),
     );
   }
 }
 
 class _AboutTile extends StatelessWidget {
+  const _AboutTile();
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.question_mark),
-      ),
-      title: Text(AppLocalizations.of(context)!.aboutProvider),
-      trailing: const Icon(Icons.chevron_right),
+    final loc = AppLocalizations.of(context)!;
+
+    return _SettingsTile(
+      icon: Icons.info_outline_rounded,
+      title: loc.aboutProvider,
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => const HealthInfoScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const HealthInfoScreen()),
       ),
     );
   }
 }
 
-class PasswordUpdateScreen extends StatelessWidget {
-  const PasswordUpdateScreen({super.key});
+// ==================== AUTH ACTION ====================
+
+/// Login / Logout, styled as a single tile that changes meaning based on
+/// authentication state. Uses the semantic error color for logout so it's
+/// clearly a destructive action.
+class _AuthActionTile extends StatelessWidget {
+  final AppUserNotifier auth;
+
+  const _AuthActionTile({required this.auth});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.passwordUpdateText),
+    final loc = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+
+    if (!auth.isAuthenticated) {
+      return _SettingsTile(
+        icon: Icons.login_rounded,
+        title: loc.loginText,
+        onTap: () => Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+          (_) => false,
+        ),
+      );
+    }
+
+    return _SettingsTile(
+      icon: Icons.logout_rounded,
+      iconColor: scheme.error,
+      titleColor: scheme.error,
+      title: loc.logoutText,
+      onTap: () => _confirmLogout(context),
+    );
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final loc = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: Icon(Icons.logout_rounded, color: scheme.error),
+        title: Text(loc.loggingOutText),
+        content: Text(loc.logoutConsentText),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(loc.cancelTxt),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: scheme.error,
+              foregroundColor: scheme.onError,
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(loc.logoutText),
+          ),
+        ],
       ),
-      body: Center(child: Text(AppLocalizations.of(context)!.comingSoon)),
+    );
+
+    if (confirmed != true) return;
+
+    // Perform logout
+    await auth.signOut();
+
+    navigator.pushNamedAndRemoveUntil(AppRoutes.login, (_) => false);
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(loc.logoutText),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 }

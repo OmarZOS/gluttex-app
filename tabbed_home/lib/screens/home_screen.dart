@@ -1,12 +1,7 @@
-// import 'dart:log';
-
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe_catalog/screens/recipe_catalog_screen.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:tabbed_home/screens/SettingsScreen.dart';
@@ -27,482 +22,210 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  // Changed from SingleTickerProviderStateMixin
-
-  late final AnimationController _animationController;
-  ProductNotifier? _productNotifier;
-  // late final AnimationController _notificationController;
-
+class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  int _animationCount = 0;
-  int _notificationCount = 5; // Example count - replace with your actual data
-  late Animation<double> _scaleAnimation;
 
-  late final List<Widget> _pages;
+  static var _pages = <Widget>[
+    const ProductCatalogScreen(),
+    const SuppliersMapScreen(),
+    const RecipeCatalogScreen(),
+    GameSelectionScreen(),
+    const ProfileScreen(),
+  ];
 
-  @override
-  void initState() {
-    super.initState();
-    _pages = [
-      const ProductCatalogScreen(),
-      const SuppliersMapScreen(),
-      const RecipeCatalogScreen(),
-      GameSelectionScreen(),
-      const ProfileScreen(),
-    ];
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _scaleAnimation = TweenSequence<double>(
-      <TweenSequenceItem<double>>[
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 1.0, end: 1.2),
-          weight: 50,
-        ),
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 1.2, end: 1.0),
-          weight: 50,
-        ),
-      ],
-    ).animate(_animationController);
-
-    // Initialize productNotifier after initState
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _productNotifier = context.read<ProductNotifier>();
-    });
+  void _onTabSelected(int index) {
+    if (index == _selectedIndex) return;
+    setState(() => _selectedIndex = index);
+    _onTabChanged(index);
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose(); // Uncomment this line
-    // _notificationController.dispose();
-    super.dispose();
-  }
-
-  void _startIconAnimation() {
-    if (_selectedIndex != GluttexPageIndex.profile) return;
-
-    _animationController.forward().then((_) {
-      _animationController.reverse().then((_) {
-        if (!mounted) return;
-        _animationCount++;
-        if (_animationCount < 2 && _selectedIndex == GluttexPageIndex.profile) {
-          _startIconAnimation();
-        }
-      });
-    });
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      _handlePageSpecificLogic(index);
-    });
-  }
-
-  void _handlePageSpecificLogic(int index) {
+  void _onTabChanged(int index) {
     switch (index) {
-      case GluttexPageIndex.catalog:
-        _handleCatalogPage();
+      case _Tab.catalog:
+        final notifier = context.read<ProductNotifier>();
+        notifier.fetchProducts(
+          categoryId: notifier.currentCategory,
+          reset: true,
+        );
         break;
-      case GluttexPageIndex.profile:
-        _handleProfilePage();
-        break;
-      case GluttexPageIndex.suppliers:
-        _handleSuppliersPage();
+      case _Tab.suppliers:
+        context.read<SupplierChangeNotifier>().fetchOrganisations();
         break;
     }
-  }
-
-  void _handleCatalogPage() {
-    final productNotifier = context.read<ProductNotifier>();
-
-    final currentCategory = productNotifier.currentCategory;
-    log('Current Category: $currentCategory');
-
-    productNotifier.fetchProducts(categoryId: currentCategory, reset: true);
-  }
-
-  void _handleProfilePage() {
-    _animationCount = 0;
-    _startIconAnimation();
-  }
-
-  void _handleSuppliersPage() {
-    context.read<SupplierChangeNotifier>().fetchOrganisations();
-  }
-
-  // Replace the _buildNotificationButton method:
-  Widget _buildNotificationButton() {
-    return NotificationButton(
-      onPressed: _showNotifications,
-      iconColor: Theme.of(context).colorScheme.onSurface,
-    );
   }
 
   void _showNotifications() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => const NotificationsPanel(),
+      builder: (_) => const NotificationsPanel(),
     );
   }
 
-  Widget _buildNotificationsList() {
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount:
-          _notificationCount.clamp(0, 5).toInt(), // Show max 5 in preview
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
-      itemBuilder: (context, index) => _buildNotificationItem(index),
-    );
-  }
-
-  Widget _buildNotificationItem(int index) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          // Handle notification tap
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceVariant.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: colorScheme.outline.withOpacity(0.1),
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _getNotificationColor(index, colorScheme),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getNotificationIcon(index),
-                  color: colorScheme.onPrimary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _getNotificationTitle(index),
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'You have a new notification from the system',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '2 hours ago',
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyNotifications() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.notifications_off_rounded,
-            size: 64,
-            color: colorScheme.onSurfaceVariant.withOpacity(0.3),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No Notifications',
-            style: textTheme.headlineSmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'You\'re all caught up!',
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant.withOpacity(0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getNotificationColor(int index, ColorScheme colorScheme) {
-    final colors = [
-      colorScheme.primary,
-      colorScheme.secondary,
-      colorScheme.tertiary,
-      Colors.orange,
-      Colors.purple,
-    ];
-    return colors[index % colors.length];
-  }
-
-  IconData _getNotificationIcon(int index) {
-    final icons = [
-      Icons.inventory_2_rounded,
-      Icons.local_offer_rounded,
-      Icons.person_add_rounded,
-      Icons.security_rounded,
-      Icons.event_available_rounded,
-    ];
-    return icons[index % icons.length];
-  }
-
-  String _getNotificationTitle(int index) {
-    final titles = [
-      'New Product',
-      'Special Offer',
-      'Team Member',
-      'Security Alert',
-      'Event Reminder',
-    ];
-    return titles[index % titles.length];
-  }
-
-  String _getTitle(int selectedIndex) {
-    final localizations = AppLocalizations.of(context);
-
-    switch (selectedIndex) {
-      case GluttexPageIndex.catalog:
-        return localizations!.productsText;
-      case GluttexPageIndex.suppliers:
-        return localizations!.providersText;
-      case GluttexPageIndex.recipes:
-        return localizations!.recipesText;
-      case GluttexPageIndex.games:
-        return localizations!.gamesText;
-      case GluttexPageIndex.profile:
-        return localizations!.profileText;
-      default:
-        return '';
-    }
-  }
-
-  void _navigateToSettings(BuildContext context) {
+  void _openSettings() {
     Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => const SettingsScreen(),
-        transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final backgroundColor = Theme.of(context).colorScheme.surfaceVariant;
+    final scheme = Theme.of(context).colorScheme;
+    final isProfileTab = _selectedIndex == _Tab.profile;
 
     return Scaffold(
-      appBar: _buildAppBar(theme, backgroundColor),
-      body: Column(
-        children: [
-          Expanded(
-            child: IndexedStack(index: _selectedIndex, children: _pages),
+      appBar: AppBar(
+        title: Text(_titleFor(context, _selectedIndex)),
+        actions: [
+          NotificationButton(
+            onPressed: _showNotifications,
+            iconColor: scheme.onSurface,
           ),
-          // _buildBannerAd(), // Banner ad above navigation
+          if (isProfileTab)
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: _openSettings,
+            ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(backgroundColor),
-    );
-  }
-
-  AppBar _buildAppBar(ThemeData theme, Color backgroundColor) {
-    return AppBar(
-      title: Text(_getTitle(_selectedIndex)),
-      actions: [
-        _buildNotificationButton(),
-        _buildSettingsButton() ?? Container(),
-      ],
-      backgroundColor: backgroundColor,
-    );
-  }
-
-  Widget? _buildSettingsButton() {
-    if (_selectedIndex != GluttexPageIndex.profile)
-      return const SizedBox.shrink();
-
-    return RotationTransition(
-      turns: Tween(begin: -0.05, end: 0.05)
-          .chain(CurveTween(curve: Curves.easeInOut))
-          .animate(_animationController),
-      child: IconButton(
-        icon: const Icon(Icons.settings),
-        onPressed: () => _navigateToSettings(context),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onTabSelected,
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        indicatorColor: scheme.surfaceContainerHighest,
+        destinations: _buildDestinations(context),
       ),
     );
   }
 
-  BottomNavigationBar _buildBottomNavigationBar(Color backgroundColor) {
-    return BottomNavigationBar(
-      unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
-      selectedItemColor: Theme.of(context).colorScheme.onPrimary,
-      backgroundColor: backgroundColor,
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
-      items: _buildNavigationItems(),
-    );
+  String _titleFor(BuildContext context, int index) {
+    final loc = AppLocalizations.of(context)!;
+    switch (index) {
+      case _Tab.catalog:
+        return loc.productsText;
+      case _Tab.suppliers:
+        return loc.providersText;
+      case _Tab.recipes:
+        return loc.recipesText;
+      case _Tab.games:
+        return loc.gamesText;
+      case _Tab.profile:
+        return loc.profileText;
+      default:
+        return '';
+    }
   }
 
-  List<BottomNavigationBarItem> _buildNavigationItems() {
-    final localizations = AppLocalizations.of(context)!;
+  List<NavigationDestination> _buildDestinations(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final appUser = context.watch<AppUserNotifier>().appUser;
-    final displayName =
-        '${appUser?.personFirstName} ${appUser?.personLastName}'.trim();
-    final backgroundColor = Theme.of(context).colorScheme.surfaceVariant;
 
     return [
-      _buildNavigationItem(
-        icon: const Icon(CupertinoIcons.cube_box_fill),
-        label: localizations.productsText,
-        backgroundColor: backgroundColor,
+      NavigationDestination(
+        icon: const Icon(CupertinoIcons.cube_box),
+        selectedIcon: const Icon(CupertinoIcons.cube_box_fill),
+        label: loc.productsText,
       ),
-      _buildNavigationItem(
-        icon: const Icon(Icons.store_sharp),
-        label: localizations.providersText,
-        backgroundColor: backgroundColor,
+      NavigationDestination(
+        icon: const Icon(Icons.store_outlined),
+        selectedIcon: const Icon(Icons.store),
+        label: loc.providersText,
       ),
-      _buildNavigationItem(
-        icon: const Icon(Icons.restaurant_menu_outlined),
-        label: localizations.recipesText,
-        backgroundColor: backgroundColor,
+      NavigationDestination(
+        icon: const Icon(Icons.food_bank_outlined),
+        selectedIcon: const Icon(Icons.food_bank),
+        label: loc.recipesText,
       ),
-      _buildNavigationItem(
-        icon: const Icon(CupertinoIcons.gamecontroller_alt_fill),
-        label: localizations.gamesText,
-        backgroundColor: backgroundColor,
+      NavigationDestination(
+        icon: const Icon(Icons.videogame_asset_outlined),
+        selectedIcon: const Icon(Icons.videogame_asset),
+        label: loc.gamesText,
       ),
-      _buildProfileNavigationItem(
-          appUser, displayName, localizations, backgroundColor),
+      NavigationDestination(
+        icon: _ProfileAvatar(user: appUser, selected: false),
+        selectedIcon: _ProfileAvatar(user: appUser, selected: true),
+        label: _profileLabel(appUser, loc),
+      ),
     ];
   }
 
-  BottomNavigationBarItem _buildNavigationItem({
-    required Widget icon,
-    required String label,
-    required Color backgroundColor,
-  }) {
-    return BottomNavigationBarItem(
-      icon: icon,
-      label: label,
-      backgroundColor: backgroundColor,
-    );
+  String _profileLabel(AppUser? user, AppLocalizations loc) {
+    final name =
+        '${user?.personFirstName ?? ''} ${user?.personLastName ?? ''}'.trim();
+    final isGuest = (user?.idAppUser ?? 0) == 0;
+    return isGuest || name.isEmpty ? loc.profileText : name;
   }
+}
 
-  BottomNavigationBarItem _buildProfileNavigationItem(
-    AppUser? appUser,
-    String displayName,
-    AppLocalizations localizations,
-    Color backgroundColor,
-  ) {
-    final isGuestUser = (appUser?.idAppUser ?? 0) == 0;
-    final profileLabel = isGuestUser || displayName.isEmpty
-        ? localizations.profileText
-        : displayName;
+// ==================== TAB CONSTANTS ====================
 
-    return BottomNavigationBarItem(
-      icon: _buildProfileIcon(appUser),
-      label: profileLabel,
-      backgroundColor: backgroundColor,
-    );
-  }
+abstract class _Tab {
+  static const int catalog = 0;
+  static const int suppliers = 1;
+  static const int recipes = 2;
+  static const int games = 3;
+  static const int profile = 4;
+}
 
-  Widget _buildProfileIcon(AppUser? appUser) {
-    final hasProfileImage = appUser?.idAppUser != 0 &&
-        appUser?.appUserImageUrl != null &&
-        appUser!.appUserImageUrl!.isNotEmpty;
+// ==================== PROFILE AVATAR ====================
 
-    if (!hasProfileImage) {
-      return const Icon(size: 24.0, CupertinoIcons.profile_circled);
-    }
+class _ProfileAvatar extends StatelessWidget {
+  final AppUser? user;
+  final bool selected;
 
-    return ClipOval(
-      child: Image.network(
-        appUser.appUserImageUrl!,
-        width: 24,
-        height: 24,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return _buildProfileLoadingIndicator(loadingProgress);
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return _buildProfileErrorWidget();
-        },
-      ),
-    );
-  }
+  const _ProfileAvatar({required this.user, required this.selected});
 
-  Widget _buildProfileLoadingIndicator(ImageChunkEvent loadingProgress) {
+  static const double _size = 26;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final url = user?.appUserImageUrl;
+    final isGuest = (user?.idAppUser ?? 0) == 0;
+    final hasImage = !isGuest && url != null && url.isNotEmpty;
+
+    if (!hasImage) return _fallbackIcon(scheme);
+
     return SizedBox(
-      height: 24,
-      width: 24,
-      child: Center(
-        child: CircularProgressIndicator(
-          value: loadingProgress.expectedTotalBytes != null
-              ? loadingProgress.cumulativeBytesLoaded /
-                  (loadingProgress.expectedTotalBytes ?? 1)
-              : null,
+      width: _size,
+      height: _size,
+      child: ClipOval(
+        child: Image.network(
+          url,
+          fit: BoxFit.cover,
+          loadingBuilder: (_, child, progress) {
+            if (progress == null) return child;
+            return Center(
+              child: SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: scheme.primary,
+                ),
+              ),
+            );
+          },
+          errorBuilder: (_, __, ___) => _fallbackIcon(scheme),
         ),
       ),
     );
   }
 
-  Widget _buildProfileErrorWidget() {
-    return const SizedBox(
-      height: 24,
-      child: Center(
-        child: Icon(Icons.person, size: 24),
-      ),
+  Widget _fallbackIcon(ColorScheme scheme) {
+    return Icon(
+      selected ? Icons.account_circle : CupertinoIcons.profile_circled,
+      size: _size,
+      color: selected ? scheme.primary : scheme.onSurfaceVariant,
     );
   }
 }
