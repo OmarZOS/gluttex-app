@@ -1538,7 +1538,20 @@ class DocumentDetailsSheet extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => PaymentFormScreen(
-                        sourceDocument: document,
+                        amountDue: document.remainingAmount,
+                        onSubmit: (amount, method, notes) async {
+                          final notifier =
+                              context.read<FinanceChangeNotifier>();
+                          final result = await notifier.submitPayment(
+                            invoiceId: document.documentId,
+                            amount: amount,
+                            method: method,
+                            notes: notes,
+                          );
+                          return result.isSuccess ? null : result.message;
+                        },
+
+                        // sourceDocument: document,
                       ),
                     ),
                   );

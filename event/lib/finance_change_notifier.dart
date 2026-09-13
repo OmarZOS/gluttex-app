@@ -426,6 +426,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
     required int invoiceId,
     required double amount,
     required String method,
+    String status = "completed",
     String? notes,
   }) async {
     if (invoiceId <= 0) {
@@ -443,10 +444,11 @@ class FinanceChangeNotifier extends ChangeNotifier {
     _setLoading(true);
     try {
       final payment = await _invoiceService.addFinancialDocument({
-        "invoiceId": invoiceId,
-        "amount": amount,
-        "method": method,
-        "notes": notes ?? '',
+        "payment_invoice_id": invoiceId,
+        "payment_amount": amount,
+        "payment_method": method,
+        "payment_status": status,
+        "payment_notes": notes ?? '',
       });
 
       if (payment == null) {
