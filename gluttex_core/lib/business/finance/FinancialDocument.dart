@@ -535,6 +535,25 @@ class Payment {
   bool get isFailed => status == 'failed' || status == 'cancelled';
 }
 
+@immutable
+class PaymentSubmitResult {
+  final bool isSuccess;
+  final String message;
+  final int? paymentId;
+
+  const PaymentSubmitResult._({
+    required this.isSuccess,
+    required this.message,
+    this.paymentId,
+  });
+
+  const PaymentSubmitResult.success(String message, {int? paymentId})
+      : this._(isSuccess: true, message: message, paymentId: paymentId);
+
+  const PaymentSubmitResult.failure(String message)
+      : this._(isSuccess: false, message: message);
+}
+
 class AdditionalFee {
   int additionalFeeId;
   int additionalFeePaymentId;

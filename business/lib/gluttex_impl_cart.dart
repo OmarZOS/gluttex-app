@@ -115,11 +115,18 @@ class CartServiceImpl extends CartService {
         final cart = Cart.fromResponseJson(result);
         _storeSuccess(key, cart);
         return cart;
-      } catch (e) {
+      } catch (e, stack) {
+        log(
+          'Cart parse failed',
+          name: 'CartServiceImpl',
+          error: e,
+          stackTrace: stack,
+        );
+        log('Raw response: $result', name: 'CartServiceImpl');
         _storeFailure(key, result,
             code: 500,
             errorCode: 'PARSE_FAILED',
-            message: 'Failed to parse cart from response');
+            message: 'Failed to parse cart: $e');
         return null;
       }
     } catch (e) {

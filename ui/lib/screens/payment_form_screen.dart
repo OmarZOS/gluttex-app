@@ -4,7 +4,6 @@ import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:event/finance_change_notifier.dart';
 import 'package:ui/components/finance/Payment_Type_UI_Manager.dart';
 import 'package:ui/components/finance/financial_ui_manager.dart';
-import 'package:ui/components/finance/payment_request_helper.dart';
 import 'package:provider/provider.dart';
 
 class PaymentFormScreen extends StatefulWidget {
@@ -12,13 +11,13 @@ class PaymentFormScreen extends StatefulWidget {
   final bool isEditing;
 
   const PaymentFormScreen({
-    Key? key,
+    super.key,
     this.sourceDocument,
     this.isEditing = false,
-  }) : super(key: key);
+  });
 
   @override
-  _PaymentFormScreenState createState() => _PaymentFormScreenState();
+  State<PaymentFormScreen> createState() => _PaymentFormScreenState();
 }
 
 class _PaymentFormScreenState extends State<PaymentFormScreen>
@@ -33,7 +32,10 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
   bool _isLoading = false;
   String _selectedPaymentType = 'deposit';
   DateTime? _selectedInstallmentDate;
-  bool _isAmountValid = true;
+  String _selectedPaymentMethod = 'cash';
+  String? _amountError;
+
+  // ==================== LIFECYCLE ====================
 
   @override
   void initState() {
@@ -74,16 +76,18 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
   }
 
   void _initializeFromDocument() {
-    if (widget.sourceDocument != null) {
-      final doc = widget.sourceDocument!;
-      if (doc.totalDeposited > 0) {
-        _selectedPaymentType = 'deposit';
-        _depositController.text = doc.remainingAmount.toStringAsFixed(2);
-      } else {
-        _selectedPaymentType = 'payment';
-      }
+    if (widget.sourceDocument == null) return;
+
+    final doc = widget.sourceDocument!;
+    if (doc.totalDeposited > 0) {
+      _selectedPaymentType = 'deposit';
+      _depositController.text = doc.remainingAmount.toStringAsFixed(2);
+    } else {
+      _selectedPaymentType = 'payment';
     }
   }
+
+  // ==================== BUILD ====================
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +99,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
         final doc = widget.sourceDocument;
         final displayTypes = _getPaymentTypesToShow(doc, loc);
         final hasExistingDeposit = (doc?.totalDeposited ?? 0) > 0;
+        final showMethodPicker = _selectedPaymentType != 'installment';
 
         return Scaffold(
           backgroundColor: theme.colorScheme.surface,
@@ -133,6 +138,10 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
                                 _buildPaymentTypeSection(
                                     context, theme, loc, displayTypes, doc),
                                 const SizedBox(height: 32),
+                                if (showMethodPicker) ...[
+                                  _buildPaymentMethodSection(theme, loc),
+                                  const SizedBox(height: 32),
+                                ],
                                 _buildNotesSection(theme, loc),
                                 const SizedBox(height: 40),
                               ],
@@ -240,6 +249,8 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
       ),
     );
   }
+
+  // ==================== DOCUMENT SUMMARY ====================
 
   Widget _buildDocumentSummary(BuildContext context, ThemeData theme,
       AppLocalizations loc, FinancialDocument doc, bool hasExistingDeposit) {
@@ -462,6 +473,8 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
     );
   }
 
+  // ==================== PAYMENT TYPE ====================
+
   Widget _buildPaymentTypeSection(
       BuildContext context,
       ThemeData theme,
@@ -574,8 +587,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
               );
             }).toList(),
           ),
-        ] else if (displayTypes.length == 1 ||
-            _selectedPaymentType == "deposit") ...[
+        ] else if (displayTypes.isNotEmpty) ...[
           _buildDetailsWidget(displayTypes.first.id, context, theme, loc, doc),
         ],
       ],
@@ -684,6 +696,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
     final remainingAmount = doc?.remainingAmount ?? 0.0;
     final currentDeposit = double.tryParse(_depositController.text) ?? 0.0;
     final color = theme.colorScheme.tertiary;
+    final sliderMax = remainingAmount > 0 ? remainingAmount : 1.0;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -732,7 +745,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
           const SizedBox(height: 20),
           TextFormField(
             controller: _depositController,
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
               labelText: loc.depositAmount,
               labelStyle: TextStyle(color: color),
@@ -750,6 +763,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
                   setState(() {
                     _depositController.text =
                         remainingAmount.toStringAsFixed(2);
+                    _amountError = null;
                   });
                 },
               ),
@@ -766,21 +780,16 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
                   width: 2,
                 ),
               ),
+              errorText: _amountError,
             ),
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
               color: theme.colorScheme.onSurface,
             ),
             textAlign: TextAlign.end,
-            // validator: (value) =>
-            //     true, //PaymentRequestHelper.validateDepositAmount(
-            // value, widget.sourceDocument),
             onChanged: (value) {
               setState(() {
-                _isAmountValid = true;
-                // PaymentRequestHelper.validateDepositAmount(
-                //         value, widget.sourceDocument) ==
-                //     null;
+                _amountError = _validateDepositAmount(value, remainingAmount);
               });
             },
           ),
@@ -822,50 +831,42 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
                   valueIndicatorColor: color,
                 ),
                 child: Slider(
-                  value: currentDeposit.clamp(0.0, remainingAmount),
+                  value: currentDeposit.clamp(0.0, sliderMax),
                   min: 0,
-                  max: remainingAmount,
-                  divisions:
-                      remainingAmount > 0 ? (remainingAmount / 10).round() : 1,
+                  max: sliderMax,
+                  // Fine-grained step so the user can reach the exact
+                  // remaining amount without fighting the thumb.
+                  divisions: remainingAmount > 0
+                      ? (remainingAmount).round().clamp(1, 1000)
+                      : null,
                   label: PaymentTypeUIManager.formatAmount(currentDeposit, loc),
                   activeColor: color,
                   inactiveColor: color.withOpacity(0.2),
-                  onChanged: (value) {
-                    setState(() {
-                      _depositController.text = value.toStringAsFixed(2);
-                      _isAmountValid = true;
-                    });
-                  },
+                  onChanged: remainingAmount > 0
+                      ? (value) {
+                          setState(() {
+                            _depositController.text = value.toStringAsFixed(2);
+                            _amountError = _validateDepositAmount(
+                                value.toString(), remainingAmount);
+                          });
+                        }
+                      : null,
                 ),
               ),
             ],
           ),
-          if (!_isAmountValid && _depositController.text.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    color: theme.colorScheme.error,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.error,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );
+  }
+
+  String? _validateDepositAmount(String raw, double remaining) {
+    if (raw.trim().isEmpty) return null;
+    final value = double.tryParse(raw.trim());
+    if (value == null || value <= 0 || value > remaining) {
+      return AppLocalizations.of(context)!.enterValidAmount;
+    }
+    return null;
   }
 
   Widget _buildInstallmentDetails(BuildContext context, ThemeData theme,
@@ -1000,6 +1001,84 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
     );
   }
 
+  // ==================== PAYMENT METHOD ====================
+
+  Widget _buildPaymentMethodSection(ThemeData theme, AppLocalizations loc) {
+    const methods = <String, IconData>{
+      'cash': Icons.payments_rounded,
+      'card': Icons.credit_card_rounded,
+      'bank_transfer': Icons.account_balance_rounded,
+      'mobile_money': Icons.phone_android_rounded,
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          // If you add `loc.paymentMethod` to the localization files,
+          // swap this out for it.
+          'PAYMENT METHOD',
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: methods.entries.map((entry) {
+            final isSelected = _selectedPaymentMethod == entry.key;
+            return GestureDetector(
+              onTap: () => setState(() => _selectedPaymentMethod = entry.key),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? theme.colorScheme.primary.withOpacity(0.1)
+                      : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isSelected
+                        ? theme.colorScheme.primary.withOpacity(0.4)
+                        : theme.colorScheme.outline.withOpacity(0.15),
+                    width: isSelected ? 2 : 1.5,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      entry.value,
+                      size: 20,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      entry.key.replaceAll('_', ' ').toUpperCase(),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  // ==================== NOTES ====================
+
   Widget _buildNotesSection(ThemeData theme, AppLocalizations loc) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1042,6 +1121,8 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
     );
   }
 
+  // ==================== ACTION BUTTONS ====================
+
   Widget _buildActionButtons(
       BuildContext context,
       ThemeData theme,
@@ -1057,13 +1138,15 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
             : loc.submitPayment;
     final isValid = _selectedPaymentType != 'installment' ||
         _selectedInstallmentDate != null;
-    final isDepositValid = _selectedPaymentType != 'deposit' || _isAmountValid;
+    final isDepositValid =
+        _selectedPaymentType != 'deposit' || _amountError == null;
     final buttonColor =
         isDeposit ? theme.colorScheme.tertiary : theme.colorScheme.primary;
+    final canSubmit = isValid && isDepositValid;
 
     return Column(
       children: [
-        if (!isValid || !isDepositValid)
+        if (!canSubmit)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
@@ -1099,14 +1182,10 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
         SizedBox(
           width: double.infinity,
           child: Material(
-            color: (isValid && isDepositValid)
-                ? buttonColor
-                : theme.colorScheme.surfaceVariant,
+            color: canSubmit ? buttonColor : theme.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(20),
             child: InkWell(
-              onTap: (isValid && isDepositValid)
-                  ? () => _submitForm(notifier)
-                  : null,
+              onTap: canSubmit ? () => _submitForm(notifier) : null,
               borderRadius: BorderRadius.circular(20),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 22),
@@ -1128,7 +1207,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
                     Text(
                       buttonText.toUpperCase(),
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: (isValid && isDepositValid)
+                        color: canSubmit
                             ? theme.colorScheme.onPrimary
                             : theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w800,
@@ -1164,8 +1243,9 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
     );
   }
 
+  // ==================== INTERACTIONS ====================
+
   Future<void> _selectInstallmentDate(BuildContext context, Color color) async {
-    final loc = AppLocalizations.of(context)!;
     final initialDate = DateTime.now().add(const Duration(days: 30));
     final selectedDate = await showDatePicker(
       context: context,
@@ -1197,71 +1277,108 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
         _selectedPaymentType = typeId;
         if (typeId == 'deposit' && doc != null) {
           _depositController.text = doc.remainingAmount.toStringAsFixed(2);
-          _isAmountValid = true;
+          _amountError = null;
         }
       });
     }
   }
 
-  Future<void> _submitForm(FinanceChangeNotifier notifier) async {
-    if (_selectedPaymentType == 'deposit') {
-      // final validationError = PaymentRequestHelper.validateDepositAmount(
-      //   _depositController.text,
-      //   widget.sourceDocument,
-      // );
-      // if (validationError != null) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text(validationError),
-      //       backgroundColor: Theme.of(context).colorScheme.error,
-      //     ),
-      //   );
-      //   return;
-      // }
-    }
+  // ==================== SUBMIT ====================
 
+  Future<void> _submitForm(FinanceChangeNotifier notifier) async {
+    // ── Local validation before hitting the backend ──
     if (_selectedPaymentType == 'installment' &&
         _selectedInstallmentDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.selectDateForInstallment,
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      _showError(AppLocalizations.of(context)!.selectDateForInstallment);
+      return;
+    }
+
+    if (_selectedPaymentType == 'deposit') {
+      final remaining = widget.sourceDocument?.remainingAmount ?? 0.0;
+      final err = _validateDepositAmount(_depositController.text, remaining);
+      if (err != null) {
+        setState(() => _amountError = err);
+        _showError(err);
+        return;
+      }
+    }
+
+    final invoiceId = _resolveInvoiceId();
+    if (invoiceId == null) {
+      _showError('No invoice linked to this document.');
+      return;
+    }
+
+    final amount = _resolveAmount();
+    if (amount <= 0) {
+      _showError(AppLocalizations.of(context)!.enterValidAmount);
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final sourceDocId = widget.sourceDocument?.documentId;
+      final method = _selectedPaymentMethod;
       final notes = _notesController.text.trim();
 
-      // TODO: Implement actual payment submission
-      // final result = await _submitPayment(notifier, sourceDocId, notes);
+      final result = await notifier.submitPayment(
+        invoiceId: invoiceId,
+        amount: amount,
+        method: method,
+        notes: notes,
+      );
 
-      // Simulate success for now
-      await Future.delayed(const Duration(seconds: 1));
+      if (!result.isSuccess) {
+        _showError(result.message);
+        return;
+      }
 
       await _showSuccessDialog();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifier.refreshAll();
-      });
-      if (mounted) Navigator.pop(context, true);
-    } catch (e) {
-      debugPrint('Error submitting form: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      if (!mounted) return;
+
+      // The notifier already refreshed its documents on success.
+      Navigator.pop(context, true);
+    } catch (e, stack) {
+      debugPrint('Error submitting payment: $e\n$stack');
+      _showError('$e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
+
+  /// Best-effort invoice id resolution.
+  /// For an invoice document, `documentId` IS the invoice id.
+  /// For grouped documents (receipt/deposit), the caller should have
+  /// passed the primary invoice document instead.
+  int? _resolveInvoiceId() {
+    final doc = widget.sourceDocument;
+    if (doc == null) return null;
+    return doc.documentId;
+  }
+
+  double _resolveAmount() {
+    final remaining = widget.sourceDocument?.remainingAmount ?? 0.0;
+    switch (_selectedPaymentType) {
+      case 'deposit':
+        return double.tryParse(_depositController.text.trim()) ?? 0.0;
+      case 'payment':
+      case 'installment':
+      default:
+        return remaining;
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  }
+
+  // ==================== SUCCESS DIALOG ====================
 
   Future<void> _showSuccessDialog() async {
     final isDeposit = _selectedPaymentType == 'deposit';
@@ -1333,9 +1450,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
                   color: successColor,
                   borderRadius: BorderRadius.circular(20),
                   child: InkWell(
-                    onTap: () {
-                      Navigator.pop(context, true);
-                    },
+                    onTap: () => Navigator.pop(context, true),
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 18),
@@ -1360,6 +1475,8 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
     );
   }
 
+  // ==================== HELPERS ====================
+
   String _getAppBarTitle(FinancialDocument? doc, AppLocalizations loc) {
     if (doc == null) return loc.paymentType;
     if (doc.totalDeposited > 0) return loc.addDeposit;
@@ -1370,8 +1487,10 @@ class _PaymentFormScreenState extends State<PaymentFormScreen>
       FinancialDocument? doc, AppLocalizations loc) {
     final allTypes = PaymentTypeUIManager.getPaymentTypes(loc);
     if (doc == null) return allTypes;
-    if (doc.totalDeposited > 0)
+    if (doc.totalDeposited > 0) {
       return [allTypes.firstWhere((type) => type.id == 'deposit')];
-    return allTypes.where((type) => type.id != 'installment').toList();
+    }
+    // Show all types on a fresh invoice — installment included.
+    return allTypes;
   }
 }

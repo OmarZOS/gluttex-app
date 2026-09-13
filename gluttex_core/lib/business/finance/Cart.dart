@@ -154,55 +154,107 @@ class Cart {
     this.userData,
   });
 
-  factory Cart.fromResponseJson(List<dynamic> jsonResponse) {
-    if (jsonResponse.isEmpty) {
-      throw FormatException('Empty response from API');
+  factory Cart.fromResponseJson(dynamic json) {
+    if (json == null) {
+      throw const FormatException('Null cart response');
     }
 
-    // The response contains two objects in an array
+    // ─── Step 1: Normalize to a flat map of the cart fields ───
+    Map<String, dynamic> data;
+
+    if (json is List) {
+      // Legacy shape: an array of [depositData, cartData].
+      // Preserve backward compatibility with the old contract.
+      return _fromLegacyListResponse(json);
+    }
+
+    if (json is Map) {
+      final asMap = Map<String, dynamic>.from(json);
+
+      // Unwrap envelope if present.
+      final envelopeData = asMap['data'];
+      if (envelopeData is Map) {
+        data = Map<String, dynamic>.from(envelopeData);
+      } else {
+        data = asMap;
+      }
+    } else {
+      throw FormatException(
+        'Unexpected cart response type: ${json.runtimeType}',
+      );
+    }
+
+    // ─── Step 2: Read cart_id with fallbacks ───
+    final cartId = _readInt(data, const ['cart_id', 'cartId', 'id']);
+    if (cartId == null) {
+      throw const FormatException('Cart response is missing cart_id');
+    }
+
+    // ─── Step 3: Read the remaining fields, tolerating both naming styles ───
+    return Cart(
+      cartId: cartId,
+      cartStatus: _readString(data, const ['cart_status', 'status']),
+      cartProductProviderId: _readInt(data, const [
+        'cart_product_provider_id',
+        'product_provider_id',
+        'provider_id',
+      ]),
+      cartPersonRef: _readInt(data, const ['cart_person_ref', 'person_ref']),
+      cartSellingUser:
+          _readInt(data, const ['cart_selling_user', 'selling_user']),
+      cartClientUser: _readInt(data, const ['cart_client_user', 'client_user']),
+      cartNotes: _readString(data, const ['cart_notes', 'notes']),
+      cartCreatedAt: _readString(data, const ['cart_created_at', 'created_at']),
+      cartUpdatedAt: _readString(data, const ['cart_updated_at', 'updated_at']),
+      cartTotalAmount: _readDouble(data, const [
+        'cart_total_amount',
+        'total_amount',
+        'total',
+      ]),
+      // These are not populated by the create endpoint — the response only
+      // carries metadata. Fetch the full cart separately if needed.
+      invoices: const [],
+      receipts: const [],
+      deposits: const [],
+      orderedItems: const [],
+      orderedServices: const [],
+    );
+  }
+
+  static Cart _fromLegacyListResponse(List<dynamic> jsonResponse) {
     Map<String, dynamic>? depositReceiptData;
     Map<String, dynamic>? cartData;
 
     for (final item in jsonResponse) {
-      if (item is Map<String, dynamic>) {
-        // Check if this item contains deposit/receipt data
-        if (item.containsKey('deposit') || item.containsKey('receipt')) {
-          depositReceiptData = item;
-        }
-        // Check if this item contains cart data
-        else if (item.containsKey('cart_id') ||
-            item.containsKey('cart_status') ||
-            item.containsKey('cart_total_amount')) {
-          cartData = item;
-        }
+      if (item is! Map<String, dynamic>) continue;
+
+      if (item.containsKey('deposit') || item.containsKey('receipt')) {
+        depositReceiptData = item;
+      } else if (item.containsKey('cart_id') ||
+          item.containsKey('cart_status') ||
+          item.containsKey('cart_total_amount')) {
+        cartData = item;
       }
     }
 
-    // Parse deposit if available
-    final List<Deposit> deposits = [];
-    if (depositReceiptData != null && depositReceiptData['deposit'] != null) {
-      final depositJson = depositReceiptData['deposit'] as Map<String, dynamic>;
+    if (cartData == null) {
+      throw const FormatException('No cart data found in legacy list response');
+    }
+
+    final deposits = <Deposit>[];
+    final depositJson = depositReceiptData?['deposit'];
+    if (depositJson is Map<String, dynamic>) {
       try {
         deposits.add(Deposit.fromJson(depositJson));
-      } catch (e) {
-        // debugPrint('Error parsing deposit: $e');
-      }
+      } catch (_) {}
     }
 
-    // Parse receipt if available
-    final List<Receipt> receipts = [];
-    if (depositReceiptData != null && depositReceiptData['receipt'] != null) {
-      final receiptJson = depositReceiptData['receipt'] as Map<String, dynamic>;
+    final receipts = <Receipt>[];
+    final receiptJson = depositReceiptData?['receipt'];
+    if (receiptJson is Map<String, dynamic>) {
       try {
         receipts.add(Receipt.fromJson(receiptJson));
-      } catch (e) {
-        // debugPrint('Error parsing receipt: $e');
-      }
-    }
-
-    // Parse cart data
-    if (cartData == null) {
-      throw FormatException('No cart data found in response');
+      } catch (_) {}
     }
 
     return Cart(
@@ -216,12 +268,51 @@ class Cart {
       cartCreatedAt: cartData['cart_created_at'] as String?,
       cartUpdatedAt: cartData['cart_updated_at'] as String?,
       cartTotalAmount: (cartData['cart_total_amount'] as num?)?.toDouble(),
-      invoices: const [], // Not in this response format
+      invoices: const [],
       receipts: receipts,
       deposits: deposits,
-      orderedItems: const [], // Not in this response format
-      orderedServices: const [], // Not in this response format
+      orderedItems: const [],
+      orderedServices: const [],
     );
+  }
+
+// ─── Typed readers ───
+
+  static int? _readInt(Map<String, dynamic> map, List<String> keys) {
+    for (final k in keys) {
+      final v = map[k];
+      if (v == null) continue;
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      if (v is String) {
+        final parsed = int.tryParse(v);
+        if (parsed != null) return parsed;
+      }
+    }
+    return null;
+  }
+
+  static double? _readDouble(Map<String, dynamic> map, List<String> keys) {
+    for (final k in keys) {
+      final v = map[k];
+      if (v == null) continue;
+      if (v is double) return v;
+      if (v is num) return v.toDouble();
+      if (v is String) {
+        final parsed = double.tryParse(v);
+        if (parsed != null) return parsed;
+      }
+    }
+    return null;
+  }
+
+  static String? _readString(Map<String, dynamic> map, List<String> keys) {
+    for (final k in keys) {
+      final v = map[k];
+      if (v == null) continue;
+      return v.toString();
+    }
+    return null;
   }
 
   // Factory constructor from API JSON (for detailed cart data)

@@ -17,6 +17,32 @@ class DocumentDetailsSheet extends StatelessWidget {
 
   const DocumentDetailsSheet({super.key, required this.document});
 
+  // ==================== PUBLIC HELPERS ====================
+
+  /// True when the document has no real customer attached.
+  ///
+  /// A document counts as "guest" when neither a customer id nor a person id
+  /// was populated. Verify against live data before relying on this — if the
+  /// backend sometimes leaves both fields empty for a real customer, they'll
+  /// be misclassified.
+  static bool isGuestDocument(FinancialDocument doc) {
+    final hasCustomerId = (doc.customerId ?? 0) > 0;
+    final hasPersonId = (doc.customerPersonId ?? 0) > 0;
+    return !hasCustomerId && !hasPersonId;
+  }
+
+  /// Label for the guest identity, e.g. "Guest #42".
+  ///
+  /// Uses `sourceId` as the cart id — that's what the finance notifier
+  /// groups by. If your backend puts a different id in `sourceId`, adjust
+  /// here or rename the label.
+  static String guestLabel(FinancialDocument doc, AppLocalizations loc) {
+    final cartId = doc.sourceId ?? 0;
+    return cartId > 0 ? 'Guest #$cartId' : loc.unknown;
+  }
+
+  // ==================== BUILD ====================
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -46,7 +72,7 @@ class DocumentDetailsSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Enhanced drag handle
+            // Drag handle
             Container(
               margin: const EdgeInsets.only(top: 12, bottom: 8),
               alignment: Alignment.center,
@@ -68,34 +94,17 @@ class DocumentDetailsSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Enhanced header with better spacing
                     _buildHeader(context, theme, loc, documentColor),
-
                     const SizedBox(height: 28),
-
-                    // Financial metrics in a beautiful 3-column grid
                     _buildFinancialMetrics(context, theme, loc),
-
                     const SizedBox(height: 28),
-
-                    // Payment progress section with improved design
                     _buildPaymentProgress(context, theme, loc),
-
                     const SizedBox(height: 28),
-
-                    // Customer details in 2x2 grid
                     _buildCustomerGrid(context, theme, loc),
-
                     const SizedBox(height: 28),
-
-                    // Document details in 2x2 grid
                     _buildDocumentGrid(context, theme, loc),
-
                     const SizedBox(height: 32),
-
-                    // Action buttons with better spacing
                     _buildActionButtons(context, theme, loc),
-
                     SizedBox(
                         height: MediaQuery.of(context).padding.bottom + 20),
                   ],
@@ -108,12 +117,18 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
+  // ==================== HEADER ====================
+
   Widget _buildHeader(
     BuildContext context,
     ThemeData theme,
     AppLocalizations loc,
     Color documentColor,
   ) {
+    final isGuest = isGuestDocument(document);
+    final statusColor =
+        FinancialUIManager.getPaymentStatusColor(document.paymentStatus, theme);
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -130,11 +145,10 @@ class DocumentDetailsSheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Document type and number
+          // ── Document type and number ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Icon with subtle glow
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -184,46 +198,85 @@ class DocumentDetailsSheet extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // Status and date row
-          Row(
+          // ── Status badge · date · (guest chip) ──
+          // Layout: status + guest chip on the left, spacer, then date.
+          // Using a Wrap for the left cluster so long status+guest
+          // combinations don't overflow on narrow screens.
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Status badge with improved design
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      FinancialUIManager.getPaymentStatusColor(
-                              document.paymentStatus, theme)
-                          .withOpacity(0.15),
-                      FinancialUIManager.getPaymentStatusColor(
-                              document.paymentStatus, theme)
-                          .withOpacity(0.08),
-                    ],
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  // Status badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          statusColor.withOpacity(0.15),
+                          statusColor.withOpacity(0.08),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: statusColor.withOpacity(0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Text(
+                      FinancialUIManager.getPaymentStatusDisplay(
+                              document.paymentStatus, loc)
+                          .toUpperCase(),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: FinancialUIManager.getPaymentStatusColor(
-                            document.paymentStatus, theme)
-                        .withOpacity(0.3),
-                    width: 1.5,
-                  ),
-                ),
-                child: Text(
-                  FinancialUIManager.getPaymentStatusDisplay(
-                          document.paymentStatus, loc)
-                      .toUpperCase(),
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: FinancialUIManager.getPaymentStatusColor(
-                        document.paymentStatus, theme),
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
-                  ),
-                ),
+
+                  // Guest chip (only when guest)
+                  if (isGuest)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color:
+                            theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: theme.colorScheme.outline.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.person_outline_rounded,
+                            size: 16,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            guestLabel(document, loc),
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
-              const Spacer(),
-              // Date with icon
+              const SizedBox(height: 10),
+              // Date on its own row — no Spacer crowding
               Row(
                 children: [
                   Icon(
@@ -248,11 +301,12 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
+  // ==================== FINANCIAL METRICS ====================
+
   Widget _buildFinancialMetrics(
       BuildContext context, ThemeData theme, AppLocalizations loc) {
     final totalPaid = document.totalPaid ?? 0;
     final totalDeposited = document.totalDeposited ?? 0;
-    final totalReceived = totalPaid + totalDeposited;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,11 +323,8 @@ class DocumentDetailsSheet extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-
-        // 3-column grid for financial metrics
         Row(
           children: [
-            // Total Amount
             Expanded(
               child: _buildMetricCard(
                 context: context,
@@ -282,17 +333,9 @@ class DocumentDetailsSheet extends StatelessWidget {
                 amount: document.documentAmount,
                 icon: Icons.receipt_long_rounded,
                 color: theme.colorScheme.primary,
-                gradient: LinearGradient(
-                  colors: [
-                    theme.colorScheme.primary.withOpacity(0.15),
-                    theme.colorScheme.primary.withOpacity(0.05),
-                  ],
-                ),
               ),
             ),
             const SizedBox(width: 12),
-
-            // Total Paid
             Expanded(
               child: _buildMetricCard(
                 context: context,
@@ -301,17 +344,9 @@ class DocumentDetailsSheet extends StatelessWidget {
                 amount: totalPaid,
                 icon: Icons.payments_rounded,
                 color: Colors.green,
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.green.withOpacity(0.15),
-                    Colors.green.withOpacity(0.05),
-                  ],
-                ),
               ),
             ),
             const SizedBox(width: 12),
-
-            // Total Deposited
             Expanded(
               child: _buildMetricCard(
                 context: context,
@@ -320,12 +355,6 @@ class DocumentDetailsSheet extends StatelessWidget {
                 amount: totalDeposited,
                 icon: Icons.account_balance_wallet_rounded,
                 color: Colors.amber.shade700,
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.amber.shade700.withOpacity(0.15),
-                    Colors.amber.shade700.withOpacity(0.05),
-                  ],
-                ),
               ),
             ),
           ],
@@ -341,12 +370,16 @@ class DocumentDetailsSheet extends StatelessWidget {
     required double amount,
     required IconData icon,
     required Color color,
-    required Gradient gradient,
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: gradient,
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.15),
+            color.withOpacity(0.05),
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: theme.colorScheme.outline.withOpacity(0.1),
@@ -364,11 +397,7 @@ class DocumentDetailsSheet extends StatelessWidget {
                   color: color.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: color,
-                ),
+                child: Icon(icon, size: 20, color: color),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -384,18 +413,24 @@ class DocumentDetailsSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            FinancialUIManager.formatCurrency(amount, context),
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w800,
-              height: 1.1,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              FinancialUIManager.formatCurrency(amount, context),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w800,
+                height: 1.1,
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
+  // ==================== PAYMENT PROGRESS ====================
 
   Widget _buildPaymentProgress(
       BuildContext context, ThemeData theme, AppLocalizations loc) {
@@ -404,7 +439,7 @@ class DocumentDetailsSheet extends StatelessWidget {
     final totalReceived = totalPaid + totalDeposited;
     final percentagePaid = document.documentAmount > 0
         ? (totalReceived / document.documentAmount * 100).clamp(0.0, 100.0)
-        : 0;
+        : 0.0;
     final remainingAmount = document.remainingAmount;
 
     return Container(
@@ -453,47 +488,31 @@ class DocumentDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Progress bar with improved design
-          Container(
-            height: 12,
-            decoration: BoxDecoration(
+          // Progress bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              height: 12,
               color: theme.colorScheme.surfaceVariant.withOpacity(0.4),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Stack(
-              children: [
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final width = constraints.maxWidth * (percentagePaid / 100);
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 800),
-                      curve: Curves.easeOutCubic,
-                      width: width,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            theme.colorScheme.primary,
-                            theme.colorScheme.primaryContainer,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(6),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.colorScheme.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: (percentagePaid / 100).clamp(0.0, 1.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        theme.colorScheme.primary,
+                        theme.colorScheme.primaryContainer,
+                      ],
+                    ),
+                  ),
                 ),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
 
-          // Amount breakdown
+          // Breakdown
           Row(
             children: [
               Expanded(
@@ -533,7 +552,7 @@ class DocumentDetailsSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'PAID + DEPOSITED'.toUpperCase(),
+                      'PAID + DEPOSITED',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
@@ -558,39 +577,59 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
+  // ==================== CUSTOMER ====================
+
   Widget _buildCustomerGrid(
       BuildContext context, ThemeData theme, AppLocalizations loc) {
-    // Fetch customer info using FutureBuilder
+    // ── Guest path ──
+    if (isGuestDocument(document)) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            theme: theme,
+            icon: Icons.person_outline_rounded,
+            iconColor: theme.colorScheme.primary,
+            title: loc.customerDetails,
+          ),
+          const SizedBox(height: 20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildGuestCard(theme: theme, loc: loc),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildSellerInfoCard(
+                  theme: theme,
+                  loc: loc,
+                  context: context,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // ── Normal path ──
     return FutureBuilder<Customer?>(
       future: _fetchCustomerInfo(context),
       builder: (context, snapshot) {
         final isLoading = snapshot.connectionState == ConnectionState.waiting;
         final customer = snapshot.data;
-        final hasCustomerInfo = customer != null;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: theme.colorScheme.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  loc.customerDetails,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                _buildSectionHeader(
+                  theme: theme,
+                  icon: Icons.person_rounded,
+                  iconColor: theme.colorScheme.primary,
+                  title: loc.customerDetails,
                 ),
                 if (isLoading) ...[
                   const SizedBox(width: 12),
@@ -607,54 +646,55 @@ class DocumentDetailsSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // 2x2 Grid for customer details
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1.6,
+            // Customer + seller as a responsive 2-column layout
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Customer Name (with avatar if available)
-                _buildCustomerInfoCard(
-                  theme: theme,
-                  icon: Icons.badge_rounded,
-                  label: loc.customerName,
-                  value: customer?.displayName ?? loc.loading,
-                  color: theme.colorScheme.primary,
-                  isLoading: isLoading,
-                  avatarUrl: customer?.avatarUrl,
+                Expanded(
+                  child: Column(
+                    children: [
+                      _buildCustomerInfoCard(
+                        theme: theme,
+                        icon: Icons.badge_rounded,
+                        label: loc.customerName,
+                        value: customer?.displayName ?? loc.loading,
+                        color: theme.colorScheme.primary,
+                        isLoading: isLoading,
+                        avatarUrl: customer?.avatarUrl,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildContactInfoCard(
+                        theme: theme,
+                        customer: customer,
+                        loc: loc,
+                        isLoading: isLoading,
+                      ),
+                    ],
+                  ),
                 ),
-
-                // Customer Type with enhanced display
-                _buildCustomerTypeCard(
-                  theme: theme,
-                  customer: customer,
-                  loc: loc,
-                  isLoading: isLoading,
-                ),
-
-                // Contact Information (Email/Phone)
-                _buildContactInfoCard(
-                  theme: theme,
-                  customer: customer,
-                  loc: loc,
-                  isLoading: isLoading,
-                ),
-
-                // Seller Information
-
-                _buildSellerInfoCard(
-                  theme: theme,
-                  loc: loc,
-                  document: document,
-                  context: context, // This is from document, not async
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _buildCustomerTypeCard(
+                        theme: theme,
+                        customer: customer,
+                        loc: loc,
+                        isLoading: isLoading,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSellerInfoCard(
+                        theme: theme,
+                        loc: loc,
+                        context: context,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
 
-            // Show address if available
+            // Address
             if (customer?.address != null && customer!.address!.isNotEmpty) ...[
               const SizedBox(height: 16),
               _buildAddressCard(
@@ -663,87 +703,6 @@ class DocumentDetailsSheet extends StatelessWidget {
                 loc: loc,
               ),
             ],
-
-            // Show customer ID badge
-            // if (hasCustomerInfo) ...[
-            //   const SizedBox(height: 12),
-            //   Row(
-            //     children: [
-            //       Container(
-            //         padding:
-            //             const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            //         decoration: BoxDecoration(
-            //           color: customer.isUser
-            //               ? Colors.blue.withOpacity(0.1)
-            //               : Colors.purple.withOpacity(0.1),
-            //           borderRadius: BorderRadius.circular(12),
-            //           border: Border.all(
-            //             color: customer.isUser
-            //                 ? Colors.blue.withOpacity(0.3)
-            //                 : Colors.purple.withOpacity(0.3),
-            //             width: 1,
-            //           ),
-            //         ),
-            //         child: Row(
-            //           mainAxisSize: MainAxisSize.min,
-            //           children: [
-            //             Icon(
-            //               customer.isUser
-            //                   ? Icons.person_outline_rounded
-            //                   : Icons.person_pin_rounded,
-            //               size: 14,
-            //               color: customer.isUser ? Colors.blue : Colors.purple,
-            //             ),
-            //             const SizedBox(width: 6),
-            //             Text(
-            //               customer.isUser
-            //                   ? '#${customer.customerId}'
-            //                   : '#${customer.personId}',
-            //               style: theme.textTheme.labelSmall?.copyWith(
-            //                 color:
-            //                     customer.isUser ? Colors.blue : Colors.purple,
-            //                 fontWeight: FontWeight.w600,
-            //               ),
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //       if (customer.isUser && customer.email != null) ...[
-            //         const SizedBox(width: 8),
-            //         Container(
-            //           padding: const EdgeInsets.symmetric(
-            //               horizontal: 12, vertical: 6),
-            //           decoration: BoxDecoration(
-            //             color: Colors.green.withOpacity(0.1),
-            //             borderRadius: BorderRadius.circular(12),
-            //             border: Border.all(
-            //               color: Colors.green.withOpacity(0.3),
-            //               width: 1,
-            //             ),
-            //           ),
-            //           child: Row(
-            //             mainAxisSize: MainAxisSize.min,
-            //             children: [
-            //               Icon(
-            //                 Icons.email_rounded,
-            //                 size: 14,
-            //                 color: Colors.green,
-            //               ),
-            //               const SizedBox(width: 6),
-            //               Text(
-            //                 'Has Account',
-            //                 style: theme.textTheme.labelSmall?.copyWith(
-            //                   color: Colors.green,
-            //                   fontWeight: FontWeight.w600,
-            //                 ),
-            //               ),
-            //             ],
-            //           ),
-            //         ),
-            //       ],
-            //     ],
-            //   ),
-            // ],
 
             // Error state
             if (snapshot.hasError) ...[
@@ -785,6 +744,34 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
+  Widget _buildSectionHeader({
+    required ThemeData theme,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<Customer?> _fetchCustomerInfo(BuildContext context) async {
     try {
       final personnelNotifier =
@@ -798,6 +785,87 @@ class DocumentDetailsSheet extends StatelessWidget {
       debugPrint('Error fetching customer info: $e');
       return null;
     }
+  }
+
+  Widget _buildGuestCard({
+    required ThemeData theme,
+    required AppLocalizations loc,
+  }) {
+    final cartId = document.sourceId ?? 0;
+    final hasCartId = cartId > 0;
+    final color = theme.colorScheme.onSurfaceVariant;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            theme.colorScheme.surfaceVariant.withOpacity(0.35),
+            theme.colorScheme.surfaceVariant.withOpacity(0.15),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.2),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  size: 18,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  loc.customerName.toUpperCase(),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.8,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            hasCartId ? 'Guest #$cartId' : loc.unknown,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Walk-in customer',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildCustomerInfoCard({
@@ -854,11 +922,7 @@ class DocumentDetailsSheet extends StatelessWidget {
                     color: color.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: color,
-                  ),
+                  child: Icon(icon, size: 18, color: color),
                 ),
                 const SizedBox(width: 12),
               ],
@@ -877,24 +941,7 @@ class DocumentDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           if (isLoading)
-            Container(
-              width: double.infinity,
-              height: 24,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Center(
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: color,
-                  ),
-                ),
-              ),
-            )
+            _buildSkeletonBar(theme: theme, color: color)
           else
             Text(
               value,
@@ -973,24 +1020,7 @@ class DocumentDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           if (isLoading)
-            Container(
-              width: double.infinity,
-              height: 24,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Center(
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: color,
-                  ),
-                ),
-              ),
-            )
+            _buildSkeletonBar(theme: theme, color: color)
           else
             Text(
               customer?.typeDisplayName ?? loc.unknown,
@@ -1012,7 +1042,6 @@ class DocumentDetailsSheet extends StatelessWidget {
   }) {
     final hasContactInfo = customer?.email != null || customer?.phone != null;
     final primaryContact = customer?.email ?? customer?.phone;
-    final contactType = customer?.email != null ? 'Email' : 'Phone';
     final color = hasContactInfo ? Colors.teal : Colors.grey;
 
     return Container(
@@ -1053,7 +1082,7 @@ class DocumentDetailsSheet extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Contact'.toUpperCase(),
+                  'CONTACT',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
@@ -1066,24 +1095,7 @@ class DocumentDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           if (isLoading)
-            Container(
-              width: double.infinity,
-              height: 24,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Center(
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: color,
-                  ),
-                ),
-              ),
-            )
+            _buildSkeletonBar(theme: theme, color: color)
           else if (hasContactInfo)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1124,11 +1136,13 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildSellerInfoCard(
-      {required ThemeData theme,
-      required AppLocalizations loc,
-      required FinancialDocument document,
-      required BuildContext context}) {
+  // ==================== SELLER ====================
+
+  Widget _buildSellerInfoCard({
+    required ThemeData theme,
+    required AppLocalizations loc,
+    required BuildContext context,
+  }) {
     final hasSeller = document.sellerId != null && document.sellerId! > 0;
     final color = hasSeller ? Colors.blue : Colors.grey;
 
@@ -1143,93 +1157,22 @@ class DocumentDetailsSheet extends StatelessWidget {
       builder: (context, snapshot) {
         final isLoading = snapshot.connectionState == ConnectionState.waiting;
 
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                color.withOpacity(0.12),
-                color.withOpacity(0.04),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: color.withOpacity(0.2),
-              width: 1.5,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.assignment_ind_rounded,
-                      size: 18,
-                      color: color,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      loc.seller.toUpperCase(),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.8,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (isLoading)
-                Container(
-                  width: double.infinity,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Center(
-                    child: SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: color,
-                      ),
-                    ),
-                  ),
-                )
-              else if (snapshot.hasData && snapshot.data != null)
-                Text(
-                  _getUserDisplayName(snapshot.data!),
+        return _sellerCardShell(
+          theme: theme,
+          color: color,
+          child: isLoading
+              ? _buildSkeletonBar(theme: theme, color: color)
+              : Text(
+                  snapshot.hasData && snapshot.data != null
+                      ? _getUserDisplayName(snapshot.data!)
+                      : loc.notAssigned,
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: color,
                     fontWeight: FontWeight.w700,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                )
-              else
-                Text(
-                  loc.notAssigned,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
                 ),
-            ],
-          ),
         );
       },
     );
@@ -1237,6 +1180,24 @@ class DocumentDetailsSheet extends StatelessWidget {
 
   Widget _buildNoSellerCard(
       ThemeData theme, AppLocalizations loc, Color color) {
+    return _sellerCardShell(
+      theme: theme,
+      color: color,
+      child: Text(
+        loc.notAssigned,
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Widget _sellerCardShell({
+    required ThemeData theme,
+    required Color color,
+    required Widget child,
+  }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1273,7 +1234,7 @@ class DocumentDetailsSheet extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  loc.seller.toUpperCase(),
+                  'SELLER',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
@@ -1285,20 +1246,13 @@ class DocumentDetailsSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            loc.notAssigned,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          child,
         ],
       ),
     );
   }
 
   String _getUserDisplayName(AppUser user) {
-    // Get the best display name
     final firstName = user.personFirstName?.trim();
     final lastName = user.personLastName?.trim();
     final userName = user.appUserName?.trim();
@@ -1309,13 +1263,13 @@ class DocumentDetailsSheet extends StatelessWidget {
       }
       return firstName;
     }
-
     if (userName != null && userName.isNotEmpty) {
       return userName;
     }
-
     return user.appUserName?.trim() ?? 'User #${user.idAppUser}';
   }
+
+  // ==================== ADDRESS ====================
 
   Widget _buildAddressCard({
     required ThemeData theme,
@@ -1342,14 +1296,14 @@ class DocumentDetailsSheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.location_on_rounded,
                 color: Colors.orange,
                 size: 20,
               ),
               const SizedBox(width: 12),
               Text(
-                'Address'.toUpperCase(),
+                'ADDRESS',
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
@@ -1371,8 +1325,48 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
+  // ==================== DOCUMENT DETAILS ====================
+
   Widget _buildDocumentGrid(
       BuildContext context, ThemeData theme, AppLocalizations loc) {
+    // Build a flat list of items so we can lay them out in two columns
+    // without a GridView-in-a-scroll-view footgun.
+    final items = <Widget>[
+      _buildGridItem(
+        theme: theme,
+        icon: Icons.calendar_month_rounded,
+        label: loc.issueDate,
+        value: FinancialUIManager.formatDate(document.issueDate),
+        color: Colors.teal,
+      ),
+      _buildGridItem(
+        theme: theme,
+        icon: document.dueDate != null
+            ? Icons.timer_rounded
+            : Icons.timer_off_rounded,
+        label: loc.dueDate,
+        value: document.dueDate != null
+            ? FinancialUIManager.formatDate(document.dueDate!)
+            : loc.notAssigned,
+        color: document.dueDate != null
+            ? (document.isOverdue ? theme.colorScheme.error : Colors.orange)
+            : theme.colorScheme.onSurfaceVariant,
+        isWarning: document.dueDate != null && document.isOverdue,
+      ),
+      _buildGridItem(
+        theme: theme,
+        icon: Icons.history_rounded,
+        label: loc.daysIssued,
+        value: '${document.daysIssued} ${loc.days}',
+        color: Colors.indigo,
+        isWarning: document.daysIssued > 30,
+      ),
+    ];
+
+    // Optional supplier card takes the full width
+    final supplierId = document.supplierId ?? 0;
+    final showSupplier = supplierId > 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1401,94 +1395,45 @@ class DocumentDetailsSheet extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        // 2x2 Grid for document details
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 1.6,
+        // First row: two items side by side
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Issue Date
-            _buildGridItem(
-              theme: theme,
-              icon: Icons.calendar_month_rounded,
-              label: loc.issueDate,
-              value: FinancialUIManager.formatDate(document.issueDate),
-              color: Colors.teal,
-            ),
-
-            // Due Date (if exists)
-            if (document.dueDate != null)
-              _buildGridItem(
-                theme: theme,
-                icon: Icons.timer_rounded,
-                label: loc.dueDate,
-                value: FinancialUIManager.formatDate(document.dueDate!),
-                color: document.isOverdue
-                    ? theme.colorScheme.error
-                    : Colors.orange,
-                isWarning: document.isOverdue,
+            Expanded(child: items[0]),
+            const SizedBox(width: 16),
+            Expanded(child: items[1]),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Second row: one item + optional full-width supplier
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: items[2]),
+            const SizedBox(width: 16),
+            if (showSupplier)
+              Expanded(
+                child: FutureBuilder<String>(
+                  future: SupplierUIProvider.getSupplierText(
+                    supplierId,
+                    loc.supplier,
+                    context.read<SupplierChangeNotifier>(),
+                  ),
+                  builder: (context, snapshot) {
+                    return _buildGridItem(
+                      theme: theme,
+                      icon: Icons.business_rounded,
+                      label: loc.supplier,
+                      value: snapshot.hasData
+                          ? snapshot.data!
+                          : '${loc.loading}...',
+                      color: Colors.deepOrange,
+                    );
+                  },
+                ),
               )
             else
-              _buildGridItem(
-                theme: theme,
-                icon: Icons.timer_off_rounded,
-                label: loc.dueDate,
-                value: loc.notAssigned,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-
-            // Days Issued
-            _buildGridItem(
-              theme: theme,
-              icon: Icons.history_rounded,
-              label: loc.daysIssued,
-              value: '${document.daysIssued} ${loc.days}',
-              color: Colors.indigo,
-              isWarning: document.daysIssued > 30,
-            ),
-
-            // Source Type
-            // if (document.sourceType != null)
-            //   _buildGridItem(
-            //     theme: theme,
-            //     icon: Icons.source_rounded,
-            //     label: loc.sourceType,
-            //     value: FinancialUIManager.getSourceTypeDisplay(
-            //         document.sourceType, loc),
-            //     color: Colors.pink,
-            //   )
-            // else
-            //   _buildGridItem(
-            //     theme: theme,
-            //     icon: Icons.source_rounded,
-            //     label: loc.sourceType,
-            //     value: loc.unknown,
-            //     color: theme.colorScheme.onSurfaceVariant,
-            //   ),
-
-            // Supplier (if exists, takes full width)
-            if (document.supplierId != null && document.supplierId! > 0)
-              FutureBuilder<String>(
-                future: SupplierUIProvider.getSupplierText(
-                  document.supplierId,
-                  loc.supplier,
-                  context.read<SupplierChangeNotifier>(),
-                ),
-                builder: (context, snapshot) {
-                  return _buildGridItem(
-                    theme: theme,
-                    icon: Icons.business_rounded,
-                    label: loc.supplier,
-                    value:
-                        snapshot.hasData ? snapshot.data! : loc.loading + '...',
-                    color: Colors.deepOrange,
-                    isFullWidth: true,
-                  );
-                },
-              ),
+              const Spacer(),
           ],
         ),
       ],
@@ -1502,10 +1447,8 @@ class DocumentDetailsSheet extends StatelessWidget {
     required String value,
     required Color color,
     bool isWarning = false,
-    bool isFullWidth = false,
   }) {
     return Container(
-      width: isFullWidth ? double.infinity : null,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -1526,11 +1469,7 @@ class DocumentDetailsSheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                size: 20,
-                color: color,
-              ),
+              Icon(icon, size: 20, color: color),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -1561,6 +1500,8 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
+  // ==================== ACTION BUTTONS ====================
+
   Widget _buildActionButtons(
       BuildContext context, ThemeData theme, AppLocalizations loc) {
     final remainingAmount = document.remainingAmount;
@@ -1569,7 +1510,6 @@ class DocumentDetailsSheet extends StatelessWidget {
     return Column(
       children: [
         if (hasBalance) ...[
-          // Primary payment button with improved design
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -1617,12 +1557,15 @@ class DocumentDetailsSheet extends StatelessWidget {
                         size: 28,
                       ),
                       const SizedBox(width: 16),
-                      Text(
-                        loc.makePayment(FinancialUIManager.formatCurrency(
-                            remainingAmount, context)),
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.w800,
+                      Flexible(
+                        child: Text(
+                          loc.makePayment(FinancialUIManager.formatCurrency(
+                              remainingAmount, context)),
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -1633,8 +1576,6 @@ class DocumentDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 20),
         ],
-
-        // Secondary actions row
         Row(
           children: [
             Expanded(
@@ -1658,10 +1599,7 @@ class DocumentDetailsSheet extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
-        // Close button with improved design
         OutlinedButton(
           onPressed: () => Navigator.pop(context),
           style: OutlinedButton.styleFrom(
@@ -1711,17 +1649,16 @@ class DocumentDetailsSheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
-                  color: color,
-                  size: 22,
-                ),
+                Icon(icon, color: color, size: 22),
                 const SizedBox(width: 12),
-                Text(
-                  label,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -1732,13 +1669,15 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
+  // ==================== SHARE ====================
+
   void _showShareOptions(
       BuildContext context, ThemeData theme, AppLocalizations loc) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (sheetContext) => Container(
         margin: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -1792,8 +1731,8 @@ class DocumentDetailsSheet extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 onTap: () {
-                  Navigator.pop(context);
-                  // Copy link logic
+                  Navigator.pop(sheetContext);
+                  _showNotImplemented(context, 'Copy link');
                 },
               ),
               ListTile(
@@ -1803,10 +1742,7 @@ class DocumentDetailsSheet extends StatelessWidget {
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    Icons.email_rounded,
-                    color: Colors.blue,
-                  ),
+                  child: const Icon(Icons.email_rounded, color: Colors.blue),
                 ),
                 title: Text(
                   loc.shareViaEmail,
@@ -1819,8 +1755,8 @@ class DocumentDetailsSheet extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 onTap: () {
-                  Navigator.pop(context);
-                  // Email logic
+                  Navigator.pop(sheetContext);
+                  _showNotImplemented(context, 'Email');
                 },
               ),
               ListTile(
@@ -1830,10 +1766,7 @@ class DocumentDetailsSheet extends StatelessWidget {
                     color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    Icons.chat_rounded,
-                    color: Colors.green,
-                  ),
+                  child: const Icon(Icons.chat_rounded, color: Colors.green),
                 ),
                 title: Text(
                   loc.shareViaMessage,
@@ -1846,13 +1779,13 @@ class DocumentDetailsSheet extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 onTap: () {
-                  Navigator.pop(context);
-                  // Message logic
+                  Navigator.pop(sheetContext);
+                  _showNotImplemented(context, 'Message');
                 },
               ),
               const SizedBox(height: 8),
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(sheetContext),
                 style: TextButton.styleFrom(
                   minimumSize: const Size(double.infinity, 56),
                 ),
@@ -1872,76 +1805,47 @@ class DocumentDetailsSheet extends StatelessWidget {
     );
   }
 
+  void _showNotImplemented(BuildContext context, String feature) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature is not implemented yet'),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(20),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // ==================== DOWNLOAD ====================
+
+  /// No fake "download complete" — this is a placeholder until the real
+  /// download service is wired up.
   void _downloadDocument(
       BuildContext context, ThemeData theme, AppLocalizations loc) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.download_rounded,
-                size: 40,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              loc.downloadingDocument,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              document.documentNumber,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 24),
-            LinearProgressIndicator(
-              color: theme.colorScheme.primary,
-              backgroundColor: theme.colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ],
+    _showNotImplemented(context, 'Download');
+  }
+
+  // ==================== SKELETON ====================
+
+  Widget _buildSkeletonBar({
+    required ThemeData theme,
+    required Color color,
+  }) {
+    return Container(
+      width: double.infinity,
+      height: 24,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(strokeWidth: 2, color: color),
         ),
       ),
     );
-
-    // Simulate download
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${loc.downloadComplete} • ${document.documentNumber}',
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          backgroundColor: theme.colorScheme.primary,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          margin: const EdgeInsets.all(20),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    });
   }
 }

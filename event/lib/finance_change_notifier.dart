@@ -422,6 +422,52 @@ class FinanceChangeNotifier extends ChangeNotifier {
     return dailyRevenue;
   }
 
+  Future<PaymentSubmitResult> submitPayment({
+    required int invoiceId,
+    required double amount,
+    required String method,
+    String? notes,
+  }) async {
+    if (invoiceId <= 0) {
+      return const PaymentSubmitResult.failure(
+          'No invoice linked to this document.');
+    }
+    if (amount <= 0) {
+      return const PaymentSubmitResult.failure(
+          'Payment amount must be greater than zero.');
+    }
+    if (method.trim().isEmpty) {
+      return const PaymentSubmitResult.failure('Payment method is required.');
+    }
+
+    _setLoading(true);
+    try {
+      final payment = await _invoiceService.addFinancialDocument({
+        "invoiceId": invoiceId,
+        "amount": amount,
+        "method": method,
+        "notes": notes ?? '',
+      });
+
+      if (payment == null) {
+        return const PaymentSubmitResult.failure('Payment was not recorded.');
+      }
+
+      // Refresh so the UI reflects the new paid/outstanding totals.
+      await refreshAll();
+
+      return PaymentSubmitResult.success(
+        'Payment recorded.',
+        paymentId: payment.documentId,
+      );
+    } catch (e, stack) {
+      debugPrint('Payment submission failed: $e\n$stack');
+      return PaymentSubmitResult.failure('$e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // ==================== PRIVATE HELPERS ====================
 
   void _addDocuments(List<FinancialDocument> newDocuments) {
