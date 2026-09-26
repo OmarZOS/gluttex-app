@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_core/business/finance/Customer.dart';
 import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:event/finance_change_notifier.dart';
 import 'package:event/personnel_notifier.dart';
-import 'package:event/supplier_change_notifier.dart';
 import 'package:provider_store/components/finance/document/document_details_sheet.dart';
-import 'package:provider_store/components/finance/document/new_document_sheet.dart';
 import 'package:ui/components/finance/financial_ui_manager.dart';
 import 'package:ui/screens/payment_form_screen.dart';
 import 'package:provider/provider.dart';
 
+/// Invoice/document list backed by a [FinanceChangeNotifier].
+///
+/// This widget does **not** trigger fetches. The notifier owns the provider
+/// scope; the parent calls `notifier.setProvider(id)` which fetches, and
+/// this widget rebuilds in response (via [AnimatedBuilder]).
 class EnhancedInvoiceList extends StatefulWidget {
+  final FinanceChangeNotifier notifier;
+
   final int? currentUserId;
-  final FinanceChangeNotifier? externalNotifier;
-  final Function(FinancialDocument)? onDocumentTap;
-  final Function(FinancialDocument)? onDocumentLongPress;
-  final Function()? onCreateDocument;
+  final ValueChanged<FinancialDocument>? onDocumentTap;
+  final ValueChanged<FinancialDocument>? onDocumentLongPress;
+  final VoidCallback? onCreateDocument;
   final bool showSummary;
   final bool showFilters;
   final bool showSearch;
@@ -25,8 +28,8 @@ class EnhancedInvoiceList extends StatefulWidget {
 
   const EnhancedInvoiceList({
     super.key,
+    required this.notifier,
     this.currentUserId,
-    this.externalNotifier,
     this.onDocumentTap,
     this.onDocumentLongPress,
     this.onCreateDocument,
@@ -41,23 +44,20 @@ class EnhancedInvoiceList extends StatefulWidget {
 }
 
 class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
-  late FinanceChangeNotifier _notifier;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   bool _isRefreshing = false;
 
+  FinanceChangeNotifier get _notifier => widget.notifier;
+
   @override
   void initState() {
     super.initState();
-    _notifier = widget.externalNotifier ?? FinanceChangeNotifier();
-
     if (widget.enablePagination) {
       _scrollController.addListener(_onScroll);
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _notifier.fetchDocuments(reset: true);
-    });
+    // No self-fetch. The notifier's provider is the parent's responsibility;
+    // when it changes, setProvider fetches, and this widget rebuilds.
   }
 
   @override
@@ -67,47 +67,54 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
     super.dispose();
   }
 
+  /// Pagination: append the next page. Only triggered by user scroll.
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      if (_notifier.hasMoreDocuments && !_notifier.isLoading) {
+      if (_notifier.hasMoreDocuments &&
+          !_notifier.isLoading &&
+          _notifier.hasProvider) {
         _notifier.fetchDocuments(reset: false);
       }
     }
   }
 
+  /// User-initiated refresh (pull-to-refresh / header button).
   Future<void> _refresh() async {
+    if (!_notifier.hasProvider) return;
     setState(() => _isRefreshing = true);
-    await _notifier.fetchDocuments(reset: true);
-    setState(() => _isRefreshing = false);
+    try {
+      await _notifier.fetchDocuments(reset: true);
+    } finally {
+      if (mounted) setState(() => _isRefreshing = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _notifier,
-      child: Consumer<FinanceChangeNotifier>(
-        builder: (context, notifier, child) {
-          return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.background,
-            body: SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(context, notifier),
-                  if (widget.showSummary &&
-                      notifier.filteredDocuments.isNotEmpty)
-                    _buildSummarySection(context, notifier),
-                  if (widget.showFilters)
-                    _buildFilterSection(context, notifier),
-                  Expanded(
-                    child: _buildContent(context, notifier),
-                  ),
-                ],
-              ),
+    return AnimatedBuilder(
+      animation: _notifier,
+      builder: (context, child) {
+        final notifier = _notifier;
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(context, notifier),
+                if (widget.showSummary && notifier.filteredDocuments.isNotEmpty)
+                  _buildSummarySection(context, notifier),
+                if (widget.showFilters) _buildFilterSection(context, notifier),
+                Expanded(
+                  child: notifier.hasProvider
+                      ? _buildContent(context, notifier)
+                      : _buildNoProviderState(context),
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -115,7 +122,9 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
 
   Widget _buildHeader(BuildContext context, FinanceChangeNotifier notifier) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
+    final docs = notifier.filteredDocuments;
+    final canRefresh = notifier.hasProvider && !_isRefreshing;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -126,14 +135,14 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  localizations?.financialDocuments ?? 'Financial Documents',
+                  loc?.financialDocuments ?? 'Financial Documents',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (notifier.filteredDocuments.isNotEmpty)
+                if (docs.isNotEmpty)
                   Text(
-                    '${notifier.filteredDocuments.length} ${localizations?.documents ?? 'documents'}',
+                    '${docs.length} ${loc?.documents ?? 'documents'}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -141,9 +150,8 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
               ],
             ),
           ),
-          // Reload Button
           IconButton(
-            onPressed: _isRefreshing ? null : _refresh,
+            onPressed: canRefresh ? _refresh : null,
             icon: _isRefreshing
                 ? const SizedBox(
                     width: 24,
@@ -151,21 +159,21 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.refresh),
-            tooltip: localizations?.refresh ?? 'Refresh',
+            tooltip: loc?.refresh ?? 'Refresh',
           ),
-          // Search Button
           if (widget.showSearch)
             IconButton(
-              onPressed: () => _showSearchDialog(context, notifier),
+              onPressed: notifier.hasProvider
+                  ? () => _showSearchDialog(context, notifier)
+                  : null,
               icon: const Icon(Icons.search),
-              tooltip: localizations?.search ?? 'Search',
+              tooltip: loc?.search ?? 'Search',
             ),
-          // Add Button
           if (widget.onCreateDocument != null)
             IconButton(
-              onPressed: widget.onCreateDocument,
+              onPressed: notifier.hasProvider ? widget.onCreateDocument : null,
               icon: const Icon(Icons.add),
-              tooltip: localizations?.addDocument ?? 'Add Document',
+              tooltip: loc?.addDocument ?? 'Add Document',
             ),
         ],
       ),
@@ -173,39 +181,39 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
   }
 
   void _showSearchDialog(BuildContext context, FinanceChangeNotifier notifier) {
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(localizations?.searchDocuments ?? 'Search Documents'),
+        title: Text(loc?.searchDocuments ?? 'Search Documents'),
         content: TextField(
           controller: _searchController,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: localizations?.searchByNumberOrCustomer ??
-                'Search by number or customer',
+            hintText:
+                loc?.searchByNumberOrCustomer ?? 'Search by number or customer',
             prefixIcon: const Icon(Icons.search),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
           onSubmitted: (value) {
-            // notifier.setSearchQuery(value);
+            notifier.setSearchQuery(value);
             Navigator.pop(context);
           },
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(localizations?.cancel ?? 'Cancel'),
+            child: Text(loc?.cancel ?? 'Cancel'),
           ),
           TextButton(
             onPressed: () {
-              // notifier.setSearchQuery(_searchController.text);
+              notifier.setSearchQuery(_searchController.text);
               Navigator.pop(context);
             },
-            child: Text(localizations?.search ?? 'Search'),
+            child: Text(loc?.search ?? 'Search'),
           ),
         ],
       ),
@@ -216,14 +224,14 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
 
   Widget _buildSummarySection(
       BuildContext context, FinanceChangeNotifier notifier) {
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
+    final docs = notifier.filteredDocuments;
     final totalAmount = notifier.totalAmount;
-    final paidAmount = notifier.filteredDocuments
-        .fold(0.0, (sum, doc) => sum + doc.totalReceived);
-    final overdueAmount = notifier.filteredDocuments
+    final paidAmount = docs.fold(0.0, (sum, doc) => sum + doc.totalReceived);
+    final overdueAmount = docs
             .where((doc) => doc.isOverdue && !doc.isPaid)
             .fold(0.0, (sum, doc) => sum + doc.documentAmount) +
-        notifier.filteredDocuments
+        docs
             .where((doc) => doc.isOverdue && doc.isPartiallyPaid)
             .fold(0.0, (sum, doc) => sum + doc.remainingAmount);
 
@@ -242,26 +250,26 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _SummaryItem(
-                    label: localizations?.total ?? 'Total',
+                    label: loc?.total ?? 'Total',
                     value:
                         FinancialUIManager.formatCurrency(totalAmount, context),
                     color: FinancialUIManager.infoColor,
                   ),
                   _SummaryItem(
-                    label: localizations?.paid ?? 'Paid',
+                    label: loc?.paid ?? 'Paid',
                     value:
                         FinancialUIManager.formatCurrency(paidAmount, context),
                     color: FinancialUIManager.paidColor,
                   ),
                   _SummaryItem(
-                    label: localizations?.overdue ?? 'Overdue',
+                    label: loc?.overdue ?? 'Overdue',
                     value: FinancialUIManager.formatCurrency(
                         overdueAmount, context),
                     color: FinancialUIManager.unpaidColor,
                   ),
                   _SummaryItem(
-                    label: localizations?.count ?? 'Count',
-                    value: '${notifier.filteredDocuments.length}',
+                    label: loc?.count ?? 'Count',
+                    value: '${docs.length}',
                     color: FinancialUIManager.pendingColor,
                   ),
                 ],
@@ -288,7 +296,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
 
   Widget _buildFilterSection(
       BuildContext context, FinanceChangeNotifier notifier) {
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -297,13 +305,13 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
         child: Row(
           children: [
             _FilterChip(
-              label: localizations?.all ?? 'All',
+              label: loc?.all ?? 'All',
               selected: notifier.filter.documentType == null &&
                   notifier.filter.status == null,
-              onTap: () => notifier.setFilter(FinanceDocumentFilter()),
+              onTap: () => notifier.setFilter(const FinanceDocumentFilter()),
             ),
             _FilterChip(
-              label: localizations?.invoices ?? 'Invoices',
+              label: loc?.invoices ?? 'Invoices',
               selected: notifier.filter.documentType == 'invoice',
               onTap: () => notifier.setFilter(
                 notifier.filter.copyWith(
@@ -314,18 +322,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
               ),
             ),
             _FilterChip(
-              label: localizations?.deposits ?? 'Deposits',
-              selected: notifier.filter.documentType == 'deposit',
-              onTap: () => notifier.setFilter(
-                notifier.filter.copyWith(
-                  documentType: notifier.filter.documentType == 'deposit'
-                      ? null
-                      : 'deposit',
-                ),
-              ),
-            ),
-            _FilterChip(
-              label: localizations?.unpaid ?? 'Unpaid',
+              label: loc?.unpaid ?? 'Unpaid',
               selected: notifier.filter.status == 'unpaid',
               onTap: () => notifier.setFilter(
                 notifier.filter.copyWith(
@@ -334,7 +331,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
               ),
             ),
             _FilterChip(
-              label: localizations?.overdue ?? 'Overdue',
+              label: loc?.overdue ?? 'Overdue',
               selected: notifier.filter.status == 'overdue',
               onTap: () => notifier.setFilter(
                 notifier.filter.copyWith(
@@ -345,7 +342,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
             ),
             if (widget.currentUserId != null)
               _FilterChip(
-                label: localizations?.myDocuments ?? 'My Documents',
+                label: loc?.myDocuments ?? 'My Documents',
                 selected: notifier.filter.clientId == widget.currentUserId,
                 onTap: () => notifier.setFilter(
                   notifier.filter.copyWith(
@@ -363,18 +360,57 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
 
   // ==================== CONTENT ====================
 
-  Widget _buildContent(BuildContext context, FinanceChangeNotifier notifier) {
-    final localizations = AppLocalizations.of(context);
+  Widget _buildNoProviderState(BuildContext context) {
+    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context);
 
-    if (notifier.isLoading && notifier.filteredDocuments.isEmpty) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.storefront_outlined,
+              size: 72,
+              color: theme.colorScheme.primary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              loc?.selectSupplierFirstText ?? 'Select a supplier first',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              loc?.selectSupplierToViewText ??
+                  'Choose a supplier to view their financial documents.',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, FinanceChangeNotifier notifier) {
+    final loc = AppLocalizations.of(context);
+    final docs = notifier.filteredDocuments;
+
+    if (notifier.isLoading && docs.isEmpty) {
       return FinancialUIManager.buildLoadingState(
         context: context,
-        message: localizations?.loadingFinancialDocuments ??
-            'Loading financial documents...',
+        message:
+            loc?.loadingFinancialDocuments ?? 'Loading financial documents...',
       );
     }
 
-    if (notifier.filteredDocuments.isEmpty && !notifier.isLoading) {
+    if (docs.isEmpty && !notifier.isLoading) {
       return _buildEmptyState(context, notifier);
     }
 
@@ -383,19 +419,22 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
       child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: notifier.filteredDocuments.length +
-            (notifier.hasMoreDocuments ? 1 : 0),
+        itemCount: docs.length + (notifier.hasMoreDocuments ? 1 : 0),
         itemBuilder: (context, index) {
-          if (index >= notifier.filteredDocuments.length) {
+          if (index >= docs.length) {
             return _buildLoadMoreIndicator(notifier, context);
           }
-          final document = notifier.filteredDocuments[index];
+          final document = docs[index];
           return _DocumentCard(
             document: document,
             notifier: notifier,
-            onTap: () =>
-                widget.onDocumentTap?.call(document) ??
-                _showDocumentDetails(context, document),
+            onTap: () {
+              if (widget.onDocumentTap != null) {
+                widget.onDocumentTap!(document);
+              } else {
+                _showDocumentDetails(context, document);
+              }
+            },
             onLongPress: () => widget.onDocumentLongPress?.call(document),
             onDownload: () => _downloadDocument(context, document),
           );
@@ -407,7 +446,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
   Widget _buildEmptyState(
       BuildContext context, FinanceChangeNotifier notifier) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
     final isFiltered = !notifier.filter.isEmpty;
     final hasSearchQuery = notifier.currentSearchQuery != null &&
         notifier.currentSearchQuery!.isNotEmpty;
@@ -432,11 +471,10 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                 const SizedBox(height: 24),
                 Text(
                   isFiltered
-                      ? localizations?.noMatchingDocuments ??
-                          'No matching documents'
+                      ? loc?.noMatchingDocuments ?? 'No matching documents'
                       : hasSearchQuery
-                          ? localizations?.noResultsFound ?? 'No results found'
-                          : localizations?.noDocumentsYet ?? 'No documents yet',
+                          ? loc?.noResultsFound ?? 'No results found'
+                          : loc?.noDocumentsYet ?? 'No documents yet',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -447,11 +485,12 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(
                     isFiltered
-                        ? localizations?.tryAdjustingFilters ??
+                        ? loc?.tryAdjustingFilters ??
                             'Try adjusting your filters'
                         : hasSearchQuery
-                            ? '${localizations?.noDocumentsMatch ?? 'No documents match'} "${notifier.currentSearchQuery}"'
-                            : localizations?.startCreatingFirstDocument ??
+                            ? '${loc?.noDocumentsMatch ?? 'No documents match'} '
+                                '"${notifier.currentSearchQuery}"'
+                            : loc?.startCreatingFirstDocument ??
                                 'Start by creating your first document',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -464,7 +503,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
                   FilledButton.icon(
                     onPressed: () => notifier.clearFilter(),
                     icon: const Icon(Icons.filter_alt_off),
-                    label: Text(localizations?.clearFilters ?? 'Clear Filters'),
+                    label: Text(loc?.clearFilters ?? 'Clear Filters'),
                   ),
               ],
             ),
@@ -476,7 +515,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
 
   Widget _buildLoadMoreIndicator(
       FinanceChangeNotifier notifier, BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
 
     if (notifier.isLoading) {
       return const Padding(
@@ -490,8 +529,8 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
       child: Center(
         child: Text(
           notifier.hasMoreDocuments
-              ? (localizations?.loadMore ?? 'Load More')
-              : (localizations?.noMoreDocuments ?? 'No more documents'),
+              ? (loc?.loadMore ?? 'Load More')
+              : (loc?.noMoreDocuments ?? 'No more documents'),
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontStyle: FontStyle.italic,
@@ -502,10 +541,10 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
   }
 
   void _downloadDocument(BuildContext context, FinancialDocument document) {
-    context.read<FinanceChangeNotifier>().downloadDocumentWithProgress(
-          document: document,
-          context: context,
-        );
+    _notifier.downloadDocumentWithProgress(
+      document: document,
+      context: context,
+    );
   }
 
   void _showDocumentDetails(BuildContext context, FinancialDocument document) {
@@ -520,7 +559,7 @@ class _EnhancedInvoiceListState extends State<EnhancedInvoiceList> {
   }
 }
 
-// ==================== SUMMARY ITEM WIDGET ====================
+// ==================== SUMMARY ITEM ====================
 
 class _SummaryItem extends StatelessWidget {
   final String label;
@@ -559,7 +598,7 @@ class _SummaryItem extends StatelessWidget {
   }
 }
 
-// ==================== FILTER CHIP WIDGET ====================
+// ==================== FILTER CHIP ====================
 
 class _FilterChip extends StatelessWidget {
   final String label;
@@ -603,7 +642,7 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-// ==================== DOCUMENT CARD WIDGET ====================
+// ==================== DOCUMENT CARD ====================
 
 class _DocumentCard extends StatelessWidget {
   final FinancialDocument document;
@@ -623,10 +662,8 @@ class _DocumentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context);
     final isOverdue = document.isOverdue && !document.isPaid;
     final isPartiallyPaid = document.isPartiallyPaid;
-    final isPaid = document.isPaid;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -672,8 +709,6 @@ class _DocumentCard extends StatelessWidget {
   }
 
   Widget _buildHeaderRow(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -722,20 +757,34 @@ class _DocumentCard extends StatelessWidget {
 
   Widget _buildCustomerName(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
+
+    final customerId = document.customerId ?? 0;
+    final personId = document.customerPersonId ?? 0;
+
+    if (customerId <= 0 && personId <= 0) {
+      return Text(
+        _guestLabel(document, loc),
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          fontStyle: FontStyle.italic,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        overflow: TextOverflow.ellipsis,
+      );
+    }
 
     return FutureBuilder<Customer?>(
       future: context.read<PersonnelNotifier>().getCustomerDisplayInfo(
-            customerId: document.customerId,
+            customerId: customerId,
             customerType: document.customerType,
-            personId: document.customerPersonId > 0
-                ? document.customerPersonId
-                : null,
+            personId: personId > 0 ? personId : null,
           ),
       builder: (context, snapshot) {
-        final customerName = snapshot.hasData && snapshot.data != null
+        final hasCustomer = snapshot.hasData && snapshot.data != null;
+        final customerName = hasCustomer
             ? snapshot.data!.displayName
-            : '${localizations?.customer ?? 'Customer'} ${document.customerId}';
+            : '${loc?.customer ?? 'Customer'} $customerId';
 
         return Text(
           customerName,
@@ -746,6 +795,11 @@ class _DocumentCard extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _guestLabel(FinancialDocument doc, AppLocalizations? loc) {
+    final cartId = doc.sourceId ?? 0;
+    return cartId > 0 ? 'Guest #$cartId' : (loc?.unknown ?? 'Guest');
   }
 
   Widget _buildDocumentTypeRow(BuildContext context) {
@@ -765,17 +819,13 @@ class _DocumentCard extends StatelessWidget {
         ),
         if (sourceTypeIcon != null) ...[
           const SizedBox(width: 6),
-          Icon(
-            sourceTypeIcon,
-            size: 14,
-            color: sourceTypeColor,
-          ),
+          Icon(sourceTypeIcon, size: 14, color: sourceTypeColor),
         ],
       ],
     );
   }
 
-  IconData? _getSourceTypeIcon(String sourceType) {
+  IconData? _getSourceTypeIcon(String? sourceType) {
     switch (sourceType) {
       case 'cart_based':
         return Icons.shopping_cart;
@@ -790,7 +840,7 @@ class _DocumentCard extends StatelessWidget {
     }
   }
 
-  Color _getSourceTypeColor(String sourceType, ThemeData theme) {
+  Color _getSourceTypeColor(String? sourceType, ThemeData theme) {
     switch (sourceType) {
       case 'cart_based':
         return Colors.purple;
@@ -807,24 +857,22 @@ class _DocumentCard extends StatelessWidget {
 
   Widget _buildDueDateIndicator(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
 
     if (document.dueDate == null) return const SizedBox.shrink();
-
-    final isPaid = document.isPaid;
-    if (isPaid) return const SizedBox.shrink();
+    if (document.isPaid) return const SizedBox.shrink();
 
     if (document.isCanceled) {
       return Row(
         children: [
-          Icon(
+          const Icon(
             Icons.cancel,
             size: 14,
             color: FinancialUIManager.canceledColor,
           ),
           const SizedBox(width: 6),
           Text(
-            localizations?.canceled ?? 'Canceled',
+            loc?.canceled ?? 'Canceled',
             style: theme.textTheme.bodySmall?.copyWith(
               color: FinancialUIManager.canceledColor,
               fontWeight: FontWeight.w600,
@@ -843,34 +891,30 @@ class _DocumentCard extends StatelessWidget {
 
     if (isPastDue) {
       color = FinancialUIManager.unpaidColor;
-      label = localizations?.overdue ?? 'Overdue';
+      label = loc?.overdue ?? 'Overdue';
       icon = Icons.warning;
     } else if (daysUntilDue <= 7) {
       color = Colors.orange;
-      label = localizations?.dueSoon ?? 'Due soon';
+      label = loc?.dueSoon ?? 'Due soon';
       icon = Icons.notification_important;
     } else {
       color = Colors.green;
-      label = localizations?.onTrack ?? 'On track';
+      label = loc?.onTrack ?? 'On track';
       icon = Icons.schedule;
     }
 
     if (document.isPartiallyPaid && isPastDue) {
       color = Colors.orange.shade700;
-      label =
-          '${localizations?.partial ?? 'Partial'} - ${localizations?.overdue?.toLowerCase() ?? 'overdue'}';
+      label = '${loc?.partial ?? 'Partial'} - '
+          '${loc?.overdue?.toLowerCase() ?? 'overdue'}';
     } else if (document.isPartiallyPaid && !isPastDue) {
       color = Colors.teal;
-      label = localizations?.partiallyPaid ?? 'Partially Paid';
+      label = loc?.partiallyPaid ?? 'Partially Paid';
     }
 
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 14,
-          color: color,
-        ),
+        Icon(icon, size: 14, color: color),
         const SizedBox(width: 6),
         Text(
           label,
@@ -885,18 +929,17 @@ class _DocumentCard extends StatelessWidget {
 
   Widget _buildAmountRow(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
     final isPaid = document.isPaid;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Amount
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              localizations?.amount ?? 'Amount',
+              loc?.amount ?? 'Amount',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.secondary,
               ),
@@ -912,14 +955,11 @@ class _DocumentCard extends StatelessWidget {
             ),
           ],
         ),
-        // Balance / Paid
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              isPaid
-                  ? (localizations?.paid ?? 'Paid')
-                  : (localizations?.balance ?? 'Balance'),
+              isPaid ? (loc?.paid ?? 'Paid') : (loc?.balance ?? 'Balance'),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.secondary,
               ),
@@ -960,7 +1000,8 @@ class _DocumentCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${(paymentPercentage * 100).toStringAsFixed(0)}% ${_getPaymentStatusLabel()}',
+              '${(paymentPercentage * 100).toStringAsFixed(0)}% '
+              '${_getPaymentStatusLabel()}',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -1007,7 +1048,7 @@ class _DocumentCard extends StatelessWidget {
 
   Widget _buildFooterRow(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
     final isOverdue = document.isOverdue && !document.isPaid;
 
     return Row(
@@ -1057,15 +1098,16 @@ class _DocumentCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.warning,
                   size: 12,
                   color: FinancialUIManager.unpaidColor,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${document.daysOverdue}d ${localizations?.overdue?.toLowerCase() ?? 'overdue'}',
-                  style: TextStyle(
+                  '${document.daysOverdue}d '
+                  '${loc?.overdue?.toLowerCase() ?? 'overdue'}',
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: FinancialUIManager.unpaidColor,
@@ -1080,13 +1122,12 @@ class _DocumentCard extends StatelessWidget {
 
   Widget _buildActionsRow(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
     final isPaid = document.isPaid;
     final isPartiallyPaid = document.isPartiallyPaid;
 
     return Row(
       children: [
-        // Download button
         Expanded(
           child: OutlinedButton.icon(
             onPressed: onDownload,
@@ -1096,7 +1137,7 @@ class _DocumentCard extends StatelessWidget {
               color: theme.colorScheme.primary,
             ),
             label: Text(
-              localizations?.download ?? 'Download',
+              loc?.download ?? 'Download',
               style: TextStyle(color: theme.colorScheme.primary),
             ),
             style: OutlinedButton.styleFrom(
@@ -1107,7 +1148,6 @@ class _DocumentCard extends StatelessWidget {
             ),
           ),
         ),
-        // Pay Now button
         if (!isPaid && !document.isCanceled) ...[
           const SizedBox(width: 8),
           Expanded(
@@ -1119,7 +1159,6 @@ class _DocumentCard extends StatelessWidget {
                     builder: (context) => PaymentFormScreen(
                       amountDue: document.remainingAmount,
                       onSubmit: (amount, method, notes) async {
-                        final notifier = context.read<FinanceChangeNotifier>();
                         final result = await notifier.submitPayment(
                           invoiceId: document.documentId,
                           amount: amount,
@@ -1128,8 +1167,6 @@ class _DocumentCard extends StatelessWidget {
                         );
                         return result.isSuccess ? null : result.message;
                       },
-
-                      // sourceDocument: document,
                     ),
                   ),
                 );
@@ -1141,11 +1178,9 @@ class _DocumentCard extends StatelessWidget {
               ),
               label: Text(
                 isPartiallyPaid
-                    ? (localizations?.payRemaining ?? 'Pay Remaining')
-                    : (localizations?.payNow ?? 'Pay Now'),
-                style: TextStyle(
-                  color: theme.colorScheme.onPrimary,
-                ),
+                    ? (loc?.payRemaining ?? 'Pay Remaining')
+                    : (loc?.payNow ?? 'Pay Now'),
+                style: TextStyle(color: theme.colorScheme.onPrimary),
               ),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 8),

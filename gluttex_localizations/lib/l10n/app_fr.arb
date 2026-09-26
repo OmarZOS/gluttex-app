@@ -2884,7 +2884,58 @@
   "addDocument": "Ajouter un document",
   "searchDocuments": "Rechercher des documents",
   "searchByNumberOrCustomer": "Rechercher par numéro ou client",
-  "payRemaining": "Payer le reste"
+  "payRemaining": "Payer le reste",
+
+    "paymentOutstandingLabel": "Montant dû",
+  "paymentRemainingAfter": "Il restera {amount} après ce paiement",
+  "@paymentRemainingAfter": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "paymentSettlesFull": "Ce paiement solde le montant total",
+
+  "paymentAmountLabel": "Montant",
+  "paymentMethodLabel": "Moyen de paiement",
+  "paymentNotesLabel": "Notes",
+  "paymentNotesHint": "Facultatif",
+
+  "paymentSubmitButton": "Payer {amount}",
+  "@paymentSubmitButton": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+
+  "paymentMethodCash": "Espèces",
+  "paymentMethodCard": "Carte",
+  "paymentMethodBankTransfer": "Virement bancaire",
+  "paymentMethodMobileMoney": "Paiement mobile",
+
+  "paymentErrorEnterAmount": "Veuillez saisir un montant",
+  "paymentErrorInvalidNumber": "Veuillez saisir un nombre valide",
+  "paymentErrorMustBePositive": "Le montant doit être supérieur à zéro",
+  "paymentErrorExceedsDue": "Le montant ne peut pas dépasser {amount}",
+  "@paymentErrorExceedsDue": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+
+  "paymentSuccessTitle": "Paiement enregistré",
+  "paymentSuccessBody": "{amount} payé par {method}.",
+  "@paymentSuccessBody": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "method": { "type": "String" }
+    }
+  },
+
+    "loadAnalyticsData": "Charger les données analytiques",
+  "collectionRate": "Taux de recouvrement",
+  "totalTransactions": "Transactions totales",
+  "totalCollected": "Total encaissé",
+  "totalOutstanding": "Total en attente"
 
 
 

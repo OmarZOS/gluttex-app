@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 
 /// A self-contained payment form.
 ///
@@ -8,12 +9,16 @@ import 'package:flutter/material.dart';
 ///                 return `null` on success, or an error message to display
 ///   - [initialAmount]: optional starting amount (defaults to [amountDue])
 ///   - [currencySymbol]: prefix for displayed amounts (defaults to empty)
-///   - [title]: optional header text
+///   - [title]: optional header text. If null, uses the localized default.
 class PaymentFormScreen extends StatefulWidget {
   final double amountDue;
   final double? initialAmount;
   final String currencySymbol;
-  final String title;
+
+  /// If null, falls back to `loc.paymentType` or similar. Pass a pre-built
+  /// string here if you want to include the document number, etc.
+  final String? title;
+
   final Future<String?> Function(double amount, String method, String notes)
       onSubmit;
 
@@ -23,7 +28,7 @@ class PaymentFormScreen extends StatefulWidget {
     required this.onSubmit,
     this.initialAmount,
     this.currencySymbol = '',
-    this.title = 'Payment',
+    this.title,
   });
 
   @override
@@ -61,32 +66,54 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
     super.dispose();
   }
 
+  // ==================== LOCALIZED LABELS ====================
+
+  /// Localized display name for a payment method id.
+  ///
+  /// If your `AppLocalizations` doesn't yet have these keys, add them to the
+  /// ARB file. Until then, the fallback (the id with underscores replaced)
+  /// is what the UI will show.
+  String _methodLabel(String id, AppLocalizations loc) {
+    switch (id) {
+      case 'cash':
+        return loc.paymentMethodCash;
+      case 'card':
+        return loc.paymentMethodCard;
+      case 'bank_transfer':
+        return loc.paymentMethodBankTransfer;
+      case 'mobile_money':
+        return loc.paymentMethodMobileMoney;
+      default:
+        return id.replaceAll('_', ' ').toUpperCase();
+    }
+  }
+
   // ==================== VALIDATION ====================
 
-  String? _validateAmount(String raw) {
+  String? _validateAmount(String raw, AppLocalizations loc) {
     final trimmed = raw.trim();
-    if (trimmed.isEmpty) return 'Enter an amount';
+    if (trimmed.isEmpty) return loc.paymentErrorEnterAmount;
     final value = double.tryParse(trimmed);
-    if (value == null) return 'Enter a valid number';
-    if (value <= 0) return 'Amount must be greater than zero';
+    if (value == null) return loc.paymentErrorInvalidNumber;
+    if (value <= 0) return loc.paymentErrorMustBePositive;
     if (value > widget.amountDue) {
-      return 'Amount cannot exceed ${_fmt(widget.amountDue)}';
+      return loc.paymentErrorExceedsDue(_fmt(context, widget.amountDue));
     }
     return null;
   }
 
   // ==================== HELPERS ====================
 
-  String _fmt(double amount) => '${widget.currencySymbol}'
-      '${amount.toStringAsFixed(2)}';
+  String _fmt(BuildContext ctx, double amount) =>
+      AppLocalizations.of(ctx)!.price(amount.toStringAsFixed(2));
 
   double get _currentAmount =>
       double.tryParse(_amountController.text.trim()) ?? 0.0;
 
   // ==================== SUBMIT ====================
 
-  Future<void> _submit() async {
-    final err = _validateAmount(_amountController.text);
+  Future<void> _submit(AppLocalizations loc) async {
+    final err = _validateAmount(_amountController.text, loc);
     if (err != null) {
       setState(() => _error = err);
       return;
@@ -111,8 +138,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
         return;
       }
 
-      // Success — show confirmation, then pop.
-      await _showSuccess();
+      await _showSuccess(loc);
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
@@ -123,7 +149,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
     }
   }
 
-  Future<void> _showSuccess() async {
+  Future<void> _showSuccess(AppLocalizations loc) async {
     final theme = Theme.of(context);
     await showDialog<void>(
       context: context,
@@ -135,16 +161,19 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
           size: 56,
           color: theme.colorScheme.primary,
         ),
-        title: const Text('Payment recorded'),
+        title: Text(loc.paymentSuccessTitle),
         content: Text(
-          '${_fmt(_currentAmount)} paid via ${_method.replaceAll('_', ' ')}.',
+          loc.paymentSuccessBody(
+            _fmt(context, _currentAmount),
+            _methodLabel(_method, loc),
+          ),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
+            child: Text(loc.ok),
           ),
         ],
       ),
@@ -156,6 +185,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -167,7 +197,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.title,
+          widget.title ?? loc.paymentType,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -184,19 +214,15 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
               _SummaryCard(
                 amountDue: widget.amountDue,
                 amountEntered: _currentAmount,
-                formatter: _fmt,
+                formatter: (double amt) => _fmt(context, amt),
+                labelOutstanding: loc.paymentOutstandingLabel,
+                labelRemainingAfter: loc.paymentRemainingAfter,
+                labelSettlesFull: loc.paymentSettlesFull,
               ),
               const SizedBox(height: 24),
 
               // ── Amount field ──
-              Text(
-                'AMOUNT',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
+              _SectionLabel(text: loc.paymentAmountLabel),
               const SizedBox(height: 8),
               TextField(
                 controller: _amountController,
@@ -222,7 +248,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                   if (_error != null) {
                     setState(() => _error = null);
                   } else {
-                    setState(() {}); // refresh summary + slider
+                    setState(() {});
                   }
                 },
               ),
@@ -237,7 +263,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                   divisions: widget.amountDue >= 100
                       ? (widget.amountDue).round().clamp(1, 1000)
                       : null,
-                  label: _fmt(_currentAmount),
+                  label: _fmt(context, _currentAmount),
                   onChanged: _submitting
                       ? null
                       : (value) {
@@ -250,12 +276,14 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('0',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        )),
                     Text(
-                      _fmt(widget.amountDue),
+                      _fmt(context, 0),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      _fmt(context, widget.amountDue),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -266,14 +294,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
               ],
 
               // ── Method picker ──
-              Text(
-                'METHOD',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
+              _SectionLabel(text: loc.paymentMethodLabel),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -288,7 +309,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                           ? theme.colorScheme.onPrimary
                           : theme.colorScheme.onSurfaceVariant,
                     ),
-                    label: Text(e.key.replaceAll('_', ' ').toUpperCase()),
+                    label: Text(_methodLabel(e.key, loc)),
                     selected: selected,
                     onSelected: _submitting
                         ? null
@@ -299,21 +320,14 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
               const SizedBox(height: 24),
 
               // ── Notes ──
-              Text(
-                'NOTES',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
+              _SectionLabel(text: loc.paymentNotesLabel),
               const SizedBox(height: 8),
               TextField(
                 controller: _notesController,
                 enabled: !_submitting,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Optional',
+                  hintText: loc.paymentNotesHint,
                   filled: true,
                   fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                   border: OutlineInputBorder(
@@ -326,7 +340,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
 
               // ── Submit ──
               FilledButton(
-                onPressed: _submitting ? null : _submit,
+                onPressed: _submitting ? null : () => _submit(loc),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                   shape: RoundedRectangleBorder(
@@ -340,7 +354,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2.5),
                       )
                     : Text(
-                        'PAY ${_fmt(_currentAmount)}',
+                        loc.paymentSubmitButton(_fmt(context, _currentAmount)),
                         style: const TextStyle(
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.0,
@@ -355,17 +369,44 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
   }
 }
 
+// ==================== SECTION LABEL ====================
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+
+  const _SectionLabel({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      text.toUpperCase(),
+      style: theme.textTheme.labelMedium?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1.2,
+      ),
+    );
+  }
+}
+
 // ==================== SUMMARY CARD ====================
 
 class _SummaryCard extends StatelessWidget {
   final double amountDue;
   final double amountEntered;
   final String Function(double) formatter;
+  final String labelOutstanding;
+  final String Function(String amount) labelRemainingAfter;
+  final String labelSettlesFull;
 
   const _SummaryCard({
     required this.amountDue,
     required this.amountEntered,
     required this.formatter,
+    required this.labelOutstanding,
+    required this.labelRemainingAfter,
+    required this.labelSettlesFull,
   });
 
   @override
@@ -386,7 +427,7 @@ class _SummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'OUTSTANDING',
+            labelOutstanding.toUpperCase(),
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
@@ -403,7 +444,7 @@ class _SummaryCard extends StatelessWidget {
           if (amountEntered > 0 && remaining > 0) ...[
             const SizedBox(height: 12),
             Text(
-              '${formatter(remaining)} remaining after this payment',
+              labelRemainingAfter(formatter(remaining)),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -412,7 +453,7 @@ class _SummaryCard extends StatelessWidget {
           if (amountEntered >= amountDue && amountDue > 0) ...[
             const SizedBox(height: 12),
             Text(
-              'This settles the full amount',
+              labelSettlesFull,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.w600,

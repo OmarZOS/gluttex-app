@@ -2708,7 +2708,57 @@
   "addDocument": "Add Document",
   "searchDocuments": "Search Documents",
   "searchByNumberOrCustomer": "Search by number or customer",
-  "payRemaining": "Pay Remaining"
+  "payRemaining": "Pay Remaining",
+
+    "paymentOutstandingLabel": "Outstanding",
+  "paymentRemainingAfter": "{amount} remaining after this payment",
+  "@paymentRemainingAfter": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "paymentSettlesFull": "This settles the full amount",
+
+  "paymentAmountLabel": "Amount",
+  "paymentMethodLabel": "Method",
+  "paymentNotesLabel": "Notes",
+  "paymentNotesHint": "Optional",
+
+  "paymentSubmitButton": "Pay {amount}",
+  "@paymentSubmitButton": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+
+  "paymentMethodCash": "Cash",
+  "paymentMethodCard": "Card",
+  "paymentMethodBankTransfer": "Bank transfer",
+  "paymentMethodMobileMoney": "Mobile money",
+
+  "paymentErrorEnterAmount": "Enter an amount",
+  "paymentErrorInvalidNumber": "Enter a valid number",
+  "paymentErrorMustBePositive": "Amount must be greater than zero",
+  "paymentErrorExceedsDue": "Amount cannot exceed {amount}",
+  "@paymentErrorExceedsDue": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+
+  "paymentSuccessTitle": "Payment recorded",
+  "paymentSuccessBody": "{amount} paid via {method}.",
+  "@paymentSuccessBody": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "method": { "type": "String" }
+    }
+  },
+    "loadAnalyticsData": "Load analytics data",
+  "collectionRate": "Collection rate",
+  "totalTransactions": "Total transactions",
+  "totalCollected": "Total collected",
+  "totalOutstanding": "Total outstanding"
 
 
 }

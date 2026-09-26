@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 
+/// Date filter values used by the finance screen.
+///
+/// Keep in sync with the `switch` in `FinanceViewModel._applyDateFilter`.
+
 class DateFilterSelector extends StatefulWidget {
-  final String selectedFilter;
-  final ValueChanged<String> onFilterChanged;
+  final DateFilter selectedFilter;
+  final ValueChanged<DateFilter> onFilterChanged;
 
   const DateFilterSelector({
     super.key,
@@ -16,13 +21,13 @@ class DateFilterSelector extends StatefulWidget {
 }
 
 class _DateFilterSelectorState extends State<DateFilterSelector> {
-  final List<Map<String, dynamic>> _filters = [
-    {'value': 'today', 'label': 'Today'},
-    {'value': 'week', 'label': 'This Week'},
-    {'value': 'month', 'label': 'This Month'},
-    {'value': 'quarter', 'label': 'This Quarter'},
-    {'value': 'year', 'label': 'This Year'},
-    {'value': 'all', 'label': 'All Time'},
+  static const _filters = <DateFilter>[
+    DateFilter.today,
+    DateFilter.week,
+    DateFilter.month,
+    DateFilter.quarter,
+    DateFilter.year,
+    DateFilter.all,
   ];
 
   @override
@@ -34,36 +39,37 @@ class _DateFilterSelectorState extends State<DateFilterSelector> {
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
+          bottom: BorderSide(
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
         ),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: _filters.map((filter) {
-            final isSelected = widget.selectedFilter == filter['value'];
+            final isSelected = widget.selectedFilter == filter;
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: FilterChip(
                 label: Text(
-                  _getLocalizedLabel(filter['label'] as String, loc),
+                  _labelFor(filter, loc),
                   style: TextStyle(
                     color: isSelected
                         ? theme.colorScheme.onPrimary
                         : theme.colorScheme.onSurface,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   ),
                 ),
                 selected: isSelected,
                 onSelected: (selected) {
-                  if (selected) {
-                    widget.onFilterChanged(filter['value'] as String);
+                  if (selected && filter != widget.selectedFilter) {
+                    widget.onFilterChanged(filter);
                   }
                 },
-                backgroundColor: isSelected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.surfaceVariant,
+                showCheckmark: false,
+                backgroundColor: theme.colorScheme.surfaceVariant,
                 selectedColor: theme.colorScheme.primary,
-                checkmarkColor: theme.colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                   side: BorderSide(
@@ -80,22 +86,20 @@ class _DateFilterSelectorState extends State<DateFilterSelector> {
     );
   }
 
-  String _getLocalizedLabel(String label, AppLocalizations loc) {
-    switch (label) {
-      case 'Today':
+  String _labelFor(DateFilter filter, AppLocalizations loc) {
+    switch (filter) {
+      case DateFilter.today:
         return loc.today;
-      case 'This Week':
+      case DateFilter.week:
         return loc.thisWeek;
-      case 'This Month':
+      case DateFilter.month:
         return loc.thisMonth;
-      case 'This Quarter':
+      case DateFilter.quarter:
         return loc.thisQuarter;
-      case 'This Year':
+      case DateFilter.year:
         return loc.thisYear;
-      case 'All Time':
+      case DateFilter.all:
         return loc.allTime;
-      default:
-        return label;
     }
   }
 }

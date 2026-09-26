@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
+import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:gluttex_core/business/services/BusinessOperationService.dart';
 import 'package:event/views/pricing_config_view_model.dart';
@@ -10,24 +11,54 @@ import 'package:event/views/pricing_config_view_model.dart';
 enum FinanceTab {
   invoices(0, 'Invoices'),
   businessOperations(1, 'Business Operations'),
-  // analytics(2, 'Analytics'),
   pricingConfig(2, 'Pricing Config');
 
+  final int indexs;
   final String title;
-  const FinanceTab(index, this.title);
+  const FinanceTab(this.indexs, this.title);
 }
 
 class FinanceViewModel extends ChangeNotifier {
   final BusinessOperationService businessOperationService;
 
-  FinanceViewModel({required this.businessOperationService});
+  /// The provider currently being viewed.
+  ///
+  /// `0` means "no provider selected" — no fetches are made, lists stay
+  /// empty, and the UI is expected to show a "select a supplier" state.
+  int _providerId;
+
+  FinanceViewModel({
+    required this.businessOperationService,
+    int providerId = 0,
+  }) : _providerId = providerId {
+    // Apply the initial date filter so the state (data) matches the UI
+    // (the "Today" chip rendered as selected).
+    _applyDateFilter(_dateFilter);
+  }
+
+  int get providerId => _providerId;
+
+  Future<void> setProvider(int newProviderId) async {
+    if (newProviderId == _providerId) return;
+    if (newProviderId < 0) return;
+
+    _providerId = newProviderId;
+    _resetPagination();
+    _resetAnalytics();
+    _pricingConfigViewModel.clearSelection();
+    notifyListeners();
+
+    if (_providerId > 0) {
+      await loadBusinessOperations(forceRefresh: true);
+    }
+  }
 
   // Navigation
   FinanceTab _selectedTab = FinanceTab.invoices;
   BusinessFilter _businessFilter = const BusinessFilter();
 
   // Pagination state
-  int _currentPage = 0; // Changed from 1 to 0 (0-based indexing)
+  int _currentPage = 0;
   static const int _pageSize = 20;
   bool _hasMore = true;
 
@@ -36,7 +67,7 @@ class FinanceViewModel extends ChangeNotifier {
   final List<Order> _orders = [];
   final List<BusinessSummary> _businessSummaries = [];
 
-  // Loading states (simplified)
+  // Loading states
   bool _isLoading = false;
   bool _isLoadingMore = false;
 
@@ -48,7 +79,7 @@ class FinanceViewModel extends ChangeNotifier {
   AnalyticsCache? _analyticsCache;
 
   // Navigation state
-  String _dateFilter = 'today';
+  DateFilter _dateFilter = DateFilter.today;
   DateTimeRange? _dateRangeFilter;
 
   // Analytics state
@@ -74,7 +105,7 @@ class FinanceViewModel extends ChangeNotifier {
   bool get hasMore => _hasMore;
   PricingConfigViewModel get pricingConfigViewModel => _pricingConfigViewModel;
   AnalyticsCache? get analyticsCache => _analyticsCache;
-  String get dateFilter => _dateFilter;
+  DateFilter get dateFilter => _dateFilter;
   DateTimeRange? get dateRangeFilter => _dateRangeFilter;
   List<BusinessOperation> get filteredOperations => _filteredOperations;
 
@@ -87,119 +118,179 @@ class FinanceViewModel extends ChangeNotifier {
   bool get hasBusinessSummaries => _businessSummaries.isNotEmpty;
   List<BusinessSummary> get topSuppliers => _businessSummaries.take(5).toList();
   List<BusinessOperation> get recentOperations =>
-      _businessOperations.take(10).toList();
+      _filteredOperations.take(10).toList();
 
-  // Navigation
+  bool get hasProvider => _providerId > 0;
+
+  // ==================== NAVIGATION ====================
+
   void selectTab(FinanceTab tab) {
-    if (_selectedTab != tab) {
-      _selectedTab = tab;
-      notifyListeners();
+    if (_selectedTab == tab) return;
 
-      // Load initial data for tab
-      if (tab == FinanceTab.businessOperations) {
-        if (_businessOperations.isEmpty) {
-          loadBusinessOperations();
-        } else {
-          // Apply current filters to existing data
-          _applyFilters();
-        }
+    _selectedTab = tab;
+    notifyListeners();
+
+    if (tab == FinanceTab.businessOperations && hasProvider) {
+      if (_businessOperations.isEmpty) {
+        loadBusinessOperations();
+      } else {
+        _applyFilters();
       }
     }
   }
 
-  // In FinanceViewModel class, update the _applyDateFilter method:
-  void _applyDateFilter(String filterType) {
+  // ==================== DATE FILTER ====================
+
+  void _applyDateFilter(DateFilter filterType) {
     final now = DateTime.now();
+    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+
     DateTime startDate;
-    DateTime endDate =
-        DateTime(now.year, now.month, now.day, 23, 59, 59); // End of day
 
     switch (filterType) {
-      case 'today':
+      case DateFilter.today:
         startDate = DateTime(now.year, now.month, now.day);
         break;
-      case 'week':
-        startDate = now.subtract(const Duration(days: 7));
-        startDate = DateTime(startDate.year, startDate.month, startDate.day);
+
+      case DateFilter.week:
+        // "This week" = since Monday (ISO 8601).
+        final weekday = now.weekday; // Monday = 1, Sunday = 7
+        startDate = DateTime(
+          now.year,
+          now.month,
+          now.day - (weekday - 1),
+        );
         break;
-      case 'month':
+
+      case DateFilter.month:
         startDate = DateTime(now.year, now.month, 1);
         break;
-      case 'quarter':
-        final month = now.month;
-        final quarterStartMonth = ((month - 1) ~/ 3) * 3 + 1;
+
+      case DateFilter.quarter:
+        final quarterStartMonth = ((now.month - 1) ~/ 3) * 3 + 1;
         startDate = DateTime(now.year, quarterStartMonth, 1);
         break;
-      case 'year':
+
+      case DateFilter.year:
         startDate = DateTime(now.year, 1, 1);
         break;
-      case 'all':
+
+      case DateFilter.all:
+        _dateRangeFilter = null;
+        _applyFilters();
+        return;
+
       default:
+        // Unknown filter → treat as "all". Log so we notice in dev.
+        log(
+          'FinanceViewModel._applyDateFilter: unknown filter "$filterType"',
+          name: 'FinanceViewModel',
+        );
         _dateRangeFilter = null;
         _applyFilters();
         return;
     }
 
-    _dateRangeFilter = DateTimeRange(start: startDate, end: endDate);
+    _dateRangeFilter = DateTimeRange(start: startDate, end: endOfDay);
     _applyFilters();
   }
 
-// Also update the _applyFilters method to properly handle date ranges:
-  void _applyFilters() {
-    if (_businessOperations.isEmpty) return;
+  // ==================== FILTERING ====================
+
+  /// Recompute `_filteredOperations`, `_businessSummaries`, and analytics
+  /// from the current filters. Does NOT fetch from the network.
+  ///
+  /// Callers are responsible for `notifyListeners()` if they want a rebuild.
+  void _applyFilters({bool notify = true}) {
+    if (_businessOperations.isEmpty) {
+      _filteredOperations = [];
+      _businessSummaries.clear();
+      _resetAnalytics();
+      if (notify) notifyListeners();
+      return;
+    }
 
     List<BusinessOperation> filtered = _businessOperations;
 
-    // Apply business filter
+    // 1. Client-side business filter (status, source, etc.).
     filtered = _businessFilter.applyFilter(filtered);
 
-    // Apply date range filter
+    // 2. Date range.
     if (_dateRangeFilter != null) {
+      final start = _dateRangeFilter!.start;
+      final end = _dateRangeFilter!.end;
       filtered = filtered.where((op) {
-        if (op.operationDate == null) return false;
-        final operationDate = op.operationDate!;
-
-        // Important: Include operations on the start date (>= start) and before or on end date (<= end)
-        return !operationDate.isBefore(_dateRangeFilter!.start) &&
-            !operationDate.isAfter(_dateRangeFilter!.end);
+        final d = op.operationDate;
+        if (d == null) return false;
+        return !d.isBefore(start) && !d.isAfter(end);
       }).toList();
     }
 
     _filteredOperations = filtered;
+
+    // Summaries are derived from the *filtered* set so any summary UI
+    // matches what the list shows.
+    _calculateBusinessSummaries(_filteredOperations);
+
     _calculateAnalytics();
-    notifyListeners();
+
+    if (notify) notifyListeners();
   }
 
+  // ==================== FILTER SETTERS ====================
+
+  /// Apply a business filter and refetch.
+  ///
+  /// NOTE: If `filter.supplierId` narrows the *fetch* (rather than being a
+  /// client-side refinement), it should be passed into
+  /// `loadBusinessOperations`. Currently it is treated as a client-side
+  /// refinement on top of the provider scope.
   void setBusinessFilter(BusinessFilter filter) {
     _businessFilter = filter;
     _resetPagination();
-    _applyFilters();
+
+    if (hasProvider) {
+      // `forceRefresh: true` already resets pagination internally, so
+      // we don't need to reset it above — but doing both is harmless.
+      loadBusinessOperations(forceRefresh: true);
+    } else {
+      _applyFilters();
+    }
   }
 
   void setDateRangeFilter(DateTimeRange? range) {
     _dateRangeFilter = range;
     _applyFilters();
-    notifyListeners();
   }
 
-  void selectDateFilter(String filterType) {
-    _dateFilter = filterType;
-    _applyDateFilter(filterType);
-    notifyListeners();
+  void selectDateFilter(DateFilter filterType) {
+    _dateFilter = DateFilter.values.firstWhere((f) => f.name == filterType);
+    _applyDateFilter(_dateFilter);
+    // _applyDateFilter → _applyFilters → notifyListeners (once).
   }
 
   void clearBusinessFilter() {
     _businessFilter = const BusinessFilter();
     _dateRangeFilter = null;
-    _dateFilter = 'today';
-    _filteredOperations = List.from(_businessOperations);
-    _calculateBusinessSummaries();
-    _calculateAnalytics();
-    notifyListeners();
+    _dateFilter = DateFilter.today;
+
+    if (hasProvider) {
+      loadBusinessOperations(forceRefresh: true);
+    } else {
+      _applyFilters();
+    }
   }
 
-  // Business Operations with Pagination
+  // ==================== FETCHING ====================
+
   Future<void> loadBusinessOperations({bool forceRefresh = false}) async {
+    if (!hasProvider) {
+      log(
+        'FinanceViewModel.loadBusinessOperations: skipped (no provider)',
+        name: 'FinanceViewModel',
+      );
+      return;
+    }
     if (_isLoading) return;
 
     if (forceRefresh) {
@@ -210,11 +301,17 @@ class FinanceViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      log(
+        'FinanceViewModel.loadBusinessOperations: '
+        'providerId=$_providerId page=$_currentPage pageSize=$_pageSize',
+        name: 'FinanceViewModel',
+      );
+
       final operations =
           await businessOperationService.getAllBusinessOperations(
         _currentPage,
         _pageSize,
-        supplierId: _businessFilter.supplierId ?? 0,
+        supplierId: _providerId,
       );
 
       if (operations != null && operations.isNotEmpty) {
@@ -226,13 +323,21 @@ class FinanceViewModel extends ChangeNotifier {
         _hasMore = operations.length >= _pageSize;
         _currentPage++;
 
-        _calculateBusinessSummaries();
-        _applyFilters(); // Apply current filters to newly loaded data
+        // _applyFilters recomputes summaries + analytics; pass notify:false
+        // because the `finally` block will fire notifyListeners once.
+        _applyFilters(notify: false);
       } else {
         _hasMore = false;
+        // Even with no new data, recompute from whatever we have.
+        _applyFilters(notify: false);
       }
-    } catch (e) {
-      log('Error loading business operations: $e', name: 'FinanceViewModel');
+    } catch (e, st) {
+      log(
+        'Error loading business operations: $e',
+        name: 'FinanceViewModel',
+        error: e,
+        stackTrace: st,
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -240,6 +345,7 @@ class FinanceViewModel extends ChangeNotifier {
   }
 
   Future<void> loadMoreBusinessOperations() async {
+    if (!hasProvider) return;
     if (_isLoadingMore || !_hasMore) return;
 
     _isLoadingMore = true;
@@ -250,22 +356,24 @@ class FinanceViewModel extends ChangeNotifier {
           await businessOperationService.getAllBusinessOperations(
         _currentPage,
         _pageSize,
-        supplierId: _businessFilter.supplierId ?? 0,
+        supplierId: _providerId,
       );
 
       if (operations != null && operations.isNotEmpty) {
         _businessOperations.addAll(operations);
         _hasMore = operations.length >= _pageSize;
         _currentPage++;
-
-        _calculateBusinessSummaries();
-        _applyFilters(); // Apply current filters to newly loaded data
+        _applyFilters(notify: false);
       } else {
         _hasMore = false;
       }
-    } catch (e) {
-      log('Error loading more business operations: $e',
-          name: 'FinanceViewModel');
+    } catch (e, st) {
+      log(
+        'Error loading more business operations: $e',
+        name: 'FinanceViewModel',
+        error: e,
+        stackTrace: st,
+      );
     } finally {
       _isLoadingMore = false;
       notifyListeners();
@@ -276,7 +384,8 @@ class FinanceViewModel extends ChangeNotifier {
     await loadBusinessOperations(forceRefresh: true);
   }
 
-  // Analytics
+  // ==================== ANALYTICS ====================
+
   void _calculateAnalytics() {
     if (_filteredOperations.isEmpty) {
       _resetAnalytics();
@@ -289,21 +398,20 @@ class FinanceViewModel extends ChangeNotifier {
     final revenueBySource = <String, double>{};
     final collectionsByStatus = <String, double>{};
 
-    for (final operation in _filteredOperations) {
-      totalRevenue += operation.totalAmount;
-      totalCollected += operation.totalPaid;
-      totalOutstanding += operation.balanceDue;
+    for (final op in _filteredOperations) {
+      totalRevenue += op.totalAmount;
+      totalCollected += op.totalPaid;
+      totalOutstanding += op.balanceDue;
 
       revenueBySource.update(
-        operation.sourceTable,
-        (value) => value + operation.totalAmount,
-        ifAbsent: () => operation.totalAmount,
+        op.sourceTable,
+        (v) => v + op.totalAmount,
+        ifAbsent: () => op.totalAmount,
       );
-
       collectionsByStatus.update(
-        operation.paymentStatus,
-        (value) => value + operation.totalPaid,
-        ifAbsent: () => operation.totalPaid,
+        op.paymentStatus,
+        (v) => v + op.totalPaid,
+        ifAbsent: () => op.totalPaid,
       );
     }
 
@@ -318,7 +426,6 @@ class FinanceViewModel extends ChangeNotifier {
           totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0.0,
     );
 
-    // Update UI state for backwards compatibility
     _totalRevenue = totalRevenue;
     _totalCollected = totalCollected;
     _totalOutstanding = totalOutstanding;
@@ -332,38 +439,43 @@ class FinanceViewModel extends ChangeNotifier {
     _totalCollected = 0.0;
     _totalOutstanding = 0.0;
     _totalTransactions = 0;
-    _revenueBySource.clear();
-    _collectionsByStatus.clear();
-    _collectionsByMonth.clear();
+    _revenueBySource = {};
+    _collectionsByStatus = {};
+    _collectionsByMonth = {};
     _analyticsCache = null;
   }
 
-  // Summaries
-  void _calculateBusinessSummaries() {
-    final supplierGroups = <int, List<BusinessOperation>>{};
+  // ==================== SUMMARIES ====================
 
-    for (final operation in _businessOperations) {
-      if (operation.supplierId != null) {
-        supplierGroups.putIfAbsent(operation.supplierId!, () => []);
-        supplierGroups[operation.supplierId]!.add(operation);
-      }
+  /// Group a list of operations by supplier into summaries.
+  void _calculateBusinessSummaries(List<BusinessOperation> source) {
+    if (source.isEmpty) {
+      _businessSummaries.clear();
+      return;
     }
 
-    _businessSummaries.clear();
-    _businessSummaries.addAll(supplierGroups.entries.map((entry) {
-      return BusinessSummary.fromOperations(
-        entry.key,
-        'Supplier ${entry.key}', // TODO: Fetch actual supplier name
-        entry.value,
-      );
-    }));
+    final groups = <int, List<BusinessOperation>>{};
+    for (final op in source) {
+      final sid = op.supplierId;
+      if (sid == null || sid <= 0) continue;
+      groups.putIfAbsent(sid, () => []).add(op);
+    }
+
+    _businessSummaries
+      ..clear()
+      ..addAll(groups.entries.map(
+        (e) => BusinessSummary.fromOperations(
+          e.key,
+          'Supplier ${e.key}',
+          e.value,
+        ),
+      ));
 
     _businessSummaries.sort((a, b) => b.totalRevenue.compareTo(a.totalRevenue));
   }
 
-  // Filtering
+  // ==================== RESET ====================
 
-  // Helper Methods
   void _resetPagination() {
     _currentPage = 0;
     _hasMore = true;
@@ -373,7 +485,8 @@ class FinanceViewModel extends ChangeNotifier {
     _resetAnalytics();
   }
 
-  // Business Operations actions
+  // ==================== LOOKUPS ====================
+
   List<BusinessOperation> getOperationsBySupplier(int supplierId) {
     return _businessOperations
         .where((op) => op.supplierId == supplierId)
@@ -381,17 +494,15 @@ class FinanceViewModel extends ChangeNotifier {
   }
 
   BusinessSummary? getSummaryBySupplier(int supplierId) {
-    try {
-      return _businessSummaries
-          .firstWhere((summary) => summary.supplierId == supplierId);
-    } catch (e) {
-      return null;
+    for (final s in _businessSummaries) {
+      if (s.supplierId == supplierId) return s;
     }
+    return null;
   }
 
-  // Invoices (placeholder methods)
+  // ==================== INVOICES (placeholders) ====================
+
   Future<void> loadInvoices() async {
-    // TODO: Implement invoice loading
     log('loadInvoices called - implement me', name: 'FinanceViewModel');
   }
 
@@ -399,7 +510,6 @@ class FinanceViewModel extends ChangeNotifier {
     required int clientId,
     List<Product>? products,
   }) async {
-    // TODO: Implement invoice creation
     log('createInvoice called - implement me', name: 'FinanceViewModel');
     notifyListeners();
   }
@@ -407,30 +517,29 @@ class FinanceViewModel extends ChangeNotifier {
   void viewInvoiceDetails(Order order) {
     log('View invoice details: ${order.idPlacedOrder}',
         name: 'FinanceViewModel');
-    // TODO: Navigate to invoice details
   }
 
   Future<void> shareInvoice(Order order) async {
     log('Share invoice: ${order.idPlacedOrder}', name: 'FinanceViewModel');
-    // TODO: Implement share functionality
   }
 
   Future<void> downloadInvoice(Order order) async {
     log('Download invoice: ${order.idPlacedOrder}', name: 'FinanceViewModel');
-    // TODO: Implement download functionality
   }
 
   void createNewInvoice() {
     log('Create new invoice', name: 'FinanceViewModel');
-    // TODO: Navigate to create invoice screen
   }
 
-  // Analytics actions
+  // ==================== EXPORT ====================
+
   Future<void> exportAnalyticsData({String format = 'csv'}) async {
     log('Exporting analytics data in $format format', name: 'FinanceViewModel');
 
     final exportData = {
       'export_date': DateTime.now().toIso8601String(),
+      'provider_id': _providerId,
+      'date_filter': _dateFilter,
       'total_revenue': _totalRevenue,
       'total_collected': _totalCollected,
       'total_outstanding': _totalOutstanding,
@@ -441,10 +550,10 @@ class FinanceViewModel extends ChangeNotifier {
     };
 
     log('Export data: $exportData', name: 'FinanceViewModel');
-    // TODO: Implement actual export logic
   }
 
-  // Pricing delegation
+  // ==================== PRICING DELEGATION ====================
+
   void handleBasePriceChanged(double price) {
     _pricingConfigViewModel.basePrice = price;
     notifyListeners();
@@ -487,7 +596,6 @@ class FinanceViewModel extends ChangeNotifier {
 
   Future<void> savePricingConfig() async {
     log('savePricingConfig called - implement me', name: 'FinanceViewModel');
-    // TODO: Save pricing configuration
     notifyListeners();
   }
 
@@ -495,15 +603,16 @@ class FinanceViewModel extends ChangeNotifier {
     await savePricingConfig();
   }
 
-  // Initialization
+  // ==================== INITIALIZATION ====================
+
   Future<void> initialize() async {
+    if (!hasProvider) return;
     await loadBusinessOperations();
   }
 
-  // Refresh all data
   Future<void> refreshAllData() async {
+    if (!hasProvider) return;
     await loadBusinessOperations(forceRefresh: true);
-    // Add other refresh calls as needed
   }
 
   @override
@@ -512,7 +621,6 @@ class FinanceViewModel extends ChangeNotifier {
   }
 }
 
-// Analytics Cache Model
 class AnalyticsCache {
   final double totalRevenue;
   final double totalCollected;

@@ -1,5 +1,6 @@
 import 'package:app_constants/app_routes.dart';
 import 'package:event/delivery_change_notifier.dart';
+import 'package:event/finance_change_notifier.dart';
 import 'package:event/product_change_notifier.dart';
 import 'package:event/service_change_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
@@ -102,7 +103,8 @@ class DashboardContentState extends State<DashboardContent> {
       personnelNotifier: widget.personnelNotifier,
       supplierNotifier: widget.supplierNotifier,
     );
-    widget.supplierNotifier.addListener(_onSupplierChanged);
+    widget.supplierNotifier
+        .addListener(_onSupplierChanged); // ← fires on every supplier change
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
@@ -110,7 +112,7 @@ class DashboardContentState extends State<DashboardContent> {
     final id = widget.supplierNotifier.selectedSupplierId ?? 0;
     if (id != 0 && id != _selectedSupplierId) {
       setState(() => _selectedSupplierId = id);
-      _loadDataForSupplier(id);
+      _loadDataForSupplier(id); // ← and this calls setProvider again
     }
   }
 
@@ -206,16 +208,27 @@ class DashboardContentState extends State<DashboardContent> {
   }
 
   Future<void> _loadDataForSupplier(int supplierId) async {
+    if (supplierId <= 0) return;
+
     final productNotifier = context.read<ProductNotifier>();
     final serviceNotifier = context.read<ServiceNotifier>();
     final deliveryNotifier = context.read<DeliveryChangeNotifier>();
+    final financeNotifier = context.read<FinanceChangeNotifier>();
 
-    if (supplierId > 0) {
-      await productNotifier.fetchProducts(providerId: supplierId, reset: true);
-      await serviceNotifier.fetchServices(providerId: supplierId, reset: true);
-      deliveryNotifier.setFilters(providerId: supplierId);
-      await deliveryNotifier.fetchFirstPage();
-    }
+    debugPrint('[_loadDataForSupplier] ENTER supplierId=$supplierId '
+        'financeNotifier=${identityHashCode(financeNotifier)} '
+        'currentProvider=${financeNotifier.providerId}');
+
+    // Sync config before any fetch that depends on it.
+    deliveryNotifier.setFilters(providerId: supplierId);
+
+    // Run all four in parallel. `setProvider` handles its own fetch internally.
+    await Future.wait([
+      productNotifier.fetchProducts(providerId: supplierId, reset: true),
+      serviceNotifier.fetchServices(providerId: supplierId, reset: true),
+      deliveryNotifier.fetchFirstPage(),
+      financeNotifier.setProvider(supplierId), // ← moved into the batch
+    ]);
   }
 
   void _buildOrganisations() {

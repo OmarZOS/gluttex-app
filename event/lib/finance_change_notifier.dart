@@ -3,24 +3,56 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 import 'package:gluttex_core/business/finance/services/InvoiceService.dart';
+import 'package:gluttex_core/business/services/BusinessOperationService.dart';
+import 'package:event/views/finance_view_model.dart';
+import 'package:event/views/pricing_config_view_model.dart';
 import 'package:locator/locator.dart';
+
+// ==================== DEBUG LOGGER ====================
+
+void _log(String tag, String message, {Object? error, StackTrace? stack}) {
+  // if (!kDebugMode) return;
+  final ts = DateTime.now().toIso8601String().substring(11, 23);
+  if (error != null) {
+    debugPrint('[$ts][FinanceNotifier][$tag] $message\n  error: $error');
+    if (stack != null) debugPrint('  stack: $stack');
+  } else {
+    debugPrint('[$ts][FinanceNotifier][$tag] $message');
+  }
+}
 
 class FinanceChangeNotifier extends ChangeNotifier {
   // ==================== DEPENDENCIES ====================
 
   final InvoiceService _invoiceService = AppLocator.get<InvoiceService>();
 
-  // ==================== STATE ====================
+  // ==================== DELEGATES ====================
 
-  // All documents (raw data)
+  /// Business operations, tabs, date filters, analytics.
+  late final FinanceViewModel _operations;
+
+  /// Pricing configuration form state.
+  PricingConfigViewModel get pricingConfigViewModel =>
+      _operations.pricingConfigViewModel;
+
+  // ==================== DOCUMENT STATE ====================
+
+  /// The provider whose documents this notifier is scoped to.
+  int _providerId = 0;
+  int get providerId => _providerId;
+  bool get hasProvider => _providerId > 0;
+
+  // All documents (raw) for the current provider.
   final List<FinancialDocument> _allDocuments = [];
 
-  // Grouped documents for UI display
+  // Grouped documents for UI display.
   final List<FinancialDocument> _groupedDocuments = [];
 
-  // Document groups mapping
+  // Document groups mapping (primary id -> related ids).
   final Map<int, List<int>> _documentGroups = {};
 
   // Filter state
@@ -39,7 +71,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
   // Filter cache
   final Map<String, List<FinancialDocument>> _filterCache = {};
 
-  // Analytics
+  // Analytics over documents
   bool _isCalculatingAnalytics = false;
   double _totalRevenue = 0.0;
   double _totalCollected = 0.0;
@@ -54,19 +86,39 @@ class FinanceChangeNotifier extends ChangeNotifier {
   double _downloadProgress = 0.0;
   bool _isDownloading = false;
 
-  // ==================== PUBLIC GETTERS ====================
+  // ==================== CONSTRUCTOR ====================
 
-  List<FinancialDocument> get documents => List.unmodifiable(_groupedDocuments);
+  FinanceChangeNotifier() {
+    _operations = FinanceViewModel(
+      businessOperationService: AppLocator.get<BusinessOperationService>(),
+    );
+    _operations.addListener(_onOperationsChanged);
+    _log('init', 'FinanceChangeNotifier created');
+  }
+
+  void _onOperationsChanged() {
+    // Forward the operations view model's notifications through this
+    // notifier so a single listener sees both document and operation
+    // updates.
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _operations.removeListener(_onOperationsChanged);
+    _operations.dispose();
+    super.dispose();
+  }
+
+  // ==================== DOCUMENT GETTERS ====================
 
   List<FinancialDocument> get filteredDocuments => _applyFilters();
-
+  List<FinancialDocument> get documents => List.unmodifiable(_groupedDocuments);
   bool get isLoading => _isLoading;
   bool get isRefreshing => _isRefreshing;
   bool get hasMoreDocuments => _hasMoreDocuments;
   FinanceDocumentFilter get filter => _filter;
   String? get currentSearchQuery => _currentSearchQuery;
-
-  // Analytics getters
   bool get isCalculatingAnalytics => _isCalculatingAnalytics;
   double get totalRevenue => _totalRevenue;
   double get totalCollected => _totalCollected;
@@ -80,22 +132,125 @@ class FinanceChangeNotifier extends ChangeNotifier {
   AnalyticsCache? get analyticsCache => _analyticsCache;
   double get collectionRate =>
       _totalRevenue > 0 ? (_totalCollected / _totalRevenue) * 100 : 0.0;
-
-  // Download getters
   double get downloadProgress => _downloadProgress;
   bool get isDownloading => _isDownloading;
 
-  // Total amount for filtered documents
   double get totalAmount {
     return filteredDocuments.fold(
         0.0, (sum, doc) => sum + (doc.documentAmount ?? 0));
   }
 
+  // ==================== DELEGATE GETTERS (operations / filters / tabs) ====================
+
+  FinanceTab get selectedTab => _operations.selectedTab;
+  void selectTab(FinanceTab tab) => _operations.selectTab(tab);
+
+  DateFilter get dateFilter => _operations.dateFilter;
+  DateTimeRange? get dateRangeFilter => _operations.dateRangeFilter;
+  void selectDateFilter(DateFilter filter) =>
+      _operations.selectDateFilter(filter);
+  void setDateRangeFilter(DateTimeRange? range) =>
+      _operations.setDateRangeFilter(range);
+
+  BusinessFilter get businessFilter => _operations.businessFilter;
+  void setBusinessFilter(BusinessFilter filter) =>
+      _operations.setBusinessFilter(filter);
+  void clearBusinessFilter() => _operations.clearBusinessFilter();
+
+  List<BusinessOperation> get businessOperations =>
+      _operations.businessOperations;
+  List<BusinessOperation> get filteredOperations =>
+      _operations.filteredOperations;
+  List<BusinessSummary> get businessSummaries => _operations.businessSummaries;
+  bool get hasBusinessOperations => _operations.hasBusinessOperations;
+  bool get hasBusinessSummaries => _operations.hasBusinessSummaries;
+  List<BusinessSummary> get topSuppliers => _operations.topSuppliers;
+  List<BusinessOperation> get recentOperations => _operations.recentOperations;
+  bool get isLoadingMore => _operations.isLoadingMore;
+  bool get hasMore => _operations.hasMore;
+
+  Future<void> loadBusinessOperations({bool forceRefresh = false}) =>
+      _operations.loadBusinessOperations(forceRefresh: forceRefresh);
+  Future<void> loadMoreBusinessOperations() =>
+      _operations.loadMoreBusinessOperations();
+  Future<void> refreshBusinessOperations() =>
+      _operations.refreshBusinessOperations();
+
+  List<BusinessOperation> getOperationsBySupplier(int supplierId) =>
+      _operations.getOperationsBySupplier(supplierId);
+  BusinessSummary? getSummaryBySupplier(int supplierId) =>
+      _operations.getSummaryBySupplier(supplierId);
+
+  // Pricing actions — delegate to the view model.
+  void handleBasePriceChanged(double price) =>
+      _operations.handleBasePriceChanged(price);
+  void handleTaxPercentageChanged(double tax) =>
+      _operations.handleTaxPercentageChanged(tax);
+  void handleProfitMarginChanged(double profit) =>
+      _operations.handleProfitMarginChanged(profit);
+  void handleFinalPriceChanged(double price) =>
+      _operations.handleFinalPriceChanged(price);
+  void handleModeChanged(PricingMode mode) =>
+      _operations.handleModeChanged(mode);
+  void handleToggleProductSelection(Product product) =>
+      _operations.handleToggleProductSelection(product);
+  void handleToggleSelectAll() => _operations.handleToggleSelectAll();
+  void handleClearSelection() => _operations.handleClearSelection();
+  Future<void> savePricingConfig() => _operations.savePricingConfig();
+  Future<void> handleUpdateSelectedProducts() =>
+      _operations.handleUpdateSelectedProducts();
+
+  // ==================== PROVIDER SCOPE ====================
+
+  Future<void> setProvider(int newProviderId) async {
+    if (newProviderId == _providerId) {
+      _log('setProvider', 'no-op (already on provider $_providerId)');
+      return;
+    }
+    if (newProviderId < 0) {
+      _log('setProvider', 'rejected (negative id $newProviderId)');
+      return;
+    }
+
+    _log('setProvider',
+        'switching $_providerId → $newProviderId (clearing state)');
+
+    _providerId = newProviderId;
+
+    // Clear document state.
+    _allDocuments.clear();
+    _groupedDocuments.clear();
+    _documentGroups.clear();
+    _filterCache.clear();
+    _currentPage = 0;
+    _hasMoreDocuments = true;
+    _resetAnalytics();
+
+    // Notify the operations delegate and clear its state too.
+    await _operations.setProvider(newProviderId);
+
+    notifyListeners();
+
+    if (_providerId > 0) {
+      _log('setProvider', 'fetching documents for provider $_providerId');
+      await _fetchDocuments(reset: true);
+    } else {
+      _log('setProvider', 'no provider (0) — skipping fetch');
+    }
+  }
+
   // ==================== CORE METHODS ====================
 
-  /// Refresh all documents (reload from server)
   Future<void> refreshAll({FinanceDocumentFilter? filter}) async {
-    if (_isRefreshing) return;
+    if (_isRefreshing) {
+      _log('refreshAll', 'skipped (already refreshing)');
+      return;
+    }
+
+    _log(
+        'refreshAll',
+        'starting (${filter != null ? "with new filter" : "keeping filter"}, '
+            'provider=$_providerId)');
 
     _isRefreshing = true;
     notifyListeners();
@@ -108,13 +263,12 @@ class FinanceChangeNotifier extends ChangeNotifier {
     } finally {
       _isRefreshing = false;
       notifyListeners();
+      _log('refreshAll', 'done');
     }
   }
 
-  /// Fetch documents with pagination
   Future<void> fetchDocuments({
     bool reset = false,
-    int supplierId = 0,
     int personId = 0,
     int clientId = 0,
     int sellerId = 0,
@@ -123,9 +277,10 @@ class FinanceChangeNotifier extends ChangeNotifier {
     int depositId = 0,
     int invoiceId = 0,
   }) async {
+    _log('fetchDocuments',
+        'reset=$reset CALLER: ${StackTrace.current.toString().split("\n")[1].trim()}');
     await _fetchDocuments(
       reset: reset,
-      supplierId: supplierId,
       personId: personId,
       clientId: clientId,
       sellerId: sellerId,
@@ -138,7 +293,6 @@ class FinanceChangeNotifier extends ChangeNotifier {
 
   Future<void> _fetchDocuments({
     bool reset = false,
-    int supplierId = 0,
     int personId = 0,
     int clientId = 0,
     int sellerId = 0,
@@ -147,9 +301,29 @@ class FinanceChangeNotifier extends ChangeNotifier {
     int depositId = 0,
     int invoiceId = 0,
   }) async {
-    if (_isLoading || (!reset && !_hasMoreDocuments)) return;
+    if (_isLoading) {
+      _log('_fetchDocuments', 'skipped (already loading)');
+      return;
+    }
+    if (!reset && !_hasMoreDocuments) {
+      _log('_fetchDocuments', 'skipped (no more documents)');
+      return;
+    }
+    if (!hasProvider) {
+      _log('_fetchDocuments', 'skipped (no provider selected)');
+      if (_allDocuments.isNotEmpty || _groupedDocuments.isNotEmpty) {
+        _allDocuments.clear();
+        _groupedDocuments.clear();
+        _documentGroups.clear();
+        _filterCache.clear();
+        _resetAnalytics();
+        notifyListeners();
+      }
+      return;
+    }
 
     if (reset) {
+      _log('_fetchDocuments', 'resetting state before fetch');
       _allDocuments.clear();
       _groupedDocuments.clear();
       _documentGroups.clear();
@@ -161,11 +335,15 @@ class FinanceChangeNotifier extends ChangeNotifier {
 
     _setLoading(true);
 
+    final offset = _currentPage * _pageSize;
+    _log('_fetchDocuments',
+        'GET provider=$_providerId offset=$offset limit=$_pageSize');
+
     try {
       final fetched = await _invoiceService.getAllFinanceDocs(
-        _currentPage * _pageSize,
+        offset,
         _pageSize,
-        supplierId: supplierId,
+        supplierId: _providerId,
         personId: personId,
         clientId: clientId,
         sellerId: sellerId,
@@ -175,23 +353,61 @@ class FinanceChangeNotifier extends ChangeNotifier {
         invoiceId: invoiceId,
       );
 
-      if (fetched != null && fetched.isNotEmpty) {
-        _addDocuments(fetched);
-        _groupDocuments();
-
-        if (fetched.length < _pageSize) {
-          _hasMoreDocuments = false;
-        } else {
-          _currentPage++;
-        }
-
-        _calculateAnalytics();
-      } else {
+      if (fetched == null) {
+        _log('_fetchDocuments', 'response was null');
         _hasMoreDocuments = false;
+        return;
       }
+
+      _log('_fetchDocuments',
+          'received ${fetched.length} document(s) for provider $_providerId');
+
+      if (fetched.isEmpty) {
+        _log('_fetchDocuments', 'empty result → no more documents');
+        _hasMoreDocuments = false;
+        return;
+      }
+
+      // Defensive scope filter — drop anything from another provider.
+      final scoped = fetched
+          .where((d) => d.supplierId == null || d.supplierId == _providerId)
+          .toList();
+
+      if (scoped.length != fetched.length) {
+        final sample = fetched.first;
+        _log(
+            '_fetchDocuments',
+            'dropped ${fetched.length - scoped.length} out-of-scope. '
+                'Sample: docId=${sample.documentId} '
+                'supplierId=${sample.supplierId} '
+                'type=${sample.documentType} '
+                'sourceId=${sample.sourceId}');
+      }
+
+      _addDocuments(scoped);
+      _groupDocuments();
+
+      if (fetched.length < _pageSize) {
+        _hasMoreDocuments = false;
+        _log(
+            '_fetchDocuments',
+            'partial page → no more documents '
+                '(server sent ${fetched.length}/$_pageSize)');
+      } else {
+        _currentPage++;
+        _log('_fetchDocuments',
+            'advanced to page $_currentPage (server sent $_pageSize)');
+      }
+
+      _calculateAnalytics();
+      _log(
+          '_fetchDocuments',
+          'done: allDocs=${_allDocuments.length} '
+              'grouped=${_groupedDocuments.length} '
+              'transactions=$_totalTransactions '
+              'revenue=${_totalRevenue.toStringAsFixed(2)}');
     } catch (e, stackTrace) {
-      debugPrint('Failed to fetch financial documents: $e');
-      debugPrint('Stack trace: $stackTrace');
+      _log('_fetchDocuments', 'FAILED', error: e, stack: stackTrace);
     } finally {
       _setLoading(false);
     }
@@ -200,18 +416,25 @@ class FinanceChangeNotifier extends ChangeNotifier {
   // ==================== FILTER MANAGEMENT ====================
 
   void setFilter(FinanceDocumentFilter newFilter) {
+    _log(
+        'setFilter',
+        'applying filter (docType=${newFilter.documentType}, '
+            'status=${newFilter.status}, supplier=${newFilter.supplierId}, '
+            'search="${newFilter.searchQuery ?? ""}")');
     _filter = newFilter;
     _filterCache.clear();
     notifyListeners();
   }
 
   void clearFilter() {
+    _log('clearFilter', 'clearing all filter fields');
     _filter = const FinanceDocumentFilter();
     _filterCache.clear();
     notifyListeners();
   }
 
   void setSearchQuery(String? query) {
+    _log('setSearchQuery', 'query="${query ?? ""}"');
     _currentSearchQuery = query;
     _filter = _filter.copyWith(searchQuery: query);
     _filterCache.clear();
@@ -219,6 +442,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
   }
 
   void clearSearch() {
+    _log('clearSearch', 'clearing search query');
     _currentSearchQuery = null;
     _filter = _filter.copyWith(searchQuery: null);
     _filterCache.clear();
@@ -229,17 +453,77 @@ class FinanceChangeNotifier extends ChangeNotifier {
 
   Future<FinancialDocument?> submitFinancialDocument(
       dynamic financeData) async {
+    _log('submitFinancialDocument', 'submitting');
     _setLoading(true);
     try {
       final data = await _invoiceService.addFinancialDocument(financeData);
       if (data != null) {
+        _log('submitFinancialDocument',
+            'succeeded (docId=${data.documentId}), refreshing');
         await refreshAll();
         return data;
       }
+      _log('submitFinancialDocument', 'service returned null');
       return null;
-    } catch (e) {
-      debugPrint('Submission error: $e');
+    } catch (e, stack) {
+      _log('submitFinancialDocument', 'FAILED', error: e, stack: stack);
       return null;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<PaymentSubmitResult> submitPayment({
+    required int invoiceId,
+    required double amount,
+    required String method,
+    String status = "pending",
+    String? notes,
+  }) async {
+    _log('submitPayment',
+        'invoice=$invoiceId amount=$amount method=$method status=$status');
+
+    if (invoiceId <= 0) {
+      _log('submitPayment', 'REJECTED: no invoice linked');
+      return const PaymentSubmitResult.failure(
+          'No invoice linked to this document.');
+    }
+    if (amount <= 0) {
+      _log('submitPayment', 'REJECTED: amount <= 0');
+      return const PaymentSubmitResult.failure(
+          'Payment amount must be greater than zero.');
+    }
+    if (method.trim().isEmpty) {
+      _log('submitPayment', 'REJECTED: empty method');
+      return const PaymentSubmitResult.failure('Payment method is required.');
+    }
+
+    _setLoading(true);
+    try {
+      final payment = await _invoiceService.addFinancialDocument({
+        "payment_invoice_id": invoiceId,
+        "payment_amount": amount,
+        "payment_method": method,
+        "payment_status": status,
+        "payment_notes": notes ?? '',
+      });
+
+      if (payment == null) {
+        _log('submitPayment', 'service returned null');
+        return const PaymentSubmitResult.failure('Payment was not recorded.');
+      }
+
+      _log('submitPayment',
+          'recorded (docId=${payment.documentId}), refreshing');
+      await refreshAll();
+
+      return PaymentSubmitResult.success(
+        'Payment recorded.',
+        paymentId: payment.documentId,
+      );
+    } catch (e, stack) {
+      _log('submitPayment', 'FAILED', error: e, stack: stack);
+      return PaymentSubmitResult.failure('$e');
     } finally {
       _setLoading(false);
     }
@@ -251,21 +535,25 @@ class FinanceChangeNotifier extends ChangeNotifier {
     String? format,
     Function(double)? onProgress,
   }) async {
-    if (_isDownloading) return;
+    if (_isDownloading) {
+      _log('download', 'skipped (already downloading)');
+      return;
+    }
+
+    _log('download', 'starting (docId=${document.documentId} format=$format)');
 
     _isDownloading = true;
     _downloadProgress = 0.0;
     notifyListeners();
 
     try {
-      // Simulate progress updates
       for (int i = 0; i <= 10; i++) {
         await Future.delayed(const Duration(milliseconds: 100));
         _downloadProgress = i / 10;
         onProgress?.call(_downloadProgress);
         notifyListeners();
       }
-      // Actual download logic here
+      _log('download', 'done (simulated)');
     } finally {
       _isDownloading = false;
       _downloadProgress = 0.0;
@@ -273,10 +561,20 @@ class FinanceChangeNotifier extends ChangeNotifier {
     }
   }
 
-  // ==================== ANALYTICS ====================
+  // ==================== ANALYTICS OVER DOCUMENTS ====================
 
   Future<void> refreshAnalytics() async {
-    if (_isCalculatingAnalytics || _groupedDocuments.isEmpty) return;
+    if (_isCalculatingAnalytics) {
+      _log('refreshAnalytics', 'skipped (already calculating)');
+      return;
+    }
+    if (_groupedDocuments.isEmpty) {
+      _log('refreshAnalytics', 'skipped (no documents)');
+      return;
+    }
+
+    _log('refreshAnalytics',
+        'recalculating over ${_groupedDocuments.length} docs');
 
     _isCalculatingAnalytics = true;
     notifyListeners();
@@ -291,6 +589,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
 
   void _calculateAnalytics() {
     if (_groupedDocuments.isEmpty) {
+      _log('_calculateAnalytics', 'no documents → reset');
       _resetAnalytics();
       return;
     }
@@ -299,9 +598,9 @@ class FinanceChangeNotifier extends ChangeNotifier {
     _totalCollected = 0.0;
     _totalOutstanding = 0.0;
     _totalTransactions = 0;
-    _revenueBySource.clear();
-    _collectionsByStatus.clear();
-    _revenueByDocumentType.clear();
+    _revenueBySource = {};
+    _collectionsByStatus = {};
+    _revenueByDocumentType = {};
 
     for (final doc in _groupedDocuments) {
       final amount = doc.documentAmount ?? 0;
@@ -332,16 +631,25 @@ class FinanceChangeNotifier extends ChangeNotifier {
       revenueByDocumentType: Map.from(_revenueByDocumentType),
       collectionRate: collectionRate,
     );
+
+    _log(
+        '_calculateAnalytics',
+        'revenue=${_totalRevenue.toStringAsFixed(2)} '
+            'collected=${_totalCollected.toStringAsFixed(2)} '
+            'outstanding=${_totalOutstanding.toStringAsFixed(2)} '
+            'txn=$_totalTransactions '
+            'rate=${collectionRate.toStringAsFixed(1)}%');
   }
 
   void _resetAnalytics() {
+    _log('_resetAnalytics', 'zeroing analytics');
     _totalRevenue = 0.0;
     _totalCollected = 0.0;
     _totalOutstanding = 0.0;
     _totalTransactions = 0;
-    _revenueBySource.clear();
-    _collectionsByStatus.clear();
-    _revenueByDocumentType.clear();
+    _revenueBySource = {};
+    _collectionsByStatus = {};
+    _revenueByDocumentType = {};
     _analyticsCache = null;
   }
 
@@ -422,66 +730,27 @@ class FinanceChangeNotifier extends ChangeNotifier {
     return dailyRevenue;
   }
 
-  Future<PaymentSubmitResult> submitPayment({
-    required int invoiceId,
-    required double amount,
-    required String method,
-    String status = "completed",
-    String? notes,
-  }) async {
-    if (invoiceId <= 0) {
-      return const PaymentSubmitResult.failure(
-          'No invoice linked to this document.');
-    }
-    if (amount <= 0) {
-      return const PaymentSubmitResult.failure(
-          'Payment amount must be greater than zero.');
-    }
-    if (method.trim().isEmpty) {
-      return const PaymentSubmitResult.failure('Payment method is required.');
-    }
-
-    _setLoading(true);
-    try {
-      final payment = await _invoiceService.addFinancialDocument({
-        "payment_invoice_id": invoiceId,
-        "payment_amount": amount,
-        "payment_method": method,
-        "payment_status": status,
-        "payment_notes": notes ?? '',
-      });
-
-      if (payment == null) {
-        return const PaymentSubmitResult.failure('Payment was not recorded.');
-      }
-
-      // Refresh so the UI reflects the new paid/outstanding totals.
-      await refreshAll();
-
-      return PaymentSubmitResult.success(
-        'Payment recorded.',
-        paymentId: payment.documentId,
-      );
-    } catch (e, stack) {
-      debugPrint('Payment submission failed: $e\n$stack');
-      return PaymentSubmitResult.failure('$e');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
   // ==================== PRIVATE HELPERS ====================
 
   void _addDocuments(List<FinancialDocument> newDocuments) {
     final existingIds =
         _allDocuments.map((d) => d.documentId).whereType<int>().toSet();
 
+    int added = 0;
+    int skipped = 0;
     for (final document in newDocuments) {
       if (document.documentId != null &&
           !existingIds.contains(document.documentId)) {
         _allDocuments.add(document);
+        added++;
+      } else {
+        skipped++;
       }
     }
+
+    _log('_addDocuments',
+        'added=$added skipped=$skipped total=${_allDocuments.length}');
+
     _filterCache.clear();
     notifyListeners();
   }
@@ -494,16 +763,24 @@ class FinanceChangeNotifier extends ChangeNotifier {
 
     for (final doc in _allDocuments) {
       final sourceId = doc.sourceId ?? 0;
-      if (sourceId == 0) continue;
+      if (sourceId == 0) {
+        _log('_groupDocuments',
+            'skipping docId=${doc.documentId} (no sourceId)');
+        continue;
+      }
       sourceIdToDocuments.putIfAbsent(sourceId, () => []);
       sourceIdToDocuments[sourceId]!.add(doc);
     }
+
+    _log(
+        '_groupDocuments',
+        'grouping ${_allDocuments.length} docs into '
+            '${sourceIdToDocuments.length} source group(s)');
 
     for (final entry in sourceIdToDocuments.entries) {
       final documents = entry.value;
       if (documents.isEmpty) continue;
 
-      // Sort by document strength
       documents.sort((a, b) {
         final order = {
           'invoice': 1,
@@ -531,6 +808,13 @@ class FinanceChangeNotifier extends ChangeNotifier {
         _documentGroups[primaryDoc.documentId ?? 0] = relatedIds;
       }
 
+      if (documents.length > 1) {
+        _log(
+            '_groupDocuments',
+            'sourceId=${entry.key}: primary=${primaryDoc.documentId} '
+                '(${primaryDoc.documentType}) + ${relatedIds.length} related');
+      }
+
       _updatePrimaryDocument(primaryDoc, documents);
     }
 
@@ -554,7 +838,6 @@ class FinanceChangeNotifier extends ChangeNotifier {
     final Set<String> countedPaymentIds = {};
     final Set<String> countedDepositIds = {};
 
-    // First pass: Find main cart/invoice
     for (final doc in group) {
       final docType = doc.documentType?.toLowerCase() ?? '';
       if (docType.contains('cart') || docType == 'invoice') {
@@ -567,7 +850,6 @@ class FinanceChangeNotifier extends ChangeNotifier {
       }
     }
 
-    // Second pass: Add receipts and deposits
     for (final doc in group) {
       final docType = doc.documentType?.toLowerCase() ?? '';
       final docId = '${doc.documentType}_${doc.documentId}';
@@ -620,6 +902,15 @@ class FinanceChangeNotifier extends ChangeNotifier {
         updatedAt: primaryDoc.updatedAt,
       );
       _groupedDocuments[index] = updatedDoc;
+
+      _log(
+          '_updatePrimaryDocument',
+          'docId=${primaryDoc.documentId} '
+              'amount=${maxCartInvoiceAmount.toStringAsFixed(2)} '
+              'paid=${totalPaid.toStringAsFixed(2)} '
+              'deposited=${totalDeposited.toStringAsFixed(2)} '
+              'outstanding=${outstandingBalance.toStringAsFixed(2)} '
+              'status=$combinedStatus');
     }
   }
 
@@ -651,12 +942,18 @@ class FinanceChangeNotifier extends ChangeNotifier {
   }
 
   List<FinancialDocument> _applyFilters() {
-    final cacheKey = _filter.toCacheKey();
-    if (_filterCache.containsKey(cacheKey)) {
-      return _filterCache[cacheKey]!;
-    }
+    final cacheKey = '$_providerId|${_filter.toCacheKey()}';
+    final cached = _filterCache[cacheKey];
+    if (cached != null) return cached;
 
     final filtered = _groupedDocuments.where((doc) {
+      // Provider scope
+      if (hasProvider &&
+          doc.supplierId != null &&
+          doc.supplierId != _providerId) {
+        return false;
+      }
+
       // Document type filter
       if (_filter.documentType != null && _filter.documentType!.isNotEmpty) {
         if (doc.documentType != _filter.documentType) return false;
@@ -675,15 +972,16 @@ class FinanceChangeNotifier extends ChangeNotifier {
             if (!doc.isOverdue) return false;
             break;
           case 'partially_paid':
-            if (!doc.paymentStatus.toLowerCase().contains('partial'))
+            if (!doc.paymentStatus.toLowerCase().contains('partial')) {
               return false;
+            }
             break;
           default:
             if (doc.paymentStatus != _filter.status) return false;
         }
       }
 
-      // Date range filter
+      // Date range
       if (_filter.startDate != null &&
           doc.issueDate.isBefore(_filter.startDate!)) {
         return false;
@@ -692,7 +990,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
         return false;
       }
 
-      // Amount range filter
+      // Amount range
       if (_filter.minAmount != null &&
           doc.documentAmount < _filter.minAmount!) {
         return false;
@@ -717,7 +1015,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
         return false;
       }
 
-      // Search query
+      // Search
       if (_filter.searchQuery != null && _filter.searchQuery!.isNotEmpty) {
         final query = _filter.searchQuery!.toLowerCase();
         final matches =
@@ -734,15 +1032,23 @@ class FinanceChangeNotifier extends ChangeNotifier {
     }).toList();
 
     _filterCache[cacheKey] = filtered;
+
+    _log(
+        '_applyFilters',
+        'cache miss → filtered ${_groupedDocuments.length} → '
+            '${filtered.length} key=${_shortKey(cacheKey)}');
+
     return filtered;
   }
 
   void _setLoading(bool loading) {
+    _log('_setLoading', 'isLoading=$loading');
     _isLoading = loading;
     notifyListeners();
   }
 
   void clearCache() {
+    _log('clearCache', 'clearing all state (provider stays $_providerId)');
     _allDocuments.clear();
     _groupedDocuments.clear();
     _documentGroups.clear();
@@ -770,6 +1076,38 @@ class FinanceChangeNotifier extends ChangeNotifier {
             uniqueIds.contains(doc.documentId) &&
             doc.documentId != primaryDocumentId)
         .toList();
+  }
+
+  // ==================== DEBUG HELPERS ====================
+
+  /// Dump the full notifier state to the console. Call when debugging.
+  void dumpState() {
+    _log('dumpState', '───── FinanceChangeNotifier state ─────');
+    _log(
+        'dumpState',
+        'provider=$_providerId '
+            'loading=$_isLoading refreshing=$_isRefreshing');
+    _log(
+        'dumpState',
+        'docs: all=${_allDocuments.length} '
+            'grouped=${_groupedDocuments.length} '
+            'groups=${_documentGroups.length}');
+    _log('dumpState',
+        'pagination: page=$_currentPage hasMore=$_hasMoreDocuments');
+    _log('dumpState', 'filter: ${_filter.toCacheKey()}');
+    _log('dumpState', 'cache entries=${_filterCache.length}');
+    _log(
+        'dumpState',
+        'analytics: txn=$_totalTransactions '
+            'revenue=${_totalRevenue.toStringAsFixed(2)} '
+            'collected=${_totalCollected.toStringAsFixed(2)} '
+            'outstanding=${_totalOutstanding.toStringAsFixed(2)}');
+    _log('dumpState', '──────────────────────────────────────');
+  }
+
+  String _shortKey(String key) {
+    if (key.length <= 24) return key;
+    return '${key.substring(0, 12)}…${key.substring(key.length - 8)}';
   }
 }
 
@@ -919,6 +1257,27 @@ class AnalyticsCache {
     required this.collectionRate,
     this.revenueByDocumentType = const {},
   });
+}
+
+// ==================== PAYMENT RESULT ====================
+
+@immutable
+class PaymentSubmitResult {
+  final bool isSuccess;
+  final String message;
+  final int? paymentId;
+
+  const PaymentSubmitResult._({
+    required this.isSuccess,
+    required this.message,
+    this.paymentId,
+  });
+
+  const PaymentSubmitResult.success(String message, {int? paymentId})
+      : this._(isSuccess: true, message: message, paymentId: paymentId);
+
+  const PaymentSubmitResult.failure(String message)
+      : this._(isSuccess: false, message: message);
 }
 
 // ==================== EXTENSIONS ====================

@@ -146,7 +146,7 @@ class InvoiceServiceImpl extends InvoiceService {
         'limit': limit,
       };
 
-      if (supplierId > 0) queryParams['supplier_id'] = supplierId;
+      if (supplierId > 0) queryParams['provider_id'] = supplierId;
       if (personId > 0) queryParams['person_id'] = personId;
       if (clientId > 0) queryParams['client_id'] = clientId;
       if (sellerId > 0) queryParams['seller_id'] = sellerId;

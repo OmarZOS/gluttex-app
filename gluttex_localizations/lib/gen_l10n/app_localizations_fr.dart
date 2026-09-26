@@ -5941,4 +5941,81 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payRemaining => 'Payer le reste';
+
+  @override
+  String get paymentOutstandingLabel => 'Montant dû';
+
+  @override
+  String paymentRemainingAfter(String amount) {
+    return 'Il restera $amount après ce paiement';
+  }
+
+  @override
+  String get paymentSettlesFull => 'Ce paiement solde le montant total';
+
+  @override
+  String get paymentAmountLabel => 'Montant';
+
+  @override
+  String get paymentMethodLabel => 'Moyen de paiement';
+
+  @override
+  String get paymentNotesLabel => 'Notes';
+
+  @override
+  String get paymentNotesHint => 'Facultatif';
+
+  @override
+  String paymentSubmitButton(String amount) {
+    return 'Payer $amount';
+  }
+
+  @override
+  String get paymentMethodCash => 'Espèces';
+
+  @override
+  String get paymentMethodCard => 'Carte';
+
+  @override
+  String get paymentMethodBankTransfer => 'Virement bancaire';
+
+  @override
+  String get paymentMethodMobileMoney => 'Paiement mobile';
+
+  @override
+  String get paymentErrorEnterAmount => 'Veuillez saisir un montant';
+
+  @override
+  String get paymentErrorInvalidNumber => 'Veuillez saisir un nombre valide';
+
+  @override
+  String get paymentErrorMustBePositive => 'Le montant doit être supérieur à zéro';
+
+  @override
+  String paymentErrorExceedsDue(String amount) {
+    return 'Le montant ne peut pas dépasser $amount';
+  }
+
+  @override
+  String get paymentSuccessTitle => 'Paiement enregistré';
+
+  @override
+  String paymentSuccessBody(String amount, String method) {
+    return '$amount payé par $method.';
+  }
+
+  @override
+  String get loadAnalyticsData => 'Charger les données analytiques';
+
+  @override
+  String get collectionRate => 'Taux de recouvrement';
+
+  @override
+  String get totalTransactions => 'Transactions totales';
+
+  @override
+  String get totalCollected => 'Total encaissé';
+
+  @override
+  String get totalOutstanding => 'Total en attente';
 }

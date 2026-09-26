@@ -5,19 +5,32 @@ import 'package:event/views/finance_view_model.dart';
 import 'package:provider/provider.dart';
 
 class FinanceStats extends StatelessWidget {
+  /// The provider whose stats are shown.
+  ///
+  /// `0` or `null` means "no provider selected" — the widget shows a
+  /// placeholder and hides the refresh action.
+  final int providerId;
+
   final VoidCallback? onCreateInvoice;
   final VoidCallback? onViewAllTransactions;
 
   const FinanceStats({
     super.key,
+    this.providerId = 0,
     this.onCreateInvoice,
     this.onViewAllTransactions,
   });
+
+  bool get _hasProvider => providerId > 0;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<FinanceViewModel>(
       builder: (context, viewModel, child) {
+        if (!_hasProvider) {
+          return _buildNoProviderState(context);
+        }
+
         final operations = viewModel.businessOperations;
         final analytics = viewModel.analyticsCache;
 
@@ -30,10 +43,53 @@ class FinanceStats extends StatelessWidget {
     );
   }
 
+  // ==================== STATES ====================
+
+  Widget _buildNoProviderState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.storefront_outlined,
+              size: 64,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              loc.selectSupplierFirstText,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                loc.selectSupplierToViewText,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState(BuildContext context, FinanceViewModel viewModel) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final loc = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -48,7 +104,7 @@ class FinanceStats extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              localizations.noAnalyticsData,
+              loc.noAnalyticsData,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
@@ -58,7 +114,7 @@ class FinanceStats extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                localizations.generateInvoicesToSeeAnalytics,
+                loc.generateInvoicesToSeeAnalytics,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -70,15 +126,13 @@ class FinanceStats extends StatelessWidget {
               const CircularProgressIndicator()
             else
               FilledButton.icon(
-                onPressed: () {
-                  viewModel.refreshAllData();
-                },
+                onPressed: () => viewModel.refreshAllData(),
                 icon: Icon(
                   Icons.refresh,
                   color: colorScheme.onPrimary,
                 ),
                 label: Text(
-                  "localizations.loadAnalyticsData",
+                  loc.loadAnalyticsData,
                   style: TextStyle(color: colorScheme.onPrimary),
                 ),
                 style: FilledButton.styleFrom(
@@ -103,40 +157,32 @@ class FinanceStats extends StatelessWidget {
     FinanceViewModel viewModel,
     AnalyticsCache analytics,
   ) {
-    final localizations = AppLocalizations.of(context)!;
+    final loc = AppLocalizations.of(context)!;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Summary Card
-          _buildSummaryCard(context, viewModel, analytics, localizations),
+          _buildSummaryCard(context, viewModel, analytics, loc),
           const SizedBox(height: 16),
-
-          // Stats Grid
-          _buildStatsGrid(context, analytics, localizations),
+          _buildStatsGrid(context, analytics, loc),
           const SizedBox(height: 16),
-
-          // Recent Transactions
-          _buildRecentTransactions(context, viewModel, localizations),
+          _buildRecentTransactions(context, viewModel, loc),
         ],
       ),
     );
   }
 
+  // ==================== SUMMARY CARD ====================
+
   Widget _buildSummaryCard(
     BuildContext context,
     FinanceViewModel viewModel,
     AnalyticsCache analytics,
-    AppLocalizations localizations,
+    AppLocalizations loc,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-
-    // Calculate growth (simplified - compare with previous period)
-    final recentOperations = viewModel.recentOperations;
-    final growth =
-        recentOperations.length > 5 ? 12.5 : 0.0; // Simplified growth
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -161,12 +207,12 @@ class FinanceStats extends StatelessWidget {
           Row(
             children: [
               Icon(
-                growth >= 0 ? Icons.trending_up : Icons.trending_down,
+                Icons.trending_up,
                 color: colorScheme.onPrimary,
               ),
               const SizedBox(width: 8),
               Text(
-                localizations.financialOverview,
+                loc.financialOverview,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: colorScheme.onPrimary,
                   fontWeight: FontWeight.w600,
@@ -176,7 +222,7 @@ class FinanceStats extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            _formatCurrency(analytics.totalRevenue, context),
+            _formatCurrency(analytics.totalRevenue, loc),
             style: theme.textTheme.headlineLarge?.copyWith(
               color: colorScheme.onPrimary,
               fontWeight: FontWeight.w800,
@@ -185,7 +231,7 @@ class FinanceStats extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            localizations.totalRevenue,
+            loc.totalRevenue,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onPrimary.withOpacity(0.9),
             ),
@@ -194,15 +240,13 @@ class FinanceStats extends StatelessWidget {
           Row(
             children: [
               _buildMiniStat(
-                context,
-                label: "localizations.collectionRate",
+                label: loc.collectionRate,
                 value: '${analytics.collectionRate.toStringAsFixed(1)}%',
                 color: colorScheme.onPrimary,
               ),
               const SizedBox(width: 16),
               _buildMiniStat(
-                context,
-                label: "localizations.totalTransactions",
+                label: loc.totalTransactions,
                 value: '${analytics.transactionCount}',
                 color: colorScheme.onPrimary,
               ),
@@ -213,10 +257,12 @@ class FinanceStats extends StatelessWidget {
     );
   }
 
+  // ==================== STATS GRID ====================
+
   Widget _buildStatsGrid(
     BuildContext context,
     AnalyticsCache analytics,
-    AppLocalizations localizations,
+    AppLocalizations loc,
   ) {
     final averageTransaction = analytics.transactionCount > 0
         ? analytics.totalRevenue / analytics.transactionCount
@@ -230,34 +276,30 @@ class FinanceStats extends StatelessWidget {
       mainAxisSpacing: 12,
       childAspectRatio: 1.2,
       children: [
-        // Total Collected Card
         _buildStatCard(
           context,
-          title: "localizations.totalCollected",
-          value: _formatCurrency(analytics.totalCollected, context),
+          title: loc.totalCollected,
+          value: _formatCurrency(analytics.totalCollected, loc),
           icon: Icons.money,
           color: Colors.green,
         ),
-        // Total Outstanding Card
         _buildStatCard(
           context,
-          title: "localizations.totalOutstanding",
-          value: _formatCurrency(analytics.totalOutstanding, context),
+          title: loc.totalOutstanding,
+          value: _formatCurrency(analytics.totalOutstanding, loc),
           icon: Icons.pending_actions,
           color: Colors.orange,
         ),
-        // Average Transaction Card
         _buildStatCard(
           context,
-          title: localizations.averageTransaction,
-          value: _formatCurrency(averageTransaction, context),
+          title: loc.averageTransaction,
+          value: _formatCurrency(averageTransaction, loc),
           icon: Icons.analytics,
           color: Theme.of(context).colorScheme.tertiary,
         ),
-        // Transactions Count Card
         _buildStatCard(
           context,
-          title: localizations.transactions,
+          title: loc.transactions,
           value: '${analytics.transactionCount}',
           icon: Icons.receipt,
           color: Theme.of(context).colorScheme.inversePrimary,
@@ -266,13 +308,15 @@ class FinanceStats extends StatelessWidget {
     );
   }
 
+  // ==================== RECENT TRANSACTIONS ====================
+
   Widget _buildRecentTransactions(
     BuildContext context,
     FinanceViewModel viewModel,
-    AppLocalizations localizations,
+    AppLocalizations loc,
   ) {
     final recentOperations = viewModel.recentOperations;
-    if (recentOperations.isEmpty) return const SizedBox();
+    if (recentOperations.isEmpty) return const SizedBox.shrink();
 
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
@@ -305,7 +349,7 @@ class FinanceStats extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                localizations.recentTransactions,
+                loc.recentTransactions,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
@@ -313,7 +357,7 @@ class FinanceStats extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '${localizations.last} 10 ${localizations.businessOperations}',
+                '${loc.last} ${recentOperations.length}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -322,9 +366,9 @@ class FinanceStats extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Column(
-            children: recentOperations.map((operation) {
-              return _buildOperationRow(context, operation);
-            }).toList(),
+            children: recentOperations
+                .map((operation) => _buildOperationRow(context, operation, loc))
+                .toList(),
           ),
           const SizedBox(height: 12),
           if (viewModel.businessOperations.length > 10)
@@ -332,7 +376,7 @@ class FinanceStats extends StatelessWidget {
               child: TextButton(
                 onPressed: onViewAllTransactions,
                 child: Text(
-                  localizations.viewAllTransactions,
+                  loc.viewAllTransactions,
                   style: TextStyle(color: colorScheme.primary),
                 ),
               ),
@@ -342,12 +386,16 @@ class FinanceStats extends StatelessWidget {
     );
   }
 
-  Widget _buildOperationRow(BuildContext context, BusinessOperation operation) {
+  Widget _buildOperationRow(
+    BuildContext context,
+    BusinessOperation operation,
+    AppLocalizations loc,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final isPaid = operation.balanceDue <= 0;
     final sourceName = operation.sourceTable;
-    final loc = AppLocalizations.of(context)!;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -388,7 +436,7 @@ class FinanceStats extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  'Supplier: ${operation.supplierId ?? 'N/A'}',
+                  '${loc.supplier}: ${operation.supplierId ?? '—'}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -420,6 +468,8 @@ class FinanceStats extends StatelessWidget {
       ),
     );
   }
+
+  // ==================== REUSABLE PIECES ====================
 
   Widget _buildStatCard(
     BuildContext context, {
@@ -460,11 +510,15 @@ class FinanceStats extends StatelessWidget {
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 12),
-          Text(
-            value,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface,
+              ),
             ),
           ),
           const SizedBox(height: 4),
@@ -473,14 +527,15 @@ class FinanceStats extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMiniStat(
-    BuildContext context, {
+  Widget _buildMiniStat({
     required String label,
     required String value,
     required Color color,
@@ -509,7 +564,7 @@ class FinanceStats extends StatelessWidget {
     );
   }
 
-  String _formatCurrency(double amount, BuildContext context) {
-    return AppLocalizations.of(context)!.price(amount.toStringAsFixed(2));
+  String _formatCurrency(double amount, AppLocalizations loc) {
+    return loc.price(amount.toStringAsFixed(2));
   }
 }

@@ -1,6 +1,15 @@
 // financial_document.dart
 import 'package:flutter/material.dart';
 
+enum DateFilter {
+  today,
+  week,
+  month,
+  quarter,
+  year,
+  all,
+}
+
 /// Represents a financial document (invoice, receipt, deposit, etc.)
 class FinancialDocument {
   // ==================== CORE FIELDS ====================

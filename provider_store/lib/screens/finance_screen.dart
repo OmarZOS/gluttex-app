@@ -1,200 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:gluttex_core/business/services/BusinessOperationService.dart';
 import 'package:event/finance_change_notifier.dart';
-// REMOVED: import 'package:provider_store/components/finance/finance_content.dart'; // Not used
-// import 'package:provider_store/components/finance/finance_stats.dart';
 import 'package:provider_store/components/finance/invoice_list.dart';
-// CHANGED: Removed InvoiceList import since you're using EnhancedInvoiceList
-import 'package:provider_store/components/finance/pricing_config.dart';
-import 'package:locator/locator.dart';
-import 'package:provider/provider.dart';
-import 'package:event/views/finance_view_model.dart';
-// ADDED: Import for EnhancedInvoiceList
-// ADDED: Import for TabNavigation
-import 'package:provider_store/components/finance/finance_navigation.dart';
-// ADDED: Import for DateFilterSelector
 import 'package:provider_store/components/finance/finance_filters.dart';
 
-class FinanceScreen extends StatefulWidget {
+class FinanceScreen extends StatelessWidget {
+  /// The notifier that owns the provider scope, documents, filters, and
+  /// analytics for the finance screen.
+  ///
+  /// Passed in by the caller — the screen does not look it up from the
+  /// widget tree. The caller is expected to wrap this widget in a
+  /// `Consumer<FinanceChangeNotifier>` (or `context.watch`) so the screen
+  /// rebuilds when the notifier notifies.
   final FinanceChangeNotifier financeNotifier;
-  const FinanceScreen({super.key, required this.financeNotifier});
 
-  @override
-  State<FinanceScreen> createState() => _FinanceScreenState();
-}
-
-class _FinanceScreenState extends State<FinanceScreen> {
-  late FinanceViewModel _viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    _viewModel = FinanceViewModel(
-      businessOperationService: AppLocator.get<BusinessOperationService>(),
-    );
-    // Initialize data
-    _viewModel.loadBusinessOperations();
-  }
-
-  @override
-  void dispose() {
-    _viewModel.dispose();
-    super.dispose();
-  }
+  const FinanceScreen({
+    super.key,
+    required this.financeNotifier,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _viewModel,
-      child: _FinanceLayout(model: widget.financeNotifier),
-    );
-  }
-}
-
-class _FinanceLayout extends StatefulWidget {
-  final FinanceChangeNotifier model;
-  const _FinanceLayout({required this.model});
-
-  @override
-  State<_FinanceLayout> createState() => _FinanceLayoutState();
-}
-
-class _FinanceLayoutState extends State<_FinanceLayout> {
-  late PageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<FinanceViewModel>(
-      builder: (context, viewModel, child) {
-        // Sync PageController with ViewModel
-        if (_pageController.hasClients &&
-            _pageController.page?.round() != viewModel.selectedTab.index) {
-          _pageController.jumpToPage(viewModel.selectedTab.index);
-        }
-
-        return SafeArea(
-          child: Column(
-            children: [
-              const _AppBar(),
-              // DateFilterSelector should be connected to viewModel
-              Consumer<FinanceViewModel>(
-                builder: (context, viewModel, child) {
-                  return DateFilterSelector(
-                    selectedFilter: viewModel.dateFilter,
-                    onFilterChanged: (filter) {
-                      viewModel.selectDateFilter(filter);
-                    },
-                  );
-                },
-              ),
-              TabNavigation(
-                currentTab: viewModel.selectedTab.index,
-                onTabSelected: (index) {
-                  final tab = FinanceTab.values[index];
-                  viewModel.selectTab(tab);
-                  _pageController.animateToPage(
-                    index,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-              ),
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    final tab = FinanceTab.values[index];
-                    if (viewModel.selectedTab != tab) {
-                      viewModel.selectTab(tab);
-                    }
-                  },
-                  children: [
-                    // Invoices Tab
-                    const _InvoiceListView(),
-                    // Business Operations Tab
-                    // const _BusinessOperationsView(),
-                    // Pricing Tab
-                    const _PricingConfigView(),
-                  ],
-                ),
-              ),
-            ],
+    return SafeArea(
+      child: Column(
+        children: [
+          _AppBar(
+            notifier: financeNotifier,
           ),
-        );
-      },
+          DateFilterSelector(
+            selectedFilter: financeNotifier.dateFilter,
+            onFilterChanged: financeNotifier.selectDateFilter,
+          ),
+          Expanded(
+            child: EnhancedInvoiceList(
+              notifier: financeNotifier,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-// Invoice List View (wrapped in Consumer)
-class _InvoiceListView extends StatelessWidget {
-  const _InvoiceListView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<FinanceViewModel>(
-      builder: (context, viewModel, child) {
-        return EnhancedInvoiceList();
-      },
-    );
-  }
-}
-
-// Pricing Config View (wrapped in Consumer)
-class _PricingConfigView extends StatelessWidget {
-  const _PricingConfigView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<FinanceViewModel>(
-      builder: (context, viewModel, child) {
-        return PricingConfigScreen(
-          viewModel: viewModel.pricingConfigViewModel,
-          isLoading: viewModel.isLoading,
-          onSave: () => viewModel.savePricingConfig(),
-          onBasePriceChanged: viewModel.handleBasePriceChanged,
-          onTaxPercentageChanged: viewModel.handleTaxPercentageChanged,
-          onProfitMarginChanged: viewModel.handleProfitMarginChanged,
-          onFinalPriceChanged: viewModel.handleFinalPriceChanged,
-          onModeChanged: viewModel.handleModeChanged,
-          onToggleProductSelection: viewModel.handleToggleProductSelection,
-          onToggleSelectAll: viewModel.handleToggleSelectAll,
-          onUpdateSelectedProducts: viewModel.handleUpdateSelectedProducts,
-          onClearSelection: viewModel.handleClearSelection,
-        );
-      },
-    );
-  }
-}
+// ==================== APP BAR ====================
 
 class _AppBar extends StatelessWidget {
-  const _AppBar();
+  final FinanceChangeNotifier notifier;
+
+  const _AppBar({required this.notifier});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final localizations = AppLocalizations.of(context)!;
+    final loc = AppLocalizations.of(context)!;
+    final hasProvider = notifier.hasProvider;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
-          bottom: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
+          bottom: BorderSide(
+            color: colorScheme.outline.withOpacity(0.1),
+          ),
         ),
       ),
       child: Row(
@@ -209,13 +78,13 @@ class _AppBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  localizations.financeAndPricing,
+                  loc.financeAndPricing,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
-                  localizations.manageInvoicesAndConfigurePricing,
+                  loc.manageInvoicesAndConfigurePricing,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -224,9 +93,9 @@ class _AppBar extends StatelessWidget {
             ),
           ),
           _ExportButton(
-            onPressed: () => _handleExport(context),
+            onPressed: hasProvider ? () => _handleExport(context) : null,
             colorScheme: colorScheme,
-            tooltip: localizations.exportData,
+            tooltip: loc.exportData,
           ),
         ],
       ),
@@ -234,18 +103,19 @@ class _AppBar extends StatelessWidget {
   }
 
   void _handleExport(BuildContext context) {
-    final viewModel = Provider.of<FinanceViewModel>(context, listen: false);
-    viewModel.exportAnalyticsData();
+    // notifier.exportAnalyticsData();
 
-    final localizations = AppLocalizations.of(context);
+    final loc = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(localizations?.exportingData ?? 'Exporting...'),
+        content: Text(loc?.exportingData ?? 'Exporting...'),
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 }
+
+// ==================== ICON BADGE ====================
 
 class _IconBadge extends StatelessWidget {
   final IconData icon;
@@ -271,8 +141,10 @@ class _IconBadge extends StatelessWidget {
   }
 }
 
+// ==================== EXPORT BUTTON ====================
+
 class _ExportButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final ColorScheme colorScheme;
   final String tooltip;
 

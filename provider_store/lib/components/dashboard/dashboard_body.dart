@@ -219,6 +219,11 @@ class DashboardBody extends StatelessWidget {
         return FinanceScreen(
           key: ValueKey('finance_$selectedSupplierId'),
           financeNotifier: financeNotifier,
+          // onSupplierChanged: (supplierId) {
+          //   // productNotifier.fetchProducts(providerId: supplierId, reset: true);
+          //   financeNotifier.setProvider(supplierId);
+          //   onSupplierChanged?.call(supplierId);
+          // },
         );
       },
     );

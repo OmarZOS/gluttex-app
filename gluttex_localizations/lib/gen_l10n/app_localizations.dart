@@ -11688,6 +11688,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pay Remaining'**
   String get payRemaining;
+
+  /// No description provided for @paymentOutstandingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get paymentOutstandingLabel;
+
+  /// No description provided for @paymentRemainingAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} remaining after this payment'**
+  String paymentRemainingAfter(String amount);
+
+  /// No description provided for @paymentSettlesFull.
+  ///
+  /// In en, this message translates to:
+  /// **'This settles the full amount'**
+  String get paymentSettlesFull;
+
+  /// No description provided for @paymentAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get paymentAmountLabel;
+
+  /// No description provided for @paymentMethodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get paymentMethodLabel;
+
+  /// No description provided for @paymentNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get paymentNotesLabel;
+
+  /// No description provided for @paymentNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get paymentNotesHint;
+
+  /// No description provided for @paymentSubmitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount}'**
+  String paymentSubmitButton(String amount);
+
+  /// No description provided for @paymentMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get paymentMethodCash;
+
+  /// No description provided for @paymentMethodCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get paymentMethodCard;
+
+  /// No description provided for @paymentMethodBankTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank transfer'**
+  String get paymentMethodBankTransfer;
+
+  /// No description provided for @paymentMethodMobileMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile money'**
+  String get paymentMethodMobileMoney;
+
+  /// No description provided for @paymentErrorEnterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount'**
+  String get paymentErrorEnterAmount;
+
+  /// No description provided for @paymentErrorInvalidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number'**
+  String get paymentErrorInvalidNumber;
+
+  /// No description provided for @paymentErrorMustBePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be greater than zero'**
+  String get paymentErrorMustBePositive;
+
+  /// No description provided for @paymentErrorExceedsDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount cannot exceed {amount}'**
+  String paymentErrorExceedsDue(String amount);
+
+  /// No description provided for @paymentSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get paymentSuccessTitle;
+
+  /// No description provided for @paymentSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} paid via {method}.'**
+  String paymentSuccessBody(String amount, String method);
+
+  /// No description provided for @loadAnalyticsData.
+  ///
+  /// In en, this message translates to:
+  /// **'Load analytics data'**
+  String get loadAnalyticsData;
+
+  /// No description provided for @collectionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection rate'**
+  String get collectionRate;
+
+  /// No description provided for @totalTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Total transactions'**
+  String get totalTransactions;
+
+  /// No description provided for @totalCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total collected'**
+  String get totalCollected;
+
+  /// No description provided for @totalOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Total outstanding'**
+  String get totalOutstanding;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

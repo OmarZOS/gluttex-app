@@ -8,6 +8,11 @@ import 'package:event/product_change_notifier.dart';
 class PricingConfigScreen extends StatefulWidget {
   final PricingConfigViewModel viewModel;
   final bool isLoading;
+
+  /// The provider whose products are being priced. `null` or `0` means
+  /// "no provider selected" — the product grid shows an empty state.
+  final int? providerId;
+
   final VoidCallback onSave;
   final ValueChanged<double> onBasePriceChanged;
   final ValueChanged<double> onTaxPercentageChanged;
@@ -23,6 +28,7 @@ class PricingConfigScreen extends StatefulWidget {
     super.key,
     required this.viewModel,
     required this.isLoading,
+    this.providerId,
     required this.onSave,
     required this.onBasePriceChanged,
     required this.onTaxPercentageChanged,
@@ -55,11 +61,67 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+  int? get _providerId => (widget.providerId != null && widget.providerId! > 0)
+      ? widget.providerId
+      : null;
+
   @override
   void initState() {
     super.initState();
     _initLocalValues();
     _initAnimation();
+    _loadProductsForProvider();
+  }
+
+  @override
+  void didUpdateWidget(covariant PricingConfigScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Provider changed → reload the product set.
+    if (oldWidget.providerId != widget.providerId) {
+      _loadProductsForProvider();
+    }
+
+    if (widget.viewModel.basePrice != oldWidget.viewModel.basePrice &&
+        !_isEditingBasePrice) {
+      _localBasePrice = widget.viewModel.basePrice;
+    }
+    if (widget.viewModel.taxPercentage != oldWidget.viewModel.taxPercentage &&
+        !_isEditingTax) {
+      _localTaxPercentage = widget.viewModel.taxPercentage;
+    }
+    if (widget.viewModel.profitMargin != oldWidget.viewModel.profitMargin &&
+        !_isEditingProfit) {
+      _localProfitMargin = widget.viewModel.profitMargin;
+    }
+    if (widget.viewModel.finalPrice != oldWidget.viewModel.finalPrice &&
+        !_isEditingFinalPrice) {
+      _localFinalPrice = widget.viewModel.finalPrice;
+    }
+    if (widget.viewModel.mode != oldWidget.viewModel.mode) {
+      _localMode = widget.viewModel.mode;
+    }
+  }
+
+  /// Load the current provider's products into the ProductNotifier.
+  ///
+  /// This is a side-effect read: we don't own the notifier, we just tell it
+  /// to fetch for the provider we care about. If you already have a parent
+  /// that loads products, you can drop this method and rely on that.
+  void _loadProductsForProvider() {
+    final providerId = _providerId;
+    if (providerId == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final productNotifier =
+          Provider.of<ProductNotifier>(context, listen: false);
+      // Adjust the method name to match ProductNotifier. Common variants:
+      //   fetchProducts(providerId: ...)
+      //   loadProducts(providerId: ...)
+      //   setProvider(providerId)
+      productNotifier.fetchProducts(providerId: providerId);
+    });
   }
 
   void _initLocalValues() {
@@ -83,31 +145,6 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
   }
 
   @override
-  void didUpdateWidget(covariant PricingConfigScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.viewModel.basePrice != oldWidget.viewModel.basePrice &&
-        !_isEditingBasePrice) {
-      _localBasePrice = widget.viewModel.basePrice;
-    }
-    if (widget.viewModel.taxPercentage != oldWidget.viewModel.taxPercentage &&
-        !_isEditingTax) {
-      _localTaxPercentage = widget.viewModel.taxPercentage;
-    }
-    if (widget.viewModel.profitMargin != oldWidget.viewModel.profitMargin &&
-        !_isEditingProfit) {
-      _localProfitMargin = widget.viewModel.profitMargin;
-    }
-    if (widget.viewModel.finalPrice != oldWidget.viewModel.finalPrice &&
-        !_isEditingFinalPrice) {
-      _localFinalPrice = widget.viewModel.finalPrice;
-    }
-    if (widget.viewModel.mode != oldWidget.viewModel.mode) {
-      _localMode = widget.viewModel.mode;
-    }
-  }
-
-  @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
@@ -122,11 +159,16 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
       appBar: _buildAppBar(context),
       body: FadeTransition(
         opacity: _fadeAnimation,
-        child: _buildBody(context),
+        child: _providerId == null
+            ? _buildNoProviderState(context)
+            : _buildBody(context),
       ),
-      floatingActionButton: _buildFloatingActionButton(),
+      floatingActionButton:
+          _providerId == null ? null : _buildFloatingActionButton(),
     );
   }
+
+  // ==================== APP BAR ====================
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -164,12 +206,15 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
           ),
         IconButton(
           icon: const Icon(Icons.save_outlined),
-          onPressed: widget.isLoading ? null : widget.onSave,
+          onPressed:
+              widget.isLoading || _providerId == null ? null : widget.onSave,
           tooltip: 'Save Configuration',
         ),
       ],
     );
   }
+
+  // ==================== BODY ====================
 
   Widget _buildBody(BuildContext context) {
     return CustomScrollView(
@@ -180,7 +225,6 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Pricing Configuration Card
                 PricingConfigCard(
                   basePrice: _localBasePrice,
                   taxPercentage: _localTaxPercentage,
@@ -209,17 +253,12 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
                   },
                 ),
                 const SizedBox(height: 24),
-
-                // Product Selector Section
                 _buildProductSelector(context),
-
                 const SizedBox(height: 20),
               ],
             ),
           ),
         ),
-
-        // Batch Actions Section
         if (widget.viewModel.selectedProducts.isNotEmpty)
           SliverToBoxAdapter(
             child: Padding(
@@ -227,8 +266,6 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
               child: _buildBatchActions(context),
             ),
           ),
-
-        // Loading Indicator
         if (widget.isLoading)
           const SliverToBoxAdapter(
             child: Padding(
@@ -236,7 +273,6 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
               child: Center(child: CircularProgressIndicator()),
             ),
           ),
-
         const SliverToBoxAdapter(
           child: SizedBox(height: 80),
         ),
@@ -244,11 +280,55 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
     );
   }
 
+  // ==================== NO PROVIDER ====================
+
+  Widget _buildNoProviderState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.storefront_outlined,
+              size: 64,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Select a supplier first',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Choose a supplier to configure pricing.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== PRODUCT SELECTOR ====================
+
   Widget _buildProductSelector(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer<ProductNotifier>(
       builder: (context, productNotifier, _) {
+        // Guard: if the notifier has stale products from a different
+        // provider, we don't want to show them. If your ProductNotifier
+        // tracks the currently loaded provider id, this is where you'd
+        // assert it matches `_providerId`.
         final products = productNotifier.products;
 
         if (productNotifier.isLoading && products.isEmpty) {
@@ -270,8 +350,11 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
                     color: colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.production_quantity_limits,
-                      size: 20, color: colorScheme.primary),
+                  child: Icon(
+                    Icons.production_quantity_limits,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -510,6 +593,8 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
     );
   }
 
+  // ==================== BATCH ACTIONS ====================
+
   Widget _buildBatchActions(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final selectedCount = widget.viewModel.selectedProducts.length;
@@ -572,7 +657,7 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
                                 ),
                       ),
                       Text(
-                        'Update ${selectedCount} product${selectedCount > 1 ? 's' : ''}',
+                        'Update $selectedCount product${selectedCount > 1 ? 's' : ''}',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -674,6 +759,8 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
     );
   }
 
+  // ==================== SKELETONS ====================
+
   Widget _buildLoadingSkeleton(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -762,6 +849,8 @@ class _PricingConfigScreenState extends State<PricingConfigScreen>
       ),
     );
   }
+
+  // ==================== FAB ====================
 
   Widget _buildFloatingActionButton() {
     return FloatingActionButton.extended(

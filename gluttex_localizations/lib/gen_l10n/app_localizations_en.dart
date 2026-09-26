@@ -5941,4 +5941,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payRemaining => 'Pay Remaining';
+
+  @override
+  String get paymentOutstandingLabel => 'Outstanding';
+
+  @override
+  String paymentRemainingAfter(String amount) {
+    return '$amount remaining after this payment';
+  }
+
+  @override
+  String get paymentSettlesFull => 'This settles the full amount';
+
+  @override
+  String get paymentAmountLabel => 'Amount';
+
+  @override
+  String get paymentMethodLabel => 'Method';
+
+  @override
+  String get paymentNotesLabel => 'Notes';
+
+  @override
+  String get paymentNotesHint => 'Optional';
+
+  @override
+  String paymentSubmitButton(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String get paymentMethodCash => 'Cash';
+
+  @override
+  String get paymentMethodCard => 'Card';
+
+  @override
+  String get paymentMethodBankTransfer => 'Bank transfer';
+
+  @override
+  String get paymentMethodMobileMoney => 'Mobile money';
+
+  @override
+  String get paymentErrorEnterAmount => 'Enter an amount';
+
+  @override
+  String get paymentErrorInvalidNumber => 'Enter a valid number';
+
+  @override
+  String get paymentErrorMustBePositive => 'Amount must be greater than zero';
+
+  @override
+  String paymentErrorExceedsDue(String amount) {
+    return 'Amount cannot exceed $amount';
+  }
+
+  @override
+  String get paymentSuccessTitle => 'Payment recorded';
+
+  @override
+  String paymentSuccessBody(String amount, String method) {
+    return '$amount paid via $method.';
+  }
+
+  @override
+  String get loadAnalyticsData => 'Load analytics data';
+
+  @override
+  String get collectionRate => 'Collection rate';
+
+  @override
+  String get totalTransactions => 'Total transactions';
+
+  @override
+  String get totalCollected => 'Total collected';
+
+  @override
+  String get totalOutstanding => 'Total outstanding';
 }

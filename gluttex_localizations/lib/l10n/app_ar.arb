@@ -2835,7 +2835,58 @@
   "addDocument": "إضافة مستند",
   "searchDocuments": "البحث في المستندات",
   "searchByNumberOrCustomer": "البحث بالرقم أو العميل",
-  "payRemaining": "دفع المتبقي"
+  "payRemaining": "دفع المتبقي",
+
+    "paymentOutstandingLabel": "المبلغ المستحق",
+  "paymentRemainingAfter": "سيبقى {amount} بعد هذا الدفع",
+  "@paymentRemainingAfter": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "paymentSettlesFull": "هذا الدفع يسدد المبلغ بالكامل",
+
+  "paymentAmountLabel": "المبلغ",
+  "paymentMethodLabel": "طريقة الدفع",
+  "paymentNotesLabel": "ملاحظات",
+  "paymentNotesHint": "اختياري",
+
+  "paymentSubmitButton": "ادفع {amount}",
+  "@paymentSubmitButton": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+
+  "paymentMethodCash": "نقدًا",
+  "paymentMethodCard": "بطاقة",
+  "paymentMethodBankTransfer": "تحويل بنكي",
+  "paymentMethodMobileMoney": "دفع عبر الهاتف",
+
+  "paymentErrorEnterAmount": "الرجاء إدخال المبلغ",
+  "paymentErrorInvalidNumber": "الرجاء إدخال رقم صحيح",
+  "paymentErrorMustBePositive": "يجب أن يكون المبلغ أكبر من الصفر",
+  "paymentErrorExceedsDue": "لا يمكن أن يتجاوز المبلغ {amount}",
+  "@paymentErrorExceedsDue": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+
+  "paymentSuccessTitle": "تم تسجيل الدفعة",
+  "paymentSuccessBody": "تم دفع {amount} عبر {method}.",
+  "@paymentSuccessBody": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "method": { "type": "String" }
+    }
+  },
+
+  "loadAnalyticsData": "تحميل البيانات التحليلية",
+  "collectionRate": "نسبة التحصيل",
+  "totalTransactions": "إجمالي المعاملات",
+  "totalCollected": "إجمالي المحصّل",
+  "totalOutstanding": "إجمالي المستحق"
 
 
 }

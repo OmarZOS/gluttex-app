@@ -5960,4 +5960,81 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get payRemaining => 'دفع المتبقي';
+
+  @override
+  String get paymentOutstandingLabel => 'المبلغ المستحق';
+
+  @override
+  String paymentRemainingAfter(String amount) {
+    return 'سيبقى $amount بعد هذا الدفع';
+  }
+
+  @override
+  String get paymentSettlesFull => 'هذا الدفع يسدد المبلغ بالكامل';
+
+  @override
+  String get paymentAmountLabel => 'المبلغ';
+
+  @override
+  String get paymentMethodLabel => 'طريقة الدفع';
+
+  @override
+  String get paymentNotesLabel => 'ملاحظات';
+
+  @override
+  String get paymentNotesHint => 'اختياري';
+
+  @override
+  String paymentSubmitButton(String amount) {
+    return 'ادفع $amount';
+  }
+
+  @override
+  String get paymentMethodCash => 'نقدًا';
+
+  @override
+  String get paymentMethodCard => 'بطاقة';
+
+  @override
+  String get paymentMethodBankTransfer => 'تحويل بنكي';
+
+  @override
+  String get paymentMethodMobileMoney => 'دفع عبر الهاتف';
+
+  @override
+  String get paymentErrorEnterAmount => 'الرجاء إدخال المبلغ';
+
+  @override
+  String get paymentErrorInvalidNumber => 'الرجاء إدخال رقم صحيح';
+
+  @override
+  String get paymentErrorMustBePositive => 'يجب أن يكون المبلغ أكبر من الصفر';
+
+  @override
+  String paymentErrorExceedsDue(String amount) {
+    return 'لا يمكن أن يتجاوز المبلغ $amount';
+  }
+
+  @override
+  String get paymentSuccessTitle => 'تم تسجيل الدفعة';
+
+  @override
+  String paymentSuccessBody(String amount, String method) {
+    return 'تم دفع $amount عبر $method.';
+  }
+
+  @override
+  String get loadAnalyticsData => 'تحميل البيانات التحليلية';
+
+  @override
+  String get collectionRate => 'نسبة التحصيل';
+
+  @override
+  String get totalTransactions => 'إجمالي المعاملات';
+
+  @override
+  String get totalCollected => 'إجمالي المحصّل';
+
+  @override
+  String get totalOutstanding => 'إجمالي المستحق';
 }
