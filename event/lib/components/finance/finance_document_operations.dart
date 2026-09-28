@@ -22,9 +22,18 @@ class FinanceDocumentOperations {
     }
   }
 
-  void setPrimaryDocuments(List<FinancialDocument> documents) {
-    _primaryDocuments.clear();
-    _primaryDocuments.addAll(documents);
+  /// Replace the primary documents list with the given documents.
+  void setPrimaryDocuments(List<FinancialDocument> docs) {
+    _primaryDocuments
+      ..clear()
+      ..addAll(docs);
+  }
+
+  /// Replace the document groups map with the given groups.
+  void setDocumentGroups(Map<int, List<int>> groups) {
+    _documentGroups
+      ..clear()
+      ..addAll(groups);
   }
 
   void clear() {

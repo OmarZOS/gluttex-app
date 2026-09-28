@@ -1,3 +1,4 @@
+import 'package:event/finance_change_notifier.dart';
 import 'package:gluttex_core/business/finance/FinancialDocument.dart';
 
 class FinanceFilter {

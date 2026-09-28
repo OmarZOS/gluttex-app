@@ -5,13 +5,10 @@ class FinanceGrouping {
 
   Map<int, List<int>> get documentGroups => Map.unmodifiable(_documentGroups);
 
-  void groupDocuments(
+  List<FinancialDocument> groupDocuments(
     List<FinancialDocument> allDocuments,
-    List<FinancialDocument> primaryDocuments,
-    Map<int, List<int>> documentGroups,
   ) {
-    primaryDocuments.clear();
-    documentGroups.clear();
+    _documentGroups.clear();
 
     final sourceIdToDocuments = <int, List<FinancialDocument>>{};
 
@@ -21,6 +18,8 @@ class FinanceGrouping {
       sourceIdToDocuments.putIfAbsent(sourceId, () => []);
       sourceIdToDocuments[sourceId]!.add(doc);
     }
+
+    final primaryDocuments = <FinancialDocument>[];
 
     for (final entry in sourceIdToDocuments.entries) {
       final documents = entry.value;
@@ -38,7 +37,7 @@ class FinanceGrouping {
           .toList();
 
       if (relatedIds.isNotEmpty) {
-        documentGroups[primaryDoc.documentId ?? 0] = relatedIds;
+        _documentGroups[primaryDoc.documentId ?? 0] = relatedIds;
       }
 
       _updatePrimaryDocument(primaryDoc, documents);
@@ -49,6 +48,8 @@ class FinanceGrouping {
       final dateB = b.issueDate ?? DateTime(1970);
       return dateB.compareTo(dateA);
     });
+
+    return primaryDocuments;
   }
 
   void _sortDocumentsByStrength(List<FinancialDocument> documents) {

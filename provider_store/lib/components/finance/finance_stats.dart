@@ -1,44 +1,36 @@
+import 'package:event/views/finance_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
-import 'package:event/views/finance_view_model.dart';
+import 'package:event/finance_change_notifier.dart';
 import 'package:provider/provider.dart';
 
 class FinanceStats extends StatelessWidget {
-  /// The provider whose stats are shown.
-  ///
-  /// `0` or `null` means "no provider selected" — the widget shows a
-  /// placeholder and hides the refresh action.
-  final int providerId;
-
   final VoidCallback? onCreateInvoice;
   final VoidCallback? onViewAllTransactions;
 
   const FinanceStats({
     super.key,
-    this.providerId = 0,
     this.onCreateInvoice,
     this.onViewAllTransactions,
   });
 
-  bool get _hasProvider => providerId > 0;
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<FinanceViewModel>(
-      builder: (context, viewModel, child) {
-        if (!_hasProvider) {
+    return Consumer<FinanceChangeNotifier>(
+      builder: (context, notifier, child) {
+        if (!notifier.hasProvider) {
           return _buildNoProviderState(context);
         }
 
-        final operations = viewModel.businessOperations;
-        final analytics = viewModel.analyticsCache;
+        final operations = notifier.businessOperations;
+        final analytics = notifier.analyticsCache;
 
         if (operations.isEmpty || analytics == null) {
-          return _buildEmptyState(context, viewModel);
+          return _buildEmptyState(context, notifier);
         }
 
-        return _buildContent(context, viewModel, analytics);
+        return _buildContent(context, notifier, analytics);
       },
     );
   }
@@ -86,7 +78,8 @@ class FinanceStats extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, FinanceViewModel viewModel) {
+  Widget _buildEmptyState(
+      BuildContext context, FinanceChangeNotifier notifier) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final loc = AppLocalizations.of(context)!;
@@ -122,11 +115,11 @@ class FinanceStats extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            if (viewModel.isLoading)
+            if (notifier.isLoading)
               const CircularProgressIndicator()
             else
               FilledButton.icon(
-                onPressed: () => viewModel.refreshAllData(),
+                onPressed: () => notifier.refreshBusinessOperations(),
                 icon: Icon(
                   Icons.refresh,
                   color: colorScheme.onPrimary,
@@ -154,7 +147,7 @@ class FinanceStats extends StatelessWidget {
 
   Widget _buildContent(
     BuildContext context,
-    FinanceViewModel viewModel,
+    FinanceChangeNotifier notifier,
     AnalyticsCache analytics,
   ) {
     final loc = AppLocalizations.of(context)!;
@@ -163,11 +156,11 @@ class FinanceStats extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildSummaryCard(context, viewModel, analytics, loc),
+          _buildSummaryCard(context, analytics, loc),
           const SizedBox(height: 16),
           _buildStatsGrid(context, analytics, loc),
           const SizedBox(height: 16),
-          _buildRecentTransactions(context, viewModel, loc),
+          _buildRecentTransactions(context, notifier, loc),
         ],
       ),
     );
@@ -177,7 +170,6 @@ class FinanceStats extends StatelessWidget {
 
   Widget _buildSummaryCard(
     BuildContext context,
-    FinanceViewModel viewModel,
     AnalyticsCache analytics,
     AppLocalizations loc,
   ) {
@@ -312,10 +304,10 @@ class FinanceStats extends StatelessWidget {
 
   Widget _buildRecentTransactions(
     BuildContext context,
-    FinanceViewModel viewModel,
+    FinanceChangeNotifier notifier,
     AppLocalizations loc,
   ) {
-    final recentOperations = viewModel.recentOperations;
+    final recentOperations = notifier.recentOperations;
     if (recentOperations.isEmpty) return const SizedBox.shrink();
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -371,7 +363,7 @@ class FinanceStats extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 12),
-          if (viewModel.businessOperations.length > 10)
+          if (notifier.businessOperations.length > 10)
             Center(
               child: TextButton(
                 onPressed: onViewAllTransactions,

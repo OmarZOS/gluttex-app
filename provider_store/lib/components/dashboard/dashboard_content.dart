@@ -252,8 +252,7 @@ class DashboardContentState extends State<DashboardContent> {
     if (_availableSuppliers.isEmpty) return;
 
     if (_organisations.isEmpty) {
-      _selectedSupplierId = _availableSuppliers.first.id;
-      widget.supplierNotifier.selectSupplier(_selectedSupplierId);
+      widget.supplierNotifier.selectSupplier(_availableSuppliers.first.id);
       return;
     }
 
@@ -264,12 +263,10 @@ class DashboardContentState extends State<DashboardContent> {
     if (filtered.isNotEmpty) {
       final owned =
           filtered.where((s) => s.accessType == SupplierAccessType.owner);
-      _selectedSupplierId =
-          owned.isNotEmpty ? owned.first.id : filtered.first.id;
-      widget.supplierNotifier.selectSupplier(_selectedSupplierId);
+      final nextId = owned.isNotEmpty ? owned.first.id : filtered.first.id;
+      widget.supplierNotifier.selectSupplier(nextId);
     }
   }
-
   // ============================================================
   // DASHBOARD ITEMS
   // ============================================================
@@ -502,16 +499,17 @@ class DashboardContentState extends State<DashboardContent> {
           if (id == null) return;
           setState(() {
             _selectedOrgId = id;
-            final filtered =
-                _availableSuppliers.where((s) => s.orgId == id).toList();
-            if (filtered.isNotEmpty) {
-              final owned = filtered
-                  .where((s) => s.accessType == SupplierAccessType.owner);
-              _selectedSupplierId =
-                  owned.isNotEmpty ? owned.first.id : filtered.first.id;
-              widget.supplierNotifier.selectSupplier(_selectedSupplierId);
-            }
           });
+          final filtered =
+              _availableSuppliers.where((s) => s.orgId == id).toList();
+          if (filtered.isNotEmpty) {
+            final owned =
+                filtered.where((s) => s.accessType == SupplierAccessType.owner);
+            final nextSupplierId =
+                owned.isNotEmpty ? owned.first.id : filtered.first.id;
+            widget.supplierNotifier.selectSupplier(
+                nextSupplierId); // ← no setState for _selectedSupplierId
+          }
         },
       ),
     );
@@ -574,11 +572,7 @@ class DashboardContentState extends State<DashboardContent> {
         ],
         onChanged: (id) {
           if (id == null) return;
-          setState(() {
-            _selectedSupplierId = id;
-            _selectedIndex = 0;
-            widget.supplierNotifier.selectSupplier(id);
-          });
+          widget.supplierNotifier.selectSupplier(id); // ← only this
         },
       ),
     );
