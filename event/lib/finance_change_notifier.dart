@@ -466,6 +466,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
       _log('submitPayment', 'REJECTED: empty method');
       return const PaymentSubmitResult.failure('Payment method is required.');
     }
+    if (method.toLowerCase() == "cash") status = "completed";
 
     _setLoading(true);
     try {

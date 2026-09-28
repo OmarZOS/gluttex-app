@@ -2754,10 +2754,20 @@
       "method": { "type": "String" }
     }
   },
+  "paymentQuickAmounts": "Quick amounts",
+"paymentFullAmount": "Full amount",
     "loadAnalyticsData": "Load analytics data",
   "collectionRate": "Collection rate",
   "totalTransactions": "Total transactions",
   "totalCollected": "Total collected",
+
+  "dashboard": "Dashboard",
+"back": "Back",
+"selectSupplier": "Select supplier",
+"chooseSupplierHint": "Choose the business you want to manage",
+"noOrganisation": "No organisation",
+"owner": "Owner",
+"managed": "Managed",
   "totalOutstanding": "Total outstanding"
 
 

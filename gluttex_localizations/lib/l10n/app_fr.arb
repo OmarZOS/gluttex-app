@@ -56,7 +56,7 @@
     "postalCodeText": "Code postal",
     "countryText": "Pays",
     "clientText": "Client",
-    "cookingChefText": "recipe_catalog cuisinier",
+    "cookingChefText": "Chef cuisinier",
     "genderTextList": "Homme,Femme,Autre",
     "nationalityTextList": "Algérien,Autre",
     "missingText": "Manquant",
@@ -2931,10 +2931,21 @@
     }
   },
 
+
+  "paymentQuickAmounts": "Montants rapides",
+"paymentFullAmount": "Montant total",
+
     "loadAnalyticsData": "Charger les données analytiques",
   "collectionRate": "Taux de recouvrement",
   "totalTransactions": "Transactions totales",
   "totalCollected": "Total encaissé",
+  "dashboard": "Tableau de bord",
+"back": "Retour",
+"selectSupplier": "Sélectionner un fournisseur",
+"chooseSupplierHint": "Choisissez l'entreprise à gérer",
+"noOrganisation": "Aucune organisation",
+"owner": "Propriétaire",
+"managed": "Géré",
   "totalOutstanding": "Total en attente"
 
 

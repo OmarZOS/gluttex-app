@@ -2238,7 +2238,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get completed => 'Completed';
 
   @override
-  String get selectSupplier => 'Select Supplier';
+  String get selectSupplier => 'Select supplier';
 
   @override
   String get noOrderManagementPrivileges => 'No order management privileges';
@@ -6005,6 +6005,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get paymentQuickAmounts => 'Quick amounts';
+
+  @override
+  String get paymentFullAmount => 'Full amount';
+
+  @override
   String get loadAnalyticsData => 'Load analytics data';
 
   @override
@@ -6015,6 +6021,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalCollected => 'Total collected';
+
+  @override
+  String get chooseSupplierHint => 'Choose the business you want to manage';
+
+  @override
+  String get noOrganisation => 'No organisation';
 
   @override
   String get totalOutstanding => 'Total outstanding';

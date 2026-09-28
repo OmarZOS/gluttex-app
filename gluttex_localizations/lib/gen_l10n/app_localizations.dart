@@ -4390,7 +4390,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectSupplier.
   ///
   /// In en, this message translates to:
-  /// **'Select Supplier'**
+  /// **'Select supplier'**
   String get selectSupplier;
 
   /// No description provided for @noOrderManagementPrivileges.
@@ -11797,6 +11797,18 @@ abstract class AppLocalizations {
   /// **'{amount} paid via {method}.'**
   String paymentSuccessBody(String amount, String method);
 
+  /// No description provided for @paymentQuickAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick amounts'**
+  String get paymentQuickAmounts;
+
+  /// No description provided for @paymentFullAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Full amount'**
+  String get paymentFullAmount;
+
   /// No description provided for @loadAnalyticsData.
   ///
   /// In en, this message translates to:
@@ -11820,6 +11832,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total collected'**
   String get totalCollected;
+
+  /// No description provided for @chooseSupplierHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the business you want to manage'**
+  String get chooseSupplierHint;
+
+  /// No description provided for @noOrganisation.
+  ///
+  /// In en, this message translates to:
+  /// **'No organisation'**
+  String get noOrganisation;
 
   /// No description provided for @totalOutstanding.
   ///

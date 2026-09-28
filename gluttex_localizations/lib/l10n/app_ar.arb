@@ -2882,10 +2882,21 @@
     }
   },
 
+  "paymentQuickAmounts": "مبالغ سريعة",
+  "paymentFullAmount": "المبلغ الكامل",
+
   "loadAnalyticsData": "تحميل البيانات التحليلية",
   "collectionRate": "نسبة التحصيل",
   "totalTransactions": "إجمالي المعاملات",
   "totalCollected": "إجمالي المحصّل",
+
+  "dashboard": "لوحة التحكم",
+"back": "رجوع",
+"selectSupplier": "اختر المورّد",
+"chooseSupplierHint": "اختر النشاط التجاري الذي تريد إدارته",
+"noOrganisation": "لا توجد مؤسسة",
+"owner": "المالك",
+"managed": "مُدار",
   "totalOutstanding": "إجمالي المستحق"
 
 

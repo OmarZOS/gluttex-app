@@ -2238,7 +2238,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get completed => 'مكتمل';
 
   @override
-  String get selectSupplier => 'اختر المورد';
+  String get selectSupplier => 'اختر المورّد';
 
   @override
   String get noOrderManagementPrivileges => 'لا توجد صلاحيات لإدارة الطلبات';
@@ -5807,7 +5807,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owned => 'مملوكة';
 
   @override
-  String get managed => 'مدار';
+  String get managed => 'مُدار';
 
   @override
   String get noResults => 'لا توجد نتائج';
@@ -5816,7 +5816,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noBusinesses => 'لا توجد شركات';
 
   @override
-  String get owner => 'مالك';
+  String get owner => 'المالك';
 
   @override
   String get privilegesFor => 'صلاحيات';
@@ -6024,6 +6024,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get paymentQuickAmounts => 'مبالغ سريعة';
+
+  @override
+  String get paymentFullAmount => 'المبلغ الكامل';
+
+  @override
   String get loadAnalyticsData => 'تحميل البيانات التحليلية';
 
   @override
@@ -6034,6 +6040,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get totalCollected => 'إجمالي المحصّل';
+
+  @override
+  String get chooseSupplierHint => 'اختر النشاط التجاري الذي تريد إدارته';
+
+  @override
+  String get noOrganisation => 'لا توجد مؤسسة';
 
   @override
   String get totalOutstanding => 'إجمالي المستحق';

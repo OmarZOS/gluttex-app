@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
 
 /// A self-contained payment form.
 ///
@@ -180,12 +181,22 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
     );
   }
 
+  void _setAmount(double value) {
+    final clamped = value.clamp(0.0, widget.amountDue);
+    setState(() {
+      _amountController.text = clamped.toStringAsFixed(2);
+      _error = _validateAmount(
+          _amountController.text, AppLocalizations.of(context)!);
+    });
+  }
+
   // ==================== BUILD ====================
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalizations.of(context)!;
+    final canSubmit = !_submitting && _error == null && _currentAmount > 0;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -210,7 +221,6 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Summary ──
               _SummaryCard(
                 amountDue: widget.amountDue,
                 amountEntered: _currentAmount,
@@ -220,8 +230,6 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                 labelSettlesFull: loc.paymentSettlesFull,
               ),
               const SizedBox(height: 24),
-
-              // ── Amount field ──
               _SectionLabel(text: loc.paymentAmountLabel),
               const SizedBox(height: 8),
               TextField(
@@ -229,6 +237,9 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 enabled: !_submitting,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                ],
                 decoration: InputDecoration(
                   hintText: '0.00',
                   prefixText: widget.currencySymbol,
@@ -244,56 +255,50 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                   fontWeight: FontWeight.w700,
                 ),
                 textAlign: TextAlign.end,
-                onChanged: (_) {
-                  if (_error != null) {
-                    setState(() => _error = null);
-                  } else {
-                    setState(() {});
-                  }
+                onChanged: (raw) {
+                  final err = _validateAmount(raw, loc);
+                  setState(() {
+                    _error = err;
+                  });
                 },
               ),
-              const SizedBox(height: 12),
-
-              // ── Slider ──
+              const SizedBox(height: 16),
               if (widget.amountDue > 0) ...[
-                Slider(
-                  value: _currentAmount.clamp(0.0, widget.amountDue),
-                  min: 0,
-                  max: widget.amountDue,
-                  divisions: widget.amountDue >= 100
-                      ? (widget.amountDue).round().clamp(1, 1000)
-                      : null,
-                  label: _fmt(context, _currentAmount),
-                  onChanged: _submitting
-                      ? null
-                      : (value) {
-                          setState(() {
-                            _amountController.text = value.toStringAsFixed(2);
-                            _error = null;
-                          });
-                        },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                _SectionLabel(text: loc.paymentQuickAmounts),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    Text(
-                      _fmt(context, 0),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                    _QuickAmountChip(
+                      label: '25%',
+                      onTap: _submitting
+                          ? null
+                          : () => _setAmount(widget.amountDue * 0.25),
                     ),
-                    Text(
-                      _fmt(context, widget.amountDue),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                    _QuickAmountChip(
+                      label: '50%',
+                      onTap: _submitting
+                          ? null
+                          : () => _setAmount(widget.amountDue * 0.50),
+                    ),
+                    _QuickAmountChip(
+                      label: '75%',
+                      onTap: _submitting
+                          ? null
+                          : () => _setAmount(widget.amountDue * 0.75),
+                    ),
+                    _QuickAmountChip(
+                      label: loc.paymentFullAmount,
+                      onTap: _submitting
+                          ? null
+                          : () => _setAmount(widget.amountDue),
+                      highlighted: true,
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
               ],
-
-              // ── Method picker ──
               _SectionLabel(text: loc.paymentMethodLabel),
               const SizedBox(height: 8),
               Wrap(
@@ -318,8 +323,6 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                 }).toList(),
               ),
               const SizedBox(height: 24),
-
-              // ── Notes ──
               _SectionLabel(text: loc.paymentNotesLabel),
               const SizedBox(height: 8),
               TextField(
@@ -337,10 +340,8 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-
-              // ── Submit ──
               FilledButton(
-                onPressed: _submitting ? null : () => _submit(loc),
+                onPressed: canSubmit ? () => _submit(loc) : null,
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                   shape: RoundedRectangleBorder(
@@ -385,6 +386,47 @@ class _SectionLabel extends StatelessWidget {
         color: theme.colorScheme.onSurfaceVariant,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.2,
+      ),
+    );
+  }
+}
+
+class _QuickAmountChip extends StatelessWidget {
+  final String label;
+  final VoidCallback? onTap;
+  final bool highlighted;
+
+  const _QuickAmountChip({
+    required this.label,
+    required this.onTap,
+    this.highlighted = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final bg = highlighted
+        ? colorScheme.primary.withOpacity(0.1)
+        : colorScheme.surfaceVariant.withOpacity(0.4);
+    final fg = highlighted ? colorScheme.primary : colorScheme.onSurface;
+
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(
+            label,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: fg,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
       ),
     );
   }

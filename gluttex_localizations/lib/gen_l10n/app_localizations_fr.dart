@@ -2238,7 +2238,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get completed => 'Terminées';
 
   @override
-  String get selectSupplier => 'Sélectionner un Fournisseur';
+  String get selectSupplier => 'Sélectionner un fournisseur';
 
   @override
   String get noOrderManagementPrivileges => 'Aucun privilège de gestion des commandes';
@@ -3730,7 +3730,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get quickView => 'Vue Rapide';
 
   @override
-  String get dashboard => 'Tableau de Bord';
+  String get dashboard => 'Tableau de bord';
 
   @override
   String get reports => 'Rapports';
@@ -6005,6 +6005,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get paymentQuickAmounts => 'Montants rapides';
+
+  @override
+  String get paymentFullAmount => 'Montant total';
+
+  @override
   String get loadAnalyticsData => 'Charger les données analytiques';
 
   @override
@@ -6015,6 +6021,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get totalCollected => 'Total encaissé';
+
+  @override
+  String get chooseSupplierHint => 'Choisissez l\'entreprise à gérer';
+
+  @override
+  String get noOrganisation => 'Aucune organisation';
 
   @override
   String get totalOutstanding => 'Total en attente';
