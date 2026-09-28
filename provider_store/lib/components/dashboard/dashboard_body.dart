@@ -159,8 +159,14 @@ class DashboardBody extends StatelessWidget {
           providerId: selectedSupplierId,
           reset: true,
         ),
-        onAddProduct: () =>
-            Navigator.pushNamed(context, AppRoutes.productCreate),
+        onAddProduct: () => Navigator.pushNamed(
+          context,
+          AppRoutes.productCreate,
+          arguments: {
+            'providerId': selectedSupplierId,
+            'lockProvider': true,
+          },
+        ),
       ),
     );
   }
@@ -238,17 +244,31 @@ class DashboardBody extends StatelessWidget {
     List<AccessibleSupplier> suppliersWithAccess,
     PersonnelAccessManager accessManager,
   ) {
+    if (selectedSupplierId <= 0) return const SizedBox.shrink();
+
     final selectedSupplier = suppliers.firstWhere(
       (s) => s.idProductProvider == selectedSupplierId,
       orElse: () => suppliers.isNotEmpty ? suppliers.first : Supplier.empty(),
     );
-
     final supplierName = selectedSupplier.providerName ?? 'Unnamed Business';
+
+    // 👇 Read the already-computed access type instead of re-checking.
+    SupplierAccessType accessType = SupplierAccessType.none;
+    for (final a in suppliersWithAccess) {
+      if (a.id == selectedSupplierId) {
+        accessType = a.accessType;
+        break;
+      }
+    }
+
     final personnelNotifier = context.read<PersonnelNotifier>();
-    final canManage = selectedSupplierId > 0 &&
-        (accessManager.isOwner(userId, selectedSupplierId) ||
-            personnelNotifier.hasPrivilege(
-                userId, selectedSupplierId, 'personnel_manage'));
+    final isOwner = accessType == SupplierAccessType.owner;
+    final hasPriv = personnelNotifier.hasPrivilege(
+        userId, selectedSupplierId, 'personnel_manage');
+    final canManage = isOwner || hasPriv;
+
+    debugPrint('PERSONNEL canManage=$canManage '
+        '(owner=$isOwner, priv=$hasPriv, accessType=$accessType)');
 
     return PersonnelManagementScreen(
       key: ValueKey('personnel_${selectedSupplierId}_${userId}'),

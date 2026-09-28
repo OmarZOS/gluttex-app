@@ -502,120 +502,48 @@ class ProductFormFields extends StatelessWidget {
   }
 
   Widget _buildSupplierPicker(BuildContext context) {
-    final userNotifier = context.watch<AppUserNotifier>();
     final supplierNotifier = context.watch<SupplierChangeNotifier>();
-    final personnelNotifier = context.watch<PersonnelNotifier>();
 
-    final currentUserId = userNotifier.appUser?.idAppUser;
+    // Locked providers are non-interactive: resolve the name and render a
+    // read-only row. No picker, no personnel fetch, no empty state.
+    if (formData.lockProvider && formData.selectedProviderId > 0) {
+      final supplier = supplierNotifier.suppliers.firstWhere(
+        (s) => s.idProductProvider == formData.selectedProviderId,
+      );
+      final name = supplier?.providerName ?? '#${formData.selectedProviderId}';
 
-    if (currentUserId == null) {
+      return _LockedSupplierRow(name: name);
+    }
+
+    // Unlocked: render the picker against whatever suppliers the notifier
+    // already has. Don't trigger a fetch — the caller (dashboard) already
+    // loads them.
+    final suppliers = supplierNotifier.suppliers.whereType<Supplier>().toList();
+
+    if (suppliers.isEmpty) {
+      // Silent fallback: no suppliers to pick from yet.
       return const SizedBox.shrink();
-    }
-
-    // Ensure personnel rules are loaded if not already
-    if (personnelNotifier.personnel.isEmpty &&
-        !personnelNotifier.isLoading &&
-        personnelNotifier.hasMore) {
-      // Load the rules in the background
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        personnelNotifier.loadPersonnel(
-          userId: currentUserId,
-          reset: true,
-          includePending: false,
-        );
-      });
-    }
-
-    // Get suppliers owned by the user
-    final userOwnedSuppliers = supplierNotifier.suppliers.where((supplier) {
-      return supplier.productProviderOwnerId == currentUserId;
-    }).toList();
-
-    // Get managed suppliers from personnel (if user has access to other suppliers)
-    final managedSupplierIds =
-        personnelNotifier.getAccessibleSupplierIds(currentUserId);
-    final managedSuppliers = supplierNotifier.suppliers.where((supplier) {
-      return managedSupplierIds.contains(supplier.idProductProvider);
-    }).toList();
-
-    // Combine and remove duplicates
-    final allAccessibleSuppliers = {
-      ...userOwnedSuppliers,
-      ...managedSuppliers,
-    }.toList();
-
-    // Show loading indicator while personnel rules are being loaded
-    if (personnelNotifier.isLoading && allAccessibleSuppliers.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    // If no suppliers available, show message and option to create
-    if (allAccessibleSuppliers.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'No suppliers available',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.error,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.providerCreate);
-            },
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Create Supplier'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            ),
-          ),
-        ],
-      );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Supplier',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.7),
-                  ),
-            ),
-            if (personnelNotifier.isLoading)
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
+        Text(
+          AppLocalizations.of(context)!.supplier,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
-          ],
         ),
         const SizedBox(height: 8),
         SupplierPicker(
+          suppliers: suppliers,
+          initialSelection: suppliers.firstWhere(
+            (s) => s.idProductProvider == formData.selectedProviderId,
+          ),
           onSupplierChanged: (selectedSupplier) {
             formData.selectedProviderId = selectedSupplier.idProductProvider;
-            formData.selectedProviderId = selectedSupplier.idProductProvider;
+            formData.providerId = selectedSupplier.idProductProvider;
           },
-          suppliers: allAccessibleSuppliers,
-          initialSelection: allAccessibleSuppliers.isNotEmpty
-              ? allAccessibleSuppliers.firstWhere(
-                  (s) => s.idProductProvider == formData.selectedProviderId,
-                  orElse: () => allAccessibleSuppliers.first,
-                )
-              : null,
         ),
       ],
     );
@@ -812,6 +740,60 @@ class PricingValues {
       profitMargin: state.profitMargin,
       finalPrice: state.finalPrice,
       mode: state.mode,
+    );
+  }
+}
+
+class _LockedSupplierRow extends StatelessWidget {
+  final String name;
+
+  const _LockedSupplierRow({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.supplier,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: cs.onSurface.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: cs.outlineVariant.withOpacity(0.5),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.storefront_rounded, size: 18, color: cs.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  name,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(Icons.lock_outline, size: 16, color: cs.onSurfaceVariant),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

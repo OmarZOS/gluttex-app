@@ -2946,7 +2946,47 @@
 "noOrganisation": "Aucune organisation",
 "owner": "Propriétaire",
 "managed": "Géré",
-  "totalOutstanding": "Total en attente"
+  "totalOutstanding": "Total en attente",
+
+    "close": "Fermer",
+  "unnamedProduct": "Produit sans nom",
+  "quantityLabel": "Quantité",
+  "itemsLabel": "articles",
+  "increaseQuantity": "Augmenter la quantité",
+  "decreaseQuantity": "Diminuer la quantité",
+  "maxAvailable": "Maximum disponible : {count}",
+  "@maxAvailable": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "priceLabel": "Prix",
+  "defaultPrice": "Prix par défaut",
+  "customPrice": "Prix personnalisé",
+  "resetToDefault": "Réinitialiser",
+  "customPriceApplied": "Prix personnalisé appliqué",
+  "customPriceAboveCatalog": "Le prix personnalisé dépasse le prix par défaut — aucun rabais",
+  "discountPreview": "{amount} de rabais ({percent} %)",
+  "@discountPreview": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "percent": { "type": "String" }
+    }
+  },
+  "notesLabel": "Notes",
+  "addNotesHint": "Ajouter des notes...",
+  "totalLabel": "Total",
+  "qtyTimesPrice": "{qty} × {price}",
+  "@qtyTimesPrice": {
+    "placeholders": {
+      "qty": { "type": "int" },
+      "price": { "type": "String" }
+    }
+  },
+  "removeLabel": "Retirer",
+  "updateLabel": "Mettre à jour",
+  "productsLabel": "produits",
+  "addToCartLabel": "Ajouter au panier"
 
 
 

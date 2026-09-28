@@ -146,7 +146,7 @@ class DashboardContentState extends State<DashboardContent> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      extendBody: true,
+      // extendBody: true,
       backgroundColor: theme.colorScheme.surface,
       body: Column(
         children: [
@@ -165,7 +165,7 @@ class DashboardContentState extends State<DashboardContent> {
         items: items,
         onIndexChanged: (i) => setState(() => _selectedIndex = i),
       ),
-      floatingActionButton: _buildFab(items),
+      // floatingActionButton: _buildFab(items),
     );
   }
 
@@ -729,7 +729,10 @@ class DashboardContentState extends State<DashboardContent> {
     final serviceNotifier = context.read<ServiceNotifier>();
     final deliveryNotifier = context.read<DeliveryChangeNotifier>();
     final financeNotifier = context.read<FinanceChangeNotifier>();
+    final cartNotifier = context.read<CartChangeNotifier>();
     final userId = widget.currentUser.idAppUser ?? 0;
+
+    cartNotifier.clearCart();
 
     deliveryNotifier.setFilters(providerId: supplierId);
 
@@ -928,6 +931,10 @@ class DashboardContentState extends State<DashboardContent> {
   Widget? _buildFab(List<DashboardItem> items) {
     if (_selectedIndex >= items.length) return null;
     final item = items[_selectedIndex];
+
+    // Personnel has its own FAB inside PersonnelManagementScreen.
+    if (item.type == DashboardScreenType.suppliersPersonnel) return null;
+
     if (!item.showFloatingAction ||
         item.privilegeLevel != PrivilegeLevel.manage) {
       return null;
@@ -938,11 +945,20 @@ class DashboardContentState extends State<DashboardContent> {
 
   void _handleFab(BuildContext context, DashboardScreenType type) {
     switch (type) {
+      // case DashboardScreenType.suppliersPersonnel:
+
       case DashboardScreenType.pos:
         _showCartSheet(context);
         break;
       case DashboardScreenType.inventory:
-        Navigator.pushNamed(context, AppRoutes.productCreate);
+        Navigator.pushNamed(
+          context,
+          AppRoutes.productCreate,
+          arguments: {
+            'providerId': _selectedSupplierId, // ← add this
+            'lockProvider': true,
+          },
+        );
         break;
       case DashboardScreenType.services:
         Navigator.pushNamed(context, AppRoutes.serviceForm,

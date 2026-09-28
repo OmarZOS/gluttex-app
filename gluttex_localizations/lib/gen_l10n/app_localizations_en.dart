@@ -5966,6 +5966,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentNotesHint => 'Optional';
 
   @override
+  String get productsLabel => 'products';
+
+  @override
   String paymentSubmitButton(String amount) {
     return 'Pay $amount';
   }
@@ -6030,4 +6033,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalOutstanding => 'Total outstanding';
+
+  @override
+  String get unnamedProduct => 'Unnamed Product';
+
+  @override
+  String get quantityLabel => 'Quantity';
+
+  @override
+  String get itemsLabel => 'items';
+
+  @override
+  String get increaseQuantity => 'Increase quantity';
+
+  @override
+  String get decreaseQuantity => 'Decrease quantity';
+
+  @override
+  String maxAvailable(int count) {
+    return 'Max available: $count';
+  }
+
+  @override
+  String get priceLabel => 'Price';
+
+  @override
+  String get defaultPrice => 'Default price';
+
+  @override
+  String get customPrice => 'Custom price';
+
+  @override
+  String get resetToDefault => 'Reset to default';
+
+  @override
+  String get customPriceApplied => 'Custom price applied';
+
+  @override
+  String get customPriceAboveCatalog => 'Custom price is above the default — no discount applied';
+
+  @override
+  String discountPreview(String amount, String percent) {
+    return '$amount off ($percent%)';
+  }
+
+  @override
+  String get notesLabel => 'Notes';
+
+  @override
+  String get addNotesHint => 'Add notes...';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String qtyTimesPrice(int qty, String price) {
+    return '$qty × $price';
+  }
+
+  @override
+  String get removeLabel => 'Remove';
+
+  @override
+  String get updateLabel => 'Update';
+
+  @override
+  String get addToCartLabel => 'Add to Cart';
 }

@@ -205,6 +205,13 @@ class PersonnelAccessManager {
 
   /// Check if user owns a supplier
   bool isOwner(int userId, int supplierId) {
+    // Fast path: already-loaded suppliers list.
+    for (final s in supplierNotifier.suppliers) {
+      if (s.idProductProvider == supplierId) {
+        return s.productProviderOwnerId == userId;
+      }
+    }
+    // Fallback: dedicated owner cache.
     return supplierNotifier
         .getSuppliersOwnedByUser(userId)
         .any((s) => s.idProductProvider == supplierId);

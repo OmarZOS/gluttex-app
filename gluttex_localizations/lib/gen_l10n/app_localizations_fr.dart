@@ -180,7 +180,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clientText => 'Client';
 
   @override
-  String get cookingChefText => 'recipe_catalog cuisinier';
+  String get cookingChefText => 'Chef cuisinier';
 
   @override
   String get genderTextList => 'Homme,Femme,Autre';
@@ -5966,6 +5966,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paymentNotesHint => 'Facultatif';
 
   @override
+  String get productsLabel => 'produits';
+
+  @override
   String paymentSubmitButton(String amount) {
     return 'Payer $amount';
   }
@@ -6030,4 +6033,70 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get totalOutstanding => 'Total en attente';
+
+  @override
+  String get unnamedProduct => 'Produit sans nom';
+
+  @override
+  String get quantityLabel => 'Quantité';
+
+  @override
+  String get itemsLabel => 'articles';
+
+  @override
+  String get increaseQuantity => 'Augmenter la quantité';
+
+  @override
+  String get decreaseQuantity => 'Diminuer la quantité';
+
+  @override
+  String maxAvailable(int count) {
+    return 'Maximum disponible : $count';
+  }
+
+  @override
+  String get priceLabel => 'Prix';
+
+  @override
+  String get defaultPrice => 'Prix par défaut';
+
+  @override
+  String get customPrice => 'Prix personnalisé';
+
+  @override
+  String get resetToDefault => 'Réinitialiser';
+
+  @override
+  String get customPriceApplied => 'Prix personnalisé appliqué';
+
+  @override
+  String get customPriceAboveCatalog => 'Le prix personnalisé dépasse le prix par défaut — aucun rabais';
+
+  @override
+  String discountPreview(String amount, String percent) {
+    return '$amount de rabais ($percent %)';
+  }
+
+  @override
+  String get notesLabel => 'Notes';
+
+  @override
+  String get addNotesHint => 'Ajouter des notes...';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String qtyTimesPrice(int qty, String price) {
+    return '$qty × $price';
+  }
+
+  @override
+  String get removeLabel => 'Retirer';
+
+  @override
+  String get updateLabel => 'Mettre à jour';
+
+  @override
+  String get addToCartLabel => 'Ajouter au panier';
 }

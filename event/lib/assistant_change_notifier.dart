@@ -349,6 +349,15 @@ class AssistantNotifier extends ChangeNotifier {
     double confidence = 1.0,
     String? operationId,
   }) {
+    // Skip if the user has already touched this field.
+    final existing = _fieldData[fieldId];
+    if (existing != null &&
+        existing.isEdited &&
+        source != DataSource.userInput) {
+      debugPrint('⏭️ Skipping $fieldId — user already edited it');
+      return;
+    }
+
     _fieldData[fieldId] = FieldData(
       value: value,
       source: source,

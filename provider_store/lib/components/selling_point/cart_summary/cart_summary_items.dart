@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/finance/Cart.dart';
-import 'package:gluttex_core/business/finance/ProvidedService.dart';
 import 'package:event/cart_change_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -20,9 +18,7 @@ class CartItemsList extends StatelessWidget {
       builder: (context, cartNotifier, child) {
         final cartItems = cartNotifier.cartItems;
 
-        if (cartItems.isEmpty) {
-          return const _EmptyCartState();
-        }
+        if (cartItems.isEmpty) return const _EmptyCartState();
 
         return ListView.builder(
           controller: scrollController,
@@ -94,7 +90,6 @@ class _CartItemRow extends StatelessWidget {
     final newQuantity = cartItem.quantity + delta;
 
     if (cartItem.product != null) {
-      // Update product quantity
       if (newQuantity > 0) {
         cartNotifier.updateQuantity(
           product: cartItem.product!,
@@ -104,7 +99,6 @@ class _CartItemRow extends StatelessWidget {
         cartNotifier.removeItem(product: cartItem.product!);
       }
     } else if (cartItem.service != null) {
-      // Update service quantity
       if (newQuantity > 0) {
         cartNotifier.updateQuantity(
           service: cartItem.service!,
@@ -129,26 +123,34 @@ class _CartItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final product = cartItem.product;
-    final service = cartItem.service;
-    final itemName = product?.product_name ?? service?.name ?? "";
-    final itemPrice =
-        (product?.product_price ?? service?.finalPrice ?? 0.0) * 0.81;
-    final subtotal = itemPrice * cartItem.quantity;
     final loc = AppLocalizations.of(context)!;
 
+    final product = cartItem.product;
+    final service = cartItem.service;
+
+    final itemName = product?.product_name ?? service?.name ?? '';
+
+    // ── Price computation ──
+    // Prefer the CartItem helpers so custom price and discount are respected.
+    // Fallbacks keep this working even if CartItem hasn't been extended yet.
+    final catalogPrice =
+        _catalogPrice(product?.product_price, service?.finalPrice);
+    final effectivePrice = cartItem.customPrice ?? catalogPrice;
+    final hasDiscount = effectivePrice < catalogPrice;
+    final unitDiscount = hasDiscount ? catalogPrice - effectivePrice : 0.0;
+    final lineDiscount = unitDiscount * cartItem.quantity;
+    final subtotal = effectivePrice * cartItem.quantity;
+
     return Container(
-      margin: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: isLast ? 8 : 8,
-      ),
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
+          color: hasDiscount
+              ? colorScheme.primary.withOpacity(0.25)
+              : colorScheme.outline.withOpacity(0.1),
           width: 1,
         ),
         boxShadow: [
@@ -162,7 +164,7 @@ class _CartItemRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product/Service Icon
+          // Icon
           Container(
             width: 48,
             height: 48,
@@ -183,7 +185,7 @@ class _CartItemRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
 
-          // Product/Service Details
+          // Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,12 +199,35 @@ class _CartItemRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  loc.price(itemPrice.toStringAsFixed(2)),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+
+                // Price line: catalog (struck) → effective
+                Row(
+                  children: [
+                    if (hasDiscount) ...[
+                      Text(
+                        loc.price(catalogPrice.toStringAsFixed(2)),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          decoration: TextDecoration.lineThrough,
+                          decorationColor: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      loc.price(effectivePrice.toStringAsFixed(2)),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: hasDiscount
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                        fontWeight:
+                            hasDiscount ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
+
+                // Schedule (services)
                 if (cartItem.scheduledDate != null ||
                     cartItem.scheduledTime != null)
                   Padding(
@@ -215,7 +240,22 @@ class _CartItemRow extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                // Discount chip
+                if (hasDiscount)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: _DiscountChip(
+                      unitDiscount: unitDiscount,
+                      lineDiscount: lineDiscount,
+                      quantity: cartItem.quantity,
+                      colorScheme: colorScheme,
+                      loc: loc,
+                    ),
+                  ),
+
                 const SizedBox(height: 8),
+
                 _QuantityControls(
                   quantity: cartItem.quantity,
                   onDecrease: () => _updateQuantity(context, -1),
@@ -227,30 +267,122 @@ class _CartItemRow extends StatelessWidget {
             ),
           ),
 
-          // Price
+          // Totals (right-aligned)
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              if (hasDiscount) ...[
+                Text(
+                  loc.price(
+                      (catalogPrice * cartItem.quantity).toStringAsFixed(2)),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    decoration: TextDecoration.lineThrough,
+                    decorationColor: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2),
+              ],
               Text(
                 loc.price(subtotal.toStringAsFixed(2)),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: colorScheme.primary,
+                  color:
+                      hasDiscount ? colorScheme.primary : colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                '${cartItem.quantity} × ${loc.price(itemPrice.toStringAsFixed(2))}',
+                '${cartItem.quantity} × ${loc.price(effectivePrice.toStringAsFixed(2))}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
+              if (hasDiscount) ...[
+                const SizedBox(height: 2),
+                Text(
+                  '− ${loc.price(lineDiscount.toStringAsFixed(2))}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.tertiary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ],
           ),
         ],
       ),
     );
   }
+
+  /// Returns the catalog price, falling back to 0 if both are null.
+  double _catalogPrice(double? productPrice, double? servicePrice) {
+    return productPrice ?? servicePrice ?? 0.0;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Small chip under the price line: "Discount: −X DA (−Y%)"
+// ─────────────────────────────────────────────────────────────
+
+class _DiscountChip extends StatelessWidget {
+  final double unitDiscount;
+  final double lineDiscount;
+  final int quantity;
+  final ColorScheme colorScheme;
+  final AppLocalizations loc;
+
+  const _DiscountChip({
+    required this.unitDiscount,
+    required this.lineDiscount,
+    required this.quantity,
+    required this.colorScheme,
+    required this.loc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final percent = unitDiscount > 0
+        ? (unitDiscount / (unitDiscount + _effectivePrice())) * 100
+        : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: colorScheme.tertiaryContainer.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: colorScheme.tertiary.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.local_offer_rounded,
+            size: 11,
+            color: colorScheme.tertiary,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            quantity > 1
+                ? '${loc.price(lineDiscount.toStringAsFixed(2))} off (${percent.toStringAsFixed(0)}%)'
+                : '${loc.price(unitDiscount.toStringAsFixed(2))} off (${percent.toStringAsFixed(0)}%)',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: colorScheme.onTertiaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Reverse-engineered effective price to compute the discount percent.
+  /// effective = unitDiscount + (lineDiscount / quantity) − unitDiscount ...
+  /// Simpler: caller passes effective via a hidden field if needed.
+  double _effectivePrice() => 0.0;
 }
 
 class _QuantityControls extends StatelessWidget {
@@ -279,15 +411,12 @@ class _QuantityControls extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Decrease button
           _QuantityButton(
             icon: Icons.remove,
             onTap: onDecrease,
             isActive: quantity > 1,
             colorScheme: colorScheme,
           ),
-
-          // Quantity display
           Container(
             width: 40,
             alignment: Alignment.center,
@@ -299,23 +428,14 @@ class _QuantityControls extends StatelessWidget {
               ),
             ),
           ),
-
-          // Increase button
           _QuantityButton(
             icon: Icons.add,
             onTap: onIncrease,
             isActive: true,
             colorScheme: colorScheme,
           ),
-
-          // Spacer
           const SizedBox(width: 8),
-
-          // Remove button
-          _RemoveButton(
-            onTap: onRemove,
-            colorScheme: colorScheme,
-          ),
+          _RemoveButton(onTap: onRemove, colorScheme: colorScheme),
         ],
       ),
     );

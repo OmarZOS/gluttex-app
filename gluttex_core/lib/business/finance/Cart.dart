@@ -8,6 +8,8 @@ import 'package:gluttex_core/business/finance/ProvidedService.dart';
 class CartItem {
   final Product? product;
   final ProvidedService? service;
+  final double? customPrice; // ← NEW: null means "use default price"
+
   final String? scheduledDate; // For services that need scheduling
   final String? scheduledTime; // For services that need scheduling
   int quantity;
@@ -17,30 +19,48 @@ class CartItem {
     this.service,
     this.scheduledDate,
     this.scheduledTime,
+    this.customPrice,
     this.quantity = 1,
   }) : assert(
           product != null || service != null,
           'CartItem must have either a product or a service',
         );
 
+  double? get unitPrice {
+    if (customPrice != null && customPrice! > 0) return customPrice;
+    if (product != null) return product!.product_price;
+    if (service != null) return service!.finalPrice;
+    return 0.0;
+  }
+
+  /// Catalog (un-discounted) unit price.
+  double? get catalogUnitPrice {
+    if (product != null) return product!.product_price;
+    if (service != null) return service!.finalPrice;
+    return 0.0;
+  }
+
+  /// Total discount for this line = (catalog − custom) × qty.
+  /// Zero when no custom price.
+  double get lineDiscount {
+    final catalog = catalogUnitPrice ?? 0.0;
+    final effective = unitPrice ?? 0.0;
+    if (effective >= catalog) return 0.0;
+    return (catalog - effective) * quantity;
+  }
+
+  double get totalPrice => (unitPrice ?? 0) * quantity;
+
+  bool get hasCustomPrice =>
+      customPrice != null &&
+      customPrice! > 0 &&
+      customPrice! != (catalogUnitPrice ?? 0);
+
   // Get item ID (product ID or service ID)
   int get itemId => product?.id_product ?? service?.id ?? 0;
 
   // Get item name
   String get itemName => product?.product_name ?? service?.name ?? '';
-
-  // Get price - handle both product and service
-  double? get unitPrice {
-    if (product != null) {
-      return product!.product_price;
-    } else if (service != null) {
-      return service!.finalPrice;
-    }
-    return 0.0;
-  }
-
-  // Get total price for this item
-  double get totalPrice => (unitPrice ?? 0) * quantity;
 
   // Check if this is a service item
   bool get isService => service != null;
@@ -61,13 +81,16 @@ class CartItem {
     ProvidedService? service,
     String? scheduledDate,
     String? scheduledTime,
+    double? customPrice,
     int? quantity,
+    bool clearCustomPrice = false, // ← to explicitly null it
   }) {
     return CartItem(
       product: product ?? this.product,
       service: service ?? this.service,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       scheduledTime: scheduledTime ?? this.scheduledTime,
+      customPrice: clearCustomPrice ? null : (customPrice ?? this.customPrice),
       quantity: quantity ?? this.quantity,
     );
   }
@@ -153,6 +176,21 @@ class Cart {
     this.personData,
     this.userData,
   });
+
+  void updateItemPrice({
+    int? productId,
+    int? serviceId,
+    required double? customPrice,
+  }) {
+    final key = _generateItemKey(productId: productId, serviceId: serviceId);
+    final existing = _items[key];
+    if (existing == null) return;
+
+    _items[key] = existing.copyWith(
+      customPrice: customPrice,
+      clearCustomPrice: customPrice == null,
+    );
+  }
 
   factory Cart.fromResponseJson(dynamic json) {
     if (json == null) {
@@ -879,7 +917,7 @@ class CheckoutData {
         "id_ordered_item": 0,
         "ordered_product_id": cartItem.product?.id_product ?? 0,
         "order_ref": 0,
-        "product_discount": 0.0,
+        "product_discount": cartItem.lineDiscount,
         "ordered_quantity": cartItem.quantity,
         "unit_price": cartItem.unitPrice ?? 0.0,
         "applied_vat": 0.0,

@@ -11731,6 +11731,12 @@ abstract class AppLocalizations {
   /// **'Optional'**
   String get paymentNotesHint;
 
+  /// No description provided for @productsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'products'**
+  String get productsLabel;
+
   /// No description provided for @paymentSubmitButton.
   ///
   /// In en, this message translates to:
@@ -11850,6 +11856,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total outstanding'**
   String get totalOutstanding;
+
+  /// No description provided for @unnamedProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed Product'**
+  String get unnamedProduct;
+
+  /// No description provided for @quantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantityLabel;
+
+  /// No description provided for @itemsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get itemsLabel;
+
+  /// No description provided for @increaseQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase quantity'**
+  String get increaseQuantity;
+
+  /// No description provided for @decreaseQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease quantity'**
+  String get decreaseQuantity;
+
+  /// No description provided for @maxAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Max available: {count}'**
+  String maxAvailable(int count);
+
+  /// No description provided for @priceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get priceLabel;
+
+  /// No description provided for @defaultPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Default price'**
+  String get defaultPrice;
+
+  /// No description provided for @customPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom price'**
+  String get customPrice;
+
+  /// No description provided for @resetToDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get resetToDefault;
+
+  /// No description provided for @customPriceApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom price applied'**
+  String get customPriceApplied;
+
+  /// No description provided for @customPriceAboveCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom price is above the default — no discount applied'**
+  String get customPriceAboveCatalog;
+
+  /// No description provided for @discountPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} off ({percent}%)'**
+  String discountPreview(String amount, String percent);
+
+  /// No description provided for @notesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notesLabel;
+
+  /// No description provided for @addNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add notes...'**
+  String get addNotesHint;
+
+  /// No description provided for @totalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalLabel;
+
+  /// No description provided for @qtyTimesPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{qty} × {price}'**
+  String qtyTimesPrice(int qty, String price);
+
+  /// No description provided for @removeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeLabel;
+
+  /// No description provided for @updateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateLabel;
+
+  /// No description provided for @addToCartLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Cart'**
+  String get addToCartLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

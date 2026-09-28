@@ -2897,7 +2897,47 @@
 "noOrganisation": "لا توجد مؤسسة",
 "owner": "المالك",
 "managed": "مُدار",
-  "totalOutstanding": "إجمالي المستحق"
+  "totalOutstanding": "إجمالي المستحق",
+
+  "close": "إغلاق",
+  "unnamedProduct": "منتج بدون اسم",
+  "quantityLabel": "الكمية",
+  "itemsLabel": "عناصر",
+  "increaseQuantity": "زيادة الكمية",
+  "decreaseQuantity": "تقليل الكمية",
+  "maxAvailable": "الحد الأقصى المتوفر: {count}",
+  "@maxAvailable": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "priceLabel": "السعر",
+  "defaultPrice": "السعر الافتراضي",
+  "customPrice": "سعر مخصص",
+  "resetToDefault": "إعادة التعيين",
+  "customPriceApplied": "تم تطبيق سعر مخصص",
+  "customPriceAboveCatalog": "السعر المخصص أعلى من الافتراضي — لا يوجد خصم",
+  "discountPreview": "خصم {amount} ({percent}%)",
+  "@discountPreview": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "percent": { "type": "String" }
+    }
+  },
+  "notesLabel": "ملاحظات",
+  "addNotesHint": "أضف ملاحظات...",
+  "totalLabel": "الإجمالي",
+  "qtyTimesPrice": "{qty} × {price}",
+  "@qtyTimesPrice": {
+    "placeholders": {
+      "qty": { "type": "int" },
+      "price": { "type": "String" }
+    }
+  },
+  "productsLabel": "منتجات",
+  "removeLabel": "إزالة",
+  "updateLabel": "تحديث",
+  "addToCartLabel": "أضف إلى السلة"
 
 
 }

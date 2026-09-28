@@ -23,10 +23,13 @@ class ProductFormData {
   bool isUpdate = false;
   int selectedProviderId = 0;
 
+  bool lockProvider = false;
+
   // Convert to Product object
   Product toProduct() {
     return Product(
       id_product: productId ?? 0,
+      // ✅ Always use the (possibly locked) selected provider.
       product_provider_id: selectedProviderId,
       product_quantifier: quantifier ?? 'pc',
       product_owner_id: ownerId ?? 1,
@@ -64,5 +67,8 @@ class ProductFormData {
     productId = product.id_product;
     imageId = product.id_product_image;
     isUpdate = true;
+    selectedProviderId = product.product_provider_id ?? 0;
+    lockProvider = true;
+    providerId = product.product_provider_id;
   }
 }

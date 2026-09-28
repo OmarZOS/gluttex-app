@@ -2723,7 +2723,7 @@
   "paymentMethodLabel": "Method",
   "paymentNotesLabel": "Notes",
   "paymentNotesHint": "Optional",
-
+"productsLabel": "products",
   "paymentSubmitButton": "Pay {amount}",
   "@paymentSubmitButton": {
     "placeholders": {
@@ -2768,7 +2768,46 @@
 "noOrganisation": "No organisation",
 "owner": "Owner",
 "managed": "Managed",
-  "totalOutstanding": "Total outstanding"
+  "totalOutstanding": "Total outstanding",
+
+    "close": "Close",
+  "unnamedProduct": "Unnamed Product",
+  "quantityLabel": "Quantity",
+  "itemsLabel": "items",
+  "increaseQuantity": "Increase quantity",
+  "decreaseQuantity": "Decrease quantity",
+  "maxAvailable": "Max available: {count}",
+  "@maxAvailable": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "priceLabel": "Price",
+  "defaultPrice": "Default price",
+  "customPrice": "Custom price",
+  "resetToDefault": "Reset to default",
+  "customPriceApplied": "Custom price applied",
+  "customPriceAboveCatalog": "Custom price is above the default — no discount applied",
+  "discountPreview": "{amount} off ({percent}%)",
+  "@discountPreview": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "percent": { "type": "String" }
+    }
+  },
+  "notesLabel": "Notes",
+  "addNotesHint": "Add notes...",
+  "totalLabel": "Total",
+  "qtyTimesPrice": "{qty} × {price}",
+  "@qtyTimesPrice": {
+    "placeholders": {
+      "qty": { "type": "int" },
+      "price": { "type": "String" }
+    }
+  },
+  "removeLabel": "Remove",
+  "updateLabel": "Update",
+  "addToCartLabel": "Add to Cart"
 
 
 }

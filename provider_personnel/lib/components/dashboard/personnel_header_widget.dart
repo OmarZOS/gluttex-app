@@ -3,14 +3,12 @@ import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 
 class PersonnelHeaderWidget extends StatelessWidget {
   final String supplierName;
-  final VoidCallback onBack;
   final ColorScheme colorScheme;
   final ThemeData theme;
 
   const PersonnelHeaderWidget({
     super.key,
     required this.supplierName,
-    required this.onBack,
     required this.colorScheme,
     required this.theme,
   });
@@ -33,30 +31,18 @@ class PersonnelHeaderWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          IconButton(
-            onPressed: onBack,
-            icon: Icon(Icons.arrow_back, color: colorScheme.onPrimary),
-          ),
-          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  supplierName,
+                  localizations.personnelManagement,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  localizations.personnelManagement,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onPrimary.withOpacity(0.9),
-                  ),
                 ),
               ],
             ),

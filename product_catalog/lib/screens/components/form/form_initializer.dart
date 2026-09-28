@@ -29,28 +29,56 @@ class FormStateManager {
 
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final Product? product = args?['product'];
 
+    // ── Read the update payload (if any).
+    final Product? product = args?['product'];
     if (product != null) {
       isUpdate = true;
       formData.populateFromProduct(product);
       controllers.syncWithFormData(formData);
     }
 
-    // Set owner ID from current user
+    // ── Read the provider hint from arguments.
+    final rawProviderId = args?['providerId'];
+    final providerId = rawProviderId is int
+        ? rawProviderId
+        : int.tryParse('${rawProviderId ?? ''}') ?? 0;
+    final lockProvider = args?['lockProvider'] == true;
+
+    // ── Set owner ID from current user.
     final userNotifier = context.read<AppUserNotifier>();
     formData.ownerId = userNotifier.appUser?.idAppUser;
 
-    // Set initial supplier
-    final supplierNotifier = context.read<SupplierChangeNotifier>();
-    final suppliers = supplierNotifier.suppliers
-        .where((s) => s?.productProviderOwnerId == formData.ownerId)
-        .whereType<Supplier>()
-        .toList();
+    // ── Resolve the initial supplier.
+    //
+    // Priority:
+    //   1. Provider from arguments (caller knows best)
+    //   2. Provider from the product being edited (populateFromProduct set it)
+    //   3. First supplier owned by the current user
+    //
+    // Only fall back to the heuristic when neither 1 nor 2 supplied a value,
+    // otherwise we'd overwrite the caller's intent.
+    if (providerId > 0) {
+      formData.selectedProviderId = providerId;
+      formData.providerId = providerId;
+      formData.lockProvider = lockProvider;
+    } else if (formData.selectedProviderId <= 0) {
+      final supplierNotifier = context.read<SupplierChangeNotifier>();
+      final suppliers = supplierNotifier.suppliers
+          .where((s) => s?.productProviderOwnerId == formData.ownerId)
+          .whereType<Supplier>()
+          .toList();
 
-    if (suppliers.isNotEmpty) {
-      formData.selectedProviderId = suppliers.first.idProductProvider;
+      if (suppliers.isNotEmpty) {
+        formData.selectedProviderId = suppliers.first.idProductProvider;
+        formData.providerId = suppliers.first.idProductProvider;
+      }
     }
+
+    // If the product was loaded via `populateFromProduct`, it already set
+    // `lockProvider = true`. Don't override that when no arguments lock
+    // was requested.
+    // (Handled above: we only assign lockProvider when providerId > 0.)
 
     initialized = true;
   }

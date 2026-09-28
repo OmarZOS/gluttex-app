@@ -82,8 +82,14 @@ class _SellingItemTabsState extends State<SellingItemTabs>
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildProductGrid(context),
-              _buildServiceGrid(context),
+              ListenableBuilder(
+                listenable: widget.cartNotifier,
+                builder: (context, _) => _buildProductGrid(context),
+              ),
+              ListenableBuilder(
+                listenable: widget.cartNotifier,
+                builder: (context, _) => _buildServiceGrid(context),
+              ),
             ],
           ),
         ),
@@ -117,8 +123,20 @@ class _SellingItemTabsState extends State<SellingItemTabs>
           item: product,
           isProduct: true,
           quantity: quantity,
-          onAddToCart: () => widget.onAddToCart(product),
-          onRemoveFromCart: () => widget.onRemoveFromCart(product),
+          onAddToCart: () => widget.cartNotifier.addProduct(product),
+          onRemoveFromCart: () {
+            final qty =
+                widget.cartNotifier.getProductCartItem(product)?.quantity ?? 0;
+            if (qty <= 1) {
+              widget.cartNotifier.removeItem(product: product);
+            } else {
+              widget.cartNotifier.updateQuantity(
+                product: product,
+                newQuantity: qty - 1,
+              );
+            }
+          },
+          onRemoveAll: () => widget.cartNotifier.removeItem(product: product),
           onConfigure: () => widget.onConfigureProduct(product),
         );
       },
@@ -152,20 +170,34 @@ class _SellingItemTabsState extends State<SellingItemTabs>
           isProduct: false,
           quantity: quantity,
           onAddToCart: () => widget.onAddServiceToCart(service),
-          onRemoveFromCart: () => widget.onRemoveServiceFromCart(service),
           onConfigure: () => widget.onConfigureService(service),
+          onRemoveFromCart: () {
+            final qty =
+                widget.cartNotifier.getServiceCartItem(service)?.quantity ?? 0;
+            if (qty <= 1) {
+              widget.cartNotifier.removeItem(service: service);
+            } else {
+              widget.cartNotifier.updateQuantity(
+                service: service,
+                newQuantity: qty - 1,
+              );
+            }
+          },
+          onRemoveAll: () => widget.cartNotifier.removeItem(service: service),
         );
       },
     );
   }
 
   int _getProductQuantity(int productId) {
+    if (productId <= 0) return 0;
     return widget.cartNotifier.cartItems
         .where((item) => (item.product?.id_product ?? 0) == productId)
         .fold(0, (sum, item) => sum + item.quantity);
   }
 
   int _getServiceQuantity(int serviceId) {
+    if (serviceId <= 0) return 0;
     return widget.cartNotifier.cartItems
         .where((item) => (item.service?.id ?? 0) == serviceId)
         .fold(0, (sum, item) => sum + item.quantity);

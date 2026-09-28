@@ -5985,6 +5985,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paymentNotesHint => 'اختياري';
 
   @override
+  String get productsLabel => 'منتجات';
+
+  @override
   String paymentSubmitButton(String amount) {
     return 'ادفع $amount';
   }
@@ -6049,4 +6052,70 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get totalOutstanding => 'إجمالي المستحق';
+
+  @override
+  String get unnamedProduct => 'منتج بدون اسم';
+
+  @override
+  String get quantityLabel => 'الكمية';
+
+  @override
+  String get itemsLabel => 'عناصر';
+
+  @override
+  String get increaseQuantity => 'زيادة الكمية';
+
+  @override
+  String get decreaseQuantity => 'تقليل الكمية';
+
+  @override
+  String maxAvailable(int count) {
+    return 'الحد الأقصى المتوفر: $count';
+  }
+
+  @override
+  String get priceLabel => 'السعر';
+
+  @override
+  String get defaultPrice => 'السعر الافتراضي';
+
+  @override
+  String get customPrice => 'سعر مخصص';
+
+  @override
+  String get resetToDefault => 'إعادة التعيين';
+
+  @override
+  String get customPriceApplied => 'تم تطبيق سعر مخصص';
+
+  @override
+  String get customPriceAboveCatalog => 'السعر المخصص أعلى من الافتراضي — لا يوجد خصم';
+
+  @override
+  String discountPreview(String amount, String percent) {
+    return 'خصم $amount ($percent%)';
+  }
+
+  @override
+  String get notesLabel => 'ملاحظات';
+
+  @override
+  String get addNotesHint => 'أضف ملاحظات...';
+
+  @override
+  String get totalLabel => 'الإجمالي';
+
+  @override
+  String qtyTimesPrice(int qty, String price) {
+    return '$qty × $price';
+  }
+
+  @override
+  String get removeLabel => 'إزالة';
+
+  @override
+  String get updateLabel => 'تحديث';
+
+  @override
+  String get addToCartLabel => 'أضف إلى السلة';
 }

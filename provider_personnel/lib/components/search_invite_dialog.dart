@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/AppUser.dart';
 import 'package:event/personnel_notifier.dart';
@@ -27,6 +29,7 @@ class SearchInviteDialog extends StatefulWidget {
 
 class _SearchInviteDialogState extends State<SearchInviteDialog> {
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
   bool _isInitialized = false;
 
   @override
@@ -42,17 +45,25 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     if (!_isInitialized) {
       _isInitialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         final notifier = context.read<PersonnelNotifier>();
-        notifier.loadPersonnel(
-          supplierId: widget.supplierId ?? 0,
-          reset: true,
+        final existing = notifier.getPersonnelForSupplier(
+          widget.supplierId ?? 0,
           includePending: true,
         );
+        if (existing.isEmpty) {
+          notifier.loadPersonnel(
+            supplierId: widget.supplierId ?? 0,
+            reset: true,
+            includePending: true,
+          );
+        }
       });
     }
   }
 
   void _onSearchChanged() {
+    _debounceTimer?.cancel();
     final query = _searchController.text.trim();
     final notifier = context.read<PersonnelNotifier>();
 
@@ -61,10 +72,11 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       return;
     }
 
-    notifier.searchPersonnel(
-      query,
-      supplierId: widget.supplierId ?? 0,
-    );
+    _debounceTimer = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) {
+        notifier.searchPersonnel(query, supplierId: widget.supplierId ?? 0);
+      }
+    });
   }
 
   @override
@@ -76,23 +88,18 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       insetPadding: const EdgeInsets.all(20),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxHeight: 600,
-          minHeight: 400,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(l10n, colorScheme),
-            _buildSearchBar(l10n, colorScheme),
-            Expanded(
-              child: Consumer<PersonnelNotifier>(
-                builder: (context, notifier, child) {
-                  return _buildContent(notifier, l10n);
-                },
-              ),
-            ),
-          ],
+        constraints: const BoxConstraints(maxHeight: 600, minHeight: 400),
+        child: Consumer<PersonnelNotifier>(
+          builder: (context, notifier, _) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(l10n, colorScheme),
+                _buildSearchBar(l10n, colorScheme, notifier.isLoading),
+                Expanded(child: _buildContent(notifier, l10n)),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -112,27 +119,31 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n?.searchAndInvite ?? 'Search & Invite',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onPrimaryContainer,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n?.searchAndInvite ?? 'Search & Invite',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n?.findUsersToAddTo(widget.supplierName) ??
-                      'Find users to add to ${widget.supplierName}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n?.findUsersToAddTo(widget.supplierName) ??
+                        'Find users to add to ${widget.supplierName}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             IconButton(
               onPressed: () => Navigator.pop(context),
@@ -155,7 +166,11 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
     );
   }
 
-  Widget _buildSearchBar(AppLocalizations? l10n, ColorScheme colorScheme) {
+  Widget _buildSearchBar(
+    AppLocalizations? l10n,
+    ColorScheme colorScheme,
+    bool isLoading,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Container(
@@ -176,6 +191,8 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
             Expanded(
               child: TextField(
                 controller: _searchController,
+                autofocus: true,
+                textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: l10n?.searchByNameUsernameOrRole ??
                       'Search by name, username, or role...',
@@ -183,6 +200,16 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                     Icons.search,
                     color: colorScheme.onSurfaceVariant,
                   ),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.clear_rounded,
+                            size: 18,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          onPressed: () => _searchController.clear(),
+                        )
+                      : null,
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -192,7 +219,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
                 style: const TextStyle(fontSize: 16),
               ),
             ),
-            if (context.watch<PersonnelNotifier>().isLoading)
+            if (isLoading)
               Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: SizedBox(
@@ -215,14 +242,13 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
   Widget _buildContent(PersonnelNotifier notifier, AppLocalizations? l10n) {
     final results = notifier.searchResults;
     final isLoading = notifier.isLoading;
+    final isDebouncing = _debounceTimer?.isActive ?? false;
     final hasQuery = _searchController.text.trim().isNotEmpty;
 
-    // ✅ Loading state
-    if (isLoading && results.isEmpty) {
+    if ((isLoading || isDebouncing) && results.isEmpty && hasQuery) {
       return _buildLoadingState(l10n);
     }
 
-    // ✅ No search query - show team members
     if (!hasQuery) {
       final personnel = notifier.getPersonnelForSupplier(
         widget.supplierId ?? 0,
@@ -234,12 +260,10 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       return _buildInitialState(l10n);
     }
 
-    // ✅ Has search query but no results
-    if (hasQuery && results.isEmpty) {
+    if (!isLoading && !isDebouncing && results.isEmpty) {
       return _buildEmptyState(notifier, l10n);
     }
 
-    // ✅ Has results
     return _buildResults(notifier, results, l10n);
   }
 
@@ -776,11 +800,6 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
       return;
     }
 
-    if (isUserInTeam && isPending) {
-      _showPendingUserDialog(user, l10n);
-      return;
-    }
-
     _showPrivilegeDialog(user);
   }
 
@@ -820,24 +839,6 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
         title: Text(l10n?.userAlreadyInTeam ?? 'User Already in Team'),
         content: Text(
           '${user.personFirstName} ${user.personLastName} ${l10n?.isAlreadyActiveMemberOf ?? 'is already an active member of'} ${widget.supplierName}.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n?.ok ?? 'OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPendingUserDialog(AppUser user, AppLocalizations? l10n) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n?.pendingInvitation ?? 'Pending Invitation'),
-        content: Text(
-          '${user.personFirstName} ${user.personLastName} ${l10n?.hasPendingInvitationFor ?? 'has a pending invitation for'} ${widget.supplierName}.',
         ),
         actions: [
           TextButton(
@@ -912,6 +913,7 @@ class _SearchInviteDialogState extends State<SearchInviteDialog> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();

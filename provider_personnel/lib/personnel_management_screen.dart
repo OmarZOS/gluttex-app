@@ -14,11 +14,11 @@ import 'package:provider_personnel/components/privilege_dialog/privilege_dialog.
 import 'package:provider_personnel/components/search_invite_dialog.dart';
 import 'package:provider_personnel/components/dashboard/add_options_sheet.dart';
 import 'package:provider_personnel/components/dashboard/confirmation_dialogs.dart';
-import 'package:provider_personnel/components/dashboard/personnel_header_widget.dart';
 import 'package:provider_personnel/components/dashboard/privilege_dialog_manager.dart';
 import 'package:ui/utils/qr_utils.dart';
 import 'package:provider_personnel/components/dashboard/quick_stats_widget.dart';
 import 'package:ui/components/search/search_bar_widget.dart';
+import 'package:ui/components/store/unified_collapsing_header.dart';
 import 'package:provider/provider.dart';
 
 class PersonnelManagementScreen extends StatefulWidget {
@@ -56,6 +56,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   Timer? _debounceTimer;
   bool _isInitialLoadComplete = false;
   bool _initialized = false;
+  bool _showFab = true;
 
   late PersonnelNotifier _personnelNotifier;
   late AppUserNotifier _userNotifier;
@@ -94,6 +95,18 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     _searchController.dispose();
     _tabController.dispose();
     super.dispose();
+  }
+
+  // ==================== SCROLL HANDLING ====================
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
+
+    final shouldShow = notification.metrics.pixels < 60;
+    if (shouldShow != _showFab && mounted) {
+      setState(() => _showFab = shouldShow);
+    }
+    return false;
   }
 
   // ==================== DATA LOADING ====================
@@ -138,151 +151,182 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final localizations = AppLocalizations.of(context)!;
+    final cs = theme.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: Column(
+      backgroundColor: cs.surface,
+      floatingActionButton:
+          widget.canManagePersonnel && _showFab ? _buildFAB(cs, l10n) : null,
+      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          // ── Collapsing header ──
+          UnifiedCollapsingHeader(
+            title: widget.supplierName,
+            leadingIcon: Icons.people_rounded,
+            expandedHeight: 100,
+            bottom: _buildTabBar(theme, cs, l10n),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.search_rounded),
+                onPressed: _focusSearch,
+                tooltip: l10n.search,
+              ),
+            ],
+          ),
+
+          // ── Stats + search (scroll away with the header) ──
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: QuickStatsWidget(supplierId: widget.supplierId),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: SearchBarWidget(
+                    controller: _searchController,
+                    tabIndex: _tabController.index,
+                    supplierId: widget.supplierId,
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ],
+        // Body of the NestedScrollView is just the tab content.
+        body: TabBarView(
+          controller: _tabController,
           children: [
-            PersonnelHeaderWidget(
-              supplierName: widget.supplierName,
-              onBack: () => Navigator.pop(context),
-              colorScheme: colorScheme,
-              theme: theme,
-            ),
-            QuickStatsWidget(supplierId: widget.supplierId),
-            _buildTabBar(theme, colorScheme, localizations),
-            SearchBarWidget(
-              controller: _searchController,
-              tabIndex: _tabController.index,
+            PersonnelTabContent(
               supplierId: widget.supplierId,
+              includePending: true,
+              onRefresh: _refreshData,
+              onShowPrivilegeDialog: _showPrivilegeDialog,
+              onShowRemoveDialog: _showRemoveDialog,
+              onCancelInvitation: _cancelInvitation,
+              canManage: widget.canManagePersonnel,
             ),
-            Expanded(child: _buildContent()),
+            PersonnelTabContent(
+              supplierId: widget.supplierId,
+              includePending: false,
+              onRefresh: _refreshData,
+              onShowPrivilegeDialog: _showPrivilegeDialog,
+              onShowRemoveDialog: _showRemoveDialog,
+              onCancelInvitation: _cancelInvitation,
+              canManage: widget.canManagePersonnel,
+            ),
+            PendingTabContent(
+              supplierId: widget.supplierId,
+              supplierName: widget.supplierName,
+              onRefresh: _refreshData,
+              onShowPrivilegeDialog: _showPrivilegeDialog,
+              onShowRemoveDialog: _showRemoveDialog,
+              onCancelInvitation: _cancelInvitation,
+              onShowAddOptions: _showAddOptions,
+              canManage: widget.canManagePersonnel,
+            ),
           ],
         ),
       ),
-      floatingActionButton: widget.canManagePersonnel
-          ? _buildFAB(colorScheme, localizations)
-          : null,
     );
   }
 
-  Widget _buildFAB(ColorScheme colorScheme, AppLocalizations localizations) {
+  void _focusSearch() {
+    // No-op for now — hook this up when the search bar exposes a FocusNode.
+    // _searchFocusNode.requestFocus();
+  }
+
+  Widget _buildFAB(ColorScheme colorScheme, AppLocalizations l10n) {
     return FloatingActionButton.extended(
       onPressed: _showAddOptions,
       backgroundColor: colorScheme.primary,
       foregroundColor: colorScheme.onPrimary,
-      icon: const Icon(Icons.person_add),
-      label: Text(localizations.addMemberText),
-    );
-  }
-
-  Widget _buildTabBar(
-    ThemeData theme,
-    ColorScheme colorScheme,
-    AppLocalizations localizations,
-  ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(50),
-                border: Border.all(
-                  color: colorScheme.outline.withOpacity(0.2),
-                  width: 1.5,
-                ),
-              ),
-              padding: const EdgeInsets.all(4),
-              child: TabBar(
-                controller: _tabController,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: colorScheme.primary,
-                ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                splashFactory: NoSplash.splashFactory,
-                labelColor: colorScheme.onPrimary,
-                unselectedLabelColor: colorScheme.onSurfaceVariant,
-                labelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
-                tabs: [
-                  _buildTabIcon(
-                    Icons.all_inclusive_rounded,
-                    localizations.allText,
-                  ),
-                  _buildTabIcon(
-                    Icons.check_circle_rounded,
-                    localizations.status_active,
-                  ),
-                  _buildTabIcon(
-                    Icons.access_time_rounded,
-                    localizations.pendingTxt,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      elevation: 3,
+      icon: const Icon(Icons.person_add_alt_1, size: 20),
+      label: Text(
+        l10n.addMemberText,
+        style: const TextStyle(fontWeight: FontWeight.w600),
       ),
     );
   }
 
-  Tab _buildTabIcon(IconData icon, String label) {
+  // ==================== TAB BAR ====================
+
+  PreferredSizeWidget _buildTabBar(
+    ThemeData theme,
+    ColorScheme cs,
+    AppLocalizations l10n,
+  ) {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(56),
+      child: Container(
+        color: cs.surface,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(50),
+            border: Border.all(
+              color: cs.outlineVariant.withOpacity(0.5),
+            ),
+          ),
+          padding: const EdgeInsets.all(4),
+          child: TabBar(
+            controller: _tabController,
+            indicator: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              color: cs.primary,
+              boxShadow: [
+                BoxShadow(
+                  color: cs.primary.withOpacity(0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorPadding: EdgeInsets.zero,
+            dividerColor: Colors.transparent,
+            splashFactory: NoSplash.splashFactory,
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
+            labelColor: cs.onPrimary,
+            unselectedLabelColor: cs.onSurfaceVariant,
+            labelStyle: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              letterSpacing: 0.1,
+            ),
+            unselectedLabelStyle: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+            ),
+            tabs: [
+              _buildTab(Icons.all_inclusive_rounded, l10n.allText),
+              _buildTab(Icons.check_circle_rounded, l10n.status_active),
+              _buildTab(Icons.schedule_rounded, l10n.pendingTxt),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Tab _buildTab(IconData icon, String label) {
     return Tab(
+      height: 40,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18),
+          Icon(icon, size: 17),
           const SizedBox(width: 6),
           Text(label),
         ],
       ),
-    );
-  }
-
-  Widget _buildContent() {
-    return TabBarView(
-      controller: _tabController,
-      children: [
-        PersonnelTabContent(
-          supplierId: widget.supplierId,
-          includePending: true,
-          onRefresh: _refreshData,
-          onShowPrivilegeDialog: _showPrivilegeDialog,
-          onShowRemoveDialog: _showRemoveDialog,
-          onCancelInvitation: _cancelInvitation,
-          canManage: widget.canManagePersonnel,
-        ),
-        PersonnelTabContent(
-          supplierId: widget.supplierId,
-          includePending: false,
-          onRefresh: _refreshData,
-          onShowPrivilegeDialog: _showPrivilegeDialog,
-          onShowRemoveDialog: _showRemoveDialog,
-          onCancelInvitation: _cancelInvitation,
-          canManage: widget.canManagePersonnel,
-        ),
-        PendingTabContent(
-          supplierId: widget.supplierId,
-          supplierName: widget.supplierName,
-          onRefresh: _refreshData,
-          onShowPrivilegeDialog: _showPrivilegeDialog,
-          onShowRemoveDialog: _showRemoveDialog,
-          onCancelInvitation: _cancelInvitation,
-          onShowAddOptions: _showAddOptions,
-          canManage: widget.canManagePersonnel,
-        ),
-      ],
     );
   }
 
@@ -295,7 +339,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => AddOptionsSheet(
+      builder: (_) => AddOptionsSheet(
         supplierName: widget.supplierName,
         onQROption: _handleQRCodeOption,
         onSearchOption: _showSearchInviteDialog,
@@ -305,12 +349,11 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
 
   void _showSearchInviteDialog() {
     final currentUserId = _userNotifier.appUser?.idAppUser;
-
     if (currentUserId == null || !mounted) return;
 
     showDialog(
       context: context,
-      builder: (context) => SearchInviteDialog(
+      builder: (_) => SearchInviteDialog(
         orgId: widget.orgId,
         onUserSelected: (user, privileges) async {
           await _addUserToSupplier(user, privileges);
@@ -325,7 +368,6 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
 
   Future<void> _handleQRCodeOption() async {
     if (!mounted) return;
-
     Navigator.pop(context);
 
     final qrCode = await Navigator.pushNamed(context, AppRoutes.QRScanPage);
@@ -339,7 +381,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
 
     final privilegesBitmask = await showDialog<int>(
       context: context,
-      builder: (context) => PrivilegeDialog(
+      builder: (_) => PrivilegeDialog(
         user: user,
         supplierName: widget.supplierName,
         initialPrivileges: 0,
@@ -418,7 +460,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   void _showRemoveDialog(int ruleId, AppUser user) {
     ConfirmationDialogs.showRemoveMemberDialog(
       context: context,
-      userName: user.personFirstName ?? "",
+      userName: user.personFirstName ?? '',
       supplierName: widget.supplierName,
       onConfirm: () => _removeUserFromSupplier(ruleId, user),
     );
@@ -445,15 +487,36 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   // ==================== HELPERS ====================
 
   void _showSnackBar(String message, bool isSuccess) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isSuccess
-            ? Theme.of(context).colorScheme.tertiary
-            : Theme.of(context).colorScheme.error,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    final colorScheme = Theme.of(context).colorScheme;
+    final messenger = ScaffoldMessenger.of(context);
+
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                isSuccess ? Icons.check_circle_outline : Icons.error_outline,
+                color: isSuccess
+                    ? colorScheme.onTertiaryContainer
+                    : colorScheme.onErrorContainer,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Text(message)),
+            ],
+          ),
+          backgroundColor: isSuccess
+              ? colorScheme.tertiaryContainer
+              : colorScheme.errorContainer,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(12),
+          duration: const Duration(seconds: 2),
+        ),
+      );
   }
 }

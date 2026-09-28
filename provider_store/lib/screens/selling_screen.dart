@@ -54,36 +54,39 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     _searchController = TextEditingController();
     _searchController.addListener(_onSearchChanged);
 
-    // Load initial data if supplier is selected
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.selectedSupplierId != null && widget.selectedSupplierId! > 0) {
-        _loadSupplierData(widget.selectedSupplierId!);
-      }
+      if (!mounted) return;
+      final id = widget.selectedSupplierId ?? 0;
+      if (id > 0) _loadSupplierData(id);
     });
   }
 
   @override
   void didUpdateWidget(covariant SellingPointScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the selected supplier changed, reload supplier-specific data
-    final oldId = oldWidget.selectedSupplierId ?? 0;
-    final newId = widget.selectedSupplierId ?? 0;
-    if (oldId != newId) {
+
+    final supplierChanged =
+        (oldWidget.selectedSupplierId ?? 0) != (widget.selectedSupplierId ?? 0);
+    final userChanged = oldWidget.userId != widget.userId;
+
+    if (!supplierChanged && !userChanged) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final newId = widget.selectedSupplierId ?? 0;
       if (newId > 0) {
         _loadSupplierData(newId);
       } else {
-        // Selection cleared: reload unfiltered lists
         widget.productNotifier.fetchProducts(reset: true);
         widget.serviceNotifier.fetchServices(reset: true);
       }
-    }
+    });
   }
 
   void _onSearchChanged() {
     final query = _searchController.text.trim();
-    setState(() {
-      _searchQuery = query;
-    });
+    if (query == _searchQuery) return;
+    setState(() => _searchQuery = query);
     widget.onSearchChanged(query);
   }
 
@@ -92,7 +95,12 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
       'Loading POS products and services for providerId=$supplierId',
       name: 'SellingPointScreen',
     );
-    // Force a reset so pagination and cached results are cleared when switching suppliers
+
+    if (_searchQuery.isNotEmpty) {
+      _searchController.clear();
+      _searchQuery = '';
+    }
+
     widget.productNotifier.fetchProducts(providerId: supplierId, reset: true);
     widget.serviceNotifier.fetchServices(providerId: supplierId, reset: true);
   }
@@ -104,6 +112,17 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     return widget.productNotifier.products.where((product) {
       final name = product.product_name?.toLowerCase() ?? '';
       final desc = product.product_description?.toLowerCase() ?? '';
+      return name.contains(query) || desc.contains(query);
+    }).toList();
+  }
+
+  List<ProvidedService> get _filteredServices {
+    if (_searchQuery.isEmpty) return widget.serviceNotifier.services;
+
+    final query = _searchQuery.toLowerCase();
+    return widget.serviceNotifier.services.where((service) {
+      final name = (service.name ?? '').toLowerCase();
+      final desc = (service.description ?? '').toLowerCase();
       return name.contains(query) || desc.contains(query);
     }).toList();
   }
@@ -120,42 +139,28 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     final hasSupplier =
         widget.selectedSupplierId != null && widget.selectedSupplierId! > 0;
 
-    if (!hasSupplier) {
-      return _buildNoSupplierSelected(context);
-    }
+    if (!hasSupplier) return _buildNoSupplierSelected(context);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
-            SellingPointAppBar(
-              onScanBarcode: widget.onScanBarcode,
-            ),
-            // Show current supplier info (optional)
-            // _buildSupplierInfo(context),
-            // Search Bar
+            SellingPointAppBar(onScanBarcode: widget.onScanBarcode),
             _buildSearchBar(context),
-            // Products/Services Tabs
             Expanded(
               child: SellingItemTabs(
                 products: _filteredProducts,
-                services: widget.serviceNotifier.services,
+                services: _filteredServices,
                 isLoading: widget.productNotifier.isLoading ||
                     widget.serviceNotifier.isLoading,
                 cartNotifier: widget.cartNotifier,
-                onAddToCart: (product) {
-                  widget.cartNotifier.addProduct(product);
-                },
-                onAddServiceToCart: (service) {
-                  widget.cartNotifier.addService(service);
-                },
-                onRemoveFromCart: (product) {
-                  widget.cartNotifier.removeItem(product: product);
-                },
-                onRemoveServiceFromCart: (service) {
-                  widget.cartNotifier.removeItem(service: service);
-                },
+                onAddToCart: widget.cartNotifier.addProduct,
+                onAddServiceToCart: widget.cartNotifier.addService,
+                onRemoveFromCart: (product) =>
+                    widget.cartNotifier.removeItem(product: product),
+                onRemoveServiceFromCart: (service) =>
+                    widget.cartNotifier.removeItem(service: service),
                 onConfigureProduct: _showProductConfiguration,
                 onConfigureService: _showServiceConfiguration,
               ),
@@ -163,7 +168,10 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
           ],
         ),
       ),
-      floatingActionButton: _buildCartFAB(context),
+      floatingActionButton: ListenableBuilder(
+        listenable: widget.cartNotifier,
+        builder: (context, _) => _buildCartFAB(context),
+      ),
     );
   }
 
@@ -195,7 +203,6 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
         initialQuantity: currentItem?.quantity ?? 1,
         initialScheduledDate: currentItem?.scheduledDate,
         initialScheduledTime: currentItem?.scheduledTime,
-        initialNotes: currentItem?.scheduledTime,
         onSave: ({
           required int quantity,
           String? scheduledDate,
@@ -221,46 +228,6 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     );
   }
 
-  // Widget _buildSupplierInfo(BuildContext context) {
-  //   final colorScheme = Theme.of(context).colorScheme;
-
-  //   // Get supplier name from product notifier or personnel notifier
-  //   String supplierName = '';
-  //   try {
-  //     final supplier = widget.productNotifier.suppliers.firstWhere(
-  //       (s) => s.idProductProvider == widget.selectedSupplierId,
-  //     );
-  //     supplierName = supplier.displayName;
-  //   } catch (_) {
-  //     supplierName = 'Supplier #${widget.selectedSupplierId}';
-  //   }
-
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  //     color: colorScheme.primaryContainer.withOpacity(0.3),
-  //     child: Row(
-  //       children: [
-  //         Icon(
-  //           Icons.storefront_rounded,
-  //           size: 16,
-  //           color: colorScheme.primary,
-  //         ),
-  //         const SizedBox(width: 8),
-  //         Expanded(
-  //           child: Text(
-  //             'Selling from: $supplierName',
-  //             style: TextStyle(
-  //               fontSize: 12,
-  //               color: colorScheme.onSurfaceVariant,
-  //               fontWeight: FontWeight.w500,
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildSearchBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -270,10 +237,7 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
         controller: _searchController,
         decoration: InputDecoration(
           hintText: 'Search products or services...',
-          prefixIcon: Icon(
-            Icons.search,
-            color: colorScheme.onSurfaceVariant,
-          ),
+          prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   icon: Icon(
@@ -343,6 +307,8 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     );
   }
 
+  /// Returns `null` when the cart is empty so the FAB slot collapses
+  /// instead of being occupied by an invisible Container.
   Widget _buildCartFAB(BuildContext context) {
     final cartItemCount = widget.cartNotifier.cartItems.length;
     if (cartItemCount == 0) return Container();
@@ -350,26 +316,11 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return FloatingActionButton.extended(
-      onPressed: () {
-        // Show cart
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => DraggableScrollableSheet(
-            initialChildSize: 0.85,
-            minChildSize: 0.5,
-            maxChildSize: 0.95,
-            builder: (_, sc) => CartSummarySheet(
-              cart: widget.cartNotifier,
-              scrollController: sc,
-            ),
-          ),
-        );
-      },
+      onPressed: () => _showCartSheet(context),
       backgroundColor: colorScheme.primary,
       foregroundColor: colorScheme.onPrimary,
       icon: Stack(
+        clipBehavior: Clip.none,
         children: [
           const Icon(Icons.shopping_cart_rounded),
           Positioned(
@@ -381,10 +332,7 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
                 color: colorScheme.error,
                 shape: BoxShape.circle,
               ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
                 cartItemCount > 9 ? '9+' : cartItemCount.toString(),
                 style: const TextStyle(
@@ -399,14 +347,29 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
         ],
       ),
       label: Text(
-        'Cart (${cartItemCount})',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-        ),
+        'Cart ($cartItemCount)',
+        style: const TextStyle(fontWeight: FontWeight.w600),
       ),
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
+      ),
+    );
+  }
+
+  void _showCartSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, sc) => CartSummarySheet(
+          cart: widget.cartNotifier,
+          scrollController: sc,
+        ),
       ),
     );
   }

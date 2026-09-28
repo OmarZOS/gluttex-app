@@ -222,7 +222,9 @@ class Order {
       }
 
       final unitPrice = item.unitPrice ?? product?.product_price ?? 0.0;
-      final itemTotal = unitPrice * item.quantity;
+      final catalogPrice = item.catalogUnitPrice ?? 0.0;
+      final effectivePrice = item.unitPrice ?? catalogPrice;
+      final itemTotal = effectivePrice * item.quantity;
       totalPrice += itemTotal;
 
       orderedItems.add({
@@ -230,7 +232,8 @@ class Order {
         "ordered_product_id": product!.id_product!,
         "order_ref": 0,
         "ordered_quantity": item.quantity,
-        "unit_price": unitPrice,
+        "unit_price": catalogPrice, // ← catalog, not effective
+        "product_discount": item.lineDiscount, // ← computed line discount
         // Optional fields from schema
         // "product_discount": item.discount ?? 0.0,
         // "applied_vat": item.vatRate ?? 0.0,
