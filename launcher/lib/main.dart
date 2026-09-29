@@ -91,6 +91,19 @@ Future<void> main() async {
     () => appUserNotifier.refreshTokenNow(callerKey: 'automatic_token_refresh'),
   );
   await appUserNotifier.initializeAuthState();
+  FlutterError.onError = (details) {
+    final msg = details.exception.toString();
+    if (msg.contains('_debugDuringDeviceUpdate')) {
+      return; // silence the Flutter framework bug
+    }
+    // Print the actual error + stack, once, in a readable form.
+    debugPrint('─── FLUTTER ERROR ───');
+    debugPrint(msg);
+    if (details.stack != null) {
+      debugPrint(details.stack.toString().split('\n').take(15).join('\n'));
+    }
+    debugPrint('─────────────────────');
+  };
 
   runApp(GluttexApp(localeProvider, appUserNotifier));
 }

@@ -18,7 +18,7 @@ import 'package:provider_personnel/components/dashboard/privilege_dialog_manager
 import 'package:ui/utils/qr_utils.dart';
 import 'package:provider_personnel/components/dashboard/quick_stats_widget.dart';
 import 'package:ui/components/search/search_bar_widget.dart';
-import 'package:ui/components/store/unified_collapsing_header.dart';
+import 'package:ui/components/store/StoreDashboardHeader.dart';
 import 'package:provider/provider.dart';
 
 class PersonnelManagementScreen extends StatefulWidget {
@@ -51,12 +51,12 @@ class PersonnelManagementScreen extends StatefulWidget {
 class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   late TabController _tabController;
 
   Timer? _debounceTimer;
   bool _isInitialLoadComplete = false;
   bool _initialized = false;
-  bool _showFab = true;
 
   late PersonnelNotifier _personnelNotifier;
   late AppUserNotifier _userNotifier;
@@ -67,6 +67,7 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_onTabChanged);
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -91,22 +92,16 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
   @override
   void dispose() {
     _debounceTimer?.cancel();
+    _tabController.removeListener(_onTabChanged);
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _tabController.dispose();
     super.dispose();
   }
 
-  // ==================== SCROLL HANDLING ====================
-
-  bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification.depth != 0) return false;
-
-    final shouldShow = notification.metrics.pixels < 60;
-    if (shouldShow != _showFab && mounted) {
-      setState(() => _showFab = shouldShow);
-    }
-    return false;
+  void _onTabChanged() {
+    if (mounted) setState(() {});
   }
 
   // ==================== DATA LOADING ====================
@@ -157,100 +152,73 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
     return Scaffold(
       backgroundColor: cs.surface,
       floatingActionButton:
-          widget.canManagePersonnel && _showFab ? _buildFAB(cs, l10n) : null,
+          widget.canManagePersonnel ? _buildFAB(cs, l10n) : null,
       floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          // ── Collapsing header ──
-          UnifiedCollapsingHeader(
-            title: widget.supplierName,
+      body: Column(
+        children: [
+          // ── Simple header ──
+          DashboardHeader(
             leadingIcon: Icons.people_rounded,
-            expandedHeight: 100,
-            bottom: _buildTabBar(theme, cs, l10n),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.search_rounded),
-                onPressed: _focusSearch,
-                tooltip: l10n.search,
-              ),
-            ],
+            title: widget.supplierName,
+            subtitle: l10n.personnelManagement,
+            searchBar: SearchBarWidget(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              tabIndex: _tabController.index,
+              supplierId: widget.supplierId,
+            ),
           ),
+          // ── Stats ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+            child: QuickStatsWidget(supplierId: widget.supplierId),
+          ),
+          // ── Tab bar ──
+          _buildTabBar(theme, cs, l10n),
 
-          // ── Stats + search (scroll away with the header) ──
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  child: QuickStatsWidget(supplierId: widget.supplierId),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SearchBarWidget(
-                    controller: _searchController,
-                    tabIndex: _tabController.index,
-                    supplierId: widget.supplierId,
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
+          // ── Tab content ──
+          Expanded(child: _buildActiveTab()),
         ],
-        // Body of the NestedScrollView is just the tab content.
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            PersonnelTabContent(
-              supplierId: widget.supplierId,
-              includePending: true,
-              onRefresh: _refreshData,
-              onShowPrivilegeDialog: _showPrivilegeDialog,
-              onShowRemoveDialog: _showRemoveDialog,
-              onCancelInvitation: _cancelInvitation,
-              canManage: widget.canManagePersonnel,
-            ),
-            PersonnelTabContent(
-              supplierId: widget.supplierId,
-              includePending: false,
-              onRefresh: _refreshData,
-              onShowPrivilegeDialog: _showPrivilegeDialog,
-              onShowRemoveDialog: _showRemoveDialog,
-              onCancelInvitation: _cancelInvitation,
-              canManage: widget.canManagePersonnel,
-            ),
-            PendingTabContent(
-              supplierId: widget.supplierId,
-              supplierName: widget.supplierName,
-              onRefresh: _refreshData,
-              onShowPrivilegeDialog: _showPrivilegeDialog,
-              onShowRemoveDialog: _showRemoveDialog,
-              onCancelInvitation: _cancelInvitation,
-              onShowAddOptions: _showAddOptions,
-              canManage: widget.canManagePersonnel,
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  void _focusSearch() {
-    // No-op for now — hook this up when the search bar exposes a FocusNode.
-    // _searchFocusNode.requestFocus();
-  }
-
-  Widget _buildFAB(ColorScheme colorScheme, AppLocalizations l10n) {
-    return FloatingActionButton.extended(
-      onPressed: _showAddOptions,
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
-      elevation: 3,
-      icon: const Icon(Icons.person_add_alt_1, size: 20),
-      label: Text(
-        l10n.addMemberText,
-        style: const TextStyle(fontWeight: FontWeight.w600),
+  Widget _buildHeader(
+    ThemeData theme,
+    ColorScheme cs,
+    AppLocalizations l10n,
+  ) {
+    return Container(
+      color: cs.surface,
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.people_rounded, size: 22, color: cs.primary),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l10n.personnelManagement,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SearchBarWidget(
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            tabIndex: _tabController.index,
+            supplierId: widget.supplierId,
+          ),
+        ],
       ),
     );
   }
@@ -326,6 +294,62 @@ class _PersonnelManagementScreenState extends State<PersonnelManagementScreen>
           const SizedBox(width: 6),
           Text(label),
         ],
+      ),
+    );
+  }
+
+  // ==================== TAB CONTENT ====================
+
+  Widget _buildActiveTab() {
+    switch (_tabController.index) {
+      case 0:
+        return PersonnelTabContent(
+          supplierId: widget.supplierId,
+          includePending: true,
+          onRefresh: _refreshData,
+          onShowPrivilegeDialog: _showPrivilegeDialog,
+          onShowRemoveDialog: _showRemoveDialog,
+          onCancelInvitation: _cancelInvitation,
+          canManage: widget.canManagePersonnel,
+        );
+
+      case 1:
+        return PersonnelTabContent(
+          supplierId: widget.supplierId,
+          includePending: false,
+          onRefresh: _refreshData,
+          onShowPrivilegeDialog: _showPrivilegeDialog,
+          onShowRemoveDialog: _showRemoveDialog,
+          onCancelInvitation: _cancelInvitation,
+          canManage: widget.canManagePersonnel,
+        );
+
+      case 2:
+        return PendingTabContent(
+          supplierId: widget.supplierId,
+          supplierName: widget.supplierName,
+          onRefresh: _refreshData,
+          onShowPrivilegeDialog: _showPrivilegeDialog,
+          onShowRemoveDialog: _showRemoveDialog,
+          onCancelInvitation: _cancelInvitation,
+          onShowAddOptions: _showAddOptions,
+          canManage: widget.canManagePersonnel,
+        );
+
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildFAB(ColorScheme colorScheme, AppLocalizations l10n) {
+    return FloatingActionButton.extended(
+      onPressed: _showAddOptions,
+      backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
+      elevation: 3,
+      icon: const Icon(Icons.person_add_alt_1, size: 20),
+      label: Text(
+        l10n.addMemberText,
       ),
     );
   }

@@ -6099,4 +6099,441 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get addToCartLabel => 'Ajouter au panier';
+
+  @override
+  String deliveryDetailTitleWithId(int id) {
+    return 'Livraison n°$id';
+  }
+
+  @override
+  String get deliveryDetailRefreshTooltip => 'Actualiser';
+
+  @override
+  String get deliveryDetailEditTooltip => 'Modifier';
+
+  @override
+  String get deliveryDetailRefreshing => 'Actualisation…';
+
+  @override
+  String get deliveryDetailCopiedToClipboard => 'Copié';
+
+  @override
+  String get deliveryDetailSectionItems => 'Articles';
+
+  @override
+  String deliveryDetailSectionItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+      zero: 'Aucun article',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryDetailSectionDestination => 'Destination';
+
+  @override
+  String get deliveryDetailSectionProvider => 'Fournisseur';
+
+  @override
+  String get deliveryDetailSectionShipping => 'Expédition';
+
+  @override
+  String get deliveryDetailSectionInvoice => 'Facture';
+
+  @override
+  String get deliveryDetailSectionMetadata => 'Métadonnées';
+
+  @override
+  String get deliveryDetailUpdatedJustNow => 'Mis à jour à l\'instant';
+
+  @override
+  String deliveryDetailUpdatedMinutesAgo(int count) {
+    return 'Mis à jour il y a $count min';
+  }
+
+  @override
+  String deliveryDetailUpdatedHoursAgo(int count) {
+    return 'Mis à jour il y a $count h';
+  }
+
+  @override
+  String deliveryDetailUpdatedDaysAgo(int count) {
+    return 'Mis à jour il y a $count j';
+  }
+
+  @override
+  String deliveryDetailUpdatedOnDate(int day, int month, int year) {
+    return 'Mis à jour le $day/$month/$year';
+  }
+
+  @override
+  String get deliveryDetailEmptyItems => 'Aucun article pour ce fournisseur';
+
+  @override
+  String get deliveryDetailEmptyDestination => 'Aucune information de destination';
+
+  @override
+  String get deliveryDetailEmptyProvider => 'Aucune information de fournisseur';
+
+  @override
+  String get deliveryDetailEmptyShipping => 'Aucune information d\'expédition';
+
+  @override
+  String get deliveryDetailEmptyInvoice => 'Aucune information de facture';
+
+  @override
+  String get deliveryDetailEmptyMetadata => 'Aucune métadonnée disponible';
+
+  @override
+  String deliveryDetailItemQuantityLabel(int count) {
+    return '$count×';
+  }
+
+  @override
+  String deliveryDetailProductFallback(int id) {
+    return 'Produit n°$id';
+  }
+
+  @override
+  String deliveryDetailItemSubline(String brand, String barcode, int productId) {
+    return '$brand · $barcode · n°$productId';
+  }
+
+  @override
+  String deliveryDetailItemUnitLine(String price, String unit, String vat) {
+    return '$price DA l\'unité · par $unit · TVA $vat %';
+  }
+
+  @override
+  String get deliveryDetailItemDelivered => 'Livré';
+
+  @override
+  String get deliveryDetailTotalsSubtotal => 'Sous-total';
+
+  @override
+  String get deliveryDetailTotalsDiscount => 'Remise';
+
+  @override
+  String get deliveryDetailTotalsTotal => 'Total';
+
+  @override
+  String deliveryDetailDiscountValue(String amount) {
+    return '− $amount DA';
+  }
+
+  @override
+  String deliveryDetailPriceWithCurrency(String price) {
+    return '$price DA';
+  }
+
+  @override
+  String get deliveryDetailFieldAddress => 'Adresse';
+
+  @override
+  String get deliveryDetailFieldStreet => 'Rue';
+
+  @override
+  String get deliveryDetailFieldCity => 'Ville';
+
+  @override
+  String get deliveryDetailFieldPostalCode => 'Code postal';
+
+  @override
+  String get deliveryDetailFieldCountry => 'Pays';
+
+  @override
+  String get deliveryDetailFieldRecipient => 'Destinataire';
+
+  @override
+  String get deliveryDetailFieldName => 'Nom';
+
+  @override
+  String get deliveryDetailFieldOrganisation => 'Organisation';
+
+  @override
+  String get deliveryDetailFieldProviderId => 'Identifiant fournisseur';
+
+  @override
+  String get deliveryDetailFieldMethod => 'Méthode';
+
+  @override
+  String get deliveryDetailFieldPackages => 'Colis';
+
+  @override
+  String get deliveryDetailFieldTotalWeight => 'Poids total';
+
+  @override
+  String get deliveryDetailFieldDimensions => 'Dimensions';
+
+  @override
+  String get deliveryDetailFieldGoods => 'Marchandises';
+
+  @override
+  String get deliveryDetailFieldHsCode => 'Code SH';
+
+  @override
+  String get deliveryDetailFieldMerchant => 'Commerçant';
+
+  @override
+  String get deliveryDetailFieldInstructions => 'Instructions';
+
+  @override
+  String get deliveryDetailFieldFee => 'Frais';
+
+  @override
+  String get deliveryDetailFieldInvoiceNumber => 'Numéro';
+
+  @override
+  String get deliveryDetailFieldInvoiceType => 'Type';
+
+  @override
+  String get deliveryDetailFieldInvoiceStatus => 'Statut';
+
+  @override
+  String get deliveryDetailFieldStatus => 'Statut';
+
+  @override
+  String get deliveryDetailFieldInvoiceTotal => 'Total';
+
+  @override
+  String get deliveryDetailFieldInvoiceIssueDate => 'Date d\'émission';
+
+  @override
+  String get deliveryDetailFieldInvoiceDueDate => 'Date d\'échéance';
+
+  @override
+  String get deliveryDetailFieldInvoiceTaxApplied => 'Taxe appliquée';
+
+  @override
+  String get deliveryDetailFieldInvoiceNotes => 'Notes';
+
+  @override
+  String get deliveryDetailFieldCreated => 'Créé le';
+
+  @override
+  String get deliveryDetailFieldUpdated => 'Mis à jour le';
+
+  @override
+  String get deliveryDetailFieldDeliveryId => 'Identifiant livraison';
+
+  @override
+  String get deliveryDetailFieldBrokerId => 'Identifiant courtier';
+
+  @override
+  String get deliveryDetailFieldInvoiceRef => 'Réf. facture';
+
+  @override
+  String get deliveryDetailFieldSourceType => 'Type de source';
+
+  @override
+  String get deliveryDetailFieldSourceId => 'Identifiant source';
+
+  @override
+  String get deliveryDetailFieldAddressId => 'Identifiant adresse';
+
+  @override
+  String get deliveryDetailFieldCurrentAddressId => 'Identifiant adresse actuelle';
+
+  @override
+  String get deliveryDetailFieldItemCount => 'Articles';
+
+  @override
+  String deliveryDetailFieldBrokerEntry(String key) {
+    return 'Courtier $key';
+  }
+
+  @override
+  String deliveryDetailPersonWithId(int id) {
+    return 'Personne n°$id';
+  }
+
+  @override
+  String deliveryDetailProviderWithId(int id) {
+    return 'Fournisseur n°$id';
+  }
+
+  @override
+  String deliveryDetailIdValue(int id) {
+    return 'n°$id';
+  }
+
+  @override
+  String deliveryDetailPackageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count colis',
+      one: '1 colis',
+      zero: 'Aucun colis',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deliveryDetailWeightKg(String weight) {
+    return '$weight kg';
+  }
+
+  @override
+  String deliveryDetailPercentValue(int value) {
+    return '$value %';
+  }
+
+  @override
+  String get deliveryDetailActionCancel => 'Annuler';
+
+  @override
+  String get deliveryDetailActionValidate => 'Valider la commande';
+
+  @override
+  String get deliveryDetailCancelDialogTitle => 'Annuler cette livraison ?';
+
+  @override
+  String deliveryDetailCancelDialogBody(int id) {
+    return 'La livraison n°$id sera marquée comme annulée. Cette action est irréversible.';
+  }
+
+  @override
+  String get deliveryDetailCancelDialogKeep => 'Conserver';
+
+  @override
+  String get deliveryDetailCancelDialogConfirm => 'Annuler la livraison';
+
+  @override
+  String get deliveryDetailCancelSuccess => 'Livraison annulée';
+
+  @override
+  String get deliveryDetailCancelFailure => 'Échec de l\'annulation';
+
+  @override
+  String get deliveryDetailValidateTitle => 'Confirmer la livraison';
+
+  @override
+  String get deliveryDetailValidateSubtitle => 'Vérifiez les détails ci-dessous avant de marquer comme terminée.';
+
+  @override
+  String get deliveryDetailValidateBack => 'Retour';
+
+  @override
+  String get deliveryDetailValidateConfirm => 'Valider';
+
+  @override
+  String deliveryDetailValidateSuccess(int id) {
+    return 'Livraison n°$id validée';
+  }
+
+  @override
+  String get deliveryStatusPending => 'En attente';
+
+  @override
+  String get deliveryStatusProcessing => 'En traitement';
+
+  @override
+  String get deliveryStatusConfirmed => 'Confirmée';
+
+  @override
+  String get deliveryStatusReadyForPickup => 'Prête à être retirée';
+
+  @override
+  String get deliveryStatusInTransit => 'En transit';
+
+  @override
+  String get deliveryStatusOutForDelivery => 'En cours de livraison';
+
+  @override
+  String get deliveryStatusDelivered => 'Livrée';
+
+  @override
+  String get deliveryStatusFailed => 'Échouée';
+
+  @override
+  String get deliveryStatusCancelled => 'Annulée';
+
+  @override
+  String get deliveryStatusReturned => 'Retournée';
+
+  @override
+  String get deliveryStatusRefunded => 'Remboursée';
+
+  @override
+  String get deliveryStatusUnknown => 'Inconnue';
+
+  @override
+  String get shippingMethodStandard => 'Livraison standard';
+
+  @override
+  String get shippingMethodExpress => 'Livraison express';
+
+  @override
+  String get shippingMethodOvernight => 'Livraison en nuit';
+
+  @override
+  String get shippingMethodFreight => 'Fret';
+
+  @override
+  String get shippingMethodPickup => 'Retrait sur place';
+
+  @override
+  String get shippingMethodCourier => 'Coursier';
+
+  @override
+  String get shippingMethodSameDay => 'Le jour même';
+
+  @override
+  String get shippingMethodInternational => 'International';
+
+  @override
+  String get invoiceTypeInvoice => 'Facture';
+
+  @override
+  String get invoiceTypeReceipt => 'Reçu';
+
+  @override
+  String get invoiceTypeProforma => 'Proforma';
+
+  @override
+  String get invoiceStatusUnpaid => 'Impayée';
+
+  @override
+  String get invoiceStatusPaid => 'Payée';
+
+  @override
+  String get invoiceStatusCanceled => 'Annulée';
+
+  @override
+  String get invoiceStatusPartiallyPaid => 'Partiellement payée';
+
+  @override
+  String get invoiceStatusOverdue => 'En retard';
+
+  @override
+  String get invoiceStatusRefunded => 'Remboursée';
+
+  @override
+  String get deliveryCardNoDestination => 'Aucune destination';
+
+  @override
+  String get deliveryCardLoadFailed => 'Impossible de charger les détails de la livraison';
+
+  @override
+  String get deliveryDetailSectionCustomer => 'Client';
+
+  @override
+  String get deliveryDetailFieldUsername => 'Nom d\'utilisateur';
+
+  @override
+  String get deliveryDetailFieldEmail => 'E-mail';
+
+  @override
+  String get deliveryDetailFieldUserType => 'Type d\'utilisateur';
+
+  @override
+  String get deliveryDetailFieldPhone => 'Téléphone';
+
+  @override
+  String get deliveryDetailFieldUserId => 'Identifiant utilisateur';
 }

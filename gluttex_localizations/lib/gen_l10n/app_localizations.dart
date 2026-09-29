@@ -11976,6 +11976,768 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add to Cart'**
   String get addToCartLabel;
+
+  /// No description provided for @deliveryDetailTitleWithId.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery #{id}'**
+  String deliveryDetailTitleWithId(int id);
+
+  /// No description provided for @deliveryDetailRefreshTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get deliveryDetailRefreshTooltip;
+
+  /// No description provided for @deliveryDetailEditTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get deliveryDetailEditTooltip;
+
+  /// No description provided for @deliveryDetailRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get deliveryDetailRefreshing;
+
+  /// No description provided for @deliveryDetailCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get deliveryDetailCopiedToClipboard;
+
+  /// No description provided for @deliveryDetailSectionItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get deliveryDetailSectionItems;
+
+  /// No description provided for @deliveryDetailSectionItemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String deliveryDetailSectionItemsCount(int count);
+
+  /// No description provided for @deliveryDetailSectionDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get deliveryDetailSectionDestination;
+
+  /// No description provided for @deliveryDetailSectionProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get deliveryDetailSectionProvider;
+
+  /// No description provided for @deliveryDetailSectionShipping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping'**
+  String get deliveryDetailSectionShipping;
+
+  /// No description provided for @deliveryDetailSectionInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice'**
+  String get deliveryDetailSectionInvoice;
+
+  /// No description provided for @deliveryDetailSectionMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata'**
+  String get deliveryDetailSectionMetadata;
+
+  /// No description provided for @deliveryDetailUpdatedJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated just now'**
+  String get deliveryDetailUpdatedJustNow;
+
+  /// No description provided for @deliveryDetailUpdatedMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {count} min ago'**
+  String deliveryDetailUpdatedMinutesAgo(int count);
+
+  /// No description provided for @deliveryDetailUpdatedHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {count} h ago'**
+  String deliveryDetailUpdatedHoursAgo(int count);
+
+  /// No description provided for @deliveryDetailUpdatedDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {count} d ago'**
+  String deliveryDetailUpdatedDaysAgo(int count);
+
+  /// No description provided for @deliveryDetailUpdatedOnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated on {day}/{month}/{year}'**
+  String deliveryDetailUpdatedOnDate(int day, int month, int year);
+
+  /// No description provided for @deliveryDetailEmptyItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No items for this provider'**
+  String get deliveryDetailEmptyItems;
+
+  /// No description provided for @deliveryDetailEmptyDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'No destination details'**
+  String get deliveryDetailEmptyDestination;
+
+  /// No description provided for @deliveryDetailEmptyProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'No provider details'**
+  String get deliveryDetailEmptyProvider;
+
+  /// No description provided for @deliveryDetailEmptyShipping.
+  ///
+  /// In en, this message translates to:
+  /// **'No shipping details'**
+  String get deliveryDetailEmptyShipping;
+
+  /// No description provided for @deliveryDetailEmptyInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'No invoice details'**
+  String get deliveryDetailEmptyInvoice;
+
+  /// No description provided for @deliveryDetailEmptyMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'No metadata available'**
+  String get deliveryDetailEmptyMetadata;
+
+  /// No description provided for @deliveryDetailItemQuantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}×'**
+  String deliveryDetailItemQuantityLabel(int count);
+
+  /// No description provided for @deliveryDetailProductFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Product #{id}'**
+  String deliveryDetailProductFallback(int id);
+
+  /// No description provided for @deliveryDetailItemSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{brand} · {barcode} · #{productId}'**
+  String deliveryDetailItemSubline(String brand, String barcode, int productId);
+
+  /// No description provided for @deliveryDetailItemUnitLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} DA each · per {unit} · VAT {vat}%'**
+  String deliveryDetailItemUnitLine(String price, String unit, String vat);
+
+  /// No description provided for @deliveryDetailItemDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get deliveryDetailItemDelivered;
+
+  /// No description provided for @deliveryDetailTotalsSubtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get deliveryDetailTotalsSubtotal;
+
+  /// No description provided for @deliveryDetailTotalsDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get deliveryDetailTotalsDiscount;
+
+  /// No description provided for @deliveryDetailTotalsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get deliveryDetailTotalsTotal;
+
+  /// No description provided for @deliveryDetailDiscountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'− {amount} DA'**
+  String deliveryDetailDiscountValue(String amount);
+
+  /// No description provided for @deliveryDetailPriceWithCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} DA'**
+  String deliveryDetailPriceWithCurrency(String price);
+
+  /// No description provided for @deliveryDetailFieldAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get deliveryDetailFieldAddress;
+
+  /// No description provided for @deliveryDetailFieldStreet.
+  ///
+  /// In en, this message translates to:
+  /// **'Street'**
+  String get deliveryDetailFieldStreet;
+
+  /// No description provided for @deliveryDetailFieldCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get deliveryDetailFieldCity;
+
+  /// No description provided for @deliveryDetailFieldPostalCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal code'**
+  String get deliveryDetailFieldPostalCode;
+
+  /// No description provided for @deliveryDetailFieldCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get deliveryDetailFieldCountry;
+
+  /// No description provided for @deliveryDetailFieldRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get deliveryDetailFieldRecipient;
+
+  /// No description provided for @deliveryDetailFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get deliveryDetailFieldName;
+
+  /// No description provided for @deliveryDetailFieldOrganisation.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation'**
+  String get deliveryDetailFieldOrganisation;
+
+  /// No description provided for @deliveryDetailFieldProviderId.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider ID'**
+  String get deliveryDetailFieldProviderId;
+
+  /// No description provided for @deliveryDetailFieldMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get deliveryDetailFieldMethod;
+
+  /// No description provided for @deliveryDetailFieldPackages.
+  ///
+  /// In en, this message translates to:
+  /// **'Packages'**
+  String get deliveryDetailFieldPackages;
+
+  /// No description provided for @deliveryDetailFieldTotalWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Total weight'**
+  String get deliveryDetailFieldTotalWeight;
+
+  /// No description provided for @deliveryDetailFieldDimensions.
+  ///
+  /// In en, this message translates to:
+  /// **'Dimensions'**
+  String get deliveryDetailFieldDimensions;
+
+  /// No description provided for @deliveryDetailFieldGoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Goods'**
+  String get deliveryDetailFieldGoods;
+
+  /// No description provided for @deliveryDetailFieldHsCode.
+  ///
+  /// In en, this message translates to:
+  /// **'HS code'**
+  String get deliveryDetailFieldHsCode;
+
+  /// No description provided for @deliveryDetailFieldMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant'**
+  String get deliveryDetailFieldMerchant;
+
+  /// No description provided for @deliveryDetailFieldInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get deliveryDetailFieldInstructions;
+
+  /// No description provided for @deliveryDetailFieldFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee'**
+  String get deliveryDetailFieldFee;
+
+  /// No description provided for @deliveryDetailFieldInvoiceNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get deliveryDetailFieldInvoiceNumber;
+
+  /// No description provided for @deliveryDetailFieldInvoiceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get deliveryDetailFieldInvoiceType;
+
+  /// No description provided for @deliveryDetailFieldInvoiceStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get deliveryDetailFieldInvoiceStatus;
+
+  /// No description provided for @deliveryDetailFieldStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get deliveryDetailFieldStatus;
+
+  /// No description provided for @deliveryDetailFieldInvoiceTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get deliveryDetailFieldInvoiceTotal;
+
+  /// No description provided for @deliveryDetailFieldInvoiceIssueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue date'**
+  String get deliveryDetailFieldInvoiceIssueDate;
+
+  /// No description provided for @deliveryDetailFieldInvoiceDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get deliveryDetailFieldInvoiceDueDate;
+
+  /// No description provided for @deliveryDetailFieldInvoiceTaxApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax applied'**
+  String get deliveryDetailFieldInvoiceTaxApplied;
+
+  /// No description provided for @deliveryDetailFieldInvoiceNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get deliveryDetailFieldInvoiceNotes;
+
+  /// No description provided for @deliveryDetailFieldCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get deliveryDetailFieldCreated;
+
+  /// No description provided for @deliveryDetailFieldUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get deliveryDetailFieldUpdated;
+
+  /// No description provided for @deliveryDetailFieldDeliveryId.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery ID'**
+  String get deliveryDetailFieldDeliveryId;
+
+  /// No description provided for @deliveryDetailFieldBrokerId.
+  ///
+  /// In en, this message translates to:
+  /// **'Broker ID'**
+  String get deliveryDetailFieldBrokerId;
+
+  /// No description provided for @deliveryDetailFieldInvoiceRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice ref'**
+  String get deliveryDetailFieldInvoiceRef;
+
+  /// No description provided for @deliveryDetailFieldSourceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Source type'**
+  String get deliveryDetailFieldSourceType;
+
+  /// No description provided for @deliveryDetailFieldSourceId.
+  ///
+  /// In en, this message translates to:
+  /// **'Source ID'**
+  String get deliveryDetailFieldSourceId;
+
+  /// No description provided for @deliveryDetailFieldAddressId.
+  ///
+  /// In en, this message translates to:
+  /// **'Address ID'**
+  String get deliveryDetailFieldAddressId;
+
+  /// No description provided for @deliveryDetailFieldCurrentAddressId.
+  ///
+  /// In en, this message translates to:
+  /// **'Current address ID'**
+  String get deliveryDetailFieldCurrentAddressId;
+
+  /// No description provided for @deliveryDetailFieldItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get deliveryDetailFieldItemCount;
+
+  /// No description provided for @deliveryDetailFieldBrokerEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Broker {key}'**
+  String deliveryDetailFieldBrokerEntry(String key);
+
+  /// No description provided for @deliveryDetailPersonWithId.
+  ///
+  /// In en, this message translates to:
+  /// **'Person #{id}'**
+  String deliveryDetailPersonWithId(int id);
+
+  /// No description provided for @deliveryDetailProviderWithId.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider #{id}'**
+  String deliveryDetailProviderWithId(int id);
+
+  /// No description provided for @deliveryDetailIdValue.
+  ///
+  /// In en, this message translates to:
+  /// **'#{id}'**
+  String deliveryDetailIdValue(int id);
+
+  /// No description provided for @deliveryDetailPackageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 package} other{{count} packages}}'**
+  String deliveryDetailPackageCount(int count);
+
+  /// No description provided for @deliveryDetailWeightKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{weight} kg'**
+  String deliveryDetailWeightKg(String weight);
+
+  /// No description provided for @deliveryDetailPercentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}%'**
+  String deliveryDetailPercentValue(int value);
+
+  /// No description provided for @deliveryDetailActionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get deliveryDetailActionCancel;
+
+  /// No description provided for @deliveryDetailActionValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate order'**
+  String get deliveryDetailActionValidate;
+
+  /// No description provided for @deliveryDetailCancelDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this delivery?'**
+  String get deliveryDetailCancelDialogTitle;
+
+  /// No description provided for @deliveryDetailCancelDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery #{id} will be marked as cancelled. This cannot be undone.'**
+  String deliveryDetailCancelDialogBody(int id);
+
+  /// No description provided for @deliveryDetailCancelDialogKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get deliveryDetailCancelDialogKeep;
+
+  /// No description provided for @deliveryDetailCancelDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel delivery'**
+  String get deliveryDetailCancelDialogConfirm;
+
+  /// No description provided for @deliveryDetailCancelSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery cancelled'**
+  String get deliveryDetailCancelSuccess;
+
+  /// No description provided for @deliveryDetailCancelFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to cancel'**
+  String get deliveryDetailCancelFailure;
+
+  /// No description provided for @deliveryDetailValidateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delivery'**
+  String get deliveryDetailValidateTitle;
+
+  /// No description provided for @deliveryDetailValidateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify the details below before marking complete.'**
+  String get deliveryDetailValidateSubtitle;
+
+  /// No description provided for @deliveryDetailValidateBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get deliveryDetailValidateBack;
+
+  /// No description provided for @deliveryDetailValidateConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate'**
+  String get deliveryDetailValidateConfirm;
+
+  /// No description provided for @deliveryDetailValidateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery #{id} validated'**
+  String deliveryDetailValidateSuccess(int id);
+
+  /// No description provided for @deliveryStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get deliveryStatusPending;
+
+  /// No description provided for @deliveryStatusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get deliveryStatusProcessing;
+
+  /// No description provided for @deliveryStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get deliveryStatusConfirmed;
+
+  /// No description provided for @deliveryStatusReadyForPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for pickup'**
+  String get deliveryStatusReadyForPickup;
+
+  /// No description provided for @deliveryStatusInTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'In transit'**
+  String get deliveryStatusInTransit;
+
+  /// No description provided for @deliveryStatusOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery'**
+  String get deliveryStatusOutForDelivery;
+
+  /// No description provided for @deliveryStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get deliveryStatusDelivered;
+
+  /// No description provided for @deliveryStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get deliveryStatusFailed;
+
+  /// No description provided for @deliveryStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get deliveryStatusCancelled;
+
+  /// No description provided for @deliveryStatusReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get deliveryStatusReturned;
+
+  /// No description provided for @deliveryStatusRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get deliveryStatusRefunded;
+
+  /// No description provided for @deliveryStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get deliveryStatusUnknown;
+
+  /// No description provided for @shippingMethodStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Delivery'**
+  String get shippingMethodStandard;
+
+  /// No description provided for @shippingMethodExpress.
+  ///
+  /// In en, this message translates to:
+  /// **'Express Delivery'**
+  String get shippingMethodExpress;
+
+  /// No description provided for @shippingMethodOvernight.
+  ///
+  /// In en, this message translates to:
+  /// **'Overnight Delivery'**
+  String get shippingMethodOvernight;
+
+  /// No description provided for @shippingMethodFreight.
+  ///
+  /// In en, this message translates to:
+  /// **'Freight Shipping'**
+  String get shippingMethodFreight;
+
+  /// No description provided for @shippingMethodPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get shippingMethodPickup;
+
+  /// No description provided for @shippingMethodCourier.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier'**
+  String get shippingMethodCourier;
+
+  /// No description provided for @shippingMethodSameDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Same Day'**
+  String get shippingMethodSameDay;
+
+  /// No description provided for @shippingMethodInternational.
+  ///
+  /// In en, this message translates to:
+  /// **'International'**
+  String get shippingMethodInternational;
+
+  /// No description provided for @invoiceTypeInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice'**
+  String get invoiceTypeInvoice;
+
+  /// No description provided for @invoiceTypeReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get invoiceTypeReceipt;
+
+  /// No description provided for @invoiceTypeProforma.
+  ///
+  /// In en, this message translates to:
+  /// **'Proforma'**
+  String get invoiceTypeProforma;
+
+  /// No description provided for @invoiceStatusUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get invoiceStatusUnpaid;
+
+  /// No description provided for @invoiceStatusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get invoiceStatusPaid;
+
+  /// No description provided for @invoiceStatusCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get invoiceStatusCanceled;
+
+  /// No description provided for @invoiceStatusPartiallyPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially paid'**
+  String get invoiceStatusPartiallyPaid;
+
+  /// No description provided for @invoiceStatusOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get invoiceStatusOverdue;
+
+  /// No description provided for @invoiceStatusRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get invoiceStatusRefunded;
+
+  /// No description provided for @deliveryCardNoDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'No destination'**
+  String get deliveryCardNoDestination;
+
+  /// No description provided for @deliveryCardLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load delivery details'**
+  String get deliveryCardLoadFailed;
+
+  /// No description provided for @deliveryDetailSectionCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get deliveryDetailSectionCustomer;
+
+  /// No description provided for @deliveryDetailFieldUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get deliveryDetailFieldUsername;
+
+  /// No description provided for @deliveryDetailFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get deliveryDetailFieldEmail;
+
+  /// No description provided for @deliveryDetailFieldUserType.
+  ///
+  /// In en, this message translates to:
+  /// **'User type'**
+  String get deliveryDetailFieldUserType;
+
+  /// No description provided for @deliveryDetailFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get deliveryDetailFieldPhone;
+
+  /// No description provided for @deliveryDetailFieldUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get deliveryDetailFieldUserId;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

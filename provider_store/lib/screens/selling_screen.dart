@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:developer' as developer;
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -236,7 +237,7 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: 'Search products or services...',
+          hintText: AppLocalizations.of(context)!.search,
           prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
@@ -310,49 +311,53 @@ class _SellingPointScreenState extends State<SellingPointScreen> {
   /// Returns `null` when the cart is empty so the FAB slot collapses
   /// instead of being occupied by an invisible Container.
   Widget _buildCartFAB(BuildContext context) {
-    final cartItemCount = widget.cartNotifier.cartItems.length;
-    if (cartItemCount == 0) return Container();
+    final count = widget.cartNotifier.cartItems.length;
+    if (count == 0) return const SizedBox.shrink();
 
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final total = widget.cartNotifier.cart.totalAmount;
 
     return FloatingActionButton.extended(
-      onPressed: () => _showCartSheet(context),
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
-      icon: Stack(
-        clipBehavior: Clip.none,
+      onPressed: () {
+        HapticFeedback.mediumImpact();
+        _showCartSheet(context);
+      },
+      backgroundColor: cs.primary,
+      foregroundColor: cs.onPrimary,
+      elevation: 3,
+      highlightElevation: 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28), // pill, not square
+      ),
+      icon: const Icon(Icons.shopping_cart_rounded, size: 20),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.shopping_cart_rounded),
-          Positioned(
-            right: -4,
-            top: -4,
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: colorScheme.error,
-                shape: BoxShape.circle,
-              ),
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              child: Text(
-                cartItemCount > 9 ? '9+' : cartItemCount.toString(),
-                style: const TextStyle(
-                  fontSize: 8,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: cs.onPrimary.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.2,
+                fontWeight: FontWeight.w800,
+                color: cs.onPrimary,
               ),
             ),
           ),
+          const SizedBox(width: 10),
+          Text(
+            '${total.toStringAsFixed(2)} DA',
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
+          ),
         ],
-      ),
-      label: Text(
-        'Cart ($cartItemCount)',
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
       ),
     );
   }

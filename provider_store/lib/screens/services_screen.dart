@@ -13,6 +13,7 @@ import 'package:provider_store/components/service/service_search_bar.dart';
 import 'package:provider_store/components/service/services_empty_state.dart';
 import 'package:provider_store/components/service/services_loading_state.dart';
 import 'package:provider_store/screens/service_details_screen.dart';
+import 'package:ui/components/store/StoreDashboardHeader.dart';
 import 'package:provider/provider.dart';
 
 class ServicesScreen extends StatefulWidget {
@@ -87,20 +88,50 @@ class _ServicesContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: cs.surface,
       floatingActionButton:
           canManage ? _buildFloatingActionButton(context, localizations) : null,
-      body: RefreshIndicator(
-        onRefresh: () async => serviceNotifier.refresh(),
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            _buildAppBar(context, localizations),
-            if (hasMultipleSuppliers) _buildSupplierSelector(context),
-            ServiceSearchBar(onSearchChanged: serviceNotifier.searchServices),
-            _buildContent(context),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ── Shared header ──
+            DashboardHeader(
+              leadingIcon: Icons.handyman_rounded,
+              title: localizations?.services ?? 'Services',
+              subtitle:
+                  '${serviceNotifier.services.length} ${localizations?.servicesAvailable ?? 'available'}',
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded),
+                  onPressed: () => serviceNotifier.refresh(),
+                  tooltip: localizations?.refresh ?? 'Refresh',
+                ),
+              ],
+              searchBar: ServiceSearchBar(
+                onSearchChanged: serviceNotifier.searchServices,
+              ),
+            ),
+
+            // ── Optional supplier selector ──
+            if (hasMultipleSuppliers)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: SupplierSelector(
+                  accessibleSuppliers: _getAccessibleSuppliers(),
+                  selectedSupplierId: serviceNotifier.currentProviderId,
+                  onSupplierChanged: (id) {
+                    serviceNotifier.fetchServices(
+                        providerId: id ?? 0, reset: true);
+                  },
+                ),
+              ),
+
+            // ── Service list ──
+            Expanded(child: _buildContent(context)),
           ],
         ),
       ),
@@ -136,71 +167,6 @@ class _ServicesContent extends StatelessWidget {
     );
   }
 
-  SliverAppBar _buildAppBar(BuildContext context, AppLocalizations? loc) {
-    return SliverAppBar(
-      floating: true,
-      snap: true,
-      expandedHeight: 140,
-      collapsedHeight: 80,
-      flexibleSpace: FlexibleSpaceBar(
-        titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-        expandedTitleScale: 1.5,
-        title: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              loc?.services ?? 'Services',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${serviceNotifier.services.length} ${loc?.servicesAvailable ?? 'available'}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ],
-        ),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                Theme.of(context).colorScheme.background,
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  SliverToBoxAdapter _buildSupplierSelector(BuildContext context) {
-    final suppliers = _getAccessibleSuppliers();
-
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: SupplierSelector(
-          accessibleSuppliers: suppliers,
-          selectedSupplierId: serviceNotifier.currentProviderId,
-          // allSuppliers: suppliers,
-          onSupplierChanged: (id) {
-            serviceNotifier.fetchServices(providerId: id ?? 0, reset: true);
-          },
-          // filterPrivilege: canManage ? 'services_manage' : 'services_view',
-          // userRules: userRules,
-        ),
-      ),
-    );
-  }
-
   List<Supplier> _getAccessibleSuppliers() {
     final suppliers = <Supplier>[];
     final supplierIds = <int>{};
@@ -221,31 +187,38 @@ class _ServicesContent extends StatelessWidget {
 
   Widget _buildContent(BuildContext context) {
     if (serviceNotifier.isLoading) {
-      return const SliverFillRemaining(child: ServicesLoadingState());
+      return const ServicesLoadingState();
     }
 
     if (serviceNotifier.services.isEmpty) {
-      return SliverFillRemaining(child: ServicesEmptyState());
+      return const ServicesEmptyState();
     }
 
-    return SliverList.separated(
-      itemCount: serviceNotifier.services.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final service = serviceNotifier.services[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: ServiceCard(
-            service: service,
-            canManage: canManage,
-            onTap: () => _handleServiceTap(context, service),
-            onEdit:
-                canManage ? () => _handleEditService(context, service) : null,
-            onDelete:
-                canManage ? () => _handleDeleteService(context, service) : null,
-          ),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: () async => serviceNotifier.refresh(),
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        itemCount: serviceNotifier.services.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          final service = serviceNotifier.services[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ServiceCard(
+              service: service,
+              canManage: canManage,
+              onTap: () => _handleServiceTap(context, service),
+              onEdit:
+                  canManage ? () => _handleEditService(context, service) : null,
+              onDelete: canManage
+                  ? () => _handleDeleteService(context, service)
+                  : null,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -315,16 +288,20 @@ class _ServicesContent extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => ServiceDetailsScreenLoader(
-            serviceId: service.id,
-            listService: service, // Pass the service from the list
-            canManage: canManage,
-            selectedSupplierId: selectedSupplierId),
+          serviceId: service.id,
+          listService: service,
+          canManage: canManage,
+          selectedSupplierId: selectedSupplierId,
+        ),
       ),
     );
   }
 }
 
-// Update your _ServiceDetailsLoader widget to use fetchServiceDetails:
+// ─────────────────────────────────────────────────────────────
+// Service details loader — unchanged
+// ─────────────────────────────────────────────────────────────
+
 class ServiceDetailsScreenLoader extends StatefulWidget {
   final int serviceId;
   final ProvidedService listService;
@@ -351,7 +328,6 @@ class _ServiceDetailsScreenLoaderState
   @override
   void initState() {
     super.initState();
-    // First try to get detailed service
     _serviceFuture = _fetchServiceDetails();
   }
 
@@ -370,10 +346,9 @@ class _ServiceDetailsScreenLoaderState
     return FutureBuilder<ProvidedService>(
       future: _serviceFuture,
       builder: (context, snapshot) {
-        // While loading, show a full screen loading indicator
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -389,7 +364,6 @@ class _ServiceDetailsScreenLoaderState
                         ),
                   ),
                   const SizedBox(height: 24),
-                  // Optionally show the service name we're loading
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 12),
@@ -412,10 +386,9 @@ class _ServiceDetailsScreenLoaderState
           );
         }
 
-        // On error, show error screen
         if (snapshot.hasError) {
           return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -436,7 +409,6 @@ class _ServiceDetailsScreenLoaderState
                               ),
                     ),
                     const SizedBox(height: 12),
-                    // Show the service name we tried to load
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 10),
@@ -498,7 +470,6 @@ class _ServiceDetailsScreenLoaderState
         }
 
         if (snapshot.hasData) {
-          // Show the detailed service
           final detailedService = snapshot.data!;
           return ServiceDetailsScreen(
             initialService: detailedService,
@@ -508,7 +479,6 @@ class _ServiceDetailsScreenLoaderState
           );
         }
 
-        // Fallback - shouldn't happen, but show basic service screen
         return ServiceDetailsScreen(
           initialService: widget.listService,
           onEditPressed: widget.canManage

@@ -2807,7 +2807,194 @@
   },
   "removeLabel": "Remove",
   "updateLabel": "Update",
-  "addToCartLabel": "Add to Cart"
+  "addToCartLabel": "Add to Cart",
+
+    "deliveryDetailTitleWithId": "Delivery #{id}",
+  "@deliveryDetailTitleWithId": { "placeholders": { "id": { "type": "int" } } },
+
+  "deliveryDetailRefreshTooltip": "Refresh",
+  "deliveryDetailEditTooltip": "Edit",
+  "deliveryDetailRefreshing": "Refreshing…",
+  "deliveryDetailCopiedToClipboard": "Copied",
+
+  "deliveryDetailSectionItems": "Items",
+  "deliveryDetailSectionItemsCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@deliveryDetailSectionItemsCount": { "placeholders": { "count": { "type": "int" } } },
+
+  "deliveryDetailSectionDestination": "Destination",
+  "deliveryDetailSectionProvider": "Provider",
+  "deliveryDetailSectionShipping": "Shipping",
+  "deliveryDetailSectionInvoice": "Invoice",
+  "deliveryDetailSectionMetadata": "Metadata",
+
+  "deliveryDetailUpdatedJustNow": "Updated just now",
+  "deliveryDetailUpdatedMinutesAgo": "Updated {count} min ago",
+  "@deliveryDetailUpdatedMinutesAgo": { "placeholders": { "count": { "type": "int" } } },
+  "deliveryDetailUpdatedHoursAgo": "Updated {count} h ago",
+  "@deliveryDetailUpdatedHoursAgo": { "placeholders": { "count": { "type": "int" } } },
+  "deliveryDetailUpdatedDaysAgo": "Updated {count} d ago",
+  "@deliveryDetailUpdatedDaysAgo": { "placeholders": { "count": { "type": "int" } } },
+  "deliveryDetailUpdatedOnDate": "Updated on {day}/{month}/{year}",
+  "@deliveryDetailUpdatedOnDate": {
+    "placeholders": {
+      "day": { "type": "int" },
+      "month": { "type": "int" },
+      "year": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailEmptyItems": "No items for this provider",
+  "deliveryDetailEmptyDestination": "No destination details",
+  "deliveryDetailEmptyProvider": "No provider details",
+  "deliveryDetailEmptyShipping": "No shipping details",
+  "deliveryDetailEmptyInvoice": "No invoice details",
+  "deliveryDetailEmptyMetadata": "No metadata available",
+
+  "deliveryDetailItemQuantityLabel": "{count}×",
+  "@deliveryDetailItemQuantityLabel": { "placeholders": { "count": { "type": "int" } } },
+
+  "deliveryDetailProductFallback": "Product #{id}",
+  "@deliveryDetailProductFallback": { "placeholders": { "id": { "type": "int" } } },
+
+  "deliveryDetailItemSubline": "{brand} · {barcode} · #{productId}",
+  "@deliveryDetailItemSubline": {
+    "placeholders": {
+      "brand": { "type": "String" },
+      "barcode": { "type": "String" },
+      "productId": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailItemUnitLine": "{price} DA each · per {unit} · VAT {vat}%",
+  "@deliveryDetailItemUnitLine": {
+    "placeholders": {
+      "price": { "type": "String" },
+      "unit": { "type": "String" },
+      "vat": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailItemDelivered": "Delivered",
+
+  "deliveryDetailTotalsSubtotal": "Subtotal",
+  "deliveryDetailTotalsDiscount": "Discount",
+  "deliveryDetailTotalsTotal": "Total",
+  "deliveryDetailDiscountValue": "− {amount} DA",
+  "@deliveryDetailDiscountValue": { "placeholders": { "amount": { "type": "String" } } },
+  "deliveryDetailPriceWithCurrency": "{price} DA",
+  "@deliveryDetailPriceWithCurrency": { "placeholders": { "price": { "type": "String" } } },
+
+  "deliveryDetailFieldAddress": "Address",
+  "deliveryDetailFieldStreet": "Street",
+  "deliveryDetailFieldCity": "City",
+  "deliveryDetailFieldPostalCode": "Postal code",
+  "deliveryDetailFieldCountry": "Country",
+  "deliveryDetailFieldRecipient": "Recipient",
+  "deliveryDetailFieldName": "Name",
+  "deliveryDetailFieldOrganisation": "Organisation",
+  "deliveryDetailFieldProviderId": "Provider ID",
+  "deliveryDetailFieldMethod": "Method",
+  "deliveryDetailFieldPackages": "Packages",
+  "deliveryDetailFieldTotalWeight": "Total weight",
+  "deliveryDetailFieldDimensions": "Dimensions",
+  "deliveryDetailFieldGoods": "Goods",
+  "deliveryDetailFieldHsCode": "HS code",
+  "deliveryDetailFieldMerchant": "Merchant",
+  "deliveryDetailFieldInstructions": "Instructions",
+  "deliveryDetailFieldFee": "Fee",
+  "deliveryDetailFieldInvoiceNumber": "Number",
+  "deliveryDetailFieldInvoiceType": "Type",
+  "deliveryDetailFieldInvoiceStatus": "Status",
+  "deliveryDetailFieldStatus": "Status",
+  "deliveryDetailFieldInvoiceTotal": "Total",
+  "deliveryDetailFieldInvoiceIssueDate": "Issue date",
+  "deliveryDetailFieldInvoiceDueDate": "Due date",
+  "deliveryDetailFieldInvoiceTaxApplied": "Tax applied",
+  "deliveryDetailFieldInvoiceNotes": "Notes",
+  "deliveryDetailFieldCreated": "Created",
+  "deliveryDetailFieldUpdated": "Updated",
+  "deliveryDetailFieldDeliveryId": "Delivery ID",
+  "deliveryDetailFieldBrokerId": "Broker ID",
+  "deliveryDetailFieldInvoiceRef": "Invoice ref",
+  "deliveryDetailFieldSourceType": "Source type",
+  "deliveryDetailFieldSourceId": "Source ID",
+  "deliveryDetailFieldAddressId": "Address ID",
+  "deliveryDetailFieldCurrentAddressId": "Current address ID",
+  "deliveryDetailFieldItemCount": "Items",
+
+  "deliveryDetailFieldBrokerEntry": "Broker {key}",
+  "@deliveryDetailFieldBrokerEntry": { "placeholders": { "key": { "type": "String" } } },
+
+  "deliveryDetailPersonWithId": "Person #{id}",
+  "@deliveryDetailPersonWithId": { "placeholders": { "id": { "type": "int" } } },
+  "deliveryDetailProviderWithId": "Provider #{id}",
+  "@deliveryDetailProviderWithId": { "placeholders": { "id": { "type": "int" } } },
+  "deliveryDetailIdValue": "#{id}",
+  "@deliveryDetailIdValue": { "placeholders": { "id": { "type": "int" } } },
+  "deliveryDetailPackageCount": "{count, plural, =1{1 package} other{{count} packages}}",
+  "@deliveryDetailPackageCount": { "placeholders": { "count": { "type": "int" } } },
+  "deliveryDetailWeightKg": "{weight} kg",
+  "@deliveryDetailWeightKg": { "placeholders": { "weight": { "type": "String" } } },
+  "deliveryDetailPercentValue": "{value}%",
+  "@deliveryDetailPercentValue": { "placeholders": { "value": { "type": "int" } } },
+
+  "deliveryDetailActionCancel": "Cancel",
+  "deliveryDetailActionValidate": "Validate order",
+  "deliveryDetailCancelDialogTitle": "Cancel this delivery?",
+  "deliveryDetailCancelDialogBody": "Delivery #{id} will be marked as cancelled. This cannot be undone.",
+  "@deliveryDetailCancelDialogBody": { "placeholders": { "id": { "type": "int" } } },
+  "deliveryDetailCancelDialogKeep": "Keep",
+  "deliveryDetailCancelDialogConfirm": "Cancel delivery",
+  "deliveryDetailCancelSuccess": "Delivery cancelled",
+  "deliveryDetailCancelFailure": "Failed to cancel",
+
+  "deliveryDetailValidateTitle": "Confirm delivery",
+  "deliveryDetailValidateSubtitle": "Verify the details below before marking complete.",
+  "deliveryDetailValidateBack": "Back",
+  "deliveryDetailValidateConfirm": "Validate",
+  "deliveryDetailValidateSuccess": "Delivery #{id} validated",
+  "@deliveryDetailValidateSuccess": { "placeholders": { "id": { "type": "int" } } },
+
+  "deliveryStatusPending": "Pending",
+  "deliveryStatusProcessing": "Processing",
+  "deliveryStatusConfirmed": "Confirmed",
+  "deliveryStatusReadyForPickup": "Ready for pickup",
+  "deliveryStatusInTransit": "In transit",
+  "deliveryStatusOutForDelivery": "Out for delivery",
+  "deliveryStatusDelivered": "Delivered",
+  "deliveryStatusFailed": "Failed",
+  "deliveryStatusCancelled": "Cancelled",
+  "deliveryStatusReturned": "Returned",
+  "deliveryStatusRefunded": "Refunded",
+  "deliveryStatusUnknown": "Unknown",
+
+  "shippingMethodStandard": "Standard Delivery",
+  "shippingMethodExpress": "Express Delivery",
+  "shippingMethodOvernight": "Overnight Delivery",
+  "shippingMethodFreight": "Freight Shipping",
+  "shippingMethodPickup": "Pickup",
+  "shippingMethodCourier": "Courier",
+  "shippingMethodSameDay": "Same Day",
+  "shippingMethodInternational": "International",
+
+  "invoiceTypeInvoice": "Invoice",
+  "invoiceTypeReceipt": "Receipt",
+  "invoiceTypeProforma": "Proforma",
+  "invoiceStatusUnpaid": "Unpaid",
+  "invoiceStatusPaid": "Paid",
+  "invoiceStatusCanceled": "Cancelled",
+  "invoiceStatusPartiallyPaid": "Partially paid",
+  "invoiceStatusOverdue": "Overdue",
+  "invoiceStatusRefunded": "Refunded",
+  "deliveryCardNoDestination": "No destination",
+  "deliveryCardLoadFailed": "Unable to load delivery details",
+
+  "deliveryDetailSectionCustomer": "Customer",
+"deliveryDetailFieldUsername": "Username",
+"deliveryDetailFieldEmail": "Email",
+"deliveryDetailFieldUserType": "User type",
+"deliveryDetailFieldPhone": "Phone",
+"deliveryDetailFieldUserId": "User ID"
 
 
 }

@@ -5,12 +5,18 @@ import 'package:provider/provider.dart';
 
 class SearchBarWidget extends StatelessWidget {
   final TextEditingController controller;
+
+  /// Optional focus node so callers can programmatically focus the field
+  /// (e.g. from a search icon in the app bar).
+  final FocusNode? focusNode;
+
   final int tabIndex;
   final int supplierId;
 
   const SearchBarWidget({
     super.key,
     required this.controller,
+    this.focusNode,
     required this.tabIndex,
     required this.supplierId,
   });
@@ -47,6 +53,7 @@ class SearchBarWidget extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: controller,
+                    focusNode: focusNode,
                     decoration: InputDecoration(
                       hintText: _getSearchHint(context),
                       prefixIcon: Icon(

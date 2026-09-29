@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/finance/Cart.dart';
 
@@ -11,17 +12,25 @@ class Order {
   final int? orderingUserId;
   final int? placedOrderLocationRef;
   final int? placedOrderStateRef;
+
+  /// Raw state string from the API (`"PENDING"`, `"PROCESSING"`, ...).
+  /// The database only stores the ref, but the payload sends both.
+  final String? placedOrderStateRaw;
+
   final DateTime placedOrderLastMod;
   final int? placedOrderInvoiceRef;
   final int? placedOrderReceiptRef;
   final DateTime placedOrderCreation;
-  List<OrderedItem>? items; // Nullable for summary vs detailed views
+  List<OrderedItem>? items;
+
+  /// Fully-parsed ordering user (when the payload embeds it).
+  AppUser? orderingUser;
 
   // Computed properties (not from database)
   String? paymentStatus;
   String? paymentMethod;
   String? paymentRef;
-  String? customerName; // For display purposes
+  String? customerName;
 
   Order({
     required this.idPlacedOrder,
@@ -30,48 +39,73 @@ class Order {
     this.orderingUserId,
     this.placedOrderLocationRef,
     this.placedOrderStateRef,
+    this.placedOrderStateRaw,
     required this.placedOrderLastMod,
     this.placedOrderInvoiceRef,
     this.placedOrderReceiptRef,
     required this.placedOrderCreation,
     this.items,
-
-    // Computed/derived properties
+    this.orderingUser,
     this.paymentStatus,
     this.paymentMethod,
     this.paymentRef,
     this.customerName,
   });
 
+  // ============================================================
+  // FACTORY
+  // ============================================================
+
   factory Order.fromJson(Map<String, dynamic> json) {
-    final items = json['items'] != null
-        ? (json['items'] as List)
-            .map((item) => OrderedItem.fromJson(item))
+    // ── Items: payload uses `ordered_item`, list endpoints use `items`.
+    final rawItems = json['ordered_item'] ?? json['items'];
+    final items = rawItems is List
+        ? rawItems
+            .whereType<Map<String, dynamic>>()
+            .map(OrderedItem.fromJson)
             .toList()
         : null;
 
-    // Calculate derived state from references if needed
+    // ── State: prefer the string form, fall back to ref.
     final stateRef = json['placed_order_state_ref'] as int?;
-    final status = _getStatusFromStateRef(stateRef);
+    final stateStr = json['placed_order_state'] as String?;
+
+    // ── Ordering user: parse the embedded AppUser if present.
+    AppUser? orderingUser;
+    final rawUser = json['ordering_user'] ?? json['app_user'];
+    if (rawUser is Map<String, dynamic>) {
+      try {
+        orderingUser = AppUser.fromJson(rawUser);
+      } catch (e) {
+        log('Order.fromJson: failed to parse ordering_user: $e');
+      }
+    }
+
+    // ── Customer name: prefer the explicit field, else the user.
+    final explicitName = json['customer_name'] as String?;
+    final derivedName = orderingUser?.displayName;
 
     return Order(
-      idPlacedOrder: json['id_placed_order'] as int,
+      idPlacedOrder: json['id_placed_order'] as int? ?? 0,
       orderDiscount: (json['order_discount'] as num?)?.toDouble(),
-      totalPrice: (json['total_price'] as num).toDouble(),
+      totalPrice: (json['total_price'] as num?)?.toDouble() ?? 0.0,
       orderingUserId: json['ordering_user_id'] as int?,
       placedOrderLocationRef: json['placed_order_location_ref'] as int?,
       placedOrderStateRef: stateRef,
+      placedOrderStateRaw: stateStr,
       placedOrderLastMod: _parseDateTime(json['placed_order_last_mod']),
-      placedOrderInvoiceRef: json['placed_order_invoice_ref'] as int?,
+      placedOrderInvoiceRef: json['placed_order_invoice'] as int? ??
+          json['placed_order_invoice_ref'] as int?,
       placedOrderReceiptRef: json['placed_order_receipt_ref'] as int?,
       placedOrderCreation: _parseDateTime(json['placed_order_creation']),
       items: items,
-
-      // Derived/computed properties from related tables
+      orderingUser: orderingUser,
       paymentStatus: json['payment_status'] as String?,
       paymentMethod: json['payment_method'] as String?,
       paymentRef: json['payment_ref'] as String?,
-      customerName: json['customer_name'] as String?,
+      customerName: (explicitName != null && explicitName.isNotEmpty)
+          ? explicitName
+          : derivedName,
     );
   }
 
@@ -84,11 +118,28 @@ class Order {
     }
   }
 
-  static String _getStatusFromStateRef(int? stateRef) {
-    // Map state reference to status string
-    // You might want to fetch this from a lookup table
-    if (stateRef == null) return 'unknown';
+  // ============================================================
+  // STATUS
+  // ============================================================
 
+  /// Normalized status string — always lowercase, always one of:
+  /// pending | processing | shipped | delivered | cancelled | refunded |
+  /// unknown
+  String get status {
+    // Prefer the string the API sent — it's authoritative.
+    if (placedOrderStateRaw != null && placedOrderStateRaw!.isNotEmpty) {
+      return placedOrderStateRaw!.toLowerCase();
+    }
+    // Fall back to the ref if the string is missing (older endpoints).
+    return _statusFromRef(placedOrderStateRef);
+  }
+
+  /// The raw string (uppercase as sent by the API). Useful for matches.
+  String get statusRaw =>
+      (placedOrderStateRaw ?? _statusFromRef(placedOrderStateRef))
+          .toUpperCase();
+
+  static String _statusFromRef(int? stateRef) {
     switch (stateRef) {
       case 1:
         return 'pending';
@@ -107,10 +158,61 @@ class Order {
     }
   }
 
-  // Get status string from state reference
-  String get status => _getStatusFromStateRef(placedOrderStateRef);
+  static int _stateToRef(String state) {
+    switch (state.toLowerCase()) {
+      case 'pending':
+        return 1;
+      case 'processing':
+        return 2;
+      case 'shipped':
+        return 3;
+      case 'delivered':
+        return 4;
+      case 'cancelled':
+        return 5;
+      case 'refunded':
+        return 6;
+      default:
+        return 1;
+    }
+  }
 
-  // For order summary (without items)
+  // ============================================================
+  // ORDERING USER HELPERS
+  // ============================================================
+
+  /// The display name for whoever placed this order.
+  String get orderingUserName {
+    if (orderingUser != null) return orderingUser!.displayName;
+    if (customerName != null && customerName!.isNotEmpty) return customerName!;
+    if (orderingUserId != null) return 'User #$orderingUserId';
+    return 'Unknown';
+  }
+
+  /// Avatar URL for the ordering user, if available.
+  String? get orderingUserImageUrl => orderingUser?.appUserImageUrl;
+
+  /// Two-letter initials for the ordering user.
+  String get orderingUserInitials {
+    if (orderingUser != null) return orderingUser!.shortName;
+    if (customerName != null && customerName!.isNotEmpty) {
+      final parts = customerName!.split(' ');
+      if (parts.length >= 2) {
+        return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+      }
+      return customerName!.substring(0, 1).toUpperCase();
+    }
+    return '?';
+  }
+
+  /// Whether we have enough to render an avatar.
+  bool get hasOrderingUser =>
+      orderingUser != null || (customerName?.isNotEmpty ?? false);
+
+  // ============================================================
+  // JSON SERIALIZATION
+  // ============================================================
+
   Map<String, dynamic> toSummaryJson() {
     return {
       'id_placed_order': idPlacedOrder,
@@ -119,6 +221,7 @@ class Order {
       'ordering_user_id': orderingUserId,
       'placed_order_location_ref': placedOrderLocationRef,
       'placed_order_state_ref': placedOrderStateRef,
+      'placed_order_state': statusRaw,
       'placed_order_last_mod': placedOrderLastMod.toIso8601String(),
       'placed_order_invoice_ref': placedOrderInvoiceRef,
       'placed_order_receipt_ref': placedOrderReceiptRef,
@@ -128,10 +231,10 @@ class Order {
       'payment_method': paymentMethod,
       'payment_ref': paymentRef,
       'customer_name': customerName,
+      if (orderingUser != null) 'ordering_user': orderingUser!.toJson(),
     };
   }
 
-  // For creating a new order submission
   Map<String, dynamic> toSubmissionJson() {
     return {
       "ordered_items": items?.map((item) => item.toJson()).toList() ?? [],
@@ -139,11 +242,135 @@ class Order {
       "total_price": totalPrice,
       "ordering_user_id": orderingUserId,
       "placed_order_location_ref": placedOrderLocationRef,
-      "placed_order_state_ref": placedOrderStateRef ?? 1, // Default to pending
+      "placed_order_state_ref": placedOrderStateRef ?? 1,
     };
   }
 
-// ============ STATIC METHODS FOR ORDER CREATION ============
+  Map<String, dynamic> toJson() {
+    return {
+      'ordered_items': items?.map((item) => item.toJson()).toList() ?? [],
+      'submitted_order': {
+        'id_placed_order': idPlacedOrder,
+        'ordered_timestamp': placedOrderCreation.toIso8601String(),
+        'order_discount': orderDiscount,
+        'placed_order_last_mod': placedOrderLastMod.toIso8601String(),
+        'payment_status': paymentStatus,
+        'payment_ref': paymentRef,
+        'placed_order_state': statusRaw,
+        'payment_method': paymentMethod,
+        'ordering_user_id': orderingUserId,
+        'total_price': totalPrice,
+        'placed_order_location_ref': placedOrderLocationRef,
+        'placed_order_state_ref': placedOrderStateRef,
+        'placed_order_invoice_ref': placedOrderInvoiceRef,
+        'placed_order_receipt_ref': placedOrderReceiptRef,
+        'customer_name': customerName,
+      },
+    };
+  }
+
+  Map<String, dynamic> toJsonForService() {
+    return {
+      'id_order': idPlacedOrder,
+      'total_amount': totalPrice,
+      'order_discount': orderDiscount,
+      'order_date': placedOrderCreation.toIso8601String(),
+      'last_modified': placedOrderLastMod.toIso8601String(),
+      'status': statusRaw,
+      'payment_status': paymentStatus,
+      'payment_method': paymentMethod,
+      'payment_reference': paymentRef,
+      'customer_name': customerName,
+      if (orderingUserId != null) 'user_id': orderingUserId,
+      if (placedOrderLocationRef != null) 'location_id': placedOrderLocationRef,
+      if (placedOrderInvoiceRef != null) 'invoice_id': placedOrderInvoiceRef,
+      if (placedOrderReceiptRef != null) 'receipt_id': placedOrderReceiptRef,
+      if (items != null)
+        'items': items!.map((item) => item.toJsonForService()).toList(),
+      if (orderingUser != null) 'user': orderingUser!.toApiJson(),
+    };
+  }
+
+  // ============================================================
+  // COPY WITH
+  // ============================================================
+
+  Order copyWith({
+    int? idPlacedOrder,
+    double? orderDiscount,
+    double? totalPrice,
+    int? orderingUserId,
+    int? placedOrderLocationRef,
+    int? placedOrderStateRef,
+    String? placedOrderStateRaw,
+    DateTime? placedOrderLastMod,
+    int? placedOrderInvoiceRef,
+    int? placedOrderReceiptRef,
+    DateTime? placedOrderCreation,
+    List<OrderedItem>? items,
+    AppUser? orderingUser,
+    String? paymentStatus,
+    String? paymentMethod,
+    String? paymentRef,
+    String? customerName,
+  }) {
+    return Order(
+      idPlacedOrder: idPlacedOrder ?? this.idPlacedOrder,
+      orderDiscount: orderDiscount ?? this.orderDiscount,
+      totalPrice: totalPrice ?? this.totalPrice,
+      orderingUserId: orderingUserId ?? this.orderingUserId,
+      placedOrderLocationRef:
+          placedOrderLocationRef ?? this.placedOrderLocationRef,
+      placedOrderStateRef: placedOrderStateRef ?? this.placedOrderStateRef,
+      placedOrderStateRaw: placedOrderStateRaw ?? this.placedOrderStateRaw,
+      placedOrderLastMod: placedOrderLastMod ?? this.placedOrderLastMod,
+      placedOrderInvoiceRef:
+          placedOrderInvoiceRef ?? this.placedOrderInvoiceRef,
+      placedOrderReceiptRef:
+          placedOrderReceiptRef ?? this.placedOrderReceiptRef,
+      placedOrderCreation: placedOrderCreation ?? this.placedOrderCreation,
+      items: items ?? this.items,
+      orderingUser: orderingUser ?? this.orderingUser,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      paymentRef: paymentRef ?? this.paymentRef,
+      customerName: customerName ?? this.customerName,
+    );
+  }
+
+  // ============================================================
+  // BOOLEAN HELPERS
+  // ============================================================
+
+  bool get isCompleted => status == 'delivered';
+  bool get isPending => status == 'pending';
+  bool get isProcessing => status == 'processing';
+  bool get isShipped => status == 'shipped';
+  bool get isCancelled => status == 'cancelled';
+  bool get isRefunded => status == 'refunded';
+
+  bool get hasInvoice => placedOrderInvoiceRef != null;
+  bool get hasReceipt => placedOrderReceiptRef != null;
+  bool get hasLocation => placedOrderLocationRef != null;
+
+  bool get isPaid => paymentStatus?.toLowerCase() == 'paid';
+
+  double get netPrice => totalPrice - (orderDiscount ?? 0.0);
+
+  bool hasItems() => items != null && items!.isNotEmpty;
+
+  int get itemCount =>
+      items?.fold(0, (sum, item) => sum ?? 0 + item.orderedQuantity) ?? 0;
+
+  int get totalQuantity =>
+      items?.fold(0, (total, item) => total ?? 0 + item!.orderedQuantity) ?? 0;
+
+  double get finalTotal => totalPrice - (orderDiscount ?? 0.0);
+
+  // ============================================================
+  // STATIC BUILDERS
+  // ============================================================
+
   static Map<String, dynamic> buildSingleOrderData({
     required Product product,
     required int quantity,
@@ -157,8 +384,9 @@ class Order {
     String? orderState,
   }) {
     if (quantity <= 0) throw ArgumentError('Quantity must be positive');
-    if (product.id_product == null)
+    if (product.id_product == null) {
       throw ArgumentError('Product ID cannot be null');
+    }
 
     final unitPrice = product.product_price ?? 0.0;
     final totalPrice = unitPrice * quantity;
@@ -173,7 +401,6 @@ class Order {
           "ordered_quantity": quantity,
           "unit_price": unitPrice,
           "applied_vat": taxRate.clamp(0.0, 1.0),
-          // Optional fields from schema
           "ordered_item_cart_ref": null,
           "ordered_item_delivery_status": null,
           "ordered_item_delivery_fee": null,
@@ -188,7 +415,7 @@ class Order {
         "placed_order_location_ref": locationRef,
         "placed_order_state_ref":
             orderState != null ? _stateToRef(orderState) : 1,
-        "placed_order_state": orderState ?? 'pending',
+        "placed_order_state": orderState ?? 'PENDING',
         "placed_order_last_mod": DateTime.now().toIso8601String(),
         "payment_status": paymentStatus ?? 'pending',
         "payment_method": paymentMethod ?? 'cash',
@@ -209,8 +436,9 @@ class Order {
     String? paymentRef,
     String? orderState,
   }) {
-    if (cartItems.isEmpty)
+    if (cartItems.isEmpty) {
       throw StateError('Cannot build order with empty cart');
+    }
 
     final orderedItems = <Map<String, dynamic>>[];
     double totalPrice = 0.0;
@@ -221,25 +449,17 @@ class Order {
         throw ArgumentError('Product ID cannot be null for order item');
       }
 
-      final unitPrice = item.unitPrice ?? product?.product_price ?? 0.0;
       final catalogPrice = item.catalogUnitPrice ?? 0.0;
       final effectivePrice = item.unitPrice ?? catalogPrice;
-      final itemTotal = effectivePrice * item.quantity;
-      totalPrice += itemTotal;
+      totalPrice += effectivePrice * item.quantity;
 
       orderedItems.add({
         "id_ordered_item": 0,
         "ordered_product_id": product!.id_product!,
         "order_ref": 0,
         "ordered_quantity": item.quantity,
-        "unit_price": catalogPrice, // ← catalog, not effective
-        "product_discount": item.lineDiscount, // ← computed line discount
-        // Optional fields from schema
-        // "product_discount": item.discount ?? 0.0,
-        // "applied_vat": item.vatRate ?? 0.0,
-        // "ordered_item_cart_ref": item.cartId,
-        // "ordered_item_delivery_status": null,
-        // "ordered_item_delivery_fee": null,
+        "unit_price": catalogPrice,
+        "product_discount": item.lineDiscount,
       });
     }
 
@@ -256,9 +476,9 @@ class Order {
         "placed_order_location_ref": locationRef,
         "placed_order_state_ref":
             orderState != null ? _stateToRef(orderState) : 1,
-        "placed_order_state": orderState ?? 'pending',
+        "placed_order_state": orderState ?? 'PENDING',
         "placed_order_last_mod": DateTime.now().toIso8601String(),
-        "payment_status": paymentStatus ?? 'pending',
+        "payment_status": paymentStatus ?? 'PENDING',
         "payment_method": paymentMethod ?? 'cash',
         "payment_ref": paymentRef ?? '',
         "placed_order_invoice_ref": null,
@@ -267,27 +487,6 @@ class Order {
     };
   }
 
-// Helper method to convert state string to reference number
-  static int _stateToRef(String state) {
-    switch (state.toLowerCase()) {
-      case 'pending':
-        return 1;
-      case 'processing':
-        return 2;
-      case 'shipped':
-        return 3;
-      case 'delivered':
-        return 4;
-      case 'cancelled':
-        return 5;
-      case 'refunded':
-        return 6;
-      default:
-        return 1; // Default to pending
-    }
-  }
-
-// New method for building order data from an Order object
   static Map<String, dynamic> buildOrderDataFromOrder(Order order) {
     return {
       "ordered_items": order.items?.map((item) => item.toJson()).toList() ?? [],
@@ -299,7 +498,7 @@ class Order {
         "ordering_user_id": order.orderingUserId,
         "placed_order_location_ref": order.placedOrderLocationRef,
         "placed_order_state_ref": order.placedOrderStateRef,
-        "placed_order_state": order.status,
+        "placed_order_state": order.statusRaw,
         "placed_order_last_mod": order.placedOrderLastMod.toIso8601String(),
         "payment_status": order.paymentStatus,
         "payment_method": order.paymentMethod,
@@ -311,7 +510,6 @@ class Order {
     };
   }
 
-// Helper method for updating existing orders
   static Map<String, dynamic> buildOrderUpdateData({
     required int orderId,
     String? orderState,
@@ -322,7 +520,7 @@ class Order {
     int? locationRef,
   }) {
     return {
-      "ordered_items": [], // Empty for updates - items shouldn't be modified
+      "ordered_items": [],
       "submitted_order": {
         "id_placed_order": orderId,
         "placed_order_state": orderState,
@@ -334,131 +532,15 @@ class Order {
         "payment_ref": paymentRef,
         "placed_order_location_ref": locationRef,
         "placed_order_last_mod": DateTime.now().toIso8601String(),
-        // Only include fields that should be updated
       },
     };
-  }
-
-  // For complete order representation
-  Map<String, dynamic> toJson() {
-    return {
-      'ordered_items': items?.map((item) => item.toJson()).toList() ?? [],
-      'submitted_order': {
-        'id_placed_order': idPlacedOrder,
-        'ordered_timestamp': placedOrderCreation.toIso8601String(),
-        'order_discount': orderDiscount,
-        'placed_order_last_mod': placedOrderLastMod.toIso8601String(),
-        'payment_status': paymentStatus,
-        'payment_ref': paymentRef,
-        'placed_order_state': status,
-        'payment_method': paymentMethod,
-        'ordering_user_id': orderingUserId,
-        // Include other fields that might be needed
-        'total_price': totalPrice,
-        'placed_order_location_ref': placedOrderLocationRef,
-        'placed_order_state_ref': placedOrderStateRef,
-        'placed_order_invoice_ref': placedOrderInvoiceRef,
-        'placed_order_receipt_ref': placedOrderReceiptRef,
-        'customer_name': customerName,
-      },
-    };
-  }
-
-  // To match your existing service method signatures
-  Map<String, dynamic> toJsonForService() {
-    return {
-      'id_order': idPlacedOrder,
-      'total_amount': totalPrice,
-      'order_discount': orderDiscount,
-      'order_date': placedOrderCreation.toIso8601String(),
-      'last_modified': placedOrderLastMod.toIso8601String(),
-      'status': status,
-      'payment_status': paymentStatus,
-      'payment_method': paymentMethod,
-      'payment_reference': paymentRef,
-      'customer_name': customerName,
-      if (orderingUserId != null) 'user_id': orderingUserId,
-      if (placedOrderLocationRef != null) 'location_id': placedOrderLocationRef,
-      if (placedOrderInvoiceRef != null) 'invoice_id': placedOrderInvoiceRef,
-      if (placedOrderReceiptRef != null) 'receipt_id': placedOrderReceiptRef,
-      if (items != null)
-        'items': items!.map((item) => item.toJsonForService()).toList(),
-    };
-  }
-
-  Order copyWith({
-    int? idPlacedOrder,
-    double? orderDiscount,
-    double? totalPrice,
-    int? orderingUserId,
-    int? placedOrderLocationRef,
-    int? placedOrderStateRef,
-    DateTime? placedOrderLastMod,
-    int? placedOrderInvoiceRef,
-    int? placedOrderReceiptRef,
-    DateTime? placedOrderCreation,
-    List<OrderedItem>? items,
-    String? paymentStatus,
-    String? paymentMethod,
-    String? paymentRef,
-    String? customerName,
-  }) {
-    return Order(
-      idPlacedOrder: idPlacedOrder ?? this.idPlacedOrder,
-      orderDiscount: orderDiscount ?? this.orderDiscount,
-      totalPrice: totalPrice ?? this.totalPrice,
-      orderingUserId: orderingUserId ?? this.orderingUserId,
-      placedOrderLocationRef:
-          placedOrderLocationRef ?? this.placedOrderLocationRef,
-      placedOrderStateRef: placedOrderStateRef ?? this.placedOrderStateRef,
-      placedOrderLastMod: placedOrderLastMod ?? this.placedOrderLastMod,
-      placedOrderInvoiceRef:
-          placedOrderInvoiceRef ?? this.placedOrderInvoiceRef,
-      placedOrderReceiptRef:
-          placedOrderReceiptRef ?? this.placedOrderReceiptRef,
-      placedOrderCreation: placedOrderCreation ?? this.placedOrderCreation,
-      items: items ?? this.items,
-      paymentStatus: paymentStatus ?? this.paymentStatus,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
-      paymentRef: paymentRef ?? this.paymentRef,
-      customerName: customerName ?? this.customerName,
-    );
-  }
-
-  // Helper methods
-  bool get isCompleted => status.toLowerCase() == 'delivered';
-  bool get isPending => status.toLowerCase() == 'pending';
-  bool get isProcessing => status.toLowerCase() == 'processing';
-  bool get isShipped => status.toLowerCase() == 'shipped';
-  bool get isCancelled => status.toLowerCase() == 'cancelled';
-  bool get isRefunded => status.toLowerCase() == 'refunded';
-
-  bool get hasInvoice => placedOrderInvoiceRef != null;
-  bool get hasReceipt => placedOrderReceiptRef != null;
-  bool get hasLocation => placedOrderLocationRef != null;
-
-  bool get isPaid => paymentStatus?.toLowerCase() == 'paid';
-
-  double get netPrice => totalPrice - (orderDiscount ?? 0.0);
-
-  bool hasItems() => items != null && items!.isNotEmpty;
-
-  int get itemCount =>
-      items?.fold(0, (sum, item) => sum ?? 0 + item.orderedQuantity) ?? 0;
-
-  // Calculate total items quantity
-  int get totalQuantity =>
-      items?.fold(0, (total, item) => total ?? 0 + item.orderedQuantity) ?? 0;
-
-  // Calculate total with discount
-  double get finalTotal {
-    final discount = orderDiscount ?? 0.0;
-    return totalPrice - discount;
   }
 
   @override
   String toString() {
-    return 'Order(id: $idPlacedOrder, total: DZD$totalPrice, status: $status, items: ${items?.length ?? 0}, created: ${placedOrderCreation.toLocal()})';
+    return 'Order(id: $idPlacedOrder, total: DZD$totalPrice, '
+        'status: $status, items: ${items?.length ?? 0}, '
+        'user: $orderingUserName)';
   }
 
   @override

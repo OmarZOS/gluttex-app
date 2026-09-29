@@ -2986,7 +2986,267 @@
   "removeLabel": "Retirer",
   "updateLabel": "Mettre à jour",
   "productsLabel": "produits",
-  "addToCartLabel": "Ajouter au panier"
+  "addToCartLabel": "Ajouter au panier",
+
+
+    "deliveryDetailTitleWithId": "Livraison n°{id}",
+  "@deliveryDetailTitleWithId": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailRefreshTooltip": "Actualiser",
+  "deliveryDetailEditTooltip": "Modifier",
+  "deliveryDetailRefreshing": "Actualisation…",
+  "deliveryDetailCopiedToClipboard": "Copié",
+
+  "deliveryDetailSectionItems": "Articles",
+  "deliveryDetailSectionItemsCount": "{count, plural, =0{Aucun article} =1{1 article} other{{count} articles}}",
+  "@deliveryDetailSectionItemsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailSectionDestination": "Destination",
+  "deliveryDetailSectionProvider": "Fournisseur",
+  "deliveryDetailSectionShipping": "Expédition",
+  "deliveryDetailSectionInvoice": "Facture",
+  "deliveryDetailSectionMetadata": "Métadonnées",
+
+  "deliveryDetailUpdatedJustNow": "Mis à jour à l'instant",
+  "deliveryDetailUpdatedMinutesAgo": "Mis à jour il y a {count} min",
+  "@deliveryDetailUpdatedMinutesAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deliveryDetailUpdatedHoursAgo": "Mis à jour il y a {count} h",
+  "@deliveryDetailUpdatedHoursAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deliveryDetailUpdatedDaysAgo": "Mis à jour il y a {count} j",
+  "@deliveryDetailUpdatedDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deliveryDetailUpdatedOnDate": "Mis à jour le {day}/{month}/{year}",
+  "@deliveryDetailUpdatedOnDate": {
+    "placeholders": {
+      "day": { "type": "int" },
+      "month": { "type": "int" },
+      "year": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailEmptyItems": "Aucun article pour ce fournisseur",
+  "deliveryDetailEmptyDestination": "Aucune information de destination",
+  "deliveryDetailEmptyProvider": "Aucune information de fournisseur",
+  "deliveryDetailEmptyShipping": "Aucune information d'expédition",
+  "deliveryDetailEmptyInvoice": "Aucune information de facture",
+  "deliveryDetailEmptyMetadata": "Aucune métadonnée disponible",
+
+  "deliveryDetailItemQuantityLabel": "{count}×",
+  "@deliveryDetailItemQuantityLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailProductFallback": "Produit n°{id}",
+  "@deliveryDetailProductFallback": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailItemSubline": "{brand} · {barcode} · n°{productId}",
+  "@deliveryDetailItemSubline": {
+    "placeholders": {
+      "brand": { "type": "String" },
+      "barcode": { "type": "String" },
+      "productId": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailItemUnitLine": "{price} DA l'unité · par {unit} · TVA {vat} %",
+  "@deliveryDetailItemUnitLine": {
+    "placeholders": {
+      "price": { "type": "String" },
+      "unit": { "type": "String" },
+      "vat": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailItemDelivered": "Livré",
+
+  "deliveryDetailTotalsSubtotal": "Sous-total",
+  "deliveryDetailTotalsDiscount": "Remise",
+  "deliveryDetailTotalsTotal": "Total",
+  "deliveryDetailDiscountValue": "− {amount} DA",
+  "@deliveryDetailDiscountValue": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "deliveryDetailPriceWithCurrency": "{price} DA",
+  "@deliveryDetailPriceWithCurrency": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailFieldAddress": "Adresse",
+  "deliveryDetailFieldStreet": "Rue",
+  "deliveryDetailFieldCity": "Ville",
+  "deliveryDetailFieldPostalCode": "Code postal",
+  "deliveryDetailFieldCountry": "Pays",
+  "deliveryDetailFieldRecipient": "Destinataire",
+  "deliveryDetailFieldName": "Nom",
+  "deliveryDetailFieldOrganisation": "Organisation",
+  "deliveryDetailFieldProviderId": "Identifiant fournisseur",
+  "deliveryDetailFieldMethod": "Méthode",
+  "deliveryDetailFieldPackages": "Colis",
+  "deliveryDetailFieldTotalWeight": "Poids total",
+  "deliveryDetailFieldDimensions": "Dimensions",
+  "deliveryDetailFieldGoods": "Marchandises",
+  "deliveryDetailFieldHsCode": "Code SH",
+  "deliveryDetailFieldMerchant": "Commerçant",
+  "deliveryDetailFieldInstructions": "Instructions",
+  "deliveryDetailFieldFee": "Frais",
+  "deliveryDetailFieldInvoiceNumber": "Numéro",
+  "deliveryDetailFieldInvoiceType": "Type",
+  "deliveryDetailFieldInvoiceStatus": "Statut",
+  "deliveryDetailFieldStatus": "Statut",
+  "deliveryDetailFieldInvoiceTotal": "Total",
+  "deliveryDetailFieldInvoiceIssueDate": "Date d'émission",
+  "deliveryDetailFieldInvoiceDueDate": "Date d'échéance",
+  "deliveryDetailFieldInvoiceTaxApplied": "Taxe appliquée",
+  "deliveryDetailFieldInvoiceNotes": "Notes",
+  "deliveryDetailFieldCreated": "Créé le",
+  "deliveryDetailFieldUpdated": "Mis à jour le",
+  "deliveryDetailFieldDeliveryId": "Identifiant livraison",
+  "deliveryDetailFieldBrokerId": "Identifiant courtier",
+  "deliveryDetailFieldInvoiceRef": "Réf. facture",
+  "deliveryDetailFieldSourceType": "Type de source",
+  "deliveryDetailFieldSourceId": "Identifiant source",
+  "deliveryDetailFieldAddressId": "Identifiant adresse",
+  "deliveryDetailFieldCurrentAddressId": "Identifiant adresse actuelle",
+  "deliveryDetailFieldItemCount": "Articles",
+
+  "deliveryDetailFieldBrokerEntry": "Courtier {key}",
+  "@deliveryDetailFieldBrokerEntry": {
+    "placeholders": {
+      "key": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailPersonWithId": "Personne n°{id}",
+  "@deliveryDetailPersonWithId": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+  "deliveryDetailProviderWithId": "Fournisseur n°{id}",
+  "@deliveryDetailProviderWithId": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+  "deliveryDetailIdValue": "n°{id}",
+  "@deliveryDetailIdValue": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+  "deliveryDetailPackageCount": "{count, plural, =0{Aucun colis} =1{1 colis} other{{count} colis}}",
+  "@deliveryDetailPackageCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deliveryDetailWeightKg": "{weight} kg",
+  "@deliveryDetailWeightKg": {
+    "placeholders": {
+      "weight": { "type": "String" }
+    }
+  },
+  "deliveryDetailPercentValue": "{value} %",
+  "@deliveryDetailPercentValue": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailActionCancel": "Annuler",
+  "deliveryDetailActionValidate": "Valider la commande",
+  "deliveryDetailCancelDialogTitle": "Annuler cette livraison ?",
+  "deliveryDetailCancelDialogBody": "La livraison n°{id} sera marquée comme annulée. Cette action est irréversible.",
+  "@deliveryDetailCancelDialogBody": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+  "deliveryDetailCancelDialogKeep": "Conserver",
+  "deliveryDetailCancelDialogConfirm": "Annuler la livraison",
+  "deliveryDetailCancelSuccess": "Livraison annulée",
+  "deliveryDetailCancelFailure": "Échec de l'annulation",
+
+  "deliveryDetailValidateTitle": "Confirmer la livraison",
+  "deliveryDetailValidateSubtitle": "Vérifiez les détails ci-dessous avant de marquer comme terminée.",
+  "deliveryDetailValidateBack": "Retour",
+  "deliveryDetailValidateConfirm": "Valider",
+  "deliveryDetailValidateSuccess": "Livraison n°{id} validée",
+  "@deliveryDetailValidateSuccess": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryStatusPending": "En attente",
+  "deliveryStatusProcessing": "En traitement",
+  "deliveryStatusConfirmed": "Confirmée",
+  "deliveryStatusReadyForPickup": "Prête à être retirée",
+  "deliveryStatusInTransit": "En transit",
+  "deliveryStatusOutForDelivery": "En cours de livraison",
+  "deliveryStatusDelivered": "Livrée",
+  "deliveryStatusFailed": "Échouée",
+  "deliveryStatusCancelled": "Annulée",
+  "deliveryStatusReturned": "Retournée",
+  "deliveryStatusRefunded": "Remboursée",
+  "deliveryStatusUnknown": "Inconnue",
+
+  "shippingMethodStandard": "Livraison standard",
+  "shippingMethodExpress": "Livraison express",
+  "shippingMethodOvernight": "Livraison en nuit",
+  "shippingMethodFreight": "Fret",
+  "shippingMethodPickup": "Retrait sur place",
+  "shippingMethodCourier": "Coursier",
+  "shippingMethodSameDay": "Le jour même",
+  "shippingMethodInternational": "International",
+
+  "invoiceTypeInvoice": "Facture",
+  "invoiceTypeReceipt": "Reçu",
+  "invoiceTypeProforma": "Proforma",
+  "invoiceStatusUnpaid": "Impayée",
+  "invoiceStatusPaid": "Payée",
+  "invoiceStatusCanceled": "Annulée",
+  "invoiceStatusPartiallyPaid": "Partiellement payée",
+  "invoiceStatusOverdue": "En retard",
+  "invoiceStatusRefunded": "Remboursée",
+  "deliveryCardNoDestination": "Aucune destination",
+  "deliveryCardLoadFailed": "Impossible de charger les détails de la livraison",
+
+  "deliveryDetailSectionCustomer": "Client",
+"deliveryDetailFieldUsername": "Nom d'utilisateur",
+"deliveryDetailFieldEmail": "E-mail",
+"deliveryDetailFieldUserType": "Type d'utilisateur",
+"deliveryDetailFieldPhone": "Téléphone",
+"deliveryDetailFieldUserId": "Identifiant utilisateur"
 
 
 

@@ -6118,4 +6118,447 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get addToCartLabel => 'أضف إلى السلة';
+
+  @override
+  String deliveryDetailTitleWithId(int id) {
+    return 'التوصيل رقم $id';
+  }
+
+  @override
+  String get deliveryDetailRefreshTooltip => 'تحديث';
+
+  @override
+  String get deliveryDetailEditTooltip => 'تعديل';
+
+  @override
+  String get deliveryDetailRefreshing => 'جارٍ التحديث…';
+
+  @override
+  String get deliveryDetailCopiedToClipboard => 'تم النسخ';
+
+  @override
+  String get deliveryDetailSectionItems => 'العناصر';
+
+  @override
+  String deliveryDetailSectionItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصرًا',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryDetailSectionDestination => 'الوجهة';
+
+  @override
+  String get deliveryDetailSectionProvider => 'المزوّد';
+
+  @override
+  String get deliveryDetailSectionShipping => 'الشحن';
+
+  @override
+  String get deliveryDetailSectionInvoice => 'الفاتورة';
+
+  @override
+  String get deliveryDetailSectionMetadata => 'البيانات الوصفية';
+
+  @override
+  String get deliveryDetailUpdatedJustNow => 'تم التحديث الآن';
+
+  @override
+  String deliveryDetailUpdatedMinutesAgo(int count) {
+    return 'تم التحديث قبل $count دقيقة';
+  }
+
+  @override
+  String deliveryDetailUpdatedHoursAgo(int count) {
+    return 'تم التحديث قبل $count ساعة';
+  }
+
+  @override
+  String deliveryDetailUpdatedDaysAgo(int count) {
+    return 'تم التحديث قبل $count يوم';
+  }
+
+  @override
+  String deliveryDetailUpdatedOnDate(int day, int month, int year) {
+    return 'تم التحديث في $day/$month/$year';
+  }
+
+  @override
+  String get deliveryDetailEmptyItems => 'لا توجد عناصر لهذا المزوّد';
+
+  @override
+  String get deliveryDetailEmptyDestination => 'لا توجد بيانات وجهة';
+
+  @override
+  String get deliveryDetailEmptyProvider => 'لا توجد بيانات مزوّد';
+
+  @override
+  String get deliveryDetailEmptyShipping => 'لا توجد بيانات شحن';
+
+  @override
+  String get deliveryDetailEmptyInvoice => 'لا توجد بيانات فاتورة';
+
+  @override
+  String get deliveryDetailEmptyMetadata => 'لا توجد بيانات وصفية';
+
+  @override
+  String deliveryDetailItemQuantityLabel(int count) {
+    return '$count×';
+  }
+
+  @override
+  String deliveryDetailProductFallback(int id) {
+    return 'المنتج رقم $id';
+  }
+
+  @override
+  String deliveryDetailItemSubline(String brand, String barcode, int productId) {
+    return '$brand · $barcode · رقم $productId';
+  }
+
+  @override
+  String deliveryDetailItemUnitLine(String price, String unit, String vat) {
+    return '$price دج للوحدة · لكل $unit · ض.ق.م $vat%';
+  }
+
+  @override
+  String get deliveryDetailItemDelivered => 'تم التسليم';
+
+  @override
+  String get deliveryDetailTotalsSubtotal => 'المجموع الفرعي';
+
+  @override
+  String get deliveryDetailTotalsDiscount => 'الخصم';
+
+  @override
+  String get deliveryDetailTotalsTotal => 'الإجمالي';
+
+  @override
+  String deliveryDetailDiscountValue(String amount) {
+    return '− $amount دج';
+  }
+
+  @override
+  String deliveryDetailPriceWithCurrency(String price) {
+    return '$price دج';
+  }
+
+  @override
+  String get deliveryDetailFieldAddress => 'العنوان';
+
+  @override
+  String get deliveryDetailFieldStreet => 'الشارع';
+
+  @override
+  String get deliveryDetailFieldCity => 'المدينة';
+
+  @override
+  String get deliveryDetailFieldPostalCode => 'الرمز البريدي';
+
+  @override
+  String get deliveryDetailFieldCountry => 'الدولة';
+
+  @override
+  String get deliveryDetailFieldRecipient => 'المستلم';
+
+  @override
+  String get deliveryDetailFieldName => 'الاسم';
+
+  @override
+  String get deliveryDetailFieldOrganisation => 'المؤسسة';
+
+  @override
+  String get deliveryDetailFieldProviderId => 'معرّف المزوّد';
+
+  @override
+  String get deliveryDetailFieldMethod => 'الطريقة';
+
+  @override
+  String get deliveryDetailFieldPackages => 'الطرود';
+
+  @override
+  String get deliveryDetailFieldTotalWeight => 'الوزن الإجمالي';
+
+  @override
+  String get deliveryDetailFieldDimensions => 'الأبعاد';
+
+  @override
+  String get deliveryDetailFieldGoods => 'البضائع';
+
+  @override
+  String get deliveryDetailFieldHsCode => 'رمز HS';
+
+  @override
+  String get deliveryDetailFieldMerchant => 'التاجر';
+
+  @override
+  String get deliveryDetailFieldInstructions => 'التعليمات';
+
+  @override
+  String get deliveryDetailFieldFee => 'الرسوم';
+
+  @override
+  String get deliveryDetailFieldInvoiceNumber => 'الرقم';
+
+  @override
+  String get deliveryDetailFieldInvoiceType => 'النوع';
+
+  @override
+  String get deliveryDetailFieldInvoiceStatus => 'الحالة';
+
+  @override
+  String get deliveryDetailFieldStatus => 'الحالة';
+
+  @override
+  String get deliveryDetailFieldInvoiceTotal => 'الإجمالي';
+
+  @override
+  String get deliveryDetailFieldInvoiceIssueDate => 'تاريخ الإصدار';
+
+  @override
+  String get deliveryDetailFieldInvoiceDueDate => 'تاريخ الاستحقاق';
+
+  @override
+  String get deliveryDetailFieldInvoiceTaxApplied => 'الضريبة المطبقة';
+
+  @override
+  String get deliveryDetailFieldInvoiceNotes => 'ملاحظات';
+
+  @override
+  String get deliveryDetailFieldCreated => 'أُنشئ في';
+
+  @override
+  String get deliveryDetailFieldUpdated => 'حُدّث في';
+
+  @override
+  String get deliveryDetailFieldDeliveryId => 'معرّف التوصيل';
+
+  @override
+  String get deliveryDetailFieldBrokerId => 'معرّف الوسيط';
+
+  @override
+  String get deliveryDetailFieldInvoiceRef => 'مرجع الفاتورة';
+
+  @override
+  String get deliveryDetailFieldSourceType => 'نوع المصدر';
+
+  @override
+  String get deliveryDetailFieldSourceId => 'معرّف المصدر';
+
+  @override
+  String get deliveryDetailFieldAddressId => 'معرّف العنوان';
+
+  @override
+  String get deliveryDetailFieldCurrentAddressId => 'معرّف العنوان الحالي';
+
+  @override
+  String get deliveryDetailFieldItemCount => 'العناصر';
+
+  @override
+  String deliveryDetailFieldBrokerEntry(String key) {
+    return 'الوسيط $key';
+  }
+
+  @override
+  String deliveryDetailPersonWithId(int id) {
+    return 'شخص رقم $id';
+  }
+
+  @override
+  String deliveryDetailProviderWithId(int id) {
+    return 'مزوّد رقم $id';
+  }
+
+  @override
+  String deliveryDetailIdValue(int id) {
+    return 'رقم $id';
+  }
+
+  @override
+  String deliveryDetailPackageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count طرد',
+      many: '$count طردًا',
+      few: '$count طرود',
+      two: 'طردان',
+      one: 'طرد واحد',
+      zero: 'لا طرود',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deliveryDetailWeightKg(String weight) {
+    return '$weight كغ';
+  }
+
+  @override
+  String deliveryDetailPercentValue(int value) {
+    return '$value%';
+  }
+
+  @override
+  String get deliveryDetailActionCancel => 'إلغاء';
+
+  @override
+  String get deliveryDetailActionValidate => 'تأكيد الطلب';
+
+  @override
+  String get deliveryDetailCancelDialogTitle => 'إلغاء هذا التوصيل؟';
+
+  @override
+  String deliveryDetailCancelDialogBody(int id) {
+    return 'سيتم وضع علامة \"ملغى\" على التوصيل رقم $id. لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String get deliveryDetailCancelDialogKeep => 'الاحتفاظ';
+
+  @override
+  String get deliveryDetailCancelDialogConfirm => 'إلغاء التوصيل';
+
+  @override
+  String get deliveryDetailCancelSuccess => 'تم إلغاء التوصيل';
+
+  @override
+  String get deliveryDetailCancelFailure => 'فشل الإلغاء';
+
+  @override
+  String get deliveryDetailValidateTitle => 'تأكيد التوصيل';
+
+  @override
+  String get deliveryDetailValidateSubtitle => 'تحقق من التفاصيل أدناه قبل وضع علامة الاكتمال.';
+
+  @override
+  String get deliveryDetailValidateBack => 'رجوع';
+
+  @override
+  String get deliveryDetailValidateConfirm => 'تأكيد';
+
+  @override
+  String deliveryDetailValidateSuccess(int id) {
+    return 'تم تأكيد التوصيل رقم $id';
+  }
+
+  @override
+  String get deliveryStatusPending => 'قيد الانتظار';
+
+  @override
+  String get deliveryStatusProcessing => 'قيد المعالجة';
+
+  @override
+  String get deliveryStatusConfirmed => 'مؤكد';
+
+  @override
+  String get deliveryStatusReadyForPickup => 'جاهز للاستلام';
+
+  @override
+  String get deliveryStatusInTransit => 'قيد النقل';
+
+  @override
+  String get deliveryStatusOutForDelivery => 'قيد التوصيل';
+
+  @override
+  String get deliveryStatusDelivered => 'تم التسليم';
+
+  @override
+  String get deliveryStatusFailed => 'فشل';
+
+  @override
+  String get deliveryStatusCancelled => 'ملغى';
+
+  @override
+  String get deliveryStatusReturned => 'مُرتجع';
+
+  @override
+  String get deliveryStatusRefunded => 'مُسترد';
+
+  @override
+  String get deliveryStatusUnknown => 'غير معروف';
+
+  @override
+  String get shippingMethodStandard => 'توصيل قياسي';
+
+  @override
+  String get shippingMethodExpress => 'توصيل سريع';
+
+  @override
+  String get shippingMethodOvernight => 'توصيل خلال الليل';
+
+  @override
+  String get shippingMethodFreight => 'شحن بالبضائع';
+
+  @override
+  String get shippingMethodPickup => 'استلام من الفرع';
+
+  @override
+  String get shippingMethodCourier => 'توصيل عبر مندوب';
+
+  @override
+  String get shippingMethodSameDay => 'في نفس اليوم';
+
+  @override
+  String get shippingMethodInternational => 'شحن دولي';
+
+  @override
+  String get invoiceTypeInvoice => 'فاتورة';
+
+  @override
+  String get invoiceTypeReceipt => 'إيصال';
+
+  @override
+  String get invoiceTypeProforma => 'فاتورة أولية';
+
+  @override
+  String get invoiceStatusUnpaid => 'غير مدفوعة';
+
+  @override
+  String get invoiceStatusPaid => 'مدفوعة';
+
+  @override
+  String get invoiceStatusCanceled => 'ملغاة';
+
+  @override
+  String get invoiceStatusPartiallyPaid => 'مدفوعة جزئيًا';
+
+  @override
+  String get invoiceStatusOverdue => 'متأخرة';
+
+  @override
+  String get invoiceStatusRefunded => 'مُستردة';
+
+  @override
+  String get deliveryCardNoDestination => 'لا توجد وجهة';
+
+  @override
+  String get deliveryCardLoadFailed => 'تعذّر تحميل تفاصيل التوصيل';
+
+  @override
+  String get deliveryDetailSectionCustomer => 'العميل';
+
+  @override
+  String get deliveryDetailFieldUsername => 'اسم المستخدم';
+
+  @override
+  String get deliveryDetailFieldEmail => 'البريد الإلكتروني';
+
+  @override
+  String get deliveryDetailFieldUserType => 'نوع المستخدم';
+
+  @override
+  String get deliveryDetailFieldPhone => 'الهاتف';
+
+  @override
+  String get deliveryDetailFieldUserId => 'معرّف المستخدم';
 }

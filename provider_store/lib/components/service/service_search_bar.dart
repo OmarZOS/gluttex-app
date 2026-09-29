@@ -14,41 +14,39 @@ class ServiceSearchBar extends StatelessWidget {
     final localizations = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.shadow.withOpacity(0.05),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: TextField(
-            onChanged: onSearchChanged,
-            decoration: InputDecoration(
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              hintText: localizations?.searchServices ?? 'Search services...',
-              hintStyle: TextStyle(
-                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: colorScheme.surface,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withOpacity(0.05),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: TextField(
+          onChanged: onSearchChanged,
+          decoration: InputDecoration(
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            hintText: localizations?.searchServices ?? 'Search services...',
+            hintStyle: TextStyle(
+              color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: colorScheme.surface,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
             ),
           ),
         ),

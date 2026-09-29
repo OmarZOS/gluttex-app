@@ -2937,7 +2937,266 @@
   "productsLabel": "منتجات",
   "removeLabel": "إزالة",
   "updateLabel": "تحديث",
-  "addToCartLabel": "أضف إلى السلة"
+  "addToCartLabel": "أضف إلى السلة",
+
+    "deliveryDetailTitleWithId": "التوصيل رقم {id}",
+  "@deliveryDetailTitleWithId": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailRefreshTooltip": "تحديث",
+  "deliveryDetailEditTooltip": "تعديل",
+  "deliveryDetailRefreshing": "جارٍ التحديث…",
+  "deliveryDetailCopiedToClipboard": "تم النسخ",
+
+  "deliveryDetailSectionItems": "العناصر",
+  "deliveryDetailSectionItemsCount": "{count, plural, =0{لا عناصر} =1{عنصر واحد} =2{عنصران} few{{count} عناصر} many{{count} عنصرًا} other{{count} عنصر}}",
+  "@deliveryDetailSectionItemsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailSectionDestination": "الوجهة",
+  "deliveryDetailSectionProvider": "المزوّد",
+  "deliveryDetailSectionShipping": "الشحن",
+  "deliveryDetailSectionInvoice": "الفاتورة",
+  "deliveryDetailSectionMetadata": "البيانات الوصفية",
+
+  "deliveryDetailUpdatedJustNow": "تم التحديث الآن",
+  "deliveryDetailUpdatedMinutesAgo": "تم التحديث قبل {count} دقيقة",
+  "@deliveryDetailUpdatedMinutesAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deliveryDetailUpdatedHoursAgo": "تم التحديث قبل {count} ساعة",
+  "@deliveryDetailUpdatedHoursAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deliveryDetailUpdatedDaysAgo": "تم التحديث قبل {count} يوم",
+  "@deliveryDetailUpdatedDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deliveryDetailUpdatedOnDate": "تم التحديث في {day}/{month}/{year}",
+  "@deliveryDetailUpdatedOnDate": {
+    "placeholders": {
+      "day": { "type": "int" },
+      "month": { "type": "int" },
+      "year": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailEmptyItems": "لا توجد عناصر لهذا المزوّد",
+  "deliveryDetailEmptyDestination": "لا توجد بيانات وجهة",
+  "deliveryDetailEmptyProvider": "لا توجد بيانات مزوّد",
+  "deliveryDetailEmptyShipping": "لا توجد بيانات شحن",
+  "deliveryDetailEmptyInvoice": "لا توجد بيانات فاتورة",
+  "deliveryDetailEmptyMetadata": "لا توجد بيانات وصفية",
+
+  "deliveryDetailItemQuantityLabel": "{count}×",
+  "@deliveryDetailItemQuantityLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailProductFallback": "المنتج رقم {id}",
+  "@deliveryDetailProductFallback": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailItemSubline": "{brand} · {barcode} · رقم {productId}",
+  "@deliveryDetailItemSubline": {
+    "placeholders": {
+      "brand": { "type": "String" },
+      "barcode": { "type": "String" },
+      "productId": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailItemUnitLine": "{price} دج للوحدة · لكل {unit} · ض.ق.م {vat}%",
+  "@deliveryDetailItemUnitLine": {
+    "placeholders": {
+      "price": { "type": "String" },
+      "unit": { "type": "String" },
+      "vat": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailItemDelivered": "تم التسليم",
+
+  "deliveryDetailTotalsSubtotal": "المجموع الفرعي",
+  "deliveryDetailTotalsDiscount": "الخصم",
+  "deliveryDetailTotalsTotal": "الإجمالي",
+  "deliveryDetailDiscountValue": "− {amount} دج",
+  "@deliveryDetailDiscountValue": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "deliveryDetailPriceWithCurrency": "{price} دج",
+  "@deliveryDetailPriceWithCurrency": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailFieldAddress": "العنوان",
+  "deliveryDetailFieldStreet": "الشارع",
+  "deliveryDetailFieldCity": "المدينة",
+  "deliveryDetailFieldPostalCode": "الرمز البريدي",
+  "deliveryDetailFieldCountry": "الدولة",
+  "deliveryDetailFieldRecipient": "المستلم",
+  "deliveryDetailFieldName": "الاسم",
+  "deliveryDetailFieldOrganisation": "المؤسسة",
+  "deliveryDetailFieldProviderId": "معرّف المزوّد",
+  "deliveryDetailFieldMethod": "الطريقة",
+  "deliveryDetailFieldPackages": "الطرود",
+  "deliveryDetailFieldTotalWeight": "الوزن الإجمالي",
+  "deliveryDetailFieldDimensions": "الأبعاد",
+  "deliveryDetailFieldGoods": "البضائع",
+  "deliveryDetailFieldHsCode": "رمز HS",
+  "deliveryDetailFieldMerchant": "التاجر",
+  "deliveryDetailFieldInstructions": "التعليمات",
+  "deliveryDetailFieldFee": "الرسوم",
+  "deliveryDetailFieldInvoiceNumber": "الرقم",
+  "deliveryDetailFieldInvoiceType": "النوع",
+  "deliveryDetailFieldInvoiceStatus": "الحالة",
+  "deliveryDetailFieldStatus": "الحالة",
+  "deliveryDetailFieldInvoiceTotal": "الإجمالي",
+  "deliveryDetailFieldInvoiceIssueDate": "تاريخ الإصدار",
+  "deliveryDetailFieldInvoiceDueDate": "تاريخ الاستحقاق",
+  "deliveryDetailFieldInvoiceTaxApplied": "الضريبة المطبقة",
+  "deliveryDetailFieldInvoiceNotes": "ملاحظات",
+  "deliveryDetailFieldCreated": "أُنشئ في",
+  "deliveryDetailFieldUpdated": "حُدّث في",
+  "deliveryDetailFieldDeliveryId": "معرّف التوصيل",
+  "deliveryDetailFieldBrokerId": "معرّف الوسيط",
+  "deliveryDetailFieldInvoiceRef": "مرجع الفاتورة",
+  "deliveryDetailFieldSourceType": "نوع المصدر",
+  "deliveryDetailFieldSourceId": "معرّف المصدر",
+  "deliveryDetailFieldAddressId": "معرّف العنوان",
+  "deliveryDetailFieldCurrentAddressId": "معرّف العنوان الحالي",
+  "deliveryDetailFieldItemCount": "العناصر",
+
+  "deliveryDetailFieldBrokerEntry": "الوسيط {key}",
+  "@deliveryDetailFieldBrokerEntry": {
+    "placeholders": {
+      "key": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailPersonWithId": "شخص رقم {id}",
+  "@deliveryDetailPersonWithId": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+  "deliveryDetailProviderWithId": "مزوّد رقم {id}",
+  "@deliveryDetailProviderWithId": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+  "deliveryDetailIdValue": "رقم {id}",
+  "@deliveryDetailIdValue": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+  "deliveryDetailPackageCount": "{count, plural, =0{لا طرود} =1{طرد واحد} =2{طردان} few{{count} طرود} many{{count} طردًا} other{{count} طرد}}",
+  "@deliveryDetailPackageCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deliveryDetailWeightKg": "{weight} كغ",
+  "@deliveryDetailWeightKg": {
+    "placeholders": {
+      "weight": { "type": "String" }
+    }
+  },
+  "deliveryDetailPercentValue": "{value}%",
+  "@deliveryDetailPercentValue": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailActionCancel": "إلغاء",
+  "deliveryDetailActionValidate": "تأكيد الطلب",
+  "deliveryDetailCancelDialogTitle": "إلغاء هذا التوصيل؟",
+  "deliveryDetailCancelDialogBody": "سيتم وضع علامة \"ملغى\" على التوصيل رقم {id}. لا يمكن التراجع عن هذا الإجراء.",
+  "@deliveryDetailCancelDialogBody": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+  "deliveryDetailCancelDialogKeep": "الاحتفاظ",
+  "deliveryDetailCancelDialogConfirm": "إلغاء التوصيل",
+  "deliveryDetailCancelSuccess": "تم إلغاء التوصيل",
+  "deliveryDetailCancelFailure": "فشل الإلغاء",
+
+  "deliveryDetailValidateTitle": "تأكيد التوصيل",
+  "deliveryDetailValidateSubtitle": "تحقق من التفاصيل أدناه قبل وضع علامة الاكتمال.",
+  "deliveryDetailValidateBack": "رجوع",
+  "deliveryDetailValidateConfirm": "تأكيد",
+  "deliveryDetailValidateSuccess": "تم تأكيد التوصيل رقم {id}",
+  "@deliveryDetailValidateSuccess": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryStatusPending": "قيد الانتظار",
+  "deliveryStatusProcessing": "قيد المعالجة",
+  "deliveryStatusConfirmed": "مؤكد",
+  "deliveryStatusReadyForPickup": "جاهز للاستلام",
+  "deliveryStatusInTransit": "قيد النقل",
+  "deliveryStatusOutForDelivery": "قيد التوصيل",
+  "deliveryStatusDelivered": "تم التسليم",
+  "deliveryStatusFailed": "فشل",
+  "deliveryStatusCancelled": "ملغى",
+  "deliveryStatusReturned": "مُرتجع",
+  "deliveryStatusRefunded": "مُسترد",
+  "deliveryStatusUnknown": "غير معروف",
+
+  "shippingMethodStandard": "توصيل قياسي",
+  "shippingMethodExpress": "توصيل سريع",
+  "shippingMethodOvernight": "توصيل خلال الليل",
+  "shippingMethodFreight": "شحن بالبضائع",
+  "shippingMethodPickup": "استلام من الفرع",
+  "shippingMethodCourier": "توصيل عبر مندوب",
+  "shippingMethodSameDay": "في نفس اليوم",
+  "shippingMethodInternational": "شحن دولي",
+
+  "invoiceTypeInvoice": "فاتورة",
+  "invoiceTypeReceipt": "إيصال",
+  "invoiceTypeProforma": "فاتورة أولية",
+  "invoiceStatusUnpaid": "غير مدفوعة",
+  "invoiceStatusPaid": "مدفوعة",
+  "invoiceStatusCanceled": "ملغاة",
+  "invoiceStatusPartiallyPaid": "مدفوعة جزئيًا",
+  "invoiceStatusOverdue": "متأخرة",
+  "invoiceStatusRefunded": "مُستردة",
+  "deliveryCardNoDestination": "لا توجد وجهة",
+  "deliveryCardLoadFailed": "تعذّر تحميل تفاصيل التوصيل",
+
+  "deliveryDetailSectionCustomer": "العميل",
+"deliveryDetailFieldUsername": "اسم المستخدم",
+"deliveryDetailFieldEmail": "البريد الإلكتروني",
+"deliveryDetailFieldUserType": "نوع المستخدم",
+"deliveryDetailFieldPhone": "الهاتف",
+"deliveryDetailFieldUserId": "معرّف المستخدم"
 
 
 }

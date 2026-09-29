@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:gluttex_core/business/Supplier.dart';
+import 'package:gluttex_core/business/finance/Order.dart';
 
 // ============================================================================
-// DELIVERY ADDRESS CLASS
+// DELIVERY ADDRESS
 // ============================================================================
 
 class DeliveryAddress {
@@ -57,7 +58,7 @@ class DeliveryAddress {
 }
 
 // ============================================================================
-// DELIVERY INVOICE CLASS
+// DELIVERY INVOICE
 // ============================================================================
 
 class DeliveryInvoice {
@@ -73,7 +74,9 @@ class DeliveryInvoice {
   final DateTime? invoiceUpdatedAt;
   final int? invoiceTaxApplied;
   final List<dynamic>? cart;
-  final List<dynamic>? placedOrder;
+
+  /// Fully-typed orders attached to this invoice.
+  final List<Order>? placedOrder;
 
   DeliveryInvoice({
     required this.invoiceId,
@@ -92,6 +95,22 @@ class DeliveryInvoice {
   });
 
   factory DeliveryInvoice.fromJson(Map<String, dynamic> json) {
+    List<Order>? orders;
+    final rawOrders = json['placed_order'];
+    if (rawOrders is List) {
+      orders = rawOrders
+          .whereType<Map<String, dynamic>>()
+          .map((o) {
+            try {
+              return Order.fromJson(o);
+            } catch (_) {
+              return null;
+            }
+          })
+          .whereType<Order>()
+          .toList();
+    }
+
     return DeliveryInvoice(
       invoiceId: json['invoice_id'] as int? ?? 0,
       invoiceTotalAmount: (json['invoice_total_amount'] as num?)?.toDouble(),
@@ -105,7 +124,7 @@ class DeliveryInvoice {
       invoiceUpdatedAt: _safeDateTime(json['invoice_updated_at']),
       invoiceTaxApplied: json['invoice_tax_applied'] as int?,
       cart: json['cart'] as List?,
-      placedOrder: json['placed_order'] as List?,
+      placedOrder: orders,
     );
   }
 
@@ -126,13 +145,13 @@ class DeliveryInvoice {
         'invoice_updated_at': invoiceUpdatedAt!.toIso8601String(),
       if (invoiceTaxApplied != null) 'invoice_tax_applied': invoiceTaxApplied,
       if (cart != null) 'cart': cart,
-      if (placedOrder != null) 'placed_order': placedOrder,
+      if (placedOrder != null)
+        'placed_order': placedOrder!.map((o) => o.toJson()).toList(),
     };
   }
 
-  String get formattedTotal {
-    return 'DA ${(invoiceTotalAmount ?? 0).toStringAsFixed(2)}';
-  }
+  String get formattedTotal =>
+      'DA ${(invoiceTotalAmount ?? 0).toStringAsFixed(2)}';
 
   static DateTime? _safeDateTime(dynamic value) {
     if (value == null) return null;
@@ -143,7 +162,7 @@ class DeliveryInvoice {
 }
 
 // ============================================================================
-// DELIVERY CLASS
+// DELIVERY
 // ============================================================================
 
 class Delivery {
@@ -206,32 +225,33 @@ class Delivery {
   // ==================== FACTORY CONSTRUCTORS ====================
 
   factory Delivery.fromJson(Map<String, dynamic> json) {
-    // Parse delivery_provider using existing Supplier.fromJson
     Supplier? provider;
     if (json['delivery_provider'] != null) {
       try {
-        final providerData = json['delivery_provider'] as Map<String, dynamic>;
-        provider = Supplier.fromJson(providerData);
+        provider = Supplier.fromJson(
+          json['delivery_provider'] as Map<String, dynamic>,
+        );
       } catch (_) {}
     }
 
-    // Parse delivery_address
     DeliveryAddress? address;
     if (json['delivery_address'] != null) {
       try {
-        address = DeliveryAddress.fromJson(json['delivery_address']);
+        address = DeliveryAddress.fromJson(
+          json['delivery_address'] as Map<String, dynamic>,
+        );
       } catch (_) {}
     }
 
-    // Parse invoice
     DeliveryInvoice? invoice;
     if (json['invoice'] != null) {
       try {
-        invoice = DeliveryInvoice.fromJson(json['invoice']);
+        invoice = DeliveryInvoice.fromJson(
+          json['invoice'] as Map<String, dynamic>,
+        );
       } catch (_) {}
     }
 
-    // Get provider ID from the provider object if available
     int? providerId = _safeIntNull(json['delivery_provider_id']);
     if (providerId == null && provider != null) {
       providerId = provider.idProductProvider;
@@ -295,7 +315,7 @@ class Delivery {
     );
   }
 
-  // ==================== HELPER METHODS ====================
+  // ==================== HELPERS ====================
 
   static int _safeInt(dynamic value) {
     if (value == null) return 0;
@@ -489,9 +509,8 @@ class Delivery {
     'RETURNED': 'Returned',
   };
 
-  String get statusLabel {
-    return statusLabels[delivery_status.toUpperCase()] ?? delivery_status;
-  }
+  String get statusLabel =>
+      statusLabels[delivery_status.toUpperCase()] ?? delivery_status;
 
   // ==================== SHIPPING METHODS ====================
 
@@ -506,27 +525,89 @@ class Delivery {
     'international': 'International',
   };
 
-  String get shippingMethodLabel {
-    return shippingMethodLabels[delivery_shipping_method] ??
-        'Standard Delivery';
-  }
+  String get shippingMethodLabel =>
+      shippingMethodLabels[delivery_shipping_method] ?? 'Standard Delivery';
 
   // ==================== FORMATTED DISPLAY ====================
 
-  String get formattedWeight {
-    final weight = delivery_total_weight ?? 0.0;
-    return '${weight.toStringAsFixed(2)} kg';
-  }
+  String get formattedWeight =>
+      '${(delivery_total_weight ?? 0.0).toStringAsFixed(2)} kg';
 
-  String get formattedFee {
-    final fee = delivery_fee ?? 0.0;
-    return 'DA ${fee.toStringAsFixed(2)}';
-  }
+  String get formattedFee => 'DA ${(delivery_fee ?? 0.0).toStringAsFixed(2)}';
 
   String get formattedPackageCount {
     final count = delivery_package_count ?? 0;
     return '$count ${count == 1 ? 'package' : 'packages'}';
   }
+
+  // ==================== ORDER / ITEM ACCESS ====================
+
+  /// The primary order attached to this delivery, if any.
+  Order? get order {
+    final list = invoice?.placedOrder;
+    if (list == null || list.isEmpty) return null;
+    return list.first;
+  }
+
+  /// Every item on the primary order, unfiltered.
+  List<OrderedItem> get allOrderItems => order?.items ?? const [];
+
+  /// The owner user id of this delivery's provider, if known.
+  ///
+  /// The API sends `delivery_provider.product_provider_owner` inside the
+  /// nested `delivery_provider` block.
+  int? get deliveryProviderOwnerId => delivery_provider?.productProviderOwnerId;
+
+  /// Items belonging to this delivery's provider.
+  ///
+  /// The embedded `ordered_product` payload carries `product_provider_id`,
+  /// so the filter compares that to `delivery_provider_id`. When the
+  /// payload doesn't include the embedded product, fall back to owner
+  /// comparison. When neither side carries a value, keep the item.
+  List<OrderedItem> get orderItems => itemsForDelivery();
+
+  List<OrderedItem> itemsForDelivery() {
+    final all = allOrderItems;
+    if (all.isEmpty) return const [];
+
+    final targetProviderId = delivery_provider_id;
+    final targetOwnerId = deliveryProviderOwnerId;
+
+    return all.where((item) {
+      final embedded = item.orderedProduct;
+
+      // Path 1 — provider id, when both sides are present.
+      if (embedded != null &&
+          embedded.productProviderId > 0 &&
+          targetProviderId != null) {
+        return embedded.productProviderId == targetProviderId;
+      }
+
+      // Path 2 — owner id fallback.
+      if (embedded != null &&
+          embedded.productOwner > 0 &&
+          targetOwnerId != null) {
+        return embedded.productOwner == targetOwnerId;
+      }
+
+      // No discriminators available — keep the item.
+      return true;
+    }).toList();
+  }
+
+  /// Whether the delivery carries a detailed, filterable order.
+  bool get hasDetailedOrder => allOrderItems.isNotEmpty;
+
+  /// Line total of the filtered items (with VAT already applied by
+  /// [OrderedItem.totalPrice]).
+  double deliverySubtotal() =>
+      orderItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+
+  /// Discount recorded on the parent order, if any.
+  double get orderDiscount => order?.orderDiscount ?? 0.0;
+
+  /// Subtotal minus the order-level discount.
+  double get deliveryNetTotal => deliverySubtotal() - orderDiscount;
 
   // ==================== VALIDATION ====================
 
@@ -539,11 +620,13 @@ class Delivery {
         (delivery_total_weight ?? 0) > 0;
   }
 
-  // ==================== TO STRING ====================
+  // ==================== TO STRING / EQUALITY ====================
 
   @override
   String toString() {
-    return 'Delivery(id: $id_delivery, status: $delivery_status, provider: ${providerName ?? delivery_provider_id})';
+    return 'Delivery(id: $id_delivery, status: $delivery_status, '
+        'provider: ${providerName ?? delivery_provider_id}, '
+        'items: ${orderItems.length})';
   }
 
   @override
@@ -558,7 +641,7 @@ class Delivery {
 }
 
 // ============================================================================
-// DELIVERY DATA CLASS (LEGACY SUPPORT)
+// DELIVERY DATA (LEGACY)
 // ============================================================================
 
 class DeliveryData {
@@ -709,9 +792,7 @@ class DeliveryData {
     );
   }
 
-  Delivery toDelivery() {
-    return Delivery.fromDeliveryData(this);
-  }
+  Delivery toDelivery() => Delivery.fromDeliveryData(this);
 
   Map<String, dynamic> toJson() {
     return {

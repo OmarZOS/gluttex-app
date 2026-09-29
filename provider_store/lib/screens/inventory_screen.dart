@@ -9,6 +9,7 @@ import 'package:gluttex_core/business/privileges/role_bit_mapper.dart';
 import 'package:provider_store/components/inventory/inventory_app_bar.dart';
 import 'package:provider_store/components/inventory/product_list.dart';
 import 'package:provider_store/components/inventory/search_bar.dart';
+import 'package:ui/components/store/StoreDashboardHeader.dart';
 
 class InventoryScreen extends StatefulWidget {
   final PrivilegeLevel privilegeLevel;
@@ -132,24 +133,28 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
-            InventoryAppBar(
-              onRefresh: widget.onRefresh,
-              privilegeLevel: widget.privilegeLevel,
-              hasSupplierSelected: widget.currentProviderId != null,
+            DashboardHeader(
+              leadingIcon: Icons.inventory_2_rounded,
+              title: AppLocalizations.of(context)!.inventory, // or a fallback
+              subtitle: '${_filteredProducts.length} items',
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded),
+                  onPressed: widget.onRefresh,
+                  tooltip: AppLocalizations.of(context)!.refresh,
+                ),
+              ],
+              searchBar: InventorySearchBar(
+                searchQuery: widget.searchQuery,
+                onSearchChanged: widget.onSearchChanged,
+              ),
             ),
             const SizedBox(height: 8),
-            InventorySearchBar(
-              searchQuery: widget.searchQuery,
-              onSearchChanged: widget.onSearchChanged,
-              isEnabled: widget._canView,
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: _buildProductList(context),
-            ),
+            Expanded(child: _buildProductList(context)),
           ],
         ),
       ),
@@ -339,9 +344,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
       icon: const Icon(Icons.add_rounded),
       label: Text(
         localizations.addProduct,
-        style: theme.textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        // style: theme.textTheme.labelLarge?.copyWith(
+        //   fontWeight: FontWeight.w600,
+        // ),
       ),
       elevation: 4,
       shape: RoundedRectangleBorder(
