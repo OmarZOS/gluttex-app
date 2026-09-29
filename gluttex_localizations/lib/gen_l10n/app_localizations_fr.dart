@@ -6536,4 +6536,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deliveryDetailFieldUserId => 'Identifiant utilisateur';
+
+  @override
+  String get deliveryDetailActionAccept => 'Accepter';
+
+  @override
+  String get deliveryDetailActionConfirm => 'Confirmer';
+
+  @override
+  String get deliveryDetailActionShip => 'Expédier';
+
+  @override
+  String get deliveryDetailActionInTransit => 'En transit';
+
+  @override
+  String get deliveryDetailActionOutForDelivery => 'En cours de livraison';
+
+  @override
+  String get deliveryDetailActionDeliver => 'Livrer';
+
+  @override
+  String get deliveryDetailValidateFailure => 'Échec de la mise à jour de la livraison';
 }

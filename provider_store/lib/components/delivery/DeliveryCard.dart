@@ -26,7 +26,7 @@ class DeliveryCard extends StatelessWidget {
     final cs = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final status = DeliveryStatusConfig.fromStatus(
-      delivery.delivery_status,
+      delivery.delivery_status.wireValue,
       l10n,
     );
 

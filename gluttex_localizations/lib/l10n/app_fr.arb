@@ -3246,7 +3246,15 @@
 "deliveryDetailFieldEmail": "E-mail",
 "deliveryDetailFieldUserType": "Type d'utilisateur",
 "deliveryDetailFieldPhone": "Téléphone",
-"deliveryDetailFieldUserId": "Identifiant utilisateur"
+"deliveryDetailFieldUserId": "Identifiant utilisateur",
+
+  "deliveryDetailActionAccept": "Accepter",
+  "deliveryDetailActionConfirm": "Confirmer",
+  "deliveryDetailActionShip": "Expédier",
+  "deliveryDetailActionInTransit": "En transit",
+  "deliveryDetailActionOutForDelivery": "En cours de livraison",
+  "deliveryDetailActionDeliver": "Livrer",
+  "deliveryDetailValidateFailure": "Échec de la mise à jour de la livraison"
 
 
 

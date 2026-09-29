@@ -2994,7 +2994,14 @@
 "deliveryDetailFieldEmail": "Email",
 "deliveryDetailFieldUserType": "User type",
 "deliveryDetailFieldPhone": "Phone",
-"deliveryDetailFieldUserId": "User ID"
+"deliveryDetailFieldUserId": "User ID",
+"deliveryDetailActionAccept": "Accept",
+"deliveryDetailActionConfirm": "Confirm",
+"deliveryDetailActionShip": "Ship",
+"deliveryDetailActionInTransit": "Mark In Transit",
+"deliveryDetailActionOutForDelivery": "Out for Delivery",
+"deliveryDetailActionDeliver": "Deliver",
+"deliveryDetailValidateFailure": "Failed to update delivery"
 
 
 }

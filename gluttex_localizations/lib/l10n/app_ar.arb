@@ -3196,7 +3196,15 @@
 "deliveryDetailFieldEmail": "البريد الإلكتروني",
 "deliveryDetailFieldUserType": "نوع المستخدم",
 "deliveryDetailFieldPhone": "الهاتف",
-"deliveryDetailFieldUserId": "معرّف المستخدم"
+"deliveryDetailFieldUserId": "معرّف المستخدم",
+
+  "deliveryDetailActionAccept": "قبول",
+  "deliveryDetailActionConfirm": "تأكيد",
+  "deliveryDetailActionShip": "شحن",
+  "deliveryDetailActionInTransit": "في الطريق",
+  "deliveryDetailActionOutForDelivery": "خارج للتوصيل",
+  "deliveryDetailActionDeliver": "تسليم",
+  "deliveryDetailValidateFailure": "فشل تحديث التوصيل"
 
 
 }

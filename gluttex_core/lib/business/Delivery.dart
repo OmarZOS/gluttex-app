@@ -162,6 +162,158 @@ class DeliveryInvoice {
 }
 
 // ============================================================================
+// DELIVERY STATUS ENUM
+// ============================================================================
+
+enum DeliveryStatus {
+  pending,
+  processing,
+  confirmed,
+  shipped,
+  inTransit,
+  outForDelivery,
+  delivered,
+  failed,
+  cancelled,
+  returned,
+  refunded;
+
+  /// The string value the database and API use (`snake_case`).
+  String get wireValue {
+    switch (this) {
+      case DeliveryStatus.pending:
+        return 'pending';
+      case DeliveryStatus.processing:
+        return 'processing';
+      case DeliveryStatus.confirmed:
+        return 'confirmed';
+      case DeliveryStatus.shipped:
+        return 'shipped';
+      case DeliveryStatus.inTransit:
+        return 'in_transit';
+      case DeliveryStatus.outForDelivery:
+        return 'out_for_delivery';
+      case DeliveryStatus.delivered:
+        return 'delivered';
+      case DeliveryStatus.failed:
+        return 'failed';
+      case DeliveryStatus.cancelled:
+        return 'cancelled';
+      case DeliveryStatus.returned:
+        return 'returned';
+      case DeliveryStatus.refunded:
+        return 'refunded';
+    }
+  }
+
+  /// Human-readable English label. For localized UI use the
+  /// `AppLocalizations.deliveryStatus*` keys instead.
+  String get label {
+    switch (this) {
+      case DeliveryStatus.pending:
+        return 'Pending';
+      case DeliveryStatus.processing:
+        return 'Processing';
+      case DeliveryStatus.confirmed:
+        return 'Confirmed';
+      case DeliveryStatus.shipped:
+        return 'Shipped';
+      case DeliveryStatus.inTransit:
+        return 'In Transit';
+      case DeliveryStatus.outForDelivery:
+        return 'Out for Delivery';
+      case DeliveryStatus.delivered:
+        return 'Delivered';
+      case DeliveryStatus.failed:
+        return 'Failed';
+      case DeliveryStatus.cancelled:
+        return 'Cancelled';
+      case DeliveryStatus.returned:
+        return 'Returned';
+      case DeliveryStatus.refunded:
+        return 'Refunded';
+    }
+  }
+
+  /// Parse a wire string into an enum value. Case-insensitive.
+  /// Returns [DeliveryStatus.pending] for unknown values so the UI
+  /// never crashes on unexpected data.
+  static DeliveryStatus fromWire(String? raw) {
+    if (raw == null || raw.isEmpty) return DeliveryStatus.pending;
+    switch (raw.toLowerCase().trim()) {
+      case 'pending':
+        return DeliveryStatus.pending;
+      case 'processing':
+        return DeliveryStatus.processing;
+      case 'confirmed':
+        return DeliveryStatus.confirmed;
+      case 'shipped':
+        return DeliveryStatus.shipped;
+      case 'in_transit':
+        return DeliveryStatus.inTransit;
+      case 'out_for_delivery':
+        return DeliveryStatus.outForDelivery;
+      case 'delivered':
+        return DeliveryStatus.delivered;
+      case 'failed':
+        return DeliveryStatus.failed;
+      case 'cancelled':
+      case 'canceled':
+        return DeliveryStatus.cancelled;
+      case 'returned':
+        return DeliveryStatus.returned;
+      case 'refunded':
+        return DeliveryStatus.refunded;
+      default:
+        return DeliveryStatus.pending;
+    }
+  }
+
+  // ── Semantic helpers ──
+
+  bool get isPending => this == DeliveryStatus.pending;
+  bool get isProcessing => this == DeliveryStatus.processing;
+  bool get isConfirmed => this == DeliveryStatus.confirmed;
+  bool get isShipped => this == DeliveryStatus.shipped;
+  bool get isInTransit => this == DeliveryStatus.inTransit;
+  bool get isOutForDelivery => this == DeliveryStatus.outForDelivery;
+  bool get isDelivered => this == DeliveryStatus.delivered;
+  bool get isFailed => this == DeliveryStatus.failed;
+  bool get isCancelled => this == DeliveryStatus.cancelled;
+  bool get isReturned => this == DeliveryStatus.returned;
+  bool get isRefunded => this == DeliveryStatus.refunded;
+
+  /// Whether the delivery is still in flight and can be modified.
+  bool get isActive =>
+      isPending ||
+      isProcessing ||
+      isConfirmed ||
+      isShipped ||
+      isInTransit ||
+      isOutForDelivery;
+
+  /// Whether the delivery is finished (delivered, failed, cancelled,
+  /// returned, or refunded).
+  bool get isTerminal =>
+      isDelivered || isFailed || isCancelled || isReturned || isRefunded;
+
+  // ── Policy-aligned transition predicates ──
+  //
+  // These mirror the server's DeliveryPolicy. The server is still the
+  // authority — a client-side button that uses these is a hint, not a
+  // bypass. Where the two disagree, the client is wrong.
+
+  /// Cancellable only before the goods leave the warehouse.
+  /// Policy permits: pending, processing, confirmed.
+  bool get canBeCancelled => isPending || isProcessing || isConfirmed;
+
+  /// Modifiable while the delivery is still moving through the graph.
+  /// Terminal states (delivered, cancelled, returned, refunded) can't
+  /// be updated; failed is terminal too.
+  bool get canBeUpdated => !isTerminal;
+}
+
+// ============================================================================
 // DELIVERY
 // ============================================================================
 
@@ -177,7 +329,8 @@ class Delivery {
   String? delivery_merchant_name;
   String delivery_shipping_method;
   String? delivery_special_instructions;
-  String delivery_status;
+  DeliveryStatus delivery_status;
+
   int? delivery_address_id;
   int? delivery_current_address_id;
   double? delivery_fee;
@@ -205,7 +358,7 @@ class Delivery {
     this.delivery_merchant_name,
     this.delivery_shipping_method = 'standard',
     this.delivery_special_instructions,
-    this.delivery_status = 'pending',
+    this.delivery_status = DeliveryStatus.pending,
     this.delivery_address_id,
     this.delivery_current_address_id,
     this.delivery_fee,
@@ -271,7 +424,9 @@ class Delivery {
           json['delivery_shipping_method'] as String? ?? 'standard',
       delivery_special_instructions:
           json['delivery_special_instructions'] as String?,
-      delivery_status: json['delivery_status'] as String? ?? 'pending',
+      delivery_status: DeliveryStatus.fromWire(
+        json['delivery_status'] as String?,
+      ),
       delivery_address_id: _safeIntNull(json['delivery_address_id']),
       delivery_current_address_id:
           _safeIntNull(json['delivery_current_address_id']),
@@ -303,7 +458,7 @@ class Delivery {
       delivery_merchant_name: data.deliveryMerchantName,
       delivery_shipping_method: data.deliveryShippingMethod,
       delivery_special_instructions: data.deliverySpecialInstructions,
-      delivery_status: data.deliveryStatus,
+      delivery_status: DeliveryStatus.fromWire(data.deliveryStatus),
       delivery_address_id: data.deliveryAddressId,
       delivery_current_address_id: data.deliveryCurrentAddressId,
       delivery_fee: data.deliveryFee,
@@ -369,7 +524,7 @@ class Delivery {
       'delivery_shipping_method': delivery_shipping_method,
       if (delivery_special_instructions != null)
         'delivery_special_instructions': delivery_special_instructions,
-      'delivery_status': delivery_status,
+      'delivery_status': delivery_status.wireValue,
       if (delivery_address_id != null)
         'delivery_address_id': delivery_address_id,
       if (delivery_current_address_id != null)
@@ -410,7 +565,7 @@ class Delivery {
     String? delivery_merchant_name,
     String? delivery_shipping_method,
     String? delivery_special_instructions,
-    String? delivery_status,
+    DeliveryStatus? delivery_status,
     int? delivery_address_id,
     int? delivery_current_address_id,
     double? delivery_fee,
@@ -480,37 +635,19 @@ class Delivery {
 
   // ==================== STATUS HELPERS ====================
 
-  bool get isPending => delivery_status.toUpperCase() == 'PENDING';
-  bool get isProcessing => delivery_status.toUpperCase() == 'PROCESSING';
-  bool get isReadyForPickup =>
-      delivery_status.toUpperCase() == 'READY_FOR_PICKUP';
-  bool get isInTransit => delivery_status.toUpperCase() == 'IN_TRANSIT';
-  bool get isOutForDelivery =>
-      delivery_status.toUpperCase() == 'OUT_FOR_DELIVERY';
-  bool get isDelivered => delivery_status.toUpperCase() == 'DELIVERED';
-  bool get isCancelled => delivery_status.toUpperCase() == 'CANCELLED';
-  bool get isFailed => delivery_status.toUpperCase() == 'FAILED';
-  bool get isReturned => delivery_status.toUpperCase() == 'RETURNED';
+  bool get isPending => delivery_status.isPending;
+  bool get isProcessing => delivery_status.isProcessing;
+  bool get isInTransit => delivery_status.isInTransit;
+  bool get isOutForDelivery => delivery_status.isOutForDelivery;
+  bool get isDelivered => delivery_status.isDelivered;
+  bool get isCancelled => delivery_status.isCancelled;
+  bool get isFailed => delivery_status.isFailed;
+  bool get isReturned => delivery_status.isReturned;
 
-  bool get canBeCancelled => isPending || isInTransit || isProcessing;
-  bool get canBeUpdated => !isDelivered && !isCancelled;
-
-  // ==================== STATUS LABELS ====================
-
-  static const Map<String, String> statusLabels = {
-    'PENDING': 'Pending',
-    'PROCESSING': 'Processing',
-    'READY_FOR_PICKUP': 'Ready for Pickup',
-    'IN_TRANSIT': 'In Transit',
-    'OUT_FOR_DELIVERY': 'Out for Delivery',
-    'DELIVERED': 'Delivered',
-    'FAILED': 'Failed',
-    'CANCELLED': 'Cancelled',
-    'RETURNED': 'Returned',
-  };
-
-  String get statusLabel =>
-      statusLabels[delivery_status.toUpperCase()] ?? delivery_status;
+  /// Delegates to the status enum, which mirrors the server's
+  /// DeliveryPolicy. Do not re-derive here.
+  bool get canBeCancelled => delivery_status.canBeCancelled;
+  bool get canBeUpdated => delivery_status.canBeUpdated;
 
   // ==================== SHIPPING METHODS ====================
 
@@ -610,14 +747,18 @@ class Delivery {
   double get deliveryNetTotal => deliverySubtotal() - orderDiscount;
 
   // ==================== VALIDATION ====================
+  //
+  // The gate a client uses before POSTing a new delivery. It matches
+  // the server's DeliveryPolicy, which requires only a destination
+  // (address, current address, or a recipient). Package count and
+  // weight are packing details and are filled in later — often at
+  // `confirm` time via an action body.
 
   bool get isValidForCreation {
-    return (delivery_address_id ?? 0) > 0 &&
-        (recipient_person > 0 ||
-            recipient_provider > 0 ||
-            (delivery_invoice_ref ?? 0) > 0) &&
-        (delivery_package_count ?? 0) > 0 &&
-        (delivery_total_weight ?? 0) > 0;
+    return (delivery_address_id ?? 0) > 0 ||
+        (delivery_current_address_id ?? 0) > 0 ||
+        recipient_person > 0 ||
+        recipient_provider > 0;
   }
 
   // ==================== TO STRING / EQUALITY ====================
@@ -702,7 +843,7 @@ class DeliveryData {
       deliveryMerchantName: delivery.delivery_merchant_name,
       deliveryShippingMethod: delivery.delivery_shipping_method,
       deliverySpecialInstructions: delivery.delivery_special_instructions,
-      deliveryStatus: delivery.delivery_status,
+      deliveryStatus: delivery.delivery_status.wireValue,
       deliveryAddressId: delivery.delivery_address_id,
       deliveryCurrentAddressId: delivery.delivery_current_address_id,
       deliveryFee: delivery.delivery_fee,

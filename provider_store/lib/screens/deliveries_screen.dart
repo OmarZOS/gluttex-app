@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider_store/components/delivery/DeliveryListView.dart';
-import 'package:provider_store/components/delivery/NewDeliverySheet.dart';
+import 'package:provider_store/components/delivery/DeliveryDetailsSheet.dart';
 import 'package:provider/provider.dart';
 import 'package:event/delivery_change_notifier.dart';
+import 'package:gluttex_core/business/Delivery.dart';
 import 'package:ui/components/store/StoreDashboardHeader.dart';
+
+// ============================================================================
+// DELIVERY TABBED VIEW
+// ============================================================================
+//
+// The strip enumerates every state the delivery state machine can
+// produce. Grouped into three phases so the operator's mental model
+// matches the workflow:
+//
+//   Active   — pre-shipment: pending, processing, confirmed
+//   In flight — moving: shipped, in transit, out for delivery
+//   Closed   — terminal: delivered, failed, cancelled, returned, refunded
+//
+// Each phase is a top-level tab. Under each tab, the individual states
+// are chips with their own counts, so an operator can see at a glance
+// where the work is sitting.
 
 class DeliveryTabbedView extends StatefulWidget {
   final DeliveryChangeNotifier? notifier;
@@ -25,7 +42,60 @@ class DeliveryTabbedView extends StatefulWidget {
   State<DeliveryTabbedView> createState() => _DeliveryTabbedViewState();
 }
 
-enum _DateFilter { all, today, week, month }
+/// A phase groups related delivery statuses under one top-level tab.
+enum _Phase {
+  active,
+  inFlight,
+  closed;
+
+  String get label {
+    switch (this) {
+      case _Phase.active:
+        return 'Active';
+      case _Phase.inFlight:
+        return 'In flight';
+      case _Phase.closed:
+        return 'Closed';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case _Phase.active:
+        return Icons.schedule_rounded;
+      case _Phase.inFlight:
+        return Icons.local_shipping_rounded;
+      case _Phase.closed:
+        return Icons.inventory_2_rounded;
+    }
+  }
+
+  /// The statuses that belong to this phase, in lifecycle order.
+  List<DeliveryStatus> get statuses {
+    switch (this) {
+      case _Phase.active:
+        return const [
+          DeliveryStatus.pending,
+          DeliveryStatus.processing,
+          DeliveryStatus.confirmed,
+        ];
+      case _Phase.inFlight:
+        return const [
+          DeliveryStatus.shipped,
+          DeliveryStatus.inTransit,
+          DeliveryStatus.outForDelivery,
+        ];
+      case _Phase.closed:
+        return const [
+          DeliveryStatus.delivered,
+          DeliveryStatus.failed,
+          DeliveryStatus.cancelled,
+          DeliveryStatus.returned,
+          DeliveryStatus.refunded,
+        ];
+    }
+  }
+}
 
 class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
     with TickerProviderStateMixin {
@@ -37,7 +107,10 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
   bool _showFilters = false;
   bool _isRefreshing = false;
   bool _initialized = false;
-  _DateFilter _activeFilter = _DateFilter.all;
+
+  /// Which status is currently selected inside the active phase.
+  /// Null means "all statuses in the phase".
+  DeliveryStatus? _activeStatusFilter;
 
   late DeliveryChangeNotifier _notifier;
 
@@ -55,7 +128,6 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
     if (widget.notifier == null) {
       _notifier = context.read<DeliveryChangeNotifier>();
     }
-
     if (!_initialized) {
       _initialized = true;
       WidgetsBinding.instance
@@ -82,7 +154,10 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
   }
 
   void _onTabChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    // Clear the per-status chip when the phase changes; the previous
+    // selection may not exist under the new phase.
+    setState(() => _activeStatusFilter = null);
   }
 
   void _loadDeliveriesForCurrentSupplier() {
@@ -94,11 +169,12 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
       _notifier.fetchDeliveries(providerId: supplierId, reset: true);
       return;
     }
-
     if (_notifier.deliveries.isEmpty) {
       _notifier.fetchFirstPage();
     }
   }
+
+  _Phase get _currentPhase => _Phase.values[_tabController.index];
 
   // ==================== BUILD ====================
 
@@ -109,12 +185,12 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
 
     return Scaffold(
       backgroundColor: cs.surface,
-      floatingActionButton: _shouldShowFab() ? _buildFab(theme) : null,
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(theme, cs),
-            _buildTabStrip(theme, cs),
+            _buildPhaseStrip(theme, cs),
+            _buildStatusChips(theme, cs),
             if (_showFilters) _buildFilterRow(theme, cs),
             const SizedBox(height: 4),
             Expanded(child: _buildContent()),
@@ -132,7 +208,7 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
     return DashboardHeader(
       leadingIcon: Icons.local_shipping_rounded,
       title: 'Deliveries',
-      subtitle: _subtitleForCurrentTab(),
+      subtitle: _subtitleForCurrentPhase(),
       actions: [
         _headerAction(
           icon: busy
@@ -183,73 +259,29 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
     );
   }
 
-  String _subtitleForCurrentTab() {
-    switch (_tabController.index) {
-      case 0:
-        return '${_notifier.pendingCount} pending';
-      case 1:
-        return '${_notifier.deliveredCount} delivered';
-      case 2:
-        return '${_notifier.cancelledCount} cancelled';
-      default:
-        return '${_notifier.totalDeliveries} total';
-    }
+  String _subtitleForCurrentPhase() {
+    final phase = _currentPhase;
+    final count = _phaseCount(phase);
+    return '$count ${phase.label.toLowerCase()}';
   }
 
-  // ==================== SEARCH ====================
-
-  Widget _buildSearchBar(ThemeData theme, ColorScheme cs) {
-    return Container(
-      height: 44,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: cs.outlineVariant.withOpacity(0.5),
-        ),
-      ),
-      child: TextField(
-        controller: _searchController,
-        focusNode: _searchFocusNode,
-        autofocus: true,
-        textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.search, size: 20),
-          hintText: 'Search by ID, customer, address…',
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  onPressed: () {
-                    _searchController.clear();
-                    widget.onSearch?.call('');
-                    setState(() {});
-                  },
-                )
-              : null,
-        ),
-        onChanged: (value) {
-          widget.onSearch?.call(value);
-          setState(() {}); // update clear-button visibility
-        },
-        style: theme.textTheme.bodyMedium,
-      ),
+  int _phaseCount(_Phase phase) {
+    return phase.statuses.fold<int>(
+      0,
+      (sum, status) => sum + _countForStatus(status),
     );
   }
 
-  // ==================== TAB STRIP ====================
+  // ==================== PHASE STRIP ====================
 
-  Widget _buildTabStrip(ThemeData theme, ColorScheme cs) {
+  Widget _buildPhaseStrip(ThemeData theme, ColorScheme cs) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest.withOpacity(0.4),
         borderRadius: BorderRadius.circular(50),
-        border: Border.all(
-          color: cs.outlineVariant.withOpacity(0.5),
-        ),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
       ),
       child: TabBar(
         controller: _tabController,
@@ -279,43 +311,149 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
           fontWeight: FontWeight.w500,
           fontSize: 13,
         ),
-        tabs: [
-          _buildTab(
-            icon: Icons.schedule_rounded,
-            label: 'Pending',
-            count: _notifier.pendingCount,
-          ),
-          _buildTab(
-            icon: Icons.check_circle_rounded,
-            label: 'Delivered',
-            count: _notifier.deliveredCount,
-          ),
-          _buildTab(
-            icon: Icons.cancel_rounded,
-            label: 'Cancelled',
-            count: _notifier.cancelledCount,
-          ),
-        ],
+        tabs: _Phase.values.map((phase) {
+          return Tab(
+            height: 40,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(phase.icon, size: 15),
+                const SizedBox(width: 6),
+                Text(phase.label),
+                const SizedBox(width: 6),
+                _CountBubble(count: _phaseCount(phase)),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
-  Tab _buildTab({
-    required IconData icon,
+  // ==================== STATUS CHIPS ====================
+
+  /// The chips below the phase strip. Each represents a specific
+  /// status within the current phase, with its own count. Tapping a
+  /// chip filters the list to that status. Tapping the leading "All"
+  /// chip clears the filter.
+  Widget _buildStatusChips(ThemeData theme, ColorScheme cs) {
+    final phase = _currentPhase;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _statusChip(
+              label: 'All',
+              count: _phaseCount(phase),
+              selected: _activeStatusFilter == null,
+              onTap: () => setState(() => _activeStatusFilter = null),
+            ),
+            const SizedBox(width: 8),
+            for (final status in phase.statuses) ...[
+              _statusChip(
+                label: _statusLabel(status),
+                count: _countForStatus(status),
+                selected: _activeStatusFilter == status,
+                onTap: () => setState(() => _activeStatusFilter = status),
+                color: _statusColor(status, cs),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _statusChip({
     required String label,
     required int count,
+    required bool selected,
+    required VoidCallback onTap,
+    Color? color,
   }) {
-    return Tab(
-      height: 40,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 15),
-          const SizedBox(width: 6),
-          Text(label),
-          const SizedBox(width: 6),
-          _CountBubble(count: count),
-        ],
+    final cs = Theme.of(context).colorScheme;
+    final accent = color ?? cs.primary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: selected
+                ? accent.withOpacity(0.12)
+                : cs.surfaceContainerHighest.withOpacity(0.35),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected
+                  ? accent.withOpacity(0.55)
+                  : cs.outlineVariant.withOpacity(0.4),
+              width: selected ? 1.4 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? accent : cs.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 6),
+              _InlineCount(count: count, active: selected, accent: accent),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==================== SEARCH ====================
+
+  Widget _buildSearchBar(ThemeData theme, ColorScheme cs) {
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
+      ),
+      child: TextField(
+        controller: _searchController,
+        focusNode: _searchFocusNode,
+        autofocus: true,
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search, size: 20),
+          hintText: 'Search by ID, customer, address…',
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: () {
+                    _searchController.clear();
+                    widget.onSearch?.call('');
+                    setState(() {});
+                  },
+                )
+              : null,
+        ),
+        onChanged: (value) {
+          widget.onSearch?.call(value);
+          setState(() {});
+        },
+        style: theme.textTheme.bodyMedium,
       ),
     );
   }
@@ -324,65 +462,62 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
 
   Widget _buildFilterRow(ThemeData theme, ColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _filterChip('All', _DateFilter.all),
-            const SizedBox(width: 8),
-            _filterChip('Today', _DateFilter.today),
-            const SizedBox(width: 8),
-            _filterChip('This week', _DateFilter.week),
-            const SizedBox(width: 8),
-            _filterChip('This month', _DateFilter.month),
-          ],
-        ),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: _filterChip(
+              icon: Icons.today_rounded,
+              label: 'Due today',
+              onTap: () => _applyQuickFilter('today'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _filterChip(
+              icon: Icons.warning_amber_rounded,
+              label: 'Delayed',
+              onTap: () => _applyQuickFilter('delayed'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _filterChip(
+              icon: Icons.priority_high_rounded,
+              label: 'Unassigned',
+              onTap: () => _applyQuickFilter('unassigned'),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _filterChip(String label, _DateFilter filter) {
-    final selected = _activeFilter == filter;
-    return ChoiceChip(
+  Widget _filterChip({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 16),
       label: Text(label, style: const TextStyle(fontSize: 12)),
-      selected: selected,
-      onSelected: (_) {
-        setState(() => _activeFilter = filter);
-        _applyFilter(label, filter);
-      },
-      showCheckmark: false,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      visualDensity: VisualDensity.compact,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        side: BorderSide(color: cs.outlineVariant.withOpacity(0.5)),
+      ),
     );
   }
 
-  void _applyFilter(String label, _DateFilter filter) {
-    // Forward to the notifier. Add a `setDateFilter` method on the
-    // notifier that accepts the same enum range, or pass a computed
-    // (from, to) pair.
-    final now = DateTime.now();
-    DateTime? from;
-    DateTime? to = now;
-
-    switch (filter) {
-      case _DateFilter.all:
-        from = null;
-        to = null;
-      case _DateFilter.today:
-        from = DateTime(now.year, now.month, now.day);
-      case _DateFilter.week:
-        from = now.subtract(const Duration(days: 7));
-      case _DateFilter.month:
-        from = DateTime(now.year, now.month, 1);
-    }
-
-    // If the notifier supports it:
-    // _notifier.setDateRange(from: from, to: to);
-    //
-    // If not, at least apply the search query filter locally. For now
-    // the chip selection is at least visible and doesn't feel inert.
-    debugPrint('Delivery filter → $label');
+  void _applyQuickFilter(String key) {
+    // The notifier doesn't yet expose date-range filters; wire them
+    // here when it does, or send them through `onSearch` if the
+    // backend supports query fragments.
+    debugPrint('Quick filter → $key');
   }
 
   // ==================== CONTENT ====================
@@ -390,54 +525,130 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
   Widget _buildContent() {
     return TabBarView(
       controller: _tabController,
-      children: [
-        _tabContent('PENDING', 'No pending deliveries',
-            'New deliveries will appear here as soon as they are created.'),
-        _tabContent('DELIVERED', 'No deliveries completed',
-            'Delivered orders will be listed here.'),
-        _tabContent('CANCELLED', 'No cancelled deliveries',
-            'Cancelled or returned deliveries will appear here.'),
-      ],
+      children: _Phase.values.map(_buildPhaseContent).toList(),
     );
   }
 
-  Widget _tabContent(String status, String emptyTitle, String emptyMessage) {
+  Widget _buildPhaseContent(_Phase phase) {
+    // When a specific status is selected, we filter to that status.
+    // Otherwise we ask the list view for the whole phase, which is
+    // the set of statuses in `phase.statuses`.
+    final statuses =
+        _activeStatusFilter != null ? [_activeStatusFilter!] : phase.statuses;
+
+    final emptyTitle = _emptyTitleFor(phase);
+    final emptyMessage = _emptyMessageFor(phase);
+
     return RefreshIndicator(
       onRefresh: _refreshData,
       child: DeliveryListView(
-        status: status,
         notifier: _notifier,
-        // If DeliveryListView supports an empty-state override, pass it.
-        // Otherwise, the list view should show its own default empty state.
+        statuses: statuses,
+        emptyTitle: emptyTitle,
+        emptyMessage: emptyMessage,
       ),
     );
   }
 
-  // ==================== FAB ====================
+  String _emptyTitleFor(_Phase phase) {
+    switch (phase) {
+      case _Phase.active:
+        return 'No active deliveries';
+      case _Phase.inFlight:
+        return 'Nothing is moving right now';
+      case _Phase.closed:
+        return 'No closed deliveries';
+    }
+  }
+
+  String _emptyMessageFor(_Phase phase) {
+    switch (phase) {
+      case _Phase.active:
+        return 'Deliveries that are pending, processing, or confirmed '
+            'will appear here.';
+      case _Phase.inFlight:
+        return 'Deliveries that are shipped, in transit, or out for '
+            'delivery will appear here.';
+      case _Phase.closed:
+        return 'Delivered, failed, cancelled, returned, or refunded '
+            'deliveries will appear here.';
+    }
+  }
+
+  // ==================== COUNT HELPERS ====================
+
+  int _countForStatus(DeliveryStatus status) {
+    // `_notifier.deliveries` is whatever the last fetch loaded. If the
+    // backend returns per-status counts, prefer those. Otherwise this
+    // is a client-side rollup of the current page.
+    return _notifier.deliveries
+        .where((d) => d.delivery_status == status)
+        .length;
+  }
+
+  String _statusLabel(DeliveryStatus status) {
+    // Uses the enum's `label` getter as the source of truth. If you
+    // want localized labels, wire them through `AppLocalizations` here.
+    switch (status) {
+      case DeliveryStatus.pending:
+        return 'Pending';
+      case DeliveryStatus.processing:
+        return 'Processing';
+      case DeliveryStatus.confirmed:
+        return 'Confirmed';
+      case DeliveryStatus.shipped:
+        return 'Shipped';
+      case DeliveryStatus.inTransit:
+        return 'In transit';
+      case DeliveryStatus.outForDelivery:
+        return 'Out for delivery';
+      case DeliveryStatus.delivered:
+        return 'Delivered';
+      case DeliveryStatus.failed:
+        return 'Failed';
+      case DeliveryStatus.cancelled:
+        return 'Cancelled';
+      case DeliveryStatus.returned:
+        return 'Returned';
+      case DeliveryStatus.refunded:
+        return 'Refunded';
+    }
+  }
+
+  Color _statusColor(DeliveryStatus status, ColorScheme cs) {
+    switch (status) {
+      case DeliveryStatus.pending:
+        return const Color(0xFFF59E0B);
+      case DeliveryStatus.processing:
+        return const Color(0xFF3B82F6);
+      case DeliveryStatus.confirmed:
+        return const Color(0xFF0EA5E9);
+      case DeliveryStatus.shipped:
+        return const Color(0xFF8B5CF6);
+      case DeliveryStatus.inTransit:
+        return const Color(0xFF8B5CF6);
+      case DeliveryStatus.outForDelivery:
+        return const Color(0xFFF97316);
+      case DeliveryStatus.delivered:
+        return const Color(0xFF10B981);
+      case DeliveryStatus.failed:
+        return const Color(0xFFEF4444);
+      case DeliveryStatus.cancelled:
+        return const Color(0xFF6B7280);
+      case DeliveryStatus.returned:
+        return const Color(0xFFF59E0B);
+      case DeliveryStatus.refunded:
+        return const Color(0xFF06B6D4);
+    }
+  }
+
+  // ==================== FAB + ACTIONS ====================
 
   bool _shouldShowFab() {
-    // Only show "New Delivery" on the Pending tab. On Delivered/Cancelled
-    // the action doesn't make sense — you can't create a delivered one.
-    return _tabController.index == 0;
+    // New deliveries only make sense on the Active phase. You can't
+    // create one that's already shipped or delivered.
+    return _currentPhase == _Phase.active;
   }
-
-  Widget _buildFab(ThemeData theme) {
-    final cs = theme.colorScheme;
-    return FloatingActionButton.extended(
-      onPressed: _showNewDeliverySheet,
-      backgroundColor: cs.primary,
-      foregroundColor: cs.onPrimary,
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      icon: const Icon(Icons.add_rounded, size: 20),
-      label: const Text(
-        'New delivery',
-        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-      ),
-    );
-  }
-
-  // ==================== ACTIONS ====================
 
   Future<void> _refreshData() async {
     if (_isRefreshing) return;
@@ -455,7 +666,6 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
       } else {
         await _notifier.refreshDeliveries();
       }
-      // No snackbar on success — the header spinner tells the story.
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -488,24 +698,13 @@ class _DeliveryTabbedViewState extends State<DeliveryTabbedView>
   void _toggleFilters() {
     setState(() => _showFilters = !_showFilters);
   }
-
-  void _showNewDeliverySheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => NewDeliverySheet(
-        notifier: _notifier,
-        providerId: widget.selectedSupplierId,
-      ),
-    );
-  }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Small animated count bubble for tab labels.
-// ─────────────────────────────────────────────────────────────
+// ============================================================================
+// COUNT BUBBLES
+// ============================================================================
 
+/// Big animated count bubble used inside the phase strip.
 class _CountBubble extends StatelessWidget {
   final int count;
 
@@ -542,6 +741,43 @@ class _CountBubble extends StatelessWidget {
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Small inline count used inside the per-status chips.
+class _InlineCount extends StatelessWidget {
+  final int count;
+  final bool active;
+  final Color accent;
+
+  const _InlineCount({
+    required this.count,
+    required this.active,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      constraints: const BoxConstraints(minWidth: 18),
+      decoration: BoxDecoration(
+        color:
+            active ? accent.withOpacity(0.18) : cs.onSurface.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        style: TextStyle(
+          fontSize: 11,
+          height: 1.2,
+          fontWeight: FontWeight.w700,
+          color: active ? accent : cs.onSurfaceVariant,
         ),
       ),
     );

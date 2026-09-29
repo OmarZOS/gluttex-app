@@ -6561,4 +6561,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deliveryDetailFieldUserId => 'معرّف المستخدم';
+
+  @override
+  String get deliveryDetailActionAccept => 'قبول';
+
+  @override
+  String get deliveryDetailActionConfirm => 'تأكيد';
+
+  @override
+  String get deliveryDetailActionShip => 'شحن';
+
+  @override
+  String get deliveryDetailActionInTransit => 'في الطريق';
+
+  @override
+  String get deliveryDetailActionOutForDelivery => 'خارج للتوصيل';
+
+  @override
+  String get deliveryDetailActionDeliver => 'تسليم';
+
+  @override
+  String get deliveryDetailValidateFailure => 'فشل تحديث التوصيل';
 }

@@ -12738,6 +12738,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User ID'**
   String get deliveryDetailFieldUserId;
+
+  /// No description provided for @deliveryDetailActionAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get deliveryDetailActionAccept;
+
+  /// No description provided for @deliveryDetailActionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get deliveryDetailActionConfirm;
+
+  /// No description provided for @deliveryDetailActionShip.
+  ///
+  /// In en, this message translates to:
+  /// **'Ship'**
+  String get deliveryDetailActionShip;
+
+  /// No description provided for @deliveryDetailActionInTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark In Transit'**
+  String get deliveryDetailActionInTransit;
+
+  /// No description provided for @deliveryDetailActionOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for Delivery'**
+  String get deliveryDetailActionOutForDelivery;
+
+  /// No description provided for @deliveryDetailActionDeliver.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver'**
+  String get deliveryDetailActionDeliver;
+
+  /// No description provided for @deliveryDetailValidateFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update delivery'**
+  String get deliveryDetailValidateFailure;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
