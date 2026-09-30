@@ -1,3 +1,4 @@
+import 'package:event/views/business_ops_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:app_constants/app_constants.dart';
@@ -16,9 +17,8 @@ import 'package:event/personnel_notifier.dart';
 import 'package:event/service_change_notifier.dart';
 import 'package:event/supplier_dashboard_provider.dart';
 import 'package:event/views/checkout_view_model.dart';
-import 'package:event/views/finance_view_model.dart';
 import 'package:impl_app/impl_notification.dart';
-import 'package:business/finance/business_operation.dart';
+import 'package:business/finance/impl_business_operation.dart';
 import 'package:business/finance/gluttex_impl_invoice.dart';
 import 'package:business/gluttex_impl_delivery.dart';
 import 'package:io/GluttexImageImpl.dart';
@@ -145,10 +145,9 @@ class GluttexApp extends StatelessWidget {
             create: (_) => FinanceChangeNotifier()),
         ChangeNotifierProvider<CheckoutViewModel>(
             create: (_) => CheckoutViewModel()),
-        ChangeNotifierProvider<FinanceViewModel>(
-            create: (_) => FinanceViewModel(
-                businessOperationService:
-                    AppLocator.get<BusinessOperationService>())),
+        ChangeNotifierProvider<BusinessOperationNotifier>(
+            create: (_) => BusinessOperationNotifier(
+                service: AppLocator.get<BusinessOperationService>())),
         ChangeNotifierProvider<PricingState>(create: (_) => PricingState()),
         ChangeNotifierProvider<LocaleProvider>(create: (_) => localeProvider),
       ],

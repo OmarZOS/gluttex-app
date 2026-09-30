@@ -1,5 +1,8 @@
+// lib/ui/components/business_operations/business_operations_list.dart
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
@@ -26,23 +29,35 @@ class BusinessOperationsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-        padding: const EdgeInsets.only(bottom: 50), // Add bottom padding
-        sliver: SliverList.builder(
-            itemCount: operations.length + (hasMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == operations.length) {
-                onLoadMore();
-                return const _LoadingMoreIndicator();
-              }
+      padding: const EdgeInsets.only(bottom: 50),
+      sliver: SliverList.builder(
+        itemCount: operations.length + (hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          // The sentinel at the end is just a visual loader. Trigger the
+          // load in a post-frame callback so we never fire a side effect
+          // during build.
+          if (index == operations.length) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) onLoadMore();
+            });
+            return _LoadingMoreIndicator(active: isLoadingMore);
+          }
 
-              return BusinessOperationCard(
-                operation: operations[index],
-                isLast: index == operations.length - 1,
-                onTap: () => onTapOperation(operations[index]),
-              );
-            }));
+          final op = operations[index];
+          return BusinessOperationCard(
+            operation: op,
+            isLast: index == operations.length - 1,
+            onTap: () => onTapOperation(op),
+          );
+        },
+      ),
+    );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Card
+// ---------------------------------------------------------------------------
 
 class BusinessOperationCard extends StatelessWidget {
   const BusinessOperationCard({
@@ -89,7 +104,9 @@ class BusinessOperationCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                StatusRail(status: operation.paymentStatus),
+                // The rail now reads the lifecycle status, not the
+                // invoice status. Payment state is shown as a chip below.
+                StatusRail(status: operation.status),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -99,10 +116,7 @@ class BusinessOperationCard extends StatelessWidget {
                       const SizedBox(height: 14),
                       FinancialInfoBlock(operation: operation),
                       const SizedBox(height: 12),
-                      DocumentInfoRow(
-                        operation: operation,
-                        // showLabels: false,
-                      ),
+                      DocumentInfoRow(operation: operation),
                     ],
                   ),
                 ),
@@ -114,6 +128,10 @@ class BusinessOperationCard extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
 
 class _Header extends StatelessWidget {
   const _Header({required this.operation, required this.l10n});
@@ -140,15 +158,13 @@ class _Header extends StatelessWidget {
               const SizedBox(height: 4),
               FutureBuilder<String>(
                 future: BusinessOperationsUIManager.getOperationSubtitle(
-                    operation,
-                    l10n,
-                    context.read<PersonnelNotifier>(),
-                    context.read<SupplierChangeNotifier>()
-                    // Get the notifier from context
-                    ),
+                  operation,
+                  l10n,
+                  context.read<PersonnelNotifier>(),
+                  context.read<SupplierChangeNotifier>(),
+                ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    // Show loading placeholder
                     return Text(
                       '${l10n.loading}...',
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -156,37 +172,26 @@ class _Header extends StatelessWidget {
                       ),
                     );
                   }
-
                   if (snapshot.hasError) {
-                    // Fallback to original format on error
-                    // final fallbackText =
-                    //     BusinessOperationsUIManager.getOperationSubtitle(
-                    //   operation, l10n,
-                    //   null, // Pass null to use fallback
-                    // );
-                    return Text(
-                      "",
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    );
+                    return const SizedBox.shrink();
                   }
-
-                  // Show the fetched subtitle
+                  final subtitle = snapshot.data ?? '';
+                  if (subtitle.isEmpty) return const SizedBox.shrink();
                   return Text(
-                    snapshot.data ?? '',
+                    subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   );
                 },
               ),
-              if (operation.operationDate != null)
+              if (operation.createdAt != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(
                     BusinessOperationsUIManager.formatDate(
-                        operation.operationDate!),
+                      operation.createdAt!,
+                    ),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.outline,
                     ),
@@ -195,25 +200,29 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-        SourceBadge(
-          source: operation.sourceTable,
-          operationType: operation.operationType,
-        ),
+        const SizedBox(width: 8),
+        // SourceBadge now takes the operation itself; it reads sourceType.
+        SourceBadge(operation: operation),
       ],
     );
   }
 }
 
+// ---------------------------------------------------------------------------
+// Loader sentinel
+// ---------------------------------------------------------------------------
+
 class _LoadingMoreIndicator extends StatelessWidget {
-  const _LoadingMoreIndicator();
+  const _LoadingMoreIndicator({this.active = true});
+
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
+    if (!active) return const SizedBox(height: 40);
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 20),
-      child: Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 }

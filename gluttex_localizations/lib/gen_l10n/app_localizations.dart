@@ -13182,6 +13182,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shipped'**
   String get deliveryStatusShipped;
+
+  /// No description provided for @sourceDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Source Distribution'**
+  String get sourceDistribution;
+
+  /// No description provided for @noDataAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get noDataAvailable;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

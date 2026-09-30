@@ -1,15 +1,21 @@
+// lib/ui/components/business_operations/business_operation_badges.dart
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:ui/components/business_operations/BusinessOperationsUIManager.dart';
 import 'package:ui/components/finance/financial_ui_manager.dart';
 
-/// 状态徽章组件
-class PaymentStatusBadge extends StatelessWidget {
-  final String status;
+// ---------------------------------------------------------------------------
+// Invoice status badge (replaces the old PaymentStatusBadge)
+// ---------------------------------------------------------------------------
+
+class InvoiceStatusBadge extends StatelessWidget {
+  final String? status;
   final bool compact;
 
-  const PaymentStatusBadge({
+  const InvoiceStatusBadge({
     super.key,
     required this.status,
     this.compact = false,
@@ -17,7 +23,7 @@ class PaymentStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = BusinessOperationsUIManager.getPaymentStatusConfig(status);
+    final config = BusinessOperationsUIManager.getInvoiceStatusConfig(status);
     final theme = Theme.of(context);
 
     if (compact) {
@@ -70,15 +76,29 @@ class PaymentStatusBadge extends StatelessWidget {
   }
 }
 
-/// 状态轨道（垂直状态指示器）
+/// Backwards-compatible alias. If anything in the app still references
+/// `PaymentStatusBadge`, this keeps it compiling. Prefer switching call
+/// sites to `InvoiceStatusBadge` — the concept was renamed upstream.
+class PaymentStatusBadge extends InvoiceStatusBadge {
+  const PaymentStatusBadge({
+    super.key,
+    required String super.status,
+    super.compact,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Lifecycle status rail (cart_status / delivery_status)
+// ---------------------------------------------------------------------------
+
 class StatusRail extends StatelessWidget {
-  final String status;
+  final String? status;
 
   const StatusRail({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final config = BusinessOperationsUIManager.getPaymentStatusConfig(status);
+    final config = BusinessOperationsUIManager.getLifecycleStatusConfig(status);
 
     return Container(
       width: 4,
@@ -98,7 +118,10 @@ class StatusRail extends StatelessWidget {
   }
 }
 
-/// 信息徽章组件（用于文档类型、操作类型等）
+// ---------------------------------------------------------------------------
+// Info badge (generic label + value chip)
+// ---------------------------------------------------------------------------
+
 class InfoBadge extends StatelessWidget {
   final String label;
   final String value;
@@ -116,7 +139,6 @@ class InfoBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -131,18 +153,9 @@ class InfoBadge extends StatelessWidget {
             Icon(icon, size: 12, color: color),
             const SizedBox(width: 4),
           ],
-          // Text(
-          //   '$label: ',
-          //   style: theme.textTheme.bodySmall?.copyWith(
-          //     color: color,
-          //     fontWeight: FontWeight.w600,
-          //   ),
-          // ),
           Text(
             value,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: color,
-            ),
+            style: theme.textTheme.bodySmall?.copyWith(color: color),
           ),
         ],
       ),
@@ -150,29 +163,29 @@ class InfoBadge extends StatelessWidget {
   }
 }
 
-/// 源标签徽章
+// ---------------------------------------------------------------------------
+// Source badge (cart vs delivery)
+// ---------------------------------------------------------------------------
+
 class SourceBadge extends StatelessWidget {
-  final String source;
-  final String operationType;
+  final BusinessOperation operation;
   final bool showIcon;
 
   const SourceBadge({
     super.key,
-    required this.source,
-    required this.operationType,
-    this.showIcon = false,
+    required this.operation,
+    this.showIcon = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final config =
+        BusinessOperationsUIManager.getSourceTypeConfig(operation.sourceType);
     final color = BusinessOperationsUIManager.getSourceBadgeColor(
-      operationType,
+      operation.sourceType,
       theme.colorScheme,
     );
-    final config =
-        BusinessOperationsUIManager.getOperationTypeConfig(operationType);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -183,7 +196,7 @@ class SourceBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showIcon && config.icon != Icons.category) ...[
+          if (showIcon) ...[
             Icon(config.icon, size: 12, color: color),
             const SizedBox(width: 4),
           ],
@@ -201,13 +214,15 @@ class SourceBadge extends StatelessWidget {
   }
 }
 
-/// 金额显示组件
+// ---------------------------------------------------------------------------
+// Amount display
+// ---------------------------------------------------------------------------
+
 class AmountDisplay extends StatelessWidget {
   final String label;
   final double value;
   final Color? color;
   final bool highlight;
-  final String? currencySymbol;
 
   const AmountDisplay({
     super.key,
@@ -215,14 +230,13 @@ class AmountDisplay extends StatelessWidget {
     required this.value,
     this.color,
     this.highlight = false,
-    this.currencySymbol = 'DZD',
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final displayColor =
-        color ?? (highlight ? Colors.red : theme.colorScheme.onSurface);
+    final displayColor = color ??
+        (highlight ? theme.colorScheme.error : theme.colorScheme.onSurface);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,7 +255,10 @@ class AmountDisplay extends StatelessWidget {
   }
 }
 
-/// 文档信息行（显示文档类型、操作类型、发票状态）
+// ---------------------------------------------------------------------------
+// Document info row (source + invoice status + optional warnings)
+// ---------------------------------------------------------------------------
+
 class DocumentInfoRow extends StatelessWidget {
   final BusinessOperation operation;
   final bool showLabels;
@@ -255,49 +272,61 @@ class DocumentInfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     final widgets = <Widget>[];
 
-    // 文档类型
-    if (operation.documentType.isNotEmpty &&
-        operation.documentType != 'unknown') {
-      final docConfig = BusinessOperationsUIManager.getDocumentTypeConfig(
-          operation.documentType);
-      widgets.add(
-        InfoBadge(
-          label: showLabels ? l10n.documentType : '',
-          value: docConfig.displayName,
-          color: docConfig.color,
-          icon: docConfig.icon,
-        ),
-      );
-    }
+    // Source: cart or delivery
+    widgets.add(SourceBadge(operation: operation));
 
-    // 操作类型
-    if (operation.operationType.isNotEmpty &&
-        operation.operationType != 'unknown') {
-      // debugPrint(operation.operationType);
-      final opConfig = BusinessOperationsUIManager.getOperationTypeConfig(
-          operation.operationType);
-      widgets.add(
-        InfoBadge(
-          label: showLabels ? l10n.operationType : '',
-          value: opConfig.displayName,
-          color: opConfig.color,
-          icon: opConfig.icon,
-        ),
-      );
-    }
-
-    // 发票状态
-    if (operation.invoiceStatus.isNotEmpty &&
-        operation.invoiceStatus != 'unknown') {
+    // Invoice status
+    if (operation.invoiceStatus != null &&
+        operation.invoiceStatus!.isNotEmpty) {
       final invConfig = BusinessOperationsUIManager.getInvoiceStatusConfig(
-          operation.invoiceStatus);
+        operation.invoiceStatus,
+      );
       widgets.add(
         InfoBadge(
           label: showLabels ? l10n.invoiceStatus : '',
           value: invConfig.displayName,
           color: invConfig.color,
+          icon: invConfig.icon,
+        ),
+      );
+    }
+
+    // Lifecycle status
+    if (operation.status != null && operation.status!.isNotEmpty) {
+      final lifeConfig = BusinessOperationsUIManager.getLifecycleStatusConfig(
+        operation.status,
+      );
+      widgets.add(
+        InfoBadge(
+          label: showLabels ? 'Status' : '',
+          value: lifeConfig.displayName,
+          color: lifeConfig.color,
+          icon: lifeConfig.icon,
+        ),
+      );
+    }
+
+    // Inconsistency warnings
+    if (operation.invoiceMismatch) {
+      widgets.add(
+        InfoBadge(
+          label: '',
+          value: 'Invoice mismatch',
+          color: Colors.orange,
+          icon: Icons.warning_amber_rounded,
+        ),
+      );
+    }
+    if (!operation.paymentStatusConsistent) {
+      widgets.add(
+        InfoBadge(
+          label: '',
+          value: 'Payment mismatch',
+          color: theme.colorScheme.error,
+          icon: Icons.error_outline,
         ),
       );
     }
@@ -310,9 +339,16 @@ class DocumentInfoRow extends StatelessWidget {
   }
 }
 
-/// 财务信息块
+// ---------------------------------------------------------------------------
+// Financial info block (settlement layer)
+// ---------------------------------------------------------------------------
+
 class FinancialInfoBlock extends StatelessWidget {
   final BusinessOperation operation;
+
+  /// Kept for API compatibility. The new envelope doesn't ship a deposit
+  /// total, so this is a no-op for now. If the backend re-introduces a
+  /// deposit figure, wire it through here.
   final bool showDeposit;
 
   const FinancialInfoBlock({
@@ -339,67 +375,27 @@ class FinancialInfoBlock extends StatelessWidget {
               Expanded(
                 child: AmountDisplay(
                   label: l10n.balance,
-                  value: operation.balanceDue,
-                  highlight: operation.balanceDue > 0,
+                  value: operation.dueAmount,
+                  highlight: operation.dueAmount > 0,
                 ),
               ),
               Expanded(
                 child: AmountDisplay(
                   label: l10n.paid,
-                  value: operation.totalPaid,
+                  value: operation.paidAmount,
                   color: Colors.green,
                 ),
               ),
               Expanded(
                 child: AmountDisplay(
                   label: l10n.totalAmount,
-                  value: operation.totalAmount,
+                  value: operation.grandTotal,
                 ),
               ),
             ],
           ),
-          if (showDeposit && operation.totalDeposited > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AmountDisplay(
-                      label: l10n.deposited,
-                      value: operation.totalDeposited,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );
   }
-
-  // static String getLocalizedOperationType(String value, AppLocalizations loc) {
-  //   switch (value.toLowerCase()) {
-  //     case 'products':
-  //     case 'products_only':
-  //       return loc.products;
-
-  //     case 'services':
-  //     case 'services_only':
-  //       return loc.services;
-
-  //     case 'mixed':
-  //     case 'mixed_products_services':
-  //     case 'products_and_services':
-  //       return loc.productsAndServices;
-
-  //     // 订单/购物类型
-  //     case 'direct_order':
-  //     case 'ecommerce':
-  //     case 'online_order':
-  //       return loc.eShopping;
-  //     default:
-  //       return value;
-  //   }
-  // }
 }

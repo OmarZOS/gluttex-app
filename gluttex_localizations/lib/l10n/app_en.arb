@@ -3263,6 +3263,10 @@
 "deliveryTransitionReqDestination": "Destination address on file",
 "deliveryTransitionReqProof": "Proof of delivery captured",
 "deliveryTransitionReqProofDesc": "Signature, photo, or scan received from the recipient.",
-"deliveryStatusShipped": "Shipped"
+"deliveryStatusShipped": "Shipped",
+
+"sourceDistribution": "Source Distribution",
+"noDataAvailable": "No data available",
+"outstanding": "Outstanding"
 
 }

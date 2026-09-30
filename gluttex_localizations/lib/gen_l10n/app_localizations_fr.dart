@@ -2690,7 +2690,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get totalPaid => 'Payé';
 
   @override
-  String get outstanding => 'En Suspens';
+  String get outstanding => 'Restant dû';
 
   @override
   String get balance => 'Solde';
@@ -6796,4 +6796,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deliveryStatusShipped => 'Expédiée';
+
+  @override
+  String get sourceDistribution => 'Répartition par source';
+
+  @override
+  String get noDataAvailable => 'Aucune donnée disponible';
 }

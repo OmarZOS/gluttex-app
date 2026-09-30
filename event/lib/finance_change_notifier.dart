@@ -4,11 +4,9 @@ import 'dart:developer';
 
 import 'package:event/components/finance/finance_download.dart';
 import 'package:flutter/material.dart';
-import 'package:gluttex_core/business/Product.dart';
-import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:gluttex_core/business/finance/FinancialDocument.dart';
+import 'package:gluttex_core/business/finance/business_analytics.dart';
 import 'package:gluttex_core/business/finance/services/InvoiceService.dart';
-import 'package:gluttex_core/business/services/BusinessOperationService.dart';
 import 'package:event/components/finance/finance_analytics.dart';
 import 'package:event/components/finance/finance_constants.dart';
 import 'package:event/components/finance/finance_document_operations.dart';
@@ -17,14 +15,11 @@ import 'package:event/components/finance/finance_grouping.dart';
 import 'package:event/components/finance/finance_pagination.dart';
 import 'package:event/components/finance/finance_search.dart';
 import 'package:event/components/finance/finance_state.dart';
-import 'package:event/views/finance_view_model.dart';
-import 'package:event/views/pricing_config_view_model.dart';
 import 'package:locator/locator.dart';
 
 // ==================== DEBUG LOGGER ====================
 
 void _log(String tag, String message, {Object? error, StackTrace? stack}) {
-  // if (!kDebugMode) return;
   final ts = DateTime.now().toIso8601String().substring(11, 23);
   if (error != null) {
     debugPrint('[$ts][FinanceNotifier][$tag] $message\n  error: $error');
@@ -34,6 +29,12 @@ void _log(String tag, String message, {Object? error, StackTrace? stack}) {
   }
 }
 
+/// Finance domain notifier.
+///
+/// Owns everything related to financial documents and their analytics.
+/// Business operations (carts, deliveries, per-supplier operation summaries)
+/// are handled by [BusinessOperationNotifier] — this class does not touch
+/// them.
 class FinanceChangeNotifier extends ChangeNotifier {
   // ==================== DEPENDENCIES ====================
 
@@ -52,13 +53,6 @@ class FinanceChangeNotifier extends ChangeNotifier {
   final FinanceSearch _search = FinanceSearch();
   final FinanceState _state = FinanceState();
 
-  // ==================== DELEGATES ====================
-
-  late final FinanceViewModel _operations;
-
-  PricingConfigViewModel get pricingConfigViewModel =>
-      _operations.pricingConfigViewModel;
-
   // ==================== PROVIDER SCOPE ====================
 
   int _providerId = 0;
@@ -68,22 +62,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
   // ==================== CONSTRUCTOR ====================
 
   FinanceChangeNotifier() {
-    _operations = FinanceViewModel(
-      businessOperationService: AppLocator.get<BusinessOperationService>(),
-    );
-    _operations.addListener(_onOperationsChanged);
     _log('init', 'FinanceChangeNotifier created');
-  }
-
-  void _onOperationsChanged() {
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _operations.removeListener(_onOperationsChanged);
-    _operations.dispose();
-    super.dispose();
   }
 
   // ==================== DOCUMENT GETTERS ====================
@@ -97,7 +76,7 @@ class FinanceChangeNotifier extends ChangeNotifier {
   bool get hasMoreDocuments => _pagination.hasMore;
   String? get currentSearchQuery => _search.currentQuery;
 
-  // Analytics (delegated)
+  // Analytics
   bool get isCalculatingAnalytics => _analytics.isCalculating;
   double get totalRevenue => _analytics.totalRevenue;
   double get totalCollected => _analytics.totalCollected;
@@ -107,10 +86,10 @@ class FinanceChangeNotifier extends ChangeNotifier {
   Map<String, double> get collectionsByStatus => _analytics.collectionsByStatus;
   Map<String, double> get revenueByDocumentType =>
       _analytics.revenueByDocumentType;
-  AnalyticsCache get analyticsCache => _analytics!.cache!;
+  AnalyticsCache? get analyticsCache => _analytics.cache;
   double get collectionRate => _analytics.collectionRate;
 
-  // Download state (kept local — no other component owns it)
+  // Download state
   double _downloadProgress = 0.0;
   double get downloadProgress => _downloadProgress;
   bool get isDownloading => _isDownloading;
@@ -120,66 +99,6 @@ class FinanceChangeNotifier extends ChangeNotifier {
     return filteredDocuments.fold(
         0.0, (sum, doc) => sum + (doc.documentAmount ?? 0));
   }
-
-  // ==================== DELEGATE GETTERS ====================
-
-  FinanceTab get selectedTab => _operations.selectedTab;
-  void selectTab(FinanceTab tab) => _operations.selectTab(tab);
-
-  DateFilter get dateFilter => _operations.dateFilter;
-  DateTimeRange? get dateRangeFilter => _operations.dateRangeFilter;
-  void selectDateFilter(DateFilter filter) =>
-      _operations.selectDateFilter(filter);
-  void setDateRangeFilter(DateTimeRange? range) =>
-      _operations.setDateRangeFilter(range);
-
-  BusinessFilter get businessFilter => _operations.businessFilter;
-  void setBusinessFilter(BusinessFilter filter) =>
-      _operations.setBusinessFilter(filter);
-  void clearBusinessFilter() => _operations.clearBusinessFilter();
-
-  List<BusinessOperation> get businessOperations =>
-      _operations.businessOperations;
-  List<BusinessOperation> get filteredOperations =>
-      _operations.filteredOperations;
-  List<BusinessSummary> get businessSummaries => _operations.businessSummaries;
-  bool get hasBusinessOperations => _operations.hasBusinessOperations;
-  bool get hasBusinessSummaries => _operations.hasBusinessSummaries;
-  List<BusinessSummary> get topSuppliers => _operations.topSuppliers;
-  List<BusinessOperation> get recentOperations => _operations.recentOperations;
-  bool get isLoadingMore => _operations.isLoadingMore;
-  bool get hasMore => _operations.hasMore;
-
-  Future<void> loadBusinessOperations({bool forceRefresh = false}) =>
-      _operations.loadBusinessOperations(forceRefresh: forceRefresh);
-  Future<void> loadMoreBusinessOperations() =>
-      _operations.loadMoreBusinessOperations();
-  Future<void> refreshBusinessOperations() =>
-      _operations.refreshBusinessOperations();
-
-  List<BusinessOperation> getOperationsBySupplier(int supplierId) =>
-      _operations.getOperationsBySupplier(supplierId);
-  BusinessSummary? getSummaryBySupplier(int supplierId) =>
-      _operations.getSummaryBySupplier(supplierId);
-
-  // Pricing actions — delegate to the view model.
-  void handleBasePriceChanged(double price) =>
-      _operations.handleBasePriceChanged(price);
-  void handleTaxPercentageChanged(double tax) =>
-      _operations.handleTaxPercentageChanged(tax);
-  void handleProfitMarginChanged(double profit) =>
-      _operations.handleProfitMarginChanged(profit);
-  void handleFinalPriceChanged(double price) =>
-      _operations.handleFinalPriceChanged(price);
-  void handleModeChanged(PricingMode mode) =>
-      _operations.handleModeChanged(mode);
-  void handleToggleProductSelection(Product product) =>
-      _operations.handleToggleProductSelection(product);
-  void handleToggleSelectAll() => _operations.handleToggleSelectAll();
-  void handleClearSelection() => _operations.handleClearSelection();
-  Future<void> savePricingConfig() => _operations.savePricingConfig();
-  Future<void> handleUpdateSelectedProducts() =>
-      _operations.handleUpdateSelectedProducts();
 
   // ==================== PROVIDER SCOPE ====================
 
@@ -198,15 +117,12 @@ class FinanceChangeNotifier extends ChangeNotifier {
 
     _providerId = newProviderId;
 
-    // Clear document state.
+    // Clear all document state.
     _documentOps.clear();
     _grouping.clear();
     _cache.clear();
     _pagination.reset();
     _analytics.reset();
-
-    // Notify the operations delegate and clear its state too.
-    await _operations.setProvider(newProviderId);
 
     notifyListeners();
 
@@ -700,7 +616,6 @@ class FinanceChangeNotifier extends ChangeNotifier {
         'pagination: page=${_pagination.currentPage} '
             'hasMore=${_pagination.hasMore}');
     _log('dumpState', 'filter: ${_filter.current.toCacheKey()}');
-    _log('dumpState', 'cache entries=<see FinanceCache>');
     _log(
         'dumpState',
         'analytics: txn=${_analytics.totalTransactions} '

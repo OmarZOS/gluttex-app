@@ -1,9 +1,12 @@
+// lib/ui/components/business_operations/operation_summary.dart
+
 import 'package:flutter/material.dart';
-import 'package:gluttex_core/app/AppUser.dart';
-import 'package:event/user_change_notifier.dart';
 import 'package:provider/provider.dart';
-import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+
+import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:event/user_change_notifier.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
 
@@ -14,35 +17,37 @@ class OperationSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.1),
+        color: cs.surfaceVariant.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            localizations.operationSummary,
+            loc.operationSummary,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           _SummaryGrid(operation: operation),
-          // const SizedBox(height: 16),
-          // _AdditionalInfo(operation: operation),
         ],
       ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Summary grid
+// ---------------------------------------------------------------------------
 
 class _SummaryGrid extends StatelessWidget {
   final BusinessOperation operation;
@@ -51,8 +56,8 @@ class _SummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
 
     return GridView.count(
       shrinkWrap: true,
@@ -63,36 +68,40 @@ class _SummaryGrid extends StatelessWidget {
       childAspectRatio: 2.5,
       children: [
         _SummaryItem(
-          label: localizations.operationId,
-          valueFuture: Future.value(_getOperationId()),
+          label: loc.operationId,
+          valueFuture: Future.value(_operationId()),
           icon: Icons.numbers,
-          color: colorScheme.primary,
+          color: cs.primary,
         ),
         _ClientSummaryItem(
           operation: operation,
-          localizations: localizations,
-          color: colorScheme.secondary,
+          localizations: loc,
+          color: cs.secondary,
         ),
         _SupplierSummaryItem(
           operation: operation,
-          localizations: localizations,
+          localizations: loc,
           color: Colors.orange,
         ),
         _SellerSummaryItem(
           operation: operation,
-          localizations: localizations,
+          localizations: loc,
           color: Colors.purple,
         ),
       ],
     );
   }
 
-  String _getOperationId() {
-    if (operation.orderId != null) return '#${operation.orderId}';
-    if (operation.cartId != null) return '#${operation.cartId}';
-    return 'N/A';
+  String _operationId() {
+    if (operation.isCart) return 'Cart #${operation.sourceId}';
+    if (operation.isDelivery) return 'Order #${operation.sourceId}';
+    return '#${operation.sourceId}';
   }
 }
+
+// ---------------------------------------------------------------------------
+// Generic summary tile
+// ---------------------------------------------------------------------------
 
 class _SummaryItem extends StatelessWidget {
   final String label;
@@ -109,14 +118,14 @@ class _SummaryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.1)),
+        border: Border.all(color: cs.outline.withOpacity(0.1)),
       ),
       child: Row(
         children: [
@@ -136,7 +145,7 @@ class _SummaryItem extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: cs.onSurfaceVariant,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -146,24 +155,22 @@ class _SummaryItem extends StatelessWidget {
                   future: valueFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return _buildLoadingSkeleton(colorScheme);
+                      return _buildLoadingSkeleton(cs);
                     }
-
                     if (snapshot.hasError) {
                       return Text(
                         'N/A',
                         style: TextStyle(
-                          color: colorScheme.error,
+                          color: cs.error,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       );
                     }
-
                     return Text(
                       snapshot.data ?? 'N/A',
                       style: TextStyle(
-                        color: colorScheme.onSurface,
+                        color: cs.onSurface,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         overflow: TextOverflow.ellipsis,
@@ -180,19 +187,23 @@ class _SummaryItem extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingSkeleton(ColorScheme colorScheme) {
+  Widget _buildLoadingSkeleton(ColorScheme cs) {
     return SizedBox(
       height: 16,
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: colorScheme.surfaceVariant,
+          color: cs.surfaceVariant,
           borderRadius: BorderRadius.circular(4),
         ),
       ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Client
+// ---------------------------------------------------------------------------
 
 class _ClientSummaryItem extends StatelessWidget {
   final BusinessOperation operation;
@@ -207,8 +218,8 @@ class _ClientSummaryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final hasClient = operation.clientId != null && operation.clientId! > 0;
+    final clientId = operation.clientId;
+    final hasClient = clientId != null && clientId > 0;
 
     if (!hasClient) {
       return _SummaryItem(
@@ -220,13 +231,13 @@ class _ClientSummaryItem extends StatelessWidget {
     }
 
     return FutureBuilder<String>(
-      future: _getClientName(context),
+      future: _getClientName(context, clientId),
       builder: (context, snapshot) {
         final value = snapshot.connectionState == ConnectionState.waiting
             ? '${localizations.loading}...'
             : snapshot.hasError
-                ? '#${operation.clientId}'
-                : snapshot.data ?? '#${operation.clientId}';
+                ? '#$clientId'
+                : snapshot.data ?? '#$clientId';
 
         return _SummaryItem(
           label: localizations.client,
@@ -238,58 +249,35 @@ class _ClientSummaryItem extends StatelessWidget {
     );
   }
 
-  Future<String> _getClientName(BuildContext context) async {
+  Future<String> _getClientName(BuildContext context, int clientId) async {
     try {
       final personnelNotifier = context.read<PersonnelNotifier>();
-
-      // Determine client type
-      final clientType = 'user';
-
       final customer = await personnelNotifier.getCustomerDisplayInfo(
-        customerId: operation.clientId!,
-        customerType: clientType,
-        personId: operation.clientId,
+        customerId: clientId,
+        customerType: 'user',
+        personId: clientId,
       );
 
-      if (customer != null && customer.displayName?.isNotEmpty == true) {
+      if (customer != null && (customer.displayName?.isNotEmpty ?? false)) {
         return customer.displayName!;
       }
 
-      // Fallback to user name if customer info not found
       final appUserNotifier = context.read<AppUserNotifier>();
-      final user = await appUserNotifier
-          .fetchUserPassively(operation.clientId.toString());
+      final user =
+          await appUserNotifier.fetchUserPassively(clientId.toString());
+      if (user != null) return _userDisplayName(user);
 
-      if (user != null) {
-        return _getUserDisplayName(user);
-      }
-
-      return '#${operation.clientId}';
+      return '#$clientId';
     } catch (e) {
       debugPrint('Error fetching client name: $e');
-      return '#${operation.clientId}';
+      return '#$clientId';
     }
-  }
-
-  String _getUserDisplayName(AppUser user) {
-    final firstName = user.personFirstName?.trim();
-    final lastName = user.personLastName?.trim();
-    final userName = user.appUserName?.trim();
-
-    if (firstName != null && firstName.isNotEmpty) {
-      if (lastName != null && lastName.isNotEmpty) {
-        return '$firstName $lastName';
-      }
-      return firstName;
-    }
-
-    if (userName != null && userName.isNotEmpty) {
-      return userName;
-    }
-
-    return 'User #${user.idAppUser}';
   }
 }
+
+// ---------------------------------------------------------------------------
+// Supplier
+// ---------------------------------------------------------------------------
 
 class _SupplierSummaryItem extends StatelessWidget {
   final BusinessOperation operation;
@@ -304,8 +292,8 @@ class _SupplierSummaryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasSupplier =
-        operation.supplierId != null && operation.supplierId! > 0;
+    final supplierId = operation.supplierId;
+    final hasSupplier = supplierId != null && supplierId > 0;
 
     if (!hasSupplier) {
       return _SummaryItem(
@@ -317,13 +305,13 @@ class _SupplierSummaryItem extends StatelessWidget {
     }
 
     return FutureBuilder<String>(
-      future: _getSupplierName(context),
+      future: _getSupplierName(context, supplierId),
       builder: (context, snapshot) {
         final value = snapshot.connectionState == ConnectionState.waiting
             ? '${localizations.loading}...'
             : snapshot.hasError
-                ? '#${operation.supplierId}'
-                : snapshot.data ?? '#${operation.supplierId}';
+                ? '#$supplierId'
+                : snapshot.data ?? '#$supplierId';
 
         return _SummaryItem(
           label: localizations.supplier,
@@ -335,26 +323,27 @@ class _SupplierSummaryItem extends StatelessWidget {
     );
   }
 
-  Future<String> _getSupplierName(BuildContext context) async {
+  Future<String> _getSupplierName(BuildContext context, int supplierId) async {
     try {
       final supplierNotifier = context.read<SupplierChangeNotifier>();
       final supplier = await supplierNotifier.getSupplierById(
-        operation.supplierId!,
+        supplierId,
         forceRefresh: false,
-        // notify: false,
       );
-
-      if (supplier != null && supplier.providerName?.isNotEmpty == true) {
+      if (supplier != null && (supplier.providerName?.isNotEmpty ?? false)) {
         return supplier.providerName!;
       }
-
-      return '#${operation.supplierId}';
+      return '#$supplierId';
     } catch (e) {
       debugPrint('Error fetching supplier name: $e');
-      return '#${operation.supplierId}';
+      return '#$supplierId';
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// Seller — carts only; the seller id lives inside the raw cart payload.
+// ---------------------------------------------------------------------------
 
 class _SellerSummaryItem extends StatelessWidget {
   final BusinessOperation operation;
@@ -367,9 +356,19 @@ class _SellerSummaryItem extends StatelessWidget {
     required this.color,
   });
 
+  /// The new operation model has no top-level seller id. Carts carry it in
+  /// `cart.cart_selling_user`; deliveries do not carry a seller at all.
+  int? get _sellerId {
+    final cart = operation.cart;
+    if (cart == null) return null;
+    final v = cart['cart_selling_user'];
+    return v is int ? v : null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasSeller = operation.sellerId != null && operation.sellerId! > 0;
+    final sellerId = _sellerId;
+    final hasSeller = sellerId != null && sellerId > 0;
 
     if (!hasSeller) {
       return _SummaryItem(
@@ -381,13 +380,13 @@ class _SellerSummaryItem extends StatelessWidget {
     }
 
     return FutureBuilder<String>(
-      future: _getSellerName(context),
+      future: _getSellerName(context, sellerId),
       builder: (context, snapshot) {
         final value = snapshot.connectionState == ConnectionState.waiting
             ? '${localizations.loading}...'
             : snapshot.hasError
-                ? '#${operation.sellerId}'
-                : snapshot.data ?? '#${operation.sellerId}';
+                ? '#$sellerId'
+                : snapshot.data ?? '#$sellerId';
 
         return _SummaryItem(
           label: localizations.seller,
@@ -399,99 +398,33 @@ class _SellerSummaryItem extends StatelessWidget {
     );
   }
 
-  Future<String> _getSellerName(BuildContext context) async {
+  Future<String> _getSellerName(BuildContext context, int sellerId) async {
     try {
       final appUserNotifier = context.read<AppUserNotifier>();
-      final user = await appUserNotifier
-          .fetchUserPassively(operation.sellerId.toString());
-
-      if (user != null) {
-        return _getUserDisplayName(user);
-      }
-
-      return '#${operation.sellerId}';
+      final user =
+          await appUserNotifier.fetchUserPassively(sellerId.toString());
+      if (user != null) return _userDisplayName(user);
+      return '#$sellerId';
     } catch (e) {
       debugPrint('Error fetching seller name: $e');
-      return '#${operation.sellerId}';
+      return '#$sellerId';
     }
-  }
-
-  String _getUserDisplayName(AppUser user) {
-    final firstName = user.personFirstName?.trim();
-    final lastName = user.personLastName?.trim();
-    final userName = user.appUserName?.trim();
-
-    if (firstName != null && firstName.isNotEmpty) {
-      if (lastName != null && lastName.isNotEmpty) {
-        return '$firstName $lastName';
-      }
-      return firstName;
-    }
-
-    if (userName != null && userName.isNotEmpty) {
-      return userName;
-    }
-
-    return 'User #${user.idAppUser}';
   }
 }
 
-class _AdditionalInfo extends StatelessWidget {
-  final BusinessOperation operation;
+// ---------------------------------------------------------------------------
+// Shared display-name helper for AppUser
+// ---------------------------------------------------------------------------
 
-  const _AdditionalInfo({required this.operation});
+String _userDisplayName(AppUser user) {
+  final first = user.personFirstName?.trim();
+  final last = user.personLastName?.trim();
+  final username = user.appUserName?.trim();
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final localizations = AppLocalizations.of(context)!;
-
-    return Row(
-      children: [
-        if (operation.invoiceStatus.isNotEmpty &&
-            operation.invoiceStatus != 'unknown')
-          _InfoChip(
-            label: '${localizations.invoice}: ${operation.invoiceStatus}',
-            color: Colors.blue,
-          ),
-        if (operation.sourceTable.isNotEmpty &&
-            operation.sourceTable != 'unknown')
-          _InfoChip(
-            label: operation.sourceTable == 'cart_based'
-                ? localizations.cartBased
-                : localizations.orderBased,
-            color: colorScheme.primary,
-          ),
-      ],
-    );
+  if (first != null && first.isNotEmpty) {
+    if (last != null && last.isNotEmpty) return '$first $last';
+    return first;
   }
-}
-
-class _InfoChip extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _InfoChip({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
+  if (username != null && username.isNotEmpty) return username;
+  return 'User #${user.idAppUser}';
 }

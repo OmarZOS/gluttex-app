@@ -2,6 +2,7 @@ import 'package:app_constants/app_routes.dart';
 import 'package:event/delivery_change_notifier.dart';
 import 'package:event/extensions/personnel_access_manager.dart';
 import 'package:event/supplier_change_notifier.dart';
+import 'package:event/views/business_ops_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -184,10 +185,18 @@ class DashboardBody extends StatelessWidget {
   }
 
   Widget _buildOperationsScreen(BuildContext context) {
-    return Consumer<PersonnelNotifier>(
-      builder: (context, personnelNotifier, child) => BusinessOperationsScreen(
-        key: ValueKey('operations_$selectedSupplierId'),
-      ),
+    return Consumer2<PersonnelNotifier, BusinessOperationNotifier>(
+      builder: (context, personnelNotifier, businessNotifier, child) {
+        final supplierId = selectedSupplierId;
+
+        // Key on the supplier so switching suppliers rebuilds the screen
+        // (and therefore rebuilds the notifier) with fresh state.
+        return BusinessOperationsScreen(
+          key: ValueKey('operations_$supplierId'),
+          supplierId: supplierId,
+          lockToSupplier: supplierId > 0,
+        );
+      },
     );
   }
 

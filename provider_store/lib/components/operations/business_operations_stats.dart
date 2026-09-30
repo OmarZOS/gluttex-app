@@ -1,54 +1,61 @@
+// lib/ui/components/business_operations/business_operations_stats.dart
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:ui/components/finance/financial_ui_manager.dart';
 
+/// Stats panel for the business operations screen.
+///
+/// Reads the pre-aggregated [BusinessOperationsStatsData] the backend ships
+/// in the response envelope. The quick-stats block is authoritative —
+/// the backend aggregated over the whole filtered window, not just the
+/// current page. The distribution chart is derived locally from the page's
+/// operations, because the envelope's bucket aggregates are not chart-ready.
 class BusinessOperationsStats extends StatelessWidget {
+  /// The authoritative aggregate from the envelope. When null, the widget
+  /// renders a compact placeholder. Do not synthesize a fallback from
+  /// [operations] — page-level numbers are not the dashboard numbers.
+  final BusinessOperationsStatsData? stats;
+
+  /// Current page of operations. Used only for the source-distribution chart.
   final List<BusinessOperation> operations;
 
-  const BusinessOperationsStats({super.key, required this.operations});
+  const BusinessOperationsStats({
+    super.key,
+    required this.stats,
+    required this.operations,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final stats = _calculateStats();
+    final loc = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       color: Theme.of(context).colorScheme.surface,
       child: Column(
         children: [
-          // Quick Stats
-          _QuickStats(stats: stats, localizations: localizations),
+          _QuickStats(stats: stats, localizations: loc),
           const SizedBox(height: 16),
-
-          // Distribution Charts
           _DistributionCharts(
-              operations: operations, localizations: localizations),
+            operations: operations,
+            localizations: loc,
+          ),
         ],
       ),
     );
   }
-
-  Map<String, dynamic> _calculateStats() {
-    final totalAmount = operations.fold(0.0, (sum, op) => sum + op.totalAmount);
-    final totalPaid = operations.fold(0.0, (sum, op) => sum + op.totalPaid);
-    final balanceDue = operations.fold(0.0, (sum, op) => sum + op.balanceDue);
-    final paidPercentage =
-        totalAmount > 0 ? (totalPaid / totalAmount * 100) : 0;
-
-    return {
-      'totalAmount': totalAmount,
-      'totalPaid': totalPaid,
-      'balanceDue': balanceDue,
-      'paidPercentage': paidPercentage,
-    };
-  }
 }
 
+// ---------------------------------------------------------------------------
+// Quick stats — authoritative totals from the envelope
+// ---------------------------------------------------------------------------
+
 class _QuickStats extends StatelessWidget {
-  final Map<String, dynamic> stats;
+  final BusinessOperationsStatsData? stats;
   final AppLocalizations localizations;
 
   const _QuickStats({
@@ -59,8 +66,40 @@ class _QuickStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final paidPercentage = stats['paidPercentage'] as double;
-    AppLocalizations loc = AppLocalizations.of(context)!;
+
+    // No stats in the envelope: render a neutral placeholder that matches
+    // the real card's shape so the layout doesn't jump.
+    if (stats == null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceVariant.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.query_stats,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Statistics unavailable',
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final totals = stats!.totals;
+    final ratios = stats!.ratios;
+
+    // Collection rate is the right "progress ring" number: paid / (paid + due).
+    final collectionRate = ratios.collectionRate ?? 0.0;
+    final paidPercentage = (collectionRate * 100).clamp(0, 100).toDouble();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -82,40 +121,83 @@ class _QuickStats extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 饼图进度指示器
-          _CircularProgress(
-            value: paidPercentage / 100,
-            label: '${paidPercentage.toStringAsFixed(1)}%',
-            color: colorScheme.primary,
+          Row(
+            children: [
+              _CircularProgress(
+                value: paidPercentage / 100,
+                label: '${paidPercentage.toStringAsFixed(1)}%',
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _StatRow(
+                      label: localizations.totalAmount,
+                      value: _fmt(totals.grandTotal, context),
+                      color: colorScheme.onSurface,
+                    ),
+                    const SizedBox(height: 8),
+                    _StatRow(
+                      label: localizations.totalPaid,
+                      value: _fmt(totals.paidAmount, context),
+                      color: Colors.green,
+                    ),
+                    const SizedBox(height: 8),
+                    _StatRow(
+                      label: localizations.outstanding,
+                      value: _fmt(totals.dueAmount, context),
+                      color:
+                          totals.dueAmount > 0 ? Colors.orange : Colors.green,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-
-          // 统计数据
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _StatRow(
-                  label: localizations.totalAmount,
-                  value: _formatCurrency(stats['totalAmount'], context),
+          const SizedBox(height: 14),
+          const Divider(height: 1),
+          const SizedBox(height: 14),
+          // Secondary metrics row: margin + ROI + avg ticket + ops count.
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  label: 'Margin',
+                  value: _fmt(totals.marginAmount, context),
+                  color: totals.marginAmount >= 0
+                      ? Colors.green
+                      : colorScheme.error,
+                ),
+              ),
+              Expanded(
+                child: _MetricTile(
+                  label: 'ROI',
+                  value: _fmtPercent(ratios.overallRoi),
+                  color: (ratios.overallRoi ?? 0) >= 0
+                      ? Colors.green
+                      : colorScheme.error,
+                ),
+              ),
+              Expanded(
+                child: _MetricTile(
+                  label: 'Avg Ticket',
+                  value: _fmt(ratios.averageTicket, context),
                   color: colorScheme.onSurface,
                 ),
-                const SizedBox(height: 8),
-                _StatRow(
-                  label: localizations.totalPaid,
-                  value: _formatCurrency(stats['totalPaid'], context),
-                  color: Colors.green,
+              ),
+              Expanded(
+                child: _MetricTile(
+                  label: 'Operations',
+                  value: '${stats!.counts.operations}',
+                  color: colorScheme.onSurface,
                 ),
-                const SizedBox(height: 8),
-                _StatRow(
-                  label: localizations.outstanding,
-                  value: _formatCurrency(stats['balanceDue'], context),
-                  color: stats['balanceDue'] > 0 ? Colors.orange : Colors.green,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -201,6 +283,48 @@ class _StatRow extends StatelessWidget {
   }
 }
 
+class _MetricTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _MetricTile({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w700,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Distribution chart — derived from the current page of operations
+// ---------------------------------------------------------------------------
+
 class _DistributionCharts extends StatelessWidget {
   final List<BusinessOperation> operations;
   final AppLocalizations localizations;
@@ -213,7 +337,7 @@ class _DistributionCharts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final sourceDistribution = _calculateSourceDistribution();
+    final distribution = _calculateSourceDistribution();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -225,7 +349,6 @@ class _DistributionCharts extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 标题
           Row(
             children: [
               Icon(
@@ -245,10 +368,8 @@ class _DistributionCharts extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-
-          // 饼图和图例
           _PieChartWithLegend(
-            distribution: sourceDistribution,
+            distribution: distribution,
             localizations: localizations,
           ),
         ],
@@ -258,30 +379,15 @@ class _DistributionCharts extends StatelessWidget {
 
   Map<String, double> _calculateSourceDistribution() {
     final distribution = <String, double>{};
-    for (final operation in operations) {
-      final source = _getSourceDisplayName(operation);
+    for (final op in operations) {
+      final key = op.sourceType; // 'cart' | 'delivery'
       distribution.update(
-        source,
-        (value) => value + operation.totalAmount,
-        ifAbsent: () => operation.totalAmount,
+        key,
+        (v) => v + op.grandTotal,
+        ifAbsent: () => op.grandTotal,
       );
     }
     return distribution;
-  }
-
-  String _getSourceDisplayName(BusinessOperation operation) {
-    switch (operation.sourceTable.toLowerCase()) {
-      case 'cart_based':
-        return 'cart';
-      case 'order_based':
-        return 'order';
-      case 'invoice_based':
-        return 'invoice';
-      case 'receipt_based':
-        return 'receipt';
-      default:
-        return operation.sourceTable;
-    }
   }
 }
 
@@ -297,9 +403,9 @@ class _PieChartWithLegend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final total = distribution.values.fold(0.0, (sum, value) => sum + value);
+    final total = distribution.values.fold(0.0, (sum, v) => sum + v);
 
-    if (distribution.isEmpty) {
+    if (distribution.isEmpty || total <= 0) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(40),
@@ -313,9 +419,7 @@ class _PieChartWithLegend extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 localizations.noDataAvailable,
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -323,7 +427,6 @@ class _PieChartWithLegend extends StatelessWidget {
       );
     }
 
-    // 准备饼图数据
     final pieSections = <PieChartSectionData>[];
     final legendItems = <_LegendItemData>[];
 
@@ -338,10 +441,9 @@ class _PieChartWithLegend extends StatelessWidget {
 
     int colorIndex = 0;
     distribution.forEach((key, value) {
-      final percentage = total > 0 ? (value / total * 100) : 0;
+      final percentage = total > 0 ? (value / total * 100) : 0.0;
       final color = colors[colorIndex % colors.length];
 
-      // 饼图区块
       pieSections.add(
         PieChartSectionData(
           value: value,
@@ -354,18 +456,14 @@ class _PieChartWithLegend extends StatelessWidget {
             color: Colors.white,
           ),
           titlePositionPercentageOffset: 0.6,
-          borderSide: BorderSide(
-            color: Colors.white,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Colors.white, width: 2),
         ),
       );
 
-      // 图例项
       legendItems.add(_LegendItemData(
-        label: _getLocalizedSourceName(key, localizations),
+        label: _localizedSourceName(key, localizations),
         value: value,
-        percentage: percentage.toDouble(),
+        percentage: percentage,
         color: color,
       ));
 
@@ -374,7 +472,6 @@ class _PieChartWithLegend extends StatelessWidget {
 
     return Row(
       children: [
-        // 饼图
         Expanded(
           child: AspectRatio(
             aspectRatio: 1,
@@ -382,12 +479,10 @@ class _PieChartWithLegend extends StatelessWidget {
               PieChartData(
                 sections: pieSections,
                 centerSpaceRadius: 40,
-                startDegreeOffset: -90, // 从顶部开始
-                sectionsSpace: 2, // 区块间距
+                startDegreeOffset: -90,
+                sectionsSpace: 2,
                 pieTouchData: PieTouchData(
-                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                    // 可添加点击交互
-                  },
+                  touchCallback: (event, response) {},
                 ),
               ),
               swapAnimationDuration: const Duration(milliseconds: 300),
@@ -396,33 +491,24 @@ class _PieChartWithLegend extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 20),
-
-        // 图例
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...legendItems.map((item) => _LegendItem(
-                    data: item,
-                    showValue: true,
-                  )),
-            ],
+            children: legendItems
+                .map((item) => _LegendItem(data: item, showValue: true))
+                .toList(),
           ),
         ),
       ],
     );
   }
 
-  String _getLocalizedSourceName(String source, AppLocalizations loc) {
+  String _localizedSourceName(String source, AppLocalizations loc) {
     switch (source.toLowerCase()) {
       case 'cart':
         return loc.cart;
-      case 'order':
+      case 'delivery':
         return loc.order;
-      case 'invoice':
-        return loc.invoice;
-      case 'receipt':
-        return loc.receipt;
       default:
         return source;
     }
@@ -455,13 +541,11 @@ class _LegendItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    AppLocalizations loc = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          // 颜色标记
           Container(
             width: 12,
             height: 12,
@@ -471,8 +555,6 @@ class _LegendItem extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-
-          // 标签
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,7 +571,8 @@ class _LegendItem extends StatelessWidget {
                 ),
                 if (showValue)
                   Text(
-                    '${_formatCurrency(data.value, context)} • ${data.percentage.toStringAsFixed(1)}%',
+                    '${_fmt(data.value, context)} • '
+                    '${data.percentage.toStringAsFixed(1)}%',
                     style: TextStyle(
                       color: colorScheme.onSurfaceVariant,
                       fontSize: 10,
@@ -504,15 +587,14 @@ class _LegendItem extends StatelessWidget {
   }
 }
 
-// 添加需要的本地化键到ARB文件
-extension LocalizationKeys on AppLocalizations {
-  String get sourceDistribution => 'Source Distribution';
-  String get noDataAvailable => 'No data available';
-  String get invoice => 'Invoice';
-  String get receipt => 'Receipt';
-  String get outstanding => 'Outstanding';
-}
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
 
-String _formatCurrency(double amount, BuildContext context) {
-  return FinancialUIManager.formatCurrency(amount, context);
+String _fmt(double v, BuildContext context) =>
+    FinancialUIManager.formatCurrency(v, context);
+
+String _fmtPercent(double? v) {
+  if (v == null) return '—';
+  return '${(v * 100).toStringAsFixed(1)}%';
 }

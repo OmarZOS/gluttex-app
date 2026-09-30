@@ -6792,4 +6792,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deliveryStatusShipped => 'Shipped';
+
+  @override
+  String get sourceDistribution => 'Source Distribution';
+
+  @override
+  String get noDataAvailable => 'No data available';
 }

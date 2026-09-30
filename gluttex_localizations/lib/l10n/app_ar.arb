@@ -3368,7 +3368,11 @@
 
   "deliveryTransitionReqProof": "تم التقاط إثبات التسليم",
   "deliveryTransitionReqProofDesc": "تم استلام توقيع أو صورة أو مسح ضوئي من المستلم.",
-  "deliveryStatusShipped": "تم الشحن"
+  "deliveryStatusShipped": "تم الشحن",
+
+  "sourceDistribution": "التوزيع حسب المصدر",
+  "noDataAvailable": "لا توجد بيانات",
+  "outstanding": "المبلغ المتبقي"
 
 
 }

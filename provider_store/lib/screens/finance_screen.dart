@@ -27,10 +27,6 @@ class FinanceScreen extends StatelessWidget {
           _AppBar(
             notifier: financeNotifier,
           ),
-          DateFilterSelector(
-            selectedFilter: financeNotifier.dateFilter,
-            onFilterChanged: financeNotifier.selectDateFilter,
-          ),
           Expanded(
             child: EnhancedInvoiceList(
               notifier: financeNotifier,

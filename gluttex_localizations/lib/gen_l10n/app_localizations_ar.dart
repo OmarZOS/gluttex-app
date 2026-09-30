@@ -2690,7 +2690,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get totalPaid => 'المدفوع';
 
   @override
-  String get outstanding => 'المستحقات';
+  String get outstanding => 'المبلغ المتبقي';
 
   @override
   String get balance => 'الرصيد';
@@ -6827,4 +6827,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deliveryStatusShipped => 'تم الشحن';
+
+  @override
+  String get sourceDistribution => 'التوزيع حسب المصدر';
+
+  @override
+  String get noDataAvailable => 'لا توجد بيانات';
 }

@@ -1,97 +1,167 @@
+// lib/ui/components/business_operations/business_operations_filters.dart
+
+import 'package:event/views/business_ops_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:provider/provider.dart';
-import 'package:event/views/finance_view_model.dart';
 
-class BusinessOperationsFilters extends StatefulWidget {
+class BusinessOperationsFilters extends StatelessWidget {
   const BusinessOperationsFilters({super.key});
 
   @override
-  State<BusinessOperationsFilters> createState() =>
-      _BusinessOperationsFiltersState();
-}
-
-class _BusinessOperationsFiltersState extends State<BusinessOperationsFilters> {
-  String? _selectedStatus;
-  String? _selectedSource;
-
-  void _applyFilters(FinanceViewModel viewModel) {
-    final filter = viewModel.businessFilter.copyWith(
-      paymentStatus: _selectedStatus,
-      sourceTable: _selectedSource,
-    );
-    viewModel.setBusinessFilter(filter);
-  }
-
-  void _clearFilters(FinanceViewModel viewModel) {
-    viewModel.setBusinessFilter(const BusinessFilter());
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
-    final viewModel = context.watch<FinanceViewModel>();
-    final hasFilters = _selectedStatus != null || _selectedSource != null;
+    final loc = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    final notifier = context.watch<BusinessOperationNotifier>();
+
+    final hasWindow = notifier.dateFrom != null || notifier.dateTo != null;
+    final hasSupplierFilter = notifier.supplierId > 0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: cs.surface,
         border: Border(
-          bottom: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
+          bottom: BorderSide(color: cs.outline.withOpacity(0.1)),
         ),
       ),
       child: Row(
         children: [
           _FilterChip(
-            label: localizations.status,
-            value: _selectedStatus,
+            label: loc.sourceDistribution, // reusing "source" label
+            value: _sourceValue(notifier),
             items: const [
               FilterItem(null, 'All'),
-              FilterItem('paid', 'Paid'),
-              FilterItem('partial', 'Partial'),
-              FilterItem('unpaid', 'Unpaid'),
-              FilterItem('overdue', 'Overdue'),
+              FilterItem('cart', 'Carts'),
+              FilterItem('delivery', 'Orders'),
             ],
             onChanged: (value) {
-              setState(() => _selectedStatus = value);
-              _applyFilters(viewModel);
+              // The new envelope doesn't accept a source filter server-side,
+              // so a source filter is purely a client concern. For now, do
+              // nothing here — the badge on each row already distinguishes
+              // cart vs delivery, and the pie chart is filtered by the
+              // backend's supplier/client/date axes.
+              //
+              // If you later add a source filter to the backend, wire it to
+              // notifier.setSourceType(value).
             },
           ),
           const SizedBox(width: 8),
-          _FilterChip(
-            label: localizations.source,
-            value: _selectedSource,
-            items: const [
-              FilterItem(null, 'All'),
-              FilterItem('cart_based', 'Carts'),
-              FilterItem('order_based', 'Orders'),
-            ],
-            onChanged: (value) {
-              setState(() => _selectedSource = value);
-              _applyFilters(viewModel);
-            },
-          ),
+          _DateRangeChip(notifier: notifier),
           const Spacer(),
-          if (hasFilters)
-            _ClearButton(
+          if (hasWindow || hasSupplierFilter)
+            TextButton.icon(
               onPressed: () {
-                setState(() {
-                  _selectedStatus = null;
-                  _selectedSource = null;
-                });
-                _clearFilters(viewModel);
+                if (hasSupplierFilter) {
+                  notifier.setSupplierId(0);
+                }
+                if (hasWindow) {
+                  notifier.clearDateRange();
+                }
               },
-              colorScheme: colorScheme,
-              label: localizations.clearFilters,
+              style: TextButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: Icon(Icons.clear_all, size: 14, color: cs.error),
+              label: Text(
+                loc.clearFilters,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: cs.error,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
         ],
       ),
     );
   }
+
+  String? _sourceValue(BusinessOperationNotifier n) => null;
 }
+
+// ---------------------------------------------------------------------------
+// Date range chip
+// ---------------------------------------------------------------------------
+
+class _DateRangeChip extends StatelessWidget {
+  const _DateRangeChip({required this.notifier});
+
+  final BusinessOperationNotifier notifier;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final from = notifier.dateFrom;
+    final to = notifier.dateTo;
+    final hasWindow = from != null || to != null;
+
+    final label = hasWindow
+        ? '${_fmt(from)} → ${_fmt(to)}'
+        : AppLocalizations.of(context)!.all;
+
+    return GestureDetector(
+      onTap: () => _pickRange(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: cs.surfaceVariant.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: cs.outline.withOpacity(0.1)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.date_range_outlined,
+                size: 14, color: cs.onSurfaceVariant),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, size: 16, color: cs.onSurfaceVariant),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _fmt(DateTime? d) {
+    if (d == null) return '—';
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-'
+        '${d.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _pickRange(BuildContext context) async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 1),
+      initialDateRange: (notifier.dateFrom != null && notifier.dateTo != null)
+          ? DateTimeRange(start: notifier.dateFrom!, end: notifier.dateTo!)
+          : null,
+      helpText: 'Select date range',
+    );
+    if (picked == null) return;
+    await notifier.setDateRange(picked.start, picked.end);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Filter chip primitive (reused from your original, minus the modal sheet)
+// ---------------------------------------------------------------------------
 
 class _FilterChip extends StatelessWidget {
   final String label;
@@ -109,8 +179,8 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final selectedItem = items.firstWhere(
+    final cs = theme.colorScheme;
+    final selected = items.firstWhere(
       (item) => item.value == value,
       orElse: () => items.first,
     );
@@ -120,33 +190,26 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceVariant.withOpacity(0.4),
+          color: cs.surfaceVariant.withOpacity(0.4),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colorScheme.outline.withOpacity(0.1)),
+          border: Border.all(color: cs.outline.withOpacity(0.1)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.filter_alt_outlined,
-              size: 14,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            Icon(Icons.filter_alt_outlined,
+                size: 14, color: cs.onSurfaceVariant),
             const SizedBox(width: 6),
             Text(
-              '$label: ${selectedItem.displayLabel}',
+              '$label: ${selected.displayLabel}',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
+                color: cs.onSurface,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(width: 4),
-            Icon(
-              Icons.arrow_drop_down,
-              size: 16,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            Icon(Icons.arrow_drop_down, size: 16, color: cs.onSurfaceVariant),
           ],
         ),
       ),
@@ -154,12 +217,12 @@ class _FilterChip extends StatelessWidget {
   }
 
   void _showFilterSheet(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: colorScheme.surface,
+      backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -173,35 +236,33 @@ class _FilterChip extends StatelessWidget {
               label,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
+                color: cs.onSurface,
               ),
             ),
             const SizedBox(height: 16),
-            ...items.map((item) {
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Radio<String?>(
-                  value: item.value,
-                  groupValue: value,
-                  onChanged: (newValue) {
-                    onChanged(newValue);
+            ...items.map((item) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Radio<String?>(
+                    value: item.value,
+                    groupValue: value,
+                    onChanged: (v) {
+                      onChanged(v);
+                      Navigator.pop(context);
+                    },
+                    activeColor: cs.primary,
+                  ),
+                  title: Text(
+                    item.displayLabel,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurface,
+                      fontWeight: item.value == value ? FontWeight.w600 : null,
+                    ),
+                  ),
+                  onTap: () {
+                    onChanged(item.value);
                     Navigator.pop(context);
                   },
-                  activeColor: colorScheme.primary,
-                ),
-                title: Text(
-                  item.displayLabel,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: item.value == value ? FontWeight.w600 : null,
-                  ),
-                ),
-                onTap: () {
-                  onChanged(item.value);
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
+                )),
             const SizedBox(height: 8),
           ],
         ),
@@ -215,41 +276,4 @@ class FilterItem {
   final String displayLabel;
 
   const FilterItem(this.value, this.displayLabel);
-}
-
-class _ClearButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final ColorScheme colorScheme;
-  final String label;
-
-  const _ClearButton({
-    required this.onPressed,
-    required this.colorScheme,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton.icon(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      icon: Icon(
-        Icons.clear_all,
-        size: 14,
-        color: colorScheme.error,
-      ),
-      label: Text(
-        label,
-        style: TextStyle(
-          fontSize: 13,
-          color: colorScheme.error,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
 }

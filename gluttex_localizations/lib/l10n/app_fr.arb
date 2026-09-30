@@ -3418,7 +3418,11 @@
 
   "deliveryTransitionReqProof": "Preuve de livraison capturée",
   "deliveryTransitionReqProofDesc": "Signature, photo ou scan reçu du destinataire.",
-  "deliveryStatusShipped": "Expédiée"
+  "deliveryStatusShipped": "Expédiée",
+
+  "sourceDistribution": "Répartition par source",
+  "noDataAvailable": "Aucune donnée disponible",
+  "outstanding": "Restant dû"
 
 
 

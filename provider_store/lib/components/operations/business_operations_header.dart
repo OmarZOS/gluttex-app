@@ -1,26 +1,29 @@
+// lib/ui/components/business_operations/business_operations_header.dart
+
+import 'package:event/views/business_ops_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:provider/provider.dart';
-import 'package:event/views/finance_view_model.dart';
+
+import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 
 class BusinessOperationsHeader extends StatelessWidget {
   const BusinessOperationsHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-    final viewModel = context.watch<FinanceViewModel>();
-    final summaries = viewModel.businessSummaries;
+
+    final notifier = context.watch<BusinessOperationNotifier>();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: cs.surface,
         border: Border(
-          bottom: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
+          bottom: BorderSide(color: cs.outline.withOpacity(0.1)),
         ),
       ),
       child: Column(
@@ -32,12 +35,12 @@ class BusinessOperationsHeader extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.1),
+                  color: cs.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.account_balance_wallet,
-                  color: colorScheme.primary,
+                  color: cs.primary,
                   size: 20,
                 ),
               ),
@@ -47,70 +50,61 @@ class BusinessOperationsHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      localizations.businessOperations,
+                      loc.businessOperations,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
+                        color: cs.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      localizations.viewAllBusinessTransactions,
+                      loc.viewAllBusinessTransactions,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
               IconButton(
-                onPressed: () => _handleExport(context, localizations),
-                icon: Icon(Icons.download_rounded, size: 20),
-                color: colorScheme.primary,
+                onPressed: notifier.isBusy ? null : () => notifier.refresh(),
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+                color: cs.primary,
                 style: IconButton.styleFrom(
-                  backgroundColor: colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: cs.primary.withOpacity(0.1),
                   padding: const EdgeInsets.all(8),
                 ),
-                tooltip: localizations.exportOperations,
+                tooltip: loc.refresh,
               ),
             ],
           ),
-          if (summaries.isNotEmpty) ...[
+          // Top suppliers strip — driven by the envelope's bySupplier buckets.
+          if (notifier.bySupplier.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _TopSuppliers(suppliers: summaries),
+            _TopSuppliers(buckets: notifier.bySupplier),
           ],
         ],
-      ),
-    );
-  }
-
-  void _handleExport(BuildContext context, AppLocalizations localizations) {
-    final viewModel = context.read<FinanceViewModel>();
-    viewModel.exportAnalyticsData();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(localizations.exportingData),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        duration: const Duration(seconds: 2),
       ),
     );
   }
 }
 
 class _TopSuppliers extends StatelessWidget {
-  final List<BusinessSummary> suppliers;
+  final Map<String, BusinessOperationsBucket> buckets;
 
-  const _TopSuppliers({required this.suppliers});
+  const _TopSuppliers({required this.buckets});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final topSuppliers = suppliers.take(3).toList();
-    AppLocalizations loc = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    // Sort by grand_total desc, take 3.
+    final entries = buckets.entries.toList()
+      ..sort((a, b) =>
+          (b.value.grandTotal ?? 0).compareTo(a.value.grandTotal ?? 0));
+    final top = entries.take(3).toList();
+
+    if (top.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +112,7 @@ class _TopSuppliers extends StatelessWidget {
         Text(
           'Top Suppliers',
           style: TextStyle(
-            color: colorScheme.onSurface,
+            color: cs.onSurface,
             fontWeight: FontWeight.w600,
             fontSize: 13,
           ),
@@ -128,15 +122,19 @@ class _TopSuppliers extends StatelessWidget {
           height: 32,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: topSuppliers.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemCount: top.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
-              final supplier = topSuppliers[index];
+              final e = top[index];
+              final supplierId = e.key;
+              final bucket = e.value;
+              final total = bucket.grandTotal ?? 0;
+
               return Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant.withOpacity(0.5),
+                  color: cs.surfaceVariant.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -147,14 +145,14 @@ class _TopSuppliers extends StatelessWidget {
                       height: 6,
                       margin: const EdgeInsets.only(right: 6),
                       decoration: BoxDecoration(
-                        color: _getColorForIndex(index, colorScheme),
+                        color: _colorForIndex(index, cs),
                         shape: BoxShape.circle,
                       ),
                     ),
                     Text(
-                      supplier.supplierName,
+                      'Supplier $supplierId',
                       style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
+                        color: cs.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -162,9 +160,9 @@ class _TopSuppliers extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      loc.price(supplier.totalRevenue.toStringAsFixed(0)),
+                      total.toStringAsFixed(0),
                       style: TextStyle(
-                        color: colorScheme.onSurface,
+                        color: cs.onSurface,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -179,12 +177,8 @@ class _TopSuppliers extends StatelessWidget {
     );
   }
 
-  Color _getColorForIndex(int index, ColorScheme colorScheme) {
-    final colors = [
-      colorScheme.primary,
-      colorScheme.secondary,
-      colorScheme.tertiary,
-    ];
+  Color _colorForIndex(int index, ColorScheme cs) {
+    final colors = [cs.primary, cs.secondary, cs.tertiary];
     return colors[index % colors.length];
   }
 }

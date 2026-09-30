@@ -1,232 +1,238 @@
+// lib/ui/managers/business_operations_ui_manager.dart
+
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:event/personnel_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:ui/components/supplier/SupplierUIProvider.dart';
 
-/// 业务操作UI管理器 - 集中管理所有UI元素和配置
+/// Centralizes every status → color/icon/label mapping the UI needs.
+///
+/// The operation model is envelope-shaped: `sourceType` (`cart` | `delivery`),
+/// `sourceId`, `status` (cart/delivery lifecycle), `invoiceStatus`
+/// (paid/unpaid/partially_paid), plus commercial/settlement/cost/profit fields.
+/// The old `paymentStatus`, `operationType`, `documentType`, `sellerId`,
+/// `orderId`, `cartId`, `invoiceId` fields no longer exist on the model.
 class BusinessOperationsUIManager {
-  /// 付款状态枚举和配置
-  static final Map<String, PaymentStatusConfig> _paymentStatusConfig = {
-    'paid': PaymentStatusConfig(
+  BusinessOperationsUIManager._();
+
+  // ---------------------------------------------------------------------
+  // Invoice status (this is what "paid / unpaid / partial" now means)
+  // ---------------------------------------------------------------------
+
+  static final Map<String, InvoiceStatusConfig> _invoiceStatusConfig = {
+    'paid': const InvoiceStatusConfig(
       displayName: 'Paid',
       color: Colors.green,
       icon: Icons.check_circle,
       priority: 1,
     ),
-    'fully_paid': PaymentStatusConfig(
-      displayName: 'Fully Paid',
-      color: Colors.green,
-      icon: Icons.check_circle,
-      priority: 1,
-    ),
-    'partial': PaymentStatusConfig(
-      displayName: 'Partial',
-      color: Colors.orange,
-      icon: Icons.pending,
-      priority: 2,
-    ),
-    'partially_paid': PaymentStatusConfig(
+    'partially_paid': const InvoiceStatusConfig(
       displayName: 'Partially Paid',
       color: Colors.orange,
       icon: Icons.pending,
       priority: 2,
     ),
-    'unpaid': PaymentStatusConfig(
+    'unpaid': const InvoiceStatusConfig(
       displayName: 'Unpaid',
       color: Colors.red,
       icon: Icons.error_outline,
       priority: 3,
     ),
-    'overdue': PaymentStatusConfig(
-      displayName: 'Overdue',
-      color: Colors.deepOrange,
-      icon: Icons.warning,
-      priority: 4,
-    ),
-  };
-
-  /// 发票状态配置
-  static final Map<String, InvoiceStatusConfig> _invoiceStatusConfig = {
-    'issued': InvoiceStatusConfig(
-      displayName: 'Issued',
-      color: Colors.blue,
-      priority: 1,
-    ),
-    'paid': InvoiceStatusConfig(
-      displayName: 'Paid',
-      color: Colors.green,
-      priority: 2,
-    ),
-    'pending': InvoiceStatusConfig(
-      displayName: 'Pending',
-      color: Colors.orange,
-      priority: 3,
-    ),
-    'partial': InvoiceStatusConfig(
-      displayName: 'Partial',
-      color: Colors.amber,
-      priority: 4,
-    ),
-    'unpaid': InvoiceStatusConfig(
-      displayName: 'Overdue',
-      color: Colors.red,
-      priority: 5,
-    ),
-    'cancelled': InvoiceStatusConfig(
+    'cancelled': const InvoiceStatusConfig(
       displayName: 'Cancelled',
       color: Colors.grey,
-      priority: 6,
+      icon: Icons.cancel_outlined,
+      priority: 4,
     ),
   };
 
-  /// 操作类型配置
-  static final Map<String, OperationTypeConfig> _operationTypeConfig = {
-    'products_only': OperationTypeConfig(
-      displayName: 'Products',
-      color: Colors.blue,
-      icon: Icons.shopping_bag,
-    ),
-    'services_only': OperationTypeConfig(
-      displayName: 'Services',
-      color: Colors.purple,
-      icon: Icons.handyman,
-    ),
-    'mixed_products_services': OperationTypeConfig(
-      displayName: 'Mixed',
-      color: Colors.teal,
-      icon: Icons.blender,
-    ),
-    'direct_order': OperationTypeConfig(
-      displayName: 'e-Shopping',
-      color: Colors.yellow,
-      icon: Icons.blender,
-    ),
-  };
-
-  /// 文档类型配置
-  static final Map<String, DocumentTypeConfig> _documentTypeConfig = {
-    'invoice': DocumentTypeConfig(
-      displayName: 'Invoice',
-      color: Colors.indigo,
-      icon: Icons.receipt_long,
-    ),
-    'receipt': DocumentTypeConfig(
-      displayName: 'Receipt',
-      color: Colors.green,
-      icon: Icons.receipt,
-    ),
-    'deposit': DocumentTypeConfig(
-      displayName: 'Deposit',
-      color: Colors.cyan,
-      icon: Icons.account_balance,
-    ),
-  };
-
-  /// 获取付款状态配置
-  static PaymentStatusConfig getPaymentStatusConfig(String status) {
-    return _paymentStatusConfig[status.toLowerCase()] ??
-        PaymentStatusConfig(
-          displayName: status,
+  static InvoiceStatusConfig getInvoiceStatusConfig(String? status) {
+    final key = (status ?? '').toLowerCase();
+    return _invoiceStatusConfig[key] ??
+        InvoiceStatusConfig(
+          displayName: status ?? 'Unknown',
           color: Colors.grey,
           icon: Icons.help_outline,
           priority: 99,
         );
   }
 
-  /// 获取发票状态配置
-  static InvoiceStatusConfig getInvoiceStatusConfig(String status) {
-    return _invoiceStatusConfig[status.toLowerCase()] ??
-        InvoiceStatusConfig(
-          displayName: status,
+  // ---------------------------------------------------------------------
+  // Source type (replaces the old "operationType" / "documentType" axes)
+  // ---------------------------------------------------------------------
+
+  static final Map<String, SourceTypeConfig> _sourceTypeConfig = {
+    'cart': const SourceTypeConfig(
+      displayName: 'Cart',
+      color: Colors.blue,
+      icon: Icons.shopping_cart_outlined,
+    ),
+    'delivery': const SourceTypeConfig(
+      displayName: 'Order',
+      color: Colors.teal,
+      icon: Icons.local_shipping_outlined,
+    ),
+  };
+
+  static SourceTypeConfig getSourceTypeConfig(String? type) {
+    final key = (type ?? '').toLowerCase();
+    return _sourceTypeConfig[key] ??
+        SourceTypeConfig(
+          displayName: type ?? 'Unknown',
           color: Colors.grey,
+          icon: Icons.category_outlined,
+        );
+  }
+
+  // ---------------------------------------------------------------------
+  // Lifecycle status (cart_status / delivery_status)
+  // ---------------------------------------------------------------------
+
+  static final Map<String, LifecycleStatusConfig> _lifecycleStatusConfig = {
+    'open': const LifecycleStatusConfig(
+      displayName: 'Open',
+      color: Colors.blueGrey,
+      icon: Icons.lock_open_outlined,
+      priority: 1,
+    ),
+    'pending': const LifecycleStatusConfig(
+      displayName: 'Pending',
+      color: Colors.orange,
+      icon: Icons.hourglass_empty,
+      priority: 2,
+    ),
+    'processing': const LifecycleStatusConfig(
+      displayName: 'Processing',
+      color: Colors.blue,
+      icon: Icons.autorenew,
+      priority: 3,
+    ),
+    'checkout': const LifecycleStatusConfig(
+      displayName: 'Checkout',
+      color: Colors.indigo,
+      icon: Icons.shopping_bag_outlined,
+      priority: 4,
+    ),
+    'partial': const LifecycleStatusConfig(
+      displayName: 'Partial',
+      color: Colors.amber,
+      icon: Icons.pie_chart_outline,
+      priority: 5,
+    ),
+    'delivered': const LifecycleStatusConfig(
+      displayName: 'Delivered',
+      color: Colors.green,
+      icon: Icons.check_circle_outline,
+      priority: 6,
+    ),
+    'completed': const LifecycleStatusConfig(
+      displayName: 'Completed',
+      color: Colors.green,
+      icon: Icons.done_all,
+      priority: 7,
+    ),
+    'abandoned': const LifecycleStatusConfig(
+      displayName: 'Abandoned',
+      color: Colors.grey,
+      icon: Icons.remove_circle_outline,
+      priority: 8,
+    ),
+    'canceled': const LifecycleStatusConfig(
+      displayName: 'Canceled',
+      color: Colors.red,
+      icon: Icons.cancel_outlined,
+      priority: 9,
+    ),
+  };
+
+  static LifecycleStatusConfig getLifecycleStatusConfig(String? status) {
+    final key = (status ?? '').toLowerCase();
+    return _lifecycleStatusConfig[key] ??
+        LifecycleStatusConfig(
+          displayName: status ?? 'Unknown',
+          color: Colors.grey,
+          icon: Icons.help_outline,
           priority: 99,
         );
   }
 
-  /// 获取操作类型配置
-  static OperationTypeConfig getOperationTypeConfig(String type) {
-    // debugPrint("Comparing between $type");
-    // debugPrint("if in ${_operationTypeConfig.keys.toString()}");
+  // ---------------------------------------------------------------------
+  // Titles and subtitles
+  // ---------------------------------------------------------------------
 
-    return _operationTypeConfig[type.toLowerCase()] ??
-        OperationTypeConfig(
-          displayName: type,
-          color: Colors.grey,
-          icon: Icons.category,
-        );
-  }
-
-  /// 获取文档类型配置
-  static DocumentTypeConfig getDocumentTypeConfig(String type) {
-    return _documentTypeConfig[type.toLowerCase()] ??
-        DocumentTypeConfig(
-          displayName: type,
-          color: Colors.grey,
-          icon: Icons.description,
-        );
-  }
-
-  /// 获取源显示文本
-  // static String getSourceDisplayText(String source, AppLocalizations l10n) {
-  //   switch (source) {
-  //     case 'cart_based':
-  //       return l10n.cart;
-  //     case 'order_based':
-  //       return l10n.order;
-  //     default:
-  //       return source;
-  //   }
-  // }
-
-  /// 获取操作标题
+  /// Title for a single operation. Prefers invoice number when available,
+  /// otherwise falls back to the source type + id.
   static String getOperationTitle(
-      BusinessOperation operation, AppLocalizations l10n) {
-    if (operation.invoiceId != null) {
-      return '${l10n.invoice} #${operation.invoiceId}';
-    } else if (operation.orderId != null) {
-      return '${l10n.order} #${operation.orderId}';
-    } else if (operation.cartId != null) {
-      return '${l10n.cart} #${operation.cartId}';
+    BusinessOperation operation,
+    AppLocalizations l10n,
+  ) {
+    final invoiceNumber = operation.invoice?['invoice_number'] as String?;
+    if (invoiceNumber != null && invoiceNumber.isNotEmpty) {
+      return '${l10n.invoice} $invoiceNumber';
     }
-    return '${l10n.transaction}';
+    if (operation.isCart) {
+      return '${l10n.cart} #${operation.sourceId}';
+    }
+    if (operation.isDelivery) {
+      return '${l10n.order} #${operation.sourceId}';
+    }
+    return l10n.transactionDetails;
   }
 
-  /// 获取操作副标题
-
+  /// Subtitle composed of client + supplier + (optional) seller.
+  /// Seller is only present for carts (`cart_selling_user`); deliveries
+  /// do not carry a seller, so it's omitted.
   static Future<String> getOperationSubtitle(
-      BusinessOperation operation,
-      AppLocalizations l10n,
-      PersonnelNotifier? personnelNotifier,
-      SupplierChangeNotifier supplierNotifier) async {
+    BusinessOperation operation,
+    AppLocalizations l10n,
+    PersonnelNotifier? personnelNotifier,
+    SupplierChangeNotifier supplierNotifier,
+  ) async {
     final parts = <String>[];
 
     // Client
     if (operation.clientId != null && personnelNotifier != null) {
-      final clientText = await _getClientText(operation.clientId!,
-          operation.operationType ?? 'user', l10n.client, personnelNotifier);
+      final clientText = await _getClientText(
+        operation.clientId!,
+        'user',
+        l10n.client,
+        personnelNotifier,
+      );
       if (clientText.isNotEmpty) parts.add(clientText);
     }
 
     // Supplier
-    if (operation.supplierId != 0) {
+    if (operation.supplierId != null && operation.supplierId! != 0) {
       final supplierText = await SupplierUIProvider.getSupplierText(
-        operation.supplierId,
+        operation.supplierId!,
         l10n.supplier,
         supplierNotifier,
       );
       if (supplierText.isNotEmpty) parts.add(supplierText);
     }
 
-    // Seller
-    if (operation.sellerId != 0 && personnelNotifier != null) {
+    // Seller — only carts carry it, in the raw cart payload.
+    final sellerId = _extractSellerId(operation);
+    if (sellerId != null && sellerId != 0 && personnelNotifier != null) {
       final sellerText = await _getSellerText(
-          operation.sellerId, l10n.seller, personnelNotifier);
+        sellerId,
+        l10n.seller,
+        personnelNotifier,
+      );
       if (sellerText.isNotEmpty) parts.add(sellerText);
     }
 
-    return parts.isNotEmpty ? parts.join(' • ') : '';
+    return parts.join(' • ');
+  }
+
+  static int? _extractSellerId(BusinessOperation operation) {
+    final cart = operation.cart;
+    if (cart == null) return null;
+    final seller = cart['cart_selling_user'];
+    return seller is int ? seller : null;
   }
 
   static Future<String> _getClientText(
@@ -241,10 +247,8 @@ class BusinessOperationsUIManager {
         customerType: clientType,
         personId: clientId,
       );
-
-      final clientName = client?.displayName?.trim() ?? '';
-
-      return clientName.isNotEmpty ? '$clientLabel: $clientName' : clientLabel;
+      final name = client?.displayName?.trim() ?? '';
+      return name.isNotEmpty ? '$clientLabel: $name' : clientLabel;
     } catch (e) {
       debugPrint('Error getting client name: $e');
       return clientLabel;
@@ -262,94 +266,107 @@ class BusinessOperationsUIManager {
         customerType: 'user',
         personId: null,
       );
-
-      final sellerName = customer?.displayName?.trim() ?? '';
-
-      return sellerName.isNotEmpty ? '$sellerLabel: $sellerName' : sellerLabel;
+      final name = customer?.displayName?.trim() ?? '';
+      return name.isNotEmpty ? '$sellerLabel: $name' : sellerLabel;
     } catch (e) {
       debugPrint('Error getting seller name: $e');
       return sellerLabel;
     }
   }
 
-  /// 格式化日期
+  // ---------------------------------------------------------------------
+  // Formatting helpers
+  // ---------------------------------------------------------------------
+
   static String formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    final local = date.toLocal();
+    return '${local.day}/${local.month}/${local.year} '
+        '${local.hour}:${local.minute.toString().padLeft(2, '0')}';
   }
 
-  /// 格式化货币
-  // static String formatCurrency(double amount) {
-  //   return '${amount.toStringAsFixed(2)}';
-  // }
+  /// Format an ROI ratio (nullable) as a percentage string.
+  static String formatRoi(double? roi) {
+    if (roi == null) return '—';
+    return '${(roi * 100).toStringAsFixed(1)}%';
+  }
 
-  /// 获取源标签颜色
+  /// Color for the source badge. Distinct from the invoice status color.
   static Color getSourceBadgeColor(
-      String operationType, ColorScheme colorScheme) {
-    switch (operationType.toLowerCase()) {
-      case 'products_only':
+    String? sourceType,
+    ColorScheme colorScheme,
+  ) {
+    switch ((sourceType ?? '').toLowerCase()) {
+      case 'cart':
         return colorScheme.primary;
-      case 'mixed_products_services':
+      case 'delivery':
         return colorScheme.secondary;
-      case 'services_only':
-        return colorScheme.tertiary;
-      case 'direct_order':
-        return colorScheme.onInverseSurface;
       default:
         return colorScheme.primary;
     }
   }
+
+  /// Optional: derive a short summary of the operation's mix.
+  /// Since the new model doesn't ship a single "operationType" string,
+  /// derive it from item/service counts on the operation.
+  static String deriveOperationTypeLabel(BusinessOperation op) {
+    final hasItems = op.itemCount > 0;
+    final hasServices = op.serviceCount > 0;
+    if (hasItems && hasServices) return 'Mixed';
+    if (hasItems) return 'Products';
+    if (hasServices) return 'Services';
+    return 'Empty';
+  }
+
+  static IconData deriveOperationTypeIcon(BusinessOperation op) {
+    final hasItems = op.itemCount > 0;
+    final hasServices = op.serviceCount > 0;
+    if (hasItems && hasServices) return Icons.blender;
+    if (hasItems) return Icons.shopping_bag_outlined;
+    if (hasServices) return Icons.handyman_outlined;
+    return Icons.inbox_outlined;
+  }
 }
 
-/// 付款状态配置模型
-class PaymentStatusConfig {
-  final String displayName;
-  final Color color;
-  final IconData icon;
-  final int priority;
+// ---------------------------------------------------------------------------
+// Config models
+// ---------------------------------------------------------------------------
 
-  const PaymentStatusConfig({
-    required this.displayName,
-    required this.color,
-    required this.icon,
-    required this.priority,
-  });
-}
-
-/// 发票状态配置模型
 class InvoiceStatusConfig {
   final String displayName;
   final Color color;
+  final IconData icon;
   final int priority;
 
   const InvoiceStatusConfig({
     required this.displayName,
     required this.color,
+    required this.icon,
     required this.priority,
   });
 }
 
-/// 操作类型配置模型
-class OperationTypeConfig {
+class SourceTypeConfig {
   final String displayName;
   final Color color;
   final IconData icon;
 
-  const OperationTypeConfig({
+  const SourceTypeConfig({
     required this.displayName,
     required this.color,
     required this.icon,
   });
 }
 
-/// 文档类型配置模型
-class DocumentTypeConfig {
+class LifecycleStatusConfig {
   final String displayName;
   final Color color;
   final IconData icon;
+  final int priority;
 
-  const DocumentTypeConfig({
+  const LifecycleStatusConfig({
     required this.displayName,
     required this.color,
     required this.icon,
+    required this.priority,
   });
 }

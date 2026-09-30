@@ -2,16 +2,16 @@ import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 
 // BusinessOperationService.dart
 abstract class BusinessOperationService {
-  Future<List<BusinessOperation>?>? getAllBusinessOperations(
+  Future<BusinessOperationsResponse?> getAllBusinessOperations(
     int page,
     int limit, {
     int supplierId = 0,
-    int orderId = 0,
-    int cartId = 0,
     int clientId = 0,
-    int sellerId = 0,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    bool includeStats = true,
   }) async {
-    return null;
+    throw UnimplementedError();
   }
 
   Future<BusinessOperation?> getBusinessOperation(

@@ -1,18 +1,39 @@
+// lib/screens/business_operations_screen.dart
+
+import 'package:event/views/business_ops_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
-import 'package:event/cart_change_notifier.dart';
-import 'package:event/order_change_notifier.dart';
+import 'package:gluttex_core/business/services/BusinessOperationService.dart';
+import 'package:locator/locator.dart';
+
 import 'package:provider_store/components/operations/business_operations_filters.dart';
 import 'package:provider_store/components/operations/business_operations_header.dart';
 import 'package:provider_store/components/operations/business_operations_list.dart';
 import 'package:provider_store/components/operations/business_operations_stats.dart';
 import 'package:provider_store/screens/business_operation_details_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:event/views/finance_view_model.dart';
 
 class BusinessOperationsScreen extends StatefulWidget {
-  const BusinessOperationsScreen({super.key});
+  /// Optional: lock the screen to a single supplier.
+  /// Pass 0 (or omit) to show all suppliers the current user can see.
+  final int supplierId;
+
+  /// Optional initial date range.
+  final DateTime? initialDateFrom;
+  final DateTime? initialDateTo;
+
+  /// If true, hide the supplier filter and stats-by-supplier bucket.
+  final bool lockToSupplier;
+
+  const BusinessOperationsScreen({
+    super.key,
+    this.supplierId = 0,
+    this.initialDateFrom,
+    this.initialDateTo,
+    this.lockToSupplier = false,
+  });
 
   @override
   State<BusinessOperationsScreen> createState() =>
@@ -20,548 +41,488 @@ class BusinessOperationsScreen extends StatefulWidget {
 }
 
 class _BusinessOperationsScreenState extends State<BusinessOperationsScreen> {
+  late final BusinessOperationNotifier _notifier;
   final ScrollController _scrollController = ScrollController();
-  bool _isInitialLoad = true;
 
   @override
   void initState() {
     super.initState();
-    // Load initial data when screen is created
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadInitialData();
+
+    // Pull the service from the locator, not from a provider above this
+    // widget. Using context.read here would fail because initState runs
+    // before the widget is attached to the tree in a way that provider
+    // can resolve.
+    _notifier = BusinessOperationNotifier(
+      service: AppLocator.get<BusinessOperationService>(),
+      defaultPageSize: 50,
+    );
+
+    // Apply the initial filters, then load. Use a post-frame callback so
+    // the widget is fully mounted before we start touching state.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      if (widget.supplierId > 0) {
+        await _notifier.setSupplierId(widget.supplierId);
+      }
+
+      if (widget.initialDateFrom != null || widget.initialDateTo != null) {
+        await _notifier.setDateRange(
+          widget.initialDateFrom,
+          widget.initialDateTo,
+        );
+      }
+
+      // If neither filter setter triggered a load, load now.
+      if (widget.supplierId == 0 && widget.initialDateFrom == null) {
+        await _notifier.load();
+      }
     });
 
-    // Setup scroll listener for pagination
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _notifier.dispose();
     super.dispose();
   }
 
-  Future<void> _loadInitialData() async {
-    final viewModel = context.read<FinanceViewModel>();
-
-    // Only load if we haven't loaded before or if data is empty
-    if (_isInitialLoad && viewModel.businessOperations.isEmpty) {
-      _isInitialLoad = false;
-      await viewModel.loadBusinessOperations();
-    }
-  }
-
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      _loadMoreData();
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 300) {
+      _notifier.nextPage();
     }
-  }
-
-  Future<void> _loadMoreData() async {
-    final viewModel = context.read<FinanceViewModel>();
-    if (!viewModel.isLoading && !viewModel.isLoadingMore && viewModel.hasMore) {
-      await viewModel.loadMoreBusinessOperations();
-    }
-  }
-
-  Future<void> _refreshData() async {
-    final viewModel = context.read<FinanceViewModel>();
-    await viewModel.refreshBusinessOperations();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FinanceViewModel>(
-      builder: (context, viewModel, child) {
-        final operations = viewModel.businessOperations;
-        final isLoading = viewModel.isLoading;
-        final isLoadingMore = viewModel.isLoadingMore;
-        final hasMore = viewModel.hasMore;
-
-        return Scaffold(
-          body: RefreshIndicator(
-            onRefresh: _refreshData,
-            child: CustomScrollView(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                // Header Section
-                const SliverToBoxAdapter(child: BusinessOperationsHeader()),
-
-                // Filters Section
-                const SliverToBoxAdapter(child: BusinessOperationsFilters()),
-
-                // Initial Loading Indicator
-                if (isLoading && operations.isEmpty)
+    return ChangeNotifierProvider<BusinessOperationNotifier>.value(
+      value: _notifier,
+      child: Consumer<BusinessOperationNotifier>(
+        builder: (context, notifier, _) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                widget.lockToSupplier && widget.supplierId > 0
+                    ? 'Operations · Supplier ${widget.supplierId}'
+                    : 'Business Operations',
+              ),
+              actions: [
+                IconButton(
+                  tooltip: 'Refresh',
+                  onPressed: notifier.isBusy ? null : notifier.refresh,
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+            body: RefreshIndicator(
+              onRefresh: notifier.refresh,
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // Header
                   const SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: CircularProgressIndicator(),
+                    child: BusinessOperationsHeader(),
+                  ),
+
+                  // KPI strip from stats.totals
+                  if (notifier.totals != null)
+                    SliverToBoxAdapter(
+                      child: _KpiStrip(
+                        totals: notifier.totals!,
+                        ratios: notifier.ratios,
+                        counts: notifier.counts,
                       ),
                     ),
+
+                  // Filters
+                  const SliverToBoxAdapter(
+                    child: BusinessOperationsFilters(),
                   ),
 
-                // Stats Summary
-                if (operations.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: BusinessOperationsStats(operations: operations),
-                  ),
-
-                // Operations List
-                if (operations.isNotEmpty)
-                  BusinessOperationsList(
-                    operations: operations,
-                    isLoadingMore: isLoadingMore,
-                    hasMore: hasMore,
-                    onLoadMore: _loadMoreData,
-                    onTapOperation: (operation) {
-                      _navigateToDetails(context, operation, viewModel);
-                    },
-                  ),
-
-                // Load More Indicator
-                if (hasMore && operations.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: _buildLoadMoreIndicator(isLoadingMore),
-                  ),
-
-                // Empty State
-                if (operations.isEmpty && !isLoading)
-                  SliverFillRemaining(
-                    child: _EmptyState(
-                      onRetry: () => viewModel.refreshBusinessOperations(),
+                  // Time window banner
+                  if (notifier.window.dateFrom != null ||
+                      notifier.window.dateTo != null)
+                    SliverToBoxAdapter(
+                      child: _TimeWindowBanner(window: notifier.window),
                     ),
-                  ),
 
-                // Bottom Padding
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 32),
+                  // Initial loading
+                  if (notifier.isLoading && !notifier.hasOperations)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+
+                  // Error
+                  if (notifier.hasError)
+                    SliverToBoxAdapter(
+                      child: _ErrorState(
+                        error: notifier.error,
+                        onRetry: notifier.load,
+                      ),
+                    ),
+
+                  // Stats summary
+                  if (notifier.hasOperations && notifier.stats != null)
+                    SliverToBoxAdapter(
+                      child: BusinessOperationsStats(
+                        stats: notifier.stats,
+                        operations: notifier.operations,
+                      ),
+                    ),
+
+                  // Operations list
+                  if (notifier.hasOperations)
+                    BusinessOperationsList(
+                      operations: notifier.operations,
+                      isLoadingMore: notifier.isLoading && notifier.page > 0,
+                      hasMore: notifier.hasNextPage,
+                      onLoadMore: notifier.nextPage,
+                      onTapOperation: (op) =>
+                          _openDetails(context, op, notifier),
+                    ),
+
+                  // Pagination footer
+                  if (notifier.hasOperations)
+                    SliverToBoxAdapter(
+                      child: _PaginationFooter(
+                        page: notifier.page,
+                        pagination: notifier.pagination,
+                        hasNext: notifier.hasNextPage,
+                        hasPrev: notifier.hasPreviousPage,
+                        isBusy: notifier.isBusy,
+                        onPrev: notifier.previousPage,
+                        onNext: notifier.nextPage,
+                      ),
+                    ),
+
+                  // Empty state
+                  if (notifier.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _EmptyState(onRetry: notifier.refresh),
+                    ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _openDetails(
+    BuildContext context,
+    BusinessOperation operation,
+    BusinessOperationNotifier notifier,
+  ) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => OperationDetailsScreen(operation: operation),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// KPI strip
+// ---------------------------------------------------------------------------
+
+class _KpiStrip extends StatelessWidget {
+  final BusinessOperationsTotals totals;
+  final BusinessOperationsRatios? ratios;
+  final BusinessOperationsCounts? counts;
+
+  const _KpiStrip({
+    required this.totals,
+    this.ratios,
+    this.counts,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _Kpi(
+                  label: 'Revenue',
+                  value: totals.grandTotal,
+                  color: cs.primary,
+                ),
+                _Kpi(
+                  label: 'Margin',
+                  value: totals.marginAmount,
+                  color: totals.marginAmount >= 0 ? Colors.green : cs.error,
+                ),
+                _Kpi(
+                  label: 'Due',
+                  value: totals.dueAmount,
+                  color: totals.dueAmount > 0 ? Colors.orange : Colors.green,
+                ),
+                _Kpi(
+                  label: 'Paid',
+                  value: totals.paidAmount,
+                  color: Colors.teal,
+                ),
+                if (ratios?.overallRoi != null)
+                  _Kpi(
+                    label: 'ROI',
+                    value: ratios!.overallRoi!,
+                    color: ratios!.overallRoi! >= 0 ? Colors.green : cs.error,
+                    isRatio: true,
+                  ),
+                _Kpi(
+                  label: 'Avg Ticket',
+                  value: ratios?.averageTicket ?? 0,
+                  color: cs.primary,
                 ),
               ],
             ),
           ),
-        );
-      },
-    );
-  }
-
-  void _navigateToDetails(BuildContext context, BusinessOperation operation,
-      FinanceViewModel viewModel) {
-    // Navigate to loader screen first
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OperationDetailsLoaderScreen(
-          operation: operation,
-          financeViewModel: viewModel,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoadMoreIndicator(bool isLoadingMore) {
-    if (!isLoadingMore) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: Column(
-          children: [
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+          if (counts != null) ...[
             const SizedBox(height: 8),
-            Text(
-              'Loading more...',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// Loader screen that fetches details before showing operation details
-class OperationDetailsLoaderScreen extends StatefulWidget {
-  final BusinessOperation operation;
-  final FinanceViewModel financeViewModel;
-
-  const OperationDetailsLoaderScreen({
-    super.key,
-    required this.operation,
-    required this.financeViewModel,
-  });
-
-  @override
-  State<OperationDetailsLoaderScreen> createState() =>
-      _OperationDetailsLoaderScreenState();
-}
-
-class _OperationDetailsLoaderScreenState
-    extends State<OperationDetailsLoaderScreen> {
-  late Future<void> _loadingFuture;
-  String? _errorMessage;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadingFuture = _loadOperationDetails();
-  }
-
-  Future<void> _loadOperationDetails() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      // Based on operation type, fetch appropriate details
-      if (widget.operation.cartId != null) {
-        await _loadCartDetails();
-      } else if (widget.operation.orderId != null) {
-        await _loadOrderDetails();
-      }
-
-      // Also ensure the operation is available in the filtered list
-      final operationExists = widget.financeViewModel.businessOperations
-          .any((op) => _areOperationsEqual(op, widget.operation));
-
-      if (!operationExists) {
-        // Refresh operations if this one isn't in the current list
-        await widget.financeViewModel.refreshBusinessOperations();
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> _loadCartDetails() async {
-    final cartId = widget.operation.cartId!;
-
-    // Check if cart exists in cart notifier
-    final cartNotifier = Provider.of<CartChangeNotifier>(
-      context,
-      listen: false,
-    );
-
-    // If cart not in cache, fetch it
-    final cartExists =
-        cartNotifier.apiCarts.any((cart) => cart.cartId == cartId);
-    if (!cartExists) {
-      await cartNotifier.fetchCartDetails(cartId);
-    }
-  }
-
-  Future<void> _loadOrderDetails() async {
-    final orderId = widget.operation.orderId!;
-
-    // Check if order exists in cart notifier
-    final orderNotifier = Provider.of<OrderChangeNotifier>(
-      context,
-      listen: false,
-    );
-    // If order not in cache, fetch it
-    final orderExists =
-        orderNotifier.orders.any((order) => order.idPlacedOrder == orderId);
-    if (!orderExists) {
-      await orderNotifier.fetchOrderDetails(orderId: orderId);
-    }
-  }
-
-  bool _areOperationsEqual(BusinessOperation a, BusinessOperation b) {
-    return a.cartId == b.cartId &&
-        a.orderId == b.orderId &&
-        a.supplierId == b.supplierId &&
-        a.totalAmount == b.totalAmount;
-  }
-
-  void _handleRetry() {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    _loadingFuture = _loadOperationDetails();
-  }
-
-  void _goBack() {
-    Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-
-    return FutureBuilder<void>(
-      future: _loadingFuture,
-      builder: (context, snapshot) {
-        // Show loading state
-        if (_isLoading) {
-          return _buildLoadingScreen(theme, colorScheme);
-        }
-
-        // Show error state
-        if (_errorMessage != null) {
-          return _buildErrorScreen(theme, colorScheme);
-        }
-
-        // Show operation details screen
-        return OperationDetailsScreen(
-          operation: widget.operation,
-        );
-      },
-    );
-  }
-
-  Widget _buildLoadingScreen(ThemeData theme, ColorScheme colorScheme) {
-    AppLocalizations loc = AppLocalizations.of(context)!;
-
-    return Scaffold(
-      backgroundColor: colorScheme.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Animated loader
-            SizedBox(
-              width: 60,
-              height: 60,
-              child: Stack(
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colorScheme.primary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation(colorScheme.primary),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Loading Operation Details',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              widget.operation.cartId != null
-                  ? 'Fetching cart items...'
-                  : 'Fetching order details...',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Operation preview
-            Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.symmetric(horizontal: 32),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          widget.operation.cartId != null
-                              ? Icons.shopping_cart
-                              : Icons.receipt_long,
-                          size: 20,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          widget.operation.cartId != null
-                              ? 'Cart #${widget.operation.cartId}'
-                              : 'Order #${widget.operation.orderId}',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        loc.price(
-                            widget.operation.totalAmount.toStringAsFixed(2)),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildStatusChip(
-                          widget.operation.paymentStatus, theme, colorScheme),
-                      const SizedBox(width: 8),
-                      _buildStatusChip(
-                          widget.operation.invoiceStatus, theme, colorScheme),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorScreen(ThemeData theme, ColorScheme colorScheme) {
-    return Scaffold(
-      backgroundColor: colorScheme.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _goBack,
-        ),
-        title: const Text('Error Loading Details'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: colorScheme.error,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Failed to Load Details',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: colorScheme.error,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  _errorMessage!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            const SizedBox(height: 32),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                OutlinedButton(
-                  onPressed: _goBack,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
+                Text(
+                  '${counts!.operations} operations',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
                   ),
-                  child: const Text('Go Back'),
                 ),
-                const SizedBox(width: 16),
-                FilledButton(
-                  onPressed: _handleRetry,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
+                const SizedBox(width: 12),
+                Text(
+                  '${counts!.carts} carts · '
+                  '${counts!.deliveries} deliveries',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
                   ),
-                  child: const Text('Retry'),
                 ),
               ],
             ),
           ],
-        ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildStatusChip(
-      String status, ThemeData theme, ColorScheme colorScheme) {
-    Color backgroundColor;
-    Color textColor;
+class _Kpi extends StatelessWidget {
+  final String label;
+  final double value;
+  final Color color;
+  final bool isRatio;
 
-    switch (status.toLowerCase()) {
-      case 'paid':
-      case 'completed':
-        backgroundColor = Colors.green.withOpacity(0.1);
-        textColor = Colors.green;
-        break;
-      case 'unpaid':
-      case 'pending':
-        backgroundColor = Colors.orange.withOpacity(0.1);
-        textColor = Colors.orange;
-        break;
-      case 'overdue':
-      case 'cancelled':
-        backgroundColor = Colors.red.withOpacity(0.1);
-        textColor = Colors.red;
-        break;
-      default:
-        backgroundColor = colorScheme.surfaceVariant;
-        textColor = colorScheme.onSurfaceVariant;
-    }
+  const _Kpi({
+    required this.label,
+    required this.value,
+    required this.color,
+    this.isRatio = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final display = isRatio
+        ? '${(value * 100).toStringAsFixed(1)}%'
+        : value.toStringAsFixed(2);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(6),
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
-      child: Text(
-        status,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            display,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Time window banner
+// ---------------------------------------------------------------------------
+
+class _TimeWindowBanner extends StatelessWidget {
+  final BusinessOperationsWindow window;
+  const _TimeWindowBanner({required this.window});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    String fmt(DateTime? d) => d == null
+        ? '—'
+        : '${d.year}-${d.month.toString().padLeft(2, '0')}-'
+            '${d.day.toString().padLeft(2, '0')}';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      child: Row(
+        children: [
+          Icon(Icons.date_range, size: 16, color: cs.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Text(
+            '${fmt(window.dateFrom)} → ${fmt(window.dateTo)}',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pagination footer
+// ---------------------------------------------------------------------------
+
+class _PaginationFooter extends StatelessWidget {
+  final int page;
+  final BusinessOperationsPagination pagination;
+  final bool hasNext;
+  final bool hasPrev;
+  final bool isBusy;
+  final VoidCallback onPrev;
+  final VoidCallback onNext;
+
+  const _PaginationFooter({
+    required this.page,
+    required this.pagination,
+    required this.hasNext,
+    required this.hasPrev,
+    required this.isBusy,
+    required this.onPrev,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextButton.icon(
+            onPressed: hasPrev && !isBusy ? onPrev : null,
+            icon: const Icon(Icons.chevron_left),
+            label: const Text('Previous'),
+          ),
+          Column(
+            children: [
+              Text(
+                'Page ${page + 1}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+              Text(
+                '${pagination.offset + pagination.returned} of '
+                '${pagination.totalInWindow}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          TextButton.icon(
+            onPressed: hasNext && !isBusy ? onNext : null,
+            icon: const Icon(Icons.chevron_right),
+            label: const Text('Next'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Error / empty states
+// ---------------------------------------------------------------------------
+
+class _ErrorState extends StatelessWidget {
+  final Object? error;
+  final Future<void> Function() onRetry;
+
+  const _ErrorState({required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, size: 56, color: cs.error),
+          const SizedBox(height: 16),
+          Text(
+            'Failed to load operations',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          if (error != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              error.toString(),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: () => onRetry(),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }
@@ -569,14 +530,13 @@ class _OperationDetailsLoaderScreenState
 
 class _EmptyState extends StatelessWidget {
   final VoidCallback? onRetry;
-
   const _EmptyState({this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Center(
       child: Padding(
@@ -587,14 +547,14 @@ class _EmptyState extends StatelessWidget {
             Icon(
               Icons.assessment_outlined,
               size: 80,
-              color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+              color: cs.onSurfaceVariant.withOpacity(0.3),
             ),
             const SizedBox(height: 24),
             Text(
-              localizations.noBusinessOperations,
+              loc.noBusinessOperations,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: colorScheme.onSurface,
+                color: cs.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -602,9 +562,9 @@ class _EmptyState extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                localizations.generateOperationsToSeeData,
+                loc.generateOperationsToSeeData,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: cs.onSurfaceVariant,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -615,13 +575,7 @@ class _EmptyState extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: Text(localizations.retry),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
+                label: Text(loc.retry),
               ),
           ],
         ),

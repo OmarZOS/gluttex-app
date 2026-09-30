@@ -1,466 +1,659 @@
-// import 'package:flutter/foundation.dart';
+// lib/models/business_operation.dart
+
+// ---------------------------------------------------------------------------
+// Envelope: what the API returns
+// ---------------------------------------------------------------------------
+
+class BusinessOperationsResponse {
+  final List<BusinessOperation> operations;
+  final BusinessOperationsStatsData? stats;
+  final BusinessOperationsPagination pagination;
+  final BusinessOperationsWindow window;
+
+  const BusinessOperationsResponse({
+    required this.operations,
+    required this.stats,
+    required this.pagination,
+    required this.window,
+  });
+
+  factory BusinessOperationsResponse.fromJson(Map<String, dynamic> json) {
+    return BusinessOperationsResponse(
+      operations: _parseOperations(json['operations']),
+      stats: _parseStatsOrNull(json['stats']),
+      pagination:
+          BusinessOperationsPagination.fromJson(_asMap(json['pagination'])),
+      window: BusinessOperationsWindow.fromJson(_asMap(json['window'])),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'operations': operations.map((e) => e.toJson()).toList(),
+        if (stats != null) 'stats': stats!.toJson(),
+        'pagination': pagination.toJson(),
+        'window': window.toJson(),
+      };
+}
+
+// ---------------------------------------------------------------------------
+// One operation
+// ---------------------------------------------------------------------------
 
 class BusinessOperation {
-  // Primary identifiers
-  final int supplierId;
-  final int? orderId;
-  final int? cartId;
-  final int? clientId; // Renamed from 'client' to match Python model
-  final int sellerId;
-  final int? invoiceId;
-  final int? receiptId;
+  // Identity
+  final String sourceType; // "cart" | "delivery"
+  final int sourceId;
+  final int? supplierId;
+  final int? clientId;
 
-  // Financial information
-  final double totalAmount;
-  final double balanceDue;
-  final double totalPaid;
-  final double totalDeposited;
+  // Status
+  final String? status;
+  final DateTime? createdAt;
 
-  // Status and classification
-  final String paymentStatus;
-  final String invoiceStatus;
-  final String documentType;
-  final String operationType;
-  final String sourceTable;
+  // Raw payloads
+  final Map<String, dynamic>? invoice;
+  final Map<String, dynamic>? cart;
+  final Map<String, dynamic>? delivery;
+  final List<Map<String, dynamic>> items;
+  final List<Map<String, dynamic>> services;
 
-  // Temporal information
-  final DateTime? operationDate;
+  // Commercial
+  final double productSubtotal;
+  final double serviceSubtotal;
+  final double grossSubtotal;
+  final double discountAmount;
+  final double itemDiscountAmount;
+  final double orderDiscountAmount;
+  final double taxAmount;
+  final double deliveryRevenue;
+  final double grandTotal;
+  final double computedGrandTotal;
+  final bool invoiceMismatch;
+
+  // Settlement
+  final double invoiceTotal;
+  final double paidAmount;
+  final double dueAmount;
+  final String? invoiceStatus;
+  final bool paymentStatusConsistent;
+
+  // Cost
+  final double productCost;
+  final double consumableServiceCost;
+  final double nonConsumableServiceCost;
+  final double laborCost;
+  final double deliveryCost;
+  final double totalCost;
+
+  // Profitability
+  final double marginAmount;
+  final double? roi;
+
+  // Counts
+  final int itemCount;
+  final int serviceCount;
 
   const BusinessOperation({
-    required this.supplierId,
-    this.orderId,
-    this.cartId,
-    this.clientId,
-    required this.sellerId,
-    this.invoiceId,
-    this.receiptId,
-    required this.totalAmount,
-    required this.balanceDue,
-    required this.totalPaid,
-    required this.totalDeposited,
-    required this.paymentStatus,
-    required this.invoiceStatus,
-    required this.documentType,
-    required this.operationType,
-    required this.sourceTable,
-    this.operationDate,
-  });
-
-  // Add this method to your BusinessOperation class
-  factory BusinessOperation.fromJson(Map<String, dynamic> json) {
-    // print('🔍 Parsing BusinessOperation JSON:');
-    // print('  Raw JSON: $json');
-
-    // Log each field to see what's coming in
-    // json.forEach((key, value) {
-    //   print('  $key: $value (type: ${value.runtimeType})');
-    // });
-
-    try {
-      return BusinessOperation(
-        supplierId: json['supplier_id'] as int? ?? 0,
-        orderId: json['order_id'] as int?,
-        cartId: json['cart_id'] as int?,
-        clientId: json['client_id'] as int?, // Updated field name
-        sellerId: json['seller_id'] as int? ?? 0,
-        invoiceId: json['invoice_id'] as int?,
-        receiptId: json['receipt_id'] as int?,
-        totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
-        balanceDue: (json['balance_due'] as num?)?.toDouble() ?? 0.0,
-        totalPaid: (json['total_paid'] as num?)?.toDouble() ?? 0.0,
-        totalDeposited: (json['total_deposited'] as num?)?.toDouble() ?? 0.0,
-        paymentStatus: json['payment_status'] as String? ?? 'unknown',
-        invoiceStatus: json['invoice_status'] as String? ?? 'unknown',
-        documentType: json['document_type'] as String? ?? 'unknown',
-        operationType: json['operation_type'] as String? ?? 'unknown',
-        sourceTable: json['source_table'] as String? ?? 'unknown',
-        operationDate: json['operation_date'] != null
-            ? DateTime.parse(json['operation_date'] as String)
-            : null,
-      );
-    } catch (e, stackTrace) {
-      print('❌ Error parsing BusinessOperation: $e');
-      print('Stack trace: $stackTrace');
-      rethrow;
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'supplier_id': supplierId,
-      'order_id': orderId,
-      'cart_id': cartId,
-      'client_id': clientId,
-      'seller_id': sellerId,
-      'invoice_id': invoiceId,
-      'receipt_id': receiptId,
-      'total_amount': totalAmount,
-      'balance_due': balanceDue,
-      'total_paid': totalPaid,
-      'total_deposited': totalDeposited,
-      'payment_status': paymentStatus,
-      'invoice_status': invoiceStatus,
-      'document_type': documentType,
-      'operation_type': operationType,
-      'source_table': sourceTable,
-      'operation_date': operationDate?.toIso8601String(),
-    };
-  }
-
-  BusinessOperation copyWith({
-    int? supplierId,
-    int? orderId,
-    int? cartId,
-    int? clientId,
-    int? sellerId,
-    int? invoiceId,
-    int? receiptId,
-    double? totalAmount,
-    double? balanceDue,
-    double? totalPaid,
-    double? totalDeposited,
-    String? paymentStatus,
-    String? invoiceStatus,
-    String? documentType,
-    String? operationType,
-    String? sourceTable,
-    DateTime? operationDate,
-  }) {
-    return BusinessOperation(
-      supplierId: supplierId ?? this.supplierId,
-      orderId: orderId ?? this.orderId,
-      cartId: cartId ?? this.cartId,
-      clientId: clientId ?? this.clientId,
-      sellerId: sellerId ?? this.sellerId,
-      invoiceId: invoiceId ?? this.invoiceId,
-      receiptId: receiptId ?? this.receiptId,
-      totalAmount: totalAmount ?? this.totalAmount,
-      balanceDue: balanceDue ?? this.balanceDue,
-      totalPaid: totalPaid ?? this.totalPaid,
-      totalDeposited: totalDeposited ?? this.totalDeposited,
-      paymentStatus: paymentStatus ?? this.paymentStatus,
-      invoiceStatus: invoiceStatus ?? this.invoiceStatus,
-      documentType: documentType ?? this.documentType,
-      operationType: operationType ?? this.operationType,
-      sourceTable: sourceTable ?? this.sourceTable,
-      operationDate: operationDate ?? this.operationDate,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is BusinessOperation &&
-        other.supplierId == supplierId &&
-        other.orderId == orderId &&
-        other.cartId == cartId &&
-        other.clientId == clientId &&
-        other.sellerId == sellerId &&
-        other.invoiceId == invoiceId &&
-        other.receiptId == receiptId &&
-        other.totalAmount == totalAmount &&
-        other.balanceDue == balanceDue &&
-        other.totalPaid == totalPaid &&
-        other.totalDeposited == totalDeposited &&
-        other.paymentStatus == paymentStatus &&
-        other.invoiceStatus == invoiceStatus &&
-        other.documentType == documentType &&
-        other.operationType == operationType &&
-        other.sourceTable == sourceTable &&
-        other.operationDate == operationDate;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      supplierId,
-      orderId,
-      cartId,
-      clientId,
-      sellerId,
-      invoiceId,
-      receiptId,
-      totalAmount,
-      balanceDue,
-      totalPaid,
-      totalDeposited,
-      paymentStatus,
-      invoiceStatus,
-      documentType,
-      operationType,
-      sourceTable,
-      operationDate,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'BusinessOperation('
-        'supplierId: $supplierId, '
-        'orderId: $orderId, '
-        'cartId: $cartId, '
-        'clientId: $clientId, '
-        'sellerId: $sellerId, '
-        'invoiceId: $invoiceId, '
-        'receiptId: $receiptId, '
-        'totalAmount: $totalAmount, '
-        'balanceDue: $balanceDue, '
-        'totalPaid: $totalPaid, '
-        'totalDeposited: $totalDeposited, '
-        'paymentStatus: $paymentStatus, '
-        'invoiceStatus: $invoiceStatus, '
-        'documentType: $documentType, '
-        'operationType: $operationType, '
-        'sourceTable: $sourceTable, '
-        'operationDate: $operationDate'
-        ')';
-  }
-
-  // Helper methods
-  bool get hasInvoice => invoiceId != null;
-  bool get hasReceipt => receiptId != null;
-  bool get isPaid =>
-      paymentStatus.toLowerCase() == 'paid' ||
-      paymentStatus.toLowerCase() == 'fully_paid';
-  bool get isPartiallyPaid =>
-      paymentStatus.toLowerCase() == 'partial' ||
-      paymentStatus.toLowerCase() == 'partially_paid';
-  bool get isUnpaid => paymentStatus.toLowerCase() == 'unpaid';
-  bool get isOverdue => paymentStatus.toLowerCase() == 'overdue';
-
-  // Get operation title based on available IDs
-  String getOperationTitle() {
-    if (orderId != null) return 'Order #$orderId';
-    if (cartId != null) return 'Cart #$cartId';
-    if (invoiceId != null) return 'Invoice #$invoiceId';
-    return 'Transaction #$supplierId';
-  }
-
-  // Get operation type display name
-  String getOperationTypeDisplay() {
-    switch (operationType.toLowerCase()) {
-      case 'products':
-        return 'Products';
-      case 'services':
-        return 'Services';
-      case 'mixed':
-        return 'Mixed';
-      default:
-        return operationType;
-    }
-  }
-
-  // Get document type display name
-  String getDocumentTypeDisplay() {
-    switch (documentType.toLowerCase()) {
-      case 'invoice':
-        return 'Invoice';
-      case 'receipt':
-        return 'Receipt';
-      case 'deposit':
-        return 'Deposit';
-      default:
-        return documentType;
-    }
-  }
-}
-
-// Summary model for aggregated data
-class BusinessSummary {
-  final int supplierId;
-  final String supplierName;
-  final double totalRevenue;
-  final double totalCollected;
-  final double totalOutstanding;
-  final int transactionCount;
-  final double averageTransaction;
-  final double collectionRate;
-
-  const BusinessSummary({
-    required this.supplierId,
-    required this.supplierName,
-    required this.totalRevenue,
-    required this.totalCollected,
-    required this.totalOutstanding,
-    required this.transactionCount,
-    required this.averageTransaction,
-    required this.collectionRate,
-  });
-
-  factory BusinessSummary.fromOperations(
-    int supplierId,
-    String supplierName,
-    List<BusinessOperation> operations,
-  ) {
-    final totalRevenue =
-        operations.fold<double>(0.0, (sum, op) => sum + op.totalAmount);
-    final totalCollected =
-        operations.fold<double>(0.0, (sum, op) => sum + op.totalPaid);
-    final totalOutstanding =
-        operations.fold<double>(0.0, (sum, op) => sum + op.balanceDue);
-
-    return BusinessSummary(
-      supplierId: supplierId,
-      supplierName: supplierName,
-      totalRevenue: totalRevenue,
-      totalCollected: totalCollected,
-      totalOutstanding: totalOutstanding,
-      transactionCount: operations.length,
-      averageTransaction:
-          operations.isEmpty ? 0.0 : totalRevenue / operations.length,
-      collectionRate:
-          totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0.0,
-    );
-  }
-}
-
-// Filter options with enhanced date filtering
-class BusinessFilter {
-  final int? supplierId;
-  final String? paymentStatus;
-  final String? invoiceStatus;
-  final String? documentType;
-  final String? operationType;
-  final String? sourceTable;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final String dateRangeType;
-
-  const BusinessFilter({
+    required this.sourceType,
+    required this.sourceId,
     this.supplierId,
-    this.paymentStatus,
+    this.clientId,
+    this.status,
+    this.createdAt,
+    this.invoice,
+    this.cart,
+    this.delivery,
+    required this.items,
+    required this.services,
+    required this.productSubtotal,
+    required this.serviceSubtotal,
+    required this.grossSubtotal,
+    required this.discountAmount,
+    required this.itemDiscountAmount,
+    required this.orderDiscountAmount,
+    required this.taxAmount,
+    required this.deliveryRevenue,
+    required this.grandTotal,
+    required this.computedGrandTotal,
+    required this.invoiceMismatch,
+    required this.invoiceTotal,
+    required this.paidAmount,
+    required this.dueAmount,
     this.invoiceStatus,
-    this.documentType,
-    this.operationType,
-    this.sourceTable,
-    this.startDate,
-    this.endDate,
-    this.dateRangeType = 'today',
+    required this.paymentStatusConsistent,
+    required this.productCost,
+    required this.consumableServiceCost,
+    required this.nonConsumableServiceCost,
+    required this.laborCost,
+    required this.deliveryCost,
+    required this.totalCost,
+    required this.marginAmount,
+    this.roi,
+    required this.itemCount,
+    required this.serviceCount,
   });
 
-  BusinessFilter copyWith({
-    int? supplierId,
-    String? paymentStatus,
-    String? invoiceStatus,
-    String? documentType,
-    String? operationType,
-    String? sourceTable,
-    DateTime? startDate,
-    DateTime? endDate,
-    String? dateRangeType,
-  }) {
-    return BusinessFilter(
-      supplierId: supplierId ?? this.supplierId,
-      paymentStatus: paymentStatus ?? this.paymentStatus,
-      invoiceStatus: invoiceStatus ?? this.invoiceStatus,
-      documentType: documentType ?? this.documentType,
-      operationType: operationType ?? this.operationType,
-      sourceTable: sourceTable ?? this.sourceTable,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      dateRangeType: dateRangeType ?? this.dateRangeType,
+  factory BusinessOperation.fromJson(Map<String, dynamic> json) {
+    return BusinessOperation(
+      sourceType: _asString(json['source_type']) ?? 'unknown',
+      sourceId: _asInt(json['source_id']) ?? 0,
+      supplierId: _asIntOrNull(json['supplier_id']),
+      clientId: _asIntOrNull(json['client_id']),
+      status: _asString(json['status']),
+      createdAt: _parseDate(json['created_at']),
+      invoice: _asMapOrNull(json['invoice']),
+      cart: _asMapOrNull(json['cart']),
+      delivery: _asMapOrNull(json['delivery']),
+      items: _asMapList(json['items']),
+      services: _asMapList(json['services']),
+      productSubtotal: _asDouble(json['product_subtotal']),
+      serviceSubtotal: _asDouble(json['service_subtotal']),
+      grossSubtotal: _asDouble(json['gross_subtotal']),
+      discountAmount: _asDouble(json['discount_amount']),
+      itemDiscountAmount: _asDouble(json['item_discount_amount']),
+      orderDiscountAmount: _asDouble(json['order_discount_amount']),
+      taxAmount: _asDouble(json['tax_amount']),
+      deliveryRevenue: _asDouble(json['delivery_revenue']),
+      grandTotal: _asDouble(json['grand_total']),
+      computedGrandTotal: _asDouble(json['computed_grand_total']),
+      invoiceMismatch: _asBool(json['invoice_mismatch']) ?? false,
+      invoiceTotal: _asDouble(json['invoice_total']),
+      paidAmount: _asDouble(json['paid_amount']),
+      dueAmount: _asDouble(json['due_amount']),
+      invoiceStatus: _asString(json['invoice_status']),
+      paymentStatusConsistent:
+          _asBool(json['payment_status_consistent']) ?? true,
+      productCost: _asDouble(json['product_cost']),
+      consumableServiceCost: _asDouble(json['consumable_service_cost']),
+      nonConsumableServiceCost: _asDouble(json['non_consumable_service_cost']),
+      laborCost: _asDouble(json['labor_cost']),
+      deliveryCost: _asDouble(json['delivery_cost']),
+      totalCost: _asDouble(json['total_cost']),
+      marginAmount: _asDouble(json['margin_amount']),
+      roi: _asDoubleOrNull(json['roi']),
+      itemCount: _asInt(json['item_count']) ?? 0,
+      serviceCount: _asInt(json['service_count']) ?? 0,
     );
   }
 
-  // Apply filter to list of operations
-  List<BusinessOperation> applyFilter(List<BusinessOperation> operations) {
-    return operations.where((operation) {
-      // Supplier filter
-      if (supplierId != null && operation.supplierId != supplierId) {
-        return false;
-      }
+  Map<String, dynamic> toJson() => {
+        'source_type': sourceType,
+        'source_id': sourceId,
+        'supplier_id': supplierId,
+        'client_id': clientId,
+        'status': status,
+        'created_at': createdAt?.toIso8601String(),
+        'invoice': invoice,
+        'cart': cart,
+        'delivery': delivery,
+        'items': items,
+        'services': services,
+        'product_subtotal': productSubtotal,
+        'service_subtotal': serviceSubtotal,
+        'gross_subtotal': grossSubtotal,
+        'discount_amount': discountAmount,
+        'item_discount_amount': itemDiscountAmount,
+        'order_discount_amount': orderDiscountAmount,
+        'tax_amount': taxAmount,
+        'delivery_revenue': deliveryRevenue,
+        'grand_total': grandTotal,
+        'computed_grand_total': computedGrandTotal,
+        'invoice_mismatch': invoiceMismatch,
+        'invoice_total': invoiceTotal,
+        'paid_amount': paidAmount,
+        'due_amount': dueAmount,
+        'invoice_status': invoiceStatus,
+        'payment_status_consistent': paymentStatusConsistent,
+        'product_cost': productCost,
+        'consumable_service_cost': consumableServiceCost,
+        'non_consumable_service_cost': nonConsumableServiceCost,
+        'labor_cost': laborCost,
+        'delivery_cost': deliveryCost,
+        'total_cost': totalCost,
+        'margin_amount': marginAmount,
+        'roi': roi,
+        'item_count': itemCount,
+        'service_count': serviceCount,
+      };
 
-      // Payment status filter
-      if (paymentStatus != null && operation.paymentStatus != paymentStatus) {
-        return false;
-      }
+  // Convenience
+  bool get isCart => sourceType == 'cart';
+  bool get isDelivery => sourceType == 'delivery';
+  bool get isPaid => invoiceStatus?.toLowerCase() == 'paid';
+  bool get isUnpaid => invoiceStatus?.toLowerCase() == 'unpaid';
+  bool get isFullySettled => dueAmount <= 0.001;
+  bool get isProfitable => marginAmount > 0;
 
-      // Invoice status filter
-      if (invoiceStatus != null && operation.invoiceStatus != invoiceStatus) {
-        return false;
-      }
-
-      // Document type filter
-      if (documentType != null && operation.documentType != documentType) {
-        return false;
-      }
-
-      // Operation type filter
-      if (operationType != null && operation.operationType != operationType) {
-        return false;
-      }
-
-      // Source table filter
-      if (sourceTable != null && operation.sourceTable != sourceTable) {
-        return false;
-      }
-
-      // Date range filter
-      if (operation.operationDate != null) {
-        if (startDate != null &&
-            operation.operationDate!.isBefore(startDate!)) {
-          return false;
-        }
-        if (endDate != null && operation.operationDate!.isAfter(endDate!)) {
-          return false;
-        }
-      }
-
-      return true;
-    }).toList();
+  String get title {
+    if (isCart) return 'Cart #$sourceId';
+    if (isDelivery) return 'Order #$sourceId';
+    return '$sourceType #$sourceId';
   }
 }
 
-// Operation statistics
-class OperationStatistics {
-  final int totalOperations;
-  final double totalRevenue;
-  final double totalCollected;
-  final double collectionRate;
-  final Map<String, int> operationTypeCount;
-  final Map<String, int> paymentStatusCount;
+// ---------------------------------------------------------------------------
+// Aggregate statistics
+// ---------------------------------------------------------------------------
 
-  const OperationStatistics({
-    required this.totalOperations,
-    required this.totalRevenue,
-    required this.totalCollected,
-    required this.collectionRate,
-    required this.operationTypeCount,
-    required this.paymentStatusCount,
+class BusinessOperationsStatsData {
+  final BusinessOperationsTotals totals;
+  final BusinessOperationsRatios ratios;
+  final BusinessOperationsCounts counts;
+  final Map<String, BusinessOperationsBucket> byStatus;
+  final Map<String, BusinessOperationsBucket> bySource;
+  final Map<String, BusinessOperationsBucket> bySupplier;
+  final Map<String, BusinessOperationsBucket> byClient;
+  final Map<String, BusinessOperationsBucket> byDay;
+
+  const BusinessOperationsStatsData({
+    required this.totals,
+    required this.ratios,
+    required this.counts,
+    required this.byStatus,
+    required this.bySource,
+    required this.bySupplier,
+    required this.byClient,
+    required this.byDay,
   });
 
-  factory OperationStatistics.fromOperations(
-      List<BusinessOperation> operations) {
-    final totalRevenue =
-        operations.fold<double>(0.0, (sum, op) => sum + op.totalAmount);
-    final totalCollected =
-        operations.fold<double>(0.0, (sum, op) => sum + op.totalPaid);
-
-    final operationTypeCount = <String, int>{};
-    final paymentStatusCount = <String, int>{};
-
-    for (final operation in operations) {
-      operationTypeCount.update(
-        operation.operationType,
-        (value) => value + 1,
-        ifAbsent: () => 1,
-      );
-
-      paymentStatusCount.update(
-        operation.paymentStatus,
-        (value) => value + 1,
-        ifAbsent: () => 1,
-      );
-    }
-
-    return OperationStatistics(
-      totalOperations: operations.length,
-      totalRevenue: totalRevenue,
-      totalCollected: totalCollected,
-      collectionRate:
-          totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0.0,
-      operationTypeCount: operationTypeCount,
-      paymentStatusCount: paymentStatusCount,
+  factory BusinessOperationsStatsData.fromJson(Map<String, dynamic> json) {
+    return BusinessOperationsStatsData(
+      totals: BusinessOperationsTotals.fromJson(_asMap(json['totals'])),
+      ratios: BusinessOperationsRatios.fromJson(_asMap(json['ratios'])),
+      counts: BusinessOperationsCounts.fromJson(_asMap(json['counts'])),
+      byStatus: _parseBuckets(json['by_status']),
+      bySource: _parseBuckets(json['by_source']),
+      bySupplier: _parseBuckets(json['by_supplier']),
+      byClient: _parseBuckets(json['by_client']),
+      byDay: _parseBuckets(json['by_day']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'totals': totals.toJson(),
+        'ratios': ratios.toJson(),
+        'counts': counts.toJson(),
+        'by_status': byStatus.map((k, v) => MapEntry(k, v.toJson())),
+        'by_source': bySource.map((k, v) => MapEntry(k, v.toJson())),
+        'by_supplier': bySupplier.map((k, v) => MapEntry(k, v.toJson())),
+        'by_client': byClient.map((k, v) => MapEntry(k, v.toJson())),
+        'by_day': byDay.map((k, v) => MapEntry(k, v.toJson())),
+      };
+}
+
+class BusinessOperationsTotals {
+  final double productSubtotal;
+  final double serviceSubtotal;
+  final double grossSubtotal;
+  final double discountAmount;
+  final double taxAmount;
+  final double deliveryRevenue;
+  final double grandTotal;
+  final double invoiceTotal;
+  final double paidAmount;
+  final double dueAmount;
+  final double productCost;
+  final double consumableServiceCost;
+  final double nonConsumableServiceCost;
+  final double laborCost;
+  final double deliveryCost;
+  final double totalCost;
+  final double marginAmount;
+  final int itemCount;
+  final int serviceCount;
+
+  const BusinessOperationsTotals({
+    required this.productSubtotal,
+    required this.serviceSubtotal,
+    required this.grossSubtotal,
+    required this.discountAmount,
+    required this.taxAmount,
+    required this.deliveryRevenue,
+    required this.grandTotal,
+    required this.invoiceTotal,
+    required this.paidAmount,
+    required this.dueAmount,
+    required this.productCost,
+    required this.consumableServiceCost,
+    required this.nonConsumableServiceCost,
+    required this.laborCost,
+    required this.deliveryCost,
+    required this.totalCost,
+    required this.marginAmount,
+    required this.itemCount,
+    required this.serviceCount,
+  });
+
+  factory BusinessOperationsTotals.fromJson(Map<String, dynamic> j) =>
+      BusinessOperationsTotals(
+        productSubtotal: _asDouble(j['product_subtotal']),
+        serviceSubtotal: _asDouble(j['service_subtotal']),
+        grossSubtotal: _asDouble(j['gross_subtotal']),
+        discountAmount: _asDouble(j['discount_amount']),
+        taxAmount: _asDouble(j['tax_amount']),
+        deliveryRevenue: _asDouble(j['delivery_revenue']),
+        grandTotal: _asDouble(j['grand_total']),
+        invoiceTotal: _asDouble(j['invoice_total']),
+        paidAmount: _asDouble(j['paid_amount']),
+        dueAmount: _asDouble(j['due_amount']),
+        productCost: _asDouble(j['product_cost']),
+        consumableServiceCost: _asDouble(j['consumable_service_cost']),
+        nonConsumableServiceCost: _asDouble(j['non_consumable_service_cost']),
+        laborCost: _asDouble(j['labor_cost']),
+        deliveryCost: _asDouble(j['delivery_cost']),
+        totalCost: _asDouble(j['total_cost']),
+        marginAmount: _asDouble(j['margin_amount']),
+        itemCount: _asInt(j['item_count']) ?? 0,
+        serviceCount: _asInt(j['service_count']) ?? 0,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'product_subtotal': productSubtotal,
+        'service_subtotal': serviceSubtotal,
+        'gross_subtotal': grossSubtotal,
+        'discount_amount': discountAmount,
+        'tax_amount': taxAmount,
+        'delivery_revenue': deliveryRevenue,
+        'grand_total': grandTotal,
+        'invoice_total': invoiceTotal,
+        'paid_amount': paidAmount,
+        'due_amount': dueAmount,
+        'product_cost': productCost,
+        'consumable_service_cost': consumableServiceCost,
+        'non_consumable_service_cost': nonConsumableServiceCost,
+        'labor_cost': laborCost,
+        'delivery_cost': deliveryCost,
+        'total_cost': totalCost,
+        'margin_amount': marginAmount,
+        'item_count': itemCount,
+        'service_count': serviceCount,
+      };
+}
+
+class BusinessOperationsRatios {
+  final double? overallRoi;
+  final double averageTicket;
+  final double? collectionRate;
+  final double? discountRate;
+
+  const BusinessOperationsRatios({
+    required this.overallRoi,
+    required this.averageTicket,
+    required this.collectionRate,
+    required this.discountRate,
+  });
+
+  factory BusinessOperationsRatios.fromJson(Map<String, dynamic> j) =>
+      BusinessOperationsRatios(
+        overallRoi: _asDoubleOrNull(j['overall_roi']),
+        averageTicket: _asDouble(j['average_ticket']),
+        collectionRate: _asDoubleOrNull(j['collection_rate']),
+        discountRate: _asDoubleOrNull(j['discount_rate']),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'overall_roi': overallRoi,
+        'average_ticket': averageTicket,
+        'collection_rate': collectionRate,
+        'discount_rate': discountRate,
+      };
+}
+
+class BusinessOperationsCounts {
+  final int operations;
+  final int carts;
+  final int deliveries;
+
+  const BusinessOperationsCounts({
+    required this.operations,
+    required this.carts,
+    required this.deliveries,
+  });
+
+  factory BusinessOperationsCounts.fromJson(Map<String, dynamic> j) =>
+      BusinessOperationsCounts(
+        operations: _asInt(j['operations']) ?? 0,
+        carts: _asInt(j['carts']) ?? 0,
+        deliveries: _asInt(j['deliveries']) ?? 0,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'operations': operations,
+        'carts': carts,
+        'deliveries': deliveries,
+      };
+}
+
+// A per-bucket aggregate. Keys vary by bucket type (status name, supplier id,
+// day string), but the numeric fields are consistent.
+class BusinessOperationsBucket {
+  final int count;
+  final double? grandTotal;
+  final double? totalAmount; // some buckets only carry total_amount
+  final double? dueAmount;
+
+  const BusinessOperationsBucket({
+    required this.count,
+    this.grandTotal,
+    this.totalAmount,
+    this.dueAmount,
+  });
+
+  factory BusinessOperationsBucket.fromJson(Map<String, dynamic> j) =>
+      BusinessOperationsBucket(
+        count: _asInt(j['count']) ?? 0,
+        grandTotal: _asDoubleOrNull(j['grand_total']),
+        totalAmount: _asDoubleOrNull(j['total_amount']),
+        dueAmount: _asDoubleOrNull(j['due_amount']),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'count': count,
+        if (grandTotal != null) 'grand_total': grandTotal,
+        if (totalAmount != null) 'total_amount': totalAmount,
+        if (dueAmount != null) 'due_amount': dueAmount,
+      };
+}
+
+// ---------------------------------------------------------------------------
+// Envelope metadata
+// ---------------------------------------------------------------------------
+
+class BusinessOperationsPagination {
+  final int offset;
+  final int limit;
+  final int returned;
+  final int totalInWindow;
+
+  const BusinessOperationsPagination({
+    required this.offset,
+    required this.limit,
+    required this.returned,
+    required this.totalInWindow,
+  });
+
+  factory BusinessOperationsPagination.fromJson(Map<String, dynamic> j) =>
+      BusinessOperationsPagination(
+        offset: _asInt(j['offset']) ?? 0,
+        limit: _asInt(j['limit']) ?? 100,
+        returned: _asInt(j['returned']) ?? 0,
+        totalInWindow: _asInt(j['total_in_window']) ?? 0,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'offset': offset,
+        'limit': limit,
+        'returned': returned,
+        'total_in_window': totalInWindow,
+      };
+}
+
+class BusinessOperationsWindow {
+  final DateTime? dateFrom;
+  final DateTime? dateTo;
+
+  const BusinessOperationsWindow({this.dateFrom, this.dateTo});
+
+  factory BusinessOperationsWindow.fromJson(Map<String, dynamic> j) =>
+      BusinessOperationsWindow(
+        dateFrom: _parseDate(j['date_from']),
+        dateTo: _parseDate(j['date_to']),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'date_from': dateFrom?.toIso8601String(),
+        'date_to': dateTo?.toIso8601String(),
+      };
+}
+
+// ---------------------------------------------------------------------------
+// Safe numeric / string / bool coercion
+// ---------------------------------------------------------------------------
+
+/// Coerce any value to a double. Accepts int, double, String, null.
+double _asDouble(dynamic v) {
+  if (v == null) return 0.0;
+  if (v is double) return v;
+  if (v is num) return v.toDouble();
+  if (v is String) return double.tryParse(v) ?? 0.0;
+  return 0.0;
+}
+
+/// Coerce any value to a double, returning null when the source is null
+/// or unparseable.
+double? _asDoubleOrNull(dynamic v) {
+  if (v == null) return null;
+  if (v is double) return v;
+  if (v is num) return v.toDouble();
+  if (v is String) return double.tryParse(v);
+  return null;
+}
+
+/// Coerce any value to an int. Accepts int, double (truncated), String.
+/// This is the key fix: the backend sometimes emits `1.0` where the client
+/// expected `1`, and `as int?` throws on that.
+int? _asInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  if (v is num) return v.toInt();
+  if (v is String) {
+    final asInt = int.tryParse(v);
+    if (asInt != null) return asInt;
+    final asDouble = double.tryParse(v);
+    return asDouble?.toInt();
+  }
+  return null;
+}
+
+int? _asIntOrNull(dynamic v) => _asInt(v);
+
+/// Coerce any value to a String. Booleans and numbers become their
+/// string form.
+String? _asString(dynamic v) {
+  if (v == null) return null;
+  if (v is String) return v;
+  return v.toString();
+}
+
+/// Coerce any value to a bool. Accepts bool, "true"/"false", 1/0.
+bool? _asBool(dynamic v) {
+  if (v == null) return null;
+  if (v is bool) return v;
+  if (v is num) return v != 0;
+  if (v is String) {
+    final s = v.toLowerCase();
+    if (s == 'true' || s == '1') return true;
+    if (s == 'false' || s == '0') return false;
+  }
+  return null;
+}
+
+/// Coerce any value to a Map<String, dynamic>. Returns an empty map when
+/// the source isn't a map, so callers never have to null-check the result
+/// of `_asMap(...)`.
+Map<String, dynamic> _asMap(dynamic v) {
+  if (v is Map<String, dynamic>) return v;
+  if (v is Map) return Map<String, dynamic>.from(v);
+  return const {};
+}
+
+/// Coerce any value to a Map<String, dynamic>, or null when the source
+/// isn't a map. Use this for optional nested payloads (invoice, cart,
+/// delivery).
+Map<String, dynamic>? _asMapOrNull(dynamic v) {
+  if (v is Map<String, dynamic>) return v;
+  if (v is Map) return Map<String, dynamic>.from(v);
+  return null;
+}
+
+/// Coerce any value to a List<Map<String, dynamic>>. Non-map entries are
+/// dropped silently.
+List<Map<String, dynamic>> _asMapList(dynamic v) {
+  if (v is! List) return const [];
+  final out = <Map<String, dynamic>>[];
+  for (final e in v) {
+    if (e is Map<String, dynamic>) {
+      out.add(e);
+    } else if (e is Map) {
+      out.add(Map<String, dynamic>.from(e));
+    }
+  }
+  return out;
+}
+
+DateTime? _parseDate(dynamic v) {
+  if (v == null) return null;
+  if (v is DateTime) return v;
+  if (v is int) {
+    // Unix epoch — seconds or milliseconds depending on magnitude.
+    final ms = v > 1000000000000 ? v : v * 1000;
+    return DateTime.fromMillisecondsSinceEpoch(ms);
+  }
+  if (v is String) {
+    if (v.isEmpty) return null;
+    try {
+      return DateTime.parse(v);
+    } catch (_) {
+      return null;
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Collection helpers
+// ---------------------------------------------------------------------------
+
+List<BusinessOperation> _parseOperations(dynamic raw) {
+  if (raw is! List) return const [];
+  final out = <BusinessOperation>[];
+  for (final e in raw) {
+    if (e is Map<String, dynamic>) {
+      out.add(BusinessOperation.fromJson(e));
+    } else if (e is Map) {
+      out.add(BusinessOperation.fromJson(Map<String, dynamic>.from(e)));
+    }
+  }
+  return out;
+}
+
+BusinessOperationsStatsData? _parseStatsOrNull(dynamic raw) {
+  final map = _asMapOrNull(raw);
+  if (map == null) return null;
+  return BusinessOperationsStatsData.fromJson(map);
+}
+
+Map<String, BusinessOperationsBucket> _parseBuckets(dynamic raw) {
+  if (raw is! Map) return const {};
+  final out = <String, BusinessOperationsBucket>{};
+  raw.forEach((k, v) {
+    if (v is Map<String, dynamic>) {
+      out[k.toString()] = BusinessOperationsBucket.fromJson(v);
+    } else if (v is Map) {
+      out[k.toString()] =
+          BusinessOperationsBucket.fromJson(Map<String, dynamic>.from(v));
+    }
+  });
+  return out;
 }
