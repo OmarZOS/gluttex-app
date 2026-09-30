@@ -1,16 +1,17 @@
 // delivery_change_notifier.dart
 //
-// DeliveryChangeNotifier — single owner of the delivery list, its cache,
-// and its in-flight fetch queue.
+// DeliveryChangeNotifier — single owner of the delivery list, its
+// cache, and its in-flight fetch queue.
 //
-// The notifier talks only to the abstract `DeliveryService`. It never
-// casts to an impl, never references `DeliveryServiceImpl`, and never
-// holds a concrete class. Whatever the locator registers — real impl,
-// fake for tests, decorator for logging — is a DeliveryService.
+// Talks only to the abstract `DeliveryService`. No cast, no impl
+// reference. Whatever the locator registers is a DeliveryService.
 //
-// Ops mirror the router one-for-one: one method per named action, each
-// taking an optional `body` (Delivery_API-shaped). Reads go through
-// `DeliveryFetch`, which also talks to the abstract.
+// Mutations apply the returned row locally. Transitions additionally
+// reconcile the current list in the background, because a transition
+// can cascade on the server (order advancement, inventory, sibling
+// deliveries). Metadata edits touch one row and skip the reconcile.
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gluttex_core/business/Delivery.dart';
@@ -34,7 +35,6 @@ class DeliveryState {
   int orderId = 0;
   int brokerId = 0;
   int itemsPerPage = 10;
-  bool isInitialized = false;
 
   void reset() {
     deliveries.clear();
@@ -47,7 +47,6 @@ class DeliveryState {
     providerId = 0;
     orderId = 0;
     brokerId = 0;
-    isInitialized = false;
   }
 
   void resetPagination() {
@@ -92,8 +91,6 @@ class DeliveryCache {
   List<Delivery>? getDeliveries(String key) => _listCache[key];
 
   void invalidateDelivery(int id) => _deliveryCache.remove(id);
-  void invalidateList(String key) => _listCache.remove(key);
-
   void clearAll() {
     _deliveryCache.clear();
     _listCache.clear();
@@ -127,15 +124,7 @@ class DeliveryFetch {
     String query = '',
     bool reset = false,
   }) async {
-    debugPrint(
-        '🚚 Fetching deliveries (providerId: $providerId, orderId: $orderId, '
-        'brokerId: $brokerId, query: "$query", reset: $reset, '
-        'page: ${_state.currentPage})');
-
-    if (_state.isLoading) {
-      debugPrint('⏳ Delivery fetch already in progress, skipping request');
-      return;
-    }
+    if (_state.isLoading) return;
 
     final paramsChanged = reset ||
         _state.providerId != providerId ||
@@ -151,13 +140,11 @@ class DeliveryFetch {
       _state.resetPagination();
     }
 
-    final cacheKey = _generateCacheKey(providerId, orderId, brokerId, query);
+    final cacheKey = 'deliveries_${providerId}_${orderId}_${brokerId}_$query';
 
     if (query.isEmpty && !reset && _state.currentPage == 0) {
       final cached = _cache.getDeliveries(cacheKey);
       if (cached != null && cached.isNotEmpty) {
-        debugPrint(
-            '📦 Using cached deliveries: ${cached.length} (key: $cacheKey)');
         _state.deliveries
           ..clear()
           ..addAll(cached);
@@ -173,10 +160,6 @@ class DeliveryFetch {
 
     try {
       final offset = _state.currentPage * _state.itemsPerPage;
-      debugPrint('📡 Calling deliveries API (offset: $offset, '
-          'limit: ${_state.itemsPerPage}, providerId: $providerId, '
-          'orderId: $orderId, brokerId: $brokerId)');
-
       final fetched = await _service.getAllDeliveries(
         offset,
         _state.itemsPerPage,
@@ -185,29 +168,19 @@ class DeliveryFetch {
         brokerId: brokerId,
       );
 
-      debugPrint('📡 API returned ${fetched.length} deliveries '
-          '(providerId: $providerId, offset: $offset)');
-
       if (fetched.isEmpty) {
         _state.hasMore = false;
       } else {
-        if (_state.currentPage == 0) {
-          _state.deliveries.clear();
-        }
+        if (_state.currentPage == 0) _state.deliveries.clear();
         _state.deliveries.addAll(fetched);
         _state.currentPage++;
         _state.hasMore = fetched.length == _state.itemsPerPage;
         _cache.cacheDeliveries(cacheKey, fetched);
       }
-
-      _state.clearError();
     } catch (e) {
       _state.setError('Error fetching deliveries: $e');
-      debugPrint('❌ Error fetching deliveries: $e');
     } finally {
       _state.setLoading(false);
-      debugPrint('📦 Total deliveries: ${_state.deliveries.length} '
-          '(hasMore: ${_state.hasMore})');
     }
   }
 
@@ -218,23 +191,15 @@ class DeliveryFetch {
     }
     try {
       final d = await _service.getDelivery(id.toString());
-      if (d != null) {
-        _cache.cacheDelivery(d);
-        return d;
-      }
-      return null;
+      if (d != null) _cache.cacheDelivery(d);
+      return d;
     } catch (e) {
       _state.setError('Error fetching delivery: $e');
-      debugPrint('Error fetching delivery: $e');
       return null;
     }
   }
 
   Delivery? getByIdSync(int id) => _cache.getDelivery(id);
-
-  String _generateCacheKey(
-          int providerId, int orderId, int brokerId, String query) =>
-      'deliveries_${providerId}_${orderId}_${brokerId}_$query';
 }
 
 // ============================================================================
@@ -242,15 +207,9 @@ class DeliveryFetch {
 // ============================================================================
 
 class DeliveryChangeNotifier extends ChangeNotifier {
-  /// The abstract contract. Whatever the locator registers is a
-  /// DeliveryService — no cast, no impl reference, no `is` check.
   final DeliveryService _service;
 
-  // In-flight fetch queue. A second fetch with different params while
-  // one is running gets stashed and replayed when the first finishes.
   bool _fetchInProgress = false;
-  Map<String, dynamic>? _activeFetch;
-  Map<String, dynamic>? _pendingFetch;
 
   late final DeliveryState _state;
   late final DeliveryCache _cache;
@@ -271,14 +230,8 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     }
   }
 
-  // ── Notification ───────────────────────────────────────────────
-
-  void _safeNotify() {
-    if (!_state.isLoading && hasListeners) notifyListeners();
-  }
-
   void _notify() {
-    if (!_state.isLoading) _safeNotify();
+    if (!_state.isLoading && hasListeners) notifyListeners();
   }
 
   // ── Getters ────────────────────────────────────────────────────
@@ -295,8 +248,6 @@ class DeliveryChangeNotifier extends ChangeNotifier {
   int get orderId => _state.orderId;
   int get brokerId => _state.brokerId;
 
-  // ── Status shortcuts ───────────────────────────────────────────
-
   List<Delivery> get pendingDeliveries => _state.deliveries
       .where((d) => d.delivery_status.wireValue.toUpperCase() == 'PENDING')
       .toList();
@@ -307,8 +258,6 @@ class DeliveryChangeNotifier extends ChangeNotifier {
 
   Map<String, List<Delivery>> get groupedByStatus =>
       groupBy(_state.deliveries, (Delivery d) => d.delivery_status.wireValue);
-
-  // ── Statistics ─────────────────────────────────────────────────
 
   int get totalDeliveries => _state.deliveries.length;
   int get pendingCount => pendingDeliveries.length;
@@ -358,69 +307,20 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     String query = '',
     bool reset = false,
   }) async {
-    debugPrint('🚚 Delivery fetch requested (providerId: $providerId, '
-        'orderId: $orderId, brokerId: $brokerId, query: "$query", '
-        'reset: $reset)');
-
-    if (_fetchInProgress) {
-      final pending = {
-        'providerId': providerId,
-        'orderId': orderId,
-        'brokerId': brokerId,
-        'query': query,
-        'reset': reset,
-      };
-      if (!_requestsMatch(_activeFetch, pending) &&
-          !_requestsMatch(_pendingFetch, pending)) {
-        _pendingFetch = pending;
-      }
-      debugPrint('⏳ Queued delivery fetch (providerId: $providerId, '
-          'orderId: $orderId, brokerId: $brokerId)');
-      return;
-    }
-
+    if (_fetchInProgress) return;
     _fetchInProgress = true;
     try {
-      do {
-        final req = _pendingFetch ??
-            {
-              'providerId': providerId,
-              'orderId': orderId,
-              'brokerId': brokerId,
-              'query': query,
-              'reset': reset,
-            };
-        _pendingFetch = null;
-        _activeFetch = req;
-
-        debugPrint('🔄 Executing delivery fetch '
-            '(providerId: ${req['providerId']}, '
-            'orderId: ${req['orderId']}, '
-            'brokerId: ${req['brokerId']}, reset: ${req['reset']})');
-
-        await _fetch.fetchDeliveries(
-          providerId: req['providerId'] as int,
-          orderId: req['orderId'] as int,
-          brokerId: req['brokerId'] as int,
-          query: req['query'] as String,
-          reset: req['reset'] as bool,
-        );
-        _notify();
-      } while (_pendingFetch != null);
+      await _fetch.fetchDeliveries(
+        providerId: providerId,
+        orderId: orderId,
+        brokerId: brokerId,
+        query: query,
+        reset: reset,
+      );
+      _notify();
     } finally {
       _fetchInProgress = false;
-      _activeFetch = null;
-      debugPrint('✅ Delivery fetch cycle finished');
     }
-  }
-
-  bool _requestsMatch(Map<String, dynamic>? a, Map<String, dynamic> b) {
-    if (a == null) return false;
-    return a['providerId'] == b['providerId'] &&
-        a['orderId'] == b['orderId'] &&
-        a['brokerId'] == b['brokerId'] &&
-        a['query'] == b['query'] &&
-        a['reset'] == b['reset'];
   }
 
   Future<void> fetchFirstPage() => fetchDeliveries(
@@ -461,18 +361,15 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     }
 
     final term = query.toLowerCase();
-    final filtered = _state.deliveries.where((d) {
-      return d.id_delivery.toString().contains(term) ||
+    _state.searchResults
+      ..clear()
+      ..addAll(_state.deliveries.where((d) =>
+          d.id_delivery.toString().contains(term) ||
           (d.delivery_merchant_name?.toLowerCase().contains(term) ?? false) ||
           (d.delivery_goods_description?.toLowerCase().contains(term) ??
               false) ||
           d.delivery_status.wireValue.toLowerCase().contains(term) ||
-          (d.delivery_source_type?.toLowerCase().contains(term) ?? false);
-    }).toList();
-
-    _state.searchResults
-      ..clear()
-      ..addAll(filtered);
+          (d.delivery_source_type?.toLowerCase().contains(term) ?? false)));
     _notify();
   }
 
@@ -482,7 +379,7 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     _notify();
   }
 
-  // ── CREATE ─────────────────────────────────────────────────────
+  // ── Create ─────────────────────────────────────────────────────
 
   Future<bool> createDelivery(Map<String, dynamic> deliveryData) async {
     if (_state.isLoading) return false;
@@ -501,23 +398,24 @@ class DeliveryChangeNotifier extends ChangeNotifier {
       return true;
     } catch (e) {
       _state.setError('Error creating delivery: $e');
-      debugPrint('Error creating delivery: $e');
       return false;
     } finally {
       _state.setLoading(false);
     }
   }
 
-  // ── OPS ────────────────────────────────────────────────────────
+  // ============================================================
+  // OPS
+  // ============================================================
   //
-  // One private helper does the loading/error/notify dance. Every
-  // public op is a one-liner that picks the abstract method. No
-  // cast, no impl reference, no `is` check.
+  // Every op: call the service, merge the returned row, notify.
+  // Transitions additionally kick off one background list refresh,
+  // because they cascade on the server. Metadata edits don't.
 
-  Future<bool> _runOp(
-    Future<Delivery?> Function() call,
-    String label,
-  ) async {
+  Future<bool> _op(
+    Future<Delivery?> Function() call, {
+    bool reconcile = false,
+  }) async {
     if (_state.isLoading) return false;
     _state.setLoading(true);
     _state.clearError();
@@ -525,54 +423,71 @@ class DeliveryChangeNotifier extends ChangeNotifier {
       final result = await call();
       if (result == null) return false;
 
-      _cache.cacheDelivery(result);
-      final i = _state.deliveries
-          .indexWhere((d) => d.id_delivery == result.id_delivery);
-      if (i != -1) _state.deliveries[i] = result;
-
-      final si = _state.searchResults
-          .indexWhere((d) => d.id_delivery == result.id_delivery);
-      if (si != -1) _state.searchResults[si] = result;
-
+      _merge(result);
       _notify();
+      if (reconcile) unawaited(_reconcile());
       return true;
     } catch (e) {
-      _state.setError('Error in [$label]: $e');
-      debugPrint('Delivery op [$label] failed: $e');
+      _state.setError('Delivery op failed: $e');
       return false;
     } finally {
       _state.setLoading(false);
     }
   }
 
+  void _merge(Delivery d) {
+    _cache.cacheDelivery(d);
+    final i =
+        _state.deliveries.indexWhere((x) => x.id_delivery == d.id_delivery);
+    if (i != -1) _state.deliveries[i] = d;
+    final si =
+        _state.searchResults.indexWhere((x) => x.id_delivery == d.id_delivery);
+    if (si != -1) _state.searchResults[si] = d;
+  }
+
+  Future<void> _reconcile() async {
+    try {
+      await fetchDeliveries(
+        providerId: _state.providerId,
+        orderId: _state.orderId,
+        brokerId: _state.brokerId,
+        reset: true,
+      );
+    } catch (_) {
+      // Local state was already applied; a failed reconcile is not
+      // user-visible.
+    }
+  }
+
+  // ── Transitions (reconcile after) ──────────────────────────────
+
   Future<bool> acceptDelivery(int id, {Map<String, dynamic>? body}) =>
-      _runOp(() => _service.acceptDelivery(id, body: body), 'accept');
+      _op(() => _service.acceptDelivery(id, body: body), reconcile: true);
 
   Future<bool> confirmDelivery(int id, {Map<String, dynamic>? body}) =>
-      _runOp(() => _service.confirmDelivery(id, body: body), 'confirm');
+      _op(() => _service.confirmDelivery(id, body: body), reconcile: true);
 
   Future<bool> shipDelivery(int id, {Map<String, dynamic>? body}) =>
-      _runOp(() => _service.shipDelivery(id, body: body), 'ship');
+      _op(() => _service.shipDelivery(id, body: body), reconcile: true);
 
   Future<bool> markInTransit(int id, {Map<String, dynamic>? body}) =>
-      _runOp(() => _service.markInTransit(id, body: body), 'in-transit');
+      _op(() => _service.markInTransit(id, body: body), reconcile: true);
 
   Future<bool> markOutForDelivery(int id, {Map<String, dynamic>? body}) =>
-      _runOp(() => _service.markOutForDelivery(id, body: body),
-          'out-for-delivery');
+      _op(() => _service.markOutForDelivery(id, body: body), reconcile: true);
 
   Future<bool> deliverDelivery(
     int id, {
     bool? proofCaptured,
     Map<String, dynamic>? body,
   }) =>
-      _runOp(
+      _op(
         () => _service.deliverDelivery(
           id,
           proofCaptured: proofCaptured,
           body: body,
         ),
-        'deliver',
+        reconcile: true,
       );
 
   Future<bool> cancelDelivery(
@@ -580,9 +495,9 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     String? reason,
     Map<String, dynamic>? body,
   }) =>
-      _runOp(
+      _op(
         () => _service.cancelDelivery(id, reason: reason, body: body),
-        'cancel',
+        reconcile: true,
       );
 
   Future<bool> failDelivery(
@@ -591,19 +506,14 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     String? reason,
     Map<String, dynamic>? body,
   }) =>
-      _runOp(
+      _op(
         () => _service.failDelivery(
           id,
           failureReported: failureReported,
           reason: reason,
           body: body,
         ),
-        'fail',
-      );
-
-  Future<bool> updateDetails(int id, {Map<String, dynamic>? body}) => _runOp(
-        () => _service.updateDetails(id, body: body),
-        'details',
+        reconcile: true,
       );
 
   Future<bool> returnDelivery(
@@ -611,13 +521,13 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     bool? returnConfirmed,
     Map<String, dynamic>? body,
   }) =>
-      _runOp(
+      _op(
         () => _service.returnDelivery(
           id,
           returnConfirmed: returnConfirmed,
           body: body,
         ),
-        'return',
+        reconcile: true,
       );
 
   Future<bool> refundDelivery(
@@ -625,34 +535,54 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     bool? refundCompleted,
     Map<String, dynamic>? body,
   }) =>
-      _runOp(
+      _op(
         () => _service.refundDelivery(
           id,
           refundCompleted: refundCompleted,
           body: body,
         ),
-        'refund',
+        reconcile: true,
       );
 
-  Future<bool> archiveDelivery(int id) =>
-      _runOp(() => _service.archiveDelivery(id), 'archive');
+  // ── Metadata (no reconcile) ────────────────────────────────────
+
+  Future<bool> updateDetails(int id, {Map<String, dynamic>? body}) =>
+      _op(() => _service.updateDetails(id, body: body));
 
   Future<bool> recordTrackingPing(int id, int addressId) =>
-      _runOp(() => _service.recordTrackingPing(id, addressId), 'tracking');
+      _op(() => _service.recordTrackingPing(id, addressId));
 
   Future<bool> rerouteDelivery(int id, int addressId) =>
-      _runOp(() => _service.rerouteDelivery(id, addressId), 'reroute');
+      _op(() => _service.rerouteDelivery(id, addressId));
+
+  // ── Archive (remove locally) ───────────────────────────────────
+
+  Future<bool> archiveDelivery(int id) async {
+    if (_state.isLoading) return false;
+    _state.setLoading(true);
+    _state.clearError();
+    try {
+      final result = await _service.archiveDelivery(id);
+      if (result == null) return false;
+      _cache.invalidateDelivery(id);
+      _state.deliveries.removeWhere((d) => d.id_delivery == id);
+      _state.searchResults.removeWhere((d) => d.id_delivery == id);
+      _notify();
+      return true;
+    } catch (e) {
+      _state.setError('Archive failed: $e');
+      return false;
+    } finally {
+      _state.setLoading(false);
+    }
+  }
 
   Future<List<String>?> nextStates(int id) => _service.nextStates(id);
 
-  // ── BULK ───────────────────────────────────────────────────────
-  //
-  // Iterates the abstract method. No impl cast, no private method
-  // access, no bulk endpoint on the router side to call.
+  // ── Bulk ───────────────────────────────────────────────────────
 
   Future<({int ok, List<int> failed})> bulkRun(
     Future<Delivery?> Function(int id) call,
-    String label,
     List<int> ids,
   ) async {
     if (_state.isLoading || ids.isEmpty) {
@@ -660,10 +590,8 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     }
     _state.setLoading(true);
     _state.clearError();
-
     var ok = 0;
     final failed = <int>[];
-
     try {
       for (final id in ids) {
         try {
@@ -672,20 +600,14 @@ class DeliveryChangeNotifier extends ChangeNotifier {
             failed.add(id);
             continue;
           }
-          _cache.cacheDelivery(result);
-          final i = _state.deliveries
-              .indexWhere((d) => d.id_delivery == result.id_delivery);
-          if (i != -1) _state.deliveries[i] = result;
-          final si = _state.searchResults
-              .indexWhere((d) => d.id_delivery == result.id_delivery);
-          if (si != -1) _state.searchResults[si] = result;
+          _merge(result);
           ok++;
-        } catch (e) {
-          debugPrint('Bulk [$label] failed for $id: $e');
+        } catch (_) {
           failed.add(id);
         }
       }
       _notify();
+      if (ok > 0) unawaited(_reconcile());
       return (ok: ok, failed: failed);
     } finally {
       _state.setLoading(false);
@@ -693,19 +615,13 @@ class DeliveryChangeNotifier extends ChangeNotifier {
   }
 
   Future<({int ok, List<int> failed})> bulkCancel(List<int> ids) =>
-      bulkRun((id) => _service.cancelDelivery(id), 'cancel', ids);
+      bulkRun((id) => _service.cancelDelivery(id), ids);
 
-  Future<({int ok, List<int> failed})> bulkDeliver(List<int> ids) => bulkRun(
-        (id) => _service.deliverDelivery(id, proofCaptured: true),
-        'deliver',
-        ids,
-      );
+  Future<({int ok, List<int> failed})> bulkDeliver(List<int> ids) =>
+      bulkRun((id) => _service.deliverDelivery(id, proofCaptured: true), ids);
 
-  Future<({int ok, List<int> failed})> bulkFail(List<int> ids) => bulkRun(
-        (id) => _service.failDelivery(id, failureReported: true),
-        'fail',
-        ids,
-      );
+  Future<({int ok, List<int> failed})> bulkFail(List<int> ids) =>
+      bulkRun((id) => _service.failDelivery(id, failureReported: true), ids);
 
   // ── Status helpers ─────────────────────────────────────────────
 
@@ -726,8 +642,6 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     _notify();
   }
 
-  // ── Refresh ────────────────────────────────────────────────────
-
   Future<void> refreshDeliveries() async {
     await fetchDeliveries(
       providerId: _state.providerId,
@@ -742,8 +656,6 @@ class DeliveryChangeNotifier extends ChangeNotifier {
 
   Future<void> refreshDelivery(int id) =>
       getDeliveryById(id, forceRefresh: true);
-
-  // ── Filter shortcuts ───────────────────────────────────────────
 
   Future<void> fetchDeliveriesByProvider(int pid) {
     _state.providerId = pid;
@@ -773,11 +685,6 @@ class DeliveryChangeNotifier extends ChangeNotifier {
     } else {
       _cache.clearAll();
     }
-    _notify();
-  }
-
-  void refreshAllCaches() {
-    _cache.clearAll();
     _notify();
   }
 

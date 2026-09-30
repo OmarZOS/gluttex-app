@@ -510,8 +510,7 @@ class Delivery {
       'id_delivery': id_delivery,
       'recipient_person': recipient_person,
       'recipient_provider': recipient_provider,
-      if (delivery_package_count != null)
-        'delivery_package_count': delivery_package_count,
+      'delivery_package_count': delivery_cargo_dimensions?.split(',') ?? 0,
       if (delivery_total_weight != null)
         'delivery_total_weight': delivery_total_weight,
       if (delivery_cargo_dimensions != null)

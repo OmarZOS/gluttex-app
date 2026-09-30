@@ -3204,7 +3204,171 @@
   "deliveryDetailActionInTransit": "في الطريق",
   "deliveryDetailActionOutForDelivery": "خارج للتوصيل",
   "deliveryDetailActionDeliver": "تسليم",
-  "deliveryDetailValidateFailure": "فشل تحديث التوصيل"
+  "deliveryDetailValidateFailure": "فشل تحديث التوصيل",
+
+    "commonSave": "حفظ",
+  "commonClear": "مسح",
+
+  "deliveryDetailsTitle": "تعديل التفاصيل",
+
+  "deliveryDetailsSectionProducts": "المنتجات",
+  "deliveryDetailsSectionPackages": "تفاصيل الطرود",
+  "deliveryDetailsSectionShipping": "معلومات الشحن",
+  "deliveryDetailsSectionAdditional": "معلومات إضافية",
+
+  "deliveryDetailsProductSearchHint": "ابحث بالاسم أو العلامة التجارية أو الباركود",
+
+  "deliveryDetailsProductFallback": "منتج رقم {id}",
+  "@deliveryDetailsProductFallback": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailsProductsSelected": "{count, plural, zero{لا توجد منتجات محددة} one{منتج واحد محدد} two{منتجان محددان} few{{count} منتجات محددة} many{{count} منتجًا محددًا} other{{count} منتج محدد}}",
+  "@deliveryDetailsProductsSelected": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailsStockIn": "{count} متوفر في المخزون",
+  "@deliveryDetailsStockIn": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailsStockOut": "غير متوفر في المخزون",
+
+  "deliveryDetailsNoProducts": "لا توجد منتجات مرتبطة بهذا التوصيل.",
+
+  "deliveryDetailsNoMatches": "لا توجد منتجات تطابق \"{query}\".",
+  "@deliveryDetailsNoMatches": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailsDimensionLength": "الطول",
+  "deliveryDetailsDimensionWidth": "العرض",
+  "deliveryDetailsDimensionHeight": "الارتفاع",
+
+  "deliveryDetailsPackageWeightLabel": "وزن الطرد {index} (كجم)",
+  "@deliveryDetailsPackageWeightLabel": {
+    "placeholders": {
+      "index": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailsRemovePackage": "إزالة الطرد",
+  "deliveryDetailsAddPackage": "إضافة طرد",
+
+  "deliveryDetailsPackageSummary": "عدد الطرود: {count}   الوزن الإجمالي: {weight} كجم",
+  "@deliveryDetailsPackageSummary": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "weight": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailsFeeLabel": "رسوم التوصيل (دج)",
+  "deliveryDetailsFeeHelper": "المبلغ الذي يدفعه العميل لشركة التوصيل",
+
+  "deliveryDetailsShippingMethodLabel": "طريقة الشحن",
+  "deliveryDetailsHsCodeLabel": "رمز HS",
+
+  "deliveryDetailsMerchantLabel": "اسم التاجر",
+  "deliveryDetailsGoodsLabel": "وصف البضائع",
+  "deliveryDetailsInstructionsLabel": "تعليمات خاصة",
+
+  "deliveryDetailsSaveButton": "حفظ التغييرات",
+  "deliveryDetailsSaveFailed": "فشل في حفظ التفاصيل",
+
+  "deliveryDetailsSaveError": "خطأ: {message}",
+  "@deliveryDetailsSaveError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailsValidationEnterWeight": "أدخل الوزن",
+  "deliveryDetailsValidationRequired": "مطلوب",
+  "deliveryDetailsValidationEnterAmount": "أدخل مبلغًا صحيحًا",
+  "deliveryDetailsValidationFeeNegative": "لا يمكن أن تكون الرسوم سالبة",
+
+    "deliveryActionAccept": "قبول",
+  "deliveryActionConfirm": "تأكيد",
+  "deliveryActionShip": "شحن",
+  "deliveryActionInTransit": "في الطريق",
+  "deliveryActionOutForDelivery": "خارج للتوصيل",
+  "deliveryActionDeliver": "تسليم",
+  "deliveryActionFail": "الإبلاغ عن فشل",
+  "deliveryActionCancel": "إلغاء التوصيل",
+  "deliveryActionReturn": "تسجيل الإرجاع",
+  "deliveryActionRefund": "استرداد",
+
+  "deliveryTransitionDeliveryId": "التوصيل رقم {id}",
+  "@deliveryTransitionDeliveryId": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryTransitionReady": "جاهز للمتابعة",
+  "deliveryTransitionMissing": "متطلبات ناقصة",
+
+  "deliveryTransitionMissingHint": "{count, plural, zero{أكمل العناصر الناقصة للمتابعة.} one{أكمل العنصر الناقص للمتابعة.} two{أكمل العنصرين الناقصين للمتابعة.} few{أكمل {count} عناصر ناقصة للمتابعة.} many{أكمل {count} عنصرًا ناقصًا للمتابعة.} other{أكمل {count} عنصر ناقص للمتابعة.}}",
+  "@deliveryTransitionMissingHint": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryTransitionWorking": "جارٍ التنفيذ…",
+
+  "deliveryTransitionCommit": "{verb} التوصيل",
+  "@deliveryTransitionCommit": {
+    "placeholders": {
+      "verb": { "type": "String" }
+    }
+  },
+
+  "deliveryTransitionSuccess": "تم {verb} بنجاح",
+  "@deliveryTransitionSuccess": {
+    "placeholders": {
+      "verb": { "type": "String" }
+    }
+  },
+
+  "deliveryTransitionFailure": "فشل {verb}",
+  "@deliveryTransitionFailure": {
+    "placeholders": {
+      "verb": { "type": "String" }
+    }
+  },
+
+  "deliveryTransitionFix": "إصلاح",
+
+  "deliveryTransitionReqRecipient": "تم تحديد المستلم",
+  "deliveryTransitionReqRecipientDesc": "يحتاج التوصيل إلى مستلم أو عنوان وجهة.",
+
+  "deliveryTransitionReqPackages": "طرد واحد على الأقل",
+  "deliveryTransitionReqPackagesDesc": "حدد الطرود والوزن قبل التأكيد.",
+
+  "deliveryTransitionReqProvider": "تم تعيين المزود",
+
+  "deliveryTransitionReqCarrierAccepted": "قبل الناقل التسليم",
+  "deliveryTransitionReqCarrierAcceptedDesc": "يسجل هذا أن الناقل قد استلم البضاعة فعليًا.",
+
+  "deliveryTransitionReqTracking": "تتبع الناقل يظهر حركة",
+  "deliveryTransitionReqTrackingDesc": "يسجل هذا أن الناقل يفيد بأن البضاعة في الطريق.",
+
+  "deliveryTransitionReqDestination": "عنوان الوجهة مسجل",
+
+  "deliveryTransitionReqProof": "تم التقاط إثبات التسليم",
+  "deliveryTransitionReqProofDesc": "تم استلام توقيع أو صورة أو مسح ضوئي من المستلم.",
+  "deliveryStatusShipped": "تم الشحن"
 
 
 }

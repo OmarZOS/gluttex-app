@@ -1,18 +1,18 @@
 // lib/provider_store/screens/DeliveryDetailScreen.dart
-// (unchanged except for _openDetailsSheet and _BottomActions wiring —
-//  the rest of the file is identical to the previous version)
 //
-// Changes:
-//   1. _openDetailsSheet now delegates the modal + provider scope to
-//      DeliveryDetailsSheet.open(...) so the launcher logic lives in
-//      one place.
-//   2. _openTransitionSheet no longer passes onFixRequirement — the
-//      transition sheet opens the edit sheet itself.
-//   3. _BottomActions gained an onTransition callback.
+// Live view of one delivery. The screen does not hold its own copy of
+// the delivery — it reads the current row from the notifier on every
+// build. When a mutation succeeds, the notifier replaces the cached
+// row and notifies; this screen rebuilds against the fresh instance,
+// and every section (status hero, shipping block, bottom actions)
+// reflects the new state in the same frame.
+//
+// Sheets that the screen opens also read the live row from the
+// notifier, so what the user sees in a modal matches what the screen
+// shows underneath it.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gluttex_core/app/AppUser.dart';
 import 'package:gluttex_core/business/Delivery.dart';
 import 'package:gluttex_core/business/finance/Order.dart';
 import 'package:event/delivery_change_notifier.dart';
@@ -27,6 +27,8 @@ import 'package:provider_store/components/delivery/DeliveryTransitionSheet.dart'
 // ============================================================================
 
 class DeliveryDetailScreen extends StatelessWidget {
+  /// The delivery the screen was opened with. Only its id is used —
+  /// the live row comes from the notifier on every build.
   final Delivery delivery;
   final DeliveryChangeNotifier notifier;
 
@@ -36,90 +38,102 @@ class DeliveryDetailScreen extends StatelessWidget {
     required this.notifier,
   });
 
+  Delivery _live(DeliveryChangeNotifier n) =>
+      n.getDeliveryByIdSync(delivery.id_delivery) ?? delivery;
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
-    final status = DeliveryStatusConfig.fromStatus(
-      delivery.delivery_status.wireValue,
-      l10n,
-    );
-    final order = delivery.order;
+    return Consumer<DeliveryChangeNotifier>(
+      builder: (context, n, _) {
+        final live = _live(n);
+        final cs = Theme.of(context).colorScheme;
+        final l10n = AppLocalizations.of(context)!;
+        final status = DeliveryStatusConfig.fromStatus(
+          live.delivery_status.wireValue,
+          l10n,
+        );
+        final order = live.order;
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      appBar: _buildAppBar(context, l10n),
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(
-            16,
-            8,
-            16,
-            delivery.canBeUpdated ? 120 : 24,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _StatusHero(delivery: delivery, status: status),
-              const SizedBox(height: 16),
-              if (order != null && order.hasOrderingUser)
-                _Section(
-                  icon: Icons.person_outline_rounded,
-                  title: l10n.deliveryDetailSectionCustomer,
-                  child: _CustomerBlock(order: order),
-                ),
-              if (order != null && order.hasOrderingUser)
-                const SizedBox(height: 12),
-              if (delivery.hasDetailedOrder)
-                _Section(
-                  icon: Icons.shopping_bag_outlined,
-                  title: l10n.deliveryDetailSectionItems,
-                  badge: l10n.deliveryDetailSectionItemsCount(
-                      delivery.orderItems.length),
-                  child: _ItemsBlock(delivery: delivery),
-                ),
-              if (delivery.hasDetailedOrder) const SizedBox(height: 12),
-              if (delivery.delivery_address != null ||
-                  delivery.recipient_person > 0 ||
-                  delivery.recipient_provider > 0)
-                _Section(
-                  icon: Icons.location_on_outlined,
-                  title: l10n.deliveryDetailSectionDestination,
-                  child: _DestinationBlock(delivery: delivery),
-                ),
-              if (delivery.delivery_address != null ||
-                  delivery.recipient_person > 0 ||
-                  delivery.recipient_provider > 0)
-                const SizedBox(height: 12),
-              _Section(
-                icon: Icons.local_shipping_outlined,
-                title: l10n.deliveryDetailSectionShipping,
-                child: _ShippingBlock(delivery: delivery),
+        return Scaffold(
+          backgroundColor: cs.surface,
+          appBar: _buildAppBar(context, l10n, live),
+          body: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                8,
+                16,
+                live.canBeUpdated ? 120 : 24,
               ),
-              const SizedBox(height: 12),
-              _Section(
-                icon: Icons.info_outline_rounded,
-                title: l10n.deliveryDetailSectionMetadata,
-                initiallyExpanded: false,
-                child: _MetadataBlock(delivery: delivery),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _StatusHero(delivery: live, status: status),
+                  const SizedBox(height: 16),
+                  if (order != null && order.hasOrderingUser)
+                    _Section(
+                      icon: Icons.person_outline_rounded,
+                      title: l10n.deliveryDetailSectionCustomer,
+                      child: _CustomerBlock(order: order),
+                    ),
+                  if (order != null && order.hasOrderingUser)
+                    const SizedBox(height: 12),
+                  if (live.hasDetailedOrder)
+                    _Section(
+                      icon: Icons.shopping_bag_outlined,
+                      title: l10n.deliveryDetailSectionItems,
+                      badge: l10n.deliveryDetailSectionItemsCount(
+                          live.orderItems.length),
+                      child: _ItemsBlock(delivery: live),
+                    ),
+                  if (live.hasDetailedOrder) const SizedBox(height: 12),
+                  if (live.delivery_address != null ||
+                      live.recipient_person > 0 ||
+                      live.recipient_provider > 0)
+                    _Section(
+                      icon: Icons.location_on_outlined,
+                      title: l10n.deliveryDetailSectionDestination,
+                      child: _DestinationBlock(delivery: live),
+                    ),
+                  if (live.delivery_address != null ||
+                      live.recipient_person > 0 ||
+                      live.recipient_provider > 0)
+                    const SizedBox(height: 12),
+                  _Section(
+                    icon: Icons.local_shipping_outlined,
+                    title: l10n.deliveryDetailSectionShipping,
+                    child: _ShippingBlock(delivery: live),
+                  ),
+                  const SizedBox(height: 12),
+                  _Section(
+                    icon: Icons.info_outline_rounded,
+                    title: l10n.deliveryDetailSectionMetadata,
+                    initiallyExpanded: false,
+                    child: _MetadataBlock(delivery: live),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-      bottomNavigationBar: delivery.canBeUpdated
-          ? _BottomActions(
-              delivery: delivery,
-              notifier: notifier,
-              onTransition: (action) => _openTransitionSheet(context, action),
-            )
-          : null,
+          bottomNavigationBar: live.canBeUpdated
+              ? _BottomActions(
+                  delivery: live,
+                  onTransition: (action) =>
+                      _openTransitionSheet(context, live, action),
+                )
+              : null,
+        );
+      },
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, AppLocalizations l10n) {
+  AppBar _buildAppBar(
+    BuildContext context,
+    AppLocalizations l10n,
+    Delivery live,
+  ) {
     final cs = Theme.of(context).colorScheme;
     return AppBar(
       elevation: 0,
@@ -127,7 +141,7 @@ class DeliveryDetailScreen extends StatelessWidget {
       backgroundColor: cs.surface,
       surfaceTintColor: Colors.transparent,
       title: Text(
-        l10n.deliveryDetailTitleWithId(delivery.id_delivery),
+        l10n.deliveryDetailTitleWithId(live.id_delivery),
         style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
       ),
       actions: [
@@ -135,33 +149,35 @@ class DeliveryDetailScreen extends StatelessWidget {
           icon: const Icon(Icons.refresh_rounded),
           tooltip: l10n.deliveryDetailRefreshTooltip,
           onPressed: () {
-            notifier.refreshDelivery(delivery.id_delivery);
+            notifier.refreshDelivery(live.id_delivery);
             _snack(context, l10n.deliveryDetailRefreshing);
           },
         ),
-        if (delivery.canBeUpdated)
+        if (live.canBeUpdated)
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: l10n.deliveryDetailEditTooltip,
-            onPressed: () => _openDetailsSheet(context),
+            onPressed: () => _openDetailsSheet(context, live),
           ),
       ],
     );
   }
 
-  Future<void> _openDetailsSheet(BuildContext context) async {
+  Future<void> _openDetailsSheet(
+    BuildContext context,
+    Delivery live,
+  ) async {
     final productNotifier = context.read<ProductNotifier>();
-    final providerId =
-        delivery.delivery_provider_id ?? notifier.currentProviderId;
+    final providerId = live.delivery_provider_id ?? notifier.currentProviderId;
 
     final initialProductIds =
-        await _resolveProviderProductIds(productNotifier, providerId);
+        await _resolveProviderProductIds(live, productNotifier, providerId);
     if (!context.mounted) return;
 
     await DeliveryDetailsSheet.open(
       context,
       notifier: notifier,
-      delivery: delivery,
+      delivery: live,
       providerId: providerId,
       initialProductIds: initialProductIds,
       // No onCommit override — the sheet's default writes through
@@ -171,6 +187,7 @@ class DeliveryDetailScreen extends StatelessWidget {
 
   Future<void> _openTransitionSheet(
     BuildContext context,
+    Delivery live,
     DeliveryAction action,
   ) {
     return showModalBottomSheet(
@@ -179,20 +196,19 @@ class DeliveryDetailScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => DeliveryTransitionSheet(
         notifier: notifier,
-        delivery: delivery,
+        delivery: live,
         action: action,
-        // No onFixRequirement — the transition sheet opens the edit
-        // sheet itself, with the correct focus per requirement.
       ),
     );
   }
 
   Future<List<int>> _resolveProviderProductIds(
+    Delivery live,
     ProductNotifier productNotifier,
     int providerId,
   ) async {
     final out = <int>{};
-    for (final item in delivery.orderItems) {
+    for (final item in live.orderItems) {
       final id = item.orderedProductId ?? 0;
       if (id <= 0) continue;
 
@@ -214,8 +230,11 @@ class DeliveryDetailScreen extends StatelessWidget {
     return out.toList();
   }
 
-  static void _snack(BuildContext context, String message,
-      {bool isError = false}) {
+  static void _snack(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     final cs = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -235,21 +254,20 @@ class DeliveryDetailScreen extends StatelessWidget {
 }
 
 // ============================================================================
-// BOTTOM ACTIONS — trimmed to what changed
+// BOTTOM ACTIONS
 // ============================================================================
 //
-// The full widget is otherwise identical to the previous version. The
-// only structural change is the `onTransition` callback replacing the
-// direct notifier calls in `_runNextAction`.
+// The action surface for a delivery. Reads the live delivery passed by
+// the screen; picks the next forward action from DeliveryAction
+// (imported from DeliveryTransitionSheet) so the enum is defined once
+// for the whole app.
 
 class _BottomActions extends StatelessWidget {
   final Delivery delivery;
-  final DeliveryChangeNotifier notifier;
   final Future<void> Function(DeliveryAction action) onTransition;
 
   const _BottomActions({
     required this.delivery,
-    required this.notifier,
     required this.onTransition,
   });
 
@@ -305,7 +323,7 @@ class _BottomActions extends StatelessWidget {
               onPressed: next == null ? null : () => onTransition(next),
               icon: Icon(next?.icon ?? Icons.check_circle_rounded, size: 18),
               label: Text(
-                next?.verb ?? '—',
+                next?.verb(l10n) ?? '—',
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               style: FilledButton.styleFrom(
@@ -659,7 +677,7 @@ class _CustomerBlock extends StatelessWidget {
         add(l10n.deliveryDetailFieldEmail, user.appUserEmail!, copyable: true);
       }
       if (user.appUserType != null) {
-        add(l10n.deliveryDetailFieldUserType, user.appUserType!.value);
+        add(l10n.deliveryDetailFieldUserType, user.appUserType);
       }
       if (user.personPhone != null && user.personPhone!.isNotEmpty) {
         add(l10n.deliveryDetailFieldPhone, user.personPhone!, copyable: true);
@@ -1396,254 +1414,6 @@ class _EmptyHint extends StatelessWidget {
 }
 
 // ============================================================================
-// BOTTOM ACTIONS
-// ============================================================================
-//
-// The action surface for a delivery. Every button here is one of the
-// router's named actions. The status determines which are available, so
-// the client never asks the server for a transition it would reject.
-
-/// The set of forward actions this screen can drive directly from the
-/// bottom bar.
-enum _DeliveryAction {
-  accept,
-  confirm,
-  ship,
-  inTransit,
-  outForDelivery,
-  deliver;
-
-  IconData get icon {
-    switch (this) {
-      case _DeliveryAction.accept:
-        return Icons.check_circle_outline_rounded;
-      case _DeliveryAction.confirm:
-        return Icons.verified_outlined;
-      case _DeliveryAction.ship:
-        return Icons.local_shipping_outlined;
-      case _DeliveryAction.inTransit:
-        return Icons.route_rounded;
-      case _DeliveryAction.outForDelivery:
-        return Icons.delivery_dining_outlined;
-      case _DeliveryAction.deliver:
-        return Icons.check_circle_rounded;
-    }
-  }
-
-  String label(AppLocalizations l10n) {
-    switch (this) {
-      case _DeliveryAction.accept:
-        return l10n.deliveryDetailActionAccept;
-      case _DeliveryAction.confirm:
-        return l10n.deliveryDetailActionConfirm;
-      case _DeliveryAction.ship:
-        return l10n.deliveryDetailActionShip;
-      case _DeliveryAction.inTransit:
-        return l10n.deliveryDetailActionInTransit;
-      case _DeliveryAction.outForDelivery:
-        return l10n.deliveryDetailActionOutForDelivery;
-      case _DeliveryAction.deliver:
-        return l10n.deliveryDetailActionDeliver;
-    }
-  }
-}
-
-// ============================================================================
-// CONFIRM DELIVER SHEET
-// ============================================================================
-//
-// The delivery "deliver" verb needs proof_captured. This is a small
-// confirmation sheet that asks the operator to confirm, then sends the
-// signal.
-
-class _ConfirmDeliverSheet extends StatelessWidget {
-  final Delivery delivery;
-  final DeliveryChangeNotifier notifier;
-
-  const _ConfirmDeliverSheet({
-    required this.delivery,
-    required this.notifier,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
-    final status = DeliveryStatusConfig.fromStatus(
-      delivery.delivery_status.wireValue,
-      l10n,
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        24,
-        12,
-        24,
-        24 + MediaQuery.of(context).padding.bottom,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: cs.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: cs.primary.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.check_circle_outline_rounded,
-                  color: cs.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.deliveryDetailValidateTitle,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.deliveryDetailValidateSubtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest.withOpacity(0.4),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: cs.outlineVariant.withOpacity(0.5),
-              ),
-            ),
-            child: Column(
-              children: [
-                _InfoRow(
-                  label: l10n.deliveryDetailFieldDeliveryId,
-                  value: l10n.deliveryDetailIdValue(delivery.id_delivery),
-                  emphasized: true,
-                ),
-                _InfoRow(
-                  label: l10n.deliveryDetailFieldStatus,
-                  value: status.label,
-                ),
-                _InfoRow(
-                  label: l10n.deliveryDetailFieldItemCount,
-                  value: l10n.deliveryDetailSectionItemsCount(
-                      delivery.orderItems.length),
-                ),
-                _InfoRow(
-                  label: l10n.deliveryDetailTotalsSubtotal,
-                  value: l10n.price(
-                    delivery.deliverySubtotal().toStringAsFixed(2),
-                  ),
-                ),
-                const Divider(height: 20),
-                _InfoRow(
-                  label: l10n.deliveryDetailTotalsTotal,
-                  value: l10n.price(
-                    delivery.deliveryNetTotal.toStringAsFixed(2),
-                  ),
-                  emphasized: true,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(l10n.deliveryDetailValidateBack),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: FilledButton.icon(
-                  onPressed: () async {
-                    final navigator = Navigator.of(context);
-                    final messenger = ScaffoldMessenger.of(context);
-                    final ok = await notifier.deliverDelivery(
-                      delivery.id_delivery,
-                      proofCaptured: true,
-                    );
-                    navigator.pop();
-                    messenger.showSnackBar(SnackBar(
-                      content: Text(
-                        ok
-                            ? l10n.deliveryDetailValidateSuccess(
-                                delivery.id_delivery)
-                            : l10n.deliveryDetailValidateFailure,
-                      ),
-                      backgroundColor: ok ? Colors.green : Colors.red,
-                    ));
-                  },
-                  icon: const Icon(Icons.check_rounded, size: 18),
-                  label: Text(
-                    l10n.deliveryDetailValidateConfirm,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: cs.primary,
-                    foregroundColor: cs.onPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============================================================================
 // STATUS CONFIG — localized
 // ============================================================================
 
@@ -1681,11 +1451,11 @@ class DeliveryStatusConfig {
           color: const Color(0xFF0EA5E9),
           label: l10n.deliveryStatusConfirmed,
         );
-      case 'READY_FOR_PICKUP':
+      case 'SHIPPED':
         return DeliveryStatusConfig(
-          icon: Icons.inventory_2_outlined,
-          color: const Color(0xFF14B8A6),
-          label: l10n.deliveryStatusReadyForPickup,
+          icon: Icons.local_shipping_rounded,
+          color: const Color(0xFF8B5CF6),
+          label: l10n.deliveryStatusShipped,
         );
       case 'IN_TRANSIT':
         return DeliveryStatusConfig(
@@ -1764,45 +1534,6 @@ class DeliveryShippingConfig {
         return l10n.shippingMethodInternational;
       default:
         return l10n.shippingMethodStandard;
-    }
-  }
-}
-
-// ============================================================================
-// INVOICE LABELS — localized
-// ============================================================================
-
-class DeliveryInvoiceConfig {
-  static String typeLabelFor(String? type, AppLocalizations l10n) {
-    switch ((type ?? '').toLowerCase()) {
-      case 'invoice':
-        return l10n.invoiceTypeInvoice;
-      case 'receipt':
-        return l10n.invoiceTypeReceipt;
-      case 'proforma':
-        return l10n.invoiceTypeProforma;
-      default:
-        return type ?? '';
-    }
-  }
-
-  static String statusLabelFor(String? status, AppLocalizations l10n) {
-    switch ((status ?? '').toLowerCase()) {
-      case 'unpaid':
-        return l10n.invoiceStatusUnpaid;
-      case 'paid':
-        return l10n.invoiceStatusPaid;
-      case 'canceled':
-      case 'cancelled':
-        return l10n.invoiceStatusCanceled;
-      case 'partially_paid':
-        return l10n.invoiceStatusPartiallyPaid;
-      case 'overdue':
-        return l10n.invoiceStatusOverdue;
-      case 'refunded':
-        return l10n.invoiceStatusRefunded;
-      default:
-        return status ?? '';
     }
   }
 }

@@ -6582,4 +6582,249 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deliveryDetailValidateFailure => 'فشل تحديث التوصيل';
+
+  @override
+  String get commonSave => 'حفظ';
+
+  @override
+  String get commonClear => 'مسح';
+
+  @override
+  String get deliveryDetailsTitle => 'تعديل التفاصيل';
+
+  @override
+  String get deliveryDetailsSectionProducts => 'المنتجات';
+
+  @override
+  String get deliveryDetailsSectionPackages => 'تفاصيل الطرود';
+
+  @override
+  String get deliveryDetailsSectionShipping => 'معلومات الشحن';
+
+  @override
+  String get deliveryDetailsSectionAdditional => 'معلومات إضافية';
+
+  @override
+  String get deliveryDetailsProductSearchHint => 'ابحث بالاسم أو العلامة التجارية أو الباركود';
+
+  @override
+  String deliveryDetailsProductFallback(int id) {
+    return 'منتج رقم $id';
+  }
+
+  @override
+  String deliveryDetailsProductsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج محدد',
+      many: '$count منتجًا محددًا',
+      few: '$count منتجات محددة',
+      two: 'منتجان محددان',
+      one: 'منتج واحد محدد',
+      zero: 'لا توجد منتجات محددة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deliveryDetailsStockIn(int count) {
+    return '$count متوفر في المخزون';
+  }
+
+  @override
+  String get deliveryDetailsStockOut => 'غير متوفر في المخزون';
+
+  @override
+  String get deliveryDetailsNoProducts => 'لا توجد منتجات مرتبطة بهذا التوصيل.';
+
+  @override
+  String deliveryDetailsNoMatches(String query) {
+    return 'لا توجد منتجات تطابق \"$query\".';
+  }
+
+  @override
+  String get deliveryDetailsDimensionLength => 'الطول';
+
+  @override
+  String get deliveryDetailsDimensionWidth => 'العرض';
+
+  @override
+  String get deliveryDetailsDimensionHeight => 'الارتفاع';
+
+  @override
+  String deliveryDetailsPackageWeightLabel(int index) {
+    return 'وزن الطرد $index (كجم)';
+  }
+
+  @override
+  String get deliveryDetailsRemovePackage => 'إزالة الطرد';
+
+  @override
+  String get deliveryDetailsAddPackage => 'إضافة طرد';
+
+  @override
+  String deliveryDetailsPackageSummary(int count, String weight) {
+    return 'عدد الطرود: $count   الوزن الإجمالي: $weight كجم';
+  }
+
+  @override
+  String get deliveryDetailsFeeLabel => 'رسوم التوصيل (دج)';
+
+  @override
+  String get deliveryDetailsFeeHelper => 'المبلغ الذي يدفعه العميل لشركة التوصيل';
+
+  @override
+  String get deliveryDetailsShippingMethodLabel => 'طريقة الشحن';
+
+  @override
+  String get deliveryDetailsHsCodeLabel => 'رمز HS';
+
+  @override
+  String get deliveryDetailsMerchantLabel => 'اسم التاجر';
+
+  @override
+  String get deliveryDetailsGoodsLabel => 'وصف البضائع';
+
+  @override
+  String get deliveryDetailsInstructionsLabel => 'تعليمات خاصة';
+
+  @override
+  String get deliveryDetailsSaveButton => 'حفظ التغييرات';
+
+  @override
+  String get deliveryDetailsSaveFailed => 'فشل في حفظ التفاصيل';
+
+  @override
+  String deliveryDetailsSaveError(String message) {
+    return 'خطأ: $message';
+  }
+
+  @override
+  String get deliveryDetailsValidationEnterWeight => 'أدخل الوزن';
+
+  @override
+  String get deliveryDetailsValidationRequired => 'مطلوب';
+
+  @override
+  String get deliveryDetailsValidationEnterAmount => 'أدخل مبلغًا صحيحًا';
+
+  @override
+  String get deliveryDetailsValidationFeeNegative => 'لا يمكن أن تكون الرسوم سالبة';
+
+  @override
+  String get deliveryActionAccept => 'قبول';
+
+  @override
+  String get deliveryActionConfirm => 'تأكيد';
+
+  @override
+  String get deliveryActionShip => 'شحن';
+
+  @override
+  String get deliveryActionInTransit => 'في الطريق';
+
+  @override
+  String get deliveryActionOutForDelivery => 'خارج للتوصيل';
+
+  @override
+  String get deliveryActionDeliver => 'تسليم';
+
+  @override
+  String get deliveryActionFail => 'الإبلاغ عن فشل';
+
+  @override
+  String get deliveryActionCancel => 'إلغاء التوصيل';
+
+  @override
+  String get deliveryActionReturn => 'تسجيل الإرجاع';
+
+  @override
+  String get deliveryActionRefund => 'استرداد';
+
+  @override
+  String deliveryTransitionDeliveryId(int id) {
+    return 'التوصيل رقم $id';
+  }
+
+  @override
+  String get deliveryTransitionReady => 'جاهز للمتابعة';
+
+  @override
+  String get deliveryTransitionMissing => 'متطلبات ناقصة';
+
+  @override
+  String deliveryTransitionMissingHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'أكمل $count عنصر ناقص للمتابعة.',
+      many: 'أكمل $count عنصرًا ناقصًا للمتابعة.',
+      few: 'أكمل $count عناصر ناقصة للمتابعة.',
+      two: 'أكمل العنصرين الناقصين للمتابعة.',
+      one: 'أكمل العنصر الناقص للمتابعة.',
+      zero: 'أكمل العناصر الناقصة للمتابعة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryTransitionWorking => 'جارٍ التنفيذ…';
+
+  @override
+  String deliveryTransitionCommit(String verb) {
+    return '$verb التوصيل';
+  }
+
+  @override
+  String deliveryTransitionSuccess(String verb) {
+    return 'تم $verb بنجاح';
+  }
+
+  @override
+  String deliveryTransitionFailure(String verb) {
+    return 'فشل $verb';
+  }
+
+  @override
+  String get deliveryTransitionFix => 'إصلاح';
+
+  @override
+  String get deliveryTransitionReqRecipient => 'تم تحديد المستلم';
+
+  @override
+  String get deliveryTransitionReqRecipientDesc => 'يحتاج التوصيل إلى مستلم أو عنوان وجهة.';
+
+  @override
+  String get deliveryTransitionReqPackages => 'طرد واحد على الأقل';
+
+  @override
+  String get deliveryTransitionReqPackagesDesc => 'حدد الطرود والوزن قبل التأكيد.';
+
+  @override
+  String get deliveryTransitionReqProvider => 'تم تعيين المزود';
+
+  @override
+  String get deliveryTransitionReqCarrierAccepted => 'قبل الناقل التسليم';
+
+  @override
+  String get deliveryTransitionReqCarrierAcceptedDesc => 'يسجل هذا أن الناقل قد استلم البضاعة فعليًا.';
+
+  @override
+  String get deliveryTransitionReqTracking => 'تتبع الناقل يظهر حركة';
+
+  @override
+  String get deliveryTransitionReqTrackingDesc => 'يسجل هذا أن الناقل يفيد بأن البضاعة في الطريق.';
+
+  @override
+  String get deliveryTransitionReqDestination => 'عنوان الوجهة مسجل';
+
+  @override
+  String get deliveryTransitionReqProof => 'تم التقاط إثبات التسليم';
+
+  @override
+  String get deliveryTransitionReqProofDesc => 'تم استلام توقيع أو صورة أو مسح ضوئي من المستلم.';
+
+  @override
+  String get deliveryStatusShipped => 'تم الشحن';
 }

@@ -3001,7 +3001,268 @@
 "deliveryDetailActionInTransit": "Mark In Transit",
 "deliveryDetailActionOutForDelivery": "Out for Delivery",
 "deliveryDetailActionDeliver": "Deliver",
-"deliveryDetailValidateFailure": "Failed to update delivery"
+"deliveryDetailValidateFailure": "Failed to update delivery",
 
+"commonSave": "Save",
+"@commonSave": {
+  "description": "Generic save action used across sheets"
+},
+
+"commonClear": "Clear",
+"@commonClear": {
+  "description": "Generic clear action for inputs and filters"
+},
+
+"deliveryDetailsTitle": "Edit Details",
+"@deliveryDetailsTitle": {
+  "description": "Title of the delivery edit sheet"
+},
+
+"deliveryDetailsSectionProducts": "Products",
+"@deliveryDetailsSectionProducts": {
+  "description": "Section header for the products block"
+},
+
+"deliveryDetailsSectionPackages": "Package Details",
+"@deliveryDetailsSectionPackages": {
+  "description": "Section header for the package details block"
+},
+
+"deliveryDetailsSectionShipping": "Shipping Information",
+"@deliveryDetailsSectionShipping": {
+  "description": "Section header for the shipping information block"
+},
+
+"deliveryDetailsSectionAdditional": "Additional Information",
+"@deliveryDetailsSectionAdditional": {
+  "description": "Section header for the additional information block"
+},
+
+"deliveryDetailsProductSearchHint": "Search by name, brand, or barcode",
+"@deliveryDetailsProductSearchHint": {
+  "description": "Hint text for the product search field"
+},
+
+"deliveryDetailsProductFallback": "Product #{id}",
+"@deliveryDetailsProductFallback": {
+  "description": "Fallback label when a product has no name",
+  "placeholders": {
+    "id": { "type": "int" }
+  }
+},
+
+"deliveryDetailsProductsSelected": "{count, plural, =1{1 product selected} other{{count} products selected}}",
+"@deliveryDetailsProductsSelected": {
+  "description": "Count of selected products in the summary row",
+  "placeholders": {
+    "count": { "type": "int" }
+  }
+},
+
+"deliveryDetailsStockIn": "{count} in stock",
+"@deliveryDetailsStockIn": {
+  "description": "Stock pill when the product has quantity available",
+  "placeholders": {
+    "count": { "type": "int" }
+  }
+},
+
+"deliveryDetailsStockOut": "Out of stock",
+"@deliveryDetailsStockOut": {
+  "description": "Stock pill when the product is out of stock"
+},
+
+"deliveryDetailsNoProducts": "This delivery has no products attached.",
+"@deliveryDetailsNoProducts": {
+  "description": "Empty state when the delivery has no products in scope"
+},
+
+"deliveryDetailsNoMatches": "No products match \"{query}\".",
+"@deliveryDetailsNoMatches": {
+  "description": "Empty state when a product search has no matches",
+  "placeholders": {
+    "query": { "type": "String" }
+  }
+},
+
+"deliveryDetailsDimensionLength": "Length",
+"@deliveryDetailsDimensionLength": {
+  "description": "Package dimension field label for length"
+},
+
+"deliveryDetailsDimensionWidth": "Width",
+"@deliveryDetailsDimensionWidth": {
+  "description": "Package dimension field label for width"
+},
+
+"deliveryDetailsDimensionHeight": "Height",
+"@deliveryDetailsDimensionHeight": {
+  "description": "Package dimension field label for height"
+},
+
+"deliveryDetailsPackageWeightLabel": "Package {index} weight (kg)",
+"@deliveryDetailsPackageWeightLabel": {
+  "description": "Weight field label for the Nth package",
+  "placeholders": {
+    "index": { "type": "int" }
+  }
+},
+
+"deliveryDetailsRemovePackage": "Remove package",
+"@deliveryDetailsRemovePackage": {
+  "description": "Tooltip for the remove-package button"
+},
+
+"deliveryDetailsAddPackage": "Add package",
+"@deliveryDetailsAddPackage": {
+  "description": "Button to add a package row"
+},
+
+"deliveryDetailsPackageSummary": "Package count: {count}   Total weight: {weight} kg",
+"@deliveryDetailsPackageSummary": {
+  "description": "Summary line under the package block",
+  "placeholders": {
+    "count": { "type": "int" },
+    "weight": { "type": "String" }
+  }
+},
+
+"deliveryDetailsFeeLabel": "Delivery Fee (DA)",
+"@deliveryDetailsFeeLabel": {
+  "description": "Label for the delivery fee input"
+},
+
+"deliveryDetailsFeeHelper": "Amount the customer pays the courier",
+"@deliveryDetailsFeeHelper": {
+  "description": "Helper text under the delivery fee input"
+},
+
+"deliveryDetailsShippingMethodLabel": "Shipping Method",
+"@deliveryDetailsShippingMethodLabel": {
+  "description": "Label for the shipping method dropdown"
+},
+
+"deliveryDetailsHsCodeLabel": "HS Code",
+"@deliveryDetailsHsCodeLabel": {
+  "description": "Label for the HS code input"
+},
+
+"deliveryDetailsMerchantLabel": "Merchant Name",
+"@deliveryDetailsMerchantLabel": {
+  "description": "Label for the merchant name input"
+},
+
+"deliveryDetailsGoodsLabel": "Goods Description",
+"@deliveryDetailsGoodsLabel": {
+  "description": "Label for the goods description input"
+},
+
+"deliveryDetailsInstructionsLabel": "Special Instructions",
+"@deliveryDetailsInstructionsLabel": {
+  "description": "Label for the special instructions input"
+},
+
+"deliveryDetailsSaveButton": "Save Changes",
+"@deliveryDetailsSaveButton": {
+  "description": "Primary button in the edit sheet"
+},
+
+"deliveryDetailsSaveFailed": "Failed to save details",
+"@deliveryDetailsSaveFailed": {
+  "description": "Snackbar when the server rejects the update"
+},
+
+"deliveryDetailsSaveError": "Error: {message}",
+"@deliveryDetailsSaveError": {
+  "description": "Snackbar when the update throws",
+  "placeholders": {
+    "message": { "type": "String" }
+  }
+},
+
+"deliveryDetailsValidationEnterWeight": "Enter weight",
+"@deliveryDetailsValidationEnterWeight": {
+  "description": "Field validator when a package weight is missing"
+},
+
+"deliveryDetailsValidationRequired": "Required",
+"@deliveryDetailsValidationRequired": {
+  "description": "Generic required-field validator"
+},
+
+"deliveryDetailsValidationEnterAmount": "Enter a valid amount",
+"@deliveryDetailsValidationEnterAmount": {
+  "description": "Fee field validator for non-numeric input"
+},
+
+"deliveryDetailsValidationFeeNegative": "Fee cannot be negative",
+"@deliveryDetailsValidationFeeNegative": {
+  "description": "Fee field validator for negative values"
+},
+
+"deliveryActionAccept": "Accept",
+"deliveryActionConfirm": "Confirm",
+"deliveryActionShip": "Ship",
+"deliveryActionInTransit": "Mark In Transit",
+"deliveryActionOutForDelivery": "Out for Delivery",
+"deliveryActionDeliver": "Deliver",
+"deliveryActionFail": "Report Failure",
+"deliveryActionCancel": "Cancel Delivery",
+"deliveryActionReturn": "Mark Returned",
+"deliveryActionRefund": "Refund",
+
+"deliveryTransitionDeliveryId": "Delivery #{id}",
+"@deliveryTransitionDeliveryId": {
+  "placeholders": {
+    "id": { "type": "int" }
+  }
+},
+
+"deliveryTransitionReady": "Ready to proceed",
+"deliveryTransitionMissing": "Missing requirements",
+"deliveryTransitionMissingHint": "{count, plural, =1{Complete the missing item to continue.} other{Complete all {count} missing items to continue.}}",
+"@deliveryTransitionMissingHint": {
+  "placeholders": {
+    "count": { "type": "int" }
+  }
+},
+
+"deliveryTransitionWorking": "Working…",
+"deliveryTransitionCommit": "{verb} Delivery",
+"@deliveryTransitionCommit": {
+  "placeholders": {
+    "verb": { "type": "String" }
+  }
+},
+
+"deliveryTransitionSuccess": "{verb} succeeded",
+"@deliveryTransitionSuccess": {
+  "placeholders": {
+    "verb": { "type": "String" }
+  }
+},
+
+"deliveryTransitionFailure": "{verb} failed",
+"@deliveryTransitionFailure": {
+  "placeholders": {
+    "verb": { "type": "String" }
+  }
+},
+
+"deliveryTransitionFix": "Fix",
+
+"deliveryTransitionReqRecipient": "Recipient specified",
+"deliveryTransitionReqRecipientDesc": "The delivery needs a recipient or destination address.",
+"deliveryTransitionReqPackages": "At least one package",
+"deliveryTransitionReqPackagesDesc": "Declare packages and weight before confirming.",
+"deliveryTransitionReqProvider": "Provider assigned",
+"deliveryTransitionReqCarrierAccepted": "Carrier accepted the handoff",
+"deliveryTransitionReqCarrierAcceptedDesc": "This records that the carrier has taken physical custody.",
+"deliveryTransitionReqTracking": "Carrier tracking shows movement",
+"deliveryTransitionReqTrackingDesc": "This records that the carrier reports the goods are moving.",
+"deliveryTransitionReqDestination": "Destination address on file",
+"deliveryTransitionReqProof": "Proof of delivery captured",
+"deliveryTransitionReqProofDesc": "Signature, photo, or scan received from the recipient.",
+"deliveryStatusShipped": "Shipped"
 
 }

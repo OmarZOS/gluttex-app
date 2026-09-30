@@ -3254,7 +3254,171 @@
   "deliveryDetailActionInTransit": "En transit",
   "deliveryDetailActionOutForDelivery": "En cours de livraison",
   "deliveryDetailActionDeliver": "Livrer",
-  "deliveryDetailValidateFailure": "Échec de la mise à jour de la livraison"
+  "deliveryDetailValidateFailure": "Échec de la mise à jour de la livraison",
+
+    "commonSave": "Enregistrer",
+  "commonClear": "Effacer",
+
+  "deliveryDetailsTitle": "Modifier les détails",
+
+  "deliveryDetailsSectionProducts": "Produits",
+  "deliveryDetailsSectionPackages": "Détails des colis",
+  "deliveryDetailsSectionShipping": "Informations d'expédition",
+  "deliveryDetailsSectionAdditional": "Informations supplémentaires",
+
+  "deliveryDetailsProductSearchHint": "Rechercher par nom, marque ou code-barres",
+
+  "deliveryDetailsProductFallback": "Produit n° {id}",
+  "@deliveryDetailsProductFallback": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailsProductsSelected": "{count, plural, =0{Aucun produit sélectionné} =1{1 produit sélectionné} other{{count} produits sélectionnés}}",
+  "@deliveryDetailsProductsSelected": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailsStockIn": "{count} en stock",
+  "@deliveryDetailsStockIn": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailsStockOut": "Rupture de stock",
+
+  "deliveryDetailsNoProducts": "Cette livraison n'a aucun produit associé.",
+
+  "deliveryDetailsNoMatches": "Aucun produit ne correspond à « {query} ».",
+  "@deliveryDetailsNoMatches": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailsDimensionLength": "Longueur",
+  "deliveryDetailsDimensionWidth": "Largeur",
+  "deliveryDetailsDimensionHeight": "Hauteur",
+
+  "deliveryDetailsPackageWeightLabel": "Poids du colis {index} (kg)",
+  "@deliveryDetailsPackageWeightLabel": {
+    "placeholders": {
+      "index": { "type": "int" }
+    }
+  },
+
+  "deliveryDetailsRemovePackage": "Retirer le colis",
+  "deliveryDetailsAddPackage": "Ajouter un colis",
+
+  "deliveryDetailsPackageSummary": "Nombre de colis : {count}   Poids total : {weight} kg",
+  "@deliveryDetailsPackageSummary": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "weight": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailsFeeLabel": "Frais de livraison (DA)",
+  "deliveryDetailsFeeHelper": "Montant payé par le client au transporteur",
+
+  "deliveryDetailsShippingMethodLabel": "Mode d'expédition",
+  "deliveryDetailsHsCodeLabel": "Code SH",
+
+  "deliveryDetailsMerchantLabel": "Nom du commerçant",
+  "deliveryDetailsGoodsLabel": "Description des marchandises",
+  "deliveryDetailsInstructionsLabel": "Instructions spéciales",
+
+  "deliveryDetailsSaveButton": "Enregistrer les modifications",
+  "deliveryDetailsSaveFailed": "Échec de l'enregistrement des détails",
+
+  "deliveryDetailsSaveError": "Erreur : {message}",
+  "@deliveryDetailsSaveError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+
+  "deliveryDetailsValidationEnterWeight": "Saisissez le poids",
+  "deliveryDetailsValidationRequired": "Requis",
+  "deliveryDetailsValidationEnterAmount": "Saisissez un montant valide",
+  "deliveryDetailsValidationFeeNegative": "Les frais ne peuvent pas être négatifs",
+
+    "deliveryActionAccept": "Accepter",
+  "deliveryActionConfirm": "Confirmer",
+  "deliveryActionShip": "Expédier",
+  "deliveryActionInTransit": "En transit",
+  "deliveryActionOutForDelivery": "En cours de livraison",
+  "deliveryActionDeliver": "Livrer",
+  "deliveryActionFail": "Signaler un échec",
+  "deliveryActionCancel": "Annuler la livraison",
+  "deliveryActionReturn": "Marquer comme retournée",
+  "deliveryActionRefund": "Rembourser",
+
+  "deliveryTransitionDeliveryId": "Livraison n° {id}",
+  "@deliveryTransitionDeliveryId": {
+    "placeholders": {
+      "id": { "type": "int" }
+    }
+  },
+
+  "deliveryTransitionReady": "Prêt à continuer",
+  "deliveryTransitionMissing": "Conditions manquantes",
+
+  "deliveryTransitionMissingHint": "{count, plural, =0{Veuillez compléter les éléments manquants.} =1{Complétez l'élément manquant pour continuer.} other{Complétez les {count} éléments manquants pour continuer.}}",
+  "@deliveryTransitionMissingHint": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deliveryTransitionWorking": "En cours…",
+
+  "deliveryTransitionCommit": "{verb} la livraison",
+  "@deliveryTransitionCommit": {
+    "placeholders": {
+      "verb": { "type": "String" }
+    }
+  },
+
+  "deliveryTransitionSuccess": "{verb} réussi",
+  "@deliveryTransitionSuccess": {
+    "placeholders": {
+      "verb": { "type": "String" }
+    }
+  },
+
+  "deliveryTransitionFailure": "Échec de {verb}",
+  "@deliveryTransitionFailure": {
+    "placeholders": {
+      "verb": { "type": "String" }
+    }
+  },
+
+  "deliveryTransitionFix": "Corriger",
+
+  "deliveryTransitionReqRecipient": "Destinataire défini",
+  "deliveryTransitionReqRecipientDesc": "La livraison a besoin d'un destinataire ou d'une adresse de destination.",
+
+  "deliveryTransitionReqPackages": "Au moins un colis",
+  "deliveryTransitionReqPackagesDesc": "Déclarez les colis et le poids avant de confirmer.",
+
+  "deliveryTransitionReqProvider": "Fournisseur assigné",
+
+  "deliveryTransitionReqCarrierAccepted": "Transporteur a accepté la remise",
+  "deliveryTransitionReqCarrierAcceptedDesc": "Ceci enregistre que le transporteur a pris physiquement possession des marchandises.",
+
+  "deliveryTransitionReqTracking": "Le suivi montre un mouvement",
+  "deliveryTransitionReqTrackingDesc": "Ceci enregistre que le transporteur signale que les marchandises sont en mouvement.",
+
+  "deliveryTransitionReqDestination": "Adresse de destination enregistrée",
+
+  "deliveryTransitionReqProof": "Preuve de livraison capturée",
+  "deliveryTransitionReqProofDesc": "Signature, photo ou scan reçu du destinataire.",
+  "deliveryStatusShipped": "Expédiée"
 
 
 

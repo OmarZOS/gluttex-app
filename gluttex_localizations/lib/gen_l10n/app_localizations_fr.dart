@@ -6557,4 +6557,243 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deliveryDetailValidateFailure => 'Échec de la mise à jour de la livraison';
+
+  @override
+  String get commonSave => 'Enregistrer';
+
+  @override
+  String get commonClear => 'Effacer';
+
+  @override
+  String get deliveryDetailsTitle => 'Modifier les détails';
+
+  @override
+  String get deliveryDetailsSectionProducts => 'Produits';
+
+  @override
+  String get deliveryDetailsSectionPackages => 'Détails des colis';
+
+  @override
+  String get deliveryDetailsSectionShipping => 'Informations d\'expédition';
+
+  @override
+  String get deliveryDetailsSectionAdditional => 'Informations supplémentaires';
+
+  @override
+  String get deliveryDetailsProductSearchHint => 'Rechercher par nom, marque ou code-barres';
+
+  @override
+  String deliveryDetailsProductFallback(int id) {
+    return 'Produit n° $id';
+  }
+
+  @override
+  String deliveryDetailsProductsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produits sélectionnés',
+      one: '1 produit sélectionné',
+      zero: 'Aucun produit sélectionné',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deliveryDetailsStockIn(int count) {
+    return '$count en stock';
+  }
+
+  @override
+  String get deliveryDetailsStockOut => 'Rupture de stock';
+
+  @override
+  String get deliveryDetailsNoProducts => 'Cette livraison n\'a aucun produit associé.';
+
+  @override
+  String deliveryDetailsNoMatches(String query) {
+    return 'Aucun produit ne correspond à « $query ».';
+  }
+
+  @override
+  String get deliveryDetailsDimensionLength => 'Longueur';
+
+  @override
+  String get deliveryDetailsDimensionWidth => 'Largeur';
+
+  @override
+  String get deliveryDetailsDimensionHeight => 'Hauteur';
+
+  @override
+  String deliveryDetailsPackageWeightLabel(int index) {
+    return 'Poids du colis $index (kg)';
+  }
+
+  @override
+  String get deliveryDetailsRemovePackage => 'Retirer le colis';
+
+  @override
+  String get deliveryDetailsAddPackage => 'Ajouter un colis';
+
+  @override
+  String deliveryDetailsPackageSummary(int count, String weight) {
+    return 'Nombre de colis : $count   Poids total : $weight kg';
+  }
+
+  @override
+  String get deliveryDetailsFeeLabel => 'Frais de livraison (DA)';
+
+  @override
+  String get deliveryDetailsFeeHelper => 'Montant payé par le client au transporteur';
+
+  @override
+  String get deliveryDetailsShippingMethodLabel => 'Mode d\'expédition';
+
+  @override
+  String get deliveryDetailsHsCodeLabel => 'Code SH';
+
+  @override
+  String get deliveryDetailsMerchantLabel => 'Nom du commerçant';
+
+  @override
+  String get deliveryDetailsGoodsLabel => 'Description des marchandises';
+
+  @override
+  String get deliveryDetailsInstructionsLabel => 'Instructions spéciales';
+
+  @override
+  String get deliveryDetailsSaveButton => 'Enregistrer les modifications';
+
+  @override
+  String get deliveryDetailsSaveFailed => 'Échec de l\'enregistrement des détails';
+
+  @override
+  String deliveryDetailsSaveError(String message) {
+    return 'Erreur : $message';
+  }
+
+  @override
+  String get deliveryDetailsValidationEnterWeight => 'Saisissez le poids';
+
+  @override
+  String get deliveryDetailsValidationRequired => 'Requis';
+
+  @override
+  String get deliveryDetailsValidationEnterAmount => 'Saisissez un montant valide';
+
+  @override
+  String get deliveryDetailsValidationFeeNegative => 'Les frais ne peuvent pas être négatifs';
+
+  @override
+  String get deliveryActionAccept => 'Accepter';
+
+  @override
+  String get deliveryActionConfirm => 'Confirmer';
+
+  @override
+  String get deliveryActionShip => 'Expédier';
+
+  @override
+  String get deliveryActionInTransit => 'En transit';
+
+  @override
+  String get deliveryActionOutForDelivery => 'En cours de livraison';
+
+  @override
+  String get deliveryActionDeliver => 'Livrer';
+
+  @override
+  String get deliveryActionFail => 'Signaler un échec';
+
+  @override
+  String get deliveryActionCancel => 'Annuler la livraison';
+
+  @override
+  String get deliveryActionReturn => 'Marquer comme retournée';
+
+  @override
+  String get deliveryActionRefund => 'Rembourser';
+
+  @override
+  String deliveryTransitionDeliveryId(int id) {
+    return 'Livraison n° $id';
+  }
+
+  @override
+  String get deliveryTransitionReady => 'Prêt à continuer';
+
+  @override
+  String get deliveryTransitionMissing => 'Conditions manquantes';
+
+  @override
+  String deliveryTransitionMissingHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Complétez les $count éléments manquants pour continuer.',
+      one: 'Complétez l\'élément manquant pour continuer.',
+      zero: 'Veuillez compléter les éléments manquants.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryTransitionWorking => 'En cours…';
+
+  @override
+  String deliveryTransitionCommit(String verb) {
+    return '$verb la livraison';
+  }
+
+  @override
+  String deliveryTransitionSuccess(String verb) {
+    return '$verb réussi';
+  }
+
+  @override
+  String deliveryTransitionFailure(String verb) {
+    return 'Échec de $verb';
+  }
+
+  @override
+  String get deliveryTransitionFix => 'Corriger';
+
+  @override
+  String get deliveryTransitionReqRecipient => 'Destinataire défini';
+
+  @override
+  String get deliveryTransitionReqRecipientDesc => 'La livraison a besoin d\'un destinataire ou d\'une adresse de destination.';
+
+  @override
+  String get deliveryTransitionReqPackages => 'Au moins un colis';
+
+  @override
+  String get deliveryTransitionReqPackagesDesc => 'Déclarez les colis et le poids avant de confirmer.';
+
+  @override
+  String get deliveryTransitionReqProvider => 'Fournisseur assigné';
+
+  @override
+  String get deliveryTransitionReqCarrierAccepted => 'Transporteur a accepté la remise';
+
+  @override
+  String get deliveryTransitionReqCarrierAcceptedDesc => 'Ceci enregistre que le transporteur a pris physiquement possession des marchandises.';
+
+  @override
+  String get deliveryTransitionReqTracking => 'Le suivi montre un mouvement';
+
+  @override
+  String get deliveryTransitionReqTrackingDesc => 'Ceci enregistre que le transporteur signale que les marchandises sont en mouvement.';
+
+  @override
+  String get deliveryTransitionReqDestination => 'Adresse de destination enregistrée';
+
+  @override
+  String get deliveryTransitionReqProof => 'Preuve de livraison capturée';
+
+  @override
+  String get deliveryTransitionReqProofDesc => 'Signature, photo ou scan reçu du destinataire.';
+
+  @override
+  String get deliveryStatusShipped => 'Expédiée';
 }

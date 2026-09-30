@@ -12780,6 +12780,408 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to update delivery'**
   String get deliveryDetailValidateFailure;
+
+  /// Generic save action used across sheets
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// Generic clear action for inputs and filters
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get commonClear;
+
+  /// Title of the delivery edit sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Details'**
+  String get deliveryDetailsTitle;
+
+  /// Section header for the products block
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get deliveryDetailsSectionProducts;
+
+  /// Section header for the package details block
+  ///
+  /// In en, this message translates to:
+  /// **'Package Details'**
+  String get deliveryDetailsSectionPackages;
+
+  /// Section header for the shipping information block
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping Information'**
+  String get deliveryDetailsSectionShipping;
+
+  /// Section header for the additional information block
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Information'**
+  String get deliveryDetailsSectionAdditional;
+
+  /// Hint text for the product search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, brand, or barcode'**
+  String get deliveryDetailsProductSearchHint;
+
+  /// Fallback label when a product has no name
+  ///
+  /// In en, this message translates to:
+  /// **'Product #{id}'**
+  String deliveryDetailsProductFallback(int id);
+
+  /// Count of selected products in the summary row
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 product selected} other{{count} products selected}}'**
+  String deliveryDetailsProductsSelected(int count);
+
+  /// Stock pill when the product has quantity available
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in stock'**
+  String deliveryDetailsStockIn(int count);
+
+  /// Stock pill when the product is out of stock
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get deliveryDetailsStockOut;
+
+  /// Empty state when the delivery has no products in scope
+  ///
+  /// In en, this message translates to:
+  /// **'This delivery has no products attached.'**
+  String get deliveryDetailsNoProducts;
+
+  /// Empty state when a product search has no matches
+  ///
+  /// In en, this message translates to:
+  /// **'No products match \"{query}\".'**
+  String deliveryDetailsNoMatches(String query);
+
+  /// Package dimension field label for length
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get deliveryDetailsDimensionLength;
+
+  /// Package dimension field label for width
+  ///
+  /// In en, this message translates to:
+  /// **'Width'**
+  String get deliveryDetailsDimensionWidth;
+
+  /// Package dimension field label for height
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get deliveryDetailsDimensionHeight;
+
+  /// Weight field label for the Nth package
+  ///
+  /// In en, this message translates to:
+  /// **'Package {index} weight (kg)'**
+  String deliveryDetailsPackageWeightLabel(int index);
+
+  /// Tooltip for the remove-package button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove package'**
+  String get deliveryDetailsRemovePackage;
+
+  /// Button to add a package row
+  ///
+  /// In en, this message translates to:
+  /// **'Add package'**
+  String get deliveryDetailsAddPackage;
+
+  /// Summary line under the package block
+  ///
+  /// In en, this message translates to:
+  /// **'Package count: {count}   Total weight: {weight} kg'**
+  String deliveryDetailsPackageSummary(int count, String weight);
+
+  /// Label for the delivery fee input
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Fee (DA)'**
+  String get deliveryDetailsFeeLabel;
+
+  /// Helper text under the delivery fee input
+  ///
+  /// In en, this message translates to:
+  /// **'Amount the customer pays the courier'**
+  String get deliveryDetailsFeeHelper;
+
+  /// Label for the shipping method dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping Method'**
+  String get deliveryDetailsShippingMethodLabel;
+
+  /// Label for the HS code input
+  ///
+  /// In en, this message translates to:
+  /// **'HS Code'**
+  String get deliveryDetailsHsCodeLabel;
+
+  /// Label for the merchant name input
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant Name'**
+  String get deliveryDetailsMerchantLabel;
+
+  /// Label for the goods description input
+  ///
+  /// In en, this message translates to:
+  /// **'Goods Description'**
+  String get deliveryDetailsGoodsLabel;
+
+  /// Label for the special instructions input
+  ///
+  /// In en, this message translates to:
+  /// **'Special Instructions'**
+  String get deliveryDetailsInstructionsLabel;
+
+  /// Primary button in the edit sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get deliveryDetailsSaveButton;
+
+  /// Snackbar when the server rejects the update
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save details'**
+  String get deliveryDetailsSaveFailed;
+
+  /// Snackbar when the update throws
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String deliveryDetailsSaveError(String message);
+
+  /// Field validator when a package weight is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Enter weight'**
+  String get deliveryDetailsValidationEnterWeight;
+
+  /// Generic required-field validator
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get deliveryDetailsValidationRequired;
+
+  /// Fee field validator for non-numeric input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount'**
+  String get deliveryDetailsValidationEnterAmount;
+
+  /// Fee field validator for negative values
+  ///
+  /// In en, this message translates to:
+  /// **'Fee cannot be negative'**
+  String get deliveryDetailsValidationFeeNegative;
+
+  /// No description provided for @deliveryActionAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get deliveryActionAccept;
+
+  /// No description provided for @deliveryActionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get deliveryActionConfirm;
+
+  /// No description provided for @deliveryActionShip.
+  ///
+  /// In en, this message translates to:
+  /// **'Ship'**
+  String get deliveryActionShip;
+
+  /// No description provided for @deliveryActionInTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark In Transit'**
+  String get deliveryActionInTransit;
+
+  /// No description provided for @deliveryActionOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for Delivery'**
+  String get deliveryActionOutForDelivery;
+
+  /// No description provided for @deliveryActionDeliver.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver'**
+  String get deliveryActionDeliver;
+
+  /// No description provided for @deliveryActionFail.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Failure'**
+  String get deliveryActionFail;
+
+  /// No description provided for @deliveryActionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Delivery'**
+  String get deliveryActionCancel;
+
+  /// No description provided for @deliveryActionReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Returned'**
+  String get deliveryActionReturn;
+
+  /// No description provided for @deliveryActionRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get deliveryActionRefund;
+
+  /// No description provided for @deliveryTransitionDeliveryId.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery #{id}'**
+  String deliveryTransitionDeliveryId(int id);
+
+  /// No description provided for @deliveryTransitionReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to proceed'**
+  String get deliveryTransitionReady;
+
+  /// No description provided for @deliveryTransitionMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing requirements'**
+  String get deliveryTransitionMissing;
+
+  /// No description provided for @deliveryTransitionMissingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Complete the missing item to continue.} other{Complete all {count} missing items to continue.}}'**
+  String deliveryTransitionMissingHint(int count);
+
+  /// No description provided for @deliveryTransitionWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get deliveryTransitionWorking;
+
+  /// No description provided for @deliveryTransitionCommit.
+  ///
+  /// In en, this message translates to:
+  /// **'{verb} Delivery'**
+  String deliveryTransitionCommit(String verb);
+
+  /// No description provided for @deliveryTransitionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{verb} succeeded'**
+  String deliveryTransitionSuccess(String verb);
+
+  /// No description provided for @deliveryTransitionFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'{verb} failed'**
+  String deliveryTransitionFailure(String verb);
+
+  /// No description provided for @deliveryTransitionFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix'**
+  String get deliveryTransitionFix;
+
+  /// No description provided for @deliveryTransitionReqRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient specified'**
+  String get deliveryTransitionReqRecipient;
+
+  /// No description provided for @deliveryTransitionReqRecipientDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The delivery needs a recipient or destination address.'**
+  String get deliveryTransitionReqRecipientDesc;
+
+  /// No description provided for @deliveryTransitionReqPackages.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one package'**
+  String get deliveryTransitionReqPackages;
+
+  /// No description provided for @deliveryTransitionReqPackagesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Declare packages and weight before confirming.'**
+  String get deliveryTransitionReqPackagesDesc;
+
+  /// No description provided for @deliveryTransitionReqProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider assigned'**
+  String get deliveryTransitionReqProvider;
+
+  /// No description provided for @deliveryTransitionReqCarrierAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Carrier accepted the handoff'**
+  String get deliveryTransitionReqCarrierAccepted;
+
+  /// No description provided for @deliveryTransitionReqCarrierAcceptedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This records that the carrier has taken physical custody.'**
+  String get deliveryTransitionReqCarrierAcceptedDesc;
+
+  /// No description provided for @deliveryTransitionReqTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Carrier tracking shows movement'**
+  String get deliveryTransitionReqTracking;
+
+  /// No description provided for @deliveryTransitionReqTrackingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This records that the carrier reports the goods are moving.'**
+  String get deliveryTransitionReqTrackingDesc;
+
+  /// No description provided for @deliveryTransitionReqDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination address on file'**
+  String get deliveryTransitionReqDestination;
+
+  /// No description provided for @deliveryTransitionReqProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Proof of delivery captured'**
+  String get deliveryTransitionReqProof;
+
+  /// No description provided for @deliveryTransitionReqProofDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Signature, photo, or scan received from the recipient.'**
+  String get deliveryTransitionReqProofDesc;
+
+  /// No description provided for @deliveryStatusShipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipped'**
+  String get deliveryStatusShipped;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
