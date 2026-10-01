@@ -3267,6 +3267,8 @@
 
 "sourceDistribution": "Source Distribution",
 "noDataAvailable": "No data available",
-"outstanding": "Outstanding"
+"outstanding": "Outstanding",
+"productQuantifierTxt":"Quantifier",
+"productOriginTxt":"Origin"
 
 }

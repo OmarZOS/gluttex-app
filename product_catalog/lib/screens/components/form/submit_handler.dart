@@ -8,8 +8,6 @@ import 'package:ui/Services/ResponseHandler.dart';
 import 'package:product_catalog/screens/components/form/form_controllers.dart';
 import 'package:provider/provider.dart';
 
-// import '../data/product_form_data.dart';
-
 class SubmitHandler {
   static Future<void> submitForm({
     required BuildContext context,
@@ -19,29 +17,28 @@ class SubmitHandler {
     required bool isUpdate,
   }) async {
     try {
-      if (formKey.currentState?.validate() == true) {
-        formKey.currentState?.save();
+      if (formKey.currentState?.validate() != true) return;
 
-        final product = formData.toProduct();
-        final productNotifier = context.read<ProductNotifier>();
+      formKey.currentState?.save();
 
-        await productNotifier.addOrUpdateProduct(product);
+      final product = formData.toProduct();
+      final productNotifier = context.read<ProductNotifier>();
 
-        ResponseHandler.handleResponse(
-          context: context,
-          statusCode: 200,
-          responseCode: AppResponseCodes.put_success,
-          finalMessage: AppLocalizations.of(context)!.putSuccess,
-        );
+      await productNotifier.addOrUpdateProduct(product);
 
-        if (context.mounted) {
-          Navigator.popUntil(
-            context,
-            (route) => route.settings.name == '/home',
-          );
-        }
-      }
+      if (!context.mounted) return;
+
+      ResponseHandler.handleResponse(
+        context: context,
+        statusCode: 200,
+        responseCode: AppResponseCodes.put_success,
+        finalMessage: AppLocalizations.of(context)!.putSuccess,
+      );
+
+      // Pop just the form and hand the saved product back to the caller.
+      Navigator.of(context).pop(product);
     } on GluttexException catch (e) {
+      if (!context.mounted) return;
       ResponseHandler.handleResponse(
         context: context,
         statusCode: e.statusCode ?? 500,
@@ -49,11 +46,12 @@ class SubmitHandler {
         finalMessage: e.error,
       );
     } catch (e) {
+      if (!context.mounted) return;
       ResponseHandler.handleResponse(
         context: context,
         statusCode: 500,
         responseCode: 'UNKNOWN_ERROR',
-        finalMessage: 'An unexpected error occurred: ${e.toString()}',
+        finalMessage: 'An unexpected error occurred: $e',
       );
     }
   }

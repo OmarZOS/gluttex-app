@@ -1,9 +1,11 @@
+// lib/screens/components/form/product_form_fields.dart
+
+import 'package:app_constants/app_constants.dart';
 import 'package:app_constants/app_routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Supplier.dart';
 import 'package:gluttex_core/business/iProduct.dart';
 import 'package:gluttex_core/business/product_form_data.dart';
@@ -13,7 +15,6 @@ import 'package:event/personnel_notifier.dart';
 import 'package:event/product_change_notifier.dart';
 import 'package:event/supplier_change_notifier.dart';
 import 'package:event/user_change_notifier.dart';
-import 'package:event/views/pricing_config_view_model.dart';
 import 'package:ui/components/category_picker.dart';
 import 'package:ui/components/pricing_config_card.dart';
 import 'package:ui/components/supplier/supplier_picker.dart';
@@ -21,7 +22,7 @@ import 'package:product_catalog/screens/components/form/form_controllers.dart';
 import 'package:product_catalog/screens/components/form/pricing_state.dart';
 import 'package:product_catalog/screens/components/smart_form.dart';
 
-class ProductFormFields extends StatelessWidget {
+class ProductFormFields extends StatefulWidget {
   final ProductFormData formData;
   final FormControllers controllers;
   final GlobalKey<FormState> formKey;
@@ -36,94 +37,125 @@ class ProductFormFields extends StatelessWidget {
   });
 
   @override
+  State<ProductFormFields> createState() => _ProductFormFieldsState();
+}
+
+class _ProductFormFieldsState extends State<ProductFormFields> {
+  // Local aliases so every method body below compiles unchanged.
+  ProductFormData get formData => widget.formData;
+  FormControllers get controllers => widget.controllers;
+  GlobalKey<FormState> get formKey => widget.formKey;
+  bool get isUpdate => widget.isUpdate;
+
+  @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final loc = AppLocalizations.of(context)!;
     final assistantNotifier = context.watch<AssistantNotifier>();
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ... other fields (name, brand, barcode) ...
+        // ---------- Basic identity ----------
 
-// Name Field
         _buildSmartField(
           context: context,
           fieldId: ProductAssistedFields.IPRODUCT_NAME,
           controller: controllers.name,
-          label: localizations.productNameTxt,
-          validator: (value) => value?.isEmpty == true
-              ? localizations.pleaseInputProductNameMsg
-              : null,
+          label: loc.productNameTxt,
+          validator: (value) =>
+              (value?.isEmpty ?? true) ? loc.pleaseInputProductNameMsg : null,
         ),
 
         const SizedBox(height: 16),
 
-        // Brand Field
         _buildSmartField(
           context: context,
           fieldId: ProductAssistedFields.IPRODUCT_BRAND,
           controller: controllers.brand,
-          label: localizations.productBrandTxt,
-          validator: (value) => value?.isEmpty == true
-              ? localizations.pleaseInputProductBrandMsg
-              : null,
+          label: loc.productBrandTxt,
+          validator: (value) =>
+              (value?.isEmpty ?? true) ? loc.pleaseInputProductBrandMsg : null,
         ),
 
         const SizedBox(height: 16),
 
-        // Barcode Field with scanner
-
-        _buildBarcodeField(context, localizations),
+        _buildBarcodeField(context, loc),
 
         const SizedBox(height: 16),
 
-        // Price Field
-        // Price Field with AI Assistant
-        _buildPriceFieldWithAssistant(
-            context, assistantNotifier, localizations),
+        // ---------- Quantity & quantifier ----------
 
-        const SizedBox(height: 16),
-
-        // Quantity Field
-        _buildSmartField(
-          context: context,
-          fieldId: ProductAssistedFields.QUANTITY,
-          controller: controllers.quantity,
-          label: localizations.productQuantityText,
-          keyboardType: TextInputType.number,
-          validator: _validateQuantity,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 2,
+              child: _buildSmartField(
+                context: context,
+                fieldId: ProductAssistedFields.QUANTITY,
+                controller: controllers.quantity,
+                label: loc.productQuantityText,
+                keyboardType: TextInputType.number,
+                validator: _validateQuantity,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 1,
+              child: _buildQuantifierField(context, loc),
+            ),
+          ],
         ),
 
         const SizedBox(height: 16),
 
-        // Description Field
+        // ---------- Description ----------
+
         _buildSmartField(
           context: context,
           fieldId: ProductAssistedFields.DESCRIPTION,
           controller: controllers.description,
-          label: localizations.productDescriptionText,
+          label: loc.productDescriptionText,
           maxLines: 3,
           validator: _validateDescription,
         ),
 
         const SizedBox(height: 24),
 
-        // Category Picker
+        // ---------- Category ----------
+
         _buildCategoryPicker(context),
 
         const SizedBox(height: 24),
 
-        // Supplier Picker
+        // ---------- Supplier ----------
+
         _buildSupplierPicker(context),
+
+        const SizedBox(height: 24),
+
+        // ---------- Pricing (base + tax + margin + final + AI) ----------
+
+        _buildPricingSection(context, assistantNotifier, loc),
+
+        const SizedBox(height: 24),
+
+        // ---------- Visibility ----------
+
+        _buildVisibilityToggle(context),
       ],
     );
   }
 
-  Widget _buildPriceFieldWithAssistant(
+  // ==================================================================
+  // Pricing section
+  // ==================================================================
+
+  Widget _buildPricingSection(
     BuildContext context,
     AssistantNotifier assistantNotifier,
-    AppLocalizations localizations,
+    AppLocalizations loc,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
     final priceField = assistantNotifier
         .getFieldData(ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA);
     final hasAIPrice = priceField?.value != null && !priceField!.isEdited;
@@ -131,289 +163,196 @@ class ProductFormFields extends StatelessWidget {
         hasAIPrice ? double.tryParse(priceField!.value.toString()) : null;
 
     return Consumer<PricingState>(
-      builder: (context, pricingState, child) {
-        // ✅ Create a local controller that only updates on significant changes
-        return _PricingCardWrapper(
-          pricingState: pricingState,
+      builder: (context, pricingState, _) {
+        // Single helper: whatever PricingState derives, push it into the
+        // external controllers and formData. Called after every mutation
+        // so the two representations never diverge.
+        void syncOut() {
+          final finalPrice = pricingState.finalPrice;
+          final basePrice = pricingState.basePrice;
+
+          formData.price = finalPrice;
+          formData.productBasePrice = basePrice;
+
+          controllers.price.text = finalPrice.toStringAsFixed(2);
+          controllers.basePrice.text = basePrice.toStringAsFixed(2);
+        }
+
+        return PricingConfigCard(
+          basePrice: pricingState.basePrice,
+          taxPercentage: pricingState.taxPercentage,
+          profitMargin: pricingState.profitMargin,
+          finalPrice: pricingState.finalPrice,
+          mode: pricingState.mode,
           aiPrice: aiPrice,
-          hasAIPrice: hasAIPrice,
-          childBuilder: (localValues) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Smart Price Field
-              _buildSmartField(
-                context: context,
-                fieldId: ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA,
-                controller: controllers.price,
-                label: localizations.productPriceTxt,
-                keyboardType: TextInputType.number,
-                validator: _validatePrice,
-                suffixIcon: hasAIPrice
-                    ? Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        child: Icon(
-                          Icons.auto_awesome,
-                          size: 16,
-                          color: colorScheme.primary,
-                        ),
-                      )
-                    : null,
-                onChanged: (value) {
-                  final price = double.tryParse(value) ?? 0.0;
-                  pricingState.updateBasePrice(price);
-                  formData.price = price;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // AI Price Suggestion Header
-              if (hasAIPrice && aiPrice != null)
-                Column(
-                  children: [
-                    _buildAIPriceSuggestionHeader(
-                        context, aiPrice!, pricingState, localizations),
-                    const SizedBox(height: 12),
-                  ],
-                ),
-
-              // Pricing Configuration Card with local values
-              PricingConfigCard(
-                basePrice: localValues.basePrice,
-                taxPercentage: localValues.taxPercentage,
-                profitMargin: localValues.profitMargin,
-                finalPrice: localValues.finalPrice,
-                mode: localValues.mode,
-                onBasePriceChanged: (price) {
-                  pricingState.updateBasePrice(price);
-                  formData.price = price;
-                },
-                onTaxPercentageChanged: (tax) {
-                  pricingState.updateTaxPercentage(tax);
-                },
-                onProfitMarginChanged: (margin) {
-                  pricingState.updateProfitMargin(margin);
-                },
-                onFinalPriceChanged: (price) {
-                  pricingState.updateFinalPrice(price);
-                  formData.price = price;
-                },
-                onModeChanged: (mode) {
-                  pricingState.updateMode(mode);
-                },
-              ),
-            ],
-          ),
+          onBasePriceChanged: (price) {
+            pricingState.basePrice = price;
+            syncOut();
+          },
+          onTaxPercentageChanged: (tax) {
+            pricingState.taxPercentage = tax;
+            syncOut();
+          },
+          onProfitMarginChanged: (margin) {
+            pricingState.profitMargin = margin;
+            syncOut();
+          },
+          onFinalPriceChanged: (price) {
+            pricingState.finalPrice = price;
+            syncOut();
+          },
+          onModeChanged: (mode) {
+            pricingState.mode = mode;
+            syncOut();
+          },
+          onAcceptAiPrice: () {
+            final ai = aiPrice;
+            if (ai == null || ai <= 0) return;
+            pricingState.applyAiPrice(ai);
+            syncOut();
+          },
         );
       },
     );
   }
 
-  Widget _buildAIPriceSuggestionHeader(
-    BuildContext context,
-    double aiPrice,
-    PricingState pricingState,
-    AppLocalizations localizations,
-  ) {
+  // ==================================================================
+  // Quantifier
+  // ==================================================================
+
+  Widget _buildQuantifierField(BuildContext context, AppLocalizations loc) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final currentPrice = pricingState.basePrice;
-    final priceDifference = (currentPrice - aiPrice).abs();
-    final isPriceAccepted = priceDifference < 0.01;
-    final isHigher = currentPrice > aiPrice;
+    final cs = theme.colorScheme;
+
+    const options = <String>[
+      'pc',
+      'kg',
+      'g',
+      'L',
+      'ml',
+      'mg',
+      'tablet',
+      'capsule',
+      'bottle',
+      'unit',
+      'package',
+      'box',
+    ];
+
+    final current = (formData.quantifier ?? 'pc').trim();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          loc.productQuantifierTxt,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: cs.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(
+          value: options.contains(current) ? current : 'pc',
+          items: options
+              .map((q) => DropdownMenuItem(value: q, child: Text(q)))
+              .toList(),
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() {
+              formData.quantifier = value;
+            });
+          },
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: cs.surfaceVariant.withOpacity(0.3),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: cs.outline.withOpacity(0.15)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: cs.primary, width: 2),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==================================================================
+  // Visibility
+  // ==================================================================
+
+  Widget _buildVisibilityToggle(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final current = (formData.visibility ?? 'VISIBLE').toUpperCase();
+    final isVisible = current == 'VISIBLE';
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(0.05),
+        color: cs.surfaceContainerHighest.withOpacity(0.4),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.primary.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
       ),
       child: Row(
         children: [
           Icon(
-            Icons.auto_awesome,
-            size: 20,
-            color: colorScheme.primary,
+            isVisible
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            size: 18,
+            color: isVisible ? cs.primary : cs.onSurfaceVariant,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI Suggested Price',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurface,
+                  'Visibility',
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 2),
                 Text(
-                  'DZD${aiPrice.toStringAsFixed(2)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
+                  isVisible
+                      ? 'Buyers can see this product'
+                      : 'Hidden from the catalog',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
-                if (!isPriceAccepted)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      isHigher
-                          ? 'Your price is DZD${priceDifference.toStringAsFixed(2)} higher'
-                          : 'Your price is DZD${priceDifference.toStringAsFixed(2)} lower',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: isHigher ? Colors.orange : Colors.green,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
-          // Accept/Reject Button
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isPriceAccepted
-                  ? colorScheme.primary.withOpacity(0.2)
-                  : colorScheme.surfaceVariant,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: Icon(
-                isPriceAccepted ? Icons.check_circle : Icons.price_change,
-                size: 20,
-                color: isPriceAccepted
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-              ),
-              onPressed: () {
-                final newPrice = isPriceAccepted ? 0.0 : aiPrice;
-                pricingState.updateBasePrice(newPrice);
-                controllers.price.text = newPrice.toStringAsFixed(2);
-                formData.price = newPrice;
-              },
-              padding: EdgeInsets.zero,
-              splashRadius: 16,
-              tooltip: isPriceAccepted ? 'Reset to AI price' : 'Use AI price',
-            ),
+          Switch(
+            value: isVisible,
+            onChanged: _toggleVisibility,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAIPricingCard(
-    BuildContext context,
-    double aiSuggestedPrice,
-    PricingState pricingState,
-    AppLocalizations localizations,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.primary.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // AI Suggestion Header
-          Row(
-            children: [
-              Icon(
-                Icons.auto_awesome,
-                size: 18,
-                color: colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'AI Suggested Price: DZD${aiSuggestedPrice.toStringAsFixed(2)}',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              _buildAcceptPriceButton(context, aiSuggestedPrice, pricingState),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Pricing Configuration Card
-          PricingConfigCard(
-            basePrice: pricingState.basePrice,
-            taxPercentage: pricingState.taxPercentage,
-            profitMargin: pricingState.profitMargin,
-            finalPrice: pricingState.finalPrice,
-            mode: pricingState.mode,
-            onBasePriceChanged: (price) {
-              pricingState.updateBasePrice(price);
-              controllers.price.text = price.toStringAsFixed(2);
-            },
-            onTaxPercentageChanged: pricingState.updateTaxPercentage,
-            onProfitMarginChanged: pricingState.updateProfitMargin,
-            onFinalPriceChanged: (price) {
-              pricingState.updateFinalPrice(price);
-              controllers.price.text = price.toStringAsFixed(2);
-            },
-            onModeChanged: pricingState.updateMode,
-          ),
-        ],
-      ),
-    );
+  void _toggleVisibility(bool isVisible) {
+    setState(() {
+      formData.visibility = isVisible ? 'VISIBLE' : 'HIDDEN';
+    });
   }
 
-  Widget _buildAcceptPriceButton(
-    BuildContext context,
-    double aiPrice,
-    PricingState pricingState,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final currentPrice = double.tryParse(controllers.price.text) ?? 0.0;
-    final isPriceAccepted = (currentPrice - aiPrice).abs() < 0.01;
-
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: isPriceAccepted
-            ? colorScheme.primary.withOpacity(0.2)
-            : colorScheme.surfaceVariant,
-        shape: BoxShape.circle,
-      ),
-      child: IconButton(
-        icon: Icon(
-          isPriceAccepted ? Icons.check_circle : Icons.price_change,
-          size: 18,
-          color: isPriceAccepted
-              ? colorScheme.primary
-              : colorScheme.onSurfaceVariant,
-        ),
-        onPressed: () {
-          final newPrice = isPriceAccepted ? 0.0 : aiPrice;
-          controllers.price.text = newPrice.toStringAsFixed(2);
-          pricingState.updateBasePrice(newPrice);
-        },
-        padding: EdgeInsets.zero,
-        splashRadius: 16,
-      ),
-    );
-  }
+  // ==================================================================
+  // Generic smart field
+  // ==================================================================
 
   Widget _buildSmartField({
     required BuildContext context,
@@ -454,6 +393,9 @@ class ProductFormFields extends StatelessWidget {
       case ProductAssistedFields.IPRODUCT_BARCODE:
         formData.productBarcode = value;
         break;
+      case ProductAssistedFields.IPRODUCT_BASE_PRICE:
+        formData.productBasePrice = double.tryParse(value ?? '0.0');
+        break;
       case ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA:
         formData.price = double.tryParse(value ?? '0.0');
         break;
@@ -466,26 +408,29 @@ class ProductFormFields extends StatelessWidget {
     }
   }
 
-  String? _validatePrice(String? value) {
-    if (value?.isEmpty == true) return 'Please enter price';
-    if (double.tryParse(value ?? '') == null)
-      return 'Please enter a valid number';
-    if (double.tryParse(value ?? '')! >= 1000000) return 'Price too high';
-    return null;
-  }
+  // ==================================================================
+  // Validators
+  // ==================================================================
 
   String? _validateQuantity(String? value) {
     if (value?.isEmpty == true) return 'Please enter quantity';
-    if (int.tryParse(value ?? '') == null) return 'Please enter a valid number';
+    final parsed = int.tryParse(value ?? '');
+    if (parsed == null) return 'Please enter a valid number';
+    if (parsed < 0) return 'Quantity cannot be negative';
     return null;
   }
 
   String? _validateDescription(String? value) {
     if (value?.isEmpty == true) return 'Please enter description';
-    if (value!.length >= 300)
+    if (value!.length >= 300) {
       return 'Description too long (max 300 characters)';
+    }
     return null;
   }
+
+  // ==================================================================
+  // Category & supplier
+  // ==================================================================
 
   Widget _buildCategoryPicker(BuildContext context) {
     final categories = context.read<ProductNotifier>().categories;
@@ -493,35 +438,29 @@ class ProductFormFields extends StatelessWidget {
       category_id: formData.categoryId ?? 1,
       categories: categories,
       onCategoryChanged: (id) {
-        formData.typeId = id;
-        formData.categoryId = id;
+        setState(() {
+          formData.typeId = id;
+          formData.categoryId = id;
+        });
       },
       pathFunction: (id) => 'assets/icons/$id.svg',
-      package: "product_catalog",
+      package: 'product_catalog',
     );
   }
 
   Widget _buildSupplierPicker(BuildContext context) {
     final supplierNotifier = context.watch<SupplierChangeNotifier>();
 
-    // Locked providers are non-interactive: resolve the name and render a
-    // read-only row. No picker, no personnel fetch, no empty state.
     if (formData.lockProvider && formData.selectedProviderId > 0) {
       final supplier = supplierNotifier.suppliers.firstWhere(
         (s) => s.idProductProvider == formData.selectedProviderId,
       );
       final name = supplier?.providerName ?? '#${formData.selectedProviderId}';
-
       return _LockedSupplierRow(name: name);
     }
 
-    // Unlocked: render the picker against whatever suppliers the notifier
-    // already has. Don't trigger a fetch — the caller (dashboard) already
-    // loads them.
     final suppliers = supplierNotifier.suppliers.whereType<Supplier>().toList();
-
     if (suppliers.isEmpty) {
-      // Silent fallback: no suppliers to pick from yet.
       return const SizedBox.shrink();
     }
 
@@ -541,17 +480,24 @@ class ProductFormFields extends StatelessWidget {
             (s) => s.idProductProvider == formData.selectedProviderId,
           ),
           onSupplierChanged: (selectedSupplier) {
-            formData.selectedProviderId = selectedSupplier.idProductProvider;
-            formData.providerId = selectedSupplier.idProductProvider;
+            setState(() {
+              formData.selectedProviderId = selectedSupplier.idProductProvider;
+              formData.providerId = selectedSupplier.idProductProvider;
+            });
           },
         ),
       ],
     );
   }
 
-  // Update the _buildSmartField method for barcode to include scanning
+  // ==================================================================
+  // Barcode
+  // ==================================================================
+
   Widget _buildBarcodeField(
-      BuildContext context, AppLocalizations localizations) {
+    BuildContext context,
+    AppLocalizations localizations,
+  ) {
     final assistantNotifier = context.watch<AssistantNotifier>();
 
     return _buildSmartField(
@@ -563,8 +509,10 @@ class ProductFormFields extends StatelessWidget {
           ? localizations.pleaseInputProductBarcodeMsg
           : null,
       suffixIcon: IconButton(
-        icon: Icon(CupertinoIcons.barcode_viewfinder,
-            color: Theme.of(context).colorScheme.primary),
+        icon: Icon(
+          CupertinoIcons.barcode_viewfinder,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         onPressed: assistantNotifier.isLoading
             ? null
             : () => _handleBarcodeScanning(context),
@@ -572,7 +520,6 @@ class ProductFormFields extends StatelessWidget {
     );
   }
 
-// Add this method to handle barcode scanning from the form field
   Future<void> _handleBarcodeScanning(BuildContext context) async {
     final String? scannedCode = await Navigator.pushNamed(
       context,
@@ -582,21 +529,16 @@ class ProductFormFields extends StatelessWidget {
     if (scannedCode != null && scannedCode.isNotEmpty) {
       final assistantNotifier = context.read<AssistantNotifier>();
 
-      // Update barcode field immediately with user input source
       assistantNotifier.setFieldData(
         fieldId: ProductAssistedFields.IPRODUCT_BARCODE,
         value: scannedCode,
         source: DataSource.userInput,
       );
 
-      // Update form data and controller
       formData.productBarcode = scannedCode;
       controllers.barcode.text = scannedCode;
 
-      // Then fetch product data
       await assistantNotifier.fetchProductByBarcode(scannedCode);
-
-      // Auto-sync form with the fetched data
       _syncFormWithAiData(context);
     }
   }
@@ -610,7 +552,6 @@ class ProductFormFields extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
 
-      // Get field data
       final nameField =
           assistantNotifier.getFieldData(ProductAssistedFields.IPRODUCT_NAME);
       final brandField =
@@ -618,26 +559,27 @@ class ProductFormFields extends StatelessWidget {
       final priceField = assistantNotifier
           .getFieldData(ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA);
 
-      // Update only non-edited fields
-      if (nameField != null && !nameField.isEdited) {
-        controllers.name.text = nameField.value?.toString() ?? '';
-        formData.productName = nameField.value?.toString();
-      }
+      setState(() {
+        if (nameField != null && !nameField.isEdited) {
+          controllers.name.text = nameField.value?.toString() ?? '';
+          formData.productName = nameField.value?.toString();
+        }
 
-      if (brandField != null && !brandField.isEdited) {
-        controllers.brand.text = brandField.value?.toString() ?? '';
-        formData.productBrand = brandField.value?.toString();
-      }
+        if (brandField != null && !brandField.isEdited) {
+          controllers.brand.text = brandField.value?.toString() ?? '';
+          formData.productBrand = brandField.value?.toString();
+        }
 
-      if (priceField != null && !priceField.isEdited) {
-        controllers.price.text = priceField.value?.toString() ?? '';
-        formData.price = double.tryParse(priceField.value?.toString() ?? '0.0');
-      }
+        if (priceField != null && !priceField.isEdited) {
+          controllers.price.text = priceField.value?.toString() ?? '';
+          formData.price =
+              double.tryParse(priceField.value?.toString() ?? '0.0');
+        }
+      });
 
-      // Show success
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Product data loaded from barcode'),
+          content: const Text('Product data loaded from barcode'),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
@@ -645,104 +587,9 @@ class ProductFormFields extends StatelessWidget {
   }
 }
 
-// Helper widget to manage local state
-class _PricingCardWrapper extends StatefulWidget {
-  final PricingState pricingState;
-  final double? aiPrice;
-  final bool hasAIPrice;
-  final Widget Function(PricingValues localValues) childBuilder;
-
-  const _PricingCardWrapper({
-    required this.pricingState,
-    required this.aiPrice,
-    required this.hasAIPrice,
-    required this.childBuilder,
-  });
-
-  @override
-  State<_PricingCardWrapper> createState() => __PricingCardWrapperState();
-}
-
-class __PricingCardWrapperState extends State<_PricingCardWrapper> {
-  late PricingValues _localValues;
-  bool _initialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _localValues = PricingValues.fromPricingState(widget.pricingState);
-
-    // Initialize with AI price if available
-    if (widget.hasAIPrice && widget.aiPrice != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.pricingState.updateBasePrice(widget.aiPrice!);
-      });
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final supplierNotifier = context.read<SupplierChangeNotifier>();
-      if (supplierNotifier.suppliers.isEmpty && !supplierNotifier.isLoading) {
-        final userNotifier = context.read<AppUserNotifier>();
-        supplierNotifier.fetchSuppliers(
-          reset: true,
-          ownerId: userNotifier.appUser?.idAppUser,
-        );
-      }
-    });
-  }
-
-  @override
-  void didUpdateWidget(covariant _PricingCardWrapper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // Only update local values if the user isn't actively using the card
-    // This prevents resetting while typing
-    if (_shouldUpdateLocalValues()) {
-      _localValues = PricingValues.fromPricingState(widget.pricingState);
-    }
-  }
-
-  bool _shouldUpdateLocalValues() {
-    // Add logic here if you want to track when user is editing
-    // For now, update on significant changes only
-    final currentState = widget.pricingState;
-    return _localValues.basePrice != currentState.basePrice ||
-        _localValues.taxPercentage != currentState.taxPercentage ||
-        _localValues.mode != currentState.mode;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.childBuilder(_localValues);
-  }
-}
-
-// Simple data class for local values
-class PricingValues {
-  final double basePrice;
-  final double taxPercentage;
-  final double profitMargin;
-  final double finalPrice;
-  final PricingMode mode;
-
-  PricingValues({
-    required this.basePrice,
-    required this.taxPercentage,
-    required this.profitMargin,
-    required this.finalPrice,
-    required this.mode,
-  });
-
-  factory PricingValues.fromPricingState(PricingState state) {
-    return PricingValues(
-      basePrice: state.basePrice,
-      taxPercentage: state.taxPercentage,
-      profitMargin: state.profitMargin,
-      finalPrice: state.finalPrice,
-      mode: state.mode,
-    );
-  }
-}
+// ==================================================================
+// Locked supplier row
+// ==================================================================
 
 class _LockedSupplierRow extends StatelessWidget {
   final String name;
@@ -770,9 +617,7 @@ class _LockedSupplierRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest.withOpacity(0.4),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: cs.outlineVariant.withOpacity(0.5),
-            ),
+            border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
           ),
           child: Row(
             children: [

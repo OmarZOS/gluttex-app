@@ -1,15 +1,20 @@
-import 'package:flutter/material.dart';
-import 'package:gluttex_core/business/Product.dart';
-import 'package:gluttex_core/business/Supplier.dart';
-import 'package:gluttex_core/business/product_form_data.dart';
-import 'package:event/user_change_notifier.dart';
-import 'package:event/supplier_change_notifier.dart';
-import 'package:product_catalog/screens/components/form/form_controllers.dart';
-import 'package:provider/provider.dart';
+// lib/screens/components/form/form_state_manager.dart
 
+import 'package:gluttex_core/business/Product.dart';
+import 'package:gluttex_core/business/product_form_data.dart';
+import 'package:product_catalog/screens/components/form/form_controllers.dart';
+
+/// Owns the create-vs-update decision and the initial hydration of the
+/// form state.
+///
+/// It is deliberately dumb: it does not read `BuildContext`, it does not
+/// look up notifiers, and it does not do any I/O. The screen calls
+/// [initializeForCreate] or [initializeForUpdate] once, after it has
+/// collected the route arguments and the current user.
 class FormStateManager {
   final ProductFormData formData;
   final FormControllers controllers;
+
   bool initialized = false;
   bool isUpdate = false;
 
@@ -18,68 +23,68 @@ class FormStateManager {
     required this.controllers,
   });
 
-  void initialize() {
-    // Set default values
-    formData.quantifier = 'pc';
-    formData.categoryId = 1;
-  }
-
-  void initializeFromArguments(BuildContext context) {
+  /// Configure the form for creating a new product.
+  ///
+  /// - Resets [formData] to its defaults.
+  /// - Clears controllers.
+  /// - Records the current user as the owner.
+  /// - Locks the provider when a provider hint is supplied by the caller.
+  void initializeForCreate({
+    required int ownerId,
+    int providerId = 0,
+    bool lockProvider = false,
+  }) {
     if (initialized) return;
 
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    // Defaults for a new product.
+    formData.quantifier = 'pc';
+    formData.categoryId = 1;
+    formData.typeId = 1;
+    formData.ownerId = ownerId;
 
-    // ── Read the update payload (if any).
-    final Product? product = args?['product'];
-    if (product != null) {
-      isUpdate = true;
-      formData.populateFromProduct(product);
-      controllers.syncWithFormData(formData);
-    }
-
-    // ── Read the provider hint from arguments.
-    final rawProviderId = args?['providerId'];
-    final providerId = rawProviderId is int
-        ? rawProviderId
-        : int.tryParse('${rawProviderId ?? ''}') ?? 0;
-    final lockProvider = args?['lockProvider'] == true;
-
-    // ── Set owner ID from current user.
-    final userNotifier = context.read<AppUserNotifier>();
-    formData.ownerId = userNotifier.appUser?.idAppUser;
-
-    // ── Resolve the initial supplier.
-    //
-    // Priority:
-    //   1. Provider from arguments (caller knows best)
-    //   2. Provider from the product being edited (populateFromProduct set it)
-    //   3. First supplier owned by the current user
-    //
-    // Only fall back to the heuristic when neither 1 nor 2 supplied a value,
-    // otherwise we'd overwrite the caller's intent.
+    // Optional provider hint from the caller.
     if (providerId > 0) {
       formData.selectedProviderId = providerId;
       formData.providerId = providerId;
       formData.lockProvider = lockProvider;
-    } else if (formData.selectedProviderId <= 0) {
-      final supplierNotifier = context.read<SupplierChangeNotifier>();
-      final suppliers = supplierNotifier.suppliers
-          .where((s) => s?.productProviderOwnerId == formData.ownerId)
-          .whereType<Supplier>()
-          .toList();
-
-      if (suppliers.isNotEmpty) {
-        formData.selectedProviderId = suppliers.first.idProductProvider;
-        formData.providerId = suppliers.first.idProductProvider;
-      }
     }
 
-    // If the product was loaded via `populateFromProduct`, it already set
-    // `lockProvider = true`. Don't override that when no arguments lock
-    // was requested.
-    // (Handled above: we only assign lockProvider when providerId > 0.)
+    controllers.syncWithFormData(formData);
 
+    isUpdate = false;
+    initialized = true;
+  }
+
+  /// Configure the form for editing an existing product.
+  ///
+  /// - Hydrates [formData] from the product.
+  /// - Syncs controllers to the hydrated values.
+  /// - Preserves the provider from the product unless the caller
+  ///   explicitly supplies a different one.
+  void initializeForUpdate({
+    required Product product,
+    required int ownerId,
+    int providerId = 0,
+    bool lockProvider = false,
+  }) {
+    if (initialized) return;
+
+    formData.populateFromProduct(product);
+    formData.ownerId = ownerId;
+
+    // Caller-supplied provider hint wins over the product's own.
+    if (providerId > 0) {
+      formData.selectedProviderId = providerId;
+      formData.providerId = providerId;
+      formData.lockProvider = lockProvider;
+    } else {
+      // populateFromProduct already set selectedProviderId and locked it.
+      // Keep that.
+    }
+
+    controllers.syncWithFormData(formData);
+
+    isUpdate = true;
     initialized = true;
   }
 }

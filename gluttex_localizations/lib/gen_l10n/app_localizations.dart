@@ -13194,6 +13194,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No data available'**
   String get noDataAvailable;
+
+  /// No description provided for @productQuantifierTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantifier'**
+  String get productQuantifierTxt;
+
+  /// No description provided for @productOriginTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin'**
+  String get productOriginTxt;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

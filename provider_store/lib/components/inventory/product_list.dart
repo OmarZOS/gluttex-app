@@ -74,6 +74,7 @@ class ProductList extends StatelessWidget {
       itemCount: filteredProducts.length,
       itemBuilder: (context, index) {
         return ProductCard(
+          mode: ProductDetailsMode.editor,
           product: filteredProducts[index],
           // canEdit: _canManage,
           // onTap: () => _handleProductTap(filteredProducts[index]),

@@ -1,3 +1,5 @@
+// lib/event/components/product/product_notifier.dart
+
 import 'package:event/components/product/product_cache.dart';
 import 'package:event/components/product/product_cart.dart';
 import 'package:event/components/product/product_crud.dart';
@@ -27,17 +29,40 @@ class ProductNotifier extends ChangeNotifier {
     _initComponents();
   }
 
+  // ============ STATE GETTERS ============
+
   String get currentSearchQuery => _state.currentSearchQuery;
   int get currentProviderId => _state.currentProviderId;
   int get currentCategory => _state.currentCategory;
   int get currentUserId => _state.currentUserId;
   int get itemsPerPage => _state.itemsPerPage;
 
-  // FIXED: Use addPostFrameCallback to avoid setState during build
+  List<Product> get products => _state.products;
+  List<Product> get cartItems => _cart.items;
+  Map<int, int> get cartQuantities => _cart.quantities;
+  bool get isLoading => _state.isLoading;
+  bool get isCartLoading => _cart.isLoading;
+  bool get hasMoreProducts => _state.hasMoreProducts;
+  List<String> get categories => _state.categories;
+  bool get supportsSupplierFilter => _state.supportsSupplierFilter;
+  bool get isCacheEnabled => _cache.isEnabled;
+
+  /// Products hidden from buyers but visible to the current editor.
+  List<Product> get hiddenProducts =>
+      _state.products.where((p) => !p.isVisible).toList();
+
+  /// Products currently visible in the public catalog.
+  List<Product> get visibleProducts =>
+      _state.products.where((p) => p.isVisible).toList();
+
+  // ============ CATEGORIES ============
+
   set productCategories(List<String> value) {
     _state.categories = value;
     _safeNotify();
   }
+
+  // ============ INIT ============
 
   void _initComponents() {
     _state = ProductState();
@@ -71,7 +96,8 @@ class ProductNotifier extends ChangeNotifier {
     super.dispose();
   }
 
-  // FIXED: Safe notification that avoids setState during build
+  // ============ SAFE NOTIFICATION ============
+
   void _safeNotify() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_state.isLoading && hasListeners) {
@@ -82,22 +108,9 @@ class ProductNotifier extends ChangeNotifier {
 
   void _notify() {
     if (!_state.isLoading) {
-      // Use safe notification to avoid build-time updates
       _safeNotify();
     }
   }
-
-  // ============ PUBLIC GETTERS ============
-
-  List<Product> get products => _state.products;
-  List<Product> get cartItems => _cart.items;
-  Map<int, int> get cartQuantities => _cart.quantities;
-  bool get isLoading => _state.isLoading;
-  bool get isCartLoading => _cart.isLoading;
-  bool get hasMoreProducts => _state.hasMoreProducts;
-  List<String> get categories => _state.categories;
-  bool get supportsSupplierFilter => _state.supportsSupplierFilter;
-  bool get isCacheEnabled => _cache.isEnabled;
 
   // ============ CART OPERATIONS ============
 
@@ -143,14 +156,112 @@ class ProductNotifier extends ChangeNotifier {
     return result;
   }
 
+  // ============ VISIBILITY ============
+
+  /// Flip a product between `VISIBLE` and `HIDDEN`.
+  ///
+  /// Returns the HTTP-style status code (200 on success, non-200 on
+  /// failure) so callers such as the form's visibility switch can react
+  /// without catching exceptions for the common failure path.
+  ///
+  /// Accepts only the two canonical values; anything else is rejected
+  /// locally without hitting the network.
+  Future<int> updateProductVisibility(
+    int productId,
+    String visibility, {
+    String? callerKey,
+  }) async {
+    final normalized = visibility.toUpperCase().trim();
+    if (normalized != 'VISIBLE' && normalized != 'HIDDEN') {
+      debugPrint(
+        '[ProductNotifier] updateProductVisibility: '
+        'rejected non-canonical value "$visibility"',
+      );
+      return 400;
+    }
+
+    if (productId <= 0) {
+      debugPrint(
+        '[ProductNotifier] updateProductVisibility: '
+        'invalid product id $productId',
+      );
+      return 400;
+    }
+
+    try {
+      final updated = await _service.updateProductVisibility(
+        productId.toString(),
+        normalized,
+        callerKey: callerKey,
+      );
+
+      if (updated == null) {
+        return 500;
+      }
+
+      // 1. Replace the product in the in-memory list so any open grid
+      //    reflects the new visibility immediately.
+      _replaceInState(updated);
+
+      // 2. Invalidate the cache entry so the next fetch picks up the
+      //    change from the backend instead of serving a stale copy.
+      _cache.invalidateProduct(productId);
+
+      // 3. If the product was hidden and the current list is a buyer
+      //    catalog (includeHidden == false), drop it from the list.
+      if (!_state.includeHidden && !updated.isVisible) {
+        _state.products.removeWhere((p) => p.id_product == productId);
+      }
+
+      _notify();
+      return 200;
+    } catch (e, st) {
+      debugPrint('[ProductNotifier] updateProductVisibility failed: $e\n$st');
+      return 500;
+    }
+  }
+
+  /// Convenience helper: mark a product visible.
+  Future<int> showProduct(int productId, {String? callerKey}) =>
+      updateProductVisibility(productId, 'VISIBLE', callerKey: callerKey);
+
+  /// Convenience helper: mark a product hidden.
+  Future<int> hideProduct(int productId, {String? callerKey}) =>
+      updateProductVisibility(productId, 'HIDDEN', callerKey: callerKey);
+
+  /// Toggle visibility without knowing the current value.
+  Future<int> toggleProductVisibility(
+    int productId, {
+    String? callerKey,
+  }) async {
+    final current = _fetch.getByIdSync(productId);
+    final next = (current?.isVisible ?? true) ? 'HIDDEN' : 'VISIBLE';
+    return updateProductVisibility(productId, next, callerKey: callerKey);
+  }
+
+  void _replaceInState(Product updated) {
+    final index = _state.products.indexWhere(
+      (p) => p.id_product == updated.id_product,
+    );
+    if (index >= 0) {
+      _state.products[index] = updated;
+    }
+  }
+
   // ============ FETCH OPERATIONS ============
 
+  /// Fetch products.
+  ///
+  /// [includeHidden] defaults to false, matching the buyer-facing
+  /// semantics of the service. Editors should pass `includeHidden: true`
+  /// to load the full catalog.
   Future<void> fetchProducts({
     int categoryId = 0,
     int userId = 0,
     int providerId = 0,
     String query = "",
     bool reset = false,
+    bool includeHidden = false,
   }) async {
     await _fetch.fetchProducts(
       categoryId: categoryId,
@@ -158,6 +269,7 @@ class ProductNotifier extends ChangeNotifier {
       providerId: providerId,
       query: query,
       reset: reset,
+      includeHidden: includeHidden,
     );
     _notify();
   }
@@ -193,8 +305,10 @@ class ProductNotifier extends ChangeNotifier {
   List<Product>? getCachedSupplierProducts(int supplierId) =>
       _supplier.getCached(supplierId);
 
-  Future<List<Product>> fetchSupplierProducts(int supplierId,
-      {bool forceRefresh = false}) async {
+  Future<List<Product>> fetchSupplierProducts(
+    int supplierId, {
+    bool forceRefresh = false,
+  }) async {
     final results =
         await _supplier.fetch(supplierId, forceRefresh: forceRefresh);
     _notify();

@@ -1,6 +1,10 @@
+// lib/event/components/product/product_fetch.dart
+
 import 'dart:developer';
+
 import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/services/ProductService.dart';
+
 import 'product_cache.dart';
 import 'product_state.dart';
 
@@ -18,7 +22,20 @@ class ProductFetch {
         _cache = cache,
         _state = state;
 
-  Future<Product?> getById(int id, {bool forceRefresh = false}) async {
+  // ================================================================
+  // Single product
+  // ================================================================
+
+  /// Fetch a single product by id.
+  ///
+  /// [includeHidden] defaults to `true` to match the service contract:
+  /// `focusOnProduct` returns hidden products so editors can open any
+  /// product by id regardless of visibility.
+  Future<Product?> getById(
+    int id, {
+    bool forceRefresh = false,
+    bool includeHidden = true,
+  }) async {
     if (!forceRefresh) {
       final cached = _cache.getProduct(id);
       if (cached != null) return cached;
@@ -28,14 +45,20 @@ class ProductFetch {
       return _pendingRequests[id];
     }
 
-    final future = _fetchProduct(id);
+    final future = _fetchProduct(id, includeHidden: includeHidden);
     _pendingRequests[id] = future;
     return future;
   }
 
-  Future<Product?> _fetchProduct(int id) async {
+  Future<Product?> _fetchProduct(
+    int id, {
+    bool includeHidden = true,
+  }) async {
     try {
-      final product = await _service.focusOnProduct(id.toString());
+      final product = await _service.focusOnProduct(
+        id.toString(),
+        includeHidden: includeHidden,
+      );
       if (product != null && product.id_product != null) {
         _cache.cacheProduct(product);
       }
@@ -48,36 +71,63 @@ class ProductFetch {
     }
   }
 
+  // ================================================================
+  // Product lists
+  // ================================================================
+
+  /// Fetch a page of products.
+  ///
+  /// [includeHidden] controls whether the backend returns hidden
+  /// products. It defaults to `false` (buyer catalog) and is part of
+  /// the cache key, so a buyer fetch and an editor fetch never collide
+  /// in the list cache.
   Future<void> fetchProducts({
     int categoryId = 0,
     int userId = 0,
     int providerId = 0,
     String query = "",
     bool reset = false,
+    bool includeHidden = false,
   }) async {
-    log('ProductFetch.fetchProducts called: providerId=$providerId reset=$reset query="$query" currentProviderId=${_state.currentProviderId}');
+    log(
+      'ProductFetch.fetchProducts called: '
+      'providerId=$providerId reset=$reset query="$query" '
+      'includeHidden=$includeHidden '
+      'currentProviderId=${_state.currentProviderId}',
+    );
+
     if (_state.isLoading) return;
 
     final paramsChanged = reset ||
         _state.currentCategory != categoryId ||
         _state.currentUserId != userId ||
         _state.currentProviderId != providerId ||
-        _state.currentSearchQuery != query;
+        _state.currentSearchQuery != query ||
+        _state.includeHidden != includeHidden;
 
     if (paramsChanged) {
       _state.currentCategory = categoryId;
       _state.currentUserId = userId;
       _state.currentProviderId = providerId;
       _state.currentSearchQuery = query;
+      _state.includeHidden = includeHidden;
       _state.resetPagination();
       if (reset) _cache.clearListCache();
     }
 
     if (!_state.hasMoreProducts) return;
 
-    // Check cache for first page
-    if (_state.currentPage == 0 && providerId == 0) {
-      final cacheKey = 'p_${categoryId}_${userId}_${providerId}_$query';
+    // Check cache for first page. Only buyer-catalog fetches are cached
+    // in the list cache; editor fetches (includeHidden == true) always
+    // go to the network so visibility changes are picked up promptly.
+    if (_state.currentPage == 0 && providerId == 0 && !includeHidden) {
+      final cacheKey = _listCacheKey(
+        categoryId: categoryId,
+        userId: userId,
+        providerId: providerId,
+        query: query,
+        includeHidden: includeHidden,
+      );
       final cached = _cache.getList(cacheKey);
       if (cached != null && cached.isNotEmpty) {
         _state.products.addAll(cached);
@@ -96,11 +146,18 @@ class ProductFetch {
         query: _state.currentSearchQuery,
         page: _state.currentPage * _state.itemsPerPage,
         limit: _state.itemsPerPage,
+        includeHidden: includeHidden,
       );
 
       if (fetched != null && fetched.isNotEmpty) {
-        if (_state.currentPage == 0 && providerId == 0) {
-          final cacheKey = 'p_${categoryId}_${userId}_${providerId}_$query';
+        if (_state.currentPage == 0 && providerId == 0 && !includeHidden) {
+          final cacheKey = _listCacheKey(
+            categoryId: categoryId,
+            userId: userId,
+            providerId: providerId,
+            query: query,
+            includeHidden: includeHidden,
+          );
           _cache.cacheList(cacheKey, fetched);
         }
 
@@ -113,7 +170,14 @@ class ProductFetch {
       } else {
         _state.hasMoreProducts = false;
       }
-      log('ProductFetch.fetchProducts result: fetched=${fetched?.length ?? 0} total=${_state.products.length} hasMore=${_state.hasMoreProducts}');
+
+      log(
+        'ProductFetch.fetchProducts result: '
+        'fetched=${fetched?.length ?? 0} '
+        'total=${_state.products.length} '
+        'hasMore=${_state.hasMoreProducts} '
+        'includeHidden=$includeHidden',
+      );
     } catch (e) {
       log("Failed to fetch products: $e");
       rethrow;
@@ -121,6 +185,39 @@ class ProductFetch {
       _state.isLoading = false;
     }
   }
+
+  // ================================================================
+  // Category-scoped fetch
+  // ================================================================
+
+  /// Fetch a single category page using `getProductsByCategory`.
+  ///
+  /// Separate from [fetchProducts] because the service exposes a
+  /// dedicated endpoint for this; it does not participate in the list
+  /// cache (category pages are usually small and short-lived).
+  Future<List<Product>> fetchByCategory({
+    required int categoryId,
+    int page = 1,
+    int limit = 10,
+    bool includeHidden = false,
+  }) async {
+    try {
+      final fetched = await _service.getProductsByCategory(
+        categoryId: categoryId,
+        page: page,
+        limit: limit,
+        includeHidden: includeHidden,
+      );
+      return fetched ?? const <Product>[];
+    } catch (e) {
+      log("Failed to fetch category $categoryId: $e");
+      return const <Product>[];
+    }
+  }
+
+  // ================================================================
+  // Sync / filter helpers
+  // ================================================================
 
   Product? getByIdSync(int id) {
     return _cache.getProduct(id) ??
@@ -136,5 +233,22 @@ class ProductFetch {
 
   List<Product> filterBySupplier(int supplierId) {
     return _state.filterBySupplier(supplierId);
+  }
+
+  // ================================================================
+  // Internal
+  // ================================================================
+
+  /// Cache key for the list cache. `includeHidden` is part of the key
+  /// so buyer and editor fetches are stored under different entries.
+  String _listCacheKey({
+    required int categoryId,
+    required int userId,
+    required int providerId,
+    required String query,
+    required bool includeHidden,
+  }) {
+    final visibility = includeHidden ? 'all' : 'public';
+    return 'p_${categoryId}_${userId}_${providerId}_${visibility}_$query';
   }
 }

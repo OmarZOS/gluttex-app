@@ -105,20 +105,6 @@ class _BusinessOperationsScreenState extends State<BusinessOperationsScreen> {
       child: Consumer<BusinessOperationNotifier>(
         builder: (context, notifier, _) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                widget.lockToSupplier && widget.supplierId > 0
-                    ? 'Operations · Supplier ${widget.supplierId}'
-                    : 'Business Operations',
-              ),
-              actions: [
-                IconButton(
-                  tooltip: 'Refresh',
-                  onPressed: notifier.isBusy ? null : notifier.refresh,
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
             body: RefreshIndicator(
               onRefresh: notifier.refresh,
               child: CustomScrollView(

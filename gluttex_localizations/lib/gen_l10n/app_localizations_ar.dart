@@ -6833,4 +6833,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noDataAvailable => 'لا توجد بيانات';
+
+  @override
+  String get productQuantifierTxt => 'الكمية';
+
+  @override
+  String get productOriginTxt => 'المصدر';
 }

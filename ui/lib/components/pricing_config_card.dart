@@ -1,10 +1,20 @@
+// lib/ui/components/pricing_config_card.dart
+
 import 'dart:async';
 
+import 'package:app_constants/app_constants.dart';
+import 'package:event/views/pricing_config_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:event/views/pricing_config_view_model.dart';
 
+/// Pure view over [PricingState].
+///
+/// The card never derives anything. It reads the five values, renders
+/// four inputs (base, tax, and whichever of profit/final is the driver
+/// for the current mode), and emits raw user input. Deriving the paired
+/// field is [PricingState]'s job — that's why the paired field can't
+/// desync: there is exactly one place that computes it.
 class PricingConfigCard extends StatefulWidget {
   final double basePrice;
   final double taxPercentage;
@@ -12,13 +22,20 @@ class PricingConfigCard extends StatefulWidget {
   final double finalPrice;
   final PricingMode mode;
 
+  /// AI-suggested selling price, or null. Purely a display / one-tap
+  /// affordance — the card does not store it.
+  final double? aiPrice;
+
   final ValueChanged<double> onBasePriceChanged;
   final ValueChanged<double> onTaxPercentageChanged;
   final ValueChanged<double> onProfitMarginChanged;
   final ValueChanged<double> onFinalPriceChanged;
   final ValueChanged<PricingMode> onModeChanged;
 
-  /// How long to wait after the last keystroke before firing the callback.
+  /// Push the AI price into the driver field for the current mode.
+  final VoidCallback onAcceptAiPrice;
+
+  /// Debounce for text-field commits.
   final Duration debounce;
 
   const PricingConfigCard({
@@ -33,6 +50,8 @@ class PricingConfigCard extends StatefulWidget {
     required this.onProfitMarginChanged,
     required this.onFinalPriceChanged,
     required this.onModeChanged,
+    required this.onAcceptAiPrice,
+    this.aiPrice,
     this.debounce = const Duration(milliseconds: 400),
   });
 
@@ -57,34 +76,30 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
   @override
   void initState() {
     super.initState();
-    _basePriceController = _controllerFor(widget.basePrice, _basePriceFocus);
-    _taxController = _controllerFor(widget.taxPercentage, _taxFocus);
-    _profitController = _controllerFor(widget.profitMargin, _profitFocus);
-    _finalPriceController = _controllerFor(widget.finalPrice, _finalPriceFocus);
+    _basePriceController = _makeController(widget.basePrice);
+    _taxController = _makeController(widget.taxPercentage);
+    _profitController = _makeController(widget.profitMargin);
+    _finalPriceController = _makeController(widget.finalPrice);
 
-    // Commit on blur — instant feedback when the user tabs/clicks away.
-    _basePriceFocus
-        .addListener(() => _commitIfBlurred(_basePriceFocus, 'base'));
-    _taxFocus.addListener(() => _commitIfBlurred(_taxFocus, 'tax'));
-    _profitFocus.addListener(() => _commitIfBlurred(_profitFocus, 'profit'));
-    _finalPriceFocus
-        .addListener(() => _commitIfBlurred(_finalPriceFocus, 'final'));
+    _basePriceFocus.addListener(() => _flushOnBlur(_basePriceFocus, 'base'));
+    _taxFocus.addListener(() => _flushOnBlur(_taxFocus, 'tax'));
+    _profitFocus.addListener(() => _flushOnBlur(_profitFocus, 'profit'));
+    _finalPriceFocus.addListener(() => _flushOnBlur(_finalPriceFocus, 'final'));
   }
 
-  TextEditingController _controllerFor(double value, FocusNode focus) {
-    return TextEditingController(text: value.toStringAsFixed(2))
-      ..selection = TextSelection(
-        baseOffset: 0,
-        extentOffset: value.toStringAsFixed(2).length,
-      );
+  TextEditingController _makeController(double value) {
+    final text = value.toStringAsFixed(2);
+    return TextEditingController(text: text)
+      ..selection = TextSelection(baseOffset: 0, extentOffset: text.length);
   }
 
   @override
   void didUpdateWidget(covariant PricingConfigCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Only overwrite controllers when the value came from outside AND the
-    // field isn't currently being edited. Otherwise typing gets clobbered.
+    // Sync controllers from state, but never stomp a field the user is
+    // actively typing in. If the user is focused, the controller is
+    // authoritative and the state will catch up on commit.
     if (widget.basePrice != oldWidget.basePrice && !_basePriceFocus.hasFocus) {
       _basePriceController.text = widget.basePrice.toStringAsFixed(2);
     }
@@ -98,6 +113,13 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
     }
     if (widget.finalPrice != oldWidget.finalPrice &&
         !_finalPriceFocus.hasFocus) {
+      _finalPriceController.text = widget.finalPrice.toStringAsFixed(2);
+    }
+
+    // Mode switch changes which field is the driver. Re-seed both
+    // paired fields so the newly-derived one shows the fresh value.
+    if (widget.mode != oldWidget.mode) {
+      _profitController.text = widget.profitMargin.toStringAsFixed(2);
       _finalPriceController.text = widget.finalPrice.toStringAsFixed(2);
     }
   }
@@ -116,51 +138,61 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
     super.dispose();
   }
 
-  // ==================== DEBOUNCE / COMMIT ====================
+  // ==================== Commit ====================
 
-  void _commitIfBlurred(FocusNode focus, String field) {
-    if (!focus.hasFocus) {
-      _commitField(field);
+  void _flushOnBlur(FocusNode focus, String field) {
+    if (!focus.hasFocus && _pendingField == field) {
+      _commit(field);
     }
   }
 
-  /// Schedule a debounced commit for the given field. Called from onChanged.
   void _scheduleCommit(String field) {
     _pendingField = field;
     _debounce?.cancel();
-    _debounce = Timer(widget.debounce, () => _commitField(field));
+    _debounce = Timer(widget.debounce, () => _commit(field));
   }
 
-  /// Immediately commit whatever value is currently in the given field.
-  void _commitField(String field) {
+  /// Emit the raw user input for [field]. No derivation here.
+  void _commit(String field) {
     _debounce?.cancel();
     _pendingField = null;
 
     switch (field) {
       case 'base':
-        final value = double.tryParse(_basePriceController.text) ?? 0.0;
-        widget.onBasePriceChanged(value);
+        widget.onBasePriceChanged(_parse(_basePriceController.text));
         break;
       case 'tax':
-        final value = double.tryParse(_taxController.text) ?? 0.0;
-        widget.onTaxPercentageChanged(value);
+        widget.onTaxPercentageChanged(_parse(_taxController.text));
         break;
       case 'profit':
-        final value = double.tryParse(_profitController.text) ?? 0.0;
-        widget.onProfitMarginChanged(value);
+        widget.onProfitMarginChanged(_parse(_profitController.text));
         break;
       case 'final':
-        final value = double.tryParse(_finalPriceController.text) ?? 0.0;
-        widget.onFinalPriceChanged(value);
+        widget.onFinalPriceChanged(_parse(_finalPriceController.text));
         break;
     }
   }
+
+  double _parse(String text) => double.tryParse(text) ?? 0.0;
+
+  // ==================== AI suggestion ====================
+
+  /// True when the AI price is present and differs from the current
+  /// final price.
+  bool get _aiAvailable {
+    final ai = widget.aiPrice;
+    if (ai == null || ai <= 0) return false;
+    return (widget.finalPrice - ai).abs() >= 0.01;
+  }
+
+  // ==================== Build ====================
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    // Preview derivations — display only, never stored.
     final taxAmount = widget.basePrice * widget.taxPercentage / 100;
     final priceAfterTax = widget.basePrice + taxAmount;
     final profitAmount = widget.mode == PricingMode.byProfit
@@ -171,9 +203,6 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
         : priceAfterTax > 0
             ? (profitAmount / priceAfterTax) * 100
             : 0.0;
-    final computedFinal = widget.mode == PricingMode.byProfit
-        ? priceAfterTax * (1 + widget.profitMargin / 100)
-        : widget.finalPrice;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -185,38 +214,45 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──
           Row(
             children: [
               Icon(Icons.tune_rounded, color: colorScheme.primary, size: 22),
               const SizedBox(width: 10),
-              Text(
-                'Pricing Configuration',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  'Pricing',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
           ),
+          if (widget.aiPrice != null && widget.aiPrice! > 0) ...[
+            const SizedBox(height: 14),
+            _AiSuggestionStrip(
+              aiPrice: widget.aiPrice!,
+              currentFinal: widget.finalPrice,
+              available: _aiAvailable,
+              onAccept: widget.onAcceptAiPrice,
+              onReset: () => widget.onFinalPriceChanged(0.0),
+            ),
+          ],
           const SizedBox(height: 20),
-
-          // ── Mode selector ──
           _ModeSelector(
             mode: widget.mode,
             onChanged: widget.onModeChanged,
           ),
           const SizedBox(height: 20),
-
-          // ── Inputs ──
           _NumericField(
-            label: 'Base Price',
+            label: 'Base price',
             helper: 'Cost before tax',
             controller: _basePriceController,
             focusNode: _basePriceFocus,
             icon: Icons.inventory_2_outlined,
             suffix: 'DZD',
             onChanged: (_) => _scheduleCommit('base'),
-            onSubmitted: (_) => _commitField('base'),
+            onSubmitted: (_) => _commit('base'),
           ),
           const SizedBox(height: 14),
           _NumericField(
@@ -227,44 +263,142 @@ class _PricingConfigCardState extends State<PricingConfigCard> {
             icon: Icons.percent_rounded,
             suffix: '%',
             onChanged: (_) => _scheduleCommit('tax'),
-            onSubmitted: (_) => _commitField('tax'),
+            onSubmitted: (_) => _commit('tax'),
           ),
           const SizedBox(height: 14),
-
-          // Only the "driver" field is shown — the one the user actually types.
           if (widget.mode == PricingMode.byProfit)
             _NumericField(
-              label: 'Profit Margin',
+              label: 'Profit margin',
               helper: 'Markup on price after tax',
               controller: _profitController,
               focusNode: _profitFocus,
               icon: Icons.trending_up_rounded,
               suffix: '%',
               onChanged: (_) => _scheduleCommit('profit'),
-              onSubmitted: (_) => _commitField('profit'),
+              onSubmitted: (_) => _commit('profit'),
             )
           else
             _NumericField(
-              label: 'Final Price',
+              label: 'Final price',
               helper: 'What the customer pays',
               controller: _finalPriceController,
               focusNode: _finalPriceFocus,
               icon: Icons.sell_outlined,
               suffix: 'DZD',
               onChanged: (_) => _scheduleCommit('final'),
-              onSubmitted: (_) => _commitField('final'),
+              onSubmitted: (_) => _commit('final'),
             ),
-
           const SizedBox(height: 24),
-
-          // ── Preview ──
           _PricePreview(
             basePrice: widget.basePrice,
             taxAmount: taxAmount,
             priceAfterTax: priceAfterTax,
             profitAmount: profitAmount,
             profitPercentage: profitPercentage,
-            finalPrice: computedFinal,
+            finalPrice: widget.finalPrice,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ==================== AI SUGGESTION STRIP ====================
+
+class _AiSuggestionStrip extends StatelessWidget {
+  final double aiPrice;
+  final double currentFinal;
+  final bool available;
+  final VoidCallback onAccept;
+  final VoidCallback onReset;
+
+  const _AiSuggestionStrip({
+    required this.aiPrice,
+    required this.currentFinal,
+    required this.available,
+    required this.onAccept,
+    required this.onReset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final diff = (currentFinal - aiPrice).abs();
+    final applied = !available;
+    final higher = currentFinal > aiPrice;
+
+    final accent = applied
+        ? Colors.green
+        : higher
+            ? Colors.orange
+            : Colors.blue;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.primary.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.auto_awesome, size: 20, color: cs.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  applied ? 'AI price applied' : 'AI Suggested Price',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: cs.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'DZD ${aiPrice.toStringAsFixed(2)}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                if (!applied)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      higher
+                          ? 'Your price is DZD ${diff.toStringAsFixed(2)} higher'
+                          : 'Your price is DZD ${diff.toStringAsFixed(2)} lower',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: accent,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: applied ? cs.primary.withOpacity(0.2) : cs.surfaceVariant,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(
+                applied ? Icons.check_circle : Icons.price_change,
+                size: 20,
+                color: applied ? cs.primary : cs.onSurfaceVariant,
+              ),
+              onPressed: applied ? onReset : onAccept,
+              padding: EdgeInsets.zero,
+              splashRadius: 16,
+              tooltip: applied ? 'Reset to AI price' : 'Use AI price',
+            ),
           ),
         ],
       ),
@@ -282,13 +416,12 @@ class _ModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.4),
+        color: cs.surfaceVariant.withOpacity(0.4),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -327,7 +460,7 @@ class _ModeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
 
     return Expanded(
       child: Material(
@@ -339,12 +472,12 @@ class _ModeTab extends StatelessWidget {
             duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: selected ? colorScheme.surface : Colors.transparent,
+              color: selected ? cs.surface : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
               boxShadow: selected
                   ? [
                       BoxShadow(
-                        color: colorScheme.shadow.withOpacity(0.08),
+                        color: cs.shadow.withOpacity(0.08),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -357,17 +490,13 @@ class _ModeTab extends StatelessWidget {
                 Icon(
                   icon,
                   size: 16,
-                  color: selected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+                  color: selected ? cs.primary : cs.onSurfaceVariant,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   label,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: selected
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
+                    color: selected ? cs.primary : cs.onSurfaceVariant,
                     fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
@@ -406,7 +535,7 @@ class _NumericField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,7 +543,7 @@ class _NumericField extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
+            color: cs.onSurfaceVariant,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -430,15 +559,14 @@ class _NumericField extends StatelessWidget {
           onChanged: onChanged,
           onSubmitted: onSubmitted,
           decoration: InputDecoration(
-            prefixIcon:
-                Icon(icon, size: 20, color: colorScheme.onSurfaceVariant),
+            prefixIcon: Icon(icon, size: 20, color: cs.onSurfaceVariant),
             suffixText: suffix,
             helperText: helper,
             helperStyle: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+              color: cs.onSurfaceVariant.withOpacity(0.7),
             ),
             filled: true,
-            fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+            fillColor: cs.surfaceVariant.withOpacity(0.3),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
@@ -447,13 +575,11 @@ class _NumericField extends StatelessWidget {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colorScheme.outline.withOpacity(0.15),
-              ),
+              borderSide: BorderSide(color: cs.outline.withOpacity(0.15)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
+              borderSide: BorderSide(color: cs.primary, width: 2),
             ),
           ),
           style: theme.textTheme.titleMedium?.copyWith(
@@ -487,23 +613,23 @@ class _PricePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
     final loc = AppLocalizations.of(context);
-    final isProfitPositive = profitAmount >= 0;
+    final profitPositive = profitAmount >= 0;
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            colorScheme.primaryContainer.withOpacity(0.15),
-            colorScheme.primaryContainer.withOpacity(0.05),
+            cs.primaryContainer.withOpacity(0.15),
+            cs.primaryContainer.withOpacity(0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.15)),
+        border: Border.all(color: cs.primary.withOpacity(0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,13 +637,12 @@ class _PricePreview extends StatelessWidget {
           Text(
             'BREAKDOWN',
             style: theme.textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+              color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
             ),
           ),
           const SizedBox(height: 14),
-
           _PreviewRow(
             label: 'Base price',
             value: _fmt(basePrice, loc),
@@ -536,17 +661,13 @@ class _PricePreview extends StatelessWidget {
           const SizedBox(height: 8),
           _PreviewRow(
             label: 'Profit (${profitPercentage.toStringAsFixed(2)}%)',
-            value: '${isProfitPositive ? '+' : ''} ${_fmt(profitAmount, loc)}',
-            valueColor:
-                isProfitPositive ? Colors.green.shade700 : colorScheme.error,
+            value: '${profitPositive ? '+' : ''} ${_fmt(profitAmount, loc)}',
+            valueColor: profitPositive ? Colors.green.shade700 : cs.error,
           ),
-
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 14),
             child: Divider(height: 1),
           ),
-
-          // ── Final price, prominent ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -555,52 +676,46 @@ class _PricePreview extends StatelessWidget {
                   'Final price',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
+                    color: cs.onSurface,
                   ),
                 ),
               ),
               Text(
                 _fmt(finalPrice, loc),
                 style: theme.textTheme.headlineSmall?.copyWith(
-                  color: colorScheme.primary,
+                  color: cs.primary,
                   fontWeight: FontWeight.w800,
                   height: 1,
                 ),
               ),
             ],
           ),
-
-          // ── Profit badge (only when in byFinalPrice mode) ──
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: (isProfitPositive ? Colors.green : colorScheme.error)
-                    .withOpacity(0.1),
+                color:
+                    (profitPositive ? Colors.green : cs.error).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    isProfitPositive
+                    profitPositive
                         ? Icons.trending_up_rounded
                         : Icons.trending_down_rounded,
                     size: 14,
-                    color: isProfitPositive
-                        ? Colors.green.shade700
-                        : colorScheme.error,
+                    color: profitPositive ? Colors.green.shade700 : cs.error,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${isProfitPositive ? '+' : ''}'
+                    '${profitPositive ? '+' : ''}'
                     '${profitPercentage.toStringAsFixed(2)}%',
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: isProfitPositive
-                          ? Colors.green.shade700
-                          : colorScheme.error,
+                      color: profitPositive ? Colors.green.shade700 : cs.error,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -635,7 +750,7 @@ class _PreviewRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -644,14 +759,14 @@ class _PreviewRow extends StatelessWidget {
           label,
           style: theme.textTheme.bodySmall?.copyWith(
             color: muted
-                ? colorScheme.onSurfaceVariant.withOpacity(0.7)
-                : colorScheme.onSurfaceVariant,
+                ? cs.onSurfaceVariant.withOpacity(0.7)
+                : cs.onSurfaceVariant,
           ),
         ),
         Text(
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: valueColor ?? colorScheme.onSurface,
+            color: valueColor ?? cs.onSurface,
             fontWeight: FontWeight.w600,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),

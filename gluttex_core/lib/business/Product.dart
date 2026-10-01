@@ -1,30 +1,90 @@
-import 'dart:convert';
+// lib/business/Product.dart
+
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:gluttex_core/app/GluttexImage.dart';
 
+/// A single product as returned by the API.
+///
+/// The model carries the fields the payload actually contains. Helper
+/// coercers (`_asInt`, `_asDouble`, `_asString`) tolerate the shapes the
+/// backend occasionally emits (numeric strings, `1.0` for `1`, null for
+/// absent values) so parsing never throws.
 class Product {
+  // ==================== Identity ====================
+
   final int? id_product;
   final int? product_provider_id;
   final int? product_category_id;
+
+  /// Alias of [product_category_id]. Both are set from `product_category_id`
+  /// in the payload for backwards compatibility with callers that read one
+  /// or the other.
   final int? id_product_category;
+
   final int? id_product_image;
+
+  /// Legacy reference field. Not the same as `product_origin_id`.
   final int? product_ref_id;
+
   final int? product_owner_id;
+  final int? product_origin_id;
+
+  // ==================== Descriptive ====================
+
   final String? product_name;
   final String? product_brand;
   final String? product_barcode;
-  final double? product_price;
   final String? product_quantifier;
-  final int? product_quantity;
-  final String? product_category_name; // Changed from product_category_desc
-  String? product_image_url;
   final String? product_description;
+
+  /// Category display name. Sourced from `product_category.product_category_name`
+  /// when the nested object is present, otherwise from a flat
+  /// `product_category_name` field.
+  final String? product_category_name;
+
+  // ==================== Pricing & stock ====================
+
+  /// Customer-facing price (VAT-inclusive). Stored as `product_price`.
+  final double? product_price;
+
+  /// Supplier-side cost. Stored as `product_base_price`. Zero when unset.
+  final double? product_base_price;
+
+  final int? product_quantity;
+  final int? product_reserved_quantity;
+
+  // ==================== Status ====================
+
+  /// `"VISIBLE"` | `"HIDDEN"` | `null`. Defaults to `"VISIBLE"` when absent.
+  final String? product_visibility;
+
+  // ==================== Timestamps ====================
+
   final DateTime? product_created_at;
   final DateTime? product_last_updated;
 
+  // ==================== Media ====================
+
+  /// Convenience URL of the last image in the payload's image list.
+  /// Kept as a mutable field because callers occasionally overwrite it
+  /// after an upload.
+  String? product_image_url;
+
+  /// Parsed image, when one has been loaded separately. Not populated by
+  /// [Product.fromJson].
   GluttexImage? productImage;
+
+  // ==================== Nested snapshots ====================
+
+  /// Full `product_category` object when the backend includes it.
+  /// Kept as a raw map so any field on the nested row survives round-trip.
+  final Map<String, dynamic>? product_category;
+
+  /// Full `product_provider` object when the backend includes it.
+  final Map<String, dynamic>? product_provider;
+
+  // ==================== Constructor ====================
 
   Product({
     required this.id_product,
@@ -37,7 +97,7 @@ class Product {
     required this.product_brand,
     required this.product_quantifier,
     required this.product_barcode,
-    required this.product_category_name, // Changed
+    required this.product_category_name,
     required this.product_image_url,
     required this.product_price,
     required this.product_quantity,
@@ -45,8 +105,17 @@ class Product {
     required this.product_created_at,
     required this.product_last_updated,
     required this.product_owner_id,
+    this.product_base_price,
+    this.product_reserved_quantity,
+    this.product_visibility,
+    this.product_origin_id,
+    this.product_category,
+    this.product_provider,
   });
 
+  // ==================== Factories ====================
+
+  /// Empty product. Useful as a placeholder before a fetch completes.
   factory Product.empty() {
     return Product(
       id_product: null,
@@ -59,7 +128,7 @@ class Product {
       product_brand: '',
       product_quantifier: '',
       product_barcode: '',
-      product_category_name: '', // Changed
+      product_category_name: '',
       product_image_url: null,
       product_price: 0.0,
       product_quantity: 0,
@@ -67,111 +136,93 @@ class Product {
       product_created_at: null,
       product_last_updated: null,
       product_owner_id: null,
+      product_base_price: 0.0,
+      product_reserved_quantity: 0,
+      product_visibility: 'VISIBLE',
+      product_origin_id: null,
+      product_category: null,
+      product_provider: null,
     );
   }
 
   factory Product.fromJson(dynamic json) {
-    String? imageUrl;
-    int imageId = 0;
-    String productCategoryName = "Missing"; // Changed variable name
+    final map = _asMap(json);
+    if (map.isEmpty) return Product.empty();
 
-    log("$json");
+    final image = _parseLastImage(map['product_image']);
+    final categoryMap = _asMapOrNull(map['product_category']);
+    final providerMap = _asMapOrNull(map['product_provider']);
 
-    // Handle product image
-    if (json['product_image'] != null && json['product_image'] is List) {
-      if (json['product_image']?.isNotEmpty) {
-        imageId = json['product_image'].last["id_product_image"] ?? 0;
-        imageUrl = json['product_image'].last["product_image_url"];
-      }
-    }
+    final categoryName = _asString(categoryMap?['product_category_name']) ??
+        _asString(map['product_category_name']) ??
+        'Missing';
 
-    // Handle product category - using the correct field name
-    if (json['product_category'] != null) {
-      // The field is 'product_category_name' not 'product_category_desc'
-      productCategoryName =
-          json['product_category']['product_category_name'] ?? "Missing";
-    }
+    final providerId = _asIntOrNull(map['product_provider_id']) ??
+        _asIntOrNull(providerMap?['id_product_provider']) ??
+        0;
 
     return Product(
-      id_product: json['id_product'] ?? 0,
-      product_provider_id: json['product_provider_id'] ?? 0,
-      product_category_id: json['product_category_id'] ?? 0,
-      id_product_category: json['product_category_id'] ?? 0,
-      id_product_image: imageId,
-      product_ref_id: json['product_ref_id'] ?? 0,
-      product_name: json['product_name'] ?? "",
-      product_brand: json['product_brand'] ?? "",
-      product_barcode: json['product_barcode'] ?? "",
-      product_quantifier: json['product_quantifier'] ?? "",
-      product_category_name: productCategoryName, // Changed
-      product_image_url: imageUrl ?? "",
-      product_price: json['product_price'] ?? 0.0,
-      product_quantity: json['product_quantity'] ?? 0,
-      product_description: json['product_description'] ?? "",
-      product_created_at:
-          DateTime.tryParse(json['created'] ?? "") ?? DateTime.now(),
-      product_last_updated:
-          DateTime.tryParse(json['last_updated'] ?? "") ?? DateTime.now(),
-      product_owner_id: json['product_owner'] ?? 0,
+      id_product: _asIntOrNull(map['id_product']),
+      product_provider_id: providerId,
+      product_category_id: _asIntOrNull(map['product_category_id']),
+      id_product_category: _asIntOrNull(map['product_category_id']),
+      id_product_image: image.id,
+      product_ref_id: _asIntOrNull(map['product_ref_id']),
+      product_name: _asString(map['product_name']) ?? '',
+      product_brand: _asString(map['product_brand']) ?? '',
+      product_barcode: _asString(map['product_barcode']) ?? '',
+      product_quantifier: _asString(map['product_quantifier']) ?? '',
+      product_category_name: categoryName,
+      product_image_url: image.url ?? '',
+      product_price: _asDoubleOrNull(map['product_price']),
+      product_quantity: _asIntOrNull(map['product_quantity']),
+      product_description: _asString(map['product_description']) ?? '',
+      product_created_at: _parseDate(map['created']),
+      product_last_updated: _parseDate(map['last_updated']),
+      product_owner_id: _asIntOrNull(map['product_owner']),
+      product_base_price: _asDoubleOrNull(map['product_base_price']),
+      product_reserved_quantity: _asIntOrNull(map['product_reserved_quantity']),
+      product_visibility: _asString(map['product_visibility']) ?? 'VISIBLE',
+      product_origin_id: _asIntOrNull(map['product_origin_id']),
+      product_category: categoryMap,
+      product_provider: providerMap,
     );
   }
 
+  /// Lenient variant used by search results. Same shape as [Product.fromJson]
+  /// but returns [Product.empty] on a null input instead of throwing.
   factory Product.fromSearchJson(dynamic json) {
-    if (json == null) {
-      return Product.empty();
-    }
-
-    // Handle images if they exist
-    String? imageUrl;
-    int imageId = 0;
-    if (json['product_image'] != null && json['product_image'] is List) {
-      final images = json['product_image'] as List;
-      if (images.isNotEmpty) {
-        final lastImage = images.last as Map<String, dynamic>;
-        imageId = lastImage["id_product_image"] ?? 0;
-        imageUrl = lastImage["product_image_url"];
-      }
-    }
-
-    // Handle category - using correct field name
-    String productCategoryName = "Missing";
-    if (json['product_category'] != null &&
-        json['product_category'] is Map<String, dynamic>) {
-      productCategoryName = json['product_category']
-              ?['product_category_name'] ??
-          "Missing"; // Changed
-    }
-
-    return Product(
-      id_product: json['id_product'] ?? 0,
-      product_provider_id: json['product_provider_id'] ?? 0,
-      product_category_id: json['product_category_id'] ?? 0,
-      id_product_category: json['product_category_id'] ?? 0,
-      id_product_image: imageId,
-      product_quantifier: json['product_quantifier'] ?? "",
-      product_ref_id: json['product_ref_id'] ?? 0,
-      product_name: json['product_name'] ?? "",
-      product_brand: json['product_brand'] ?? "",
-      product_barcode: json['product_barcode'] ?? "",
-      product_category_name: productCategoryName, // Changed
-      product_image_url: imageUrl ?? "",
-      product_price: (json['product_price'] is num)
-          ? (json['product_price'] as num).toDouble()
-          : 0.0,
-      product_quantity: json['product_quantity'] ?? 0,
-      product_description: json['product_description'] ?? "",
-      product_created_at:
-          DateTime.tryParse(json['created'] ?? "") ?? DateTime.now(),
-      product_last_updated:
-          DateTime.tryParse(json['last_updated'] ?? "") ?? DateTime.now(),
-      product_owner_id: json['product_owner'] ?? 0,
-    );
+    if (json == null) return Product.empty();
+    return Product.fromJson(json);
   }
+
+  // ==================== copyWith ====================
 
   Product copyWith({
     int? id_product,
-    int? product_quantity,
+    int? product_provider_id,
+    int? product_category_id,
+    int? id_product_category,
+    int? id_product_image,
+    int? product_ref_id,
+    int? product_owner_id,
+    int? product_origin_id,
+    String? product_name,
+    String? product_brand,
+    String? product_barcode,
+    String? product_quantifier,
+    String? product_description,
+    String? product_category_name,
     String? product_image_url,
+    double? product_price,
+    double? product_base_price,
+    int? product_quantity,
+    int? product_reserved_quantity,
+    String? product_visibility,
+    DateTime? product_created_at,
+    DateTime? product_last_updated,
+    Map<String, dynamic>? product_category,
+    Map<String, dynamic>? product_provider,
   }) {
     return Product(
       id_product: id_product ?? this.id_product,
@@ -180,70 +231,202 @@ class Product {
       id_product_category: id_product_category ?? this.id_product_category,
       id_product_image: id_product_image ?? this.id_product_image,
       product_ref_id: product_ref_id ?? this.product_ref_id,
+      product_owner_id: product_owner_id ?? this.product_owner_id,
+      product_origin_id: product_origin_id ?? this.product_origin_id,
       product_name: product_name ?? this.product_name,
       product_brand: product_brand ?? this.product_brand,
       product_barcode: product_barcode ?? this.product_barcode,
       product_quantifier: product_quantifier ?? this.product_quantifier,
+      product_description: product_description ?? this.product_description,
       product_category_name:
           product_category_name ?? this.product_category_name,
       product_image_url: product_image_url ?? this.product_image_url,
       product_price: product_price ?? this.product_price,
+      product_base_price: product_base_price ?? this.product_base_price,
       product_quantity: product_quantity ?? this.product_quantity,
-      product_description: product_description ?? this.product_description,
+      product_reserved_quantity:
+          product_reserved_quantity ?? this.product_reserved_quantity,
+      product_visibility: product_visibility ?? this.product_visibility,
       product_created_at: product_created_at ?? this.product_created_at,
       product_last_updated: product_last_updated ?? this.product_last_updated,
-      product_owner_id: product_owner_id ?? this.product_owner_id,
+      product_category: product_category ?? this.product_category,
+      product_provider: product_provider ?? this.product_provider,
     );
   }
 
+  // ==================== Serialisation ====================
+
+  /// Payload shape the API expects. The `product` sub-object holds the
+  /// top-level fields; `image` carries the last image in the list.
   Map<String, dynamic> toJson() {
     return {
-      "product": {
+      'product': {
         'id_product': id_product ?? 0,
         'product_provider_id': product_provider_id ?? 0,
         'product_category_id': product_category_id ?? 0,
         'id_product_category': product_category_id ?? 0,
         'id_product_image': id_product_image ?? 0,
-        'product_name': product_name ?? "",
-        'product_brand': product_brand ?? "",
-        'product_barcode': product_barcode ?? "",
-        'product_quantifier': product_quantifier ?? "",
-        'product_category_desc':
-            product_category_name ?? "", // Keep as desc for API
+        'product_name': product_name ?? '',
+        'product_brand': product_brand ?? '',
+        'product_barcode': product_barcode ?? '',
+        'product_quantifier': product_quantifier ?? '',
+        'product_category_desc': product_category_name ?? '',
         'product_price': product_price ?? 0,
+        'product_base_price': product_base_price ?? 0,
         'product_quantity': product_quantity ?? 0,
-        'product_description': product_description ?? "",
-        "product_owner": product_owner_id ?? 0
+        'product_reserved_quantity': product_reserved_quantity ?? 0,
+        'product_visibility': product_visibility ?? 'VISIBLE',
+        'product_origin_id': product_origin_id ?? 0,
+        'product_description': product_description ?? '',
+        'product_owner': product_owner_id ?? 0,
       },
-      "image": {
-        "id_product_image": id_product_image ?? 0,
-        "product_image_url": product_image_url ?? "",
-        "product_ref_id": product_ref_id ?? 0
-      }
+      'image': {
+        'id_product_image': id_product_image ?? 0,
+        'product_image_url': product_image_url ?? '',
+        'product_ref_id': product_ref_id ?? 0,
+      },
     };
   }
+
+  // ==================== Convenience getters ====================
+
+  /// Available stock: quantity minus what's reserved, clamped at zero.
+  int get product_available_quantity {
+    final total = product_quantity ?? 0;
+    final reserved = product_reserved_quantity ?? 0;
+    return (total - reserved).clamp(0, total);
+  }
+
+  /// True when the product is visible to buyers.
+  bool get isVisible =>
+      (product_visibility ?? 'VISIBLE').toUpperCase() == 'VISIBLE';
+
+  /// True when the product has any sellable stock left.
+  bool get isInStock => product_available_quantity > 0;
+
+  /// Margin per unit: sale price minus base price. Null when no base price
+  /// is set, since margin is undefined without a cost.
+  double? get unitMargin {
+    final base = product_base_price ?? 0;
+    if (base <= 0) return null;
+    return (product_price ?? 0) - base;
+  }
+
+  /// Margin as a fraction of the base price. Null when no base price.
+  double? get unitMarginPercent {
+    final base = product_base_price ?? 0;
+    if (base <= 0) return null;
+    return ((product_price ?? 0) - base) / base;
+  }
+
+  // ==================== Equality ====================
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Product && other.id_product == id_product;
+  }
+
+  @override
+  int get hashCode => id_product.hashCode;
+
+  @override
+  String toString() =>
+      'Product(id: $id_product, name: $product_name, price: $product_price)';
 }
+
+// ==================== Parse helpers ====================
+
+double? _asDoubleOrNull(dynamic v) {
+  if (v == null) return null;
+  if (v is double) return v;
+  if (v is num) return v.toDouble();
+  if (v is String) return double.tryParse(v);
+  return null;
+}
+
+int? _asIntOrNull(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  if (v is num) return v.toInt();
+  if (v is String) {
+    final asInt = int.tryParse(v);
+    if (asInt != null) return asInt;
+    return double.tryParse(v)?.toInt();
+  }
+  return null;
+}
+
+String? _asString(dynamic v) {
+  if (v == null) return null;
+  if (v is String) return v;
+  return v.toString();
+}
+
+Map<String, dynamic> _asMap(dynamic v) {
+  if (v is Map<String, dynamic>) return v;
+  if (v is Map) return Map<String, dynamic>.from(v);
+  return const {};
+}
+
+Map<String, dynamic>? _asMapOrNull(dynamic v) {
+  if (v is Map<String, dynamic>) return v;
+  if (v is Map) return Map<String, dynamic>.from(v);
+  return null;
+}
+
+DateTime? _parseDate(dynamic v) {
+  if (v == null) return null;
+  if (v is DateTime) return v;
+  if (v is int) {
+    final ms = v > 1000000000000 ? v : v * 1000;
+    return DateTime.fromMillisecondsSinceEpoch(ms);
+  }
+  if (v is String) {
+    if (v.isEmpty) return null;
+    try {
+      return DateTime.parse(v);
+    } catch (_) {
+      return null;
+    }
+  }
+  return null;
+}
+
+/// Extract the id and url of the last entry in a `product_image` list.
+/// Returns zero/null when the list is missing or malformed.
+({int id, String? url}) _parseLastImage(dynamic raw) {
+  if (raw is! List || raw.isEmpty) return (id: 0, url: null);
+  final last = raw.last;
+  if (last is! Map) return (id: 0, url: null);
+  final map = Map<String, dynamic>.from(last);
+  return (
+    id: _asIntOrNull(map['id_product_image']) ?? 0,
+    url: _asString(map['product_image_url']),
+  );
+}
+
+// ==================== ProductCategory ====================
 
 class ProductCategory {
   final int product_provider_type_id;
   final String product_category_desc;
 
-  ProductCategory({
+  const ProductCategory({
     required this.product_provider_type_id,
     required this.product_category_desc,
   });
 
   factory ProductCategory.fromJson(Map<String, dynamic> json) {
     return ProductCategory(
-      product_provider_type_id: json['id_product_category'] ?? 0,
-      product_category_desc: json['product_category_desc'] ?? "",
+      product_provider_type_id: _asIntOrNull(json['id_product_category']) ?? 0,
+      product_category_desc: _asString(json['product_category_desc']) ?? '',
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id_product_provider_type': product_provider_type_id,
-      'product_provider_type_desc': product_category_desc,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id_product_provider_type': product_provider_type_id,
+        'product_provider_type_desc': product_category_desc,
+      };
 }

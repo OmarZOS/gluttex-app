@@ -50,12 +50,9 @@ class BusinessOperationsFilters extends StatelessWidget {
           const SizedBox(width: 8),
           _DateRangeChip(notifier: notifier),
           const Spacer(),
-          if (hasWindow || hasSupplierFilter)
+          if (hasWindow)
             TextButton.icon(
               onPressed: () {
-                if (hasSupplierFilter) {
-                  notifier.setSupplierId(0);
-                }
                 if (hasWindow) {
                   notifier.clearDateRange();
                 }

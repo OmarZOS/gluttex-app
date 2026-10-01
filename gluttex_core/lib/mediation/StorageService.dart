@@ -244,7 +244,9 @@ abstract class StorageService<T> {
   }
 
   Future<dynamic> get(String destination, String id,
-      {String? callerKey, String? token}) async {
+      {String? callerKey,
+      String? token,
+      Map<String, dynamic>? parameters}) async {
     return null;
   }
 
@@ -255,7 +257,7 @@ abstract class StorageService<T> {
 
   Future<dynamic> update(String destination, String id,
       Map<String, dynamic> parameters, Map<String, dynamic> data,
-      {String? callerKey, String? token}) async {
+      {String? callerKey, String? token, String method = "PUT"}) async {
     return null;
   }
 

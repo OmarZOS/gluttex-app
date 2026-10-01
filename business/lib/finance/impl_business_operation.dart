@@ -29,8 +29,8 @@ class BusinessOperationServiceImpl implements BusinessOperationService {
         'limit': '$limit',
         if (supplierId > 0) 'supplier_id': '$supplierId',
         if (clientId > 0) 'client_id': '$clientId',
-        if (dateFrom != null) 'date_from': dateFrom.toUtc().toIso8601String(),
-        if (dateTo != null) 'date_to': dateTo.toUtc().toIso8601String(),
+        if (dateFrom != null) 'date_from': _formatDate(dateFrom),
+        if (dateTo != null) 'date_to': _formatDate(dateTo),
         'include_stats': includeStats ? 'true' : 'false',
       };
 
@@ -62,6 +62,13 @@ class BusinessOperationServiceImpl implements BusinessOperationService {
       developer.log(stacktrace.toString());
       return null;
     }
+  }
+
+  String _formatDate(DateTime d) {
+    final local = d.toLocal();
+    return '${local.year.toString().padLeft(4, '0')}-'
+        '${local.month.toString().padLeft(2, '0')}-'
+        '${local.day.toString().padLeft(2, '0')}';
   }
 
   @override

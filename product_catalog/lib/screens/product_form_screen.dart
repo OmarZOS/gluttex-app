@@ -1,5 +1,9 @@
+// lib/screens/product_form_screen.dart
+
+import 'package:event/user_change_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:gluttex_core/business/Product.dart';
 import 'package:gluttex_core/business/product_form_data.dart';
 import 'package:event/assistant_change_notifier.dart';
 import 'package:ui/components/ImagePickerSection.dart';
@@ -24,7 +28,9 @@ class ProductFormScreenState extends State<ProductFormScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ProductFormData _formData = ProductFormData();
   final FormControllers _controllers = FormControllers();
-  late FormStateManager _stateManager;
+  late final FormStateManager _stateManager;
+
+  bool _initialized = false;
 
   @override
   void initState() {
@@ -33,21 +39,49 @@ class ProductFormScreenState extends State<ProductFormScreen> {
       formData: _formData,
       controllers: _controllers,
     );
-    _stateManager.initialize();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    final productArg = args?['product'];
+    final existingProduct = productArg is Product ? productArg : null;
+
+    final ownerId = context.read<AppUserNotifier>().appUser?.idAppUser ?? 0;
+
+    final rawProviderId = args?['providerId'];
+    final providerId = rawProviderId is int
+        ? rawProviderId
+        : int.tryParse('${rawProviderId ?? ''}') ?? 0;
+    final lockProvider = args?['lockProvider'] == true;
+
+    if (existingProduct != null) {
+      _stateManager.initializeForUpdate(
+        product: existingProduct,
+        ownerId: ownerId,
+        providerId: providerId,
+        lockProvider: lockProvider,
+      );
+    } else {
+      _stateManager.initializeForCreate(
+        ownerId: ownerId,
+        providerId: providerId,
+        lockProvider: lockProvider,
+      );
+    }
+
+    _initialized = true;
   }
 
   @override
   void dispose() {
     _controllers.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_stateManager.initialized) {
-      _stateManager.initializeFromArguments(context);
-    }
   }
 
   Future<void> _submitForm() async {
@@ -68,8 +102,17 @@ class ProductFormScreenState extends State<ProductFormScreen> {
     return Consumer<AssistantNotifier>(
       builder: (context, assistantNotifier, child) {
         return Scaffold(
-          appBar: _buildAppBar(localizations, colorScheme),
-          // Update the floating action button to use the new AiAssistant class
+          appBar: AppBar(
+            title: Text(
+              _stateManager.isUpdate
+                  ? localizations.updateProductText
+                  : localizations.addProductTxt,
+            ),
+            backgroundColor: colorScheme.surface,
+            foregroundColor: colorScheme.onSurface,
+            elevation: 0,
+            centerTitle: false,
+          ),
           floatingActionButton: assistantNotifier.isLoading
               ? null
               : FloatingActionButton(
@@ -81,7 +124,6 @@ class ProductFormScreenState extends State<ProductFormScreen> {
                 ),
           body: Stack(
             children: [
-              // Background
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -94,8 +136,6 @@ class ProductFormScreenState extends State<ProductFormScreen> {
                   ),
                 ),
               ),
-
-              // Content
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
@@ -104,10 +144,11 @@ class ProductFormScreenState extends State<ProductFormScreen> {
                     children: [
                       if (!_stateManager.isUpdate)
                         AiAssistanceSection(
-                            formData: _formData, controllers: _controllers),
+                          formData: _formData,
+                          controllers: _controllers,
+                        ),
                       if (_formData.image != null ||
-                          (_formData.imageUrl != null &&
-                              _formData.imageUrl!.isNotEmpty))
+                          (_formData.imageUrl ?? '').isNotEmpty)
                         _buildImagePickerSection(),
                       const SizedBox(height: 24),
                       ProductFormFields(
@@ -120,13 +161,13 @@ class ProductFormScreenState extends State<ProductFormScreen> {
                       SubmitSection(
                         onSubmit: _submitForm,
                         isUpdate: _stateManager.isUpdate,
-                        hasAiData: false, // Replace with actual AI data check
+                        hasAiData: false,
                       ),
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
               ),
-
               if (assistantNotifier.isLoading) const LoadingOverlay(),
             ],
           ),
@@ -135,35 +176,19 @@ class ProductFormScreenState extends State<ProductFormScreen> {
     );
   }
 
-  AppBar _buildAppBar(AppLocalizations localizations, ColorScheme colorScheme) {
-    return AppBar(
-      title: Text(_stateManager.isUpdate
-          ? localizations.updateProductText
-          : localizations.addProductTxt),
-      backgroundColor: colorScheme.surface,
-      foregroundColor: colorScheme.onSurface,
-      elevation: 0,
-      centerTitle: false,
-    );
-  }
-
   Widget _buildImagePickerSection() {
-    return Consumer<AssistantNotifier>(
-      builder: (context, assistantNotifier, child) {
-        return ImagePickerSection(
-          initialImageUrl: _formData.imageUrl ?? "",
-          entityType: 'product',
-          ownerId: '${_formData.ownerId}',
-          entityId: '${_formData.productId}',
-          onImageUploaded: (newImage) {
-            setState(() {
-              _formData.image = newImage;
-              _formData.imageId = 0;
-            });
-          },
-          capturedImageFile: _formData.imageFile,
-        );
+    return ImagePickerSection(
+      initialImageUrl: _formData.imageUrl ?? '',
+      entityType: 'product',
+      ownerId: '${_formData.ownerId}',
+      entityId: '${_formData.productId}',
+      onImageUploaded: (newImage) {
+        setState(() {
+          _formData.image = newImage;
+          _formData.imageId = 0;
+        });
       },
+      capturedImageFile: _formData.imageFile,
     );
   }
 }

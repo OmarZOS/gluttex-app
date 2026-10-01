@@ -1,24 +1,36 @@
+// lib/ui/product_card.dart
+
 import 'dart:developer';
 
+import 'package:app_constants/app_constants.dart';
 import 'package:app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
-import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/business/Product.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
 
-  const ProductCard({Key? key, required this.product}) : super(key: key);
+  /// Which view the card opens when tapped.
+  ///
+  /// Defaults to [ProductDetailsMode.customer] so a card rendered in a
+  /// shop or catalog opens the buyer-facing view. Pass
+  /// [ProductDetailsMode.editor] when the card is rendered inside the
+  /// supplier dashboard, where tapping a product should open the editor.
+  final ProductDetailsMode mode;
+
+  const ProductCard({
+    Key? key,
+    required this.product,
+    this.mode = ProductDetailsMode.customer,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    int categoryId = product.product_category_id ?? 0;
-    // log("Card id_product: ${product.id_product}");
+    final categoryId = product.product_category_id ?? 0;
+
     return Card(
-      // color: AppConstants().getCardColor(
-      //     categoryId - 1, Theme.of(context).brightness == Brightness.dark),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -26,19 +38,26 @@ class ProductCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          // Add a slight delay to allow the scale animation to complete
           Future.delayed(const Duration(milliseconds: 150), () {
-            Navigator.pushNamed(context, AppRoutes.productDetails,
-                arguments: {"product": product});
+            Navigator.pushNamed(
+              context,
+              AppRoutes.productDetails,
+              arguments: {
+                "product": product,
+                // Route args always carry the mode. It defaults to
+                // "customer" so the details screen doesn't have to
+                // fall back to its own default.
+                "mode":
+                    mode == ProductDetailsMode.editor ? "editor" : "customer",
+              },
+            );
           });
         },
         borderRadius: BorderRadius.circular(12),
-        // splashColor: Theme.of(context).primaryColor.withOpacity(0.1),
-        // highlightColor: Theme.of(context).primaryColor.withOpacity(0.05),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 🟢 Image takes all available space
+            // Image
             Expanded(
               child: Container(
                 alignment: Alignment.center,
@@ -51,8 +70,7 @@ class ProductCard extends StatelessWidget {
                           child: Image.network(
                             product.product_image_url!,
                             key: ValueKey(product.id_product_image),
-                            fit: BoxFit
-                                .contain, // or BoxFit.scaleDown based on preference
+                            fit: BoxFit.contain,
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return const Center(
@@ -69,11 +87,11 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // 🔵 Text section: let it size naturally without expanding
+            // Text section
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // avoid extra vertical space
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
@@ -94,9 +112,11 @@ class ProductCard extends StatelessWidget {
                       package: "product_catalog",
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    label: Text(AppLocalizations.of(context)!
-                        .productCategoryTextList
-                        .split(",")[(product.product_category_id ?? 1) - 1]),
+                    label: Text(
+                      AppLocalizations.of(context)!
+                          .productCategoryTextList
+                          .split(",")[(product.product_category_id ?? 1) - 1],
+                    ),
                     backgroundColor:
                         Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     labelStyle: TextStyle(
@@ -113,7 +133,6 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // const SizedBox(height: 8),
                   SizedBox(
                     height: 20,
                     child: Row(
@@ -130,7 +149,6 @@ class ProductCard extends StatelessWidget {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                         ),
-
                         Icon(
                           Icons.chevron_right,
                           size: 20,
@@ -139,12 +157,6 @@ class ProductCard extends StatelessWidget {
                               .onSurface
                               .withOpacity(0.6),
                         ),
-                        // IconButton(
-                        //   icon:
-                        //   onPressed: () {},
-                        //   padding: EdgeInsets.zero,
-                        //   constraints: const BoxConstraints(),
-                        // ),
                       ],
                     ),
                   ),
@@ -188,3 +200,8 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
+
+/// Mirror of the enum declared on the details screen. Keep the two in
+/// sync — or, if the details screen already exports the enum, import it
+/// from there instead of redeclaring.
+enum ProductDetailsMode { customer, editor }

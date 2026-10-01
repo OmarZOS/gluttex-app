@@ -1,10 +1,15 @@
 // lib/screens/business_operation_details_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
 
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/business/finance/BusinessOperation.dart';
 import 'package:ui/components/finance/financial_ui_manager.dart';
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
 
 class OperationDetailsScreen extends StatelessWidget {
   final BusinessOperation operation;
@@ -16,119 +21,123 @@ class OperationDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 240,
-              pinned: true,
-              flexibleSpace: _OperationHeader(operation: operation),
-              actions: [
-                IconButton(
-                  onPressed: () => _shareOperation(context),
-                  icon: const Icon(Icons.share),
-                  tooltip: AppLocalizations.of(context)!.share,
-                ),
-                IconButton(
-                  onPressed: () => _printOperation(context),
-                  icon: const Icon(Icons.print),
-                  tooltip: AppLocalizations.of(context)!.print,
-                ),
-              ],
-            ),
-            SliverToBoxAdapter(child: _OperationBody(operation: operation)),
-          ],
+        top: false,
+        child: DefaultTabController(
+          length: 1, // placeholder so we can use TabBar later if needed
+          child: CustomScrollView(
+            slivers: [
+              _OperationHero(operation: operation),
+              SliverToBoxAdapter(
+                child: _Body(operation: operation),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  void _shareOperation(BuildContext context) {
+// ---------------------------------------------------------------------------
+// Hero header
+// ---------------------------------------------------------------------------
+
+class _OperationHero extends StatelessWidget {
+  final BusinessOperation operation;
+  const _OperationHero({required this.operation});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
+
+    return SliverAppBar(
+      expandedHeight: 260,
+      pinned: true,
+      stretch: true,
+      backgroundColor: _heroColor(cs, operation),
+      foregroundColor: Colors.white,
+      actions: [
+        IconButton(
+          tooltip: loc.share,
+          onPressed: () => _share(context, operation),
+          icon: const Icon(Icons.ios_share_rounded),
+        ),
+        IconButton(
+          tooltip: loc.print,
+          onPressed: () => _print(context, operation),
+          icon: const Icon(Icons.print_outlined),
+        ),
+      ],
+      flexibleSpace: FlexibleSpaceBar(
+        stretchModes: const [StretchMode.zoomBackground],
+        background: _HeroBackground(operation: operation),
+      ),
+    );
+  }
+
+  static Color _heroColor(ColorScheme cs, BusinessOperation op) {
+    switch ((op.invoiceStatus ?? '').toLowerCase()) {
+      case 'paid':
+        return const Color(0xFF1E8E5A);
+      case 'partially_paid':
+        return const Color(0xFFB8791C);
+      case 'unpaid':
+        return const Color(0xFF9E3B3B);
+      default:
+        return cs.primary;
+    }
+  }
+
+  static void _share(BuildContext context, BusinessOperation op) {
+    // Copy a plain-text summary to the clipboard as a placeholder for
+    // a real share sheet. Replace with share_plus when you're ready.
+    final text = _shareSummary(op);
+    Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context)!.sharingOperation)),
     );
   }
 
-  void _printOperation(BuildContext context) {
+  static void _print(BuildContext context, BusinessOperation op) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context)!.printingOperation)),
     );
   }
+
+  static String _shareSummary(BusinessOperation op) {
+    return [
+      op.title,
+      'Total: ${op.grandTotal.toStringAsFixed(2)}',
+      'Paid:  ${op.paidAmount.toStringAsFixed(2)}',
+      'Due:   ${op.dueAmount.toStringAsFixed(2)}',
+    ].join('\n');
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Header
-// ---------------------------------------------------------------------------
-
-class _OperationHeader extends StatelessWidget {
+class _HeroBackground extends StatelessWidget {
   final BusinessOperation operation;
-
-  const _OperationHeader({required this.operation});
+  const _HeroBackground({required this.operation});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCollapsed = constraints.biggest.height <= kToolbarHeight + 20;
-
-        return FlexibleSpaceBar(
-          collapseMode: CollapseMode.pin,
-          titlePadding: const EdgeInsetsDirectional.only(
-            start: 56,
-            bottom: 16,
-            end: 16,
-          ),
-          title: isCollapsed
-              ? Text(
-                  _title(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                )
-              : null,
-          background: _HeaderBackground(
-            operation: operation,
-            colorScheme: colorScheme,
-          ),
-        );
-      },
-    );
-  }
-
-  String _title(BuildContext context) {
+    final cs = theme.colorScheme;
     final loc = AppLocalizations.of(context)!;
-    if (operation.isCart) {
-      return '${loc.cart} #${operation.sourceId}';
-    }
-    if (operation.isDelivery) {
-      return '${loc.order} #${operation.sourceId}';
-    }
-    return loc.transactionDetails;
-  }
-}
 
-class _HeaderBackground extends StatelessWidget {
-  final BusinessOperation operation;
-  final ColorScheme colorScheme;
+    final hero = _OperationHero._heroColor(cs, operation);
 
-  const _HeaderBackground({
-    required this.operation,
-    required this.colorScheme,
-  });
+    final settlementRatio = operation.grandTotal > 0
+        ? (operation.paidAmount / operation.grandTotal).clamp(0.0, 1.0)
+        : 0.0;
 
-  @override
-  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            _headerColor(colorScheme, operation),
-            colorScheme.primaryContainer,
+            hero,
+            Color.lerp(hero, Colors.black, 0.35)!,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -137,197 +146,207 @@ class _HeaderBackground extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, kToolbarHeight + 12, 20, 16),
-          child: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _HeaderIcon(operation: operation, colorScheme: colorScheme),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _HeaderSummary(operation: operation),
+          padding: const EdgeInsets.fromLTRB(20, kToolbarHeight + 16, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Identity line
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
                     ),
-                  ],
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      operation.isCart ? loc.cart : loc.order,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '#${operation.sourceId}',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const Spacer(),
+                  _InvoiceStatusChip(status: operation.invoiceStatus),
+                ],
+              ),
+
+              const Spacer(),
+
+              // Grand total — the focal number
+              Text(
+                FinancialUIManager.formatCurrency(
+                    operation.grandTotal, context),
+                style: theme.textTheme.displaySmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: [
-                    _StatusPill(
-                      label: operation.status ?? 'unknown',
-                      color: _statusColor(operation.status, colorScheme),
-                    ),
-                    _StatusPill(
-                      label: operation.invoiceStatus ?? 'unknown',
-                      color: _invoiceStatusColor(
-                        operation.invoiceStatus,
-                        colorScheme,
-                      ),
-                    ),
-                    _StatusPill(
-                      label: operation.sourceType,
-                      color: colorScheme.onPrimary.withOpacity(0.85),
-                      onColor: colorScheme.onSurface,
-                    ),
-                    if (operation.invoiceMismatch)
-                      _StatusPill(
-                        label: 'invoice mismatch',
-                        color: Colors.orange,
-                      ),
-                    if (!operation.paymentStatusConsistent)
-                      _StatusPill(
-                        label: 'payment mismatch',
-                        color: Colors.red,
-                      ),
-                  ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Grand total',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withOpacity(0.85),
                 ),
-              ],
-            ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Payment progress
+              _PaymentProgress(
+                paid: operation.paidAmount,
+                due: operation.dueAmount,
+                ratio: settlementRatio,
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-
-  static Color _headerColor(
-    ColorScheme cs,
-    BusinessOperation op,
-  ) {
-    final s = (op.invoiceStatus ?? '').toLowerCase();
-    switch (s) {
-      case 'paid':
-        return cs.primary;
-      case 'partially_paid':
-      case 'partial':
-        return cs.secondary;
-      case 'unpaid':
-        return cs.tertiary;
-      default:
-        return cs.onSurface;
-    }
-  }
-
-  static Color _statusColor(String? s, ColorScheme cs) {
-    switch ((s ?? '').toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'processing':
-        return Colors.blue;
-      case 'delivered':
-      case 'completed':
-        return Colors.green;
-      case 'cancelled':
-        return cs.error;
-      default:
-        return cs.onSurfaceVariant;
-    }
-  }
-
-  static Color _invoiceStatusColor(String? s, ColorScheme cs) {
-    switch ((s ?? '').toLowerCase()) {
-      case 'paid':
-        return Colors.green;
-      case 'partially_paid':
-        return Colors.orange;
-      case 'unpaid':
-        return cs.error;
-      default:
-        return cs.onSurfaceVariant;
-    }
-  }
 }
 
-class _HeaderIcon extends StatelessWidget {
-  final BusinessOperation operation;
-  final ColorScheme colorScheme;
-
-  const _HeaderIcon({required this.operation, required this.colorScheme});
+class _InvoiceStatusChip extends StatelessWidget {
+  final String? status;
+  const _InvoiceStatusChip({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final paid = operation.isPaid;
+    final s = (status ?? 'unknown').replaceAll('_', ' ');
+    final color = switch ((status ?? '').toLowerCase()) {
+      'paid' => const Color(0xFF7CFFB2),
+      'partially_paid' => const Color(0xFFFFD27C),
+      'unpaid' => const Color(0xFFFFA8A8),
+      _ => Colors.white70,
+    };
     return Container(
-      width: 56,
-      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: colorScheme.onPrimary.withOpacity(0.2),
-        shape: BoxShape.circle,
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.25)),
       ),
-      child: Icon(
-        paid ? Icons.check_circle : Icons.receipt_long,
-        size: 30,
-        color: colorScheme.onPrimary,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            s,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _HeaderSummary extends StatelessWidget {
-  final BusinessOperation operation;
+class _PaymentProgress extends StatelessWidget {
+  final double paid;
+  final double due;
+  final double ratio;
 
-  const _HeaderSummary({required this.operation});
+  const _PaymentProgress({
+    required this.paid,
+    required this.due,
+    required this.ratio,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          FinancialUIManager.formatCurrency(operation.grandTotal, context),
-          style: theme.textTheme.headlineMedium?.copyWith(
-            color: cs.onPrimary,
-            fontWeight: FontWeight.w800,
+        // Bar
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: ratio,
+            minHeight: 6,
+            backgroundColor: Colors.white.withOpacity(0.2),
+            valueColor: const AlwaysStoppedAnimation(Color(0xFF7CFFB2)),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          'Due ${FinancialUIManager.formatCurrency(operation.dueAmount, context)}'
-          '  •  Paid ${FinancialUIManager.formatCurrency(operation.paidAmount, context)}',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: cs.onPrimary.withOpacity(0.9),
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _HeroMetric(
+              label: 'Paid',
+              value: paid,
+              color: const Color(0xFF7CFFB2),
+            ),
+            const SizedBox(width: 20),
+            _HeroMetric(
+              label: 'Due',
+              value: due,
+              color: due > 0 ? const Color(0xFFFFD27C) : Colors.white70,
+            ),
+          ],
         ),
       ],
     );
   }
 }
 
-class _StatusPill extends StatelessWidget {
+class _HeroMetric extends StatelessWidget {
   final String label;
+  final double value;
   final Color color;
-  final Color? onColor;
 
-  const _StatusPill({
+  const _HeroMetric({
     required this.label,
+    required this.value,
     required this.color,
-    this.onColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textColor = onColor ?? Colors.white;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
-      ),
-      child: Text(
-        label.replaceAll('_', ' '),
-        style: TextStyle(
-          color: textColor,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.75),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-      ),
+        Text(
+          FinancialUIManager.formatCurrency(value, context),
+          style: TextStyle(
+            color: color,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -336,39 +355,32 @@ class _StatusPill extends StatelessWidget {
 // Body
 // ---------------------------------------------------------------------------
 
-class _OperationBody extends StatelessWidget {
+class _Body extends StatelessWidget {
   final BusinessOperation operation;
-
-  const _OperationBody({required this.operation});
+  const _Body({required this.operation});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _CommercialSection(operation: operation),
+          _MetaGrid(operation: operation),
           const SizedBox(height: 16),
-          _SettlementSection(operation: operation),
+          _FinancialBreakdownCard(operation: operation),
           const SizedBox(height: 16),
-          _ProfitabilitySection(operation: operation),
+          _ProfitabilityCard(operation: operation),
           const SizedBox(height: 16),
-          _ItemsSection(operation: operation),
-          const SizedBox(height: 16),
-          _ServicesSection(operation: operation),
-          if (operation.invoice != null) ...[
+          if (operation.items.isNotEmpty) ...[
+            _ItemsCard(operation: operation),
             const SizedBox(height: 16),
-            _InvoiceSection(invoice: operation.invoice!),
           ],
-          if (operation.delivery != null) ...[
+          if (operation.services.isNotEmpty) ...[
+            _ServicesCard(operation: operation),
             const SizedBox(height: 16),
-            _DeliverySection(delivery: operation.delivery!),
           ],
-          if (operation.cart != null) ...[
-            const SizedBox(height: 16),
-            _CartSection(cart: operation.cart!),
-          ],
+          _MetaCard(operation: operation),
         ],
       ),
     );
@@ -376,194 +388,555 @@ class _OperationBody extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Commercial
+// Meta grid (status, supplier, client, created)
 // ---------------------------------------------------------------------------
 
-class _CommercialSection extends StatelessWidget {
+class _MetaGrid extends StatelessWidget {
   final BusinessOperation operation;
-  const _CommercialSection({required this.operation});
+  const _MetaGrid({required this.operation});
 
   @override
   Widget build(BuildContext context) {
-    return _Section(
-      title: 'Commercial',
-      icon: Icons.calculate_outlined,
-      children: [
-        _Row('Product subtotal', operation.productSubtotal),
-        _Row('Service subtotal', operation.serviceSubtotal),
-        _Row('Gross subtotal', operation.grossSubtotal, bold: true),
-        _Row('Item discount', -operation.itemDiscountAmount),
-        _Row('Order discount', -operation.orderDiscountAmount),
-        _Row('Discount total', -operation.discountAmount, bold: true),
-        _Row('Tax', operation.taxAmount),
-        _Row('Delivery revenue', operation.deliveryRevenue),
-        const Divider(height: 24),
-        _Row(
-          'Grand total',
-          operation.grandTotal,
-          bold: true,
-          accent: Theme.of(context).colorScheme.primary,
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
+
+    final items = <_MetaTile>[
+      _MetaTile(
+        icon: Icons.tag,
+        label: 'Operation',
+        value: '${operation.sourceType} #${operation.sourceId}',
+      ),
+      if (operation.supplierId != null)
+        _MetaTile(
+          icon: Icons.storefront_outlined,
+          label: loc.supplier,
+          value: '#${operation.supplierId}',
         ),
-        if (operation.invoiceMismatch)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
+      if (operation.clientId != null)
+        _MetaTile(
+          icon: Icons.person_outline,
+          label: loc.client,
+          value: '#${operation.clientId}',
+        ),
+      if (operation.createdAt != null)
+        _MetaTile(
+          icon: Icons.schedule,
+          label: 'Created',
+          value: _fmtDate(operation.createdAt!),
+        ),
+      if (operation.status != null)
+        _MetaTile(
+          icon: Icons.flag_outlined,
+          label: 'Status',
+          value: operation.status!.replaceAll('_', ' '),
+        ),
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceVariant.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: items.map((m) => _MetaChip(tile: m)).toList(),
+      ),
+    );
+  }
+
+  static String _fmtDate(DateTime d) {
+    final local = d.toLocal();
+    return '${local.year}-${local.month.toString().padLeft(2, '0')}-'
+        '${local.day.toString().padLeft(2, '0')} '
+        '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+class _MetaTile {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _MetaTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+}
+
+class _MetaChip extends StatelessWidget {
+  final _MetaTile tile;
+  const _MetaChip({required this.tile});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(tile.icon, size: 14, color: cs.primary),
+          const SizedBox(width: 6),
+          Text(
+            '${tile.label}: ',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            tile.value,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Financial breakdown — the "why is the total this number" card
+// ---------------------------------------------------------------------------
+
+class _FinancialBreakdownCard extends StatelessWidget {
+  final BusinessOperation operation;
+  const _FinancialBreakdownCard({required this.operation});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    final rows = <_MoneyRow>[
+      _MoneyRow('Product subtotal', operation.productSubtotal),
+      _MoneyRow('Service subtotal', operation.serviceSubtotal),
+      _MoneyRow(
+        'Gross subtotal',
+        operation.grossSubtotal,
+        emphasis: _Emphasis.subtotal,
+      ),
+      if (operation.discountAmount > 0)
+        _MoneyRow(
+          'Discount',
+          -operation.discountAmount,
+          emphasis: _Emphasis.negative,
+        ),
+      if (operation.taxAmount > 0) _MoneyRow('Tax', operation.taxAmount),
+      if (operation.deliveryRevenue > 0)
+        _MoneyRow('Delivery', operation.deliveryRevenue),
+      _MoneyRow(
+        'Grand total',
+        operation.grandTotal,
+        emphasis: _Emphasis.total,
+      ),
+    ];
+
+    return _Card(
+      title: 'Commercial breakdown',
+      icon: Icons.receipt_long_outlined,
+      child: Column(
+        children: rows.map((r) => _MoneyRowWidget(row: r)).toList(),
+      ),
+    );
+  }
+}
+
+enum _Emphasis { none, subtotal, total, negative }
+
+class _MoneyRow {
+  final String label;
+  final double value;
+  final _Emphasis emphasis;
+  const _MoneyRow(this.label, this.value, {this.emphasis = _Emphasis.none});
+}
+
+class _MoneyRowWidget extends StatelessWidget {
+  final _MoneyRow row;
+  const _MoneyRowWidget({required this.row});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final labelColor = switch (row.emphasis) {
+      _Emphasis.subtotal => cs.onSurface,
+      _Emphasis.total => cs.onSurface,
+      _ => cs.onSurfaceVariant,
+    };
+
+    final valueColor = switch (row.emphasis) {
+      _Emphasis.total => cs.primary,
+      _Emphasis.negative => cs.error,
+      _ => cs.onSurface,
+    };
+
+    final bold =
+        row.emphasis == _Emphasis.total || row.emphasis == _Emphasis.subtotal;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: row.emphasis == _Emphasis.total ? 8 : 6,
+      ),
+      child: Row(
+        children: [
+          Expanded(
             child: Text(
-              'Computed total (${operation.computedGrandTotal.toStringAsFixed(2)}) '
-              'differs from invoice total.',
-              style: TextStyle(
-                color: Colors.orange.shade700,
-                fontSize: 12,
+              row.label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: labelColor,
+                fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
               ),
             ),
           ),
-      ],
+          Text(
+            FinancialUIManager.formatCurrency(row.value, context),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: valueColor,
+              fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Settlement
+// Profitability card
 // ---------------------------------------------------------------------------
 
-class _SettlementSection extends StatelessWidget {
+class _ProfitabilityCard extends StatelessWidget {
   final BusinessOperation operation;
-  const _SettlementSection({required this.operation});
+  const _ProfitabilityCard({required this.operation});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return _Section(
-      title: 'Settlement',
-      icon: Icons.account_balance_wallet_outlined,
-      children: [
-        _Row('Invoice total', operation.invoiceTotal),
-        _Row('Paid', operation.paidAmount, accent: Colors.teal),
-        _Row(
-          'Due',
-          operation.dueAmount,
-          bold: true,
-          accent: operation.dueAmount > 0 ? Colors.orange : Colors.green,
-        ),
-        const Divider(height: 24),
-        _SimpleRow('Invoice status', operation.invoiceStatus ?? '—'),
-        _SimpleRow(
-          'Payment consistency',
-          operation.paymentStatusConsistent ? 'OK' : 'Mismatch',
-          valueColor: operation.paymentStatusConsistent ? cs.primary : cs.error,
-        ),
-      ],
-    );
-  }
-}
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
-// ---------------------------------------------------------------------------
-// Profitability
-// ---------------------------------------------------------------------------
-
-class _ProfitabilitySection extends StatelessWidget {
-  final BusinessOperation operation;
-  const _ProfitabilitySection({required this.operation});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final margin = operation.marginAmount;
+    final marginColor = margin >= 0 ? const Color(0xFF1E8E5A) : cs.error;
+
+    final cost = operation.totalCost;
     final roi = operation.roi;
 
-    return _Section(
+    return _Card(
       title: 'Profitability',
-      icon: Icons.trending_up,
+      icon: Icons.trending_up_rounded,
+      trailing: _Pill(
+        label: roi == null ? '—' : '${(roi * 100).toStringAsFixed(1)}% ROI',
+        color: roi == null
+            ? cs.onSurfaceVariant
+            : (roi >= 0 ? const Color(0xFF1E8E5A) : cs.error),
+      ),
+      child: Column(
+        children: [
+          _MoneyRowWidget(
+            row: _MoneyRow(
+              'Total cost',
+              cost,
+              emphasis: _Emphasis.subtotal,
+            ),
+          ),
+          _MoneyRowWidget(
+            row: _MoneyRow(
+              'Margin',
+              margin,
+              emphasis: _Emphasis.total,
+            ),
+          ),
+          if (cost > 0) ...[
+            const SizedBox(height: 8),
+            _CostBar(
+              productCost: operation.productCost,
+              consumable: operation.consumableServiceCost,
+              nonConsumable: operation.nonConsumableServiceCost,
+              labor: operation.laborCost,
+              delivery: operation.deliveryCost,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CostBar extends StatelessWidget {
+  final double productCost;
+  final double consumable;
+  final double nonConsumable;
+  final double labor;
+  final double delivery;
+
+  const _CostBar({
+    required this.productCost,
+    required this.consumable,
+    required this.nonConsumable,
+    required this.labor,
+    required this.delivery,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final segments = <_CostSegment>[
+      if (productCost > 0) _CostSegment('Products', productCost, cs.primary),
+      if (consumable > 0) _CostSegment('Consumables', consumable, cs.secondary),
+      if (nonConsumable > 0)
+        _CostSegment('Amortized', nonConsumable, cs.tertiary),
+      if (labor > 0) _CostSegment('Labor', labor, const Color(0xFF8B6CD9)),
+      if (delivery > 0)
+        _CostSegment('Delivery', delivery, const Color(0xFFD08B1C)),
+    ];
+
+    final total = segments.fold<double>(0, (s, e) => s + e.value);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _Row('Product cost', operation.productCost),
-        _Row('Consumable service cost', operation.consumableServiceCost),
-        _Row('Non-consumable (amortized)', operation.nonConsumableServiceCost),
-        _Row('Labor cost', operation.laborCost),
-        _Row('Delivery cost', operation.deliveryCost),
-        _Row('Total cost', operation.totalCost, bold: true),
-        const Divider(height: 24),
-        _Row(
-          'Margin',
-          margin,
-          bold: true,
-          accent: margin >= 0 ? Colors.green : cs.error,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 10,
+            child: Row(
+              children: segments.map((s) {
+                final flex = ((s.value / total) * 1000).round().clamp(1, 1000);
+                return Expanded(
+                  flex: flex,
+                  child: ColoredBox(color: s.color),
+                );
+              }).toList(),
+            ),
+          ),
         ),
-        _SimpleRow(
-          'ROI',
-          roi == null ? '—' : '${(roi * 100).toStringAsFixed(1)}%',
-          valueColor: roi == null
-              ? cs.onSurfaceVariant
-              : (roi >= 0 ? Colors.green : cs.error),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 4,
+          children: segments.map((s) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: s.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${s.label} ${FinancialUIManager.formatCurrency(s.value, context)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
         ),
       ],
     );
   }
+}
+
+class _CostSegment {
+  final String label;
+  final double value;
+  final Color color;
+  const _CostSegment(this.label, this.value, this.color);
 }
 
 // ---------------------------------------------------------------------------
 // Items
 // ---------------------------------------------------------------------------
 
-class _ItemsSection extends StatelessWidget {
+class _ItemsCard extends StatelessWidget {
   final BusinessOperation operation;
-  const _ItemsSection({required this.operation});
+  const _ItemsCard({required this.operation});
 
   @override
   Widget build(BuildContext context) {
-    if (operation.items.isEmpty) return const SizedBox.shrink();
-    return _Section(
-      title: 'Items (${operation.itemCount})',
+    return _Card(
+      title: 'Items',
       icon: Icons.inventory_2_outlined,
-      children: operation.items.map(_itemTile).toList(),
+      trailing: _Pill(
+        label: '${operation.itemCount}',
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      child: Column(
+        children: operation.items.map((item) => _ItemRow(item: item)).toList(),
+      ),
+    );
+  }
+}
+
+class _ItemRow extends StatelessWidget {
+  final Map<String, dynamic> item;
+  const _ItemRow({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final product = item['ordered_product'] as Map<String, dynamic>?;
+    final name = product?['product_name'] as String? ??
+        'Product #${item['ordered_product_id']}';
+    final qty = (item['ordered_quantity'] as num?)?.toInt() ?? 0;
+    final price = (item['unit_price'] as num?)?.toDouble() ?? 0;
+    final vat = (item['applied_vat'] as num?)?.toDouble() ?? 0;
+    final status = item['ordered_item_delivery_status'] as String?;
+
+    final lineTotal = qty * price;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Avatar(letter: _initial(name)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 2,
+                  children: [
+                    _MiniChip(
+                      label: '× $qty',
+                      color: cs.onSurfaceVariant,
+                    ),
+                    _MiniChip(
+                      label: '@ ${price.toStringAsFixed(2)}',
+                      color: cs.onSurfaceVariant,
+                    ),
+                    if (vat > 0)
+                      _MiniChip(
+                        label: 'VAT ${vat.toStringAsFixed(0)}%',
+                        color: cs.primary,
+                      ),
+                    if (status != null)
+                      _MiniChip(
+                        label: status.replaceAll('_', ' '),
+                        color: _statusColor(status, cs),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            FinancialUIManager.formatCurrency(lineTotal, context),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _itemTile(Map<String, dynamic> item) {
-    final product = item['ordered_product'] as Map<String, dynamic>?;
-    final name =
-        product?['product_name'] ?? 'Product #${item['ordered_product_id']}';
-    final qty = item['ordered_quantity'];
-    final price = item['unit_price'];
-    final vat = item['applied_vat'];
-    final discount = item['product_discount'];
-    final status = item['ordered_item_delivery_status'];
+  static String _initial(String s) {
+    if (s.isEmpty) return '?';
+    return s.trim()[0].toUpperCase();
+  }
 
-    return Builder(
-      builder: (context) {
-        final theme = Theme.of(context);
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      name,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '× $qty',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'unit $price  ·  vat $vat%'
-                '${discount != null ? '  ·  discount $discount' : ''}'
-                '${status != null ? '  ·  $status' : ''}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+  static Color _statusColor(String s, ColorScheme cs) {
+    switch (s.toLowerCase()) {
+      case 'delivered':
+      case 'completed':
+        return const Color(0xFF1E8E5A);
+      case 'processing':
+        return Colors.blue;
+      case 'pending':
+        return Colors.orange;
+      case 'cancelled':
+      case 'canceled':
+        return cs.error;
+      default:
+        return cs.onSurfaceVariant;
+    }
+  }
+}
+
+class _Avatar extends StatelessWidget {
+  final String letter;
+  const _Avatar({required this.letter});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: cs.primaryContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        letter,
+        style: TextStyle(
+          color: cs.onPrimaryContainer,
+          fontWeight: FontWeight.w800,
+          fontSize: 15,
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _MiniChip({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }
@@ -572,177 +945,320 @@ class _ItemsSection extends StatelessWidget {
 // Services
 // ---------------------------------------------------------------------------
 
-class _ServicesSection extends StatelessWidget {
+class _ServicesCard extends StatelessWidget {
   final BusinessOperation operation;
-  const _ServicesSection({required this.operation});
+  const _ServicesCard({required this.operation});
 
   @override
   Widget build(BuildContext context) {
-    if (operation.services.isEmpty) return const SizedBox.shrink();
-    return _Section(
-      title: 'Services (${operation.serviceCount})',
+    return _Card(
+      title: 'Services',
       icon: Icons.handyman_outlined,
-      children: operation.services.map(_serviceTile).toList(),
+      trailing: _Pill(
+        label: '${operation.serviceCount}',
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      child: Column(
+        children:
+            operation.services.map((svc) => _ServiceRow(service: svc)).toList(),
+      ),
     );
   }
+}
 
-  Widget _serviceTile(Map<String, dynamic> service) {
-    final svc = service['ordered_service_service'] as Map<String, dynamic>?;
-    final name = svc?['provided_service_name'] ??
+class _ServiceRow extends StatelessWidget {
+  final Map<String, dynamic> service;
+  const _ServiceRow({required this.service});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final provided =
+        service['ordered_service_service'] as Map<String, dynamic>?;
+    final name = provided?['provided_service_name'] as String? ??
         'Service #${service['ordered_service_service_id']}';
-    final qty = service['ordered_service_quantity'];
-    final total = service['ordered_service_total_price'];
-    final scheduled = service['ordered_service_scheduled_at'];
-    final status = service['ordered_service_delivery_status'];
+    final qty = (service['ordered_service_quantity'] as num?)?.toInt() ?? 0;
+    final total =
+        (service['ordered_service_total_price'] as num?)?.toDouble() ?? 0;
+    final scheduled = service['ordered_service_scheduled_at'] as String?;
+    final status = service['ordered_service_delivery_status'] as String?;
 
     final resourceReqs =
-        (svc?['service_resource_requirement'] as List<dynamic>?) ?? const [];
+        (provided?['service_resource_requirement'] as List<dynamic>?) ??
+            const [];
 
-    return Builder(
-      builder: (context) {
-        final theme = Theme.of(context);
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
+              _Avatar(letter: _initial(name)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       name,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Text('× $qty', style: theme.textTheme.bodySmall),
-                  const SizedBox(width: 8),
-                  Text('$total', style: theme.textTheme.bodyMedium),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                [
-                  if (scheduled != null) 'scheduled $scheduled',
-                  if (status != null) status,
-                ].join('  ·  '),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              if (resourceReqs.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: resourceReqs.map((r) {
-                      final rr = r as Map<String, dynamic>;
-                      final consumable =
-                          rr['service_resource_requirement_is_consumable'] ==
-                                  1 ||
-                              rr['service_resource_requirement_is_consumable'] ==
-                                  true;
-                      return Text(
-                        '• ${rr['service_resource_requirement_name']} '
-                        '× ${rr['service_resource_requirement_quantity']} '
-                        '${consumable ? "(consumable)" : "(amortized)"}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(height: 2),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 2,
+                      children: [
+                        _MiniChip(
+                          label: '× $qty',
+                          color: cs.onSurfaceVariant,
                         ),
-                      );
-                    }).toList(),
-                  ),
+                        if (scheduled != null)
+                          _MiniChip(
+                            label: _shortDate(scheduled),
+                            color: cs.onSurfaceVariant,
+                          ),
+                        if (status != null)
+                          _MiniChip(
+                            label: status.replaceAll('_', ' '),
+                            color: _statusColor(status, cs),
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
+              const SizedBox(width: 12),
+              Text(
+                FinancialUIManager.formatCurrency(total, context),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
             ],
           ),
-        );
-      },
+          if (resourceReqs.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 48),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: resourceReqs.map((r) {
+                  final rr = r as Map<String, dynamic>;
+                  final consumable =
+                      rr['service_resource_requirement_is_consumable'] == 1 ||
+                          rr['service_resource_requirement_is_consumable'] ==
+                              true;
+                  final n =
+                      rr['service_resource_requirement_name'] as String? ??
+                          'Resource';
+                  final q = rr['service_resource_requirement_quantity'];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: [
+                        Icon(
+                          consumable
+                              ? Icons.local_fire_department_outlined
+                              : Icons.build_outlined,
+                          size: 12,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '$n × $q',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: (consumable ? cs.secondary : cs.tertiary)
+                                .withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            consumable ? 'consumable' : 'amortized',
+                            style: TextStyle(
+                              color: consumable ? cs.secondary : cs.tertiary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
+  }
+
+  static String _initial(String s) {
+    if (s.isEmpty) return '?';
+    return s.trim()[0].toUpperCase();
+  }
+
+  static String _shortDate(String iso) {
+    final d = DateTime.tryParse(iso);
+    if (d == null) return iso;
+    final local = d.toLocal();
+    return '${local.year}-${local.month.toString().padLeft(2, '0')}-'
+        '${local.day.toString().padLeft(2, '0')} '
+        '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
+  }
+
+  static Color _statusColor(String s, ColorScheme cs) {
+    switch (s.toLowerCase()) {
+      case 'delivered':
+      case 'completed':
+        return const Color(0xFF1E8E5A);
+      case 'scheduled':
+      case 'processing':
+        return Colors.blue;
+      case 'pending':
+        return Colors.orange;
+      case 'cancelled':
+      case 'canceled':
+        return cs.error;
+      default:
+        return cs.onSurfaceVariant;
+    }
   }
 }
 
 // ---------------------------------------------------------------------------
-// Invoice / Delivery / Cart sub-payloads
+// Meta card (invoice / delivery / cart)
 // ---------------------------------------------------------------------------
 
-class _InvoiceSection extends StatelessWidget {
-  final Map<String, dynamic> invoice;
-  const _InvoiceSection({required this.invoice});
+class _MetaCard extends StatelessWidget {
+  final BusinessOperation operation;
+  const _MetaCard({required this.operation});
 
   @override
   Widget build(BuildContext context) {
-    return _Section(
-      title: 'Invoice',
-      icon: Icons.description_outlined,
-      children: [
-        _SimpleRow('Number', '${invoice['invoice_number'] ?? '—'}'),
-        _SimpleRow('Status', '${invoice['invoice_status'] ?? '—'}'),
-        _SimpleRow('Total', '${invoice['invoice_total_amount'] ?? 0}'),
-        _SimpleRow('Issue date', '${invoice['invoice_issue_date'] ?? '—'}'),
-        _SimpleRow('Due date', '${invoice['invoice_due_date'] ?? '—'}'),
-        _SimpleRow('Type', '${invoice['invoice_type'] ?? '—'}'),
-      ],
+    final cs = Theme.of(context).colorScheme;
+
+    if (operation.isCart && operation.cart != null) {
+      return _Card(
+        title: 'Cart details',
+        icon: Icons.shopping_cart_outlined,
+        child: _kvBlock(operation.cart!),
+      );
+    }
+    if (operation.isDelivery && operation.delivery != null) {
+      return _Card(
+        title: 'Delivery details',
+        icon: Icons.local_shipping_outlined,
+        child: _kvBlock(operation.delivery!),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _kvBlock(Map<String, dynamic> m) {
+    final entries = <_Kv>[
+      if (m['id_delivery'] != null) _Kv('Delivery ID', '${m['id_delivery']}'),
+      if (m['delivery_status'] != null)
+        _Kv('Status', '${m['delivery_status']}'),
+      if (m['delivery_shipping_method'] != null)
+        _Kv('Method', '${m['delivery_shipping_method']}'),
+      if (m['delivery_fee'] != null) _Kv('Fee', '${m['delivery_fee']}'),
+      if (m['cart_id'] != null) _Kv('Cart ID', '${m['cart_id']}'),
+      if (m['cart_status'] != null) _Kv('Status', '${m['cart_status']}'),
+      if (m['cart_total_amount'] != null)
+        _Kv('Total', '${m['cart_total_amount']}'),
+      if (m['cart_created_at'] != null)
+        _Kv('Created', '${m['cart_created_at']}'),
+      if (m['delivery_created_at'] != null)
+        _Kv('Created', '${m['delivery_created_at']}'),
+    ];
+
+    return Column(
+      children: entries.map((e) => _KvRow(kv: e)).toList(),
     );
   }
 }
 
-class _DeliverySection extends StatelessWidget {
-  final Map<String, dynamic> delivery;
-  const _DeliverySection({required this.delivery});
-
-  @override
-  Widget build(BuildContext context) {
-    return _Section(
-      title: 'Delivery',
-      icon: Icons.local_shipping_outlined,
-      children: [
-        _SimpleRow('Delivery ID', '${delivery['id_delivery'] ?? '—'}'),
-        _SimpleRow('Status', '${delivery['delivery_status'] ?? '—'}'),
-        _SimpleRow('Method', '${delivery['delivery_shipping_method'] ?? '—'}'),
-        _SimpleRow('Fee', '${delivery['delivery_fee'] ?? 0}'),
-        _SimpleRow('Source type', '${delivery['delivery_source_type'] ?? '—'}'),
-        _SimpleRow('Created', '${delivery['delivery_created_at'] ?? '—'}'),
-      ],
-    );
-  }
+class _Kv {
+  final String k;
+  final String v;
+  const _Kv(this.k, this.v);
 }
 
-class _CartSection extends StatelessWidget {
-  final Map<String, dynamic> cart;
-  const _CartSection({required this.cart});
+class _KvRow extends StatelessWidget {
+  final _Kv kv;
+  const _KvRow({required this.kv});
 
   @override
   Widget build(BuildContext context) {
-    return _Section(
-      title: 'Cart',
-      icon: Icons.shopping_cart_outlined,
-      children: [
-        _SimpleRow('Cart ID', '${cart['cart_id'] ?? '—'}'),
-        _SimpleRow('Status', '${cart['cart_status'] ?? '—'}'),
-        _SimpleRow('Total', '${cart['cart_total_amount'] ?? 0}'),
-        _SimpleRow('Created', '${cart['cart_created_at'] ?? '—'}'),
-      ],
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              kv.k,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Text(
+            kv.v,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Shared layout primitives
+// Shared primitives
 // ---------------------------------------------------------------------------
 
-class _Section extends StatelessWidget {
+class _Card extends StatefulWidget {
   final String title;
   final IconData icon;
-  final List<Widget> children;
+  final Widget child;
+  final Widget? trailing;
 
-  const _Section({
+  const _Card({
     required this.title,
     required this.icon,
-    required this.children,
+    required this.child,
+    this.trailing,
   });
+
+  @override
+  State<_Card> createState() => _CardState();
+}
+
+class _CardState extends State<_Card> {
+  bool _expanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -751,64 +1267,60 @@ class _Section extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: cs.surfaceVariant.withOpacity(0.4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 18, color: cs.primary),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Row extends StatelessWidget {
-  final String label;
-  final double value;
-  final bool bold;
-  final Color? accent;
-
-  const _Row(this.label, this.value, {this.bold = false, this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = accent ?? theme.colorScheme.onSurface;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
+      color: cs.surfaceContainerHighest.withOpacity(0.4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(widget.icon, size: 16, color: cs.primary),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  if (widget.trailing != null) ...[
+                    widget.trailing!,
+                    const SizedBox(width: 6),
+                  ],
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 180),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          Text(
-            FinancialUIManager.formatCurrency(value, context),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: color,
-              fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 180),
+            crossFadeState: _expanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox(width: double.infinity),
+            secondChild: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: widget.child,
             ),
           ),
         ],
@@ -817,31 +1329,26 @@ class _Row extends StatelessWidget {
   }
 }
 
-class _SimpleRow extends StatelessWidget {
+class _Pill extends StatelessWidget {
   final String label;
-  final String value;
-  final Color? valueColor;
-
-  const _SimpleRow(this.label, this.value, {this.valueColor});
+  final Color color;
+  const _Pill({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(label, style: theme.textTheme.bodyMedium),
-          ),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: valueColor ?? theme.colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

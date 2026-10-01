@@ -3422,7 +3422,9 @@
 
   "sourceDistribution": "Répartition par source",
   "noDataAvailable": "Aucune donnée disponible",
-  "outstanding": "Restant dû"
+  "outstanding": "Restant dû",
+"productQuantifierTxt":"Quantificateur",
+"productOriginTxt":"Origine"
 
 
 

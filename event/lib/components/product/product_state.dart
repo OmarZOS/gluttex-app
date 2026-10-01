@@ -1,3 +1,5 @@
+// lib/event/components/product/product_state.dart
+
 import 'package:gluttex_core/business/Product.dart';
 
 class ProductState {
@@ -16,6 +18,17 @@ class ProductState {
   String currentSearchQuery = "";
   int itemsPerPage = 20;
 
+  /// Whether the current product list includes hidden products.
+  ///
+  /// Set by [ProductFetch.fetchProducts] on every fetch. Defaults to
+  /// `false` to match the service contract, where `getAllProducts`
+  /// excludes hidden products for buyers unless told otherwise.
+  ///
+  /// This is a *mode*, not pagination state: [resetPagination] leaves
+  /// it alone so that switching pages does not silently drop back to
+  /// the buyer catalog. Only [reset] clears it.
+  bool includeHidden = false;
+
   void reset() {
     products.clear();
     cartQuantities.clear();
@@ -28,6 +41,7 @@ class ProductState {
     currentUserId = 0;
     currentProviderId = 0;
     currentSearchQuery = "";
+    includeHidden = false;
   }
 
   void resetPagination() {
@@ -50,4 +64,19 @@ class ProductState {
         .where((product) => product.product_provider_id == supplierId)
         .toList();
   }
+
+  // ================================================================
+  // Visibility-aware views
+  // ================================================================
+
+  /// Products currently visible in the buyer-facing catalog.
+  List<Product> get visibleProducts =>
+      products.where((p) => p.isVisible).toList();
+
+  /// Products hidden from buyers but present in the current list.
+  ///
+  /// Only non-empty when [includeHidden] is true, since buyer fetches
+  /// never return hidden products in the first place.
+  List<Product> get hiddenProducts =>
+      products.where((p) => !p.isVisible).toList();
 }

@@ -6798,4 +6798,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noDataAvailable => 'No data available';
+
+  @override
+  String get productQuantifierTxt => 'Quantifier';
+
+  @override
+  String get productOriginTxt => 'Origin';
 }

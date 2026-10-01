@@ -309,27 +309,27 @@ class DocumentInfoRow extends StatelessWidget {
       );
     }
 
-    // Inconsistency warnings
-    if (operation.invoiceMismatch) {
-      widgets.add(
-        InfoBadge(
-          label: '',
-          value: 'Invoice mismatch',
-          color: Colors.orange,
-          icon: Icons.warning_amber_rounded,
-        ),
-      );
-    }
-    if (!operation.paymentStatusConsistent) {
-      widgets.add(
-        InfoBadge(
-          label: '',
-          value: 'Payment mismatch',
-          color: theme.colorScheme.error,
-          icon: Icons.error_outline,
-        ),
-      );
-    }
+    // // Inconsistency warnings
+    // if (operation.invoiceMismatch) {
+    //   widgets.add(
+    //     InfoBadge(
+    //       label: '',
+    //       value: 'Invoice mismatch',
+    //       color: Colors.orange,
+    //       icon: Icons.warning_amber_rounded,
+    //     ),
+    //   );
+    // }
+    // if (!operation.paymentStatusConsistent) {
+    //   widgets.add(
+    //     InfoBadge(
+    //       label: '',
+    //       value: 'Payment mismatch',
+    //       color: theme.colorScheme.error,
+    //       icon: Icons.error_outline,
+    //     ),
+    //   );
+    // }
 
     return Wrap(
       spacing: 8,

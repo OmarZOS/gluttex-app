@@ -129,7 +129,7 @@ class ProductCatalogScreenState extends State<ProductCatalogScreen> {
         uniqueId: 'product_fab',
         horizontalButtons: [
           SpeedDialButton(
-            icon: Icon(CupertinoIcons.barcode_viewfinder),
+            icon: const Icon(CupertinoIcons.barcode_viewfinder),
             label: AppLocalizations.of(context)!.scannerTxt,
             onTap: () async {
               String? barcode = await Navigator.pushNamed(
@@ -146,18 +146,6 @@ class ProductCatalogScreenState extends State<ProductCatalogScreen> {
                     ),
                   ),
                 );
-              }
-            },
-          ),
-          SpeedDialButton(
-            icon: Icon(Icons.add_box_outlined),
-            label: AppLocalizations.of(context)!.addProductTxt,
-            onTap: () async {
-              final result =
-                  await Navigator.pushNamed(context, AppRoutes.productCreate);
-              if (result == true && mounted) {
-                // Product added, refresh the list
-                await _refreshProducts();
               }
             },
           ),

@@ -241,14 +241,17 @@ class StorageServiceImpl extends StorageService<FormData> {
 
   @override
   Future<dynamic> get(String destination, String id,
-      {String? callerKey, String? token}) async {
+      {String? callerKey,
+      String? token,
+      Map<String, dynamic>? parameters}) async {
     final key = _getCallerKey(callerKey, 'get_$id');
     final url = '$destination/$id';
     _logRequest('GET', url, callerKey: key, token: token);
 
     try {
       final options = _applyToken(Options(), token);
-      final response = await _dio.get(url, options: options);
+      final response =
+          await _dio.get(url, options: options, queryParameters: parameters);
 
       if (response.statusCode == 200) {
         _logResponse(response.data);
@@ -519,7 +522,7 @@ class StorageServiceImpl extends StorageService<FormData> {
   @override
   Future<dynamic> update(String destination, String id,
       Map<String, dynamic> parameters, Map<String, dynamic> data,
-      {String? callerKey, String? token}) async {
+      {String? callerKey, String? token, String method = "PUT"}) async {
     final key = _getCallerKey(callerKey, 'update_$id');
     final url = '$destination/$id';
     _logRequest('PUT', url,
@@ -532,13 +535,22 @@ class StorageServiceImpl extends StorageService<FormData> {
         ),
         token,
       );
-
-      final response = await _dio.put(
-        url,
-        data: data,
-        queryParameters: parameters,
-        options: options,
-      );
+      var response;
+      if (method == "PUT") {
+        response = await _dio.put(
+          url,
+          data: data,
+          queryParameters: parameters,
+          options: options,
+        );
+      } else {
+        response = await _dio.patch(
+          url,
+          data: data,
+          queryParameters: parameters,
+          options: options,
+        );
+      }
 
       developer.log('Update Response: ${response.data}',
           name: 'StorageService');

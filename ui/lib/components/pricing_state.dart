@@ -10,9 +10,9 @@ import 'package:flutter/foundation.dart';
 /// base / tax / margin / final relate to each other.
 ///
 /// Two modes:
-///   - [PricingMode.byProfit]     → `profitMargin` is the driver,
+///   - [PricingMode.byProfit]     → `profitMargin` is the input,
 ///                                   `finalPrice` is derived.
-///   - [PricingMode.byFinalPrice] → `finalPrice` is the driver,
+///   - [PricingMode.byFinalPrice] → `finalPrice` is the input,
 ///                                   `profitMargin` is derived.
 ///
 /// `basePrice` and `taxPercentage` are inputs in both modes; changing
@@ -32,8 +32,8 @@ class PricingState extends ChangeNotifier {
   double get finalPrice => _finalPrice;
   PricingMode get mode => _mode;
 
-  /// Price after tax but before margin. Computed on the fly; never
-  /// stored, so it can't drift out of sync with base + tax.
+  /// Price after tax but before margin. Intermediate value the
+  /// breakdown UI shows; computed on the fly, never stored.
   double get priceAfterTax => _basePrice * (1 + _taxPercentage / 100);
 
   // ==================== Setters (inputs) ====================
@@ -83,8 +83,8 @@ class PricingState extends ChangeNotifier {
 
   // ==================== Whole-state update ====================
 
-  /// Seed from an existing product (or reset to a known baseline)
-  /// without firing per-field derivations mid-flight.
+  /// Seed from an existing product without triggering per-field
+  /// derivations mid-flight. Useful when the form is (re)initialised.
   void load({
     required double basePrice,
     double taxPercentage = 19.0,
@@ -104,23 +104,6 @@ class PricingState extends ChangeNotifier {
       _deriveMarginFromFinal();
     }
 
-    notifyListeners();
-  }
-
-  // ==================== AI suggestion ====================
-
-  /// Apply an AI-suggested selling price. In either mode the final
-  /// price becomes the suggestion; the derived field is recomputed.
-  void applyAiPrice(double aiPrice) {
-    if (aiPrice <= 0) return;
-    if (_mode == PricingMode.byProfit) {
-      // Reverse-engineer the margin that yields this final price.
-      _finalPrice = aiPrice;
-      _deriveMarginFromFinal();
-    } else {
-      _finalPrice = aiPrice;
-      _deriveMarginFromFinal();
-    }
     notifyListeners();
   }
 

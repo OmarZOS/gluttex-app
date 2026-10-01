@@ -67,15 +67,12 @@ class BusinessOperation {
   final double taxAmount;
   final double deliveryRevenue;
   final double grandTotal;
-  final double computedGrandTotal;
-  final bool invoiceMismatch;
 
   // Settlement
   final double invoiceTotal;
   final double paidAmount;
   final double dueAmount;
   final String? invoiceStatus;
-  final bool paymentStatusConsistent;
 
   // Cost
   final double productCost;
@@ -114,13 +111,10 @@ class BusinessOperation {
     required this.taxAmount,
     required this.deliveryRevenue,
     required this.grandTotal,
-    required this.computedGrandTotal,
-    required this.invoiceMismatch,
     required this.invoiceTotal,
     required this.paidAmount,
     required this.dueAmount,
     this.invoiceStatus,
-    required this.paymentStatusConsistent,
     required this.productCost,
     required this.consumableServiceCost,
     required this.nonConsumableServiceCost,
@@ -155,14 +149,10 @@ class BusinessOperation {
       taxAmount: _asDouble(json['tax_amount']),
       deliveryRevenue: _asDouble(json['delivery_revenue']),
       grandTotal: _asDouble(json['grand_total']),
-      computedGrandTotal: _asDouble(json['computed_grand_total']),
-      invoiceMismatch: _asBool(json['invoice_mismatch']) ?? false,
       invoiceTotal: _asDouble(json['invoice_total']),
       paidAmount: _asDouble(json['paid_amount']),
       dueAmount: _asDouble(json['due_amount']),
       invoiceStatus: _asString(json['invoice_status']),
-      paymentStatusConsistent:
-          _asBool(json['payment_status_consistent']) ?? true,
       productCost: _asDouble(json['product_cost']),
       consumableServiceCost: _asDouble(json['consumable_service_cost']),
       nonConsumableServiceCost: _asDouble(json['non_consumable_service_cost']),
@@ -197,13 +187,10 @@ class BusinessOperation {
         'tax_amount': taxAmount,
         'delivery_revenue': deliveryRevenue,
         'grand_total': grandTotal,
-        'computed_grand_total': computedGrandTotal,
-        'invoice_mismatch': invoiceMismatch,
         'invoice_total': invoiceTotal,
         'paid_amount': paidAmount,
         'due_amount': dueAmount,
         'invoice_status': invoiceStatus,
-        'payment_status_consistent': paymentStatusConsistent,
         'product_cost': productCost,
         'consumable_service_cost': consumableServiceCost,
         'non_consumable_service_cost': nonConsumableServiceCost,
@@ -223,6 +210,11 @@ class BusinessOperation {
   bool get isUnpaid => invoiceStatus?.toLowerCase() == 'unpaid';
   bool get isFullySettled => dueAmount <= 0.001;
   bool get isProfitable => marginAmount > 0;
+
+  /// True when the payment records fall short of the invoice's stated total.
+  /// Computed on the client from the values the backend already sends; the
+  /// backend no longer ships an explicit `payment_status_consistent` flag.
+  bool get paymentShortfall => paidAmount + 0.01 < invoiceTotal;
 
   String get title {
     if (isCart) return 'Cart #$sourceId';
@@ -530,8 +522,6 @@ double? _asDoubleOrNull(dynamic v) {
 }
 
 /// Coerce any value to an int. Accepts int, double (truncated), String.
-/// This is the key fix: the backend sometimes emits `1.0` where the client
-/// expected `1`, and `as int?` throws on that.
 int? _asInt(dynamic v) {
   if (v == null) return null;
   if (v is int) return v;
@@ -606,7 +596,6 @@ DateTime? _parseDate(dynamic v) {
   if (v == null) return null;
   if (v is DateTime) return v;
   if (v is int) {
-    // Unix epoch — seconds or milliseconds depending on magnitude.
     final ms = v > 1000000000000 ? v : v * 1000;
     return DateTime.fromMillisecondsSinceEpoch(ms);
   }

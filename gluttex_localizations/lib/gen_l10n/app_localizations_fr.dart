@@ -6802,4 +6802,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noDataAvailable => 'Aucune donnée disponible';
+
+  @override
+  String get productQuantifierTxt => 'Quantificateur';
+
+  @override
+  String get productOriginTxt => 'Origine';
 }

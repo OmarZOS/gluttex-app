@@ -310,6 +310,8 @@ class ProductAssistedFields {
   static const String IPRODUCT_BARCODE = "iproduct_barcode";
   static const String IPRODUCT_ESTIMATED_PRICE_DA =
       "iproduct_estimated_price_DA";
+  static const String IPRODUCT_BASE_PRICE = "iproduct_base_price";
+
   static const String IPRODUCT_GLUTEN_STATUS = "iproduct_gluten_status";
   static const String DESCRIPTION = "iproduct_desc";
   static const String QUANTIFIER = "iproduct_quantifier";
@@ -340,3 +342,7 @@ class RoleTypes {
   static const String personnel_view = 'personnel_view';
   static const String personnel_manage = 'personnel_manage';
 }
+
+enum ProductDetailsMode { customer, editor }
+
+enum PricingMode { byProfit, byFinalPrice }
