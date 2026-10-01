@@ -3269,6 +3269,309 @@
 "noDataAvailable": "No data available",
 "outstanding": "Outstanding",
 "productQuantifierTxt":"Quantifier",
-"productOriginTxt":"Origin"
+"productOriginTxt":"Origin",
+
+"productHiddenLabel": "Hidden",
+"@productHiddenLabel": {
+  "description": "Badge shown on a product card whose visibility is HIDDEN"
+},
+
+"deleteProductTitle": "Delete product?",
+"@deleteProductTitle": {
+  "description": "Title of the delete confirmation dialog on the product details screen"
+},
+
+"deleteProductConfirmation": "Deleting \"{productName}\" removes it from the catalog. Orders that reference it keep their historical record.",
+"@deleteProductConfirmation": {
+  "description": "Body of the delete confirmation dialog",
+  "placeholders": {
+    "productName": { "type": "String", "example": "Blue Widget" }
+  }
+},
+
+"thisProductFallback": "this product",
+"@thisProductFallback": {
+  "description": "Fallback name for a product whose product_name is empty"
+},
+
+"cancelButton": "Cancel",
+"@cancelButton": {
+  "description": "Generic cancel action label"
+},
+
+"deleteButton": "Delete",
+"@deleteButton": {
+  "description": "Generic delete action label"
+},
+
+"productDeletedMessage": "Product deleted",
+"@productDeletedMessage": {
+  "description": "Snackbar confirmation after deleting a product"
+},
+
+"productDeleteFailedMessage": "Failed to delete product",
+"@productDeleteFailedMessage": {
+  "description": "Snackbar shown when deleting a product fails"
+},
+
+"productNowVisibleMessage": "Product is now visible",
+"@productNowVisibleMessage": {
+  "description": "Snackbar shown after making a product visible"
+},
+
+"productNowHiddenMessage": "Product is now hidden",
+"@productNowHiddenMessage": {
+  "description": "Snackbar shown after hiding a product"
+},
+
+"productVisibilityUpdateFailedMessage": "Failed to update visibility",
+"@productVisibilityUpdateFailedMessage": {
+  "description": "Snackbar shown when the visibility update request fails"
+},
+
+"editorModeBadge": "Editor mode",
+"@editorModeBadge": {
+  "description": "Badge on the product details hero indicating the editor is viewing the product in edit context"
+},
+
+"pricingSectionTitle": "Pricing",
+"@pricingSectionTitle": { "description": "Header of the pricing card" },
+
+"basePriceLabel": "Base price",
+"@basePriceLabel": { "description": "Label above the supplier cost value" },
+
+"basePriceCaption": "Supplier cost",
+"@basePriceCaption": { "description": "Caption under the base price value" },
+
+"finalPriceLabel": "Final price",
+"@finalPriceLabel": { "description": "Label above the customer-facing price value" },
+
+"finalPriceCaption": "Customer pays",
+"@finalPriceCaption": { "description": "Caption under the final price value" },
+
+"marginLabel": "Margin",
+"@marginLabel": { "description": "Label of the absolute margin KPI pill" },
+
+"marginPercentLabel": "Margin %",
+"@marginPercentLabel": { "description": "Label of the percentage margin KPI pill" },
+
+"setBasePriceHint": "Set a base price to see margin and ROI",
+"@setBasePriceHint": { "description": "Hint shown when no base price is set" },
+
+"hideAction": "Hide",
+"@hideAction": { "description": "Action button that hides a product" },
+
+"showAction": "Show",
+"@showAction": { "description": "Action button that shows a product" },
+
+"stockSectionTitle": "Stock",
+"@stockSectionTitle": { "description": "Header of the stock card" },
+
+"inStockLabel": "In stock",
+"@inStockLabel": { "description": "Pill label when available quantity > 0" },
+
+"outOfStockLabel": "Out of stock",
+"@outOfStockLabel": { "description": "Pill label when available quantity is 0" },
+
+"stockTotalLabel": "Total",
+"@stockTotalLabel": { "description": "Stock stat label: total quantity" },
+
+"stockReservedLabel": "Reserved",
+"@stockReservedLabel": { "description": "Stock stat label: reserved quantity" },
+
+"stockAvailableLabel": "Available",
+"@stockAvailableLabel": { "description": "Stock stat label: available quantity" },
+
+"metadataSectionTitle": "Product metadata",
+"@metadataSectionTitle": { "description": "Header of the metadata card" },
+
+"metaIdLabel": "ID",
+"@metaIdLabel": { "description": "Metadata chip label for product id" },
+
+"metaCategoryLabel": "Category",
+"@metaCategoryLabel": { "description": "Metadata chip label for category" },
+
+"metaBarcodeLabel": "Barcode",
+"@metaBarcodeLabel": { "description": "Metadata chip label for barcode" },
+
+"metaUnitLabel": "Unit",
+"@metaUnitLabel": { "description": "Metadata chip label for unit of measurement" },
+
+"metaProviderLabel": "Provider",
+"@metaProviderLabel": { "description": "Metadata chip label for provider" },
+
+"metaOwnerLabel": "Owner",
+"@metaOwnerLabel": { "description": "Metadata chip label for owner" },
+
+"metaOriginLabel": "Origin",
+"@metaOriginLabel": { "description": "Metadata chip label for origin" },
+
+"visibilityVisibleLabel": "Visible",
+"@visibilityVisibleLabel": { "description": "Value shown when the product is visible" },
+
+"visibilityHiddenLabel": "Hidden",
+"@visibilityHiddenLabel": { "description": "Value shown when the product is hidden" },
+
+"dangerZoneTitle": "Danger zone",
+"@dangerZoneTitle": { "description": "Header of the danger zone card" },
+
+"dangerZoneBody": "Deleting a product removes it from the catalog. Orders that reference it keep their historical record.",
+"@dangerZoneBody": { "description": "Description under the danger zone header" },
+"productVisibilityTitle": "Visibility",
+"@productVisibilityTitle": {
+  "description": "Header of the visibility toggle in the product form, and label of the visibility chip in the product details metadata card"
+},
+
+"editServiceTitle": "Edit Service",
+"@editServiceTitle": { "description": "App bar title when editing an existing provided service" },
+
+"createServiceTitle": "Create Service",
+"@createServiceTitle": { "description": "App bar title when creating a new provided service" },
+
+"basicInformationSection": "Basic Information",
+"@basicInformationSection": { "description": "Header of the basic information section" },
+
+"pricingSection": "Pricing",
+"@pricingSection": { "description": "Header of the pricing section" },
+
+"pricingConfigurationSection": "Pricing Configuration",
+"@pricingConfigurationSection": { "description": "Header of the optional pricing configuration section" },
+
+"resourceRequirementsSection": "Resource Requirements",
+"@resourceRequirementsSection": { "description": "Header of the resource requirements section" },
+
+"staffRequirementsSection": "Staff Requirements",
+"@staffRequirementsSection": { "description": "Header of the staff requirements section" },
+
+"costSummarySection": "Cost Summary",
+"@costSummarySection": { "description": "Header of the cost summary section" },
+
+"serviceNameLabel": "Service Name",
+"@serviceNameLabel": { "description": "Label of the service name input" },
+
+"serviceNameHint": "Enter service name",
+"@serviceNameHint": { "description": "Placeholder hint for the service name input" },
+
+"serviceNameRequired": "Service name is required",
+"@serviceNameRequired": { "description": "Validation message when the service name is empty" },
+
+"descriptionLabel": "Description",
+"@descriptionLabel": { "description": "Label of the description input" },
+
+"descriptionHint": "Enter description",
+"@descriptionHint": { "description": "Placeholder hint for the description input" },
+
+"durationLabel": "Duration (minutes)",
+"@durationLabel": { "description": "Label of the duration input" },
+
+"durationHint": "Enter duration",
+"@durationHint": { "description": "Placeholder hint for the duration input" },
+
+"durationInvalid": "Enter a valid duration",
+"@durationInvalid": { "description": "Validation message when duration is missing or non-positive" },
+
+"minutesSuffix": "min",
+"@minutesSuffix": { "description": "Suffix shown inside the duration input" },
+
+"basePriceLabel": "Base Price",
+"@basePriceLabel": { "description": "Label of the base price input" },
+
+"finalPriceLabel": "Final Price",
+"@finalPriceLabel": { "description": "Label of the final price input" },
+
+"ageGroupLabel": "Age Group",
+"@ageGroupLabel": { "description": "Label of the age group input" },
+
+"ageGroupHint": "Enter age group",
+"@ageGroupHint": { "description": "Placeholder hint for the age group input" },
+
+"sampleTypeLabel": "Sample Type",
+"@sampleTypeLabel": { "description": "Label of the sample type input" },
+
+"sampleTypeHint": "Enter sample type",
+"@sampleTypeHint": { "description": "Placeholder hint for the sample type input" },
+
+"specialistConsultationLabel": "Specialist Consultation",
+"@specialistConsultationLabel": { "description": "Checkbox label for specialist consultation" },
+
+"governmentFundedLabel": "Government Funded",
+"@governmentFundedLabel": { "description": "Checkbox label for government funded" },
+
+"consultationIncludedLabel": "Consultation Included",
+"@consultationIncludedLabel": { "description": "Checkbox label for consultation included" },
+
+"digitalImagingLabel": "Digital Imaging",
+"@digitalImagingLabel": { "description": "Checkbox label for digital imaging" },
+
+"materialOptionsLabel": "Material Options",
+"@materialOptionsLabel": { "description": "Label of the material options chip input" },
+
+"includesLabel": "Includes",
+"@includesLabel": { "description": "Label of the includes chip input" },
+
+"noResourcesAdded": "No resources added yet",
+"@noResourcesAdded": { "description": "Empty state message in the resources section" },
+
+"noStaffAdded": "No staff added yet",
+"@noStaffAdded": { "description": "Empty state message in the staff section" },
+
+"roleFallback": "Role #{roleId}",
+"@roleFallback": {
+  "description": "Fallback label shown when a staff role name cannot be resolved",
+  "placeholders": {
+    "roleId": { "type": "int" }
+  }
+},
+
+"validationProviderRequired": "A valid provider is required",
+"@validationProviderRequired": { "description": "Business validation error when provider id is missing" },
+
+"validationCategoryRequired": "A valid category is required",
+"@validationCategoryRequired": { "description": "Business validation error when category id is missing" },
+
+"validationDurationPositive": "Duration must be greater than zero",
+"@validationDurationPositive": { "description": "Business validation error for non-positive duration" },
+
+"validationBasePricePositive": "Base price must be greater than zero",
+"@validationBasePricePositive": { "description": "Business validation error for non-positive base price" },
+
+"validationFinalPricePositive": "Final price must be greater than zero",
+"@validationFinalPricePositive": { "description": "Business validation error for non-positive final price" },
+
+"validationFinalPriceExceedsBase": "Final price cannot be greater than the base price",
+"@validationFinalPriceExceedsBase": { "description": "Business validation error when final price exceeds base price" },
+
+"unexpectedErrorWithDetail": "An unexpected error occurred: {detail}",
+"@unexpectedErrorWithDetail": {
+  "description": "Generic error message wrapping an exception's toString",
+  "placeholders": {
+    "detail": { "type": "String" }
+  }
+},
+
+"durationHoursMinutes": "{hours, plural, =1 {1 hour} other {{hours} hours}} {minutes, plural, =1 {1 minute} other {{minutes} minutes}}",
+"@durationHoursMinutes": {
+  "description": "Formatted duration when it has both hours and minutes, e.g. '1 hour 30 minutes'",
+  "placeholders": {
+    "hours": { "type": "int" },
+    "minutes": { "type": "int" }
+  }
+},
+
+"durationHoursOnly": "{hours, plural, =1 {1 hour} other {{hours} hours}}",
+"@durationHoursOnly": {
+  "description": "Formatted duration when it is a whole number of hours",
+  "placeholders": {
+    "hours": { "type": "int" }
+  }
+},
+
+"durationMinutesOnly": "{minutes, plural, =1 {1 minute} other {{minutes} minutes}}",
+"@durationMinutesOnly": {
+  "description": "Formatted duration when it is under an hour",
+  "placeholders": {
+    "minutes": { "type": "int" }
+  }
+}
 
 }

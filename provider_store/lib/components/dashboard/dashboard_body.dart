@@ -158,6 +158,7 @@ class DashboardBody extends StatelessWidget {
         },
         onRefresh: () => productNotifier.fetchProducts(
           providerId: selectedSupplierId,
+          includeHidden: true,
           reset: true,
         ),
         onAddProduct: () => Navigator.pushNamed(

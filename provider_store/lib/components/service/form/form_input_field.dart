@@ -16,6 +16,21 @@ class FormInputField extends StatelessWidget {
   final Function(String?)? onSaved;
   final Function(String)? onChanged;
 
+  /// Optional external controller.
+  ///
+  /// When provided, the caller owns the controller and is responsible
+  /// for disposing it. The widget uses it as the field's text source,
+  /// which lets callers set the text programmatically (e.g. from
+  /// preset chips) while keeping the field editable.
+  ///
+  /// When null, the field behaves as before: `initialValue` seeds it
+  /// and `TextFormField` manages its own internal state.
+  ///
+  /// Note: `initialValue` and `controller` are mutually exclusive in
+  /// `TextFormField`. If both are supplied, `controller` wins and
+  /// `initialValue` is ignored.
+  final TextEditingController? controller;
+
   const FormInputField({
     super.key,
     required this.label,
@@ -30,6 +45,7 @@ class FormInputField extends StatelessWidget {
     this.validator,
     this.onSaved,
     this.onChanged,
+    this.controller,
   });
 
   @override
@@ -74,7 +90,12 @@ class FormInputField extends StatelessWidget {
             ),
           ),
           child: TextFormField(
-            initialValue: initialValue,
+            // `controller` takes precedence when supplied. Passing both
+            // is legal but `initialValue` is then ignored by
+            // `TextFormField` — documented in the field's own doc
+            // comment for anyone reading the call site.
+            controller: controller,
+            initialValue: controller == null ? initialValue : null,
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: theme.textTheme.bodyMedium?.copyWith(

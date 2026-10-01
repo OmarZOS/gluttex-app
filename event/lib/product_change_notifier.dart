@@ -207,7 +207,15 @@ class ProductNotifier extends ChangeNotifier {
       //    change from the backend instead of serving a stale copy.
       _cache.invalidateProduct(productId);
 
-      // 3. If the product was hidden and the current list is a buyer
+      // 3. Drop any cached supplier lists that contained this product.
+      //    Both the buyer and editor variants, since a visibility flip
+      //    affects the buyer list's membership.
+      final supplierId = updated.product_provider_id ?? 0;
+      if (supplierId > 0) {
+        _cache.invalidateSupplierCacheAll(supplierId);
+      }
+
+      // 4. If the product was hidden and the current list is a buyer
       //    catalog (includeHidden == false), drop it from the list.
       if (!_state.includeHidden && !updated.isVisible) {
         _state.products.removeWhere((p) => p.id_product == productId);
@@ -299,29 +307,61 @@ class ProductNotifier extends ChangeNotifier {
 
   // ============ SUPPLIER PRODUCTS ============
 
-  bool isFetchingSupplierProducts(int supplierId) =>
-      _supplier.isFetching(supplierId);
+  bool isFetchingSupplierProducts(
+    int supplierId, {
+    bool includeHidden = false,
+  }) =>
+      _supplier.isFetching(supplierId, includeHidden: includeHidden);
 
-  List<Product>? getCachedSupplierProducts(int supplierId) =>
-      _supplier.getCached(supplierId);
+  List<Product>? getCachedSupplierProducts(
+    int supplierId, {
+    bool includeHidden = false,
+  }) =>
+      _supplier.getCached(supplierId, includeHidden: includeHidden);
 
+  /// Fetch a supplier's products.
+  ///
+  /// [includeHidden] defaults to `false` (buyer-facing semantics,
+  /// matching the service contract). Editors pass `true` to load hidden
+  /// products alongside visible ones.
+  ///
+  /// The flag participates in the cache key, so a buyer fetch and an
+  /// editor fetch for the same supplier never overwrite each other.
   Future<List<Product>> fetchSupplierProducts(
     int supplierId, {
     bool forceRefresh = false,
+    bool includeHidden = false,
   }) async {
-    final results =
-        await _supplier.fetch(supplierId, forceRefresh: forceRefresh);
+    final results = await _supplier.fetch(
+      supplierId,
+      forceRefresh: forceRefresh,
+      includeHidden: includeHidden,
+    );
     _notify();
     return results;
   }
 
-  void invalidateSupplierCache(int supplierId) {
-    _supplier.invalidateCache(supplierId);
+  void invalidateSupplierCache(
+    int supplierId, {
+    bool includeHidden = false,
+  }) {
+    _supplier.invalidateCache(supplierId, includeHidden: includeHidden);
     _notify();
   }
 
-  bool hasValidSupplierCache(int supplierId) =>
-      _supplier.hasValidCache(supplierId);
+  /// Invalidate every cached variant for a supplier (buyer + editor).
+  /// Convenience for the visibility-change path, where both views may
+  /// be open in different screens.
+  void invalidateSupplierCacheAll(int supplierId) {
+    _cache.invalidateSupplierCacheAll(supplierId);
+    _notify();
+  }
+
+  bool hasValidSupplierCache(
+    int supplierId, {
+    bool includeHidden = false,
+  }) =>
+      _supplier.hasValidCache(supplierId, includeHidden: includeHidden);
 
   // ============ POLLING ============
 

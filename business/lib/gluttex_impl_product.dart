@@ -102,7 +102,7 @@ class ProductServiceImpl extends ProductService {
     try {
       final result = await _storageService.delete(
         '${AppConstants.apiBaseUrl}'
-        '${AppConstants.deleteProductEndpoint}/$productId',
+        '${AppConstants.deleteProductEndpoint}',
         productId,
         callerKey: key,
       );

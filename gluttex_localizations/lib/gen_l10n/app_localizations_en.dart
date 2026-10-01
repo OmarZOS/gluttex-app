@@ -6804,4 +6804,271 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productOriginTxt => 'Origin';
+
+  @override
+  String get productHiddenLabel => 'Hidden';
+
+  @override
+  String get deleteProductTitle => 'Delete product?';
+
+  @override
+  String deleteProductConfirmation(String productName) {
+    return 'Deleting \"$productName\" removes it from the catalog. Orders that reference it keep their historical record.';
+  }
+
+  @override
+  String get thisProductFallback => 'this product';
+
+  @override
+  String get cancelButton => 'Cancel';
+
+  @override
+  String get deleteButton => 'Delete';
+
+  @override
+  String get productDeletedMessage => 'Product deleted';
+
+  @override
+  String get productDeleteFailedMessage => 'Failed to delete product';
+
+  @override
+  String get productNowVisibleMessage => 'Product is now visible';
+
+  @override
+  String get productNowHiddenMessage => 'Product is now hidden';
+
+  @override
+  String get productVisibilityUpdateFailedMessage => 'Failed to update visibility';
+
+  @override
+  String get editorModeBadge => 'Editor mode';
+
+  @override
+  String get pricingSectionTitle => 'Pricing';
+
+  @override
+  String get basePriceLabel => 'Base Price';
+
+  @override
+  String get basePriceCaption => 'Supplier cost';
+
+  @override
+  String get finalPriceCaption => 'Customer pays';
+
+  @override
+  String get marginLabel => 'Margin';
+
+  @override
+  String get marginPercentLabel => 'Margin %';
+
+  @override
+  String get setBasePriceHint => 'Set a base price to see margin and ROI';
+
+  @override
+  String get hideAction => 'Hide';
+
+  @override
+  String get showAction => 'Show';
+
+  @override
+  String get stockSectionTitle => 'Stock';
+
+  @override
+  String get inStockLabel => 'In stock';
+
+  @override
+  String get outOfStockLabel => 'Out of stock';
+
+  @override
+  String get stockTotalLabel => 'Total';
+
+  @override
+  String get stockReservedLabel => 'Reserved';
+
+  @override
+  String get stockAvailableLabel => 'Available';
+
+  @override
+  String get metadataSectionTitle => 'Product metadata';
+
+  @override
+  String get metaIdLabel => 'ID';
+
+  @override
+  String get metaCategoryLabel => 'Category';
+
+  @override
+  String get metaBarcodeLabel => 'Barcode';
+
+  @override
+  String get metaUnitLabel => 'Unit';
+
+  @override
+  String get metaProviderLabel => 'Provider';
+
+  @override
+  String get metaOwnerLabel => 'Owner';
+
+  @override
+  String get metaOriginLabel => 'Origin';
+
+  @override
+  String get visibilityVisibleLabel => 'Visible';
+
+  @override
+  String get visibilityHiddenLabel => 'Hidden';
+
+  @override
+  String get dangerZoneTitle => 'Danger zone';
+
+  @override
+  String get dangerZoneBody => 'Deleting a product removes it from the catalog. Orders that reference it keep their historical record.';
+
+  @override
+  String get productVisibilityTitle => 'Visibility';
+
+  @override
+  String get editServiceTitle => 'Edit Service';
+
+  @override
+  String get createServiceTitle => 'Create Service';
+
+  @override
+  String get basicInformationSection => 'Basic Information';
+
+  @override
+  String get pricingSection => 'Pricing';
+
+  @override
+  String get pricingConfigurationSection => 'Pricing Configuration';
+
+  @override
+  String get resourceRequirementsSection => 'Resource Requirements';
+
+  @override
+  String get staffRequirementsSection => 'Staff Requirements';
+
+  @override
+  String get costSummarySection => 'Cost Summary';
+
+  @override
+  String get serviceNameLabel => 'Service Name';
+
+  @override
+  String get serviceNameHint => 'Enter service name';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get descriptionHint => 'Enter description';
+
+  @override
+  String get durationLabel => 'Duration (minutes)';
+
+  @override
+  String get durationHint => 'Enter duration';
+
+  @override
+  String get durationInvalid => 'Enter a valid duration';
+
+  @override
+  String get minutesSuffix => 'min';
+
+  @override
+  String get ageGroupLabel => 'Age Group';
+
+  @override
+  String get ageGroupHint => 'Enter age group';
+
+  @override
+  String get sampleTypeLabel => 'Sample Type';
+
+  @override
+  String get sampleTypeHint => 'Enter sample type';
+
+  @override
+  String get specialistConsultationLabel => 'Specialist Consultation';
+
+  @override
+  String get governmentFundedLabel => 'Government Funded';
+
+  @override
+  String get consultationIncludedLabel => 'Consultation Included';
+
+  @override
+  String get digitalImagingLabel => 'Digital Imaging';
+
+  @override
+  String get materialOptionsLabel => 'Material Options';
+
+  @override
+  String get includesLabel => 'Includes';
+
+  @override
+  String roleFallback(int roleId) {
+    return 'Role #$roleId';
+  }
+
+  @override
+  String get validationProviderRequired => 'A valid provider is required';
+
+  @override
+  String get validationCategoryRequired => 'A valid category is required';
+
+  @override
+  String get validationDurationPositive => 'Duration must be greater than zero';
+
+  @override
+  String get validationBasePricePositive => 'Base price must be greater than zero';
+
+  @override
+  String get validationFinalPricePositive => 'Final price must be greater than zero';
+
+  @override
+  String get validationFinalPriceExceedsBase => 'Final price cannot be greater than the base price';
+
+  @override
+  String unexpectedErrorWithDetail(String detail) {
+    return 'An unexpected error occurred: $detail';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours hours',
+      one: '1 hour',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes minutes',
+      one: '1 minute',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String durationHoursOnly(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
 }

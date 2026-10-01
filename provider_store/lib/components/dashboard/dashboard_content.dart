@@ -737,7 +737,8 @@ class DashboardContentState extends State<DashboardContent> {
     deliveryNotifier.setFilters(providerId: supplierId);
 
     await Future.wait([
-      productNotifier.fetchProducts(providerId: supplierId, reset: true),
+      productNotifier.fetchProducts(
+          providerId: supplierId, reset: true, includeHidden: true),
       serviceNotifier.fetchServices(providerId: supplierId, reset: true),
       deliveryNotifier.fetchFirstPage(),
       financeNotifier.setProvider(supplierId),

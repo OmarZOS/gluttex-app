@@ -23,6 +23,7 @@ class EditorHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
     final hasImage = _isValidImage(product.product_image_url);
 
     return Container(
@@ -64,7 +65,7 @@ class EditorHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Badge(
-                  label: isRTL ? 'وضع المحرر' : 'Editor mode',
+                  label: loc.editorModeBadge,
                   color: cs.tertiary,
                 ),
                 const SizedBox(height: 10),
@@ -138,6 +139,7 @@ class PricingHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     final base = product.product_base_price ?? 0;
     final finalPrice = product.product_price ?? 0;
@@ -179,7 +181,7 @@ class PricingHero extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                'Pricing',
+                loc.pricingSectionTitle,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.3,
@@ -193,8 +195,8 @@ class PricingHero extends StatelessWidget {
             children: [
               Expanded(
                 child: _BigPrice(
-                  label: 'Base price',
-                  caption: 'Supplier cost',
+                  label: loc.basePriceLabel,
+                  caption: loc.basePriceCaption,
                   value: hasBase ? base : null,
                   color: cs.onSurfaceVariant,
                 ),
@@ -207,8 +209,8 @@ class PricingHero extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: _BigPrice(
-                  label: 'Final price',
-                  caption: 'Customer pays',
+                  label: loc.finalPriceLabel,
+                  caption: loc.finalPriceCaption,
                   value: finalPrice > 0 ? finalPrice : null,
                   color: cs.primary,
                   alignEnd: true,
@@ -224,7 +226,7 @@ class PricingHero extends StatelessWidget {
               children: [
                 Expanded(
                   child: _KpiPill(
-                    label: 'Margin',
+                    label: loc.marginLabel,
                     value: margin == null
                         ? '—'
                         : '${margin >= 0 ? '+' : ''}${margin.toStringAsFixed(2)}',
@@ -237,7 +239,7 @@ class PricingHero extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _KpiPill(
-                    label: 'Margin %',
+                    label: loc.marginPercentLabel,
                     value: marginPct == null
                         ? '—'
                         : '${(marginPct * 100).toStringAsFixed(1)}%',
@@ -268,7 +270,7 @@ class PricingHero extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Set a base price to see margin and ROI',
+                      loc.setBasePriceHint,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: cs.onTertiaryContainer,
                       ),
@@ -330,7 +332,7 @@ class EditorActions extends StatelessWidget {
                   : Icons.visibility_outlined,
               size: 18,
             ),
-            label: Text(isVisible ? 'Hide' : 'Show'),
+            label: Text(isVisible ? loc.hideAction : loc.showAction),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -357,6 +359,7 @@ class StockCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     final stock = product.product_quantity ?? 0;
     final reserved = product.product_reserved_quantity ?? 0;
     final available = product.product_available_quantity;
@@ -366,9 +369,9 @@ class StockCard extends StatelessWidget {
 
     return _SectionCard(
       icon: Icons.inventory_2_outlined,
-      title: 'Stock',
+      title: loc.stockSectionTitle,
       trailing: _Pill(
-        label: available > 0 ? 'In stock' : 'Out of stock',
+        label: available > 0 ? loc.inStockLabel : loc.outOfStockLabel,
         color: available > 0 ? const Color(0xFF1E8E5A) : cs.error,
       ),
       child: Column(
@@ -400,21 +403,21 @@ class StockCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _Stat(
-                  label: 'Total',
+                  label: loc.stockTotalLabel,
                   value: '$stock',
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _Stat(
-                  label: 'Reserved',
+                  label: loc.stockReservedLabel,
                   value: '$reserved',
                   color: cs.tertiary,
                 ),
               ),
               Expanded(
                 child: _Stat(
-                  label: 'Available',
+                  label: loc.stockAvailableLabel,
                   value: '$available',
                   color: available > 0 ? const Color(0xFF1E8E5A) : cs.error,
                   bold: true,
@@ -439,52 +442,56 @@ class MetadataCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     final entries = <_MetaEntry>[
       _MetaEntry(
         icon: Icons.tag,
-        label: 'ID',
+        label: loc.metaIdLabel,
         value: '${product.id_product ?? '—'}',
       ),
       _MetaEntry(
         icon: Icons.category_outlined,
-        label: 'Category',
+        label: loc.metaCategoryLabel,
         value: product.product_category_name ?? '—',
       ),
       _MetaEntry(
         icon: Icons.qr_code,
-        label: 'Barcode',
+        label: loc.metaBarcodeLabel,
         value: product.product_barcode ?? '—',
       ),
       _MetaEntry(
         icon: Icons.straighten,
-        label: 'Unit',
+        label: loc.metaUnitLabel,
         value: product.product_quantifier ?? '—',
       ),
       _MetaEntry(
         icon: Icons.storefront_outlined,
-        label: 'Provider',
+        label: loc.metaProviderLabel,
         value: '${product.product_provider_id ?? '—'}',
       ),
       _MetaEntry(
         icon: Icons.person_outline,
-        label: 'Owner',
+        label: loc.metaOwnerLabel,
         value: '${product.product_owner_id ?? '—'}',
       ),
       _MetaEntry(
         icon: Icons.public,
-        label: 'Origin',
+        label: loc.metaOriginLabel,
         value: '${product.product_origin_id ?? '—'}',
       ),
       _MetaEntry(
         icon: Icons.visibility_outlined,
-        label: 'Visibility',
-        value: product.isVisible ? 'Visible' : 'Hidden',
+        label: loc.productVisibilityTitle,
+        value: product.isVisible
+            ? loc.visibilityVisibleLabel
+            : loc.visibilityHiddenLabel,
       ),
     ];
 
     return _SectionCard(
       icon: Icons.info_outline,
-      title: 'Product metadata',
+      title: loc.metadataSectionTitle,
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -524,7 +531,7 @@ class DangerZoneCard extends StatelessWidget {
               Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
               const SizedBox(width: 8),
               Text(
-                'Danger zone',
+                loc.dangerZoneTitle,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: cs.error,
@@ -534,8 +541,7 @@ class DangerZoneCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Deleting a product removes it from the catalog. '
-            'Orders that reference it keep their historical record.',
+            loc.dangerZoneBody,
             style: theme.textTheme.bodySmall?.copyWith(
               color: cs.onSurfaceVariant,
               height: 1.4,

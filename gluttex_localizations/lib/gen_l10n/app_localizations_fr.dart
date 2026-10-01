@@ -5144,7 +5144,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enterServiceName => 'Entrez le nom du service';
 
   @override
-  String get serviceNameRequired => 'Le nom du service est requis';
+  String get serviceNameRequired => 'Le nom du service est obligatoire';
 
   @override
   String get description => 'Description';
@@ -6808,4 +6808,275 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productOriginTxt => 'Origine';
+
+  @override
+  String get productHiddenLabel => 'Masqué';
+
+  @override
+  String get deleteProductTitle => 'Supprimer le produit ?';
+
+  @override
+  String deleteProductConfirmation(String productName) {
+    return 'La suppression de « $productName » le retire du catalogue. Les commandes qui y font référence conservent leur historique.';
+  }
+
+  @override
+  String get thisProductFallback => 'ce produit';
+
+  @override
+  String get cancelButton => 'Annuler';
+
+  @override
+  String get deleteButton => 'Supprimer';
+
+  @override
+  String get productDeletedMessage => 'Produit supprimé';
+
+  @override
+  String get productDeleteFailedMessage => 'Échec de la suppression du produit';
+
+  @override
+  String get productNowVisibleMessage => 'Le produit est maintenant visible';
+
+  @override
+  String get productNowHiddenMessage => 'Le produit est maintenant masqué';
+
+  @override
+  String get productVisibilityUpdateFailedMessage => 'Échec de la mise à jour de la visibilité';
+
+  @override
+  String get editorModeBadge => 'Mode éditeur';
+
+  @override
+  String get pricingSectionTitle => 'Tarification';
+
+  @override
+  String get basePriceLabel => 'Prix de base';
+
+  @override
+  String get basePriceCaption => 'Coût fournisseur';
+
+  @override
+  String get finalPriceCaption => 'Payé par le client';
+
+  @override
+  String get marginLabel => 'Marge';
+
+  @override
+  String get marginPercentLabel => 'Marge %';
+
+  @override
+  String get setBasePriceHint => 'Définissez un prix de base pour voir la marge et le retour';
+
+  @override
+  String get hideAction => 'Masquer';
+
+  @override
+  String get showAction => 'Afficher';
+
+  @override
+  String get stockSectionTitle => 'Stock';
+
+  @override
+  String get inStockLabel => 'En stock';
+
+  @override
+  String get outOfStockLabel => 'Rupture de stock';
+
+  @override
+  String get stockTotalLabel => 'Total';
+
+  @override
+  String get stockReservedLabel => 'Réservé';
+
+  @override
+  String get stockAvailableLabel => 'Disponible';
+
+  @override
+  String get metadataSectionTitle => 'Métadonnées du produit';
+
+  @override
+  String get metaIdLabel => 'ID';
+
+  @override
+  String get metaCategoryLabel => 'Catégorie';
+
+  @override
+  String get metaBarcodeLabel => 'Code-barres';
+
+  @override
+  String get metaUnitLabel => 'Unité';
+
+  @override
+  String get metaProviderLabel => 'Fournisseur';
+
+  @override
+  String get metaOwnerLabel => 'Propriétaire';
+
+  @override
+  String get metaOriginLabel => 'Origine';
+
+  @override
+  String get visibilityVisibleLabel => 'Visible';
+
+  @override
+  String get visibilityHiddenLabel => 'Masqué';
+
+  @override
+  String get dangerZoneTitle => 'Zone de danger';
+
+  @override
+  String get dangerZoneBody => 'La suppression d\'un produit le retire du catalogue. Les commandes qui y font référence conservent leur historique.';
+
+  @override
+  String get productVisibilityTitle => 'Visibilité';
+
+  @override
+  String get editServiceTitle => 'Modifier le service';
+
+  @override
+  String get createServiceTitle => 'Créer un service';
+
+  @override
+  String get basicInformationSection => 'Informations de base';
+
+  @override
+  String get pricingSection => 'Tarification';
+
+  @override
+  String get pricingConfigurationSection => 'Configuration tarifaire';
+
+  @override
+  String get resourceRequirementsSection => 'Besoins en ressources';
+
+  @override
+  String get staffRequirementsSection => 'Besoins en personnel';
+
+  @override
+  String get costSummarySection => 'Récapitulatif des coûts';
+
+  @override
+  String get serviceNameLabel => 'Nom du service';
+
+  @override
+  String get serviceNameHint => 'Saisir le nom du service';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get descriptionHint => 'Saisir la description';
+
+  @override
+  String get durationLabel => 'Durée (minutes)';
+
+  @override
+  String get durationHint => 'Saisir la durée';
+
+  @override
+  String get durationInvalid => 'Saisir une durée valide';
+
+  @override
+  String get minutesSuffix => 'min';
+
+  @override
+  String get ageGroupLabel => 'Tranche d\'âge';
+
+  @override
+  String get ageGroupHint => 'Saisir la tranche d\'âge';
+
+  @override
+  String get sampleTypeLabel => 'Type d\'échantillon';
+
+  @override
+  String get sampleTypeHint => 'Saisir le type d\'échantillon';
+
+  @override
+  String get specialistConsultationLabel => 'Consultation spécialisée';
+
+  @override
+  String get governmentFundedLabel => 'Financé par l\'État';
+
+  @override
+  String get consultationIncludedLabel => 'Consultation incluse';
+
+  @override
+  String get digitalImagingLabel => 'Imagerie numérique';
+
+  @override
+  String get materialOptionsLabel => 'Options de matériaux';
+
+  @override
+  String get includesLabel => 'Inclut';
+
+  @override
+  String roleFallback(int roleId) {
+    return 'Rôle #$roleId';
+  }
+
+  @override
+  String get validationProviderRequired => 'Un fournisseur valide est requis';
+
+  @override
+  String get validationCategoryRequired => 'Une catégorie valide est requise';
+
+  @override
+  String get validationDurationPositive => 'La durée doit être supérieure à zéro';
+
+  @override
+  String get validationBasePricePositive => 'Le prix de base doit être supérieur à zéro';
+
+  @override
+  String get validationFinalPricePositive => 'Le prix final doit être supérieur à zéro';
+
+  @override
+  String get validationFinalPriceExceedsBase => 'Le prix final ne peut pas dépasser le prix de base';
+
+  @override
+  String unexpectedErrorWithDetail(String detail) {
+    return 'Une erreur inattendue est survenue : $detail';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours heures',
+      one: '1 heure',
+      zero: '0 heure',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes minutes',
+      one: '1 minute',
+      zero: '0 minute',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String durationHoursOnly(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours heures',
+      one: '1 heure',
+      zero: '0 heure',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes minutes',
+      one: '1 minute',
+      zero: '0 minute',
+    );
+    return '$_temp0';
+  }
 }

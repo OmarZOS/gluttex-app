@@ -5259,13 +5259,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addResource => 'إضافة مورد';
 
   @override
-  String get noResourcesAdded => 'لم تتم إضافة أي موارد بعد';
+  String get noResourcesAdded => 'لم تتم إضافة موارد بعد';
 
   @override
   String get addStaff => 'إضافة موظف';
 
   @override
-  String get noStaffAdded => 'لم تتم إضافة أي موظفين بعد';
+  String get noStaffAdded => 'لم يتم إضافة موظفين بعد';
 
   @override
   String get serviceUpdated => 'تم تحديث الخدمة بنجاح';
@@ -6839,4 +6839,287 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get productOriginTxt => 'المصدر';
+
+  @override
+  String get productHiddenLabel => 'مخفي';
+
+  @override
+  String get deleteProductTitle => 'حذف المنتج؟';
+
+  @override
+  String deleteProductConfirmation(String productName) {
+    return 'سيؤدي حذف \"$productName\" إلى إزالته من الكتالوج. ستحتفظ الطلبات التي تشير إليه بسجلها التاريخي.';
+  }
+
+  @override
+  String get thisProductFallback => 'هذا المنتج';
+
+  @override
+  String get cancelButton => 'إلغاء';
+
+  @override
+  String get deleteButton => 'حذف';
+
+  @override
+  String get productDeletedMessage => 'تم حذف المنتج';
+
+  @override
+  String get productDeleteFailedMessage => 'فشل حذف المنتج';
+
+  @override
+  String get productNowVisibleMessage => 'المنتج الآن مرئي';
+
+  @override
+  String get productNowHiddenMessage => 'المنتج الآن مخفي';
+
+  @override
+  String get productVisibilityUpdateFailedMessage => 'فشل تحديث حالة الظهور';
+
+  @override
+  String get editorModeBadge => 'وضع المحرر';
+
+  @override
+  String get pricingSectionTitle => 'التسعير';
+
+  @override
+  String get basePriceLabel => 'السعر الأساسي';
+
+  @override
+  String get basePriceCaption => 'تكلفة المورّد';
+
+  @override
+  String get finalPriceCaption => 'يدفعه العميل';
+
+  @override
+  String get marginLabel => 'الهامش';
+
+  @override
+  String get marginPercentLabel => 'نسبة الهامش';
+
+  @override
+  String get setBasePriceHint => 'قم بتعيين سعر أساسي لرؤية الهامش والعائد';
+
+  @override
+  String get hideAction => 'إخفاء';
+
+  @override
+  String get showAction => 'إظهار';
+
+  @override
+  String get stockSectionTitle => 'المخزون';
+
+  @override
+  String get inStockLabel => 'متوفر';
+
+  @override
+  String get outOfStockLabel => 'غير متوفر';
+
+  @override
+  String get stockTotalLabel => 'الإجمالي';
+
+  @override
+  String get stockReservedLabel => 'محجوز';
+
+  @override
+  String get stockAvailableLabel => 'متاح';
+
+  @override
+  String get metadataSectionTitle => 'بيانات المنتج';
+
+  @override
+  String get metaIdLabel => 'المعرّف';
+
+  @override
+  String get metaCategoryLabel => 'الفئة';
+
+  @override
+  String get metaBarcodeLabel => 'الباركود';
+
+  @override
+  String get metaUnitLabel => 'الوحدة';
+
+  @override
+  String get metaProviderLabel => 'المورّد';
+
+  @override
+  String get metaOwnerLabel => 'المالك';
+
+  @override
+  String get metaOriginLabel => 'المنشأ';
+
+  @override
+  String get visibilityVisibleLabel => 'مرئي';
+
+  @override
+  String get visibilityHiddenLabel => 'مخفي';
+
+  @override
+  String get dangerZoneTitle => 'منطقة الخطر';
+
+  @override
+  String get dangerZoneBody => 'حذف المنتج يزيله من الكتالوج. ستحتفظ الطلبات التي تشير إليه بسجلها التاريخي.';
+
+  @override
+  String get productVisibilityTitle => 'الظهور';
+
+  @override
+  String get editServiceTitle => 'تعديل الخدمة';
+
+  @override
+  String get createServiceTitle => 'إنشاء خدمة';
+
+  @override
+  String get basicInformationSection => 'المعلومات الأساسية';
+
+  @override
+  String get pricingSection => 'التسعير';
+
+  @override
+  String get pricingConfigurationSection => 'إعدادات التسعير';
+
+  @override
+  String get resourceRequirementsSection => 'متطلبات الموارد';
+
+  @override
+  String get staffRequirementsSection => 'متطلبات الموظفين';
+
+  @override
+  String get costSummarySection => 'ملخص التكلفة';
+
+  @override
+  String get serviceNameLabel => 'اسم الخدمة';
+
+  @override
+  String get serviceNameHint => 'أدخل اسم الخدمة';
+
+  @override
+  String get descriptionLabel => 'الوصف';
+
+  @override
+  String get descriptionHint => 'أدخل الوصف';
+
+  @override
+  String get durationLabel => 'المدة (بالدقائق)';
+
+  @override
+  String get durationHint => 'أدخل المدة';
+
+  @override
+  String get durationInvalid => 'أدخل مدة صحيحة';
+
+  @override
+  String get minutesSuffix => 'دقيقة';
+
+  @override
+  String get ageGroupLabel => 'الفئة العمرية';
+
+  @override
+  String get ageGroupHint => 'أدخل الفئة العمرية';
+
+  @override
+  String get sampleTypeLabel => 'نوع العينة';
+
+  @override
+  String get sampleTypeHint => 'أدخل نوع العينة';
+
+  @override
+  String get specialistConsultationLabel => 'استشارة متخصص';
+
+  @override
+  String get governmentFundedLabel => 'ممول حكومياً';
+
+  @override
+  String get consultationIncludedLabel => 'الاستشارة مشمولة';
+
+  @override
+  String get digitalImagingLabel => 'التصوير الرقمي';
+
+  @override
+  String get materialOptionsLabel => 'خيارات المواد';
+
+  @override
+  String get includesLabel => 'يشمل';
+
+  @override
+  String roleFallback(int roleId) {
+    return 'الدور #$roleId';
+  }
+
+  @override
+  String get validationProviderRequired => 'مطلوب مزوّد صالح';
+
+  @override
+  String get validationCategoryRequired => 'مطلوب فئة صالحة';
+
+  @override
+  String get validationDurationPositive => 'يجب أن تكون المدة أكبر من صفر';
+
+  @override
+  String get validationBasePricePositive => 'يجب أن يكون السعر الأساسي أكبر من صفر';
+
+  @override
+  String get validationFinalPricePositive => 'يجب أن يكون السعر النهائي أكبر من صفر';
+
+  @override
+  String get validationFinalPriceExceedsBase => 'لا يمكن أن يكون السعر النهائي أكبر من السعر الأساسي';
+
+  @override
+  String unexpectedErrorWithDetail(String detail) {
+    return 'حدث خطأ غير متوقع: $detail';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours ساعة',
+      many: '$hours ساعة',
+      few: '$hours ساعات',
+      two: 'ساعتان',
+      one: 'ساعة واحدة',
+      zero: 'صفر ساعات',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes دقيقة',
+      many: '$minutes دقيقة',
+      few: '$minutes دقائق',
+      two: 'دقيقتان',
+      one: 'دقيقة واحدة',
+      zero: 'صفر دقائق',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String durationHoursOnly(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours ساعة',
+      many: '$hours ساعة',
+      few: '$hours ساعات',
+      two: 'ساعتان',
+      one: 'ساعة واحدة',
+      zero: 'صفر ساعات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes دقيقة',
+      many: '$minutes دقيقة',
+      few: '$minutes دقائق',
+      two: 'دقيقتان',
+      one: 'دقيقة واحدة',
+      zero: 'صفر دقائق',
+    );
+    return '$_temp0';
+  }
 }

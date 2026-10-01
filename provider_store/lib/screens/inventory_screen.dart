@@ -174,7 +174,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     return ProductList(
       selectedSupplierId: widget.currentProviderId!,
       searchQuery: widget.searchQuery,
-      products: _filteredProducts,
+      // products: _filteredProducts,
       isLoading: widget.isLoading,
       onProductTap: widget.onProductTap,
       privilegeLevel: widget.privilegeLevel,

@@ -116,9 +116,8 @@ class _ProductSelectorDialogContentState
         if (cached != null) {
           products = cached;
         } else {
-          products = await productNotifier.fetchSupplierProducts(
-            widget.supplierId!,
-          );
+          products = await productNotifier
+              .fetchSupplierProducts(widget.supplierId!, includeHidden: true);
         }
         _itemsPerPage = products?.length ?? 20;
       } else {

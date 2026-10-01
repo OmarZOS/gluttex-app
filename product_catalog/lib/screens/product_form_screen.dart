@@ -102,17 +102,7 @@ class ProductFormScreenState extends State<ProductFormScreen> {
     return Consumer<AssistantNotifier>(
       builder: (context, assistantNotifier, child) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              _stateManager.isUpdate
-                  ? localizations.updateProductText
-                  : localizations.addProductTxt,
-            ),
-            backgroundColor: colorScheme.surface,
-            foregroundColor: colorScheme.onSurface,
-            elevation: 0,
-            centerTitle: false,
-          ),
+          appBar: _buildAppBar(localizations, colorScheme),
           floatingActionButton: assistantNotifier.isLoading
               ? null
               : FloatingActionButton(
@@ -124,6 +114,7 @@ class ProductFormScreenState extends State<ProductFormScreen> {
                 ),
           body: Stack(
             children: [
+              // Background
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -136,38 +127,45 @@ class ProductFormScreenState extends State<ProductFormScreen> {
                   ),
                 ),
               ),
+
+              // Content
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
                   key: _formKey,
                   child: ListView(
                     children: [
+                      // AI assistance only on create.
                       if (!_stateManager.isUpdate)
                         AiAssistanceSection(
                           formData: _formData,
                           controllers: _controllers,
                         ),
-                      if (_formData.image != null ||
-                          (_formData.imageUrl ?? '').isNotEmpty)
-                        _buildImagePickerSection(),
+
+                      // Image picker: always visible, in both modes.
+                      _buildImagePickerSection(),
+
                       const SizedBox(height: 24),
+
                       ProductFormFields(
                         formData: _formData,
                         controllers: _controllers,
                         formKey: _formKey,
                         isUpdate: _stateManager.isUpdate,
                       ),
+
                       const SizedBox(height: 32),
+
                       SubmitSection(
                         onSubmit: _submitForm,
                         isUpdate: _stateManager.isUpdate,
                         hasAiData: false,
                       ),
-                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
               ),
+
               if (assistantNotifier.isLoading) const LoadingOverlay(),
             ],
           ),
@@ -178,7 +176,7 @@ class ProductFormScreenState extends State<ProductFormScreen> {
 
   Widget _buildImagePickerSection() {
     return ImagePickerSection(
-      initialImageUrl: _formData.imageUrl ?? '',
+      initialImageUrl: _formData.imageUrl ?? "",
       entityType: 'product',
       ownerId: '${_formData.ownerId}',
       entityId: '${_formData.productId}',
@@ -189,6 +187,18 @@ class ProductFormScreenState extends State<ProductFormScreen> {
         });
       },
       capturedImageFile: _formData.imageFile,
+    );
+  }
+
+  AppBar _buildAppBar(AppLocalizations localizations, ColorScheme colorScheme) {
+    return AppBar(
+      title: Text(_stateManager.isUpdate
+          ? localizations.updateProductText
+          : localizations.addProductTxt),
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      elevation: 0,
+      centerTitle: false,
     );
   }
 }

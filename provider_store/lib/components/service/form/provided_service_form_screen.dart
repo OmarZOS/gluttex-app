@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/business/Product.dart';
@@ -31,6 +30,7 @@ import 'form_chip_input.dart';
 import 'requirement_card.dart';
 import 'category_dropdown.dart';
 import 'role_dropdown.dart';
+import 'duration_picker_field.dart';
 
 class ProvidedServiceFormScreen extends StatefulWidget {
   const ProvidedServiceFormScreen({super.key});
@@ -287,14 +287,14 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
 
   // ===================== BUSINESS VALIDATION =====================
 
-  String? get _businessValidationError {
-    if (_providerId <= 0) return 'A valid provider is required';
-    if (_categoryId <= 0) return 'A valid category is required';
-    if (_actualDuration <= 0) return 'Duration must be greater than zero';
-    if (_basePrice <= 0) return 'Base price must be greater than zero';
-    if (_finalPrice <= 0) return 'Final price must be greater than zero';
+  String? _businessValidationError(AppLocalizations loc) {
+    if (_providerId <= 0) return loc.validationProviderRequired;
+    if (_categoryId <= 0) return loc.validationCategoryRequired;
+    if (_actualDuration <= 0) return loc.validationDurationPositive;
+    if (_basePrice <= 0) return loc.validationBasePricePositive;
+    if (_finalPrice <= 0) return loc.validationFinalPricePositive;
     if (_finalPrice > _basePrice) {
-      return 'Final price cannot be greater than the base price';
+      return loc.validationFinalPriceExceedsBase;
     }
     return null;
   }
@@ -307,7 +307,8 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final validationError = _businessValidationError;
+      final loc = AppLocalizations.of(context)!;
+      final validationError = _businessValidationError(loc);
       if (validationError != null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -424,7 +425,8 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
             context: context,
             statusCode: 500,
             responseCode: 'ERROR',
-            finalMessage: 'Error: $e',
+            finalMessage:
+                AppLocalizations.of(context)!.unexpectedErrorWithDetail('$e'),
           );
         }
       } finally {
@@ -437,9 +439,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
 
   // ===================== UI HELPERS =====================
 
-  String _roleName(int roleId) {
+  String _roleName(int roleId, AppLocalizations loc) {
     final matches = _staffRoles.where((role) => role.id == roleId);
-    return matches.isEmpty ? 'Role #$roleId' : matches.first.name;
+    return matches.isEmpty ? loc.roleFallback(roleId) : matches.first.name;
   }
 
   // ===================== BUILD =====================
@@ -449,11 +451,12 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
     super.build(context);
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _updatePage ? 'Edit Service' : 'Create Service',
+          _updatePage ? loc.editServiceTitle : loc.createServiceTitle,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -475,7 +478,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                   children: [
                     // ==================== BASIC INFO ====================
                     FormSectionHeader(
-                      title: 'Basic Information',
+                      title: loc.basicInformationSection,
                       icon: Icons.info_outline,
                       isExpanded: _basicInfoExpanded,
                       isCompleted: _basicInfoCompleted,
@@ -487,13 +490,13 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                     if (_basicInfoExpanded) ...[
                       const SizedBox(height: 12),
                       FormInputField(
-                        label: 'Service Name',
+                        label: loc.serviceNameLabel,
                         initialValue: _serviceName,
-                        hintText: 'Enter service name',
+                        hintText: loc.serviceNameHint,
                         isRequired: true,
                         validator: (val) {
                           if (val == null || val.isEmpty) {
-                            return 'Service name is required';
+                            return loc.serviceNameRequired;
                           }
                           return null;
                         },
@@ -505,9 +508,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                       ),
                       const SizedBox(height: 12),
                       FormInputField(
-                        label: 'Description',
+                        label: loc.descriptionLabel,
                         initialValue: _serviceDescription,
-                        hintText: 'Enter description',
+                        hintText: loc.descriptionHint,
                         maxLines: 3,
                         onSaved: (val) {
                           _serviceDescription = val ?? '';
@@ -529,37 +532,17 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                           _updateCompletionStates();
                         },
                       ),
-                      const SizedBox(height: 12),
-                      FormInputField(
-                        label: 'Duration (minutes)',
-                        initialValue: _actualDuration > 0
-                            ? _actualDuration.toString()
-                            : '',
-                        hintText: 'Enter duration',
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        suffixText: 'min',
-                        isRequired: true,
-                        validator: (value) {
-                          final duration = int.tryParse(value ?? '');
-                          return duration == null || duration <= 0
-                              ? 'Enter a valid duration'
-                              : null;
-                        },
-                        onSaved: (val) {
-                          _actualDuration = int.tryParse(val ?? '') ?? 0;
-                          _updateCompletionStates();
-                        },
-                        onChanged: (_) => _updateCompletionStates(),
-                      ),
+                      const SizedBox(height: 16),
+
+                      // -------- Duration picker --------
+                      _buildDurationField(loc),
+
                       const SizedBox(height: 24),
                     ],
 
                     // ==================== PRICING ====================
                     FormSectionHeader(
-                      title: 'Pricing',
+                      title: loc.pricingSection,
                       icon: Icons.attach_money,
                       isExpanded: _pricingExpanded,
                       isCompleted: _pricingCompleted,
@@ -571,7 +554,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                     if (_pricingExpanded) ...[
                       const SizedBox(height: 12),
                       FormPriceField(
-                        label: 'Base Price',
+                        label: loc.basePriceLabel,
                         value: _basePrice,
                         isRequired: true,
                         onSaved: (val) {
@@ -582,7 +565,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                       ),
                       const SizedBox(height: 12),
                       FormPriceField(
-                        label: 'Final Price',
+                        label: loc.finalPriceLabel,
                         value: _finalPrice,
                         isRequired: true,
                         onSaved: (val) {
@@ -605,7 +588,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
 
                     // ==================== PRICING CONFIG ====================
                     FormSectionHeader(
-                      title: 'Pricing Configuration',
+                      title: loc.pricingConfigurationSection,
                       icon: Icons.settings,
                       isExpanded: _pricingConfigExpanded,
                       isCompleted: _pricingConfigCompleted,
@@ -620,9 +603,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                         children: [
                           Expanded(
                             child: FormInputField(
-                              label: 'Age Group',
+                              label: loc.ageGroupLabel,
                               initialValue: _ageGroup,
-                              hintText: 'Enter age group',
+                              hintText: loc.ageGroupHint,
                               onSaved: (val) {
                                 _ageGroup = val ?? '';
                                 _updateCompletionStates();
@@ -632,9 +615,9 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                           const SizedBox(width: 12),
                           Expanded(
                             child: FormInputField(
-                              label: 'Sample Type',
+                              label: loc.sampleTypeLabel,
                               initialValue: _sampleType,
-                              hintText: 'Enter sample type',
+                              hintText: loc.sampleTypeHint,
                               onSaved: (val) {
                                 _sampleType = val ?? '';
                                 _updateCompletionStates();
@@ -647,7 +630,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                       Column(
                         children: [
                           FormCheckboxOption(
-                            label: 'Specialist Consultation',
+                            label: loc.specialistConsultationLabel,
                             value: _specialistConsultation,
                             onChanged: (val) {
                               setState(
@@ -657,7 +640,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                           ),
                           const SizedBox(height: 8),
                           FormCheckboxOption(
-                            label: 'Government Funded',
+                            label: loc.governmentFundedLabel,
                             value: _governmentFunded,
                             onChanged: (val) {
                               setState(() => _governmentFunded = val ?? false);
@@ -666,7 +649,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                           ),
                           const SizedBox(height: 8),
                           FormCheckboxOption(
-                            label: 'Consultation Included',
+                            label: loc.consultationIncludedLabel,
                             value: _consultationIncluded,
                             onChanged: (val) {
                               setState(
@@ -676,7 +659,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                           ),
                           const SizedBox(height: 8),
                           FormCheckboxOption(
-                            label: 'Digital Imaging',
+                            label: loc.digitalImagingLabel,
                             value: _digitalImaging,
                             onChanged: (val) {
                               setState(() => _digitalImaging = val ?? false);
@@ -687,7 +670,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                       ),
                       const SizedBox(height: 12),
                       FormChipInput(
-                        label: 'Material Options',
+                        label: loc.materialOptionsLabel,
                         items: _materialOptions,
                         onAdd: (material) {
                           if (!_materialOptions.contains(material)) {
@@ -702,7 +685,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                       ),
                       const SizedBox(height: 12),
                       FormChipInput(
-                        label: 'Includes',
+                        label: loc.includesLabel,
                         items: _includes,
                         onAdd: (include) {
                           if (!_includes.contains(include)) {
@@ -720,7 +703,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
 
                     // ==================== RESOURCES ====================
                     FormSectionHeader(
-                      title: 'Resource Requirements',
+                      title: loc.resourceRequirementsSection,
                       icon: Icons.inventory,
                       isExpanded: _resourcesExpanded,
                       isCompleted: _resourcesCompleted,
@@ -732,8 +715,8 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                     if (_resourcesExpanded) ...[
                       const SizedBox(height: 12),
                       if (_resourceRequirements.isEmpty)
-                        const EmptyState(
-                          message: 'No resources added yet',
+                        EmptyState(
+                          message: loc.noResourcesAdded,
                           icon: Icons.inventory_2_outlined,
                         )
                       else
@@ -772,7 +755,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
 
                     // ==================== STAFF ====================
                     FormSectionHeader(
-                      title: 'Staff Requirements',
+                      title: loc.staffRequirementsSection,
                       icon: Icons.people,
                       isExpanded: _staffExpanded,
                       isCompleted: _staffCompleted,
@@ -784,8 +767,8 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                     if (_staffExpanded) ...[
                       const SizedBox(height: 12),
                       if (_staffRequirements.isEmpty)
-                        const EmptyState(
-                          message: 'No staff added yet',
+                        EmptyState(
+                          message: loc.noStaffAdded,
                           icon: Icons.people_outline,
                         )
                       else
@@ -794,7 +777,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
                           final req = entry.value;
                           return RequirementCard(
                             title:
-                                '${_roleName(req.role)} (${req.minCount}-${req.maxCount})',
+                                '${_roleName(req.role, loc)} (${req.minCount}-${req.maxCount})',
                             subtitle:
                                 '${req.allocatedHours}h × DZD ${req.hourlyRate.toStringAsFixed(2)}/h ≈ DZD ${(req.hourlyRate * req.allocatedHours * ((req.minCount + req.maxCount) / 2)).toStringAsFixed(2)}',
                             onEdit: () => _showStaffDialog(
@@ -825,7 +808,7 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
 
                     // ==================== COST SUMMARY ====================
                     FormSectionHeader(
-                      title: 'Cost Summary',
+                      title: loc.costSummarySection,
                       icon: Icons.calculate,
                       isExpanded: _costSummaryExpanded,
                       isCompleted: _costSummaryCompleted,
@@ -869,6 +852,29 @@ class _ProvidedServiceFormScreenState extends State<ProvidedServiceFormScreen>
           ),
         ],
       ),
+    );
+  }
+
+  // ===================== DURATION FIELD =====================
+
+  /// Duration input backed by a [CupertinoTimerPicker].
+  ///
+  /// The picker is always a valid Duration, so the old "must be > 0"
+  /// validator is unreachable at the widget level. The submit-time
+  /// business validation (`validationDurationPositive`) still catches
+  /// a zero value.
+  Widget _buildDurationField(AppLocalizations loc) {
+    return DurationPickerField(
+      label: loc.durationLabel,
+      isRequired: true,
+      value: Duration(minutes: _actualDuration),
+      initiallyExpanded: _actualDuration == 0,
+      onChanged: (d) {
+        final minutes = d.inMinutes;
+        if (minutes == _actualDuration) return;
+        setState(() => _actualDuration = minutes);
+        _updateCompletionStates();
+      },
     );
   }
 

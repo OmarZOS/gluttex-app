@@ -10111,7 +10111,7 @@ abstract class AppLocalizations {
   /// **'Enter service name'**
   String get enterServiceName;
 
-  /// No description provided for @serviceNameRequired.
+  /// Validation message when the service name is empty
   ///
   /// In en, this message translates to:
   /// **'Service name is required'**
@@ -10303,7 +10303,7 @@ abstract class AppLocalizations {
   /// **'Add Resource'**
   String get addResource;
 
-  /// No description provided for @noResourcesAdded.
+  /// Empty state message in the resources section
   ///
   /// In en, this message translates to:
   /// **'No resources added yet'**
@@ -10315,7 +10315,7 @@ abstract class AppLocalizations {
   /// **'Add Staff'**
   String get addStaff;
 
-  /// No description provided for @noStaffAdded.
+  /// Empty state message in the staff section
   ///
   /// In en, this message translates to:
   /// **'No staff added yet'**
@@ -10381,7 +10381,7 @@ abstract class AppLocalizations {
   /// **'Type and press enter...'**
   String get typeAndPressEnter;
 
-  /// No description provided for @finalPriceLabel.
+  /// Label of the final price input
   ///
   /// In en, this message translates to:
   /// **'Final Price'**
@@ -13206,6 +13206,468 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Origin'**
   String get productOriginTxt;
+
+  /// Badge shown on a product card whose visibility is HIDDEN
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get productHiddenLabel;
+
+  /// Title of the delete confirmation dialog on the product details screen
+  ///
+  /// In en, this message translates to:
+  /// **'Delete product?'**
+  String get deleteProductTitle;
+
+  /// Body of the delete confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting \"{productName}\" removes it from the catalog. Orders that reference it keep their historical record.'**
+  String deleteProductConfirmation(String productName);
+
+  /// Fallback name for a product whose product_name is empty
+  ///
+  /// In en, this message translates to:
+  /// **'this product'**
+  String get thisProductFallback;
+
+  /// Generic cancel action label
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelButton;
+
+  /// Generic delete action label
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteButton;
+
+  /// Snackbar confirmation after deleting a product
+  ///
+  /// In en, this message translates to:
+  /// **'Product deleted'**
+  String get productDeletedMessage;
+
+  /// Snackbar shown when deleting a product fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete product'**
+  String get productDeleteFailedMessage;
+
+  /// Snackbar shown after making a product visible
+  ///
+  /// In en, this message translates to:
+  /// **'Product is now visible'**
+  String get productNowVisibleMessage;
+
+  /// Snackbar shown after hiding a product
+  ///
+  /// In en, this message translates to:
+  /// **'Product is now hidden'**
+  String get productNowHiddenMessage;
+
+  /// Snackbar shown when the visibility update request fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update visibility'**
+  String get productVisibilityUpdateFailedMessage;
+
+  /// Badge on the product details hero indicating the editor is viewing the product in edit context
+  ///
+  /// In en, this message translates to:
+  /// **'Editor mode'**
+  String get editorModeBadge;
+
+  /// Header of the pricing card
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get pricingSectionTitle;
+
+  /// Label of the base price input
+  ///
+  /// In en, this message translates to:
+  /// **'Base Price'**
+  String get basePriceLabel;
+
+  /// Caption under the base price value
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier cost'**
+  String get basePriceCaption;
+
+  /// Caption under the final price value
+  ///
+  /// In en, this message translates to:
+  /// **'Customer pays'**
+  String get finalPriceCaption;
+
+  /// Label of the absolute margin KPI pill
+  ///
+  /// In en, this message translates to:
+  /// **'Margin'**
+  String get marginLabel;
+
+  /// Label of the percentage margin KPI pill
+  ///
+  /// In en, this message translates to:
+  /// **'Margin %'**
+  String get marginPercentLabel;
+
+  /// Hint shown when no base price is set
+  ///
+  /// In en, this message translates to:
+  /// **'Set a base price to see margin and ROI'**
+  String get setBasePriceHint;
+
+  /// Action button that hides a product
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get hideAction;
+
+  /// Action button that shows a product
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get showAction;
+
+  /// Header of the stock card
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get stockSectionTitle;
+
+  /// Pill label when available quantity > 0
+  ///
+  /// In en, this message translates to:
+  /// **'In stock'**
+  String get inStockLabel;
+
+  /// Pill label when available quantity is 0
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get outOfStockLabel;
+
+  /// Stock stat label: total quantity
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get stockTotalLabel;
+
+  /// Stock stat label: reserved quantity
+  ///
+  /// In en, this message translates to:
+  /// **'Reserved'**
+  String get stockReservedLabel;
+
+  /// Stock stat label: available quantity
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get stockAvailableLabel;
+
+  /// Header of the metadata card
+  ///
+  /// In en, this message translates to:
+  /// **'Product metadata'**
+  String get metadataSectionTitle;
+
+  /// Metadata chip label for product id
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get metaIdLabel;
+
+  /// Metadata chip label for category
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get metaCategoryLabel;
+
+  /// Metadata chip label for barcode
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get metaBarcodeLabel;
+
+  /// Metadata chip label for unit of measurement
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get metaUnitLabel;
+
+  /// Metadata chip label for provider
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get metaProviderLabel;
+
+  /// Metadata chip label for owner
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get metaOwnerLabel;
+
+  /// Metadata chip label for origin
+  ///
+  /// In en, this message translates to:
+  /// **'Origin'**
+  String get metaOriginLabel;
+
+  /// Value shown when the product is visible
+  ///
+  /// In en, this message translates to:
+  /// **'Visible'**
+  String get visibilityVisibleLabel;
+
+  /// Value shown when the product is hidden
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get visibilityHiddenLabel;
+
+  /// Header of the danger zone card
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get dangerZoneTitle;
+
+  /// Description under the danger zone header
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting a product removes it from the catalog. Orders that reference it keep their historical record.'**
+  String get dangerZoneBody;
+
+  /// Header of the visibility toggle in the product form, and label of the visibility chip in the product details metadata card
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility'**
+  String get productVisibilityTitle;
+
+  /// App bar title when editing an existing provided service
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Service'**
+  String get editServiceTitle;
+
+  /// App bar title when creating a new provided service
+  ///
+  /// In en, this message translates to:
+  /// **'Create Service'**
+  String get createServiceTitle;
+
+  /// Header of the basic information section
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Information'**
+  String get basicInformationSection;
+
+  /// Header of the pricing section
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get pricingSection;
+
+  /// Header of the optional pricing configuration section
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing Configuration'**
+  String get pricingConfigurationSection;
+
+  /// Header of the resource requirements section
+  ///
+  /// In en, this message translates to:
+  /// **'Resource Requirements'**
+  String get resourceRequirementsSection;
+
+  /// Header of the staff requirements section
+  ///
+  /// In en, this message translates to:
+  /// **'Staff Requirements'**
+  String get staffRequirementsSection;
+
+  /// Header of the cost summary section
+  ///
+  /// In en, this message translates to:
+  /// **'Cost Summary'**
+  String get costSummarySection;
+
+  /// Label of the service name input
+  ///
+  /// In en, this message translates to:
+  /// **'Service Name'**
+  String get serviceNameLabel;
+
+  /// Placeholder hint for the service name input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter service name'**
+  String get serviceNameHint;
+
+  /// Label of the description input
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get descriptionLabel;
+
+  /// Placeholder hint for the description input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter description'**
+  String get descriptionHint;
+
+  /// Label of the duration input
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (minutes)'**
+  String get durationLabel;
+
+  /// Placeholder hint for the duration input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter duration'**
+  String get durationHint;
+
+  /// Validation message when duration is missing or non-positive
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid duration'**
+  String get durationInvalid;
+
+  /// Suffix shown inside the duration input
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutesSuffix;
+
+  /// Label of the age group input
+  ///
+  /// In en, this message translates to:
+  /// **'Age Group'**
+  String get ageGroupLabel;
+
+  /// Placeholder hint for the age group input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter age group'**
+  String get ageGroupHint;
+
+  /// Label of the sample type input
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Type'**
+  String get sampleTypeLabel;
+
+  /// Placeholder hint for the sample type input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter sample type'**
+  String get sampleTypeHint;
+
+  /// Checkbox label for specialist consultation
+  ///
+  /// In en, this message translates to:
+  /// **'Specialist Consultation'**
+  String get specialistConsultationLabel;
+
+  /// Checkbox label for government funded
+  ///
+  /// In en, this message translates to:
+  /// **'Government Funded'**
+  String get governmentFundedLabel;
+
+  /// Checkbox label for consultation included
+  ///
+  /// In en, this message translates to:
+  /// **'Consultation Included'**
+  String get consultationIncludedLabel;
+
+  /// Checkbox label for digital imaging
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Imaging'**
+  String get digitalImagingLabel;
+
+  /// Label of the material options chip input
+  ///
+  /// In en, this message translates to:
+  /// **'Material Options'**
+  String get materialOptionsLabel;
+
+  /// Label of the includes chip input
+  ///
+  /// In en, this message translates to:
+  /// **'Includes'**
+  String get includesLabel;
+
+  /// Fallback label shown when a staff role name cannot be resolved
+  ///
+  /// In en, this message translates to:
+  /// **'Role #{roleId}'**
+  String roleFallback(int roleId);
+
+  /// Business validation error when provider id is missing
+  ///
+  /// In en, this message translates to:
+  /// **'A valid provider is required'**
+  String get validationProviderRequired;
+
+  /// Business validation error when category id is missing
+  ///
+  /// In en, this message translates to:
+  /// **'A valid category is required'**
+  String get validationCategoryRequired;
+
+  /// Business validation error for non-positive duration
+  ///
+  /// In en, this message translates to:
+  /// **'Duration must be greater than zero'**
+  String get validationDurationPositive;
+
+  /// Business validation error for non-positive base price
+  ///
+  /// In en, this message translates to:
+  /// **'Base price must be greater than zero'**
+  String get validationBasePricePositive;
+
+  /// Business validation error for non-positive final price
+  ///
+  /// In en, this message translates to:
+  /// **'Final price must be greater than zero'**
+  String get validationFinalPricePositive;
+
+  /// Business validation error when final price exceeds base price
+  ///
+  /// In en, this message translates to:
+  /// **'Final price cannot be greater than the base price'**
+  String get validationFinalPriceExceedsBase;
+
+  /// Generic error message wrapping an exception's toString
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred: {detail}'**
+  String unexpectedErrorWithDetail(String detail);
+
+  /// Formatted duration when it has both hours and minutes, e.g. '1 hour 30 minutes'
+  ///
+  /// In en, this message translates to:
+  /// **'{hours, plural, =1 {1 hour} other {{hours} hours}} {minutes, plural, =1 {1 minute} other {{minutes} minutes}}'**
+  String durationHoursMinutes(int hours, int minutes);
+
+  /// Formatted duration when it is a whole number of hours
+  ///
+  /// In en, this message translates to:
+  /// **'{hours, plural, =1 {1 hour} other {{hours} hours}}'**
+  String durationHoursOnly(int hours);
+
+  /// Formatted duration when it is under an hour
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, =1 {1 minute} other {{minutes} minutes}}'**
+  String durationMinutesOnly(int minutes);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

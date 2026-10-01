@@ -38,15 +38,44 @@ class _EditorProductViewState extends State<EditorProductView> {
   }
 
   Future<void> _toggleVisibility() async {
-    // Wire to the product update endpoint.
+    final productId = widget.product.id_product;
+    if (productId == null || productId <= 0) return;
+
+    final loc = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Visibility toggle is not wired yet. Connect to your update API.',
-        ),
-      ),
+    final nextVisibility = widget.product.isVisible ? 'HIDDEN' : 'VISIBLE';
+
+    final status = await _productNotifier.updateProductVisibility(
+      productId,
+      nextVisibility,
     );
+
+    if (!mounted) return;
+
+    if (status == 200) {
+      // Refresh the local product so the view reflects the new value.
+      final refreshed = _productNotifier.products.firstWhere(
+        (p) => p.id_product == productId,
+        orElse: () => widget.product.copyWith(
+          product_visibility: nextVisibility,
+        ),
+      );
+      widget.onProductUpdated(refreshed);
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            nextVisibility == 'VISIBLE'
+                ? loc.productNowVisibleMessage
+                : loc.productNowHiddenMessage,
+          ),
+        ),
+      );
+    } else {
+      messenger.showSnackBar(
+        SnackBar(content: Text(loc.productVisibilityUpdateFailedMessage)),
+      );
+    }
   }
 
   Future<void> _navigateToEdit() async {
@@ -70,19 +99,21 @@ class _EditorProductViewState extends State<EditorProductView> {
   }
 
   void _showDeleteConfirmation() {
+    final loc = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete product?'),
+        title: Text(loc.deleteProductTitle),
         content: Text(
-          'Deleting "${widget.product.product_name ?? 'this product'}" '
-          'removes it from the catalog. Orders that reference it keep '
-          'their historical record.',
+          loc.deleteProductConfirmation(
+            widget.product.product_name ?? loc.thisProductFallback,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(loc.cancelButton),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -102,15 +133,15 @@ class _EditorProductViewState extends State<EditorProductView> {
               if (status == 200) {
                 navigator.pop();
                 messenger.showSnackBar(
-                  const SnackBar(content: Text('Product deleted')),
+                  SnackBar(content: Text(loc.productDeletedMessage)),
                 );
               } else {
                 messenger.showSnackBar(
-                  const SnackBar(content: Text('Failed to delete product')),
+                  SnackBar(content: Text(loc.productDeleteFailedMessage)),
                 );
               }
             },
-            child: const Text('Delete'),
+            child: Text(loc.deleteButton),
           ),
         ],
       ),
