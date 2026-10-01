@@ -1,4 +1,8 @@
+// lib/business/Supplier.dart
+
 import 'package:gluttex_core/app/GluttexImage.dart';
+import 'package:gluttex_core/business/NamingContribution.dart';
+import 'package:gluttex_core/business/iProduct.dart' show NamingContribution;
 
 class Supplier {
   final int idProviderDetails;
@@ -27,6 +31,21 @@ class Supplier {
 
   final GluttexImage? supplierImage;
 
+  /// Trilingual provider name from
+  /// `product_provider_details.naming_contribution`. Null when the
+  /// backend didn't include it (older rows, or a flattened search
+  /// projection).
+  ///
+  /// The FK lives on the details row in the schema, not on the
+  /// provider — that's why this is parsed from
+  /// `product_provider_details` and not from the top level.
+  final NamingContribution? naming;
+
+  /// Trilingual organisation name from
+  /// `product_provider_org.naming_contribution`. Null when the org
+  /// block is missing or carries no naming.
+  final NamingContribution? organisationNaming;
+
   Supplier({
     required this.idProviderDetails,
     required this.idProductProvider,
@@ -50,6 +69,8 @@ class Supplier {
     required this.addressPostalCode,
     required this.addressCountry,
     this.supplierImage,
+    this.naming,
+    this.organisationNaming,
   });
 
   factory Supplier.empty() => Supplier(
@@ -74,6 +95,8 @@ class Supplier {
         addressCity: "",
         addressPostalCode: "",
         addressCountry: "",
+        naming: null,
+        organisationNaming: null,
       );
 
   Supplier copyWith({
@@ -99,6 +122,8 @@ class Supplier {
     String? supplierImageUrl,
     int? supplierImageId,
     GluttexImage? supplierImage,
+    NamingContribution? naming,
+    NamingContribution? organisationNaming,
   }) {
     return Supplier(
       idProviderDetails: idProviderDetails ?? this.idProviderDetails,
@@ -129,6 +154,8 @@ class Supplier {
       addressPostalCode: addressPostalCode ?? this.addressPostalCode,
       addressCountry: addressCountry ?? this.addressCountry,
       supplierImage: supplierImage ?? this.supplierImage,
+      naming: naming ?? this.naming,
+      organisationNaming: organisationNaming ?? this.organisationNaming,
     );
   }
 
@@ -171,25 +198,38 @@ class Supplier {
         }
       }
 
-      // Safely parse organisation
+      // Safely parse organisation + its naming contribution
       String organisationName = "";
       String organisationDesc = "";
+      NamingContribution? organisationNaming;
       final orgData = json['product_provider_org'];
       if (orgData != null && orgData is Map<String, dynamic>) {
         organisationName =
             (orgData["provider_organisation_name"] ?? "").toString();
         organisationDesc =
             (orgData["provider_organisation_desc"] ?? "").toString();
+
+        final orgNamingJson = orgData['naming_contribution'];
+        if (orgNamingJson != null) {
+          organisationNaming = NamingContribution.fromJson(orgNamingJson);
+        }
       }
 
-      // Safely parse details
+      // Safely parse details + its naming contribution.
+      // The naming FK lives on the details row, not the provider row.
       final detailsData = json['product_provider_details'];
       String providerName = "";
       String providerContactInfo = "";
+      NamingContribution? providerNaming;
       if (detailsData != null && detailsData is Map<String, dynamic>) {
         providerName = (detailsData["provider_name"] ?? "").toString();
         providerContactInfo =
             (detailsData["provider_contact_info"] ?? "").toString();
+
+        final detailsNamingJson = detailsData['naming_contribution'];
+        if (detailsNamingJson != null) {
+          providerNaming = NamingContribution.fromJson(detailsNamingJson);
+        }
       }
 
       // Safely parse address from location
@@ -240,12 +280,15 @@ class Supplier {
         idLocation: _parseInt(json["product_provider_location_id"]),
         supplierImageUrl: imageUrl,
         supplierImageId: imageId,
+        naming: providerNaming,
+        organisationNaming: organisationNaming,
       );
     } catch (e, stackTrace) {
       // log("Error parsing Supplier: $e\n$stackTrace");
       return Supplier.empty();
     }
   }
+
   factory Supplier.fromSearchJson(Map<String, dynamic> json) {
     try {
       Map<String, dynamic> provider = {};
@@ -313,19 +356,43 @@ class Supplier {
         }
       }
 
+      // Resolve the details map — it may be nested under the provider
+      // or flattened onto the top-level search row.
+      final Map<String, dynamic> detailsMap =
+          (provider['product_provider_details'] is Map<String, dynamic>)
+              ? provider['product_provider_details'] as Map<String, dynamic>
+              : (json['product_provider_details'] is Map<String, dynamic>)
+                  ? json['product_provider_details'] as Map<String, dynamic>
+                  : json;
+
       // Get provider name from multiple possible sources
       String providerName = _getString(
         json['provider_name'] ??
             provider['provider_name'] ??
-            (provider['product_provider_details'] is Map<String, dynamic>
-                ? provider['product_provider_details']
-                    ? ['provider_name']
-                    : ""
-                : ""),
+            detailsMap['provider_name'],
       );
 
       if (providerName.isEmpty) {
         providerName = 'Unknown Supplier';
+      }
+
+      // Provider naming — on the details map in every shape.
+      NamingContribution? providerNaming;
+      final detailsNamingJson = detailsMap['naming_contribution'];
+      if (detailsNamingJson != null) {
+        providerNaming = NamingContribution.fromJson(detailsNamingJson);
+      }
+
+      // Organisation naming — may be nested under the org map or
+      // flattened at the top level.
+      NamingContribution? organisationNaming;
+      final orgNamingJson = org['naming_contribution'] ??
+          (json['product_provider_org'] is Map<String, dynamic>
+              ? (json['product_provider_org']
+                  as Map<String, dynamic>)['naming_contribution']
+              : null);
+      if (orgNamingJson != null) {
+        organisationNaming = NamingContribution.fromJson(orgNamingJson);
       }
 
       return Supplier(
@@ -347,7 +414,9 @@ class Supplier {
             _parseInt(provider['product_provider_details_id']),
         providerName: providerName,
         providerContactInfo: _getString(
-          json['provider_contact_info'] ?? provider['provider_contact_info'],
+          json['provider_contact_info'] ??
+              provider['provider_contact_info'] ??
+              detailsMap['provider_contact_info'],
         ),
         productProviderOwnerId: _parseInt(json['product_provider_owner']),
         locationLatitude: latitude ?? 0.0,
@@ -365,6 +434,8 @@ class Supplier {
         idLocation: _parseInt(loc['id_location']),
         supplierImageUrl: _getString(json['supplier_image_url']),
         supplierImageId: _parseInt(json['supplier_image_id']),
+        naming: providerNaming,
+        organisationNaming: organisationNaming,
       );
     } catch (e, stackTrace) {
       // log("Error parsing Supplier from search: $e\n$stackTrace");
@@ -385,6 +456,9 @@ class Supplier {
         "product_provider_type_desc": "string",
         'provider_name': providerName,
         'provider_contact_info': providerContactInfo,
+        // Echo the provider naming block when present so a save doesn't
+        // strip translations the caller didn't touch.
+        if (naming != null) 'naming': naming!.toJson(),
       },
       "image": {
         "id_provider_image": supplierImageId ?? 0,
@@ -406,6 +480,23 @@ class Supplier {
     };
   }
 
+  // ==================== Naming accessors ====================
+
+  /// Return the provider's name in [lang]. Prefers the trilingual
+  /// naming contribution; falls back to the flat `providerName`.
+  String nameFor(String lang) {
+    final resolved = naming?.nameFor(lang) ?? '';
+    if (resolved.isNotEmpty) return resolved;
+    return providerName;
+  }
+
+  /// Return the organisation's name in [lang]. Same fallback rule.
+  String organisationNameFor(String lang) {
+    final resolved = organisationNaming?.nameFor(lang) ?? '';
+    if (resolved.isNotEmpty) return resolved;
+    return providerOrganisationName;
+  }
+
   bool get hasLocation => locationLatitude != 0.0 && locationLongitude != 0.0;
 
   bool get hasAddress => addressStreet.isNotEmpty || addressCity.isNotEmpty;
@@ -420,9 +511,17 @@ class Supplier {
     return parts.join(', ');
   }
 
+  /// English-preferring display name. Kept for backward compatibility
+  /// with callers that don't care about the locale-aware path.
   String get displayName {
+    if (organisationNaming?.en.isNotEmpty == true) {
+      return organisationNaming!.en;
+    }
     if (providerOrganisationName.isNotEmpty) {
       return providerOrganisationName;
+    }
+    if (naming?.en.isNotEmpty == true) {
+      return naming!.en;
     }
     return providerName;
   }
@@ -442,7 +541,8 @@ class Supplier {
     return 'Supplier(id: $idProductProvider, name: $providerName, location: $hasLocation)';
   }
 
-  // Helper methods
+  // ==================== Helpers ====================
+
   static int _parseInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;
@@ -485,7 +585,6 @@ class SupplierCategory {
             Supplier._getString(json['product_provider_type_desc']),
       );
     } catch (e) {
-      // // log("Error parsing SupplierCategory: $e");
       return SupplierCategory(
         productProviderTypeId: 0,
         productCategoryDesc: "Unknown",

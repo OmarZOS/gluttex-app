@@ -6565,7 +6565,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonClear => 'Effacer';
 
   @override
-  String get deliveryDetailsTitle => 'Modifier les détails';
+  String get deliveryDetailsTitle => 'Détails de la livraison';
 
   @override
   String get deliveryDetailsSectionProducts => 'Produits';
@@ -7078,5 +7078,218 @@ class AppLocalizationsFr extends AppLocalizations {
       zero: '0 minute',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get glutenFreeLabel => 'Sans gluten';
+
+  @override
+  String get containsGlutenLabel => 'Contient du gluten';
+
+  @override
+  String get mayContainGlutenLabel => 'Peut contenir du gluten';
+
+  @override
+  String get importedFromAi => 'Importé par IA';
+
+  @override
+  String importedFromSource(String source) {
+    return 'Importé depuis $source';
+  }
+
+  @override
+  String get metaImportedBrandLabel => 'Marque importée';
+
+  @override
+  String get metaImportSourceLabel => 'Source d\'importation';
+
+  @override
+  String get metaImportConfidenceLabel => 'Confiance de l\'import';
+
+  @override
+  String get expiresLabel => 'Expire le';
+
+  @override
+  String get failedToLoadProducts => 'Échec du chargement des produits';
+
+  @override
+  String get retryButton => 'Réessayer';
+
+  @override
+  String get deleteTooltip => 'Supprimer le fournisseur';
+
+  @override
+  String get editTooltip => 'Modifier le fournisseur';
+
+  @override
+  String get modulePersonnel => 'Personnel';
+
+  @override
+  String get moduleInventory => 'Inventaire';
+
+  @override
+  String get moduleServices => 'Services';
+
+  @override
+  String get moduleSeller => 'Point de vente';
+
+  @override
+  String get moduleOrders => 'Commandes';
+
+  @override
+  String get moduleOperations => 'Opérations';
+
+  @override
+  String get moduleFinance => 'Finances';
+
+  @override
+  String get failedToLoadSuppliers => 'Échec du chargement des fournisseurs';
+
+  @override
+  String get grandTotalLabel => 'Total général';
+
+  @override
+  String get paidLabel => 'Payé';
+
+  @override
+  String get dueLabel => 'Dû';
+
+  @override
+  String get roiLabel => 'ROI';
+
+  @override
+  String get discountLabel => 'Remise';
+
+  @override
+  String get taxLabel => 'Taxe';
+
+  @override
+  String get deliveryLabel => 'Livraison';
+
+  @override
+  String get productSubtotalLabel => 'Sous-total produits';
+
+  @override
+  String get serviceSubtotalLabel => 'Sous-total services';
+
+  @override
+  String get grossSubtotalLabel => 'Sous-total brut';
+
+  @override
+  String get totalCostLabel => 'Coût total';
+
+  @override
+  String get commercialBreakdownTitle => 'Détail commercial';
+
+  @override
+  String get profitabilityTitle => 'Rentabilité';
+
+  @override
+  String get itemsTitle => 'Articles';
+
+  @override
+  String get servicesTitle => 'Services';
+
+  @override
+  String get cartDetailsTitle => 'Détails du panier';
+
+  @override
+  String get cartIdLabel => 'ID du panier';
+
+  @override
+  String get deliveryIdLabel => 'ID de livraison';
+
+  @override
+  String get deliveryMethodLabel => 'Méthode';
+
+  @override
+  String get deliveryFeeLabel => 'Frais';
+
+  @override
+  String get metaOperationLabel => 'Opération';
+
+  @override
+  String get metaCreatedLabel => 'Créé le';
+
+  @override
+  String get metaStatusLabel => 'Statut';
+
+  @override
+  String get vatLabel => 'TVA';
+
+  @override
+  String get invoiceStatusUnknown => 'Inconnue';
+
+  @override
+  String get itemStatusDelivered => 'Livré';
+
+  @override
+  String get itemStatusProcessing => 'En traitement';
+
+  @override
+  String get itemStatusPending => 'En attente';
+
+  @override
+  String get itemStatusCancelled => 'Annulé';
+
+  @override
+  String get itemStatusReturned => 'Retourné';
+
+  @override
+  String get itemStatusPartial => 'Partiel';
+
+  @override
+  String get serviceStatusCompleted => 'Terminée';
+
+  @override
+  String get serviceStatusScheduled => 'Planifiée';
+
+  @override
+  String get serviceStatusInProgress => 'En cours';
+
+  @override
+  String get serviceStatusProcessing => 'En traitement';
+
+  @override
+  String get serviceStatusPending => 'En attente';
+
+  @override
+  String get serviceStatusCancelled => 'Annulée';
+
+  @override
+  String get serviceStatusNoShow => 'Non présenté';
+
+  @override
+  String get costSegmentProducts => 'Produits';
+
+  @override
+  String get costSegmentConsumables => 'Consommables';
+
+  @override
+  String get costSegmentAmortized => 'Amorti';
+
+  @override
+  String get costSegmentLabor => 'Main-d\'œuvre';
+
+  @override
+  String get costSegmentDelivery => 'Livraison';
+
+  @override
+  String get resourceKindConsumable => 'consommable';
+
+  @override
+  String get resourceKindAmortized => 'amorti';
+
+  @override
+  String get resourceFallbackName => 'Ressource';
+
+  @override
+  String productFallbackName(Object id) {
+    return 'Produit #$id';
+  }
+
+  @override
+  String serviceFallbackName(Object id) {
+    return 'Service #$id';
   }
 }

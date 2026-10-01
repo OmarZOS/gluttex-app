@@ -1,3 +1,5 @@
+// lib/ui/supplier_product_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
@@ -24,6 +26,18 @@ class SupplierProductCard extends StatelessWidget {
     return url != null && url.isNotEmpty && url.startsWith('http');
   }
 
+  /// Prefer the seller's own image; fall back to the linked IProduct's
+  /// reference image when the flat URL is missing or malformed.
+  String? _resolvedImageUrl() {
+    final flat = product.product_image_url;
+    if (_isValidImageUrl(flat)) return flat;
+
+    final origin = product.product_origin?.iproductImageUrl;
+    if (_isValidImageUrl(origin)) return origin;
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -36,6 +50,15 @@ class SupplierProductCard extends StatelessWidget {
             ? theme.colorScheme.error
             : theme.colorScheme.primary;
 
+    // Locale-aware name. Uses the trilingual naming contribution when
+    // the ambient locale is Arabic or French and a translation exists;
+    // falls back to the product's own resolved name (English by
+    // default) for any other locale.
+    final localeLang = Localizations.localeOf(context).languageCode;
+    final displayName = (localeLang == 'ar' || localeLang == 'fr')
+        ? product.nameFor(localeLang)
+        : product.product_name;
+
     final categories = loc.productCategoryTextList.split(",");
     final categoryName = categories.isNotEmpty &&
             product.product_category_id != null
@@ -47,14 +70,14 @@ class SupplierProductCard extends StatelessWidget {
     return GestureDetector(
       onTap: isOutOfStock ? null : onTap,
       child: Container(
-        width: 280, // Optimal for horizontal scrolling
+        width: 280,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isDarkMode
                 ? Colors.white.withOpacity(0.5)
-                : Colors.black.withOpacity(0.5), // Border color
-            width: 1, // Border width
+                : Colors.black.withOpacity(0.5),
+            width: 1,
           ),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -76,13 +99,11 @@ class SupplierProductCard extends StatelessWidget {
                   : theme.colorScheme.primary.withOpacity(0.1),
               child: Stack(
                 children: [
-                  // Main content
                   Padding(
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Image section
                         Column(
                           children: [
                             _buildProductImage(context, theme),
@@ -110,20 +131,18 @@ class SupplierProductCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            )
-                            // Price badge
+                            ),
                           ],
                         ),
                         const SizedBox(width: 12),
-
-                        // Info section
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Product name and supplier
                               Text(
-                                product.product_name ?? loc.missingText,
+                                displayName.isNotEmpty
+                                    ? displayName
+                                    : loc.missingText,
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: isOutOfStock
@@ -147,17 +166,12 @@ class SupplierProductCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
-
-                              // Category chip
                               if (categoryName.isNotEmpty)
                                 _buildCategoryChip(
                                     context, theme, categoryName),
                               const SizedBox(height: 8),
-
-                              // Stock and price info
                               Row(
                                 children: [
-                                  // Stock indicator
                                   Icon(
                                     isOutOfStock
                                         ? Icons.block
@@ -189,8 +203,6 @@ class SupplierProductCard extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // Out of stock overlay
                   if (isOutOfStock)
                     Positioned.fill(
                       child: Container(
@@ -210,6 +222,8 @@ class SupplierProductCard extends StatelessWidget {
   }
 
   Widget _buildProductImage(BuildContext context, ThemeData theme) {
+    final imageUrl = _resolvedImageUrl();
+
     return Hero(
       tag: 'product-image-${product.id_product}',
       child: Container(
@@ -221,9 +235,9 @@ class SupplierProductCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: _isValidImageUrl(product.product_image_url)
+          child: imageUrl != null
               ? Image.network(
-                  product.product_image_url!,
+                  imageUrl,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;

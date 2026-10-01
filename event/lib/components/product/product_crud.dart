@@ -18,16 +18,55 @@ class ProductCrud {
         _state = state;
 
   Future<Product?> createOrUpdate(Product product) async {
-    if (product.productImage != null) {
-      final url = await product.productImage?.uploadImage();
-      product.product_image_url = url;
+    final image = product.productImage;
+    final isCreate = product.id_product == 0;
+
+    Product? result;
+    if (isCreate) {
+      result = await _service.addProduct(product);
+      if (result == null) return null;
+    } else {
+      if (image != null) {
+        image.setupImage(
+          filepath: image.filepath,
+          filename: image.filename,
+          entityType: 'product',
+          ownerId: '${product.product_owner_id ?? 0}',
+          entityId: '${product.id_product}',
+        );
+        product.product_image_url = await image.uploadImage();
+      }
+      result = await _service.updateProduct(product);
+      if (result == null) return null;
     }
 
-    final result = product.id_product == 0
-        ? await _service.addProduct(product)
-        : await _service.updateProduct(product);
+    if (isCreate && image != null) {
+      final productId = result.id_product;
+      if (productId == null || productId <= 0) {
+        throw StateError('Created product did not return a valid ID.');
+      }
+      image.setupImage(
+        filepath: image.filepath,
+        filename: image.filename,
+        entityType: 'product',
+        ownerId: '${result.product_owner_id ?? product.product_owner_id ?? 0}',
+        entityId: '$productId',
+      );
+      final imageUrl = await image.uploadImage();
+      if (imageUrl == null || imageUrl.isEmpty) {
+        throw StateError('Image upload did not return an image path.');
+      }
 
-    if (result != null && result.id_product != null) {
+      final productWithImage = result.copyWith(product_image_url: imageUrl);
+      result = await _service.updateProduct(productWithImage);
+      if (result == null) {
+        throw StateError(
+          'Product was created, but its image URL could not be saved.',
+        );
+      }
+    }
+
+    if (result.id_product != null) {
       _cache.invalidateProduct(result.id_product);
       _cache.cacheProduct(result);
       _updateInList(result);

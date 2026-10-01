@@ -1,3 +1,5 @@
+// lib/ui/SupplierCard.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gluttex_core/app/ManagementRule.dart';
@@ -23,7 +25,30 @@ class SupplierCard extends StatelessWidget {
     this.statusText,
   });
 
-  // Helper to get supplier name
+  // ==================== Name resolution ====================
+
+  /// Locale-aware display name.
+  ///
+  /// Prefers the linked supplier's trilingual naming contribution when
+  /// the ambient locale is one of the contribution's languages. Falls
+  /// back to the flat `providerName` for any other locale, or when the
+  /// supplier's payload didn't carry a naming block.
+  ///
+  /// The `managementRule` path has no naming support (its nested
+  /// `productProvider` doesn't carry one), so it always uses the flat
+  /// name.
+  String _localizedName(BuildContext context) {
+    if (supplier != null) {
+      final localeLang = Localizations.localeOf(context).languageCode;
+      // `Supplier.nameFor` already handles the fallback chain:
+      // naming.<lang> → naming.en → flat providerName.
+      return supplier!.nameFor(localeLang);
+    }
+    return _supplierName;
+  }
+
+  /// Flat provider name. Used for the management-rule path, for
+  /// navigation, and anywhere a `BuildContext` isn't available.
   String get _supplierName {
     if (supplier != null) {
       return supplier!.providerName;
@@ -34,7 +59,8 @@ class SupplierCard extends StatelessWidget {
     return 'Unknown Supplier';
   }
 
-  // Helper to get supplier ID
+  // ==================== Lookups (unchanged) ====================
+
   int get _supplierId {
     if (supplier != null) {
       return supplier!.idProductProvider;
@@ -45,7 +71,6 @@ class SupplierCard extends StatelessWidget {
     return 0;
   }
 
-  // Helper to get organisation ID
   int get _orgId {
     if (supplier != null) {
       return supplier!.idProviderOrganisation;
@@ -56,7 +81,6 @@ class SupplierCard extends StatelessWidget {
     return 0;
   }
 
-  // Helper to get provider type ID
   int get _providerTypeId {
     if (supplier != null) {
       return supplier!.productProviderTypeId;
@@ -67,7 +91,6 @@ class SupplierCard extends StatelessWidget {
     return 0;
   }
 
-  // Helper to get contact info
   String get _contactInfo {
     if (supplier?.locationName != null && supplier!.locationName!.isNotEmpty) {
       return supplier!.locationName!;
@@ -78,7 +101,6 @@ class SupplierCard extends StatelessWidget {
     return '';
   }
 
-  // Helper to get status
   bool get _isActive {
     if (managementRule != null) {
       return managementRule!.isActive;
@@ -93,15 +115,14 @@ class SupplierCard extends StatelessWidget {
     return false;
   }
 
+  // ==================== Build ====================
+
   @override
   Widget build(BuildContext context) {
-    // Validate that we have either a management rule or a supplier
     if (managementRule == null && supplier == null) {
       return const SizedBox.shrink();
     }
 
-    // If we have a supplier but no rule, use the supplier data
-    // If we have a rule, use the rule data
     final hasValidData = (supplier != null) ||
         (managementRule?.productProvider != null &&
             managementRule!.productProvider!.providerName != null);
@@ -126,14 +147,9 @@ class SupplierCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Supplier Logo/Status
               _buildSupplierLogo(context),
               const SizedBox(width: 16),
-
-              // Supplier Info
               Expanded(child: _buildSupplierInfo(context)),
-
-              // ✅ Custom Trailing Widget (passable)
               if (trailing != null) trailing!,
             ],
           ),
@@ -174,7 +190,6 @@ class SupplierCard extends StatelessWidget {
                       : colorScheme.onSurfaceVariant,
                 ),
         ),
-        // Status indicator dot
         Positioned(
           bottom: 0,
           right: 0,
@@ -204,9 +219,10 @@ class SupplierCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Supplier Name
+        // Locale-aware supplier name. Falls back to the flat name
+        // when no naming block is present.
         Text(
-          _supplierName,
+          _localizedName(context),
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -216,7 +232,6 @@ class SupplierCard extends StatelessWidget {
 
         const SizedBox(height: 4),
 
-        // Contact/Location Info
         if (_contactInfo.isNotEmpty)
           Row(
             children: [
@@ -241,10 +256,8 @@ class SupplierCard extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        // Status and Category Row
         Row(
           children: [
-            // Status Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -260,7 +273,6 @@ class SupplierCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            // Category Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -282,6 +294,8 @@ class SupplierCard extends StatelessWidget {
       ],
     );
   }
+
+  // ==================== Status helpers ====================
 
   Color _getStatusColor(BuildContext context) {
     final theme = Theme.of(context);
@@ -325,6 +339,8 @@ class SupplierCard extends StatelessWidget {
     return icons[categoryId % icons.length];
   }
 
+  // ==================== Navigation ====================
+
   void _navigateToPersonnelManagement(BuildContext context) {
     final id = _supplierId;
     final orgId = _orgId;
@@ -343,6 +359,10 @@ class SupplierCard extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => PersonnelManagementScreen(
+          // Pass the flat name to the next screen. The personnel screen
+          // displays it as a header, and we don't know its display
+          // language yet. The screen itself can resolve the locale-aware
+          // name from the supplier id if that becomes important.
           supplierName: _supplierName,
           orgId: orgId,
           supplierId: id,

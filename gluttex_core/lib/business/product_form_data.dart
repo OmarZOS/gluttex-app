@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:gluttex_core/app/GluttexImage.dart';
+import 'package:gluttex_core/business/iProduct.dart';
 import 'package:gluttex_core/business/Product.dart';
 
 class ProductFormData {
@@ -43,11 +44,19 @@ class ProductFormData {
   /// built by [toProduct] keeps the current value on update.
   int? reservedQuantity;
 
-  /// Origin (country / region) reference. Carried through untouched.
+  /// Origin reference, populated only from assistant-provided data.
   int? originId;
 
-  // Convert to Product object
-  Product toProduct() {
+  /// Assistant-origin data synced into this form, if any.
+  IProduct? assistantOrigin;
+
+  // ==================== Convert to Product ====================
+
+  /// Build the Product for the write path.
+  ///
+  /// Origin metadata is opt-in and must be supplied only when assistant
+  /// data remains unedited.
+  Product toProduct({IProduct? assistantProductOrigin}) {
     return Product(
       id_product: productId ?? 0,
       // Always use the (possibly locked) selected provider.
@@ -58,7 +67,9 @@ class ProductFormData {
       product_category_id: typeId ?? categoryId ?? 1,
       id_product_image: imageId,
       product_ref_id: productId,
-      product_name: productName ?? '',
+      // Write path sends the flat name. Read path resolves it via the
+      // `product_name` getter on the Product model.
+      product_nameRaw: productName ?? '',
       product_brand: productBrand ?? '',
       product_barcode: productBarcode ?? '',
       product_image_url: imageUrl,
@@ -68,15 +79,24 @@ class ProductFormData {
       product_quantity: quantity ?? 0,
       product_reserved_quantity: reservedQuantity ?? 0,
       product_visibility: visibility,
-      product_origin_id: originId,
+      product_origin_id: assistantProductOrigin?.idIproduct,
       product_description: productDescription ?? '',
       product_created_at: null,
       product_last_updated: null,
+      product_origin: assistantProductOrigin,
     );
   }
 
-  // Populate from existing product
+  // ==================== Populate from Product ====================
+
+  /// Seed the form from an existing Product.
+  ///
+  /// [productName] takes the resolved name from the model's getter, so
+  /// the editor shows whichever language the caller has selected (or
+  /// English by default).
   void populateFromProduct(Product product) {
+    // Resolved name — English unless the caller set a preferred
+    // language on the Product instance before calling this.
     productName = product.product_name;
     productBrand = product.product_brand;
     productBarcode = product.product_barcode;
@@ -99,6 +119,5 @@ class ProductFormData {
     // Fields carried through on update
     visibility = product.product_visibility ?? 'VISIBLE';
     reservedQuantity = product.product_reserved_quantity;
-    originId = product.product_origin_id;
   }
 }

@@ -12670,7 +12670,7 @@ abstract class AppLocalizations {
   /// No description provided for @invoiceStatusCanceled.
   ///
   /// In en, this message translates to:
-  /// **'Cancelled'**
+  /// **'Canceled'**
   String get invoiceStatusCanceled;
 
   /// No description provided for @invoiceStatusPartiallyPaid.
@@ -12796,7 +12796,7 @@ abstract class AppLocalizations {
   /// Title of the delivery edit sheet
   ///
   /// In en, this message translates to:
-  /// **'Edit Details'**
+  /// **'Delivery details'**
   String get deliveryDetailsTitle;
 
   /// Section header for the products block
@@ -13668,6 +13668,420 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes, plural, =1 {1 minute} other {{minutes} minutes}}'**
   String durationMinutesOnly(int minutes);
+
+  /// Badge shown when the product is certified gluten-free
+  ///
+  /// In en, this message translates to:
+  /// **'Gluten free'**
+  String get glutenFreeLabel;
+
+  /// Warning badge shown when the product contains gluten
+  ///
+  /// In en, this message translates to:
+  /// **'Contains gluten'**
+  String get containsGlutenLabel;
+
+  /// Informational badge shown when gluten cross-contamination is possible
+  ///
+  /// In en, this message translates to:
+  /// **'May contain gluten'**
+  String get mayContainGlutenLabel;
+
+  /// Small hint under the product header indicating the data came from AI extraction
+  ///
+  /// In en, this message translates to:
+  /// **'AI-imported'**
+  String get importedFromAi;
+
+  /// Hint under the product header naming the import source
+  ///
+  /// In en, this message translates to:
+  /// **'Imported from {source}'**
+  String importedFromSource(String source);
+
+  /// Metadata chip label for the brand name extracted from the linked IProduct
+  ///
+  /// In en, this message translates to:
+  /// **'Imported brand'**
+  String get metaImportedBrandLabel;
+
+  /// Metadata chip label for the source of the imported IProduct data
+  ///
+  /// In en, this message translates to:
+  /// **'Import source'**
+  String get metaImportSourceLabel;
+
+  /// Metadata chip label for the AI extraction confidence score
+  ///
+  /// In en, this message translates to:
+  /// **'Import confidence'**
+  String get metaImportConfidenceLabel;
+
+  /// Prefix shown before an expiration date on a privilege tile
+  ///
+  /// In en, this message translates to:
+  /// **'Expires'**
+  String get expiresLabel;
+
+  /// Error message shown when the supplier's product list fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load products'**
+  String get failedToLoadProducts;
+
+  /// Button label to retry a failed request
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryButton;
+
+  /// Tooltip on the delete supplier icon button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete supplier'**
+  String get deleteTooltip;
+
+  /// Tooltip on the edit supplier icon button
+  ///
+  /// In en, this message translates to:
+  /// **'Edit supplier'**
+  String get editTooltip;
+
+  /// Dashboard module label: personnel management
+  ///
+  /// In en, this message translates to:
+  /// **'Personnel'**
+  String get modulePersonnel;
+
+  /// Dashboard module label: inventory management
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get moduleInventory;
+
+  /// Dashboard module label: services
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get moduleServices;
+
+  /// Dashboard module label: point of sale
+  ///
+  /// In en, this message translates to:
+  /// **'Seller'**
+  String get moduleSeller;
+
+  /// Dashboard module label: orders
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get moduleOrders;
+
+  /// Dashboard module label: operations
+  ///
+  /// In en, this message translates to:
+  /// **'Operations'**
+  String get moduleOperations;
+
+  /// Dashboard module label: finance
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get moduleFinance;
+
+  /// Snackbar shown when the dashboard can't load the supplier list
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load suppliers'**
+  String get failedToLoadSuppliers;
+
+  /// No description provided for @grandTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand total'**
+  String get grandTotalLabel;
+
+  /// No description provided for @paidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paidLabel;
+
+  /// No description provided for @dueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get dueLabel;
+
+  /// No description provided for @roiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ROI'**
+  String get roiLabel;
+
+  /// No description provided for @discountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get discountLabel;
+
+  /// No description provided for @taxLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get taxLabel;
+
+  /// No description provided for @deliveryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get deliveryLabel;
+
+  /// No description provided for @productSubtotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Product subtotal'**
+  String get productSubtotalLabel;
+
+  /// No description provided for @serviceSubtotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Service subtotal'**
+  String get serviceSubtotalLabel;
+
+  /// No description provided for @grossSubtotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross subtotal'**
+  String get grossSubtotalLabel;
+
+  /// No description provided for @totalCostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total cost'**
+  String get totalCostLabel;
+
+  /// No description provided for @commercialBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial breakdown'**
+  String get commercialBreakdownTitle;
+
+  /// No description provided for @profitabilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profitability'**
+  String get profitabilityTitle;
+
+  /// No description provided for @itemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get itemsTitle;
+
+  /// No description provided for @servicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get servicesTitle;
+
+  /// No description provided for @cartDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart details'**
+  String get cartDetailsTitle;
+
+  /// No description provided for @cartIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart ID'**
+  String get cartIdLabel;
+
+  /// No description provided for @deliveryIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery ID'**
+  String get deliveryIdLabel;
+
+  /// No description provided for @deliveryMethodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get deliveryMethodLabel;
+
+  /// No description provided for @deliveryFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee'**
+  String get deliveryFeeLabel;
+
+  /// No description provided for @metaOperationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation'**
+  String get metaOperationLabel;
+
+  /// No description provided for @metaCreatedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get metaCreatedLabel;
+
+  /// No description provided for @metaStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get metaStatusLabel;
+
+  /// No description provided for @vatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT'**
+  String get vatLabel;
+
+  /// No description provided for @invoiceStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get invoiceStatusUnknown;
+
+  /// No description provided for @itemStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get itemStatusDelivered;
+
+  /// No description provided for @itemStatusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get itemStatusProcessing;
+
+  /// No description provided for @itemStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get itemStatusPending;
+
+  /// No description provided for @itemStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get itemStatusCancelled;
+
+  /// No description provided for @itemStatusReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get itemStatusReturned;
+
+  /// No description provided for @itemStatusPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get itemStatusPartial;
+
+  /// No description provided for @serviceStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get serviceStatusCompleted;
+
+  /// No description provided for @serviceStatusScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get serviceStatusScheduled;
+
+  /// No description provided for @serviceStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get serviceStatusInProgress;
+
+  /// No description provided for @serviceStatusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get serviceStatusProcessing;
+
+  /// No description provided for @serviceStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get serviceStatusPending;
+
+  /// No description provided for @serviceStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get serviceStatusCancelled;
+
+  /// No description provided for @serviceStatusNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'No show'**
+  String get serviceStatusNoShow;
+
+  /// No description provided for @costSegmentProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get costSegmentProducts;
+
+  /// No description provided for @costSegmentConsumables.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumables'**
+  String get costSegmentConsumables;
+
+  /// No description provided for @costSegmentAmortized.
+  ///
+  /// In en, this message translates to:
+  /// **'Amortized'**
+  String get costSegmentAmortized;
+
+  /// No description provided for @costSegmentLabor.
+  ///
+  /// In en, this message translates to:
+  /// **'Labor'**
+  String get costSegmentLabor;
+
+  /// No description provided for @costSegmentDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get costSegmentDelivery;
+
+  /// No description provided for @resourceKindConsumable.
+  ///
+  /// In en, this message translates to:
+  /// **'consumable'**
+  String get resourceKindConsumable;
+
+  /// No description provided for @resourceKindAmortized.
+  ///
+  /// In en, this message translates to:
+  /// **'amortized'**
+  String get resourceKindAmortized;
+
+  /// No description provided for @resourceFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource'**
+  String get resourceFallbackName;
+
+  /// No description provided for @productFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Product #{id}'**
+  String productFallbackName(Object id);
+
+  /// No description provided for @serviceFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Service #{id}'**
+  String serviceFallbackName(Object id);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

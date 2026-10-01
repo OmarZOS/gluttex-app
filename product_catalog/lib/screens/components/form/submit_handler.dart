@@ -3,6 +3,8 @@ import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:app_constants/app_response_codes.dart';
 import 'package:gluttex_core/app/GluttexException.dart';
 import 'package:gluttex_core/business/product_form_data.dart';
+import 'package:event/assistant_change_notifier.dart';
+import 'package:event/components/lib.dart';
 import 'package:event/product_change_notifier.dart';
 import 'package:ui/Services/ResponseHandler.dart';
 import 'package:product_catalog/screens/components/form/form_controllers.dart';
@@ -21,10 +23,25 @@ class SubmitHandler {
 
       formKey.currentState?.save();
 
-      final product = formData.toProduct();
+      final assistantNotifier = context.read<AssistantNotifier>();
+      final assistantSource = assistantNotifier.source_of_data;
+      final sourceIsAssistant = assistantSource == DataSource.aiGenerated ||
+          assistantSource == DataSource.databaseFetched;
+      final assistedFieldsWereEdited =
+          assistantNotifier.fieldData.values.any((field) => field.isEdited);
+      final assistantOrigin = sourceIsAssistant && !assistedFieldsWereEdited
+          ? formData.assistantOrigin
+          : null;
+
+      final product = formData.toProduct(
+        assistantProductOrigin: assistantOrigin,
+      )..productImage = formData.image;
       final productNotifier = context.read<ProductNotifier>();
 
-      await productNotifier.addOrUpdateProduct(product);
+      final savedProduct = await productNotifier.addOrUpdateProduct(product);
+      if (savedProduct == null) {
+        throw StateError('The product could not be saved.');
+      }
 
       if (!context.mounted) return;
 
@@ -36,14 +53,14 @@ class SubmitHandler {
       );
 
       // Pop just the form and hand the saved product back to the caller.
-      Navigator.of(context).pop(product);
+      Navigator.of(context).pop(savedProduct);
     } on GluttexException catch (e) {
       if (!context.mounted) return;
       ResponseHandler.handleResponse(
         context: context,
         statusCode: e.statusCode ?? 500,
         responseCode: e.message,
-        finalMessage: e.error,
+        finalMessage: e.error?.toString() ?? e.message,
       );
     } catch (e) {
       if (!context.mounted) return;

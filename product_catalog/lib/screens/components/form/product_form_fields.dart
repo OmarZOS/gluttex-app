@@ -186,22 +186,37 @@ class _ProductFormFieldsState extends State<ProductFormFields> {
           mode: pricingState.mode,
           aiPrice: aiPrice,
           onBasePriceChanged: (price) {
+            assistantNotifier.markFieldAsEdited(
+              ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA,
+            );
             pricingState.basePrice = price;
             syncOut();
           },
           onTaxPercentageChanged: (tax) {
+            assistantNotifier.markFieldAsEdited(
+              ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA,
+            );
             pricingState.taxPercentage = tax;
             syncOut();
           },
           onProfitMarginChanged: (margin) {
+            assistantNotifier.markFieldAsEdited(
+              ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA,
+            );
             pricingState.profitMargin = margin;
             syncOut();
           },
           onFinalPriceChanged: (price) {
+            assistantNotifier.markFieldAsEdited(
+              ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA,
+            );
             pricingState.finalPrice = price;
             syncOut();
           },
           onModeChanged: (mode) {
+            assistantNotifier.markFieldAsEdited(
+              ProductAssistedFields.IPRODUCT_ESTIMATED_PRICE_DA,
+            );
             pricingState.mode = mode;
             syncOut();
           },
@@ -259,6 +274,9 @@ class _ProductFormFieldsState extends State<ProductFormFields> {
               .toList(),
           onChanged: (value) {
             if (value == null) return;
+            context
+                .read<AssistantNotifier>()
+                .markFieldAsEdited(ProductAssistedFields.QUANTIFIER);
             setState(() {
               formData.quantifier = value;
             });
@@ -551,6 +569,8 @@ class _ProductFormFieldsState extends State<ProductFormFields> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
+
+      formData.assistantOrigin = currentProduct;
 
       final nameField =
           assistantNotifier.getFieldData(ProductAssistedFields.IPRODUCT_NAME);

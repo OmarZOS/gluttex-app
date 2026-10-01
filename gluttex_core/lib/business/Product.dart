@@ -3,6 +3,7 @@
 import 'dart:developer';
 
 import 'package:gluttex_core/app/GluttexImage.dart';
+import 'package:gluttex_core/business/iProduct.dart';
 
 /// A single product as returned by the API.
 ///
@@ -16,47 +17,33 @@ class Product {
   final int? id_product;
   final int? product_provider_id;
   final int? product_category_id;
-
-  /// Alias of [product_category_id]. Both are set from `product_category_id`
-  /// in the payload for backwards compatibility with callers that read one
-  /// or the other.
   final int? id_product_category;
-
   final int? id_product_image;
-
-  /// Legacy reference field. Not the same as `product_origin_id`.
   final int? product_ref_id;
-
   final int? product_owner_id;
   final int? product_origin_id;
 
   // ==================== Descriptive ====================
 
-  final String? product_name;
+  /// Raw flat name from the payload. The public [product_name] getter
+  /// composes from this and the nested naming contribution.
+  final String? product_nameRaw;
+
   final String? product_brand;
   final String? product_barcode;
   final String? product_quantifier;
   final String? product_description;
-
-  /// Category display name. Sourced from `product_category.product_category_name`
-  /// when the nested object is present, otherwise from a flat
-  /// `product_category_name` field.
   final String? product_category_name;
 
   // ==================== Pricing & stock ====================
 
-  /// Customer-facing price (VAT-inclusive). Stored as `product_price`.
   final double? product_price;
-
-  /// Supplier-side cost. Stored as `product_base_price`. Zero when unset.
   final double? product_base_price;
-
   final int? product_quantity;
   final int? product_reserved_quantity;
 
   // ==================== Status ====================
 
-  /// `"VISIBLE"` | `"HIDDEN"` | `null`. Defaults to `"VISIBLE"` when absent.
   final String? product_visibility;
 
   // ==================== Timestamps ====================
@@ -66,23 +53,20 @@ class Product {
 
   // ==================== Media ====================
 
-  /// Convenience URL of the last image in the payload's image list.
-  /// Kept as a mutable field because callers occasionally overwrite it
-  /// after an upload.
   String? product_image_url;
-
-  /// Parsed image, when one has been loaded separately. Not populated by
-  /// [Product.fromJson].
   GluttexImage? productImage;
 
   // ==================== Nested snapshots ====================
 
-  /// Full `product_category` object when the backend includes it.
-  /// Kept as a raw map so any field on the nested row survives round-trip.
   final Map<String, dynamic>? product_category;
-
-  /// Full `product_provider` object when the backend includes it.
   final Map<String, dynamic>? product_provider;
+
+  /// Linked imported product, when the backend includes it.
+  ///
+  /// Carries the trilingual naming contribution and the AI-provenance
+  /// metadata that the flat Product row doesn't have. Null for
+  /// products without an origin.
+  final IProduct? product_origin;
 
   // ==================== Constructor ====================
 
@@ -93,7 +77,7 @@ class Product {
     required this.id_product_category,
     required this.id_product_image,
     required this.product_ref_id,
-    required this.product_name,
+    required this.product_nameRaw,
     required this.product_brand,
     required this.product_quantifier,
     required this.product_barcode,
@@ -111,11 +95,45 @@ class Product {
     this.product_origin_id,
     this.product_category,
     this.product_provider,
+    this.product_origin,
   });
+
+  // ==================== Name access ====================
+
+  /// Customer-facing name. Always English unless the caller opts into
+  /// another language via [nameFor] or [preferredNameLanguage].
+  String get product_name => _resolveName(_nameLanguage);
+
+  String get productNameEn => _resolveName('en');
+  String get productNameAr => _resolveName('ar');
+  String get productNameFr => _resolveName('fr');
+
+  /// Resolve the name in a specific language without mutating state.
+  String nameFor(String lang) => _resolveName(lang);
+
+  String _nameLanguage = 'en';
+
+  set preferredNameLanguage(String lang) {
+    _nameLanguage = lang;
+  }
+
+  /// Resolve a name for a given language, falling back in order:
+  /// requested language → English → Arabic → French → flat field → ''.
+  ///
+  /// Delegates the trilingual fallback to [NamingContribution.nameFor]
+  /// so the fallback policy lives in one place. When there's no naming
+  /// contribution at all, uses the flat `product_nameRaw` field.
+  String _resolveName(String lang) {
+    final naming = product_origin?.namingContribution;
+    if (naming != null) {
+      final resolved = naming.nameFor(lang);
+      if (resolved.isNotEmpty) return resolved;
+    }
+    return (product_nameRaw ?? '').trim();
+  }
 
   // ==================== Factories ====================
 
-  /// Empty product. Useful as a placeholder before a fetch completes.
   factory Product.empty() {
     return Product(
       id_product: null,
@@ -124,7 +142,7 @@ class Product {
       id_product_category: null,
       id_product_image: null,
       product_ref_id: null,
-      product_name: '',
+      product_nameRaw: '',
       product_brand: '',
       product_quantifier: '',
       product_barcode: '',
@@ -142,6 +160,7 @@ class Product {
       product_origin_id: null,
       product_category: null,
       product_provider: null,
+      product_origin: null,
     );
   }
 
@@ -152,6 +171,7 @@ class Product {
     final image = _parseLastImage(map['product_image']);
     final categoryMap = _asMapOrNull(map['product_category']);
     final providerMap = _asMapOrNull(map['product_provider']);
+    final originMap = _asMapOrNull(map['product_origin']);
 
     final categoryName = _asString(categoryMap?['product_category_name']) ??
         _asString(map['product_category_name']) ??
@@ -168,7 +188,7 @@ class Product {
       id_product_category: _asIntOrNull(map['product_category_id']),
       id_product_image: image.id,
       product_ref_id: _asIntOrNull(map['product_ref_id']),
-      product_name: _asString(map['product_name']) ?? '',
+      product_nameRaw: _asString(map['product_name']) ?? '',
       product_brand: _asString(map['product_brand']) ?? '',
       product_barcode: _asString(map['product_barcode']) ?? '',
       product_quantifier: _asString(map['product_quantifier']) ?? '',
@@ -186,11 +206,12 @@ class Product {
       product_origin_id: _asIntOrNull(map['product_origin_id']),
       product_category: categoryMap,
       product_provider: providerMap,
+      // Parse the origin once, typed. `IProduct.fromJson` is already the
+      // canonical parser for that shape.
+      product_origin: originMap == null ? null : IProduct.fromJson(originMap),
     );
   }
 
-  /// Lenient variant used by search results. Same shape as [Product.fromJson]
-  /// but returns [Product.empty] on a null input instead of throwing.
   factory Product.fromSearchJson(dynamic json) {
     if (json == null) return Product.empty();
     return Product.fromJson(json);
@@ -207,7 +228,7 @@ class Product {
     int? product_ref_id,
     int? product_owner_id,
     int? product_origin_id,
-    String? product_name,
+    String? product_nameRaw,
     String? product_brand,
     String? product_barcode,
     String? product_quantifier,
@@ -223,6 +244,7 @@ class Product {
     DateTime? product_last_updated,
     Map<String, dynamic>? product_category,
     Map<String, dynamic>? product_provider,
+    IProduct? product_origin,
   }) {
     return Product(
       id_product: id_product ?? this.id_product,
@@ -233,7 +255,7 @@ class Product {
       product_ref_id: product_ref_id ?? this.product_ref_id,
       product_owner_id: product_owner_id ?? this.product_owner_id,
       product_origin_id: product_origin_id ?? this.product_origin_id,
-      product_name: product_name ?? this.product_name,
+      product_nameRaw: product_nameRaw ?? this.product_nameRaw,
       product_brand: product_brand ?? this.product_brand,
       product_barcode: product_barcode ?? this.product_barcode,
       product_quantifier: product_quantifier ?? this.product_quantifier,
@@ -251,14 +273,14 @@ class Product {
       product_last_updated: product_last_updated ?? this.product_last_updated,
       product_category: product_category ?? this.product_category,
       product_provider: product_provider ?? this.product_provider,
+      product_origin: product_origin ?? this.product_origin,
     );
   }
 
   // ==================== Serialisation ====================
 
-  /// Payload shape the API expects. The `product` sub-object holds the
-  /// top-level fields; `image` carries the last image in the list.
   Map<String, dynamic> toJson() {
+    final originJson = product_origin?.toJson();
     return {
       'product': {
         'id_product': id_product ?? 0,
@@ -266,7 +288,11 @@ class Product {
         'product_category_id': product_category_id ?? 0,
         'id_product_category': product_category_id ?? 0,
         'id_product_image': id_product_image ?? 0,
-        'product_name': product_name ?? '',
+        // Write the raw flat name, not the resolved one. Writing the
+        // resolved name would overwrite `naming.en` with a translated
+        // string on the server whenever the caller set a preferred
+        // language. The write path sends the seller's canonical name.
+        'product_name': product_nameRaw ?? '',
         'product_brand': product_brand ?? '',
         'product_barcode': product_barcode ?? '',
         'product_quantifier': product_quantifier ?? '',
@@ -276,43 +302,40 @@ class Product {
         'product_quantity': product_quantity ?? 0,
         'product_reserved_quantity': product_reserved_quantity ?? 0,
         'product_visibility': product_visibility ?? 'VISIBLE',
-        'product_origin_id': product_origin_id ?? 0,
         'product_description': product_description ?? '',
         'product_owner': product_owner_id ?? 0,
+        if (product_origin_id != null) 'product_origin_id': product_origin_id,
       },
       'image': {
         'id_product_image': id_product_image ?? 0,
         'product_image_url': product_image_url ?? '',
         'product_ref_id': product_ref_id ?? 0,
       },
+      // Only include the origin when it exists. An empty origin on a
+      // create would be noise; on an update it would strip the link.
+      if (originJson != null) 'product_origin': originJson,
     };
   }
 
   // ==================== Convenience getters ====================
 
-  /// Available stock: quantity minus what's reserved, clamped at zero.
   int get product_available_quantity {
     final total = product_quantity ?? 0;
     final reserved = product_reserved_quantity ?? 0;
     return (total - reserved).clamp(0, total);
   }
 
-  /// True when the product is visible to buyers.
   bool get isVisible =>
       (product_visibility ?? 'VISIBLE').toUpperCase() == 'VISIBLE';
 
-  /// True when the product has any sellable stock left.
   bool get isInStock => product_available_quantity > 0;
 
-  /// Margin per unit: sale price minus base price. Null when no base price
-  /// is set, since margin is undefined without a cost.
   double? get unitMargin {
     final base = product_base_price ?? 0;
     if (base <= 0) return null;
     return (product_price ?? 0) - base;
   }
 
-  /// Margin as a fraction of the base price. Null when no base price.
   double? get unitMarginPercent {
     final base = product_base_price ?? 0;
     if (base <= 0) return null;

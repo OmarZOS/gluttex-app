@@ -30,6 +30,15 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoryId = product.product_category_id ?? 0;
 
+    // Resolve the product name in the ambient locale when it's one of
+    // the three languages the naming contribution carries. Falls back
+    // to English for any other locale, which `product.product_name`
+    // handles itself.
+    final localeLang = Localizations.localeOf(context).languageCode;
+    final localizedName = (localeLang == 'ar' || localeLang == 'fr')
+        ? product.nameFor(localeLang)
+        : product.product_name;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -97,7 +106,7 @@ class ProductCard extends StatelessWidget {
                   SizedBox(
                     height: 20,
                     child: Text(
-                      product.product_name ?? '',
+                      localizedName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),

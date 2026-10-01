@@ -23,7 +23,7 @@ class OperationDetailsScreen extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: DefaultTabController(
-          length: 1, // placeholder so we can use TabBar later if needed
+          length: 1,
           child: CustomScrollView(
             slivers: [
               _OperationHero(operation: operation),
@@ -48,8 +48,7 @@ class _OperationHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final loc = AppLocalizations.of(context)!;
 
     return SliverAppBar(
@@ -91,27 +90,27 @@ class _OperationHero extends StatelessWidget {
   }
 
   static void _share(BuildContext context, BusinessOperation op) {
-    // Copy a plain-text summary to the clipboard as a placeholder for
-    // a real share sheet. Replace with share_plus when you're ready.
-    final text = _shareSummary(op);
+    final loc = AppLocalizations.of(context)!;
+    final text = _shareSummary(op, loc);
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.sharingOperation)),
+      SnackBar(content: Text(loc.sharingOperation)),
     );
   }
 
   static void _print(BuildContext context, BusinessOperation op) {
+    final loc = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.printingOperation)),
+      SnackBar(content: Text(loc.printingOperation)),
     );
   }
 
-  static String _shareSummary(BusinessOperation op) {
+  static String _shareSummary(BusinessOperation op, AppLocalizations loc) {
     return [
       op.title,
-      'Total: ${op.grandTotal.toStringAsFixed(2)}',
-      'Paid:  ${op.paidAmount.toStringAsFixed(2)}',
-      'Due:   ${op.dueAmount.toStringAsFixed(2)}',
+      '${loc.totalLabel}: ${op.grandTotal.toStringAsFixed(2)}',
+      '${loc.paidLabel}:  ${op.paidAmount.toStringAsFixed(2)}',
+      '${loc.dueLabel}:   ${op.dueAmount.toStringAsFixed(2)}',
     ].join('\n');
   }
 }
@@ -150,7 +149,6 @@ class _HeroBackground extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Identity line
               Row(
                 children: [
                   Container(
@@ -183,10 +181,7 @@ class _HeroBackground extends StatelessWidget {
                   _InvoiceStatusChip(status: operation.invoiceStatus),
                 ],
               ),
-
               const Spacer(),
-
-              // Grand total — the focal number
               Text(
                 FinancialUIManager.formatCurrency(
                     operation.grandTotal, context),
@@ -198,15 +193,12 @@ class _HeroBackground extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Grand total',
+                loc.grandTotalLabel,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: Colors.white.withOpacity(0.85),
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // Payment progress
               _PaymentProgress(
                 paid: operation.paidAmount,
                 due: operation.dueAmount,
@@ -226,13 +218,45 @@ class _InvoiceStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = (status ?? 'unknown').replaceAll('_', ' ');
-    final color = switch ((status ?? '').toLowerCase()) {
+    final loc = AppLocalizations.of(context)!;
+    final raw = (status ?? 'unknown').toLowerCase();
+
+    // Human-readable label per status. The `_unknown` fallback keeps
+    // the raw status visible if the backend sends something we don't
+    // map yet.
+    final String label;
+    switch (raw) {
+      case 'paid':
+        label = loc.invoiceStatusPaid;
+        break;
+      case 'partially_paid':
+        label = loc.invoiceStatusPartiallyPaid;
+        break;
+      case 'unpaid':
+        label = loc.invoiceStatusUnpaid;
+        break;
+      case 'overdue':
+        label = loc.invoiceStatusOverdue;
+        break;
+      case 'canceled':
+      case 'cancelled':
+        label = loc.invoiceStatusCanceled;
+        break;
+      case 'refunded':
+        label = loc.invoiceStatusRefunded;
+        break;
+      default:
+        label = loc.invoiceStatusUnknown;
+        break;
+    }
+
+    final color = switch (raw) {
       'paid' => const Color(0xFF7CFFB2),
       'partially_paid' => const Color(0xFFFFD27C),
       'unpaid' => const Color(0xFFFFA8A8),
       _ => Colors.white70,
     };
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -253,7 +277,7 @@ class _InvoiceStatusChip extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            s,
+            label,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,
@@ -279,11 +303,10 @@ class _PaymentProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Bar
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -297,13 +320,13 @@ class _PaymentProgress extends StatelessWidget {
         Row(
           children: [
             _HeroMetric(
-              label: 'Paid',
+              label: loc.paidLabel,
               value: paid,
               color: const Color(0xFF7CFFB2),
             ),
             const SizedBox(width: 20),
             _HeroMetric(
-              label: 'Due',
+              label: loc.dueLabel,
               value: due,
               color: due > 0 ? const Color(0xFFFFD27C) : Colors.white70,
             ),
@@ -388,7 +411,7 @@ class _Body extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Meta grid (status, supplier, client, created)
+// Meta grid
 // ---------------------------------------------------------------------------
 
 class _MetaGrid extends StatelessWidget {
@@ -404,7 +427,7 @@ class _MetaGrid extends StatelessWidget {
     final items = <_MetaTile>[
       _MetaTile(
         icon: Icons.tag,
-        label: 'Operation',
+        label: loc.metaOperationLabel,
         value: '${operation.sourceType} #${operation.sourceId}',
       ),
       if (operation.supplierId != null)
@@ -422,13 +445,13 @@ class _MetaGrid extends StatelessWidget {
       if (operation.createdAt != null)
         _MetaTile(
           icon: Icons.schedule,
-          label: 'Created',
+          label: loc.metaCreatedLabel,
           value: _fmtDate(operation.createdAt!),
         ),
       if (operation.status != null)
         _MetaTile(
           icon: Icons.flag_outlined,
-          label: 'Status',
+          label: loc.metaStatusLabel,
           value: operation.status!.replaceAll('_', ' '),
         ),
     ];
@@ -507,7 +530,7 @@ class _MetaChip extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Financial breakdown — the "why is the total this number" card
+// Financial breakdown
 // ---------------------------------------------------------------------------
 
 class _FinancialBreakdownCard extends StatelessWidget {
@@ -516,34 +539,34 @@ class _FinancialBreakdownCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     final rows = <_MoneyRow>[
-      _MoneyRow('Product subtotal', operation.productSubtotal),
-      _MoneyRow('Service subtotal', operation.serviceSubtotal),
+      _MoneyRow(loc.productSubtotalLabel, operation.productSubtotal),
+      _MoneyRow(loc.serviceSubtotalLabel, operation.serviceSubtotal),
       _MoneyRow(
-        'Gross subtotal',
+        loc.grossSubtotalLabel,
         operation.grossSubtotal,
         emphasis: _Emphasis.subtotal,
       ),
       if (operation.discountAmount > 0)
         _MoneyRow(
-          'Discount',
+          loc.discountLabel,
           -operation.discountAmount,
           emphasis: _Emphasis.negative,
         ),
-      if (operation.taxAmount > 0) _MoneyRow('Tax', operation.taxAmount),
+      if (operation.taxAmount > 0) _MoneyRow(loc.taxLabel, operation.taxAmount),
       if (operation.deliveryRevenue > 0)
-        _MoneyRow('Delivery', operation.deliveryRevenue),
+        _MoneyRow(loc.deliveryLabel, operation.deliveryRevenue),
       _MoneyRow(
-        'Grand total',
+        loc.grandTotalLabel,
         operation.grandTotal,
         emphasis: _Emphasis.total,
       ),
     ];
 
     return _Card(
-      title: 'Commercial breakdown',
+      title: loc.commercialBreakdownTitle,
       icon: Icons.receipt_long_outlined,
       child: Column(
         children: rows.map((r) => _MoneyRowWidget(row: r)).toList(),
@@ -624,20 +647,21 @@ class _ProfitabilityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     final margin = operation.marginAmount;
     final marginColor = margin >= 0 ? const Color(0xFF1E8E5A) : cs.error;
-
     final cost = operation.totalCost;
     final roi = operation.roi;
 
     return _Card(
-      title: 'Profitability',
+      title: loc.profitabilityTitle,
       icon: Icons.trending_up_rounded,
       trailing: _Pill(
-        label: roi == null ? '—' : '${(roi * 100).toStringAsFixed(1)}% ROI',
+        label: roi == null
+            ? '—'
+            : '${(roi * 100).toStringAsFixed(1)}% ${loc.roiLabel}',
         color: roi == null
             ? cs.onSurfaceVariant
             : (roi >= 0 ? const Color(0xFF1E8E5A) : cs.error),
@@ -646,14 +670,14 @@ class _ProfitabilityCard extends StatelessWidget {
         children: [
           _MoneyRowWidget(
             row: _MoneyRow(
-              'Total cost',
+              loc.totalCostLabel,
               cost,
               emphasis: _Emphasis.subtotal,
             ),
           ),
           _MoneyRowWidget(
             row: _MoneyRow(
-              'Margin',
+              loc.marginLabel,
               margin,
               emphasis: _Emphasis.total,
             ),
@@ -693,15 +717,20 @@ class _CostBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     final segments = <_CostSegment>[
-      if (productCost > 0) _CostSegment('Products', productCost, cs.primary),
-      if (consumable > 0) _CostSegment('Consumables', consumable, cs.secondary),
+      if (productCost > 0)
+        _CostSegment(loc.costSegmentProducts, productCost, cs.primary),
+      if (consumable > 0)
+        _CostSegment(loc.costSegmentConsumables, consumable, cs.secondary),
       if (nonConsumable > 0)
-        _CostSegment('Amortized', nonConsumable, cs.tertiary),
-      if (labor > 0) _CostSegment('Labor', labor, const Color(0xFF8B6CD9)),
+        _CostSegment(loc.costSegmentAmortized, nonConsumable, cs.tertiary),
+      if (labor > 0)
+        _CostSegment(loc.costSegmentLabor, labor, const Color(0xFF8B6CD9)),
       if (delivery > 0)
-        _CostSegment('Delivery', delivery, const Color(0xFFD08B1C)),
+        _CostSegment(
+            loc.costSegmentDelivery, delivery, const Color(0xFFD08B1C)),
     ];
 
     final total = segments.fold<double>(0, (s, e) => s + e.value);
@@ -773,8 +802,9 @@ class _ItemsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return _Card(
-      title: 'Items',
+      title: loc.itemsTitle,
       icon: Icons.inventory_2_outlined,
       trailing: _Pill(
         label: '${operation.itemCount}',
@@ -795,10 +825,11 @@ class _ItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     final product = item['ordered_product'] as Map<String, dynamic>?;
     final name = product?['product_name'] as String? ??
-        'Product #${item['ordered_product_id']}';
+        loc.productFallbackName('${item['ordered_product_id']}');
     final qty = (item['ordered_quantity'] as num?)?.toInt() ?? 0;
     final price = (item['unit_price'] as num?)?.toDouble() ?? 0;
     final vat = (item['applied_vat'] as num?)?.toDouble() ?? 0;
@@ -840,12 +871,12 @@ class _ItemRow extends StatelessWidget {
                     ),
                     if (vat > 0)
                       _MiniChip(
-                        label: 'VAT ${vat.toStringAsFixed(0)}%',
+                        label: '${loc.vatLabel} ${vat.toStringAsFixed(0)}%',
                         color: cs.primary,
                       ),
                     if (status != null)
                       _MiniChip(
-                        label: status.replaceAll('_', ' '),
+                        label: _statusLabel(status, loc),
                         color: _statusColor(status, cs),
                       ),
                   ],
@@ -869,6 +900,27 @@ class _ItemRow extends StatelessWidget {
   static String _initial(String s) {
     if (s.isEmpty) return '?';
     return s.trim()[0].toUpperCase();
+  }
+
+  static String _statusLabel(String s, AppLocalizations loc) {
+    switch (s.toLowerCase()) {
+      case 'delivered':
+      case 'completed':
+        return loc.itemStatusDelivered;
+      case 'processing':
+        return loc.itemStatusProcessing;
+      case 'pending':
+        return loc.itemStatusPending;
+      case 'cancelled':
+      case 'canceled':
+        return loc.itemStatusCancelled;
+      case 'returned':
+        return loc.itemStatusReturned;
+      case 'partial':
+        return loc.itemStatusPartial;
+      default:
+        return s.replaceAll('_', ' ');
+    }
   }
 
   static Color _statusColor(String s, ColorScheme cs) {
@@ -951,8 +1003,9 @@ class _ServicesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return _Card(
-      title: 'Services',
+      title: loc.servicesTitle,
       icon: Icons.handyman_outlined,
       trailing: _Pill(
         label: '${operation.serviceCount}',
@@ -974,11 +1027,12 @@ class _ServiceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     final provided =
         service['ordered_service_service'] as Map<String, dynamic>?;
     final name = provided?['provided_service_name'] as String? ??
-        'Service #${service['ordered_service_service_id']}';
+        loc.serviceFallbackName('${service['ordered_service_service_id']}');
     final qty = (service['ordered_service_quantity'] as num?)?.toInt() ?? 0;
     final total =
         (service['ordered_service_total_price'] as num?)?.toDouble() ?? 0;
@@ -1027,7 +1081,7 @@ class _ServiceRow extends StatelessWidget {
                           ),
                         if (status != null)
                           _MiniChip(
-                            label: status.replaceAll('_', ' '),
+                            label: _statusLabel(status, loc),
                             color: _statusColor(status, cs),
                           ),
                       ],
@@ -1059,7 +1113,7 @@ class _ServiceRow extends StatelessWidget {
                               true;
                   final n =
                       rr['service_resource_requirement_name'] as String? ??
-                          'Resource';
+                          loc.resourceFallbackName;
                   final q = rr['service_resource_requirement_quantity'];
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
@@ -1092,7 +1146,9 @@ class _ServiceRow extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            consumable ? 'consumable' : 'amortized',
+                            consumable
+                                ? loc.resourceKindConsumable
+                                : loc.resourceKindAmortized,
                             style: TextStyle(
                               color: consumable ? cs.secondary : cs.tertiary,
                               fontSize: 10,
@@ -1127,6 +1183,29 @@ class _ServiceRow extends StatelessWidget {
         '${local.minute.toString().padLeft(2, '0')}';
   }
 
+  static String _statusLabel(String s, AppLocalizations loc) {
+    switch (s.toLowerCase()) {
+      case 'delivered':
+      case 'completed':
+        return loc.serviceStatusCompleted;
+      case 'scheduled':
+        return loc.serviceStatusScheduled;
+      case 'in_progress':
+        return loc.serviceStatusInProgress;
+      case 'processing':
+        return loc.serviceStatusProcessing;
+      case 'pending':
+        return loc.serviceStatusPending;
+      case 'cancelled':
+      case 'canceled':
+        return loc.serviceStatusCancelled;
+      case 'no_show':
+        return loc.serviceStatusNoShow;
+      default:
+        return s.replaceAll('_', ' ');
+    }
+  }
+
   static Color _statusColor(String s, ColorScheme cs) {
     switch (s.toLowerCase()) {
       case 'delivered':
@@ -1134,6 +1213,7 @@ class _ServiceRow extends StatelessWidget {
         return const Color(0xFF1E8E5A);
       case 'scheduled':
       case 'processing':
+      case 'in_progress':
         return Colors.blue;
       case 'pending':
         return Colors.orange;
@@ -1147,7 +1227,7 @@ class _ServiceRow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Meta card (invoice / delivery / cart)
+// Meta card
 // ---------------------------------------------------------------------------
 
 class _MetaCard extends StatelessWidget {
@@ -1156,41 +1236,44 @@ class _MetaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     if (operation.isCart && operation.cart != null) {
       return _Card(
-        title: 'Cart details',
+        title: loc.cartDetailsTitle,
         icon: Icons.shopping_cart_outlined,
-        child: _kvBlock(operation.cart!),
+        child: _kvBlock(operation.cart!, loc),
       );
     }
     if (operation.isDelivery && operation.delivery != null) {
       return _Card(
-        title: 'Delivery details',
+        title: loc.deliveryDetailsTitle,
         icon: Icons.local_shipping_outlined,
-        child: _kvBlock(operation.delivery!),
+        child: _kvBlock(operation.delivery!, loc),
       );
     }
     return const SizedBox.shrink();
   }
 
-  Widget _kvBlock(Map<String, dynamic> m) {
+  Widget _kvBlock(Map<String, dynamic> m, AppLocalizations loc) {
     final entries = <_Kv>[
-      if (m['id_delivery'] != null) _Kv('Delivery ID', '${m['id_delivery']}'),
+      if (m['id_delivery'] != null)
+        _Kv(loc.deliveryIdLabel, '${m['id_delivery']}'),
       if (m['delivery_status'] != null)
-        _Kv('Status', '${m['delivery_status']}'),
+        _Kv(loc.metaStatusLabel, '${m['delivery_status']}'),
       if (m['delivery_shipping_method'] != null)
-        _Kv('Method', '${m['delivery_shipping_method']}'),
-      if (m['delivery_fee'] != null) _Kv('Fee', '${m['delivery_fee']}'),
-      if (m['cart_id'] != null) _Kv('Cart ID', '${m['cart_id']}'),
-      if (m['cart_status'] != null) _Kv('Status', '${m['cart_status']}'),
+        _Kv(loc.deliveryMethodLabel, '${m['delivery_shipping_method']}'),
+      if (m['delivery_fee'] != null)
+        _Kv(loc.deliveryFeeLabel, '${m['delivery_fee']}'),
+      if (m['cart_id'] != null) _Kv(loc.cartIdLabel, '${m['cart_id']}'),
+      if (m['cart_status'] != null)
+        _Kv(loc.metaStatusLabel, '${m['cart_status']}'),
       if (m['cart_total_amount'] != null)
-        _Kv('Total', '${m['cart_total_amount']}'),
+        _Kv(loc.totalLabel, '${m['cart_total_amount']}'),
       if (m['cart_created_at'] != null)
-        _Kv('Created', '${m['cart_created_at']}'),
+        _Kv(loc.metaCreatedLabel, '${m['cart_created_at']}'),
       if (m['delivery_created_at'] != null)
-        _Kv('Created', '${m['delivery_created_at']}'),
+        _Kv(loc.metaCreatedLabel, '${m['delivery_created_at']}'),
     ];
 
     return Column(

@@ -135,9 +135,9 @@ class IProductInfoSection extends StatelessWidget {
           isRecent: iproduct.isPriceRecent,
         ),
         InfoCard(
-          icon: _getSourceIcon(iproduct.iproductSource),
+          icon: _getSourceIcon(iproduct.iproductInfoSource),
           title: AppLocalizations.of(context)!.sourceText,
-          value: _getSourceText(iproduct.iproductSource),
+          value: _getSourceText(iproduct.iproductInfoSource),
           color: colorScheme.secondary,
         ),
         InfoCard(

@@ -366,6 +366,8 @@ class AiAssistant {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
 
+      formData.assistantOrigin = currentProduct;
+
       // Get all field data from assistant
       final nameField =
           assistantNotifier.getFieldData(ProductAssistedFields.IPRODUCT_NAME);

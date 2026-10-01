@@ -6500,7 +6500,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invoiceStatusPaid => 'Paid';
 
   @override
-  String get invoiceStatusCanceled => 'Cancelled';
+  String get invoiceStatusCanceled => 'Canceled';
 
   @override
   String get invoiceStatusPartiallyPaid => 'Partially paid';
@@ -6563,7 +6563,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonClear => 'Clear';
 
   @override
-  String get deliveryDetailsTitle => 'Edit Details';
+  String get deliveryDetailsTitle => 'Delivery details';
 
   @override
   String get deliveryDetailsSectionProducts => 'Products';
@@ -7070,5 +7070,218 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 minute',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get glutenFreeLabel => 'Gluten free';
+
+  @override
+  String get containsGlutenLabel => 'Contains gluten';
+
+  @override
+  String get mayContainGlutenLabel => 'May contain gluten';
+
+  @override
+  String get importedFromAi => 'AI-imported';
+
+  @override
+  String importedFromSource(String source) {
+    return 'Imported from $source';
+  }
+
+  @override
+  String get metaImportedBrandLabel => 'Imported brand';
+
+  @override
+  String get metaImportSourceLabel => 'Import source';
+
+  @override
+  String get metaImportConfidenceLabel => 'Import confidence';
+
+  @override
+  String get expiresLabel => 'Expires';
+
+  @override
+  String get failedToLoadProducts => 'Failed to load products';
+
+  @override
+  String get retryButton => 'Retry';
+
+  @override
+  String get deleteTooltip => 'Delete supplier';
+
+  @override
+  String get editTooltip => 'Edit supplier';
+
+  @override
+  String get modulePersonnel => 'Personnel';
+
+  @override
+  String get moduleInventory => 'Inventory';
+
+  @override
+  String get moduleServices => 'Services';
+
+  @override
+  String get moduleSeller => 'Seller';
+
+  @override
+  String get moduleOrders => 'Orders';
+
+  @override
+  String get moduleOperations => 'Operations';
+
+  @override
+  String get moduleFinance => 'Finance';
+
+  @override
+  String get failedToLoadSuppliers => 'Failed to load suppliers';
+
+  @override
+  String get grandTotalLabel => 'Grand total';
+
+  @override
+  String get paidLabel => 'Paid';
+
+  @override
+  String get dueLabel => 'Due';
+
+  @override
+  String get roiLabel => 'ROI';
+
+  @override
+  String get discountLabel => 'Discount';
+
+  @override
+  String get taxLabel => 'Tax';
+
+  @override
+  String get deliveryLabel => 'Delivery';
+
+  @override
+  String get productSubtotalLabel => 'Product subtotal';
+
+  @override
+  String get serviceSubtotalLabel => 'Service subtotal';
+
+  @override
+  String get grossSubtotalLabel => 'Gross subtotal';
+
+  @override
+  String get totalCostLabel => 'Total cost';
+
+  @override
+  String get commercialBreakdownTitle => 'Commercial breakdown';
+
+  @override
+  String get profitabilityTitle => 'Profitability';
+
+  @override
+  String get itemsTitle => 'Items';
+
+  @override
+  String get servicesTitle => 'Services';
+
+  @override
+  String get cartDetailsTitle => 'Cart details';
+
+  @override
+  String get cartIdLabel => 'Cart ID';
+
+  @override
+  String get deliveryIdLabel => 'Delivery ID';
+
+  @override
+  String get deliveryMethodLabel => 'Method';
+
+  @override
+  String get deliveryFeeLabel => 'Fee';
+
+  @override
+  String get metaOperationLabel => 'Operation';
+
+  @override
+  String get metaCreatedLabel => 'Created';
+
+  @override
+  String get metaStatusLabel => 'Status';
+
+  @override
+  String get vatLabel => 'VAT';
+
+  @override
+  String get invoiceStatusUnknown => 'Unknown';
+
+  @override
+  String get itemStatusDelivered => 'Delivered';
+
+  @override
+  String get itemStatusProcessing => 'Processing';
+
+  @override
+  String get itemStatusPending => 'Pending';
+
+  @override
+  String get itemStatusCancelled => 'Cancelled';
+
+  @override
+  String get itemStatusReturned => 'Returned';
+
+  @override
+  String get itemStatusPartial => 'Partial';
+
+  @override
+  String get serviceStatusCompleted => 'Completed';
+
+  @override
+  String get serviceStatusScheduled => 'Scheduled';
+
+  @override
+  String get serviceStatusInProgress => 'In progress';
+
+  @override
+  String get serviceStatusProcessing => 'Processing';
+
+  @override
+  String get serviceStatusPending => 'Pending';
+
+  @override
+  String get serviceStatusCancelled => 'Cancelled';
+
+  @override
+  String get serviceStatusNoShow => 'No show';
+
+  @override
+  String get costSegmentProducts => 'Products';
+
+  @override
+  String get costSegmentConsumables => 'Consumables';
+
+  @override
+  String get costSegmentAmortized => 'Amortized';
+
+  @override
+  String get costSegmentLabor => 'Labor';
+
+  @override
+  String get costSegmentDelivery => 'Delivery';
+
+  @override
+  String get resourceKindConsumable => 'consumable';
+
+  @override
+  String get resourceKindAmortized => 'amortized';
+
+  @override
+  String get resourceFallbackName => 'Resource';
+
+  @override
+  String productFallbackName(Object id) {
+    return 'Product #$id';
+  }
+
+  @override
+  String serviceFallbackName(Object id) {
+    return 'Service #$id';
   }
 }

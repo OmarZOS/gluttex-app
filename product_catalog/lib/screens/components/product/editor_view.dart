@@ -37,6 +37,33 @@ class _EditorProductViewState extends State<EditorProductView> {
     _productNotifier = context.read<ProductNotifier>();
   }
 
+  /// Product name resolved for the current locale.
+  ///
+  /// Prefers the linked IProduct's naming contribution when present —
+  /// the origin carries the AI-extracted names, which are often more
+  /// complete than the flat Product row. Falls back to the Product's
+  /// own resolved name when there's no origin or the origin is empty.
+  ///
+  /// Resolution order:
+  ///   1. `origin.nameFor(locale)` — the naming contribution for the
+  ///      ambient locale, or English, or the flat iproduct name.
+  ///   2. `product.nameFor(locale)` — the same for the Product's own
+  ///      naming block.
+  ///   3. `product.product_name` — the flat product name.
+  String get _localizedName {
+    final origin = widget.product.product_origin;
+    final localeLang = Localizations.localeOf(context).languageCode;
+
+    if (origin != null) {
+      final fromOrigin = origin.nameFor(localeLang);
+      if (fromOrigin.isNotEmpty) return fromOrigin;
+    }
+
+    return (localeLang == 'ar' || localeLang == 'fr')
+        ? widget.product.nameFor(localeLang)
+        : widget.product.product_name;
+  }
+
   Future<void> _toggleVisibility() async {
     final productId = widget.product.id_product;
     if (productId == null || productId <= 0) return;
@@ -107,7 +134,9 @@ class _EditorProductViewState extends State<EditorProductView> {
         title: Text(loc.deleteProductTitle),
         content: Text(
           loc.deleteProductConfirmation(
-            widget.product.product_name ?? loc.thisProductFallback,
+            _localizedName.isNotEmpty
+                ? _localizedName
+                : loc.thisProductFallback,
           ),
         ),
         actions: [
@@ -168,6 +197,7 @@ class _EditorProductViewState extends State<EditorProductView> {
             child: EditorHero(
               product: product,
               isRTL: widget.isRTL,
+              displayName: _localizedName,
             ),
           ),
           SliverPadding(

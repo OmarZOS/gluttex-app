@@ -61,18 +61,22 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
   List<AccessibleSupplier> get _managed =>
       _visibleSuppliers.where((s) => s.isManaged).toList();
 
-  // ✅ FIXED: Get pending rules directly from the notifier
   List<ManagementRule> get _pendingRules {
     return widget.personnelNotifier.getPendingRulesForUser(widget.userId);
   }
 
-  // ✅ FIXED: Build pending suppliers from pending rules
   List<ManagementRule> get _pendingSuppliersWithRules {
     return _pendingRules.where((r) => r.productProvider != null).toList();
   }
 
   int get _pendingCount => _pendingRules.length;
 
+  /// Filter suppliers by the current type and query.
+  ///
+  /// The search matches against the flat provider name AND against
+  /// every language in the naming contribution, so a user typing in
+  /// Arabic or French finds the same rows a user typing in English
+  /// would find.
   List<AccessibleSupplier> get _filtered {
     var suppliers = _visibleSuppliers;
 
@@ -84,7 +88,6 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
         suppliers = _managed;
         break;
       case 'pending':
-        // ✅ Return empty list - we'll handle pending separately
         return [];
       default:
         break;
@@ -93,14 +96,28 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       suppliers = suppliers.where((s) {
-        final name = s.supplier.providerName?.toLowerCase() ?? '';
-        final org = s.supplier.providerOrganisationName?.toLowerCase() ?? '';
-        return name.contains(q) || org.contains(q);
+        // Provider matches: flat + every language on the naming block.
+        final providerMatches = _matchesQuery(s.supplier.providerName, q) ||
+            _matchesQuery(s.supplier.naming?.en, q) ||
+            _matchesQuery(s.supplier.naming?.ar, q) ||
+            _matchesQuery(s.supplier.naming?.fr, q);
+
+        // Org matches: same idea.
+        final orgMatches =
+            _matchesQuery(s.supplier.providerOrganisationName, q) ||
+                _matchesQuery(s.supplier.organisationNaming?.en, q) ||
+                _matchesQuery(s.supplier.organisationNaming?.ar, q) ||
+                _matchesQuery(s.supplier.organisationNaming?.fr, q);
+
+        return providerMatches || orgMatches;
       }).toList();
     }
 
     return suppliers;
   }
+
+  bool _matchesQuery(String? value, String lowerQuery) =>
+      value != null && value.toLowerCase().contains(lowerQuery);
 
   // ============================================================
   // LIFECYCLE
@@ -450,8 +467,13 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
     ManagementRule rule,
   ) {
     final supplier = rule.productProvider!;
-    final isPending = rule.isPending;
     final createdAt = rule.createdAt;
+
+    // Resolve the name for the ambient locale so the pending card
+    // shows the same translation the rest of the app uses.
+    final localeLang = Localizations.localeOf(context).languageCode;
+    final displayName = supplier.nameFor(localeLang);
+    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'S';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -468,7 +490,6 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
           children: [
             Row(
               children: [
-                // Avatar
                 Container(
                   width: 50,
                   height: 50,
@@ -478,9 +499,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
                   ),
                   child: Center(
                     child: Text(
-                      supplier.providerName.isNotEmpty
-                          ? supplier.providerName[0].toUpperCase()
-                          : 'S',
+                      initial,
                       style: const TextStyle(
                         color: Colors.orange,
                         fontSize: 20,
@@ -495,7 +514,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        supplier.providerName,
+                        displayName,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -545,7 +564,6 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
               ],
             ),
             const SizedBox(height: 12),
-            // ✅ Accept/Refuse Buttons
             Row(
               children: [
                 Expanded(
@@ -767,6 +785,11 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
     final active = rules.where((r) => r.isActive).toList();
     final pending = rules.where((r) => r.isPending).toList();
 
+    // Resolve the name once for the dialog header.
+    final localeLang = Localizations.localeOf(context).languageCode;
+    final displayName = supplier.nameFor(localeLang);
+    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'S';
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -778,9 +801,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
             CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               child: Text(
-                supplier.providerName.isNotEmpty
-                    ? supplier.providerName[0].toUpperCase()
-                    : 'S',
+                initial,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -790,7 +811,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                supplier.providerName,
+                displayName,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -871,6 +892,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
 
   Widget _privilegeTile(ManagementRule rule, bool active) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
@@ -895,7 +917,7 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _getPrivilegeDisplay(rule.managementRuleCode),
+                  _getPrivilegeDisplay(rule.managementRuleCode, l10n),
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     color: cs.onSurface,
@@ -903,7 +925,8 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
                 ),
                 if (rule.managementRuleExpiry != null)
                   Text(
-                    'Expires: ${_formatDate(rule.managementRuleExpiry!)}',
+                    '${l10n?.expiresLabel ?? 'Expires'}: '
+                    '${_formatDate(rule.managementRuleExpiry!)}',
                     style: TextStyle(
                       fontSize: 10,
                       color: cs.onSurfaceVariant,
@@ -919,7 +942,9 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              active ? 'Active' : 'Pending',
+              active
+                  ? (l10n?.activeStatus ?? 'Active')
+                  : (l10n?.pendingStatus ?? 'Pending'),
               style: TextStyle(
                 fontSize: 9,
                 color: active ? Colors.green : Colors.orange,
@@ -932,7 +957,19 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
     );
   }
 
-  String _getPrivilegeDisplay(int code) {
+  /// Human-readable label for a rule code.
+  ///
+  /// Falls back to `AppLocalizations.privilegeByCode` when available;
+  /// otherwise returns the raw code. Migrate this map to ARB when you
+  /// want full localization; the fallback keeps the screen working
+  /// while the ARB keys are being added.
+  String _getPrivilegeDisplay(int code, AppLocalizations? l10n) {
+    // If AppLocalizations exposes a `privilege_<code>` lookup, use it.
+    // Uncomment and adapt once the ARB keys land:
+    //
+    // final resolved = l10n?.privilegeByCode(code);
+    // if (resolved != null && resolved.isNotEmpty) return resolved;
+
     const map = {
       1: 'Admin',
       2: 'Manage Personnel',
@@ -962,6 +999,10 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
       context,
       AppRoutes.supplierManage,
       arguments: {
+        // Route arg stays the flat name — the downstream screen
+        // resolves its own locale-aware name when it needs to render
+        // a header. Passing the flat name keeps the argument stable
+        // across locale changes.
         'supplierName': supplier.providerName,
         'orgId': supplier.idProviderOrganisation,
         'supplierId': supplier.idProductProvider,
@@ -989,7 +1030,9 @@ class _SupplierEntitiesScreenState extends State<SupplierEntitiesScreen>
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      return '${date.day}/${date.month}/${date.year} '
+          '${date.hour.toString().padLeft(2, '0')}:'
+          '${date.minute.toString().padLeft(2, '0')}';
     } catch (_) {
       return dateString;
     }

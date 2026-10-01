@@ -65,18 +65,22 @@ class DashboardBody extends StatelessWidget {
 
     return IndexedStack(
       index: index,
-      children: items
-          .map((item) => _buildScreenWithData(
-                context,
-                item,
-                userId,
-                supplierIds,
-                userRules,
-                suppliers,
-                suppliersWithAccess,
-                accessManager,
-              ))
-          .toList(),
+      children: List.generate(items.length, (childIndex) {
+        final item = items[childIndex];
+        return HeroMode(
+          enabled: childIndex == index,
+          child: _buildScreenWithData(
+            context,
+            item,
+            userId,
+            supplierIds,
+            userRules,
+            suppliers,
+            suppliersWithAccess,
+            accessManager,
+          ),
+        );
+      }),
     );
   }
 

@@ -3572,6 +3572,156 @@
   "placeholders": {
     "minutes": { "type": "int" }
   }
-}
+},
+
+"glutenFreeLabel": "Gluten free",
+"@glutenFreeLabel": {
+  "description": "Badge shown when the product is certified gluten-free"
+},
+
+"containsGlutenLabel": "Contains gluten",
+"@containsGlutenLabel": {
+  "description": "Warning badge shown when the product contains gluten"
+},
+
+"mayContainGlutenLabel": "May contain gluten",
+"@mayContainGlutenLabel": {
+  "description": "Informational badge shown when gluten cross-contamination is possible"
+},
+
+"importedFromAi": "AI-imported",
+"@importedFromAi": {
+  "description": "Small hint under the product header indicating the data came from AI extraction"
+},
+
+"importedFromSource": "Imported from {source}",
+"@importedFromSource": {
+  "description": "Hint under the product header naming the import source",
+  "placeholders": {
+    "source": { "type": "String" }
+  }
+},
+
+"metaImportedBrandLabel": "Imported brand",
+"@metaImportedBrandLabel": {
+  "description": "Metadata chip label for the brand name extracted from the linked IProduct"
+},
+
+"metaImportSourceLabel": "Import source",
+"@metaImportSourceLabel": {
+  "description": "Metadata chip label for the source of the imported IProduct data"
+},
+
+"metaImportConfidenceLabel": "Import confidence",
+"@metaImportConfidenceLabel": {
+  "description": "Metadata chip label for the AI extraction confidence score"
+},
+
+"expiresLabel": "Expires",
+"@expiresLabel": {
+  "description": "Prefix shown before an expiration date on a privilege tile"
+},
+
+"failedToLoadProducts": "Failed to load products",
+"@failedToLoadProducts": {
+  "description": "Error message shown when the supplier's product list fails to load"
+},
+
+"retryButton": "Retry",
+"@retryButton": {
+  "description": "Button label to retry a failed request"
+},
+
+"deleteTooltip": "Delete supplier",
+"@deleteTooltip": {
+  "description": "Tooltip on the delete supplier icon button"
+},
+
+"editTooltip": "Edit supplier",
+"@editTooltip": {
+  "description": "Tooltip on the edit supplier icon button"
+},
+
+"modulePersonnel": "Personnel",
+"@modulePersonnel": { "description": "Dashboard module label: personnel management" },
+
+"moduleInventory": "Inventory",
+"@moduleInventory": { "description": "Dashboard module label: inventory management" },
+
+"moduleServices": "Services",
+"@moduleServices": { "description": "Dashboard module label: services" },
+
+"moduleSeller": "Seller",
+"@moduleSeller": { "description": "Dashboard module label: point of sale" },
+
+"moduleOrders": "Orders",
+"@moduleOrders": { "description": "Dashboard module label: orders" },
+
+"moduleOperations": "Operations",
+"@moduleOperations": { "description": "Dashboard module label: operations" },
+
+"moduleFinance": "Finance",
+"@moduleFinance": { "description": "Dashboard module label: finance" },
+
+"failedToLoadSuppliers": "Failed to load suppliers",
+"@failedToLoadSuppliers": { "description": "Snackbar shown when the dashboard can't load the supplier list" },
+
+"grandTotalLabel": "Grand total",
+"paidLabel": "Paid",
+"dueLabel": "Due",
+"totalLabel": "Total",
+"marginLabel": "Margin",
+"roiLabel": "ROI",
+"discountLabel": "Discount",
+"taxLabel": "Tax",
+"deliveryLabel": "Delivery",
+"productSubtotalLabel": "Product subtotal",
+"serviceSubtotalLabel": "Service subtotal",
+"grossSubtotalLabel": "Gross subtotal",
+"totalCostLabel": "Total cost",
+"commercialBreakdownTitle": "Commercial breakdown",
+"profitabilityTitle": "Profitability",
+"itemsTitle": "Items",
+"servicesTitle": "Services",
+"cartDetailsTitle": "Cart details",
+"deliveryDetailsTitle": "Delivery details",
+"cartIdLabel": "Cart ID",
+"deliveryIdLabel": "Delivery ID",
+"deliveryMethodLabel": "Method",
+"deliveryFeeLabel": "Fee",
+"metaOperationLabel": "Operation",
+"metaCreatedLabel": "Created",
+"metaStatusLabel": "Status",
+"vatLabel": "VAT",
+"invoiceStatusPaid": "Paid",
+"invoiceStatusPartiallyPaid": "Partially paid",
+"invoiceStatusUnpaid": "Unpaid",
+"invoiceStatusOverdue": "Overdue",
+"invoiceStatusCanceled": "Canceled",
+"invoiceStatusRefunded": "Refunded",
+"invoiceStatusUnknown": "Unknown",
+"itemStatusDelivered": "Delivered",
+"itemStatusProcessing": "Processing",
+"itemStatusPending": "Pending",
+"itemStatusCancelled": "Cancelled",
+"itemStatusReturned": "Returned",
+"itemStatusPartial": "Partial",
+"serviceStatusCompleted": "Completed",
+"serviceStatusScheduled": "Scheduled",
+"serviceStatusInProgress": "In progress",
+"serviceStatusProcessing": "Processing",
+"serviceStatusPending": "Pending",
+"serviceStatusCancelled": "Cancelled",
+"serviceStatusNoShow": "No show",
+"costSegmentProducts": "Products",
+"costSegmentConsumables": "Consumables",
+"costSegmentAmortized": "Amortized",
+"costSegmentLabor": "Labor",
+"costSegmentDelivery": "Delivery",
+"resourceKindConsumable": "consumable",
+"resourceKindAmortized": "amortized",
+"resourceFallbackName": "Resource",
+"productFallbackName": "Product #{id}",
+"serviceFallbackName": "Service #{id}"
 
 }

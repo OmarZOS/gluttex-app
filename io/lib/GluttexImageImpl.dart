@@ -1,11 +1,9 @@
 import 'dart:developer';
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:app_constants/app_constants.dart';
 import 'package:gluttex_core/mediation/StorageService.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
 import 'package:locator/locator.dart';
-import 'package:path/path.dart';
 
 class GluttexImageImpl extends GluttexImage<FormData> {
   GluttexImageImpl();
@@ -24,10 +22,14 @@ class GluttexImageImpl extends GluttexImage<FormData> {
   Future<String?> uploadImage() async {
     StorageService storageService = AppLocator.get<StorageService>();
     log("uploading");
-    dynamic result = await storageService.insertBinary(
+    final dynamic result = await storageService.insertBinary(
         '${AppConstants.fsBaseUrl}${AppConstants.postImageEndpoint}/$entityType/$ownerId/$entityId/',
         await formData());
 
-    return result['path'].toString().replaceFirst("files/", "");
+    if (result is! Map || result['path'] is! String) {
+      throw StateError('Image upload response did not include a path.');
+    }
+
+    return (result['path'] as String).replaceFirst('files/', '');
   }
 }

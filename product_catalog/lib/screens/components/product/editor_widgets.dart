@@ -13,10 +13,19 @@ class EditorHero extends StatelessWidget {
   final Product product;
   final bool isRTL;
 
+  /// Pre-resolved display name. When provided and non-empty, the hero
+  /// uses it directly instead of reading `product.product_name`.
+  ///
+  /// This lets the caller decide whether the linked IProduct's name or
+  /// the flat Product name wins. `EditorProductView` passes the value
+  /// from its `_localizedName` getter, which prefers the origin.
+  final String? displayName;
+
   const EditorHero({
     super.key,
     required this.product,
     required this.isRTL,
+    this.displayName,
   });
 
   @override
@@ -24,7 +33,19 @@ class EditorHero extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final loc = AppLocalizations.of(context)!;
-    final hasImage = _isValidImage(product.product_image_url);
+
+    // Prefer the origin's reference image when the flat product has
+    // none. Same rule the customer view uses.
+    final imageUrl = _resolvedImageUrl();
+    final hasImage = imageUrl != null;
+
+    // Caller-supplied display name wins; otherwise use the product's
+    // own resolved name. The product's getter already handles the
+    // English / Arabic / French fallback when the caller didn't
+    // provide one.
+    final name = (displayName != null && displayName!.isNotEmpty)
+        ? displayName!
+        : product.product_name;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
@@ -46,7 +67,7 @@ class EditorHero extends StatelessWidget {
               color: cs.surfaceVariant,
               child: hasImage
                   ? Image.network(
-                      product.product_image_url!,
+                      imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _placeholder(cs),
                       loadingBuilder: (context, child, progress) {
@@ -79,7 +100,7 @@ class EditorHero extends StatelessWidget {
                   ),
                 const SizedBox(height: 2),
                 Text(
-                  product.product_name ?? '',
+                  name,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                     height: 1.2,
@@ -102,6 +123,13 @@ class EditorHero extends StatelessWidget {
                         label: product.product_quantifier!,
                         color: cs.onSurfaceVariant,
                       ),
+                    // Origin-derived pill: gluten status. Only shown
+                    // when the linked IProduct actually carries one.
+                    if (_originGlutenStatus() != null)
+                      _Pill(
+                        label: _originGlutenLabel(context)!,
+                        color: _originGlutenColor(context),
+                      ),
                   ],
                 ),
               ],
@@ -110,6 +138,56 @@ class EditorHero extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Prefer the seller's own image; fall back to the linked IProduct's
+  /// reference image when the flat URL is missing or malformed.
+  String? _resolvedImageUrl() {
+    final flat = product.product_image_url;
+    if (_isValidImage(flat)) return flat;
+
+    final origin = product.product_origin?.iproductImageUrl;
+    if (_isValidImage(origin)) return origin;
+
+    return null;
+  }
+
+  /// The origin's gluten status, or null when there's no origin, the
+  /// status is empty, or the status is the neutral 'unknown'.
+  String? _originGlutenStatus() {
+    final origin = product.product_origin;
+    if (origin == null) return null;
+    final s = origin.iproductGlutenStatus;
+    if (s.isEmpty || s == 'unknown') return null;
+    return s;
+  }
+
+  String? _originGlutenLabel(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    switch (_originGlutenStatus()) {
+      case 'gluten_free':
+        return loc.glutenFreeLabel;
+      case 'contains_gluten':
+        return loc.containsGlutenLabel;
+      case 'may_contain_gluten':
+        return loc.mayContainGlutenLabel;
+      default:
+        return null;
+    }
+  }
+
+  Color _originGlutenColor(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    switch (_originGlutenStatus()) {
+      case 'gluten_free':
+        return const Color(0xFF1E8E5A);
+      case 'contains_gluten':
+        return cs.error;
+      case 'may_contain_gluten':
+        return const Color(0xFFB26A00);
+      default:
+        return cs.onSurfaceVariant;
+    }
   }
 
   static bool _isValidImage(String? url) =>
@@ -443,6 +521,22 @@ class MetadataCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final origin = product.product_origin;
+
+    // Barcode: prefer the origin's extracted barcode when present —
+    // it came from the physical product, not from a human typing.
+    final barcode = (origin != null && origin.iproductBarcode.isNotEmpty)
+        ? origin.iproductBarcode
+        : (product.product_barcode ?? '—');
+
+    // Imported brand: the origin's own brand field, when non-empty
+    // and different from the seller's. Shown as a distinct chip so a
+    // steward can spot a mismatch.
+    final originBrand = (origin != null &&
+            origin.iproductBrand.isNotEmpty &&
+            origin.iproductBrand != (product.product_brand ?? ''))
+        ? origin.iproductBrand
+        : null;
 
     final entries = <_MetaEntry>[
       _MetaEntry(
@@ -458,7 +552,7 @@ class MetadataCard extends StatelessWidget {
       _MetaEntry(
         icon: Icons.qr_code,
         label: loc.metaBarcodeLabel,
-        value: product.product_barcode ?? '—',
+        value: barcode,
       ),
       _MetaEntry(
         icon: Icons.straighten,
@@ -487,6 +581,25 @@ class MetadataCard extends StatelessWidget {
             ? loc.visibilityVisibleLabel
             : loc.visibilityHiddenLabel,
       ),
+      // ---- origin-only rows, rendered when the origin exists ----
+      if (originBrand != null)
+        _MetaEntry(
+          icon: Icons.business_outlined,
+          label: loc.metaImportedBrandLabel,
+          value: originBrand,
+        ),
+      if (origin != null && origin.iproductInfoSource.isNotEmpty)
+        _MetaEntry(
+          icon: Icons.auto_awesome_outlined,
+          label: loc.metaImportSourceLabel,
+          value: origin.iproductInfoSource,
+        ),
+      if (origin != null)
+        _MetaEntry(
+          icon: Icons.verified_outlined,
+          label: loc.metaImportConfidenceLabel,
+          value: '${(origin.iproductInfoConfidence * 100).round()}%',
+        ),
     ];
 
     return _SectionCard(

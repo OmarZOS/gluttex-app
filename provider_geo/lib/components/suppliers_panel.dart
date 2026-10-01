@@ -1,3 +1,5 @@
+// lib/provider_geo/components/suppliers_panel.dart
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -36,8 +38,7 @@ class PanelContent extends StatefulWidget {
 }
 
 class _PanelContentState extends State<PanelContent> {
-  final ValueNotifier<bool>? _localFilterNotifier =
-      ValueNotifier<bool>(false); // Add this
+  final ValueNotifier<bool>? _localFilterNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -68,11 +69,8 @@ class _PanelContentState extends State<PanelContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Header section - rebuilds only when filter changes
         _buildHeaderSection(theme, loc),
         const SizedBox(height: 8),
-
-        // Supplier List - use separate builder to optimize rebuilds
         _buildSupplierList(theme, loc, isDarkMode),
       ],
     );
@@ -95,7 +93,6 @@ class _PanelContentState extends State<PanelContent> {
       ),
       child: Column(
         children: [
-          // Drag Handle
           Center(
             child: Container(
               width: 60,
@@ -107,13 +104,10 @@ class _PanelContentState extends State<PanelContent> {
             ),
           ),
           const SizedBox(height: 16),
-
-          // Title and Filter Button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Title
               Expanded(
                 child: Text(
                   loc.providersText,
@@ -125,11 +119,8 @@ class _PanelContentState extends State<PanelContent> {
                   ),
                 ),
               ),
-
-              // Filter Button - use ValueListenableBuilder to prevent rebuilds
               ValueListenableBuilder<bool>(
-                valueListenable:
-                    _localFilterNotifier!, // Your filter notifier here,
+                valueListenable: _localFilterNotifier!,
                 builder: (context, isFilterApplied, child) {
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
@@ -153,15 +144,13 @@ class _PanelContentState extends State<PanelContent> {
                             : theme.colorScheme.primary.withOpacity(0.7),
                         size: 24,
                       ),
-                      tooltip: 'Filter by location',
+                      // tooltip: loc.filterByLocationTooltip,
                     ),
                   );
                 },
               ),
             ],
           ),
-
-          // Active filter chip
           if (widget.selectedLocation != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -223,8 +212,13 @@ class _PanelContentState extends State<PanelContent> {
 
   Widget _buildSupplierItem(Supplier supplier, ThemeData theme,
       AppLocalizations loc, bool isDarkMode) {
-    final category = loc.providerCategoryTextList
-        .split(",")[supplier.productProviderTypeId - 1];
+    // Guard against out-of-range category ids so a stale or missing
+    // type doesn't crash the list. The old code indexed directly and
+    // assumed the id was within bounds.
+    final categories = loc.providerCategoryTextList.split(",");
+    final categoryIndex =
+        (supplier.productProviderTypeId - 1).clamp(0, categories.length - 1);
+    final category = categories.isNotEmpty ? categories[categoryIndex] : '';
 
     return Card(
       color: isDarkMode
@@ -236,10 +230,9 @@ class _PanelContentState extends State<PanelContent> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: _buildSupplierImage(supplier, theme),
         title: _buildSupplierTitle(supplier, category, theme),
-        subtitle: _buildSupplierSubtitle(supplier, theme),
+        subtitle: _buildSupplierSubtitle(supplier, theme, loc),
         trailing: _buildLocationButton(supplier, theme),
         onTap: () {
-          // Update global selected supplier so other parts of the app can react
           Provider.of<SupplierChangeNotifier>(context, listen: false)
               .selectSupplier(supplier.idProductProvider);
           showSupplierDetails(context, supplier);
@@ -283,13 +276,19 @@ class _PanelContentState extends State<PanelContent> {
 
   Widget _buildSupplierTitle(
       Supplier supplier, String category, ThemeData theme) {
+    // Resolve the supplier name for the ambient locale. `nameFor`
+    // prefers the naming contribution's translation when present and
+    // falls back to the flat provider name otherwise.
+    final localeLang = Localizations.localeOf(context).languageCode;
+    final displayName = supplier.nameFor(localeLang);
+
     return Wrap(
       spacing: 8,
       runSpacing: 4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(
-          supplier.providerName,
+          displayName,
           style: theme.textTheme.titleMedium,
         ),
         Container(
@@ -309,10 +308,14 @@ class _PanelContentState extends State<PanelContent> {
     );
   }
 
-  Widget _buildSupplierSubtitle(Supplier supplier, ThemeData theme) {
+  Widget _buildSupplierSubtitle(
+      Supplier supplier, ThemeData theme, AppLocalizations loc) {
+    // Same treatment for the organisation name.
+    final localeLang = Localizations.localeOf(context).languageCode;
+    final organisationName = supplier.organisationNameFor(localeLang);
+
     return Text(
-      AppLocalizations.of(context)!
-          .by_organisation(supplier.providerOrganisationName),
+      loc.by_organisation(organisationName),
       style: theme.textTheme.bodyMedium?.copyWith(
         color: theme.colorScheme.onSurface.withOpacity(0.6),
       ),

@@ -250,7 +250,7 @@ class AssistantNotifier extends ChangeNotifier {
       // iproductDescription: updates['iproduct_description'] ??
       //     _currentProduct!.iproductDescription,
       iproductImageUrl: _currentProduct!.iproductImageUrl,
-      iproductSource: _currentProduct!.iproductSource,
+      iproductInfoSource: _currentProduct!.iproductInfoSource,
       // iproductInfoConfidence: _currentProduct!.iproductInfoConfidence,
       iproductLastPriceUpdate: _currentProduct!.iproductLastPriceUpdate,
       iproductCreatedAt: _currentProduct!.iproductCreatedAt,

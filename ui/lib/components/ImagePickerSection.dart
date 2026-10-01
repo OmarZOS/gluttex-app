@@ -1,8 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:gluttex_core/app/GluttexImage.dart';
+import 'package:gluttex_localizations/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:locator/locator.dart';
 
@@ -15,15 +16,16 @@ class ImagePickerSection extends StatefulWidget {
   final File? capturedImageFile;
   final void Function(GluttexImage? newImageUrl)? onImageUploaded;
 
-  const ImagePickerSection(
-      {super.key,
-      required this.initialImageUrl,
-      required this.entityType,
-      required this.ownerId,
-      required this.entityId,
-      this.onImageUploaded,
-      this.landscape = false,
-      this.capturedImageFile = null});
+  const ImagePickerSection({
+    super.key,
+    required this.initialImageUrl,
+    required this.entityType,
+    required this.ownerId,
+    required this.entityId,
+    this.onImageUploaded,
+    this.landscape = false,
+    this.capturedImageFile,
+  });
 
   @override
   State<ImagePickerSection> createState() => _ImagePickerSectionState();
@@ -31,341 +33,207 @@ class ImagePickerSection extends StatefulWidget {
 
 class _ImagePickerSectionState extends State<ImagePickerSection> {
   File? _pickedImageFile;
-  bool _isUploading = false;
   bool _isHovering = false;
-  late final ImagePicker _picker = ImagePicker();
-  late final landscape;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
-    landscape = widget.landscape;
     super.initState();
-    _pickedImageFile =
-        widget.capturedImageFile; // Initialize with captured image
+    _pickedImageFile = widget.capturedImageFile;
   }
 
   @override
   void didUpdateWidget(ImagePickerSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Update when capturedImageFile changes
     if (widget.capturedImageFile != oldWidget.capturedImageFile) {
-      setState(() {
-        _pickedImageFile = widget.capturedImageFile;
-      });
+      _pickedImageFile = widget.capturedImageFile;
     }
   }
 
   Future<void> _pickImage() async {
-    final context = this.context;
     final loc = AppLocalizations.of(context)!;
-
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      builder: (context) => SafeArea(
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading: const Icon(Icons.photo_library_outlined),
               title: Text(loc.gallery),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
+              leading: const Icon(Icons.photo_camera_outlined),
               title: Text(loc.camera),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
     );
 
-    if (source == null) return;
+    if (source == null || !mounted) return;
 
     try {
-      final picked = await _picker.pickImage(source: source);
-      if (picked != null && mounted) {
-        setState(() => _pickedImageFile = File(picked.path));
-        _uploadImage(picked.path);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(loc.imagePickFailed),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 88,
+        maxWidth: 2400,
+        maxHeight: 2400,
+      );
+      if (picked == null || !mounted) return;
+
+      final image = AppLocator.get<GluttexImage>()
+        ..setupImage(
+          filepath: picked.path,
+          filename: picked.name,
+          entityType: widget.entityType,
+          ownerId: widget.ownerId,
+          entityId: widget.entityId,
         );
-      }
+
+      setState(() => _pickedImageFile = File(picked.path));
+      widget.onImageUploaded?.call(image);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${loc.imagePickFailed}: $error'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
-  void _uploadImage(String path) async {
-    setState(() => _isUploading = true);
-
-    try {
-      GluttexImage gluttexImage = AppLocator.get<GluttexImage>();
-
-      gluttexImage.setupImage(
-        filepath: path,
-        filename: path.split("/").last,
-        entityType: widget.entityType,
-        ownerId: widget.ownerId,
-        entityId: widget.entityId,
-      );
-
-      widget.onImageUploaded?.call(gluttexImage);
-
-      // if (mounted) {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text("AppLocalizations.of(context)!.imageUploadSuccess"),
-      //     backgroundColor: Colors.green,
-      //     behavior: SnackBarBehavior.floating,
-      //   ),
-      // );
-      // }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('{AppLocalizations.of(context)!.uploadFailed}: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isUploading = false);
-      }
-    }
+  void _removeImage() {
+    HapticFeedback.lightImpact();
+    setState(() => _pickedImageFile = null);
+    widget.onImageUploaded?.call(null);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final loc = AppLocalizations.of(context)!;
     final hasImage = _pickedImageFile != null ||
-        (widget.initialImageUrl != null && widget.initialImageUrl!.isNotEmpty);
+        (widget.initialImageUrl?.isNotEmpty ?? false);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Image Preview Card
-        Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: _isUploading ? null : _pickImage,
-            onHover: (hovering) => setState(() => _isHovering = hovering),
-            child: Container(
-              height: landscape ? 200 : MediaQuery.of(context).size.width * 0.5,
-              width: landscape
-                  ? double.infinity
-                  : MediaQuery.of(context).size.width * 0.5,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(16),
+        MouseRegion(
+          onEnter: (_) => setState(() => _isHovering = true),
+          onExit: (_) => setState(() => _isHovering = false),
+          child: Material(
+            color: colors.surfaceContainerLow,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(
+                color: _isHovering ? colors.primary : colors.outlineVariant,
+                width: _isHovering ? 1.5 : 1,
               ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Image Content
-                  if (_isUploading)
-                    const Center(child: CircularProgressIndicator())
-                  else if (_pickedImageFile != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.file(
+            ),
+            child: InkWell(
+              onTap: _pickImage,
+              child: SizedBox(
+                height: widget.landscape ? 210 : 230,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (_pickedImageFile != null)
+                      Image.file(
                         _pickedImageFile!,
                         fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-                    )
-                  else if (widget.initialImageUrl != null &&
-                      widget.initialImageUrl!.isNotEmpty)
-                    ClipRRect(
-                      // Make sure this matches the condition above
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildPlaceholder(theme, loc),
+                      )
+                    else if (widget.initialImageUrl?.isNotEmpty ?? false)
+                      Image.network(
                         widget.initialImageUrl!,
                         fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          final expected = progress.expectedTotalBytes;
                           return Center(
                             child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
+                              value: expected == null
+                                  ? null
+                                  : progress.cumulativeBytesLoaded / expected,
                             ),
                           );
                         },
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildPlaceholder(theme, loc);
-                        },
-                      ),
-                    )
-                  else
-                    _buildPlaceholder(theme, loc),
-
-                  // Hover Effect
-                  if (_isHovering && !_isUploading)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              hasImage ? Icons.edit : Icons.add_a_photo,
-                              size: 36,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              hasImage ? loc.changeImage : loc.selectImage,
-                              style: theme.textTheme.bodyLarge?.copyWith(
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildPlaceholder(theme, loc),
+                      )
+                    else
+                      _buildPlaceholder(theme, loc),
+                    if (_isHovering)
+                      ColoredBox(
+                        color: Colors.black.withValues(alpha: 0.42),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                hasImage
+                                    ? Icons.edit_outlined
+                                    : Icons.add_a_photo_outlined,
+                                size: 32,
                                 color: Colors.white,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(
+                                hasImage ? loc.changeImage : loc.selectImage,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
-
-        // Action Buttons
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: _isUploading
-                      ? null
-                      : LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Theme.of(context).colorScheme.primary,
-                            Theme.of(context).colorScheme.primaryContainer,
-                          ],
-                        ),
-                  boxShadow: _isUploading
-                      ? null
-                      : [
-                          BoxShadow(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                ),
-                child: FilledButton.icon(
-                  icon: _isUploading
-                      ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        )
-                      : const Icon(Icons.camera_alt, size: 22),
-                  label: _isUploading
-                      ? Text(
-                          loc.uploadingImage,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        )
-                      : Text(
-                          hasImage ? loc.changeImage : loc.uploadImage,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 18, horizontal: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    backgroundColor:
-                        _isUploading ? Colors.grey[300] : Colors.transparent,
-                    foregroundColor: _isUploading
-                        ? Colors.grey[600]
-                        : Theme.of(context).colorScheme.onPrimary,
-                    elevation: 0,
+              child: FilledButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                label: Text(hasImage ? loc.changeImage : loc.uploadImage),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  onPressed: _isUploading ? null : _pickImage,
                 ),
               ),
             ),
             if (_pickedImageFile != null) ...[
-              const SizedBox(width: 12),
-              AnimatedScale(
-                duration: const Duration(milliseconds: 300),
-                scale: _isUploading ? 0.9 : 1.0,
-                child: Tooltip(
-                  message: loc.removeImage,
-                  child: IconButton.filledTonal(
-                    style: IconButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      backgroundColor: _isUploading
-                          ? Colors.grey[300]
-                          : Theme.of(context).colorScheme.errorContainer,
-                      foregroundColor: _isUploading
-                          ? Colors.grey[600]
-                          : Theme.of(context).colorScheme.onErrorContainer,
+              const SizedBox(width: 10),
+              Tooltip(
+                message: loc.removeImage,
+                child: IconButton.filledTonal(
+                  onPressed: _removeImage,
+                  icon: const Icon(Icons.delete_outline),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(50, 50),
+                    backgroundColor: colors.errorContainer,
+                    foregroundColor: colors.onErrorContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    onPressed: _isUploading
-                        ? null
-                        : () {
-                            HapticFeedback.lightImpact();
-                            setState(() => _pickedImageFile = null);
-                          },
-                    icon: _isUploading
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(context).colorScheme.onErrorContainer,
-                              ),
-                            ),
-                          )
-                        : const Icon(Icons.delete_outline, size: 22),
                   ),
                 ),
               ),
@@ -377,22 +245,32 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
   }
 
   Widget _buildPlaceholder(ThemeData theme, AppLocalizations loc) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.image_search,
-          size: 48,
-          color: theme.colorScheme.onSurface.withOpacity(0.3),
+    final colors = theme.colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [colors.surfaceContainerLow, colors.surfaceContainerHighest],
         ),
-        const SizedBox(height: 12),
-        Text(
-          loc.noImageSelected,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.image_search_outlined,
+            size: 42,
+            color: colors.onSurfaceVariant.withValues(alpha: 0.75),
           ),
-        ),
-      ],
+          const SizedBox(height: 10),
+          Text(
+            loc.noImageSelected,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

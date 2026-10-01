@@ -6530,13 +6530,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invoiceStatusCanceled => 'ملغاة';
 
   @override
-  String get invoiceStatusPartiallyPaid => 'مدفوعة جزئيًا';
+  String get invoiceStatusPartiallyPaid => 'مدفوعة جزئياً';
 
   @override
   String get invoiceStatusOverdue => 'متأخرة';
 
   @override
-  String get invoiceStatusRefunded => 'مُستردة';
+  String get invoiceStatusRefunded => 'مستردة';
 
   @override
   String get deliveryCardNoDestination => 'لا توجد وجهة';
@@ -6590,7 +6590,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonClear => 'مسح';
 
   @override
-  String get deliveryDetailsTitle => 'تعديل التفاصيل';
+  String get deliveryDetailsTitle => 'تفاصيل التوصيل';
 
   @override
   String get deliveryDetailsSectionProducts => 'المنتجات';
@@ -7121,5 +7121,218 @@ class AppLocalizationsAr extends AppLocalizations {
       zero: 'صفر دقائق',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get glutenFreeLabel => 'خالٍ من الغلوتين';
+
+  @override
+  String get containsGlutenLabel => 'يحتوي على الغلوتين';
+
+  @override
+  String get mayContainGlutenLabel => 'قد يحتوي على الغلوتين';
+
+  @override
+  String get importedFromAi => 'مستورد بالذكاء الاصطناعي';
+
+  @override
+  String importedFromSource(String source) {
+    return 'مستورد من $source';
+  }
+
+  @override
+  String get metaImportedBrandLabel => 'العلامة التجارية المستوردة';
+
+  @override
+  String get metaImportSourceLabel => 'مصدر الاستيراد';
+
+  @override
+  String get metaImportConfidenceLabel => 'ثقة الاستيراد';
+
+  @override
+  String get expiresLabel => 'تنتهي في';
+
+  @override
+  String get failedToLoadProducts => 'تعذّر تحميل المنتجات';
+
+  @override
+  String get retryButton => 'إعادة المحاولة';
+
+  @override
+  String get deleteTooltip => 'حذف المورّد';
+
+  @override
+  String get editTooltip => 'تعديل المورّد';
+
+  @override
+  String get modulePersonnel => 'الموظفون';
+
+  @override
+  String get moduleInventory => 'المخزون';
+
+  @override
+  String get moduleServices => 'الخدمات';
+
+  @override
+  String get moduleSeller => 'نقطة البيع';
+
+  @override
+  String get moduleOrders => 'الطلبات';
+
+  @override
+  String get moduleOperations => 'العمليات';
+
+  @override
+  String get moduleFinance => 'المالية';
+
+  @override
+  String get failedToLoadSuppliers => 'تعذّر تحميل المورّدين';
+
+  @override
+  String get grandTotalLabel => 'المجموع الإجمالي';
+
+  @override
+  String get paidLabel => 'المدفوع';
+
+  @override
+  String get dueLabel => 'المستحق';
+
+  @override
+  String get roiLabel => 'العائد على الاستثمار';
+
+  @override
+  String get discountLabel => 'الخصم';
+
+  @override
+  String get taxLabel => 'الضريبة';
+
+  @override
+  String get deliveryLabel => 'التوصيل';
+
+  @override
+  String get productSubtotalLabel => 'مجموع المنتجات';
+
+  @override
+  String get serviceSubtotalLabel => 'مجموع الخدمات';
+
+  @override
+  String get grossSubtotalLabel => 'المجموع الفرعي الإجمالي';
+
+  @override
+  String get totalCostLabel => 'التكلفة الإجمالية';
+
+  @override
+  String get commercialBreakdownTitle => 'التفصيل التجاري';
+
+  @override
+  String get profitabilityTitle => 'الربحية';
+
+  @override
+  String get itemsTitle => 'العناصر';
+
+  @override
+  String get servicesTitle => 'الخدمات';
+
+  @override
+  String get cartDetailsTitle => 'تفاصيل السلة';
+
+  @override
+  String get cartIdLabel => 'معرّف السلة';
+
+  @override
+  String get deliveryIdLabel => 'معرّف التوصيل';
+
+  @override
+  String get deliveryMethodLabel => 'الطريقة';
+
+  @override
+  String get deliveryFeeLabel => 'الرسوم';
+
+  @override
+  String get metaOperationLabel => 'العملية';
+
+  @override
+  String get metaCreatedLabel => 'تاريخ الإنشاء';
+
+  @override
+  String get metaStatusLabel => 'الحالة';
+
+  @override
+  String get vatLabel => 'ضريبة القيمة المضافة';
+
+  @override
+  String get invoiceStatusUnknown => 'غير معروفة';
+
+  @override
+  String get itemStatusDelivered => 'تم التسليم';
+
+  @override
+  String get itemStatusProcessing => 'قيد المعالجة';
+
+  @override
+  String get itemStatusPending => 'قيد الانتظار';
+
+  @override
+  String get itemStatusCancelled => 'ملغى';
+
+  @override
+  String get itemStatusReturned => 'مُعاد';
+
+  @override
+  String get itemStatusPartial => 'جزئي';
+
+  @override
+  String get serviceStatusCompleted => 'مكتملة';
+
+  @override
+  String get serviceStatusScheduled => 'مجدولة';
+
+  @override
+  String get serviceStatusInProgress => 'قيد التنفيذ';
+
+  @override
+  String get serviceStatusProcessing => 'قيد المعالجة';
+
+  @override
+  String get serviceStatusPending => 'قيد الانتظار';
+
+  @override
+  String get serviceStatusCancelled => 'ملغاة';
+
+  @override
+  String get serviceStatusNoShow => 'لم يحضر';
+
+  @override
+  String get costSegmentProducts => 'المنتجات';
+
+  @override
+  String get costSegmentConsumables => 'المستهلكات';
+
+  @override
+  String get costSegmentAmortized => 'المطفأة';
+
+  @override
+  String get costSegmentLabor => 'العمالة';
+
+  @override
+  String get costSegmentDelivery => 'التوصيل';
+
+  @override
+  String get resourceKindConsumable => 'مستهلك';
+
+  @override
+  String get resourceKindAmortized => 'مُطفأ';
+
+  @override
+  String get resourceFallbackName => 'مورد';
+
+  @override
+  String productFallbackName(Object id) {
+    return 'منتج #$id';
+  }
+
+  @override
+  String serviceFallbackName(Object id) {
+    return 'خدمة #$id';
   }
 }

@@ -1,3 +1,5 @@
+// lib/ui/components/supplier/supplier_details_modal.dart
+
 import 'dart:developer';
 
 import 'package:app_constants/app_routes.dart';
@@ -86,21 +88,18 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
   void _loadSupplierProducts() {
     final supplierId = widget.supplier.idProductProvider;
 
-    // Check for cached products first
     final cached = widget.productNotifier.getCachedSupplierProducts(supplierId);
     if (cached != null && cached.isNotEmpty) {
       log('Using cached products: ${cached.length}');
       _cachedProducts = cached;
     }
 
-    // Create future for fetching fresh data (will use cache if available)
     _supplierProductsFuture = _fetchSupplierProducts();
   }
 
   Future<List<Product>> _fetchSupplierProducts() async {
     final supplierId = widget.supplier.idProductProvider;
 
-    // First, check if products are already in the notifier's products list
     final existingProducts = widget.productNotifier.products
         .where((p) => p.product_provider_id == supplierId)
         .toList();
@@ -110,7 +109,6 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
       return existingProducts;
     }
 
-    // Check product notifier's supplier cache
     final cachedProducts =
         widget.productNotifier.getCachedSupplierProducts(supplierId);
     if (cachedProducts != null && cachedProducts.isNotEmpty) {
@@ -118,7 +116,6 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
       return cachedProducts;
     }
 
-    // Fetch from API
     log('Fetching products from API for supplier $supplierId');
     setState(() {
       _isLoading = true;
@@ -151,6 +148,11 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
     final loc = AppLocalizations.of(context)!;
     final supplier = widget.supplier;
     final contacts = parseContactInfo(supplier.providerContactInfo);
+
+    // Resolve the display names once for the ambient locale. Used in
+    // the section header and the header wrap.
+    final localeLang = Localizations.localeOf(context).languageCode;
+    final displayName = supplier.nameFor(localeLang);
 
     return Container(
       decoration: BoxDecoration(
@@ -195,7 +197,10 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                       ),
                       _buildSectionHeader(
                         context,
-                        loc.productsFromSupplier(supplier.providerName),
+                        // Use the locale-resolved supplier name in the
+                        // section title. Falls back to the flat name
+                        // when no naming block is present.
+                        loc.productsFromSupplier(displayName),
                       ),
                       const SizedBox(height: 8),
                     ]),
@@ -230,17 +235,14 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
       child: FutureBuilder<List<Product>>(
         future: _supplierProductsFuture,
         builder: (context, snapshot) {
-          // Show loading state while fetching, but if we have cached products, show them immediately
           final hasCachedProducts =
               _cachedProducts != null && _cachedProducts!.isNotEmpty;
           final isLoading =
               snapshot.connectionState == ConnectionState.waiting || _isLoading;
 
-          // Display cached products while loading if available
           if (hasCachedProducts && isLoading) {
             return Column(
               children: [
-                // Show cached products
                 SizedBox(
                   height: 180,
                   child: ListView.separated(
@@ -254,7 +256,6 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                     },
                   ),
                 ),
-                // Show loading indicator at the bottom
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: SizedBox(
@@ -270,7 +271,6 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
             );
           }
 
-          // Show loading state (no cached products)
           if (isLoading) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
@@ -278,7 +278,6 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
             );
           }
 
-          // Handle error
           if (snapshot.hasError) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -288,7 +287,7 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                       color: theme.colorScheme.error, size: 48),
                   const SizedBox(height: 8),
                   Text(
-                    'Failed to load products',
+                    loc.failedToLoadProducts,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.error,
                     ),
@@ -299,14 +298,13 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                         _supplierProductsFuture = _fetchSupplierProducts();
                       });
                     },
-                    child: const Text('Retry'),
+                    child: Text(loc.retryButton),
                   ),
                 ],
               ),
             );
           }
 
-          // Show products
           final products = snapshot.data ?? [];
           if (products.isEmpty) {
             return Padding(
@@ -367,6 +365,12 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
 
   Widget _buildHeader(BuildContext context, Supplier supplier) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
+
+    // Resolve both names for the ambient locale.
+    final localeLang = Localizations.localeOf(context).languageCode;
+    final displayName = supplier.nameFor(localeLang);
+    final organisationName = supplier.organisationNameFor(localeLang);
 
     return Column(
       children: [
@@ -430,22 +434,23 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      supplier.providerName,
+                      displayName,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      supplier.providerOrganisationName ?? '',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    if (organisationName.isNotEmpty)
+                      Text(
+                        organisationName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ],
                 ),
               ),
@@ -458,6 +463,7 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                     IconButton(
                       iconSize: 27,
                       color: theme.colorScheme.tertiary,
+                      tooltip: loc.deleteTooltip,
                       onPressed: () {
                         showDeleteConfirmation(
                           context,
@@ -470,6 +476,7 @@ class _SupplierDetailsModalState extends State<_SupplierDetailsModal> {
                     IconButton(
                       iconSize: 27,
                       color: theme.colorScheme.secondary,
+                      tooltip: loc.editTooltip,
                       onPressed: () {
                         Navigator.pushNamed(
                           context,

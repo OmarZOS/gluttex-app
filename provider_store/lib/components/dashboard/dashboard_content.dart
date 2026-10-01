@@ -1,4 +1,5 @@
-// (imports unchanged from the previous version)
+// (imports unchanged)
+
 import 'package:app_constants/app_routes.dart';
 import 'package:event/delivery_change_notifier.dart';
 import 'package:event/finance_change_notifier.dart';
@@ -24,7 +25,7 @@ import 'pending_invitations_dialog.dart';
 import 'package:provider/provider.dart';
 
 // ============================================================
-// DATA CLASSES (unchanged)
+// DATA CLASSES
 // ============================================================
 
 class SupplierData {
@@ -55,15 +56,26 @@ class SupplierData {
       );
 
   bool get isValid => id > 0;
+
+  /// Locale-aware provider name. Falls back to the flat name when the
+  /// supplier carries no naming contribution.
+  String providerNameFor(String lang) => supplier.nameFor(lang);
+
+  /// Locale-aware organisation name.
+  String orgNameFor(String lang) => supplier.organisationNameFor(lang);
 }
 
 class _Module {
   final DashboardScreenType type;
   final IconData icon;
-  final String label;
+
+  /// ARB key resolved at build time. Storing the key rather than the
+  /// already-localized string keeps this record const-constructible.
+  final String labelKey;
+
   final List<String> privilegeIds;
 
-  const _Module(this.type, this.icon, this.label, this.privilegeIds);
+  const _Module(this.type, this.icon, this.labelKey, this.privilegeIds);
 }
 
 // ============================================================
@@ -127,6 +139,9 @@ class DashboardContentState extends State<DashboardContent> {
     return null;
   }
 
+  /// Ambient locale for all name resolutions on this screen.
+  String get _localeLang => Localizations.localeOf(context).languageCode;
+
   // ============================================================
   // BUILD
   // ============================================================
@@ -146,7 +161,6 @@ class DashboardContentState extends State<DashboardContent> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      // extendBody: true,
       backgroundColor: theme.colorScheme.surface,
       body: Column(
         children: [
@@ -165,12 +179,11 @@ class DashboardContentState extends State<DashboardContent> {
         items: items,
         onIndexChanged: (i) => setState(() => _selectedIndex = i),
       ),
-      // floatingActionButton: _buildFab(items),
     );
   }
 
   // ============================================================
-  // TOP BAR (unchanged from previous version)
+  // TOP BAR
   // ============================================================
 
   Widget _buildTopBar() {
@@ -178,6 +191,11 @@ class DashboardContentState extends State<DashboardContent> {
     final cs = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final current = _currentSupplier;
+
+    // Resolve the two names for the ambient locale.
+    final displayName = current?.providerNameFor(_localeLang) ??
+        (l10n?.selectSupplier ?? 'Select supplier');
+    final organisationName = current?.orgNameFor(_localeLang) ?? '';
 
     return Material(
       color: cs.surface,
@@ -213,6 +231,7 @@ class DashboardContentState extends State<DashboardContent> {
                           supplier: current,
                           size: 36,
                           selected: true,
+                          localeLang: _localeLang,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -221,8 +240,7 @@ class DashboardContentState extends State<DashboardContent> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                current?.supplier.providerName ??
-                                    (l10n?.selectSupplier ?? 'Select supplier'),
+                                displayName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.titleMedium?.copyWith(
@@ -233,8 +251,8 @@ class DashboardContentState extends State<DashboardContent> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                current?.orgName.isNotEmpty == true
-                                    ? current!.orgName
+                                organisationName.isNotEmpty
+                                    ? organisationName
                                     : (l10n?.noOrganisation ??
                                         'No organisation'),
                                 maxLines: 1,
@@ -282,11 +300,12 @@ class DashboardContentState extends State<DashboardContent> {
   }
 
   // ============================================================
-  // SUPPLIER PICKER SHEET — collapsible groups
+  // SUPPLIER PICKER SHEET
   // ============================================================
 
   Future<void> _showSupplierSheet() async {
     final l10n = AppLocalizations.of(context);
+    final lang = _localeLang;
 
     // Group suppliers by organisation.
     final byOrg = <int, List<SupplierData>>{};
@@ -294,23 +313,26 @@ class DashboardContentState extends State<DashboardContent> {
       byOrg.putIfAbsent(s.orgId, () => []).add(s);
     }
 
-    // Sort orgs by name; sort suppliers within each org (owned first, then by name).
+    // Sort orgs by locale-aware name.
     final orgs = byOrg.keys.toList()
       ..sort((a, b) {
-        final nameA = _orgNameFor(a) ?? '';
-        final nameB = _orgNameFor(b) ?? '';
+        final nameA = _orgNameFor(a, lang) ?? '';
+        final nameB = _orgNameFor(b, lang) ?? '';
         return nameA.compareTo(nameB);
       });
+
+    // Sort suppliers within each org: owned first, then locale-aware
+    // alphabetical. The locale-aware sort matters in Arabic, where
+    // the collation order differs from ASCII.
     for (final list in byOrg.values) {
       list.sort((a, b) {
         final aOwner = a.accessType == SupplierAccessType.owner ? 0 : 1;
         final bOwner = b.accessType == SupplierAccessType.owner ? 0 : 1;
         if (aOwner != bOwner) return aOwner - bOwner;
-        return a.supplier.providerName.compareTo(b.supplier.providerName);
+        return a.providerNameFor(lang).compareTo(b.providerNameFor(lang));
       });
     }
 
-    // Default: only the current supplier's org is expanded.
     final currentOrgId = _currentSupplier?.orgId ?? -1;
     final expanded = <int>{
       if (currentOrgId != -1) currentOrgId,
@@ -353,7 +375,6 @@ class DashboardContentState extends State<DashboardContent> {
                   ),
                   child: Column(
                     children: [
-                      // Handle
                       Padding(
                         padding: const EdgeInsets.only(top: 12, bottom: 4),
                         child: Container(
@@ -365,7 +386,6 @@ class DashboardContentState extends State<DashboardContent> {
                           ),
                         ),
                       ),
-                      // Header
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
                         child: Row(
@@ -401,7 +421,6 @@ class DashboardContentState extends State<DashboardContent> {
                         ),
                       ),
                       Divider(height: 1, color: cs.outline.withOpacity(0.06)),
-                      // Groups
                       Expanded(
                         child: ListView.builder(
                           controller: scrollController,
@@ -410,7 +429,7 @@ class DashboardContentState extends State<DashboardContent> {
                           itemBuilder: (ctx, i) {
                             final orgId = orgs[i];
                             final orgSuppliers = byOrg[orgId]!;
-                            final orgName = _orgNameFor(orgId) ??
+                            final orgName = _orgNameFor(orgId, lang) ??
                                 (l10n?.noOrganisation ?? 'No organisation');
                             final isExpanded = expanded.contains(orgId);
 
@@ -421,6 +440,7 @@ class DashboardContentState extends State<DashboardContent> {
                               expanded: isExpanded,
                               currentSupplierId: _selectedSupplierId,
                               onToggle: () => toggleOrg(orgId),
+                              localeLang: lang,
                             );
                           },
                         ),
@@ -440,15 +460,18 @@ class DashboardContentState extends State<DashboardContent> {
     }
   }
 
-  String? _orgNameFor(int orgId) {
+  /// Locale-aware org name lookup. Returns the naming-contribution
+  /// translation when the supplier carries one, else the flat name.
+  String? _orgNameFor(int orgId, String lang) {
     for (final s in _availableSuppliers) {
-      if (s.orgId == orgId && s.orgName.isNotEmpty) return s.orgName;
+      if (s.orgId == orgId) {
+        final resolved = s.orgNameFor(lang);
+        if (resolved.isNotEmpty) return resolved;
+      }
     }
     return null;
   }
 
-  /// One organisation group: header row with name + counts + chevron, and
-  /// an animated expansion showing its suppliers.
   Widget _buildOrgGroup(
     BuildContext context, {
     required String orgName,
@@ -456,6 +479,7 @@ class DashboardContentState extends State<DashboardContent> {
     required bool expanded,
     required int currentSupplierId,
     required VoidCallback onToggle,
+    required String localeLang,
   }) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
@@ -469,7 +493,6 @@ class DashboardContentState extends State<DashboardContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Org header ──
         Material(
           color: containsCurrent && !expanded
               ? cs.primary.withOpacity(0.04)
@@ -480,7 +503,6 @@ class DashboardContentState extends State<DashboardContent> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
-                  // Chevron
                   AnimatedRotation(
                     turns: expanded ? 0.25 : 0.0,
                     duration: const Duration(milliseconds: 180),
@@ -491,7 +513,6 @@ class DashboardContentState extends State<DashboardContent> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  // Org icon
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
@@ -505,7 +526,6 @@ class DashboardContentState extends State<DashboardContent> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Org name + counts
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -531,7 +551,6 @@ class DashboardContentState extends State<DashboardContent> {
                       ],
                     ),
                   ),
-                  // Count pill
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -552,7 +571,6 @@ class DashboardContentState extends State<DashboardContent> {
             ),
           ),
         ),
-        // ── Suppliers (animated expand/collapse) ──
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
@@ -564,6 +582,7 @@ class DashboardContentState extends State<DashboardContent> {
                             context,
                             supplier: s,
                             selected: s.id == currentSupplierId,
+                            localeLang: localeLang,
                           ))
                       .toList(),
                 )
@@ -578,7 +597,6 @@ class DashboardContentState extends State<DashboardContent> {
     );
   }
 
-  /// "2 owned · 3 managed" — or just "2 owned" / "3 managed" when one is 0.
   String _countSummary(int owned, int managed, AppLocalizations? l10n) {
     final ownedLabel = l10n?.owned ?? 'owned';
     final managedLabel = l10n?.managed ?? 'managed';
@@ -594,29 +612,37 @@ class DashboardContentState extends State<DashboardContent> {
     BuildContext context, {
     required SupplierData supplier,
     required bool selected,
+    required String localeLang,
   }) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isOwner = supplier.accessType == SupplierAccessType.owner;
     final l10n = AppLocalizations.of(context);
 
+    // Locale-aware provider name for the tile title.
+    final displayName = supplier.providerNameFor(localeLang);
+
     return InkWell(
       onTap: () => Navigator.pop(context, supplier.id),
       child: Container(
-        // Indented so the tiles read as children of the org header.
         padding:
             const EdgeInsets.only(left: 58, right: 20, top: 10, bottom: 10),
         color: selected ? cs.primary.withOpacity(0.06) : Colors.transparent,
         child: Row(
           children: [
-            _SupplierAvatar(supplier: supplier, size: 36, selected: selected),
+            _SupplierAvatar(
+              supplier: supplier,
+              size: 36,
+              selected: selected,
+              localeLang: localeLang,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    supplier.supplier.providerName,
+                    displayName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -663,7 +689,7 @@ class DashboardContentState extends State<DashboardContent> {
   }
 
   // ============================================================
-  // DATA LOADING (unchanged)
+  // DATA LOADING
   // ============================================================
 
   Future<void> _loadData() async {
@@ -690,11 +716,13 @@ class DashboardContentState extends State<DashboardContent> {
 
       _buildSupplierList(suppliersWithAccess);
     } catch (e, stack) {
-      debugPrint('❌ Error loading data: $e\n$stack');
+      debugPrint('Error loading data: $e\n$stack');
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load suppliers: $e'),
+            content:
+                Text(l10n?.failedToLoadSuppliers ?? 'Failed to load suppliers'),
             backgroundColor: Colors.red,
           ),
         );
@@ -733,7 +761,6 @@ class DashboardContentState extends State<DashboardContent> {
     final userId = widget.currentUser.idAppUser ?? 0;
 
     cartNotifier.clearCart();
-
     deliveryNotifier.setFilters(providerId: supplierId);
 
     await Future.wait([
@@ -761,12 +788,13 @@ class DashboardContentState extends State<DashboardContent> {
   }
 
   // ============================================================
-  // DASHBOARD ITEMS (unchanged)
+  // DASHBOARD ITEMS — localized module labels
   // ============================================================
 
   List<DashboardItem> _buildDashboardItems() {
     if (_selectedSupplierId == 0) return [];
 
+    final l10n = AppLocalizations.of(context)!;
     final data = _availableSuppliers.firstWhere(
       (s) => s.id == _selectedSupplierId,
       orElse: () => _availableSuppliers.first,
@@ -776,20 +804,23 @@ class DashboardContentState extends State<DashboardContent> {
     final userId = widget.currentUser.idAppUser ?? 0;
     final isOwner = data.accessType == SupplierAccessType.owner;
 
+    // Module labels resolved from ARB at build time. The `_Module`
+    // record keeps the ARB key as a string so it stays
+    // const-constructible; the actual localization happens here.
     const modules = [
       _Module(DashboardScreenType.suppliersPersonnel, Icons.people_rounded,
-          'Personnel', ['personnel_manage', 'personnel_view']),
+          'modulePersonnel', ['personnel_manage', 'personnel_view']),
       _Module(DashboardScreenType.inventory, Icons.inventory_2_rounded,
-          'Inventory', ['inventory_manage', 'inventory_view']),
-      _Module(DashboardScreenType.services, Icons.handyman_sharp, 'Services',
-          ['services_manage', 'services_view']),
-      _Module(DashboardScreenType.pos, Icons.point_of_sale, 'Seller',
+          'moduleInventory', ['inventory_manage', 'inventory_view']),
+      _Module(DashboardScreenType.services, Icons.handyman_sharp,
+          'moduleServices', ['services_manage', 'services_view']),
+      _Module(DashboardScreenType.pos, Icons.point_of_sale, 'moduleSeller',
           ['pos_manage', 'pos_view']),
-      _Module(DashboardScreenType.orders, Icons.delivery_dining, 'Orders',
+      _Module(DashboardScreenType.orders, Icons.delivery_dining, 'moduleOrders',
           ['orders_manage', 'orders_view']),
-      _Module(DashboardScreenType.operations, Icons.sell, 'Operations',
+      _Module(DashboardScreenType.operations, Icons.sell, 'moduleOperations',
           ['operations_manage', 'operations_view']),
-      _Module(DashboardScreenType.finance, Icons.attach_money, 'Finance',
+      _Module(DashboardScreenType.finance, Icons.attach_money, 'moduleFinance',
           ['finance_manage', 'finance_view']),
     ];
 
@@ -801,7 +832,7 @@ class DashboardContentState extends State<DashboardContent> {
       items.add(DashboardItem(
         type: m.type,
         icon: m.icon,
-        label: m.label,
+        label: _labelForModule(m.labelKey, l10n),
         index: items.length,
         privilegeLevel: isOwner
             ? PrivilegeLevel.manage
@@ -811,6 +842,29 @@ class DashboardContentState extends State<DashboardContent> {
       ));
     }
     return items;
+  }
+
+  /// Resolve a module label key to its localized string. Keeps the
+  /// mapping in one place so adding a module is a one-line change.
+  String _labelForModule(String key, AppLocalizations l10n) {
+    switch (key) {
+      case 'modulePersonnel':
+        return l10n.modulePersonnel;
+      case 'moduleInventory':
+        return l10n.moduleInventory;
+      case 'moduleServices':
+        return l10n.moduleServices;
+      case 'moduleSeller':
+        return l10n.moduleSeller;
+      case 'moduleOrders':
+        return l10n.moduleOrders;
+      case 'moduleOperations':
+        return l10n.moduleOperations;
+      case 'moduleFinance':
+        return l10n.moduleFinance;
+      default:
+        return key;
+    }
   }
 
   bool _hasPrivilege(
@@ -838,7 +892,7 @@ class DashboardContentState extends State<DashboardContent> {
   }
 
   // ============================================================
-  // LOADING / NO ACCESS (unchanged)
+  // LOADING / NO ACCESS
   // ============================================================
 
   Widget _buildLoading() {
@@ -874,7 +928,7 @@ class DashboardContentState extends State<DashboardContent> {
       );
 
   // ============================================================
-  // PENDING INVITATIONS (unchanged)
+  // PENDING INVITATIONS
   // ============================================================
 
   Widget _buildPendingInvitationsButton(ColorScheme cs) {
@@ -926,16 +980,13 @@ class DashboardContentState extends State<DashboardContent> {
   }
 
   // ============================================================
-  // FAB (unchanged)
+  // FAB
   // ============================================================
 
   Widget? _buildFab(List<DashboardItem> items) {
     if (_selectedIndex >= items.length) return null;
     final item = items[_selectedIndex];
-
-    // Personnel has its own FAB inside PersonnelManagementScreen.
     if (item.type == DashboardScreenType.suppliersPersonnel) return null;
-
     if (!item.showFloatingAction ||
         item.privilegeLevel != PrivilegeLevel.manage) {
       return null;
@@ -946,8 +997,6 @@ class DashboardContentState extends State<DashboardContent> {
 
   void _handleFab(BuildContext context, DashboardScreenType type) {
     switch (type) {
-      // case DashboardScreenType.suppliersPersonnel:
-
       case DashboardScreenType.pos:
         _showCartSheet(context);
         break;
@@ -956,7 +1005,7 @@ class DashboardContentState extends State<DashboardContent> {
           context,
           AppRoutes.productCreate,
           arguments: {
-            'providerId': _selectedSupplierId, // ← add this
+            'providerId': _selectedSupplierId,
             'lockProvider': true,
           },
         );
@@ -1008,7 +1057,7 @@ class DashboardContentState extends State<DashboardContent> {
 }
 
 // ============================================================
-// SUPPLIER AVATAR (unchanged)
+// SUPPLIER AVATAR — locale-aware initial
 // ============================================================
 
 class _SupplierAvatar extends StatelessWidget {
@@ -1016,17 +1065,27 @@ class _SupplierAvatar extends StatelessWidget {
   final double size;
   final bool selected;
 
+  /// Locale used to resolve the supplier name's first character.
+  /// Without this, an Arabic or French supplier whose name starts with
+  /// a different letter in those languages would show the wrong
+  /// initial.
+  final String localeLang;
+
   const _SupplierAvatar({
     required this.supplier,
     required this.size,
     required this.selected,
+    required this.localeLang,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isOwner = supplier?.accessType == SupplierAccessType.owner;
-    final name = supplier?.supplier.providerName ?? '';
+
+    // Resolve the locale-aware name and take its first character.
+    // Falls back to '?' when the name is empty.
+    final name = supplier?.providerNameFor(localeLang) ?? '';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
     return Container(

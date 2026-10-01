@@ -59,6 +59,14 @@ class _CustomerProductViewState extends State<CustomerProductView> {
     _productNotifier = context.read<ProductNotifier>();
   }
 
+  String get _localizedName {
+    final localeLang = Localizations.localeOf(context).languageCode;
+    if (localeLang == 'ar' || localeLang == 'fr') {
+      return widget.product.nameFor(localeLang);
+    }
+    return widget.product.product_name;
+  }
+
   void _updateQuantity(int newValue) {
     if (!mounted) return;
     setState(() => _quantity = newValue);
@@ -195,8 +203,9 @@ class _CustomerProductViewState extends State<CustomerProductView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.product.product_name ??
-                          AppLocalizations.of(context)!.missingText,
+                      _localizedName.isNotEmpty
+                          ? _localizedName
+                          : AppLocalizations.of(context)!.missingText,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -308,8 +317,17 @@ class _CustomerProductViewState extends State<CustomerProductView> {
   Widget _buildProductHeader(BuildContext context) {
     final theme = Theme.of(context);
     final product = widget.product;
-    final hasImage = product.product_image_url != null &&
-        product.product_image_url!.startsWith('http');
+
+    // Prefer the seller's own image; fall back to the IProduct's
+    // reference image when the flat URL is missing or malformed.
+    final flatImage = product.product_image_url;
+    final originImage = product.product_origin?.iproductImageUrl;
+    final imageUrl = (flatImage != null && flatImage.startsWith('http'))
+        ? flatImage
+        : (originImage != null && originImage.startsWith('http'))
+            ? originImage
+            : null;
+    final hasImage = imageUrl != null;
 
     return Stack(
       children: [
@@ -338,7 +356,7 @@ class _CustomerProductViewState extends State<CustomerProductView> {
                   child: Hero(
                     tag: 'product-image-${product.id_product}-card',
                     child: Image.network(
-                      product.product_image_url!,
+                      imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) =>
                           const Icon(Icons.broken_image, size: 64),
@@ -369,13 +387,14 @@ class _CustomerProductViewState extends State<CustomerProductView> {
                   Text(product.product_brand!),
                 const SizedBox(height: 4),
                 Text(
-                  product.product_name ?? '',
+                  _localizedName,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
+                _buildGlutenBadge(context),
                 const SizedBox(height: AppConstants.kDefaultPaddin),
                 Text(
                   AppLocalizations.of(context)!.priceText,
@@ -397,6 +416,64 @@ class _CustomerProductViewState extends State<CustomerProductView> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Dietary badge derived from the linked IProduct's gluten status.
+  /// Renders nothing when there's no origin or the status is unknown.
+  Widget _buildGlutenBadge(BuildContext context) {
+    final origin = widget.product.product_origin;
+    if (origin == null) return const SizedBox.shrink();
+
+    final status = origin.iproductGlutenStatus;
+    if (status.isEmpty || status == 'unknown') return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final loc = AppLocalizations.of(context)!;
+
+    final (IconData icon, String label, Color color) = switch (status) {
+      'gluten_free' => (
+          Icons.verified_rounded,
+          loc.glutenFreeLabel,
+          const Color(0xFF1E8E5A),
+        ),
+      'contains_gluten' => (
+          Icons.warning_amber_rounded,
+          loc.containsGlutenLabel,
+          cs.error,
+        ),
+      'may_contain_gluten' => (
+          Icons.info_outline_rounded,
+          loc.mayContainGlutenLabel,
+          const Color(0xFFB26A00),
+        ),
+      _ => (Icons.help_outline_rounded, status, cs.onSurfaceVariant),
+    };
+
+    return Container(
+      margin: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
