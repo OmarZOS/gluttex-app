@@ -3823,7 +3823,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get yearsAgo => 'ans';
 
   @override
-  String get documentsCount => 'Nombre de documents';
+  String documentsCount(int count) {
+    return '$count documents';
+  }
 
   @override
   String get totalDocuments => 'Total des documents';
@@ -5073,7 +5075,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hasAccount => 'A un Compte';
 
   @override
-  String get myDocuments => 'Mes Documents';
+  String get myDocuments => 'Mes documents';
 
   @override
   String get loadingFinancialDocuments => 'Chargement des documents financiers...';
@@ -5085,16 +5087,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noResultsFound => 'Aucun résultat trouvé';
 
   @override
-  String get noDocumentsYet => 'Aucun document pour l\'instant';
+  String get noDocumentsYet => 'Aucun document pour le moment';
 
   @override
-  String get tryAdjustingFilters => 'Essayez d\'ajuster vos filtres pour voir plus de résultats';
+  String get tryAdjustingFilters => 'Essayez d\'ajuster vos filtres';
 
   @override
-  String get noDocumentsMatch => 'Aucun document ne correspond';
+  String noDocumentsMatch(String query) {
+    return 'Aucun document ne correspond à « $query »';
+  }
 
   @override
-  String get startCreatingFirstDocument => 'Commencez par créer votre premier document financier';
+  String get startCreatingFirstDocument => 'Commencez par créer votre premier document';
 
   @override
   String get createFirstDocument => 'Créer le premier document';
@@ -5120,10 +5124,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get canceled => 'Annulé';
 
   @override
-  String get dueSoon => 'À échéance proche';
+  String get dueSoon => 'Bientôt dû';
 
   @override
-  String get onTrack => 'Dans les délais';
+  String get onTrack => 'Dans les temps';
 
   @override
   String get loadMore => 'Charger plus';
@@ -5940,7 +5944,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchByNumberOrCustomer => 'Rechercher par numéro ou client';
 
   @override
-  String get payRemaining => 'Payer le reste';
+  String get payRemaining => 'Payer le solde';
 
   @override
   String get paymentOutstandingLabel => 'Montant dû';
@@ -7291,5 +7295,26 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String serviceFallbackName(Object id) {
     return 'Service #$id';
+  }
+
+  @override
+  String customerWithId(int id) {
+    return 'Client $id';
+  }
+
+  @override
+  String guestWithId(int id) {
+    return 'Invité #$id';
+  }
+
+  @override
+  String get guestLabel => 'Invité';
+
+  @override
+  String get partialOverdue => 'Partiel - en retard';
+
+  @override
+  String overdueDays(int days) {
+    return '${days}j de retard';
   }
 }

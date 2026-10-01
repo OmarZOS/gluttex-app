@@ -3722,6 +3722,120 @@
 "resourceKindAmortized": "amortized",
 "resourceFallbackName": "Resource",
 "productFallbackName": "Product #{id}",
-"serviceFallbackName": "Service #{id}"
+"serviceFallbackName": "Service #{id}",
+
+"financialDocuments": "Financial Documents",
+"@financialDocuments": { "description": "Header title for the financial document list" },
+
+"documentsCount": "{count} documents",
+"@documentsCount": {
+  "description": "Document count subtitle",
+  "placeholders": { "count": { "type": "int" } }
+},
+
+"addDocument": "Add Document",
+"@addDocument": { "description": "Tooltip on the add-document button" },
+
+"searchDocuments": "Search Documents",
+"@searchDocuments": { "description": "Title of the search dialog" },
+
+"searchByNumberOrCustomer": "Search by number or customer",
+"@searchByNumberOrCustomer": { "description": "Hint text in the search dialog" },
+
+"count": "Count",
+"@count": { "description": "Summary label: count of documents" },
+
+"invoices": "Invoices",
+"@invoices": { "description": "Filter label: invoices only" },
+
+"myDocuments": "My Documents",
+"@myDocuments": { "description": "Filter label: documents for the current user" },
+
+"loadingFinancialDocuments": "Loading financial documents...",
+"@loadingFinancialDocuments": { "description": "Loading state message" },
+
+"noMatchingDocuments": "No matching documents",
+"@noMatchingDocuments": { "description": "Empty state title when filters exclude everything" },
+
+"noResultsFound": "No results found",
+"@noResultsFound": { "description": "Empty state title when search returns nothing" },
+
+"noDocumentsYet": "No documents yet",
+"@noDocumentsYet": { "description": "Empty state title when there are no documents at all" },
+
+"tryAdjustingFilters": "Try adjusting your filters",
+"@tryAdjustingFilters": { "description": "Empty state hint when filters are active" },
+
+"noDocumentsMatch": "No documents match \"{query}\"",
+"@noDocumentsMatch": {
+  "description": "Empty state hint when a search query returns nothing",
+  "placeholders": { "query": { "type": "String" } }
+},
+
+"startCreatingFirstDocument": "Start by creating your first document",
+"@startCreatingFirstDocument": { "description": "Empty state hint on a fresh account" },
+
+"clearFilters": "Clear Filters",
+"@clearFilters": { "description": "Button label to clear all active filters" },
+
+"loadMore": "Load More",
+"@loadMore": { "description": "Pagination footer while more pages exist" },
+
+"noMoreDocuments": "No more documents",
+"@noMoreDocuments": { "description": "Pagination footer when the last page is loaded" },
+
+"customerWithId": "Customer {id}",
+"@customerWithId": {
+  "description": "Fallback customer label when the display name isn't loaded yet",
+  "placeholders": { "id": { "type": "int" } }
+},
+
+"guestWithId": "Guest #{id}",
+"@guestWithId": {
+  "description": "Fallback label for a guest checkout with a cart id",
+  "placeholders": { "id": { "type": "int" } }
+},
+
+"guestLabel": "Guest",
+"@guestLabel": { "description": "Fallback label for an anonymous customer" },
+
+"canceled": "Canceled",
+"@canceled": { "description": "Status label for a canceled document" },
+
+"dueSoon": "Due soon",
+"@dueSoon": { "description": "Status label when a document is due within a week" },
+
+"onTrack": "On track",
+"@onTrack": { "description": "Status label when a document is not overdue and not near due" },
+
+"partialOverdue": "Partial - overdue",
+"@partialOverdue": { "description": "Status label for a partially paid, overdue document" },
+
+"partiallyPaid": "Partially Paid",
+"@partiallyPaid": { "description": "Status label for a partially paid document that isn't overdue" },
+
+"partial": "Partial",
+"@partial": { "description": "Short status label used in the payment progress bar" },
+
+"amount": "Amount",
+"@amount": { "description": "Label above the document's total amount" },
+
+"balance": "Balance",
+"@balance": { "description": "Label above the remaining amount" },
+
+"overdueDays": "{days}d overdue",
+"@overdueDays": {
+  "description": "Badge showing how many days a document is overdue",
+  "placeholders": { "days": { "type": "int" } }
+},
+
+"download": "Download",
+"@download": { "description": "Button label for downloading a document" },
+
+"payNow": "Pay Now",
+"@payNow": { "description": "Button label for paying an unpaid document" },
+
+"payRemaining": "Pay Remaining",
+"@payRemaining": { "description": "Button label for paying the remaining balance on a partially paid document" }
 
 }

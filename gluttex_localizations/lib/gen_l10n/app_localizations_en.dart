@@ -3823,7 +3823,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yearsAgo => 'years ago';
 
   @override
-  String get documentsCount => 'Documents Count';
+  String documentsCount(int count) {
+    return '$count documents';
+  }
 
   @override
   String get totalDocuments => 'Total Documents';
@@ -5088,13 +5090,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noDocumentsYet => 'No documents yet';
 
   @override
-  String get tryAdjustingFilters => 'Try adjusting your filters to see more results';
+  String get tryAdjustingFilters => 'Try adjusting your filters';
 
   @override
-  String get noDocumentsMatch => 'No documents match';
+  String noDocumentsMatch(String query) {
+    return 'No documents match \"$query\"';
+  }
 
   @override
-  String get startCreatingFirstDocument => 'Start by creating your first financial document';
+  String get startCreatingFirstDocument => 'Start by creating your first document';
 
   @override
   String get createFirstDocument => 'Create First Document';
@@ -7283,5 +7287,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String serviceFallbackName(Object id) {
     return 'Service #$id';
+  }
+
+  @override
+  String customerWithId(int id) {
+    return 'Customer $id';
+  }
+
+  @override
+  String guestWithId(int id) {
+    return 'Guest #$id';
+  }
+
+  @override
+  String get guestLabel => 'Guest';
+
+  @override
+  String get partialOverdue => 'Partial - overdue';
+
+  @override
+  String overdueDays(int days) {
+    return '${days}d overdue';
   }
 }

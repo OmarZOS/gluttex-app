@@ -97,6 +97,10 @@ class _SellingItemTabsState extends State<SellingItemTabs>
     );
   }
 
+  // ==================================================================
+  // Product grid
+  // ==================================================================
+
   Widget _buildProductGrid(BuildContext context) {
     if (widget.isLoading && widget.products.isEmpty) {
       return _buildLoadingState(context);
@@ -106,42 +110,49 @@ class _SellingItemTabsState extends State<SellingItemTabs>
       return _buildEmptyState(context, isProduct: true);
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: widget.products.length,
-      itemBuilder: (context, index) {
-        final product = widget.products[index];
-        final quantity = _getProductQuantity(product.id_product ?? 0);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GridView.builder(
+          padding: const EdgeInsets.all(12),
+          gridDelegate: _responsiveGridDelegate(
+            availableWidth: constraints.maxWidth,
+          ),
+          itemCount: widget.products.length,
+          itemBuilder: (context, index) {
+            final product = widget.products[index];
+            final quantity = _getProductQuantity(product.id_product ?? 0);
 
-        return ItemCardWithConfiguration(
-          item: product,
-          isProduct: true,
-          quantity: quantity,
-          onAddToCart: () => widget.cartNotifier.addProduct(product),
-          onRemoveFromCart: () {
-            final qty =
-                widget.cartNotifier.getProductCartItem(product)?.quantity ?? 0;
-            if (qty <= 1) {
-              widget.cartNotifier.removeItem(product: product);
-            } else {
-              widget.cartNotifier.updateQuantity(
-                product: product,
-                newQuantity: qty - 1,
-              );
-            }
+            return ItemCardWithConfiguration(
+              item: product,
+              isProduct: true,
+              quantity: quantity,
+              onAddToCart: () => widget.cartNotifier.addProduct(product),
+              onRemoveFromCart: () {
+                final qty =
+                    widget.cartNotifier.getProductCartItem(product)?.quantity ??
+                        0;
+                if (qty <= 1) {
+                  widget.cartNotifier.removeItem(product: product);
+                } else {
+                  widget.cartNotifier.updateQuantity(
+                    product: product,
+                    newQuantity: qty - 1,
+                  );
+                }
+              },
+              onRemoveAll: () =>
+                  widget.cartNotifier.removeItem(product: product),
+              onConfigure: () => widget.onConfigureProduct(product),
+            );
           },
-          onRemoveAll: () => widget.cartNotifier.removeItem(product: product),
-          onConfigure: () => widget.onConfigureProduct(product),
         );
       },
     );
   }
+
+  // ==================================================================
+  // Service grid
+  // ==================================================================
 
   Widget _buildServiceGrid(BuildContext context) {
     if (widget.isLoading && widget.services.isEmpty) {
@@ -152,42 +163,101 @@ class _SellingItemTabsState extends State<SellingItemTabs>
       return _buildEmptyState(context, isProduct: false);
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: widget.services.length,
-      itemBuilder: (context, index) {
-        final service = widget.services[index];
-        final quantity = _getServiceQuantity(service.id);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GridView.builder(
+          padding: const EdgeInsets.all(12),
+          gridDelegate: _responsiveGridDelegate(
+            availableWidth: constraints.maxWidth,
+          ),
+          itemCount: widget.services.length,
+          itemBuilder: (context, index) {
+            final service = widget.services[index];
+            final quantity = _getServiceQuantity(service.id);
 
-        return ItemCardWithConfiguration(
-          item: service,
-          isProduct: false,
-          quantity: quantity,
-          onAddToCart: () => widget.onAddServiceToCart(service),
-          onConfigure: () => widget.onConfigureService(service),
-          onRemoveFromCart: () {
-            final qty =
-                widget.cartNotifier.getServiceCartItem(service)?.quantity ?? 0;
-            if (qty <= 1) {
-              widget.cartNotifier.removeItem(service: service);
-            } else {
-              widget.cartNotifier.updateQuantity(
-                service: service,
-                newQuantity: qty - 1,
-              );
-            }
+            return ItemCardWithConfiguration(
+              item: service,
+              isProduct: false,
+              quantity: quantity,
+              onAddToCart: () => widget.onAddServiceToCart(service),
+              onConfigure: () => widget.onConfigureService(service),
+              onRemoveFromCart: () {
+                final qty =
+                    widget.cartNotifier.getServiceCartItem(service)?.quantity ??
+                        0;
+                if (qty <= 1) {
+                  widget.cartNotifier.removeItem(service: service);
+                } else {
+                  widget.cartNotifier.updateQuantity(
+                    service: service,
+                    newQuantity: qty - 1,
+                  );
+                }
+              },
+              onRemoveAll: () =>
+                  widget.cartNotifier.removeItem(service: service),
+            );
           },
-          onRemoveAll: () => widget.cartNotifier.removeItem(service: service),
         );
       },
     );
   }
+
+  // ==================================================================
+  // Responsive grid delegate
+  // ==================================================================
+
+  /// Pick a column count and aspect ratio that keep tiles a sensible
+  /// size at every screen width.
+  ///
+  /// Column count is derived from the widest acceptable tile:
+  /// `usableWidth / (maxTileWidth + spacing)`, rounded up so the last
+  /// column isn't chopped. Clamped to 1..6 so extremes (folded phones,
+  /// ultra-wide desktops) don't produce absurd counts.
+  ///
+  /// Aspect ratio widens with the column count so a single-column
+  /// phone tile is a squat banner rather than a tall strip, and a
+  /// six-column desktop tile is a compact card.
+  SliverGridDelegate _responsiveGridDelegate({
+    required double availableWidth,
+    double maxTileWidth = 220,
+    double spacing = 12,
+    double padding = 12,
+  }) {
+    final usable = availableWidth - (padding * 2);
+    final columns = (usable / (maxTileWidth + spacing)).ceil().clamp(1, 6);
+    final tileWidth = (usable - (spacing * (columns - 1))) / columns;
+
+    // The card's minimum viable height:
+    //   - image header: min 60, capped at 130 (40% of tile, but at least
+    //     enough for the icon)
+    //   - info block: ~80px of content (title up to 2 lines + price + stock)
+    //   - controls bar: ~48px when in cart, 0 when not
+    //   - padding: ~24px
+    //
+    // We size for the in-cart case since a tile whose content doesn't fit
+    // when carted is a visible bug the moment a user adds anything.
+    const infoHeight = 80.0;
+    const controlsTotal = 52.0; // bar + insets
+    const paddingTotal = 24.0;
+
+    // Image height scales with width but is bounded.
+    final imageHeight = (tileWidth * 0.45).clamp(64.0, 120.0);
+
+    final tileHeight = imageHeight + infoHeight + controlsTotal + paddingTotal;
+
+    final aspectRatio = tileWidth / tileHeight;
+
+    return SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: columns,
+      crossAxisSpacing: spacing,
+      mainAxisSpacing: spacing,
+      childAspectRatio: aspectRatio,
+    );
+  }
+  // ==================================================================
+  // Cart quantity lookups
+  // ==================================================================
 
   int _getProductQuantity(int productId) {
     if (productId <= 0) return 0;
@@ -202,6 +272,10 @@ class _SellingItemTabsState extends State<SellingItemTabs>
         .where((item) => (item.service?.id ?? 0) == serviceId)
         .fold(0, (sum, item) => sum + item.quantity);
   }
+
+  // ==================================================================
+  // Loading / empty states
+  // ==================================================================
 
   Widget _buildLoadingState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

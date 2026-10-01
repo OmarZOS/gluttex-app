@@ -2487,7 +2487,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get share => 'مشاركة';
 
   @override
-  String get download => 'تحميل';
+  String get download => 'تنزيل';
 
   @override
   String get noInvoicesYet => 'لا توجد فواتير بعد';
@@ -2681,7 +2681,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get carts => 'عربات التسوق';
 
   @override
-  String get clearFilters => 'مسح الفلاتر';
+  String get clearFilters => 'مسح عوامل التصفية';
 
   @override
   String get totalAmount => 'الإجمالي';
@@ -2789,7 +2789,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullyPaid => 'مدفوع بالكامل';
 
   @override
-  String get partiallyPaid => 'مدفوع جزئياً';
+  String get partiallyPaid => 'مدفوعة جزئياً';
 
   @override
   String get cart => 'سلة';
@@ -3833,7 +3833,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get yearsAgo => 'سنوات مضت';
 
   @override
-  String get documentsCount => 'عدد المستندات';
+  String documentsCount(int count) {
+    return '$count مستند';
+  }
 
   @override
   String get totalDocuments => 'إجمالي المستندات';
@@ -5095,25 +5097,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get myDocuments => 'مستنداتي';
 
   @override
-  String get loadingFinancialDocuments => 'جاري تحميل المستندات المالية...';
+  String get loadingFinancialDocuments => 'جارٍ تحميل المستندات المالية...';
 
   @override
   String get noMatchingDocuments => 'لا توجد مستندات مطابقة';
 
   @override
-  String get noResultsFound => 'لم يتم العثور على نتائج';
+  String get noResultsFound => 'لا توجد نتائج';
 
   @override
   String get noDocumentsYet => 'لا توجد مستندات بعد';
 
   @override
-  String get tryAdjustingFilters => 'حاول تعديل الفلاتر لرؤية المزيد من النتائج';
+  String get tryAdjustingFilters => 'حاول تعديل عوامل التصفية';
 
   @override
-  String get noDocumentsMatch => 'لا توجد مستندات تطابق';
+  String noDocumentsMatch(String query) {
+    return 'لا توجد مستندات تطابق \"$query\"';
+  }
 
   @override
-  String get startCreatingFirstDocument => 'ابدأ بإنشاء أول مستند مالي لك';
+  String get startCreatingFirstDocument => 'ابدأ بإنشاء أول مستند لك';
 
   @override
   String get createFirstDocument => 'إنشاء أول مستند';
@@ -5136,19 +5140,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get payNow => 'ادفع الآن';
 
   @override
-  String get canceled => 'ملغي';
+  String get canceled => 'ملغاة';
 
   @override
-  String get dueSoon => 'قريب الاستحقاق';
+  String get dueSoon => 'يستحق قريباً';
 
   @override
-  String get onTrack => 'ضمن الجدول';
+  String get onTrack => 'في المسار الصحيح';
 
   @override
   String get loadMore => 'تحميل المزيد';
 
   @override
-  String get noMoreDocuments => 'لا توجد مستندات إضافية';
+  String get noMoreDocuments => 'لا مزيد من المستندات';
 
   @override
   String get editService => 'تعديل الخدمة';
@@ -5959,7 +5963,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchByNumberOrCustomer => 'البحث بالرقم أو العميل';
 
   @override
-  String get payRemaining => 'دفع المتبقي';
+  String get payRemaining => 'ادفع المتبقي';
 
   @override
   String get paymentOutstandingLabel => 'المبلغ المستحق';
@@ -7334,5 +7338,26 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String serviceFallbackName(Object id) {
     return 'خدمة #$id';
+  }
+
+  @override
+  String customerWithId(int id) {
+    return 'العميل $id';
+  }
+
+  @override
+  String guestWithId(int id) {
+    return 'ضيف #$id';
+  }
+
+  @override
+  String get guestLabel => 'ضيف';
+
+  @override
+  String get partialOverdue => 'جزئي - متأخر';
+
+  @override
+  String overdueDays(int days) {
+    return 'متأخر $days يوم';
   }
 }

@@ -4495,7 +4495,7 @@ abstract class AppLocalizations {
   /// **'All Time'**
   String get allTime;
 
-  /// No description provided for @invoices.
+  /// Filter label: invoices only
   ///
   /// In en, this message translates to:
   /// **'Invoices'**
@@ -4885,7 +4885,7 @@ abstract class AppLocalizations {
   /// **'Share'**
   String get share;
 
-  /// Download button label
+  /// Button label for downloading a document
   ///
   /// In en, this message translates to:
   /// **'Download'**
@@ -5209,7 +5209,7 @@ abstract class AppLocalizations {
   /// **'Unpaid'**
   String get unpaid;
 
-  /// No description provided for @partial.
+  /// Short status label used in the payment progress bar
   ///
   /// In en, this message translates to:
   /// **'Partial'**
@@ -5269,7 +5269,7 @@ abstract class AppLocalizations {
   /// **'Carts'**
   String get carts;
 
-  /// No description provided for @clearFilters.
+  /// Button label to clear all active filters
   ///
   /// In en, this message translates to:
   /// **'Clear Filters'**
@@ -5293,7 +5293,7 @@ abstract class AppLocalizations {
   /// **'Outstanding'**
   String get outstanding;
 
-  /// No description provided for @balance.
+  /// Label above the remaining amount
   ///
   /// In en, this message translates to:
   /// **'Balance'**
@@ -5485,7 +5485,7 @@ abstract class AppLocalizations {
   /// **'Fully Paid'**
   String get fullyPaid;
 
-  /// No description provided for @partiallyPaid.
+  /// Status label for a partially paid document that isn't overdue
   ///
   /// In en, this message translates to:
   /// **'Partially Paid'**
@@ -6361,7 +6361,7 @@ abstract class AppLocalizations {
   /// **'Date'**
   String get date;
 
-  /// No description provided for @amount.
+  /// Label above the document's total amount
   ///
   /// In en, this message translates to:
   /// **'Amount'**
@@ -6691,7 +6691,7 @@ abstract class AppLocalizations {
   /// **'Direct Deposit'**
   String get directDeposit;
 
-  /// No description provided for @financialDocuments.
+  /// Header title for the financial document list
   ///
   /// In en, this message translates to:
   /// **'Financial Documents'**
@@ -6709,7 +6709,7 @@ abstract class AppLocalizations {
   /// **'Due'**
   String get due;
 
-  /// No description provided for @count.
+  /// Summary label: count of documents
   ///
   /// In en, this message translates to:
   /// **'Count'**
@@ -7531,11 +7531,11 @@ abstract class AppLocalizations {
   /// **'years ago'**
   String get yearsAgo;
 
-  /// No description provided for @documentsCount.
+  /// Document count subtitle
   ///
   /// In en, this message translates to:
-  /// **'Documents Count'**
-  String get documentsCount;
+  /// **'{count} documents'**
+  String documentsCount(int count);
 
   /// No description provided for @totalDocuments.
   ///
@@ -9973,52 +9973,52 @@ abstract class AppLocalizations {
   /// **'Has Account'**
   String get hasAccount;
 
-  /// No description provided for @myDocuments.
+  /// Filter label: documents for the current user
   ///
   /// In en, this message translates to:
   /// **'My Documents'**
   String get myDocuments;
 
-  /// No description provided for @loadingFinancialDocuments.
+  /// Loading state message
   ///
   /// In en, this message translates to:
   /// **'Loading financial documents...'**
   String get loadingFinancialDocuments;
 
-  /// No description provided for @noMatchingDocuments.
+  /// Empty state title when filters exclude everything
   ///
   /// In en, this message translates to:
   /// **'No matching documents'**
   String get noMatchingDocuments;
 
-  /// No description provided for @noResultsFound.
+  /// Empty state title when search returns nothing
   ///
   /// In en, this message translates to:
   /// **'No results found'**
   String get noResultsFound;
 
-  /// No description provided for @noDocumentsYet.
+  /// Empty state title when there are no documents at all
   ///
   /// In en, this message translates to:
   /// **'No documents yet'**
   String get noDocumentsYet;
 
-  /// No description provided for @tryAdjustingFilters.
+  /// Empty state hint when filters are active
   ///
   /// In en, this message translates to:
-  /// **'Try adjusting your filters to see more results'**
+  /// **'Try adjusting your filters'**
   String get tryAdjustingFilters;
 
-  /// No description provided for @noDocumentsMatch.
+  /// Empty state hint when a search query returns nothing
   ///
   /// In en, this message translates to:
-  /// **'No documents match'**
-  String get noDocumentsMatch;
+  /// **'No documents match \"{query}\"'**
+  String noDocumentsMatch(String query);
 
-  /// No description provided for @startCreatingFirstDocument.
+  /// Empty state hint on a fresh account
   ///
   /// In en, this message translates to:
-  /// **'Start by creating your first financial document'**
+  /// **'Start by creating your first document'**
   String get startCreatingFirstDocument;
 
   /// No description provided for @createFirstDocument.
@@ -10051,37 +10051,37 @@ abstract class AppLocalizations {
   /// **'Try different filters or search terms.'**
   String get tryDifferentFilters;
 
-  /// No description provided for @payNow.
+  /// Button label for paying an unpaid document
   ///
   /// In en, this message translates to:
   /// **'Pay Now'**
   String get payNow;
 
-  /// No description provided for @canceled.
+  /// Status label for a canceled document
   ///
   /// In en, this message translates to:
   /// **'Canceled'**
   String get canceled;
 
-  /// No description provided for @dueSoon.
+  /// Status label when a document is due within a week
   ///
   /// In en, this message translates to:
   /// **'Due soon'**
   String get dueSoon;
 
-  /// No description provided for @onTrack.
+  /// Status label when a document is not overdue and not near due
   ///
   /// In en, this message translates to:
   /// **'On track'**
   String get onTrack;
 
-  /// No description provided for @loadMore.
+  /// Pagination footer while more pages exist
   ///
   /// In en, this message translates to:
   /// **'Load More'**
   String get loadMore;
 
-  /// No description provided for @noMoreDocuments.
+  /// Pagination footer when the last page is loaded
   ///
   /// In en, this message translates to:
   /// **'No more documents'**
@@ -11665,25 +11665,25 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get search;
 
-  /// No description provided for @addDocument.
+  /// Tooltip on the add-document button
   ///
   /// In en, this message translates to:
   /// **'Add Document'**
   String get addDocument;
 
-  /// No description provided for @searchDocuments.
+  /// Title of the search dialog
   ///
   /// In en, this message translates to:
   /// **'Search Documents'**
   String get searchDocuments;
 
-  /// No description provided for @searchByNumberOrCustomer.
+  /// Hint text in the search dialog
   ///
   /// In en, this message translates to:
   /// **'Search by number or customer'**
   String get searchByNumberOrCustomer;
 
-  /// No description provided for @payRemaining.
+  /// Button label for paying the remaining balance on a partially paid document
   ///
   /// In en, this message translates to:
   /// **'Pay Remaining'**
@@ -14082,6 +14082,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Service #{id}'**
   String serviceFallbackName(Object id);
+
+  /// Fallback customer label when the display name isn't loaded yet
+  ///
+  /// In en, this message translates to:
+  /// **'Customer {id}'**
+  String customerWithId(int id);
+
+  /// Fallback label for a guest checkout with a cart id
+  ///
+  /// In en, this message translates to:
+  /// **'Guest #{id}'**
+  String guestWithId(int id);
+
+  /// Fallback label for an anonymous customer
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guestLabel;
+
+  /// Status label for a partially paid, overdue document
+  ///
+  /// In en, this message translates to:
+  /// **'Partial - overdue'**
+  String get partialOverdue;
+
+  /// Badge showing how many days a document is overdue
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d overdue'**
+  String overdueDays(int days);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
